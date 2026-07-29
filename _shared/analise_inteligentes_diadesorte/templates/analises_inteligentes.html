@@ -1,0 +1,802 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+  :root {
+    --cor-sequencia-1: #86efac;
+    --cor-sequencia-1-texto: #14532d;
+    --cor-sequencia-2: #93c5fd;
+    --cor-sequencia-2-texto: #1e3a8a;
+    --cor-sequencia-3: #d8b4fe;
+    --cor-sequencia-3-texto: #581c87;
+    --cor-repetidos: #fcd34d;
+    --cor-repetidos-texto: #78350f;
+  }
+  #ai-root .ai-kpi {
+    background: var(--surface, #fff);
+    border: 1px solid rgba(192,139,0,.22);
+    border-radius: 10px;
+    padding: .65rem .85rem;
+    height: 100%;
+  }
+  #ai-root .ai-kpi .lbl { font-size:.7rem; font-weight:700; color:#6c757d; text-transform:uppercase; }
+  #ai-root .ai-kpi .val { font-size:1.1rem; font-weight:800; color:var(--primary-xdark); }
+  #ai-root .ai-table { font-size:.82rem; }
+  #ai-root .ai-table thead th {
+    background: var(--primary); color:#fff; font-weight:700;
+    text-align:center; vertical-align:middle; white-space:nowrap;
+  }
+  #ai-root .ai-table td { text-align:center; vertical-align:middle; }
+  #ai-root .ai-table td.td-left { text-align:left !important; }
+  /* Dezenas: sempre uma linha — ganha largura; outras colunas cedem espaço */
+  #ai-root .ai-table th.col-dezenas,
+  #ai-root .ai-table td.td-dezenas {
+    white-space: nowrap !important;
+    min-width: 12.5rem;
+    width: 12.5rem;
+    letter-spacing: .01em;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root .ai-table th.col-digitos-unicos,
+  #ai-root .ai-table td.td-digitos-unicos {
+    max-width: 6.5rem;
+    white-space: normal;
+  }
+  #ai-root .ai-table th.col-nao-sairam,
+  #ai-root .ai-table td.td-nao-sairam {
+    max-width: 9.5rem;
+    width: 9.5rem;
+  }
+  #ai-root .ai-table th.col-gerar,
+  #ai-root .ai-table td.td-gerar {
+    max-width: 7.2rem;
+    white-space: normal;
+  }
+  #ai-root .ai-table td.td-gerar .btn-ai { margin-bottom: .15rem; }
+  #ai-root .nav-tabs .nav-link.active {
+    font-weight:800; color:var(--primary-xdark); border-bottom-color:var(--primary);
+  }
+  #ai-root .btn-ai { font-size:.72rem; font-weight:700; padding:.2rem .45rem; }
+  #ai-root .mes-pill {
+    display:inline-block; min-width:2.4rem; padding:.15rem .4rem; border-radius:6px;
+    font-weight:800; font-size:.75rem; color:#fff !important;
+  }
+  #ai-root .mes-pill:not([class*="mes-nome-"]) { background:#6c757d; }
+  {% for nome, cor in (meses_cores or {}).items() %}
+  #ai-root .mes-pill.mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+  {% endfor %}
+  #ai-root .ai-hint {
+    font-size:.8rem; color:#6c757d; border-left:3px solid var(--accent,#ffd54f);
+    padding:.35rem .65rem; background:var(--accent-light);
+  }
+  #ai-root .digitos-chip {
+    display:inline-block; background:#fff8e1; border:1px solid #ffe082;
+    border-radius:6px; padding:.1rem .35rem; font-weight:700; margin:0 1px;
+  }
+  #ai-root .btn-dl-sutil {
+    border:0; background:transparent; color:#8a6d00; font-size:.68rem;
+    padding:0; opacity:.75; text-decoration:underline; cursor:pointer;
+    display:inline; line-height:1.2; white-space:nowrap;
+  }
+  #ai-root .btn-dl-sutil:hover { opacity:1; color:var(--primary-xdark); }
+  #ai-root .nao-sairam-cell {
+    display:flex; flex-direction:column; align-items:center; gap:.12rem;
+    padding:.15rem .2rem; white-space:nowrap;
+  }
+  #ai-root .nao-sairam-linha {
+    display:inline-flex; align-items:center; justify-content:center;
+    gap:.35rem; flex-wrap:nowrap; line-height:1.2;
+  }
+  #ai-root .nao-sairam-top {
+    font-size:.95rem; font-weight:800; color:var(--primary-xdark);
+  }
+  #ai-root .nao-sairam-centro {
+    font-size:.9rem; font-weight:800; color:#196f3d;
+    background:rgba(25,111,61,.08); border-radius:5px; padding:.05rem .35rem;
+  }
+  #ai-root .nao-sairam-nums {
+    font-size:.62rem; color:#666; text-align:center; max-width:9rem;
+    line-height:1.15; white-space:normal;
+  }
+  #ai-root th.ai-sort { cursor:pointer; user-select:none; white-space:nowrap; }
+  #ai-root th.ai-sort:hover { filter:brightness(.95); }
+  #ai-root th.ai-sort .ai-sort-ind { font-size:.65rem; margin-left:.2rem; opacity:.55; }
+  #ai-root th.ai-sort.ai-sort-asc .ai-sort-ind,
+  #ai-root th.ai-sort.ai-sort-desc .ai-sort-ind { opacity:1; }
+  #ai-root .ai-pager {
+    display:flex; flex-wrap:wrap; align-items:center; gap:.5rem;
+    font-size:.8rem; color:#555; margin-top:.65rem;
+  }
+  #ai-root .ai-pager .ai-pager-info { font-weight:600; color:var(--primary-xdark); }
+  #ai-root .ai-pager .btn { min-width:2rem; }
+
+
+</style>
+
+<div class="container-fluid py-3" id="ai-root"
+     data-api="{{ api_base }}"
+     data-aba="{{ aba_inicial }}"
+     data-n="{{ n_inicial }}"
+     data-digitos="{{ digitos_inicial }}"
+     data-concurso="{{ concurso_inicial }}"
+     data-gc-url="{{ gerador_gc_url }}"
+     data-elite-url="{{ gerador_elite_url }}">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1"><i class="fas fa-brain text-primary"></i> {{ page_title }}</h1>
+      <p class="text-muted small mb-0">{{ page_subtitle }} — {{ modality_nome }}</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <span class="badge bg-light text-dark border" id="aiLblUltimo">—</span>
+      <a class="btn btn-sm btn-outline-success" href="{{ gerador_gc_url }}"><i class="fas fa-magic"></i> Gerador Pro / GC</a>
+      <a class="btn btn-sm btn-outline-warning" href="{{ gerador_elite_url }}"><i class="fas fa-brain"></i> Gerador Elite</a>
+      <a class="btn btn-sm btn-outline-secondary" href="{{ geradores_elite_home }}"><i class="fas fa-home"></i> Geradores Elite</a>
+    </div>
+  </div>
+
+  <div class="ai-hint mb-3">
+    Esta rota é só <strong>análise</strong> (4 abas). Para <strong>gerar apostas</strong>, use os atalhos
+    <em>gcN</em> / <em>Elite Nd</em> na tabela — eles abrem
+    <a href="{{ gerador_gc_url }}">Gerador Pro / GC</a> ou
+    <a href="{{ gerador_elite_url }}">Gerador Elite</a>
+    já com os dígitos da análise.
+  </div>
+
+  <ul class="nav nav-tabs mb-3" id="aiTabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-resultados" type="button" data-aba="resultados">1 · Resultados &amp; Dígitos</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-combinacoes" type="button" data-aba="combinacoes">2 · Combinações</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-padroes" type="button" data-aba="padroes">3 · Padrões</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tubular" type="button" data-aba="tubular">4 · Visualização Tubular</button></li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- ABA 1 -->
+    <div class="tab-pane fade show active" id="tab-resultados">
+      <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        <span class="small fw-bold text-muted">Por página:</span>
+        <select id="aiPageSize" class="form-select form-select-sm" style="width:auto">
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+        </select>
+        <button type="button" class="btn btn-sm btn-primary" id="aiBtnCarregar"><i class="fas fa-sync"></i> Recarregar</button>
+        <button type="button" class="btn btn-sm btn-outline-success" id="aiBtnExportCsv"><i class="fas fa-file-csv"></i> CSV</button>
+        <span class="small text-muted" id="aiRangeLbl">Carregando todos os concursos…</span>
+      </div>
+      <div class="row g-2 mb-3" id="aiKpis"></div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaResultados">
+          <thead>
+            <tr>
+              <th class="ai-sort" data-sort="concurso" data-table="res">Concurso <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="data" data-table="res">Data <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dezenas" data-sort="dezenas_fmt" data-table="res">Dezenas <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="mes_num" data-table="res">Mês <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="digitos_fmt" data-table="res">Dígitos (I\|F) <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-digitos-unicos" data-sort="digitos_ordenados_fmt" data-table="res">Dígitos Ord. <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="qtd_digitos" data-table="res">Qtd <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="soma" data-table="res">Soma <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="volume_combinacoes" data-table="res">Volume C(n,7) <span class="ai-sort-ind">⇅</span></th>
+              <th class="col-gerar">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="ai-pager" id="aiPagerRes" data-table="res"></div>
+    </div>
+
+    <!-- ABA 2 — só análise -->
+    <div class="tab-pane fade" id="tab-combinacoes">
+      <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        <span class="small fw-bold text-muted">N dígitos (catálogo):</span>
+        <select id="aiNDigitos" class="form-select form-select-sm" style="width:auto">
+          {% for i in range(1, 11) %}<option value="{{ i }}" {% if i == 8 %}selected{% endif %}>{{ i }}d → index{{ i }}</option>{% endfor %}
+        </select>
+        <input type="text" id="aiBuscaDigitos" class="form-control form-control-sm" style="max-width:220px" placeholder="Filtrar ex: 0,1,2,3">
+        <button type="button" class="btn btn-sm btn-primary" id="aiBtnCatalogo"><i class="fas fa-chart-bar"></i> Gerar análise</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiBtnStatsHist"><i class="fas fa-history"></i> Stats histórico</button>
+      </div>
+      <div class="ai-hint mb-2">
+        Catálogo e volumes teóricos apenas. Para apostar com perfil do concurso real, use <strong>gcN / Elite</strong> na aba Resultados;
+        daqui abre o gerador só com os dígitos (informe o concurso lá se quiser o perfil).
+        (vai para Geradores Elite com os dígitos).
+      </div>
+      <div class="row g-2 mb-3" id="aiResumoCatalogo"></div>
+      <div class="row g-2 mb-3" id="aiStatsHist"></div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaCatalogo">
+          <thead>
+            <tr><th>#</th><th>Dígitos</th><th>Nº válidos</th><th>Volume C(n,7)</th><th>Gerar apostas em…</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ABA 3 — Padrões -->
+    <div class="tab-pane fade" id="tab-padroes">
+      <p class="small text-muted mb-2">
+        Padrões derivados dos mesmos concursos (mês, inicial/final, pares/ímpares, não saíram).
+        Em <strong>Não Saíram</strong>: quantidade = {{ dezena_max }} − {{ sorteadas }} = <strong>{{ nao_sairam_qtd }}</strong> ·
+        <span class="text-muted">↓ todos</span> baixa a lista ·
+        <span class="text-muted">↓ 16</span> gera conjunto-base para o
+        <a href="{{ construtor_url }}">Construtor</a>.
+        Para apostas com os dígitos do concurso, use a coluna <strong>Gerar</strong> (abre Geradores Elite).
+      </p>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaPadroes">
+          <thead>
+            <tr>
+              <th class="ai-sort" data-sort="concurso" data-table="pad">Concurso <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="data" data-table="pad">Data <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dezenas" data-sort="dezenas_fmt" data-table="pad">Dezenas <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="mes_num" data-table="pad">Mês <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="padrao_inicial" data-table="pad">Padrão Inicial <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="padrao_final" data-table="pad">Padrão Final <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-digitos-unicos" data-sort="digitos_ordenados_fmt" data-table="pad">Dígitos Únicos <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="qtd_digitos" data-table="pad">Qtd <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="soma" data-table="pad">Soma <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="pares" data-table="pad">Pares/Ímpares <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-nao-sairam" data-sort="qtd_nao_sairam" data-table="pad">Não Saíram <span class="ai-sort-ind">⇅</span></th>
+              <th class="col-gerar">Gerar</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="ai-pager" id="aiPagerPad" data-table="pad"></div>
+    </div>
+
+    <!-- ABA 4 — Visualização Tubular (fiel a vizualizacao_tubular.html) -->
+    <div class="tab-pane fade" id="tab-tubular">
+      <div id="ai-tubular-root"
+           data-api="{{ api_base }}"
+           data-meses-cores='{{ (meses_cores or {})|tojson }}'
+           data-dezena-min="{{ dezena_min }}"
+           data-dezena-max="{{ dezena_max }}"
+           data-sorteadas="{{ sorteadas }}">
+        <ul class="nav nav-pills tb-subnav mb-3 gap-1">
+          <li class="nav-item"><button type="button" class="nav-link active" data-tb-sub="seq">📊 Sequências</button></li>
+          <li class="nav-item"><button type="button" class="nav-link" data-tb-sub="s10">🎯 Seção 10</button></li>
+          <li class="nav-item"><button type="button" class="nav-link" data-tb-sub="s11">🎯 Seção 11</button></li>
+        </ul>
+
+        <!-- Sub 1: Sequências -->
+        <div data-tb-panel="seq">
+          <div class="tb-card">
+            <div class="tb-header-center mb-3">
+              <h2 class="h5 mb-1 fw-bold">📊 Visualização Tabular das Sequências (1° ao Último)</h2>
+              <div class="small text-muted fw-semibold" id="tbStatus">—</div>
+            </div>
+            <div class="d-flex flex-wrap justify-content-center gap-2 align-items-center mb-3">
+              <button type="button" class="btn btn-sm btn-primary" id="tbBtnLoad"><i class="fas fa-sync"></i> Carregar Dados</button>
+              <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-secondary active" id="tbViewDraw">Ordem Caixa</button>
+                <button type="button" class="btn btn-outline-secondary" id="tbViewAsc">Crescente</button>
+              </div>
+              <button type="button" class="btn btn-sm btn-success" id="tbBtnMark">🔍 Marcar Sequências</button>
+              <button type="button" class="btn btn-sm btn-secondary" id="tbBtnReset">Resetar Marcações</button>
+              <label class="small text-muted mb-0 d-flex align-items-center gap-1">
+                Por página
+                <select id="tbPageSize" class="form-select form-select-sm" style="width:auto">
+                  <option value="100" selected>100</option>
+                  <option value="200">200</option>
+                  <option value="500">500</option>
+                  <option value="0">Todos</option>
+                </select>
+              </label>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbExportTXT">TXT</button>
+              <button type="button" class="btn btn-sm btn-outline-success" id="tbExportXLSX">XLSX</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="tbExportHTML">HTML</button>
+              <button type="button" class="btn btn-sm btn-outline-dark" id="tbPrint" title="Imprimir a página atual">🖨 Imprimir</button>
+            </div>
+
+            <div class="tb-kpi-grid" id="tbKpis"></div>
+
+            <!-- Legenda idêntica à referência -->
+            <div class="tb-legend tb-legend-center">
+              <h3>📊 Cores e Significados:</h3>
+              <div class="row g-3 justify-content-center">
+                <div class="col-md-6">
+                  <h4>📊 Cores Simples (1 condição):</h4>
+                  <div class="d-flex flex-wrap gap-3 justify-content-center">
+                    <div class="d-flex align-items-center gap-2"><div class="tb-swatch seq-2">2</div><span>Sequência de 2</span></div>
+                    <div class="d-flex align-items-center gap-2"><div class="tb-swatch seq-3">3</div><span>Sequência de 3</span></div>
+                    <div class="d-flex align-items-center gap-2"><div class="tb-swatch seq-4">4+</div><span>Sequência de 4+</span></div>
+                    <div class="d-flex align-items-center gap-2"><div class="tb-swatch repetition">R</div><span>Repetição</span></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <h4>🎨 Gradientes (múltiplas condições):</h4>
+                  <div class="d-flex flex-column gap-2 align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="tb-swatch-grad" style="background:linear-gradient(135deg,var(--cor-sequencia-1) 0%,var(--cor-sequencia-1) 50%,var(--cor-repetidos) 50%,var(--cor-repetidos) 100%);color:var(--cor-sequencia-1-texto)">2+R</div>
+                      <span>Seq. 2 + Repetição</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="tb-swatch-grad" style="background:linear-gradient(135deg,var(--cor-sequencia-3) 0%,var(--cor-sequencia-3) 33%,var(--cor-sequencia-2) 33%,var(--cor-sequencia-2) 66%,var(--cor-sequencia-1) 66%,var(--cor-sequencia-1) 100%);color:var(--cor-sequencia-3-texto)">4+3+2</div>
+                      <span>Seq. 4+ + Seq. 3 + Seq. 2</span>
+                    </div>
+                  </div>
+                  <div class="tb-legend-hint">↗️ Passe o mouse sobre os números para ver todas as condições</div>
+                </div>
+              </div>
+              <div class="tb-qtde-legend mt-3">
+                <h4>Qtde (dígitos únicos):</h4>
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                  <span class="tb-qtde tb-qtde-5">5</span>
+                  <span class="tb-qtde tb-qtde-6">6</span>
+                  <span class="tb-qtde tb-qtde-7">7</span>
+                  <span class="tb-qtde tb-qtde-8">8</span>
+                  <span class="tb-qtde tb-qtde-9">9</span>
+                  <span class="tb-qtde tb-qtde-10">10</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tb-wrap">
+              <table class="table table-sm table-bordered tb-table" id="tbTabela">
+                <thead>
+                  <tr>
+                    <th>Concurso</th><th>Data</th>
+                    <th class="tb-dez-h tb-dez-h-first">1º</th>
+                    <th class="tb-dez-h">2º</th>
+                    <th class="tb-dez-h">3º</th>
+                    <th class="tb-dez-h">4º</th>
+                    <th class="tb-dez-h">5º</th>
+                    <th class="tb-dez-h">6º</th>
+                    <th class="tb-dez-h tb-dez-h-last">7º</th>
+                    <th>Mês</th><th>SEQ</th><th>FINAIS</th><th>Rept</th>
+                    <th>DEZENAS<br>Soma</th><th>Pares</th><th>Ímpares</th>
+                    <th>Inicial</th><th>Final</th>
+                    <th>Qtde</th><th>Números</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-2" id="tbPager"></div>
+          </div>
+        </div>
+
+        <!-- Sub 2: Seção 10 -->
+        <div data-tb-panel="s10" class="d-none">
+          <div class="tb-card">
+            <h2 class="h5 fw-bold">🎯 SEÇÃO 10 — Análise Manual (ordem crescente)</h2>
+            <p class="small text-muted">Crie jogos manualmente, cole texto ou arraste arquivos. Stats em tempo real. Hook futuro: apostas do Gerador Elite.</p>
+            <div class="tb-drop mb-2" id="tbDrop10" data-ai-compare="s10">Arraste TXT/CSV aqui · ou cole abaixo</div>
+            <textarea id="tbPaste10" class="form-control form-control-sm mb-2" rows="3" placeholder="FORMATOS: 01 02 03 04 05 06 07 · 01 02 03 04 05 06 07 - Jul · 01 02 03 04 05 06 07 - Julho"></textarea>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-success" id="tbProcess10">✓ Processar Jogos</button>
+              <button type="button" class="btn btn-sm btn-primary" id="tbAdd10">+ Adicionar Linha</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear10">Limpar</button>
+            </div>
+            <div class="tb-stats-panel mb-2" id="tbStats10"></div>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered tb-table" id="tbManual10">
+                <thead>
+                  <tr><th>#</th><th>Dezenas</th><th>SEQ</th><th>FINAIS</th><th>Rept</th><th>Soma</th><th>P/I</th><th>Inicial</th><th>Final</th><th>Qtde</th><th></th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub 3: Seção 11 -->
+        <div data-tb-panel="s11" class="d-none">
+          <div class="tb-card">
+            <h2 class="h5 fw-bold">🎯 SEÇÃO 11 — Análise Manual (ordem de sorteio)</h2>
+            <p class="small text-muted">Mesma UX da Seção 10, comparando repetições na ordem oficial do sorteio.</p>
+            <div class="tb-drop mb-2" id="tbDrop11" data-ai-compare="s11">Arraste TXT/CSV aqui · ou cole abaixo</div>
+            <textarea id="tbPaste11" class="form-control form-control-sm mb-2" rows="3" placeholder="Ex: 19 01 25 04 12 06 09 JUL"></textarea>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-success" id="tbProcess11">✓ Processar Jogos</button>
+              <button type="button" class="btn btn-sm btn-primary" id="tbAdd11">+ Adicionar Linha</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear11">Limpar</button>
+            </div>
+            <div class="tb-stats-panel mb-2" id="tbStats11"></div>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered tb-table" id="tbManual11">
+                <thead>
+                  <tr><th>#</th><th>Dezenas</th><th>SEQ</th><th>FINAIS</th><th>Rept</th><th>Soma</th><th>P/I</th><th>Inicial</th><th>Final</th><th>Qtde</th><th></th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css">
+<style>
+  {% for nome, cor in (meses_cores or {}).items() %}
+  #ai-tubular-root .mes-cor.mes-nome-{{ nome }} { background-color: {{ cor }} !important; }
+  {% endfor %}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="/analise/api/inteligentes/assets/tubular.js"></script>
+<script>
+(function () {
+  const root = document.getElementById('ai-root');
+  if (!root) return;
+  const API = root.dataset.api;
+  const GC_URL = root.dataset.gcUrl || '/geradores-elite/gerador-gc/';
+  const ELITE_URL = root.dataset.eliteUrl || '/geradores-elite/gerador-elite/';
+  let CACHE = [];
+  let CAT = [];
+  let SORT = { res: { key: 'concurso', dir: 'desc' }, pad: { key: 'concurso', dir: 'desc' } };
+  let PAGE = { res: 1, pad: 1 };
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function parseDigitos(txt) {
+    return String(txt || '').split(/[,;\s]+/).map(x => x.trim()).filter(x => /^[0-9]$/.test(x));
+  }
+  function fmtVol(n) { return Number(n || 0).toLocaleString('pt-BR'); }
+  function mesBadge(l) {
+    const nome = (l.mes_nome || l.mes_abrev || '').replace(/\s+/g, '');
+    const ab = l.mes_abrev || nome.slice(0, 3).toUpperCase() || '—';
+    const cls = nome ? `mes-nome-${nome}` : '';
+    return `<span class="mes-pill ${cls}">${esc(ab)}</span>`;
+  }
+  function downloadTxt(txt, nome) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([txt], {type:'text/plain'}));
+    a.download = nome;
+    a.click();
+  }
+  function getPageSize() {
+    const el = document.getElementById('aiPageSize');
+    const n = el ? +el.value : 50;
+    return Number.isFinite(n) && n > 0 ? n : 50;
+  }
+  function slicePagina(linhas, table) {
+    const size = getPageSize();
+    const total = linhas.length;
+    const pages = Math.max(1, Math.ceil(total / size) || 1);
+    if (PAGE[table] > pages) PAGE[table] = pages;
+    if (PAGE[table] < 1) PAGE[table] = 1;
+    const page = PAGE[table];
+    const start = (page - 1) * size;
+    return { page, pages, size, total, start, rows: linhas.slice(start, start + size) };
+  }
+  function renderPager(elId, table, meta) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (!meta.total) { el.innerHTML = '<span class="text-muted">Sem dados</span>'; return; }
+    const de = meta.start + 1;
+    const ate = Math.min(meta.start + meta.size, meta.total);
+    el.innerHTML = `
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-act="page" data-table="${table}" data-page="1" ${meta.page<=1?'disabled':''}>«</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-act="page" data-table="${table}" data-page="${meta.page-1}" ${meta.page<=1?'disabled':''}>‹</button>
+      <span class="ai-pager-info">Pág. ${meta.page}/${meta.pages} · ${de}–${ate} de ${meta.total}</span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-act="page" data-table="${table}" data-page="${meta.page+1}" ${meta.page>=meta.pages?'disabled':''}>›</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-act="page" data-table="${table}" data-page="${meta.pages}" ${meta.page>=meta.pages?'disabled':''}>»</button>`;
+  }
+
+  function naoSairamHtml(l) {
+    const qtd = l.qtd_nao_sairam ?? (l.nao_sairam || []).length;
+    const conc = l.concurso;
+    return `<div class="nao-sairam-cell">
+      <div class="nao-sairam-linha">
+        <span class="nao-sairam-top" title="Total que não saíram (31−7)">${esc(qtd)}</span>
+        <button type="button" class="btn-dl-sutil" data-act="dl-nao" data-concurso="${esc(conc)}" title="Baixar todos">↓ todos</button>
+        <span class="nao-sairam-centro" title="Conjunto-base Construtor">16</span>
+        <button type="button" class="btn-dl-sutil" data-act="dl-nao16" data-concurso="${esc(conc)}" title="Baixar 16 para o Construtor">↓ 16</button>
+      </div>
+      <div class="nao-sairam-nums">${esc(l.nao_sairam_fmt || '')}</div>
+    </div>`;
+  }
+
+  function sortValue(row, key) {
+    const v = row[key];
+    if (v == null || v === '') return '';
+    if (typeof v === 'number') return v;
+    if (Array.isArray(v)) return v.join(' ');
+    const s = String(v);
+    if (key === 'volume_combinacoes' || key === 'soma' || key === 'concurso' || key === 'qtd_digitos' || key === 'mes_num' || key === 'pares' || key === 'qtd_nao_sairam') {
+      const nn = Number(v);
+      return Number.isFinite(nn) ? nn : s;
+    }
+    if (key === 'data') {
+      const m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+      if (m) return `${m[3]}${m[2]}${m[1]}`;
+    }
+    return s.toLowerCase();
+  }
+  function ordenarLinhas(linhas, key, dir) {
+    const mult = dir === 'asc' ? 1 : -1;
+    return [...linhas].sort((a, b) => {
+      const va = sortValue(a, key), vb = sortValue(b, key);
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * mult;
+      return String(va).localeCompare(String(vb), 'pt-BR', { numeric: true }) * mult;
+    });
+  }
+  function atualizarIndicadoresSort() {
+    document.querySelectorAll('#ai-root th.ai-sort').forEach(th => {
+      th.classList.remove('ai-sort-asc', 'ai-sort-desc');
+      const ind = th.querySelector('.ai-sort-ind');
+      const st = SORT[th.dataset.table];
+      if (ind) ind.textContent = '⇅';
+      if (st && st.key === th.dataset.sort) {
+        th.classList.add(st.dir === 'asc' ? 'ai-sort-asc' : 'ai-sort-desc');
+        if (ind) ind.textContent = st.dir === 'asc' ? '▲' : '▼';
+      }
+    });
+  }
+
+  function renderKpis(linhas) {
+    const box = document.getElementById('aiKpis');
+    if (!linhas.length) { box.innerHTML = ''; return; }
+    const ns = {};
+    linhas.forEach(l => { ns[l.qtd_digitos] = (ns[l.qtd_digitos] || 0) + 1; });
+    const topN = Object.entries(ns).sort((a,b)=>b[1]-a[1])[0];
+    box.innerHTML = `
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Concursos</div><div class="val">${linhas.length}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Último</div><div class="val">${esc(Math.max(...linhas.map(x => +x.concurso)))}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">N mais comum</div><div class="val">${topN ? topN[0]+'d ('+topN[1]+')' : '—'}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Média qtd dígitos</div><div class="val">${(linhas.reduce((s,l)=>s+l.qtd_digitos,0)/linhas.length).toFixed(1)}</div></div></div>`;
+  }
+
+  function geLinksHtml(n, dig, concurso) {
+    const q = encodeURIComponent(dig);
+    const conc = concurso ? `&concurso=${encodeURIComponent(concurso)}` : '';
+    let html = '';
+    if (n >= 3) {
+      html += `<a class="btn btn-outline-success btn-ai me-1" href="${GC_URL}?digitos=${q}${conc}" title="Gerar no Pro/GC com perfil do concurso real">gc${n}</a>`;
+    }
+    if (n >= 3 && n <= 9) {
+      html += `<a class="btn btn-outline-warning btn-ai" href="${ELITE_URL}?n=${n}&digitos=${q}${conc}" title="Gerar no Elite com perfil do concurso real">Elite ${n}d</a>`;
+    }
+    return html || '<span class="text-muted small">—</span>';
+  }
+
+  function acoesHtml(l) {
+    const n = l.qtd_digitos;
+    const dig = (l.digitos_ordenados || []).join(',');
+    let html = `<button class="btn btn-outline-primary btn-ai me-1" data-act="comb" data-n="${n}" data-dig="${esc(dig)}" title="Ver catálogo analítico">Combinações</button>`;
+    html += geLinksHtml(n, dig, l.concurso);
+    return html;
+  }
+
+  function fmtDezena(n) {
+    return String(n).padStart(2, '0');
+  }
+  /** Sequência da coluna Dezenas (crescente) — base dos padrões Inicial/Final. */
+  function dezenasOrdenadasDe(l) {
+    const raw = (l && l.dezenas) || [];
+    if (raw.length) return raw.map(Number).filter(Number.isFinite).slice().sort((a, b) => a - b);
+    const fmt = String((l && l.dezenas_fmt) || '').trim();
+    if (!fmt) return [];
+    return fmt.split(/\s+/).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+  }
+  function padraoInicialDe(dez) {
+    return dez.map(d => Math.floor(d / 10)).join(' ');
+  }
+  function padraoFinalDe(dez) {
+    return dez.map(d => d % 10).join(' ');
+  }
+
+  function renderResultados(linhas, opts) {
+    if (!opts || !opts.keepCache) {
+      CACHE = linhas;
+      PAGE.res = 1;
+      PAGE.pad = 1;
+    }
+    const linhasRes = ordenarLinhas(CACHE, SORT.res.key, SORT.res.dir);
+    const linhasPad = ordenarLinhas(CACHE, SORT.pad.key, SORT.pad.dir);
+    const metaRes = slicePagina(linhasRes, 'res');
+    const metaPad = slicePagina(linhasPad, 'pad');
+    renderKpis(CACHE);
+    document.querySelector('#aiTabelaResultados tbody').innerHTML = metaRes.rows.map(l => `
+      <tr>
+        <td><strong>${esc(l.concurso)}</strong></td>
+        <td>${esc(l.data)}</td>
+        <td class="td-left text-start td-dezenas">${esc(l.dezenas_fmt)}</td>
+        <td>${mesBadge(l)}</td>
+        <td class="td-left text-start">${esc(l.digitos_fmt)}</td>
+        <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
+        <td><strong>${esc(l.qtd_digitos)}</strong></td>
+        <td><strong>${esc(l.soma)}</strong></td>
+        <td class="td-left text-start">${fmtVol(l.volume_combinacoes)}</td>
+        <td class="text-nowrap td-gerar">${acoesHtml(l)}</td>
+      </tr>`).join('') || '<tr><td colspan="10" class="text-muted">Sem dados</td></tr>';
+    document.querySelector('#aiTabelaPadroes tbody').innerHTML = metaPad.rows.map(l => {
+      const dez = dezenasOrdenadasDe(l);
+      const dezFmt = l.dezenas_fmt || dez.map(fmtDezena).join(' ');
+      const pi = padraoInicialDe(dez) || String(l.padrao_inicial || '').replace(/,/g, ' ');
+      const pf = padraoFinalDe(dez) || String(l.padrao_final || '').replace(/,/g, ' ');
+      return `
+      <tr>
+        <td><strong>${esc(l.concurso)}</strong></td>
+        <td>${esc(l.data)}</td>
+        <td class="td-left text-start td-dezenas">${esc(dezFmt)}</td>
+        <td>${mesBadge(l)}</td>
+        <td class="text-nowrap">${esc(pi)}</td>
+        <td class="text-nowrap">${esc(pf)}</td>
+        <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
+        <td>${esc(l.qtd_digitos)}</td>
+        <td><strong>${esc(l.soma)}</strong></td>
+        <td>${esc(l.pares_impares_fmt)}</td>
+        <td class="td-nao-sairam">${naoSairamHtml(l)}</td>
+        <td class="td-gerar">${geLinksHtml(l.qtd_digitos, (l.digitos_ordenados||[]).join(','), l.concurso)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="12" class="text-muted">Sem dados</td></tr>';
+    const concs = CACHE.map(x => +x.concurso).filter(Number.isFinite);
+    const prim = concs.length ? Math.min(...concs) : null;
+    const ult = concs.length ? Math.max(...concs) : null;
+    document.getElementById('aiLblUltimo').textContent = ult != null ? `Concursos ${prim} → ${ult} (${CACHE.length})` : 'Sem dados';
+    const rangeLbl = document.getElementById('aiRangeLbl');
+    if (rangeLbl) rangeLbl.textContent = ult != null ? `Todos no banco: ${prim} → ${ult} (${CACHE.length} concursos)` : 'Sem dados';
+    renderPager('aiPagerRes', 'res', metaRes);
+    renderPager('aiPagerPad', 'pad', metaPad);
+    atualizarIndicadoresSort();
+  }
+
+  async function carregarResultados() {
+    const rangeLbl = document.getElementById('aiRangeLbl');
+    if (rangeLbl) rangeLbl.textContent = 'Carregando todos os concursos…';
+    const r = await fetch(`${API}/resultados?janela=0&base=geral`);
+    const j = await r.json();
+    if (!j.sucesso) { alert(j.erro || 'Falha ao carregar'); return; }
+    renderResultados(j.linhas || []);
+  }
+
+  function renderCatalogo(data) {
+    CAT = data.linhas || [];
+    const res = data.resumo || {};
+    document.getElementById('aiResumoCatalogo').innerHTML = `
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Combinações C(10,N)</div><div class="val">${res.total||0}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Alto volume</div><div class="val text-success">${res.alto_volume||0}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Médio</div><div class="val text-primary">${res.medio_volume||0}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Baixo / zero</div><div class="val">${(res.baixo_volume||0)+(res.insuficientes||0)}</div></div></div>`;
+    const busca = document.getElementById('aiBuscaDigitos').value.trim();
+    let rows = CAT;
+    if (busca) {
+      const parts = parseDigitos(busca);
+      rows = CAT.filter(r => parts.every(p => (r.digitos||[]).includes(p)));
+    }
+    const nCat = +(document.getElementById('aiNDigitos')?.value || data.n_digitos || 8);
+    document.querySelector('#aiTabelaCatalogo tbody').innerHTML = rows.map(r => {
+      const dig = (r.digitos || []).join(',');
+      const podeGc = nCat >= 3 && r.pode_gerar_jogo;
+      const podeElite = nCat >= 3 && nCat <= 9 && r.pode_gerar_jogo;
+      let links = '';
+      if (podeGc) links += `<a class="btn btn-outline-success btn-ai me-1" href="${GC_URL}?digitos=${encodeURIComponent(dig)}">Abrir GC</a>`;
+      if (podeElite) links += `<a class="btn btn-outline-warning btn-ai" href="${ELITE_URL}?n=${nCat}&digitos=${encodeURIComponent(dig)}">Abrir Elite</a>`;
+      if (!links) links = '<span class="text-muted small">Pool insuficiente</span>';
+      return `
+      <tr>
+        <td>${esc(r.indice)}</td>
+        <td>${esc(r.digitos_fmt)}</td>
+        <td>${esc(r.qtd_numeros_validos)}</td>
+        <td>${fmtVol(r.volume_combinacoes)}</td>
+        <td class="text-nowrap">${links}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="5" class="text-muted">Sem linhas</td></tr>';
+  }
+
+  async function carregarCatalogo(n) {
+    const r = await fetch(`${API}/catalogo?n=${n}`);
+    const j = await r.json();
+    if (!j.sucesso) { alert(j.erro || 'Falha no catálogo'); return; }
+    renderCatalogo(j);
+  }
+
+  async function carregarStatsHist() {
+    const r = await fetch(`${API}/estatisticas-historico?base=geral`);
+    const j = await r.json();
+    if (!j.sucesso) { alert(j.erro || 'Falha nas estatísticas'); return; }
+    const dist = j.distribuicao_n || [];
+    document.getElementById('aiStatsHist').innerHTML = `
+      <div class="col-12"><div class="ai-hint mb-2">Distribuição histórica de quantidade de dígitos (${j.total_concursos||0} concursos${j.primeiro_concurso!=null?`: ${j.primeiro_concurso}→${j.ultimo_concurso}`:''}).</div></div>
+      ${dist.map(d => `
+        <div class="col-6 col-md-3 col-lg-2"><div class="ai-kpi">
+          <div class="lbl">${d.n_digitos}d</div>
+          <div class="val">${d.frequencia} <span class="small text-muted">(${d.pct}%)</span></div>
+          <div class="small text-muted">vol méd. ${fmtVol(d.volume_medio)}</div>
+        </div></div>`).join('')}`;
+  }
+
+  function exportCsv() {
+    const header = ['concurso','data','dezenas','mes','digitos','digitos_ordenados','qtd_digitos','soma','volume','padrao_inicial','padrao_final','pares','impares','qtd_nao_sairam','nao_sairam','nao_sairam_16'];
+    const lines = [header.join(';')];
+    CACHE.forEach(l => {
+      lines.push([
+        l.concurso, l.data, l.dezenas_fmt, l.mes_abrev, l.digitos_fmt, l.digitos_ordenados_fmt,
+        l.qtd_digitos, l.soma, l.volume_combinacoes, l.padrao_inicial, l.padrao_final,
+        l.pares, l.impares, l.qtd_nao_sairam, l.nao_sairam_fmt, l.nao_sairam_16_fmt
+      ].map(x => `"${String(x??'').replace(/"/g,'""')}"`).join(';'));
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'}));
+    a.download = 'analises_inteligentes_diadesorte.csv';
+    a.click();
+  }
+
+  function goAba(nome) {
+    const btn = document.querySelector(`#aiTabs [data-aba="${nome}"]`);
+    if (btn) btn.click();
+  }
+
+  // events
+  document.getElementById('aiBtnCarregar').addEventListener('click', carregarResultados);
+  document.getElementById('aiBtnExportCsv').addEventListener('click', exportCsv);
+  document.getElementById('aiPageSize').addEventListener('change', () => {
+    PAGE.res = 1; PAGE.pad = 1;
+    renderResultados(CACHE, { keepCache: true });
+  });
+  document.getElementById('aiBtnCatalogo').addEventListener('click', () => carregarCatalogo(+document.getElementById('aiNDigitos').value));
+  document.getElementById('aiBtnStatsHist').addEventListener('click', carregarStatsHist);
+  document.getElementById('aiBuscaDigitos').addEventListener('input', () => {
+    if (CAT.length) renderCatalogo({ linhas: CAT, resumo: {}, n_digitos: +document.getElementById('aiNDigitos').value });
+  });
+
+    root.addEventListener('click', (ev) => {
+    const th = ev.target.closest('th.ai-sort');
+    if (th) {
+      const table = th.dataset.table;
+      const key = th.dataset.sort;
+      if (!table || !key || !SORT[table]) return;
+      if (SORT[table].key === key) SORT[table].dir = SORT[table].dir === 'asc' ? 'desc' : 'asc';
+      else {
+        SORT[table].key = key;
+        SORT[table].dir = (key === 'concurso' || key === 'data') ? 'desc' : 'asc';
+      }
+      PAGE[table] = 1;
+      renderResultados(CACHE, { keepCache: true });
+      return;
+    }
+    const btn = ev.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    if (act === 'page') {
+      const table = btn.dataset.table;
+      PAGE[table] = +(btn.dataset.page || 1);
+      renderResultados(CACHE, { keepCache: true });
+      return;
+    }
+    const n = +(btn.dataset.n || 0);
+    const dig = btn.dataset.dig || '';
+    const conc = +(btn.dataset.concurso || 0);
+    if (act === 'dl-nao' || act === 'dl-nao16') {
+      const row = CACHE.find(x => +x.concurso === conc);
+      if (!row) return;
+      const txt = act === 'dl-nao16' ? (row.nao_sairam_16_fmt || '') : (row.nao_sairam_fmt || '');
+      const suf = act === 'dl-nao16' ? '16_construtor' : 'todos';
+      downloadTxt(txt.replace(/\s+/g, ' ').trim() + '\n', `nao_sairam_c${conc}_${suf}.txt`);
+      return;
+    }
+    if (act === 'comb') {
+      document.getElementById('aiNDigitos').value = String(n);
+      document.getElementById('aiBuscaDigitos').value = dig;
+      goAba('combinacoes');
+      carregarCatalogo(n);
+      carregarStatsHist();
+    }
+  });
+
+  // deep-link
+  const aba0 = (root.dataset.aba || 'resultados').toLowerCase();
+  const n0 = +(root.dataset.n || 0);
+  carregarResultados().then(() => {
+    if (aba0 && aba0 !== 'resultados') goAba(aba0);
+    if (aba0 === 'combinacoes' && n0) {
+      document.getElementById('aiNDigitos').value = String(n0);
+      carregarCatalogo(n0);
+      carregarStatsHist();
+    }
+    if (aba0 === 'tubular' && window.AiTubular) window.AiTubular.load();
+  });
+})();
+</script>
+{% endblock %}

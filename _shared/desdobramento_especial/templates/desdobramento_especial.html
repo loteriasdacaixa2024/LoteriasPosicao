@@ -1,0 +1,907 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --transition-soft: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        --gold: #d97706;
+    }
+    .page-header {
+        background: linear-gradient(135deg, #1a3a5c, var(--primary));
+        border-radius: 16px;
+        padding: 2rem 2.5rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 32px rgba(4, 37, 10, 0.15);
+    }
+    .dez-ball {
+        display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center;
+        border-radius: 50%; background: var(--primary); color: #fff; font-weight: 800; font-size: 0.85rem;
+    }
+    .status-banner {
+        border-radius: 12px; padding: 0.85rem 1.25rem; font-weight: 600; margin-bottom: 1rem;
+    }
+    .status-banner.warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .status-banner.ok { background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; }
+    .status-banner.info { background: #eff6ff; border: 1px solid #93c5fd; color: #1e40af; }
+
+    .sugestao-card {
+        background: #fff; border: 1px solid rgba(10, 107, 26, 0.1); border-radius: 16px;
+        padding: 1.25rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        transition: var(--transition-soft); display: flex; gap: 1rem; cursor: pointer;
+    }
+    .sugestao-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(10, 107, 26, 0.1); border-color: var(--accent); }
+    .sugestao-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .bg-success-light { background: #e8faea; }
+    .bg-warning-light { background: #fffbeb; }
+    .bg-primary-light { background: #eff6ff; }
+    .col-badge { font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+    .col-badge.active-col { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .volante-container {
+        background: #fff; border-radius: 16px; border: 1.5px solid #d6f0da;
+        padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+    .volante-grid {
+        display: grid;
+        grid-template-columns: 20px 2px repeat({{ page.colunas_header }}, 1fr);
+        grid-template-rows: 20px 2px repeat({{ page.volante_linhas }}, 1fr);
+        gap: 8px; max-width: 550px; margin: 0 auto; align-items: center;
+    }
+    .col-label-item, .row-label-item { color: #558b5f; font-weight: 500; font-size: 0.65rem; text-align: center; user-select: none; }
+    .col-label-item {
+        cursor: pointer; border-radius: 8px; padding: 4px 2px; transition: var(--transition-soft);
+        font-weight: 700;
+    }
+    .col-label-item:hover { background: #e8faea; color: var(--primary); }
+    .col-label-item.coluna-marcada {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark, #1a1a2e));
+        color: #fff !important;
+    }
+    .col-label-item.coluna-simples-impar { box-shadow: 0 0 0 2px var(--gold); }
+    .row-label-item { display: flex; align-items: center; justify-content: center; }
+    .volante-line-horizontal { width: 100%; height: 1.5px; background-color: #ccead4; }
+    .volante-line-vertical { height: 100%; width: 1.5px; background-color: #ccead4; }
+  /* Grade do volante: só visual (ciclo). Marcação apenas nos cabeçalhos das colunas. */
+    .volante-celula {
+        aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 0.95rem; background: #f8fafc;
+        border: 1.5px solid #e2e8f0; color: #334155; user-select: none; position: relative;
+        pointer-events: none; cursor: default;
+    }
+    .volante-celula.cycle-drawn { border: 2.5px solid var(--accent) !important; background-color: #ecfdf5 !important; }
+    .volante-celula.coluna-selecionada {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark, #1a1a2e));
+        color: #fff; border-color: var(--primary-dark, #1a1a2e);
+        box-shadow: 0 4px 12px rgba(10, 107, 26, 0.35);
+    }
+    .volante-celula.coluna-simples { box-shadow: 0 0 0 3px var(--gold) !important; }
+    .cycle-check { position: absolute; bottom: 1px; font-size: 0.55rem; color: var(--primary); font-weight: 900; }
+    .volante-celula.coluna-selecionada .cycle-check { color: rgba(255,255,255,0.85); }
+
+    .contador-badge, .colunas-detalhe-badge {
+        background: #f3f4f6; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; border: 1px solid #e5e7eb;
+    }
+    .colunas-detalhe-badge { background: #f0fdf4; color: var(--primary); border-color: #dcfce7; }
+
+    .modo-montagem-card {
+        border: 2px solid #e5e7eb; border-radius: 12px; padding: 1rem; cursor: pointer; text-align: center; transition: var(--transition-soft);
+    }
+    .modo-montagem-card.active { border-color: var(--primary); background: #f0fdf4; }
+
+    .modo-card input[type="radio"] { display: none; }
+    .modo-card-content { transition: var(--transition-soft); border: 2px solid #e2e8f0 !important; background: #fff; }
+    .modo-card input:checked + .modo-card-content {
+        border-color: var(--primary) !important; background: #f0fdf4 !important;
+        box-shadow: 0 8px 24px rgba(10, 107, 26, 0.08); transform: translateY(-4px);
+    }
+    .modo-badge { font-size: 0.68rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
+    .modo-badge.bronze { background: #fef3c7; color: #d97706; }
+    .modo-badge.prata { background: #f3f4f6; color: #4b5563; }
+    .modo-badge.ouro { background: #fee2e2; color: #dc2626; }
+    .modo-badge.diamante { background: #eff6ff; color: #2563eb; }
+    .modo-preco { font-size: 1rem; }
+
+    .par-chip { display: inline-flex; background: #fff; border: 1.5px solid #bbf7d0; border-radius: 8px; padding: 4px 8px; font-weight: 700; font-size: 0.75rem; margin: 3px; }
+    .jogo-row { border-bottom: 1px solid #f3f4f6; padding: 0.5rem 0; }
+    .num-chip {
+        display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center;
+        border-radius: 50%; background: var(--primary); color: #fff; font-weight: 800; font-size: 0.75rem; margin: 2px;
+    }
+</style>
+
+<div class="page-header text-center">
+    <div style="font-size:2.5rem">{{ page.emoji }}</div>
+    <h2 class="mb-1 fw-extrabold text-uppercase">{{ page.titulo }} — Desdobramento Especial</h2>
+    <p class="mb-0 opacity-90" style="max-width:680px;margin:0 auto;font-size:.95rem">
+        {% if page.layout == 'bloco5' %}
+        Volante em <strong>5 colunas</strong> (blocos de 5 dezenas). Marque só o cabeçalho da coluna; o sistema desdobra 2 em 2 dentro de cada coluna.
+        Aposta válida neste modo: <strong>{{ page.min_dezenas }} a {{ page.max_dezenas }} dezenas</strong>.
+        {% else %}
+        Mesmo volante do Desdobramento Inteligente — escolha só <strong>colunas</strong> (finais 1 a 0).
+        Desdobramento 2 em 2 por coluna. Aposta entre <strong>{{ page.min_dezenas }} e {{ page.max_dezenas }} dezenas</strong> conforme colunas e PAR/ÍMPAR.
+        {% endif %}
+    </p>
+    {% if page.nota_aposta %}
+    <p class="mb-0 mt-2 small opacity-90" style="max-width:720px;margin:0 auto">{{ page.nota_aposta|safe }}</p>
+    {% endif %}
+</div>
+
+<!-- ÚLTIMO SORTEIO -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#f0fdf4;border-radius:12px;">
+        <div class="d-flex align-items-center gap-3">
+            <span style="font-size:1.8rem;">🏆</span>
+            <div>
+                <h5 class="mb-0 fw-bold">Último Concurso Sorteado</h5>
+                <small class="text-muted">Concurso: <strong id="concurso-numero" style="color:var(--primary);">--</strong> | Data: <strong id="concurso-data">--</strong></small>
+            </div>
+        </div>
+        <div class="dezenas-sorteadas d-flex gap-2 flex-wrap" id="dezenas-sorteadas">
+            {% for _ in range(page.sorteio_bolas) %}<span class="dez-ball">--</span>{% endfor %}
+        </div>
+        <button id="btn-atualizar-sorteio" class="btn btn-sm btn-outline-success fw-bold px-3" style="border-radius:8px;">
+            <i class="fas fa-sync-alt me-1"></i> Sincronizar Caixa
+        </button>
+    </div>
+</div>
+
+<!-- CICLO ATIVO -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4" style="border:1.5px solid rgba(10,107,26,0.15);border-radius:12px;">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h5 class="mb-2 fw-bold d-flex align-items-center gap-2">
+                    <i class="fas fa-sync fa-spin text-success"></i>
+                    Ciclo ativo: nº <span class="badge bg-success">{{ ciclo.ciclo_num }}</span>
+                </h5>
+                <p class="mb-2 text-secondary small">
+                    Todas as <b>{{ page.ciclo_total }} dezenas</b> são sorteadas até o ciclo fechar.
+                    <b>{{ ciclo.concursos_no_ciclo }}</b> concurso(s) no ciclo atual.
+                </p>
+                {% set pct = (ciclo.total_sorteadas / page.ciclo_total * 100)|round(0) %}
+                <div class="progress mb-2" style="height:10px">
+                    <div class="progress-bar bg-success" style="width:{{ pct }}%"></div>
+                </div>
+                <small class="text-muted fw-bold" style="font-size:0.78rem">
+                    Progresso: {{ pct }}% — {{ ciclo.total_sorteadas }} sorteadas no volante,
+                    {{ ciclo.total_faltantes }} faltantes.
+                </small>
+            </div>
+            <div class="col-md-5 mt-3 mt-md-0 border-start ps-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary fw-bold small text-uppercase">Faltam ({{ ciclo.total_faltantes }}):</span>
+                    {% if ciclo.dezenas_faltantes %}
+                    <button type="button" class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" style="font-size:0.68rem" onclick="selecionarColunasFaltantesCiclo()">
+                        <i class="fas fa-magic me-1"></i>Selecionar Faltantes
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="d-flex flex-wrap gap-1" style="max-height:110px;overflow-y:auto">
+                    {% if ciclo.dezenas_faltantes %}
+                        {% for d in ciclo.dezenas_faltantes %}
+                        <span class="badge bg-light text-dark border fw-bold" style="width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%">{{ "%02d"|format(d) }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-success small fw-bold"><i class="fas fa-check-double me-1"></i>Ciclo completo!</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SUGESTÕES ESTRATÉGICAS -->
+<h4 class="fw-bold mb-3 text-center"><i class="fas fa-chart-line me-2 text-success"></i>Sugestões Estratégicas de Colunas</h4>
+<div class="row g-3 mb-4 justify-content-center">
+    <div class="col-md-4">
+        <div class="sugestao-card h-100" onclick="aplicarSugestao('quentes')">
+            <div class="sugestao-icon bg-success-light"><i class="fas fa-fire text-success"></i></div>
+            <div>
+                <h6 class="mb-1 text-success fw-bold">Colunas Quentes</h6>
+                <p class="mb-2 text-muted" style="font-size:0.72rem">Maior frequência histórica — ideal para modo PAR com 4 colunas (8 dezenas).</p>
+                <div class="sugestao-badge-row" id="sug-cols-quentes"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="sugestao-card h-100" onclick="aplicarSugestao('atrasadas')">
+            <div class="sugestao-icon bg-warning-light"><i class="fas fa-hourglass-half text-warning"></i></div>
+            <div>
+                <h6 class="mb-1 text-warning fw-bold">Colunas Atrasadas</h6>
+                <p class="mb-2 text-muted" style="font-size:0.72rem">Maior atraso atual — boa para capturar ciclos maduros no especial.</p>
+                <div class="sugestao-badge-row" id="sug-cols-atrasadas"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="sugestao-card h-100" onclick="aplicarSugestao('balanceadas')">
+            <div class="sugestao-icon bg-primary-light"><i class="fas fa-balance-scale text-primary"></i></div>
+            <div>
+                <h6 class="mb-1 text-primary fw-bold">Sugestão Balanceada</h6>
+                <p class="mb-2 text-muted" style="font-size:0.72rem">2 quentes + 2 atrasadas — equilíbrio para 4 colunas no volante.</p>
+                <div class="sugestao-badge-row" id="sug-cols-balanceadas"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODO PAR / ÍMPAR -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="fw-bold text-center mb-3">Modo de montagem da aposta</h5>
+        <div class="row g-3 justify-content-center">
+            <div class="col-md-5">
+                <div class="modo-montagem-card active" id="card-modo-par" onclick="setModo('par')">
+                    <h6 class="fw-bold text-success">PAR</h6>
+                    <p class="small text-muted mb-0">Colunas × 2 dezenas · 3–7 colunas (6–14 dez.)</p>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="modo-montagem-card" id="card-modo-impar" onclick="setModo('impar')">
+                    <h6 class="fw-bold text-warning">ÍMPAR</h6>
+                    <p class="small text-muted mb-0">1 simples + pares · 3–8 colunas (5–15 dez.)</p>
+                </div>
+            </div>
+        </div>
+        <p class="text-center text-muted small mt-2 mb-0" id="hint-impar" style="display:none">
+            ÍMPAR: uma coluna fica <strong>simples</strong> (sem desdobramento); as demais colunas desdobram 2 em 2.
+        </p>
+    </div>
+</div>
+
+<!-- META: COLUNAS → TAMANHO DA APOSTA (5–15) -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="fw-bold text-center mb-2">Quantas colunas marcar?</h5>
+        <p class="text-center text-muted small mb-3">
+            Você escolhe só <strong>colunas</strong>. O tamanho da aposta ({{ page.min_dezenas }} a {{ page.max_dezenas }} na Caixa) vem das colunas + PAR/ÍMPAR.
+            <strong>1 coluna</strong> não fecha aposta. Os jogos do desdobramento são os pares alinhados por coluna, não “colunas extras”.
+        </p>
+        <p class="text-center small text-muted mb-2">Opcional: clique no tamanho desejado da aposta para ver quantas colunas marcar:</p>
+        <div class="d-flex flex-wrap justify-content-center gap-2 mb-3" id="meta-dezenas-btns">
+            {% for d in range(page.min_dezenas, page.max_dezenas + 1) %}
+            <button type="button" class="btn btn-outline-success btn-sm fw-bold meta-dez-btn" data-meta="{{ d }}">{{ d }}</button>
+            {% endfor %}
+        </div>
+        <div class="text-center mb-2">
+            <button type="button" class="btn btn-link btn-sm text-muted" onclick="limparMetaDezenas()">Limpar meta</button>
+        </div>
+        <div id="painel-orientacao" class="p-3 rounded-3 border bg-light small mb-3" style="border-color:#d6f0da!important">
+            <div class="fw-bold text-success mb-1" id="orientacao-titulo">Como funciona</div>
+            <p class="mb-2" id="orientacao-texto">Selecione PAR ou ÍMPAR e marque as colunas no volante (cabeçalhos 1 a 0).</p>
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-2" id="orientacao-contadores" style="display:none">
+                <span class="badge bg-primary" id="badge-precisa-colunas">Precisa: — colunas</span>
+                <span class="badge bg-secondary" id="badge-marcou-colunas">Marcou: 0</span>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-0 text-center" style="font-size:0.8rem">
+                <thead class="table-success">
+                    <tr>
+                        <th>Colunas no volante</th>
+                        <th>Resultado (dezenas Caixa)</th>
+                        <th id="th-modo-tabela">Modo PAR</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-colunas-dezenas"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="status-montagem" class="status-banner info">
+    Marque as <strong>colunas</strong> no volante. A aposta fecha entre {{ page.min_dezenas }} e {{ page.max_dezenas }} dezenas conforme colunas e modo.
+</div>
+
+<!-- VOLANTE (igual ao Desdobramento Inteligente — interação só por coluna) -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-4">
+        <div class="max-width-xl mx-auto text-center">
+            <h3 class="fw-bold mb-1">Selecione as colunas no Volante</h3>
+            <p class="text-muted small mb-4">
+                Clique só no <strong>cabeçalho da coluna</strong>. Cada coluna marcada entra inteira no desdobramento 2 em 2.
+            </p>
+        </div>
+        <div class="row justify-content-center mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted text-uppercase">Nome do desdobramento</label>
+                <input type="text" id="nome" class="form-control form-control-lg text-center fw-bold" placeholder="Ex: São João 2026" style="border-radius:10px;border:1.5px solid #d6f0da">
+            </div>
+        </div>
+        <div class="volante-container mb-3 d-inline-block w-100 text-center">
+            <div class="volante-grid" id="volante-grid"></div>
+        </div>
+        <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap mb-3">
+            <div class="contador-badge"><span id="contador-colunas" class="fw-extrabold">0</span> coluna(s)</div>
+            <div class="contador-badge">
+                <span id="contador-dezenas-aposta" class="fw-extrabold">0</span> dezenas (Caixa · {{ page.min_dezenas }}–{{ page.max_dezenas }})
+            </div>
+            <div class="colunas-detalhe-badge" id="colunas-selecionadas-info">Nenhuma coluna</div>
+        </div>
+        <p class="text-center text-muted small mb-2" id="hint-impar-volante" style="display:none">
+            Modo ÍMPAR: 2º clique no mesmo cabeçalho define a coluna <strong>simples</strong> (sem desdobramento 2 em 2).
+        </p>
+        <div class="text-center">
+            <button type="button" class="btn btn-outline-danger fw-bold px-4" onclick="limparColunas()" style="border-radius:10px">
+                <i class="fas fa-trash-alt me-2"></i>Limpar Volante
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- GARANTIA COM VALORES -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header fw-bold py-3 text-center border-0" style="background:#e8faea">
+        <h4 class="mb-0 fw-bold text-success"><i class="fas fa-shield-alt me-2"></i>Escolha a Garantia de Fechamento</h4>
+        <p class="mb-0 small text-muted mt-1">
+            Cada coluna gera pares alinhados (2 em 2). A garantia define quantos <strong>jogos</strong> usar — preço = aposta × jogos.
+        </p>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <label class="modo-card h-100 w-100" for="gar-bronze">
+                    <input type="radio" name="modo_fechamento" id="gar-bronze" value="bronze">
+                    <div class="modo-card-content p-3 h-100 d-flex flex-column align-items-center text-center border rounded-4">
+                        <span class="modo-badge bronze mb-2">BRONZE</span>
+                        <span class="modo-title fw-extrabold mb-1" id="gar-titulo-bronze">— Apostas</span>
+                        <span class="modo-desc text-muted mb-2 small" id="gar-desc-bronze">Amostra inicial</span>
+                        <span class="modo-preco fw-bold text-success" id="preco-bronze">R$ —</span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="modo-card h-100 w-100" for="gar-prata">
+                    <input type="radio" name="modo_fechamento" id="gar-prata" value="prata">
+                    <div class="modo-card-content p-3 h-100 d-flex flex-column align-items-center text-center border rounded-4">
+                        <span class="modo-badge prata mb-2">PRATA</span>
+                        <span class="modo-title fw-extrabold mb-1" id="gar-titulo-prata">— Apostas</span>
+                        <span class="modo-desc text-muted mb-2 small" id="gar-desc-prata">Metade do desdobramento</span>
+                        <span class="modo-preco fw-bold text-success" id="preco-prata">R$ —</span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="modo-card h-100 w-100" for="gar-ouro">
+                    <input type="radio" name="modo_fechamento" id="gar-ouro" value="ouro" checked>
+                    <div class="modo-card-content p-3 h-100 d-flex flex-column align-items-center text-center border rounded-4">
+                        <span class="modo-badge ouro mb-2">OURO</span>
+                        <span class="modo-title fw-extrabold mb-1" id="gar-titulo-ouro">— Apostas</span>
+                        <span class="modo-desc text-muted mb-2 small" id="gar-desc-ouro">Cobertura ampla</span>
+                        <span class="modo-preco fw-bold text-success" id="preco-ouro">R$ —</span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="modo-card h-100 w-100" for="gar-diamante">
+                    <input type="radio" name="modo_fechamento" id="gar-diamante" value="diamante">
+                    <div class="modo-card-content p-3 h-100 d-flex flex-column align-items-center text-center border rounded-4">
+                        <span class="modo-badge diamante mb-2">DIAMANTE</span>
+                        <span class="modo-title fw-extrabold mb-1" id="gar-titulo-diamante">— Apostas</span>
+                        <span class="modo-desc text-muted mb-2 small" id="gar-desc-diamante">Desdobramento integral</span>
+                        <span class="modo-preco fw-bold text-success" id="preco-diamante">R$ —</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="p-3 border rounded-3 bg-light small" style="border-color:#d6f0da!important">
+            <strong class="text-success">Como ler os valores:</strong>
+            o preço unitário depende de quantas dezenas você marca ({{ page.min_dezenas }} a {{ page.max_dezenas }}, conforme colunas e PAR/ÍMPAR).
+            O total do pacote = <em>valor da aposta × número de jogos</em> do nível escolhido.
+        </div>
+        <div class="text-center mt-4">
+            <button type="button" id="btn-gerar" class="btn btn-success btn-lg fw-extrabold px-5 py-3 shadow-lg" style="border-radius:12px" disabled onclick="gerarJogos()">
+                <i class="fas fa-magic me-2"></i>GERAR DESDOBRAMENTO ESTRUTURAL
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4" id="card-resultados" style="display:none">
+    <div class="card-header fw-bold bg-success text-white d-flex justify-content-between flex-wrap gap-2">
+        <span id="resumo-titulo">Resultados</span>
+        <div>
+            <button type="button" class="btn btn-sm btn-light" onclick="exportarTxt()">Exportar TXT</button>
+            <button type="button" class="btn btn-sm btn-outline-light" onclick="gerarJogos(true)">Salvar</button>
+        </div>
+    </div>
+    <div class="card-body" style="max-height:480px;overflow-y:auto" id="lista-jogos"></div>
+    <div class="card-footer small" id="resumo-valores"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const API = '/desdobramento-especial/api';
+const PAGE = {{ page|tojson }};
+const MAX_DEZENA = PAGE.max_dezena;
+const MIN_DEZENA = 1;
+const VOLANTE_LINHAS = PAGE.volante_linhas;
+const COLUNAS_HEADER = PAGE.colunas_header;
+const LAYOUT = PAGE.layout;
+const MIN_DEZENAS_APOSTA = PAGE.min_dezenas;
+const MAX_DEZENAS_APOSTA = PAGE.max_dezenas;
+const MIN_COLUNAS = PAGE.min_colunas;
+const dezenasSorteadasCiclo = {{ ciclo.dezenas_sorteadas|tojson }};
+const dezenasFaltantesCiclo = {{ ciclo.dezenas_faltantes|tojson }};
+const sorteadasCiclo = new Set(dezenasSorteadasCiclo);
+const faltantesCiclo = new Set(dezenasFaltantesCiclo);
+
+let config = null;
+let cacheSugestoes = null;
+let modo = 'par';
+let colunasSel = new Set();
+let colunaSimples = null;
+let resultadoAtual = null;
+let ultimoValorUnitario = 0;
+let metaDezenas = null;
+
+function finalColuna(num) {
+    if (LAYOUT === 'bloco5') return Math.ceil(num / 5);
+    return num % 10 === 0 ? 10 : num % 10;
+}
+
+function labelColuna(c) {
+    if (LAYOUT === 'bloco5') return String(c);
+    return c === 10 ? '0' : String(c);
+}
+
+function fmtMoeda(v) {
+    return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function colunasNecessariasParaMeta(dezenas, m) {
+    if (dezenas < MIN_DEZENAS_APOSTA || dezenas > MAX_DEZENAS_APOSTA) return null;
+    if (m === 'par') return dezenas % 2 === 0 ? dezenas / 2 : null;
+    return (dezenas - 1) % 2 === 0 ? 1 + (dezenas - 1) / 2 : null;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const r = await fetch(API + '/config');
+    const d = await r.json();
+    if (d.status === 'success') {
+        config = d;
+        aplicarGarantiasUI();
+    }
+    criarVolanteOficial();
+    carregarSugestoesEstatisticas();
+    atualizarResultadoCaixa();
+    document.getElementById('btn-atualizar-sorteio').addEventListener('click', atualizarResultadoCaixa);
+    document.querySelectorAll('input[name="modo_fechamento"]').forEach(inp => {
+        inp.addEventListener('change', () => {});
+    });
+    document.querySelectorAll('.meta-dez-btn').forEach(btn => {
+        btn.addEventListener('click', () => setMetaDezenas(parseInt(btn.dataset.meta, 10)));
+    });
+    renderTabelaModo();
+    atualizarOrientacao();
+    atualizarMontagem();
+});
+
+function setMetaDezenas(n) {
+    metaDezenas = n;
+    document.querySelectorAll('.meta-dez-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.meta, 10) === n);
+        b.classList.toggle('btn-success', parseInt(b.dataset.meta, 10) === n);
+        b.classList.toggle('btn-outline-success', parseInt(b.dataset.meta, 10) !== n);
+    });
+    atualizarOrientacao();
+    atualizarMontagem();
+}
+
+function limparMetaDezenas() {
+    metaDezenas = null;
+    document.querySelectorAll('.meta-dez-btn').forEach(b => {
+        b.classList.remove('active', 'btn-success');
+        b.classList.add('btn-outline-success');
+    });
+    atualizarOrientacao();
+    atualizarMontagem();
+}
+
+function renderTabelaModo() {
+    const tbody = document.getElementById('tabela-colunas-dezenas');
+    const tabela = modo === 'impar' ? config?.tabela_impar : config?.tabela_par;
+    document.getElementById('th-modo-tabela').textContent = modo === 'impar' ? 'Modo ÍMPAR' : 'Modo PAR';
+    if (!tabela || !tbody) return;
+    tbody.innerHTML = tabela.map(l => `
+        <tr data-dez="${l.dezenas}" data-cols="${l.colunas}">
+            <td><strong>${l.colunas}</strong></td>
+            <td><strong>${l.dezenas}</strong></td>
+            <td class="text-start small">${l.formula}</td>
+        </tr>`).join('');
+}
+
+async function atualizarOrientacao() {
+    const body = { modo, colunas: [...colunasSel] };
+    if (metaDezenas != null) body.meta_dezenas = metaDezenas;
+    try {
+        const r = await fetch(API + '/orientacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        if (d.status !== 'success') return;
+        document.getElementById('orientacao-texto').textContent = d.instrucao || '';
+        const cont = document.getElementById('orientacao-contadores');
+        if (d.meta_dezenas != null && d.colunas_necessarias != null) {
+            cont.style.display = 'flex';
+            document.getElementById('badge-precisa-colunas').textContent =
+                `Precisa: ${d.colunas_necessarias} coluna(s) para ${d.meta_dezenas} dezenas`;
+            document.getElementById('badge-marcou-colunas').textContent =
+                `Marcou: ${d.colunas_marcadas}`;
+            document.getElementById('badge-marcou-colunas').className =
+                'badge ' + (d.meta_ok ? 'bg-success' : (d.colunas_marcadas > d.colunas_necessarias ? 'bg-danger' : 'bg-warning text-dark'));
+        } else {
+            cont.style.display = 'none';
+        }
+        document.querySelectorAll('#tabela-colunas-dezenas tr').forEach(tr => {
+            const dez = parseInt(tr.dataset.dez, 10);
+            const cols = parseInt(tr.dataset.cols, 10);
+            tr.classList.remove('table-success', 'table-warning');
+            if (metaDezenas === dez) tr.classList.add('table-success');
+            else if (colunasSel.size === cols && d.dezenas_atual === dez) tr.classList.add('table-warning');
+        });
+    } catch (e) { console.error(e); }
+}
+
+function aplicarGarantiasUI() {
+    const g = config?.garantias || {};
+    ['bronze', 'prata', 'ouro', 'diamante'].forEach(k => {
+        const info = g[k];
+        if (!info) return;
+        const t = document.getElementById('gar-titulo-' + k);
+        const d = document.getElementById('gar-desc-' + k);
+        if (t) t.textContent = info.titulo || (info.jogos + ' Apostas');
+        if (d) d.textContent = info.desc || '';
+    });
+}
+
+function criarVolanteOficial() {
+    const volante = document.getElementById('volante-grid');
+    volante.innerHTML = '';
+    for (let col = 1; col <= COLUNAS_HEADER; col++) {
+        const lbl = document.createElement('div');
+        lbl.className = 'col-label-item';
+        lbl.style.gridRow = '1';
+        lbl.style.gridColumn = String(col + 2);
+        lbl.textContent = labelColuna(col);
+        lbl.dataset.col = col;
+        lbl.title = 'Marcar/desmarcar coluna ' + labelColuna(col);
+        lbl.addEventListener('click', (e) => { e.stopPropagation(); toggleColuna(col); });
+        volante.appendChild(lbl);
+    }
+    const hLine = document.createElement('div');
+    hLine.className = 'volante-line-horizontal';
+    hLine.style.gridRow = '2';
+    hLine.style.gridColumn = '3 / span ' + COLUNAS_HEADER;
+    volante.appendChild(hLine);
+    for (let row = 1; row <= VOLANTE_LINHAS; row++) {
+        const lbl = document.createElement('div');
+        lbl.className = 'row-label-item';
+        lbl.style.gridRow = String(row + 2);
+        lbl.style.gridColumn = '1';
+        lbl.textContent = row;
+        volante.appendChild(lbl);
+    }
+    const vLine = document.createElement('div');
+    vLine.className = 'volante-line-vertical';
+    vLine.style.gridRow = '3 / span ' + VOLANTE_LINHAS;
+    vLine.style.gridColumn = '2';
+    volante.appendChild(vLine);
+    if (LAYOUT === 'bloco5') {
+        for (let linha = 0; linha < VOLANTE_LINHAS; linha++) {
+            for (let col = 1; col <= COLUNAS_HEADER; col++) {
+                const numero = linha + (col - 1) * VOLANTE_LINHAS + 1;
+                if (numero < MIN_DEZENA || numero > MAX_DEZENA) continue;
+                appendCelulaVolante(volante, numero, linha + 3, col + 2);
+            }
+        }
+    } else {
+        for (let linha = 0; linha < VOLANTE_LINHAS; linha++) {
+            for (let col = 1; col <= COLUNAS_HEADER; col++) {
+                const numero = linha * 10 + col;
+                if (numero < MIN_DEZENA || numero > MAX_DEZENA) continue;
+                appendCelulaVolante(volante, numero, linha + 3, col + 2);
+            }
+        }
+    }
+    syncVolanteHighlight();
+}
+
+function appendCelulaVolante(volante, numero, gridRow, gridCol) {
+    const celula = document.createElement('div');
+    celula.className = 'volante-celula';
+    celula.style.gridRow = String(gridRow);
+    celula.style.gridColumn = String(gridCol);
+    if (sorteadasCiclo.has(numero)) celula.classList.add('cycle-drawn');
+    celula.textContent = String(numero).padStart(2, '0');
+    celula.dataset.numero = numero;
+    if (sorteadasCiclo.has(numero)) {
+        const check = document.createElement('span');
+        check.className = 'cycle-check';
+        check.textContent = '✓';
+        celula.appendChild(check);
+    }
+    volante.appendChild(celula);
+}
+
+function syncVolanteHighlight() {
+    document.querySelectorAll('.col-label-item[data-col]').forEach(lbl => {
+        const c = parseInt(lbl.dataset.col, 10);
+        lbl.classList.toggle('coluna-marcada', colunasSel.has(c));
+        lbl.classList.toggle('coluna-simples-impar', modo === 'impar' && colunaSimples === c);
+    });
+    document.querySelectorAll('.volante-celula').forEach(cell => {
+        const n = parseInt(cell.dataset.numero, 10);
+        const col = finalColuna(n);
+        cell.classList.remove('coluna-selecionada', 'coluna-simples');
+        if (colunasSel.has(col)) {
+            cell.classList.add('coluna-selecionada');
+            if (modo === 'impar' && colunaSimples === col) cell.classList.add('coluna-simples');
+        }
+    });
+    const cols = [...colunasSel].sort((a, b) => a - b);
+    const info = document.getElementById('colunas-selecionadas-info');
+    if (!cols.length) {
+        info.textContent = 'Nenhuma coluna';
+        info.style.background = '#f3f4f6';
+        info.style.color = '#6b7280';
+    } else {
+        const extra = modo === 'impar' && colunaSimples ? ` · simples: Col ${labelColuna(colunaSimples)}` : '';
+        info.textContent = cols.map(c => `Col ${labelColuna(c)}`).join(' · ') + extra;
+        info.style.background = '#dcfce7';
+        info.style.color = 'var(--primary)';
+    }
+}
+
+function setModo(m) {
+    modo = m;
+    document.getElementById('card-modo-par').classList.toggle('active', m === 'par');
+    document.getElementById('card-modo-impar').classList.toggle('active', m === 'impar');
+    document.getElementById('hint-impar').style.display = m === 'impar' ? 'block' : 'none';
+    if (m === 'par') colunaSimples = null;
+    document.getElementById('hint-impar-volante').style.display = m === 'impar' ? 'block' : 'none';
+    renderTabelaModo();
+    syncVolanteHighlight();
+    atualizarOrientacao();
+    atualizarMontagem();
+}
+
+function toggleColuna(c) {
+    if (colunasSel.has(c)) {
+        if (modo === 'impar' && colunaSimples !== c) {
+            colunaSimples = c;
+        } else {
+            colunasSel.delete(c);
+            if (colunaSimples === c) colunaSimples = null;
+        }
+    } else {
+        colunasSel.add(c);
+    }
+    document.getElementById('contador-colunas').textContent = colunasSel.size;
+    syncVolanteHighlight();
+    atualizarOrientacao();
+    atualizarMontagem();
+}
+
+function limparColunas() {
+    colunasSel.clear();
+    colunaSimples = null;
+    document.getElementById('contador-colunas').textContent = '0';
+    syncVolanteHighlight();
+    atualizarOrientacao();
+    atualizarMontagem();
+    document.getElementById('contador-dezenas-aposta').textContent = '0';
+    document.getElementById('card-resultados').style.display = 'none';
+}
+
+function atualizarPrecosGarantia(valorUnit) {
+    ultimoValorUnitario = valorUnit || 0;
+    const g = config?.garantias || { bronze: { jogos: 7 }, prata: { jogos: 14 }, ouro: { jogos: 21 }, diamante: { jogos: 28 } };
+    ['bronze', 'prata', 'ouro', 'diamante'].forEach(k => {
+        const n = g[k]?.jogos || 28;
+        const el = document.getElementById('preco-' + k);
+        if (el) el.textContent = valorUnit > 0 ? fmtMoeda(valorUnit * n) : 'R$ —';
+    });
+}
+
+async function atualizarMontagem() {
+    const cols = [...colunasSel].sort((a, b) => a - b);
+    const banner = document.getElementById('status-montagem');
+    const btn = document.getElementById('btn-gerar');
+    if (cols.length < MIN_COLUNAS) {
+        banner.className = 'status-banner info';
+        banner.textContent = `Selecione no mínimo ${MIN_COLUNAS} colunas no volante.`;
+        btn.disabled = true;
+        atualizarPrecosGarantia(0);
+        document.getElementById('contador-dezenas-aposta').textContent = '0';
+        return;
+    }
+    const body = { colunas: cols, modo };
+    if (modo === 'impar' && colunaSimples) body.coluna_simples = colunaSimples;
+    try {
+        const r = await fetch(API + '/preview-montagem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        const qtd = d.total_dezenas_aposta || 0;
+        document.getElementById('contador-dezenas-aposta').textContent = qtd;
+        const tp = config?.tabela_precos || {};
+        const valorUnit = Number(tp[qtd] ?? tp[String(qtd)] ?? 0);
+        atualizarPrecosGarantia(valorUnit);
+        if (d.montagem_valida) {
+            banner.className = 'status-banner ok';
+            banner.innerHTML = `<i class="fas fa-check-circle me-2"></i>${d.formula} — <strong>${qtd} dezenas</strong> na aposta (${MIN_DEZENAS_APOSTA}–${MAX_DEZENAS_APOSTA}). ${fmtMoeda(valorUnit)} por jogo. Pares gerados nas colunas marcadas.`;
+            const need = metaDezenas != null ? colunasNecessariasParaMeta(metaDezenas, modo) : null;
+            const metaOk = need == null || (cols.length === need && d.montagem_valida);
+            btn.disabled = (modo === 'impar' && !colunaSimples) || (metaDezenas != null && !metaOk);
+        } else {
+            banner.className = 'status-banner warn';
+            banner.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${d.erro || d.formula} Ajuste colunas para ${MIN_DEZENAS_APOSTA}–${MAX_DEZENAS_APOSTA} dezenas.`;
+            btn.disabled = true;
+            atualizarPrecosGarantia(0);
+        }
+    } catch (e) {
+        banner.className = 'status-banner warn';
+        banner.textContent = 'Erro ao calcular montagem.';
+        btn.disabled = true;
+    }
+}
+
+async function carregarSugestoesEstatisticas() {
+    try {
+        const r = await fetch(API + '/sugestoes-colunas');
+        const d = await r.json();
+        if (d.status === 'success' && d.sugestoes) {
+            cacheSugestoes = d.sugestoes;
+            ['quentes', 'atrasadas', 'balanceadas'].forEach(t => {
+                const el = document.getElementById('sug-cols-' + t);
+                if (el && d.sugestoes[t]) {
+                    el.innerHTML = d.sugestoes[t].colunas.map(c =>
+                        `<span class="col-badge active-col">Col ${labelColuna(c)}</span>`).join('');
+                }
+            });
+        }
+    } catch (e) { console.error(e); }
+}
+
+function aplicarSugestao(tipo) {
+    if (!cacheSugestoes?.[tipo]) {
+        Swal.fire('Aguarde', 'Carregando estatísticas…', 'info');
+        return;
+    }
+    limparColunas();
+    cacheSugestoes[tipo].colunas.forEach(c => toggleColuna(c));
+    Swal.fire({
+        icon: 'success',
+        title: 'Sugestão aplicada',
+        text: `Colunas ${cacheSugestoes[tipo].colunas.join(', ')} marcadas no volante.`,
+        timer: 2200,
+        showConfirmButton: false,
+    });
+}
+
+function selecionarColunasFaltantesCiclo() {
+    limparColunas();
+    const scores = [];
+    const cv = config?.colunas_volante || {};
+    for (let c = 1; c <= COLUNAS_HEADER; c++) {
+        const dezs = (cv[String(c)]?.dezenas) || cv[c]?.dezenas || [];
+        const falt = dezs.filter(n => faltantesCiclo.has(n)).length;
+        scores.push({ coluna: c, falt });
+    }
+    scores.sort((a, b) => b.falt - a.falt || a.coluna - b.coluna);
+    const nCols = modo === 'impar'
+        ? Math.min(COLUNAS_HEADER, Math.max(MIN_COLUNAS, Math.ceil((MAX_DEZENAS_APOSTA - 1) / 2)))
+        : Math.min(COLUNAS_HEADER, Math.max(MIN_COLUNAS, Math.floor(MAX_DEZENAS_APOSTA / 2)));
+    const picked = scores.slice(0, nCols);
+    picked.forEach(s => toggleColuna(s.coluna));
+    if (modo === 'impar' && picked.length) {
+        colunaSimples = picked[0].coluna;
+        syncVolanteHighlight();
+    }
+    atualizarMontagem();
+    Swal.fire({
+        icon: 'success',
+        title: 'Colunas pelo ciclo',
+        text: `Selecionadas ${nCols} colunas com mais dezenas faltantes.`,
+        timer: 2500,
+    });
+}
+
+async function atualizarResultadoCaixa() {
+    const btn = document.getElementById('btn-atualizar-sorteio');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Carregando...';
+    try {
+        const r = await fetch(API + '/ultimos');
+        const d = await r.json();
+        const sorteios = d.sorteios || [];
+        if (d.status === 'success' && sorteios.length) {
+            const s = sorteios[0];
+            const dezenas = s.dezenas || s.sorteio1 || [];
+            document.getElementById('concurso-numero').textContent = s.concurso ?? '--';
+            document.getElementById('concurso-data').textContent = s.data ?? '--';
+            document.getElementById('dezenas-sorteadas').innerHTML =
+                dezenas.length
+                    ? dezenas.map(n => `<span class="dez-ball">${String(n).padStart(2, '0')}</span>`).join('')
+                    : Array.from({ length: PAGE.sorteio_bolas || 5 }, () => '<span class="dez-ball">--</span>').join('');
+        }
+    } catch (e) { console.error(e); }
+    finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sincronizar Caixa';
+    }
+}
+
+async function gerarJogos(salvar = false) {
+    const cols = [...colunasSel].sort((a, b) => a - b);
+    const gar = document.querySelector('input[name="modo_fechamento"]:checked')?.value || 'ouro';
+    const body = {
+        colunas: cols,
+        modo,
+        garantia: gar,
+        nome: document.getElementById('nome').value.trim(),
+        salvar: !!salvar,
+    };
+    if (modo === 'impar') body.coluna_simples = colunaSimples;
+    Swal.showLoading();
+    try {
+        const r = await fetch(API + '/gerar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        Swal.close();
+        if (d.status !== 'success') {
+            Swal.fire('Erro', d.message || 'Falha na geração.', 'error');
+            return;
+        }
+        resultadoAtual = d;
+        mostrarResultados(d);
+        if (salvar && d.id_salvo) Swal.fire('Salvo', `#${d.id_salvo} gravado.`, 'success');
+        else Swal.fire({ icon: 'success', title: 'Gerado', timer: 1500, showConfirmButton: false });
+    } catch (e) {
+        Swal.close();
+        Swal.fire('Erro', e.message, 'error');
+    }
+}
+
+function mostrarResultados(d) {
+    document.getElementById('card-resultados').style.display = 'block';
+    document.getElementById('resumo-titulo').textContent =
+        `${d.garantia_label || d.garantia} · ${d.total_jogos} jogos · ${d.qtd_dezenas} dez. · ${d.modo.toUpperCase()}`;
+    document.getElementById('resumo-valores').textContent =
+        `${d.resumo} · Unitário ${fmtMoeda(d.valor_aposta)} · Total ${fmtMoeda(d.valor_total)}`;
+    document.getElementById('lista-jogos').innerHTML = (d.jogos_detalhe || []).map(j => `
+        <div class="jogo-row">
+            <span class="text-muted small me-2">#${j.numero}</span>
+            ${j.dezenas_fmt.map(x => `<span class="num-chip">${x}</span>`).join('')}
+            <span class="text-muted small ms-2">${j.formula}</span>
+        </div>`).join('');
+    document.getElementById('card-resultados').scrollIntoView({ behavior: 'smooth' });
+}
+
+function exportarTxt() {
+    if (!resultadoAtual) return;
+    const nome = document.getElementById('nome').value.trim() || (PAGE.titulo || 'Especial').replace(/\s+/g, '_');
+    fetch(API + '/exportar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resultado: resultadoAtual, nome }),
+    }).then(async r => {
+        if (!r.ok) { Swal.fire('Erro', 'Exportação falhou.', 'error'); return; }
+        const blob = await r.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = nome.replace(/\s+/g, '_') + '.txt';
+        a.click();
+    });
+}
+</script>
+{% endblock %}

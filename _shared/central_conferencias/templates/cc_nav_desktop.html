@@ -1,0 +1,20 @@
+{# Substitui link simples "Conferência" — usar com cc_cfg no contexto #}
+            <div class="nav-item-wrap">
+                <button class="nav-btn"><i class="fas fa-trophy nav-icon"></i> Central de Conferências <i
+                        class="fas fa-chevron-down caret"></i></button>
+                <div class="nav-dropdown">
+                    <div class="dd-header">Conferência {{ cc_cfg.nome }}</div>
+                    <a class="dd-link" href="/central-conferencias/#historico"><span class="dd-icon"
+                            style="background:#fef3c7;color:#92400e;"><i class="fas fa-trophy"></i></span><span
+                            class="dd-text-block"><span class="dd-title">Conferência Histórica</span><span
+                                class="dd-desc">{{ cc_cfg.menu_hist_desc }}</span></span></a>
+                    <a class="dd-link" href="/central-conferencias/#conversor"><span class="dd-icon"
+                            style="background:var(--accent-light);color:var(--primary);"><i class="fas fa-right-left"></i></span><span
+                            class="dd-text-block"><span class="dd-title">Conversor de Apostas</span><span
+                                class="dd-desc">{{ cc_cfg.menu_conv_desc }}</span></span></a>
+                    <a class="dd-link" href="/central-conferencias/#concursos"><span class="dd-icon"
+                            style="background:#c8ddf2;color:#0d2a4a;"><i class="fas fa-folder-open"></i></span><span
+                            class="dd-text-block"><span class="dd-title">Concursos Disponíveis</span><span
+                                class="dd-desc">Conferir apostas.json com o banco</span></span></a>
+                </div>
+            </div>

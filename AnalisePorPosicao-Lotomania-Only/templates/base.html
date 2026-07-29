@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotomania Absoluta — Análise Estratégica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Identidade Lotomania — espelha configuracoes.temas_modalidade */
+            --primary: #c45c00;
+            --primary-dark: #9e4900;
+            --primary-xdark: #6e3200;
+            --accent: #f5820a;
+            --accent-light: #fef0e0;
+            --on-accent: #ffffff;
+            --bg: #fff8f2;
+            --surface: #ffffff;
+            --radius: 12px;
+            --nav-h: 62px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            color: #2d2d2d;
+            padding-top: var(--nav-h);
+        }
+
+        /* ══ NAVBAR ══ */
+        .navbar-main {
+            height: var(--nav-h);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-xdark) 100%);
+            box-shadow: 0 3px 20px rgba(0, 0, 0, .35);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            padding: 0 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .nav-brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .nav-brand-text {
+            color: #fff;
+            font-weight: 800;
+            font-size: .92rem;
+            line-height: 1.2;
+            letter-spacing: -.3px;
+        }
+
+        .nav-brand-text small {
+            display: block;
+            font-weight: 400;
+            font-size: .7rem;
+            opacity: .75;
+            letter-spacing: .4px;
+        }
+
+        .nav-sep {
+            width: 1px;
+            height: 30px;
+            background: rgba(255, 255, 255, .25);
+            flex-shrink: 0;
+        }
+
+        .nav-items {
+            display: flex;
+            align-items: center;
+            gap: .15rem;
+            flex: 1;
+        }
+
+        .nav-item-wrap {
+            position: relative;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .45rem .9rem;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, .88);
+            font-weight: 500;
+            font-size: .83rem;
+            text-decoration: none;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: background .18s, color .18s;
+            white-space: nowrap;
+        }
+
+        .nav-btn i.nav-icon {
+            font-size: .82rem;
+            opacity: .85;
+        }
+
+        .nav-btn .caret {
+            font-size: .6rem;
+            opacity: .7;
+            margin-left: .1rem;
+            transition: transform .2s;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+        }
+
+        .nav-item-wrap:hover .nav-btn .caret,
+        .nav-item-wrap.open .nav-btn .caret {
+            transform: rotate(180deg);
+        }
+
+        .nav-badge {
+            background: var(--accent);
+            color: #fff;
+            font-size: .58rem;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 6px;
+            letter-spacing: .3px;
+            text-transform: uppercase;
+        }
+
+        /* Dropdown */
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 260px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, .18);
+            border: 1px solid rgba(196, 92, 0, .15);
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: all .2s ease;
+            z-index: 2000;
+        }
+
+        .nav-item-wrap:hover .nav-dropdown,
+        .nav-item-wrap.open .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dd-header {
+            padding: .65rem 1rem .45rem;
+            font-size: .7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--accent-light);
+        }
+
+        .dd-link {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .7rem 1rem;
+            text-decoration: none;
+            color: #333;
+            font-size: .83rem;
+            font-weight: 500;
+            transition: background .15s;
+        }
+
+        .dd-link:hover {
+            background: var(--accent-light);
+            color: var(--primary);
+        }
+
+        .dd-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .78rem;
+            flex-shrink: 0;
+            transition: transform .15s;
+        }
+
+        .dd-link:hover .dd-icon {
+            transform: scale(1.1);
+        }
+
+        .dd-text-block {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dd-title {
+            display: block;
+            font-weight: 600;
+            font-size: .83rem;
+        }
+
+        .dd-desc {
+            display: block;
+            font-size: .71rem;
+            color: #888;
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dd-sep {
+            height: 1px;
+            background: var(--accent-light);
+            margin: .3rem 0;
+        }
+
+        /* Mobile */
+        .nav-toggler {
+            display: none;
+            background: rgba(255, 255, 255, .15);
+            border: none;
+            border-radius: 8px;
+            padding: .5rem .7rem;
+            color: #fff;
+            font-size: 1.1rem;
+            margin-left: auto;
+            cursor: pointer;
+        }
+
+        .nav-mobile-panel {
+            display: none;
+            position: fixed;
+            top: var(--nav-h);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary-xdark);
+            z-index: 1040;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .nav-mobile-panel.open {
+            display: block;
+        }
+
+        .mobile-link {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .85rem 1rem;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, .9);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: .9rem;
+            margin-bottom: .25rem;
+            transition: background .15s;
+        }
+
+        .mobile-link:hover {
+            background: rgba(255, 255, 255, .12);
+            color: #fff;
+        }
+
+        .mobile-link i {
+            width: 20px;
+            text-align: center;
+            opacity: .75;
+        }
+
+        .mobile-group-title {
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            color: rgba(255, 255, 255, .4);
+            padding: .75rem 1rem .35rem;
+        }
+
+        /* Conteúdo */
+        .page-content {
+            padding: 1.25rem .75rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width:900px) {
+            .nav-items {
+                display: none;
+            }
+
+            .nav-toggler {
+                display: block;
+            }
+        }
+    
+        .nav-gear-isolated {
+            margin-left: auto;
+            flex-shrink: 0;
+            padding: .45rem .75rem !important;
+        }
+        .nav-gear-isolated i { font-size: 1rem; }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar-main">
+        <a class="nav-brand" href="/">
+            <div class="nav-brand-icon">🎱</div>
+            <div class="nav-brand-text">
+                Lotomania Absoluta
+                <small>Análise Estratégica — 100 Dezenas</small>
+            </div>
+        </a>
+
+        <div class="nav-sep"></div>
+
+        <div class="nav-items" id="navItems">
+
+            <!-- Dados -->
+            <div class="nav-item-wrap">
+                <button class="nav-btn">
+                    <i class="fas fa-database nav-icon"></i> Dados
+                    <i class="fas fa-chevron-down caret"></i>
+                </button>
+                <div class="nav-dropdown">
+                    <div class="dd-header">Base de Dados</div>
+                    {% include 'nav_dados_block_desktop.html' %}
+                </div>
+            </div>
+
+            <!-- Análise -->
+            <div class="nav-item-wrap">
+                <button class="nav-btn">
+                    <i class="fas fa-crosshairs nav-icon"></i> Análise
+                    <i class="fas fa-chevron-down caret"></i>
+                </button>
+                <div class="nav-dropdown">
+                    <div class="dd-header">Ferramentas de Análise</div>
+                    {% include 'nav_analise_block_desktop.html' %}
+                </div>
+            </div>
+
+            <!-- Conferência -->
+            {% include 'nav_desdobramento_desktop.html' %}
+            {% include 'cc_nav_desktop.html' %}
+            {% include 'nav_geradores_elite_desktop.html' %}
+        </div>            <a class="nav-btn nav-gear-isolated" href="/configuracoes/" title="Configurações"><i class="fas fa-cog"></i></a>
+
+
+        <button class="nav-toggler" id="navToggler" onclick="toggleMobileNav()">
+            <i class="fas fa-bars" id="togglerIcon"></i>
+        </button>
+    </nav>
+
+    <!-- MOBILE PANEL -->
+    <div class="nav-mobile-panel" id="mobilePanel">
+        {% include 'nav_geradores_elite_mobile.html' %}
+        <div class="mobile-group-title">Base de Dados</div>
+        {% include 'nav_dados_block_mobile.html' %}
+        <div class="mobile-group-title">Análise</div>
+        {% include 'nav_analise_block_mobile.html' %}
+        {% include 'nav_desdobramento_mobile.html' %}
+        {% include 'cc_nav_mobile.html' %}
+        <a class="mobile-link" href="/configuracoes/" onclick="closeMobileNav()" title="Configurações">
+            <i class="fas fa-cog"></i> Configurações
+        </a>
+    </div>
+
+    <!-- CONTEÚDO -->
+    <div class="page-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function toggleMobileNav() {
+            const panel = document.getElementById('mobilePanel');
+            const icon = document.getElementById('togglerIcon');
+            panel.classList.toggle('open');
+            icon.className = panel.classList.contains('open') ? 'fas fa-times' : 'fas fa-bars';
+        }
+        function closeMobileNav() {
+            document.getElementById('mobilePanel').classList.remove('open');
+            document.getElementById('togglerIcon').className = 'fas fa-bars';
+        }
+        document.addEventListener('click', function (e) {
+            const panel = document.getElementById('mobilePanel');
+            const toggler = document.getElementById('navToggler');
+            if (panel.classList.contains('open') && !panel.contains(e.target) && !toggler.contains(e.target)) {
+                closeMobileNav();
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

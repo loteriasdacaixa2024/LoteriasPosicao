@@ -1,0 +1,193 @@
+<script>
+(function () {
+    if (!window.__REP_SNIPER_INTELIGENTE__) return;
+
+    let modoGeracao = 'automatico';
+    let sniperData = null;
+
+    function apiPath(suffix) {
+        return `${window.__REP_API_BASE__}${suffix}`;
+    }
+
+    function setModoBody(m) {
+        modoGeracao = m;
+        document.body.classList.toggle('sniper-modo-auto', m === 'automatico');
+        document.body.classList.toggle('sniper-modo-manual', m === 'manual');
+        document.querySelectorAll('.sniper-modo-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.modo === m);
+        });
+    }
+
+    function renderEvidencias(ev) {
+        const el = document.getElementById('evidCorpo');
+        if (!el || !ev) return;
+        const rep = ev.repeticoes || {};
+        const tipos = ev.tipos_sorteio || [];
+        const nums = ev.numeros_fortes || [];
+        const cols = ev.colunas_fortes || [];
+
+        const fmtInt = (n) => (n != null && n !== '' ? String(Math.round(Number(n))) : '—');
+
+        const repHtml = Object.entries(rep).map(([k, v]) =>
+            `<div class="evid-linha"><span>${v.label}</span><span class="evid-pct">${fmtInt(v.qtd)}</span></div>`
+        ).join('');
+
+        const tipHtml = tipos.slice(0, 5).map(t =>
+            `<div class="evid-linha"><span>${t.label}</span><span class="evid-pct">${fmtInt(t.vezes)}</span></div>`
+        ).join('');
+
+        const numHtml = nums.map(n =>
+            `<div class="evid-linha"><span>${n.posicao}º Número ${n.digito}</span><span class="evid-pct">${fmtInt(n.ocorrencias)}</span></div>`
+        ).join('');
+
+        const colHtml = cols.map((c, i) =>
+            `<div class="evid-linha"><span>${i + 1}º ${c.label}</span><span class="evid-pct">${fmtInt(c.vezes)}</span></div>`
+        ).join('');
+
+        el.innerHTML = `
+        <div class="row g-2">
+            <div class="col-md-6 col-lg-3"><div class="evid-box"><h6>Repetições</h6>${repHtml}</div></div>
+            <div class="col-md-6 col-lg-3"><div class="evid-box"><h6>Tipo de sorteio</h6>${tipHtml}</div></div>
+            <div class="col-md-6 col-lg-3"><div class="evid-box"><h6>Números mais fortes</h6>${numHtml || '<span class="text-muted small">—</span>'}</div></div>
+            <div class="col-md-6 col-lg-3"><div class="evid-box"><h6>Colunas mais fortes</h6>${colHtml || '<span class="text-muted small">—</span>'}</div></div>
+        </div>
+        <p class="small text-muted mb-0 mt-2">Base: ${ev.total_concursos || 0} concursos analisados.</p>`;
+    }
+
+    function preencherParManual(ev) {
+        const sel = document.getElementById('selParManual');
+        const chk = document.getElementById('regPares');
+        if (!sel) return;
+        if (!chk?.checked) { sel.disabled = true; return; }
+        sel.disabled = false;
+        sel.innerHTML = '<option value="">Automático (1º par)</option>';
+        (ev.top_pares_colunas || []).forEach((p, i) => {
+            const o = document.createElement('option');
+            o.value = String(i);
+            o.textContent = `C${p.c1} & C${p.c2} (${p.qtd}×)`;
+            sel.appendChild(o);
+        });
+    }
+
+    function coletarRegrasManuais() {
+        const regras = {};
+        document.querySelectorAll('.reg-manual').forEach(inp => {
+            const k = inp.dataset.k;
+            if (k) regras[k] = inp.checked;
+        });
+        regras.tipo_sorteio_alvo = document.getElementById('selTipoManual')?.value || '';
+        const par = document.getElementById('selParManual')?.value;
+        regras.par_colunas_idx = par === '' ? null : parseInt(par, 10);
+        const dig = document.getElementById('selDigitoManual')?.value;
+        regras.digito_foco = dig === '' ? null : parseInt(dig, 10);
+        regras.forcar_par_colunas = true;
+        return regras;
+    }
+
+    window.__sniperBuildGerarBody = function (base) {
+        const body = { ...base, modo_geracao: modoGeracao };
+        if (modoGeracao === 'manual') {
+            body.regras_manuais = coletarRegrasManuais();
+            body.usar_ultimo_par = !!body.regras_manuais.usar_ultimo_par;
+            const alguma = Object.entries(body.regras_manuais).some(([k, v]) =>
+                k.startsWith('usar_') && v === true
+            );
+            if (!alguma) {
+                throw new Error('Ative pelo menos uma regra manual.');
+            }
+        } else {
+            body.regras_manuais = null;
+            body.usar_ultimo_par = true;
+        }
+        return body;
+    };
+
+    window.__sniperHtmlLinearColunas = function (dezenas, marcas) {
+        const cnt = {};
+        (dezenas || []).forEach(d => { cnt[d] = (cnt[d] || 0) + 1; });
+        const digM = marcas?.digitos || {};
+        const colM = marcas?.colunas || {};
+        return `<div class="coluna-ball-wrap">${(dezenas || []).map((n, i) => {
+            let cls = 'dez-ball';
+            if (cnt[n] > 1) cls += ' rep-intra';
+            else if (digM[String(n)] === 'quente') cls += ' dig-quente';
+            else if (digM[String(n)] === 'frio') cls += ' dig-frio';
+            else if (digM[String(n)] === 'seq-rep') cls += ' dig-seq-rep';
+            const colCls = colM[String(i + 1)] === 'forte' ? ' col-forte' : '';
+            return `<div class="coluna-ball-item${colCls}"><div class="col-mini-lbl">C${i + 1}</div><span class="${cls}">${n}</span></div>`;
+        }).join('')}</div>`;
+    };
+
+    window.__sniperHtmlCriterios = function (a) {
+        if (!a.criterios?.length) return '';
+        const lines = a.criterios.map(c => `<div class="crit-line">${c.texto}</div>`).join('');
+        return `<div class="aposta-criterios mt-2 w-100"><div class="fw-bold small mb-1">Critérios utilizados:</div>${lines}</div>`;
+    };
+
+    async function carregarInteligente() {
+        const loader = document.getElementById('evidLoader');
+        loader?.classList.remove('d-none');
+        try {
+            const r = await fetch(apiPath('/analise'));
+            const data = await r.json();
+            if (!data.sucesso) {
+                document.getElementById('evidCorpo').innerHTML = `<span class="text-danger">${data.erro || 'Erro'}</span>`;
+                return;
+            }
+            sniperData = data;
+            window.__SNIPER_INTRASORTE__ = data.intrasorte;
+            renderEvidencias(data.evidencias);
+            preencherParManual(data.evidencias);
+            const txt = (data.criterios_auto_preview || []).join(' · ') || '—';
+            const el = document.getElementById('autoCriteriosTxt');
+            if (el) el.textContent = txt;
+            if (typeof window.__sniperCarregarAnaliseHook === 'function') {
+                window.__sniperCarregarAnaliseHook(data);
+            }
+        } catch (err) {
+            const el = document.getElementById('evidCorpo');
+            if (el) el.innerHTML = `<span class="text-danger small">Falha ao carregar análises: ${err.message || err}</span>`;
+        } finally {
+            loader?.classList.add('d-none');
+        }
+    }
+
+    function bindModoButtons() {
+        document.getElementById('grpModoGeracao')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('.sniper-modo-btn');
+            if (!btn?.dataset.modo) return;
+            e.preventDefault();
+            setModoBody(btn.dataset.modo);
+        });
+    }
+
+    document.getElementById('regPares')?.addEventListener('change', () => {
+        if (sniperData?.evidencias) preencherParManual(sniperData.evidencias);
+    });
+
+    function initSniperPage() {
+        setModoBody('automatico');
+        const dup = document.getElementById('chkUltimoPar')?.closest('.form-check-inline');
+        if (dup) dup.classList.add('d-none');
+        const loader = document.getElementById('loaderAnalise');
+        const painel = document.getElementById('painelAnalise');
+        if (loader) loader.style.display = 'none';
+        if (painel) painel.style.display = 'none';
+        bindModoButtons();
+        carregarInteligente();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSniperPage);
+    } else {
+        initSniperPage();
+    }
+
+    window.__sniperAfterGerar = function (data) {
+        if (data.criterios_modo_auto?.length && modoGeracao === 'automatico') {
+            const el = document.getElementById('autoCriteriosTxt');
+            if (el) el.textContent = data.criterios_modo_auto.join(' · ');
+        }
+    };
+})();
+</script>

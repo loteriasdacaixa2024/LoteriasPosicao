@@ -1,0 +1,510 @@
+{
+  "lotofacil": {
+    "api_slug": "lotofacil",
+    "sigla": "LF",
+    "descricao": "Escolha de 15 a 20 dezenas entre 01 e 25. Sorteio de 15 dezenas. Maior frequência de sorteios entre as loterias numéricas.",
+    "sorteios": {
+      "dias": ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
+      "horario": "20h",
+      "frequencia": "6 vezes por semana",
+      "acumulada": "Não acumula para concurso seguinte na faixa principal (regras vigentes na Caixa)"
+    },
+    "aposta": {
+      "universo": "01 a 25",
+      "dezenas_sorteadas": 15,
+      "marcacao_min": 15,
+      "marcacao_max": 20,
+      "jogos_simples_min": 1,
+      "jogos_simples_max": "Conforme combinações / bolão"
+    },
+    "bolao": {
+      "regras": "Bolão com no mínimo 2 cotas. Cada cota deve ter apostas equivalentes. Valor mínimo do bolão proporcional ao preço da aposta simples e quantidade de combinações.",
+      "cotas_min": 2,
+      "cotas_max": 100,
+      "valor_minimo_nota": "Referência: 12× aposta simples de 15 dezenas (ajustável no painel central)",
+      "max_apostas_bolao": "Conforme regulamento Caixa"
+    },
+    "tabela_precos": [
+      {"dezenas": 15, "valor": 3.5},
+      {"dezenas": 16, "valor": 56.0},
+      {"dezenas": 17, "valor": 476.0},
+      {"dezenas": 18, "valor": 2856.0},
+      {"dezenas": 19, "valor": 13566.0},
+      {"dezenas": 20, "valor": 54264.0}
+    ],
+    "probabilidades": [
+      {"faixa": "15 acertos", "probabilidade": "1 em 3.268.760"},
+      {"faixa": "14 acertos", "probabilidade": "1 em 21.791"},
+      {"faixa": "13 acertos", "probabilidade": "1 em 691"},
+      {"faixa": "12 acertos", "probabilidade": "1 em 60"},
+      {"faixa": "11 acertos", "probabilidade": "1 em 11"}
+    ],
+    "premiacao": [
+      {"faixa": "15 acertos", "descricao": "Faixa principal"},
+      {"faixa": "14 acertos", "descricao": "Segunda faixa"},
+      {"faixa": "13 acertos", "descricao": "Terceira faixa"},
+      {"faixa": "12 acertos", "descricao": "Quarta faixa"},
+      {"faixa": "11 acertos", "descricao": "Quinta faixa"}
+    ],
+    "regras_especificas": [
+      "Marque de 15 a 20 números no volante.",
+      "Prêmio líquido sujeito a tributação conforme legislação.",
+      "Consulte regulamento oficial para prazos de pagamento."
+    ],
+    "fechamento": {
+      "padrao_sistema": "Desdobramento 16 dezenas em 4 colunas (fechamento tipo Mega)",
+      "cobertura": "Estruturas de fechamento para 11+ acertos conforme modo bronze/prata/ouro"
+    },
+    "institucional": {
+      "operador": "Caixa Econômica Federal",
+      "fonte": "Regulamento Lotofácil — loterias.caixa.gov.br"
+    }
+  },
+  "diadesorte": {
+    "api_slug": "diadesorte",
+    "sigla": "DS",
+    "descricao": "Escolha de 7 a 15 dezenas (01 a 31) + 1 Mês da Sorte. Sorteio de 7 dezenas + mês.",
+    "sorteios": {
+      "dias": ["Terça", "Quinta", "Sábado"],
+      "horario": "20h",
+      "frequencia": "3 vezes por semana",
+      "acumulada": "Conforme regulamento vigente na Caixa"
+    },
+    "aposta": {
+      "universo": "01 a 31",
+      "dezenas_sorteadas": 7,
+      "marcacao_min": 7,
+      "marcacao_max": 15,
+      "extra": "Mês da Sorte (1 de 12)"
+    },
+    "bolao": {
+      "regras": "Bolão mínimo de 2 cotas. Inclui combinações de dezenas e meses conforme regulamento.",
+      "cotas_min": 2,
+      "cotas_max": 80,
+      "valor_minimo_nota": "Referência: 10× aposta simples de 7 dezenas"
+    },
+    "tabela_precos": [
+      {"dezenas": 7, "valor": 2.5},
+      {"dezenas": 8, "valor": 20.0},
+      {"dezenas": 9, "valor": 90.0},
+      {"dezenas": 10, "valor": 300.0},
+      {"dezenas": 11, "valor": 825.0},
+      {"dezenas": 12, "valor": 1980.0},
+      {"dezenas": 13, "valor": 4290.0},
+      {"dezenas": 14, "valor": 8580.0},
+      {"dezenas": 15, "valor": 12870.0}
+    ],
+    "probabilidades": [
+      {"faixa": "7 dezenas + mês", "probabilidade": "Consulte regulamento Caixa"},
+      {"faixa": "6 dezenas + mês", "probabilidade": "Faixa intermediária"},
+      {"faixa": "5 dezenas + mês", "probabilidade": "Faixa intermediária"},
+      {"faixa": "4 dezenas", "probabilidade": "Faixa fixa"}
+    ],
+    "premiacao": [
+      {"faixa": "7 + Mês", "descricao": "Faixa principal"},
+      {"faixa": "6 + Mês", "descricao": "Segunda faixa"},
+      {"faixa": "5 + Mês", "descricao": "Terceira faixa"},
+      {"faixa": "4", "descricao": "Quarta faixa (fixa)"}
+    ],
+    "regras_especificas": [
+      "O Mês da Sorte é obrigatório em cada aposta.",
+      "Personalização de cores dos meses disponível nesta aplicação."
+    ],
+    "fechamento": {
+      "padrao_sistema": "Desdobramento 16 dezenas (01–31) em 4 colunas",
+      "cobertura": "Fechamentos para cobertura de faixas principais"
+    },
+    "institucional": {
+      "operador": "Caixa Econômica Federal",
+      "fonte": "Regulamento Dia de Sorte — loterias.caixa.gov.br"
+    }
+  },
+  "lotomania": {
+    "api_slug": "lotomania",
+    "sigla": "LM",
+    "descricao": "Aposta com 50 dezenas no volante (universo 00 a 99). Sorteio de 20 dezenas. Prêmio para quem acerta e para quem não acerta nenhuma (zero).",
+    "sorteios": {
+      "dias": ["Segunda", "Quarta", "Sexta"],
+      "horario": "20h",
+      "frequencia": "3 vezes por semana",
+      "acumulada": "Conforme regulamento Caixa"
+    },
+    "aposta": {
+      "universo": "00 a 99",
+      "dezenas_sorteadas": 20,
+      "marcacao_min": 50,
+      "marcacao_max": 50,
+      "jogos_fixos": 1
+    },
+    "bolao": {
+      "regras": "Bolão com mínimo 2 cotas. Cada aposta contém 50 dezenas.",
+      "cotas_min": 2,
+      "cotas_max": 100,
+      "valor_minimo_nota": "Referência: 50× aposta simples"
+    },
+    "tabela_precos": [
+      {"dezenas": 50, "valor": 3.0, "obs": "Aposta única no volante"}
+    ],
+    "probabilidades": [
+      {"faixa": "20 acertos", "probabilidade": "1 em 11.372.635"},
+      {"faixa": "19 acertos", "probabilidade": "Faixa intermediária"},
+      {"faixa": "18 acertos", "probabilidade": "Faixa intermediária"},
+      {"faixa": "0 acertos", "probabilidade": "Prêmio especial — consulte Caixa"}
+    ],
+    "premiacao": [
+      {"faixa": "20", "descricao": "Faixa principal"},
+      {"faixa": "19 a 16", "descricao": "Faixas intermediárias"},
+      {"faixa": "0", "descricao": "Prêmio para nenhum acerto"}
+    ],
+    "regras_especificas": [
+      "Volante oficial: 100 dezenas (00–99), marque 50.",
+      "Validação de colunas no desdobramento: 4 colunas × 4 dezenas."
+    ],
+    "fechamento": {
+      "padrao_sistema": "Grade 10×10 (00–99), fechamento 16/4 colunas",
+      "cobertura": "Estruturas para múltiplas faixas de acerto"
+    },
+    "institucional": {
+      "operador": "Caixa Econômica Federal",
+      "fonte": "Regulamento Lotomania — loterias.caixa.gov.br"
+    }
+  },
+  "quina": {
+    "api_slug": "quina",
+    "sigla": "QN",
+    "descricao": "Escolha de 5 a 15 dezenas entre 01 e 80. Sorteio de 5 dezenas.",
+    "sorteios": {
+      "dias": ["Segunda a Sábado"],
+      "horario": "20h",
+      "frequencia": "6 vezes por semana",
+      "acumulada": "Acumula conforme regulamento"
+    },
+    "aposta": {
+      "universo": "01 a 80",
+      "dezenas_sorteadas": 5,
+      "marcacao_min": 5,
+      "marcacao_max": 15
+    },
+    "bolao": {
+      "regras": "Mínimo 2 cotas. Valor proporcional às combinações.",
+      "cotas_min": 2,
+      "cotas_max": 100,
+      "valor_minimo_nota": "Referência: 8× aposta simples (5 dezenas)"
+    },
+    "tabela_precos": [
+      {"dezenas": 5, "valor": 3.0},
+      {"dezenas": 6, "valor": 18.0},
+      {"dezenas": 7, "valor": 63.0},
+      {"dezenas": 8, "valor": 168.0},
+      {"dezenas": 9, "valor": 378.0},
+      {"dezenas": 10, "valor": 756.0},
+      {"dezenas": 11, "valor": 1386.0},
+      {"dezenas": 12, "valor": 2376.0},
+      {"dezenas": 13, "valor": 3861.0},
+      {"dezenas": 14, "valor": 6006.0},
+      {"dezenas": 15, "valor": 9009.0}
+    ],
+    "probabilidades": [
+      {"faixa": "5 acertos", "probabilidade": "1 em 24.040.016"},
+      {"faixa": "4 acertos", "probabilidade": "1 em 64.106"},
+      {"faixa": "3 acertos", "probabilidade": "1 em 866"},
+      {"faixa": "2 acertos", "probabilidade": "1 em 36"}
+    ],
+    "premiacao": [
+      {"faixa": "Quina", "descricao": "5 acertos"},
+      {"faixa": "Quadra", "descricao": "4 acertos"},
+      {"faixa": "Terno", "descricao": "3 acertos"},
+      {"faixa": "Duque", "descricao": "2 acertos (prêmio fixo)"}
+    ],
+    "regras_especificas": [
+      "Quina de São João: concurso especial anual.",
+      "Volante 8×10 (dezenas 01–80)."
+    ],
+    "fechamento": {
+      "padrao_sistema": "16 dezenas / 4 colunas",
+      "cobertura": "Modos bronze, prata e ouro"
+    },
+    "institucional": {
+      "operador": "Caixa Econômica Federal",
+      "fonte": "Regulamento Quina — loterias.caixa.gov.br"
+    }
+  },
+  "megasena": {
+    "api_slug": "megasena",
+    "sigla": "MG",
+    "descricao": "Escolha de 6 a 20 dezenas entre 01 e 60. Sorteio de 6 dezenas. Principal loteria acumulada do Brasil.",
+    "sorteios": {
+      "dias": ["Quarta", "Sábado"],
+      "horario": "20h",
+      "frequencia": "2 vezes por semana",
+      "acumulada": "Sim — faixa principal acumula"
+    },
+    "aposta": {
+      "universo": "01 a 60",
+      "dezenas_sorteadas": 6,
+      "marcacao_min": 6,
+      "marcacao_max": 20
+    },
+    "bolao": {
+      "regras": "Bolão mínimo 2 cotas. Mega da Virada e concursos especiais conforme edital.",
+      "cotas_min": 2,
+      "cotas_max": 100,
+      "valor_minimo_nota": "Referência: 8× aposta simples (6 dezenas)"
+    },
+    "tabela_precos": [
+      {"dezenas": 6, "valor": 6.0},
+      {"dezenas": 7, "valor": 42.0},
+      {"dezenas": 8, "valor": 168.0},
+      {"dezenas": 9, "valor": 504.0},
+      {"dezenas": 10, "valor": 1260.0},
+      {"dezenas": 11, "valor": 2772.0},
+      {"dezenas": 12, "valor": 5544.0},
+      {"dezenas": 13, "valor": 10296.0},
+      {"dezenas": 14, "valor": 18018.0},
+      {"dezenas": 15, "valor": 30030.0},
+      {"dezenas": 16, "valor": 48048.0},
+      {"dezenas": 17, "valor": 74256.0},
+      {"dezenas": 18, "valor": 111384.0},
+      {"dezenas": 19, "valor": 162792.0},
+      {"dezenas": 20, "valor": 232560.0}
+    ],
+    "probabilidades": [
+      {"faixa": "Sena (6)", "probabilidade": "1 em 50.063.860"},
+      {"faixa": "Quina (5)", "probabilidade": "1 em 154.518"},
+      {"faixa": "Quadra (4)", "probabilidade": "1 em 2.332"}
+    ],
+    "premiacao": [
+      {"faixa": "Sena", "descricao": "6 acertos — faixa principal"},
+      {"faixa": "Quina", "descricao": "5 acertos"},
+      {"faixa": "Quadra", "descricao": "4 acertos"}
+    ],
+    "regras_especificas": [
+      "Mega da Virada: concurso especial de final de ano.",
+      "Dois desdobramentos no sistema: Des1 e Des2 (estrutural)."
+    ],
+    "fechamento": {
+      "padrao_sistema": "Volante 6×10, fechamento 16/4 colunas",
+      "cobertura": "Referência padrão para demais modalidades"
+    },
+    "institucional": {
+      "operador": "Caixa Econômica Federal",
+      "fonte": "Regulamento Mega-Sena — loterias.caixa.gov.br"
+    }
+  },
+  "maismilionaria": {
+    "api_slug": "maismilionaria",
+    "sigla": "MM",
+    "descricao": "6 a 12 dezenas (01–50) + 2 a 6 trevos (01–06). Sorteio de 6 dezenas + 2 trevos.",
+    "sorteios": {
+      "dias": ["Quarta", "Sábado"],
+      "horario": "20h",
+      "frequencia": "2 vezes por semana",
+      "acumulada": "Conforme regulamento"
+    },
+    "aposta": {
+      "universo": "01 a 50",
+      "dezenas_sorteadas": 6,
+      "marcacao_min": 6,
+      "marcacao_max": 12,
+      "extra": "Trevos: marcar de 2 a 6 (entre 1 e 6)",
+      "trevo_min": 2,
+      "trevo_max": 6,
+      "trevo_universo": 6
+    },
+    "bolao": {
+      "regras": "Bolão mínimo 2 cotas. Combinações de dezenas e trevos.",
+      "cotas_min": 2,
+      "cotas_max": 100,
+      "valor_minimo_nota": "Referência: 10× aposta simples"
+    },
+    "tabela_precos": [
+      {"dezenas": 6, "valor": 6.0, "obs": "+ 2 trevos incluídos"},
+      {"dezenas": 7, "valor": 42.0},
+      {"dezenas": 8, "valor": 168.0},
+      {"dezenas": 9, "valor": 504.0},
+      {"dezenas": 10, "valor": 1260.0},
+      {"dezenas": 11, "valor": 2772.0},
+      {"dezenas": 12, "valor": 5544.0}
+    ],
+    "probabilidades": [
+      {"faixa": "6 + 2 trevos", "probabilidade": "Consulte regulamento Caixa"},
+      {"faixa": "Combinações parciais", "probabilidade": "Múltiplas faixas dezenas/trevos"}
+    ],
+    "premiacao": [
+      {"faixa": "Principal", "descricao": "6 dezenas + 2 trevos"},
+      {"faixa": "Intermediárias", "descricao": "Faixas de dezenas e trevos"}
+    ],
+    "regras_especificas": [
+      "Fechamento de trevos disponível no desdobramento (4 trevos → 6 combinações de 2).",
+      "Volante de dezenas 5×10 (01–50)."
+    ],
+    "fechamento": {
+      "padrao_sistema": "Dezenas 16/4 colunas + módulo trevos",
+      "cobertura": "Painel separado para fechamento de trevos"
+    },
+    "institucional": {
+      "operador": "Caixa Econômica Federal",
+      "fonte": "Regulamento +Milionária — loterias.caixa.gov.br"
+    }
+  },
+  "duplasena": {
+    "api_slug": "duplasena",
+    "sigla": "DSN",
+    "descricao": "6 a 15 dezenas (01–50). Dois sorteios no mesmo concurso (1º e 2º sorteio).",
+    "sorteios": {
+      "dias": ["Segunda", "Quarta", "Sexta"],
+      "horario": "20h",
+      "frequencia": "3 vezes por semana",
+      "acumulada": "Conforme faixa e sorteio"
+    },
+    "aposta": {
+      "universo": "01 a 50",
+      "dezenas_sorteadas": 6,
+      "marcacao_min": 6,
+      "marcacao_max": 15,
+      "extra": "2 sorteios por concurso"
+    },
+    "bolao": {
+      "regras": "Bolão mínimo 2 cotas. Premiação em ambos os sorteios.",
+      "cotas_min": 2,
+      "cotas_max": 100,
+      "valor_minimo_nota": "Referência: 8× aposta simples"
+    },
+    "tabela_precos": [
+      {"dezenas": 6, "valor": 3.0},
+      {"dezenas": 7, "valor": 21.0},
+      {"dezenas": 8, "valor": 84.0},
+      {"dezenas": 9, "valor": 252.0},
+      {"dezenas": 10, "valor": 630.0},
+      {"dezenas": 11, "valor": 1386.0},
+      {"dezenas": 12, "valor": 2772.0},
+      {"dezenas": 13, "valor": 5148.0},
+      {"dezenas": 14, "valor": 9009.0},
+      {"dezenas": 15, "valor": 15015.0}
+    ],
+    "probabilidades": [
+      {"faixa": "Sena 1º sorteio", "probabilidade": "1 em 15.890.700"},
+      {"faixa": "Sena 2º sorteio", "probabilidade": "Mesmo universo — sorteio independente"},
+      {"faixa": "Quina / Quadra", "probabilidade": "Faixas por sorteio"}
+    ],
+    "premiacao": [
+      {"faixa": "Sena", "descricao": "6 acertos (por sorteio)"},
+      {"faixa": "Quina", "descricao": "5 acertos"},
+      {"faixa": "Quadra", "descricao": "4 acertos"},
+      {"faixa": "Terno", "descricao": "3 acertos"},
+      {"faixa": "Duque", "descricao": "2 acertos (fixo)"}
+    ],
+    "regras_especificas": [
+      "Cada concurso realiza dois sorteios com a mesma aposta.",
+      "Backtesting considera prêmio duplo."
+    ],
+    "fechamento": {
+      "padrao_sistema": "16 dezenas / 4 colunas",
+      "cobertura": "Padrão Mega-Sena adaptado"
+    },
+    "institucional": {
+      "operador": "Caixa Econômica Federal",
+      "fonte": "Regulamento Dupla Sena — loterias.caixa.gov.br"
+    }
+  },
+  "timemania": {
+    "api_slug": "timemania",
+    "sigla": "TM",
+    "descricao": "10 dezenas fixas (01–80) + Time do Coração. Sorteio de 7 dezenas + time.",
+    "sorteios": {
+      "dias": ["Terça", "Quinta", "Sábado"],
+      "horario": "20h",
+      "frequencia": "3 vezes por semana",
+      "acumulada": "Conforme regulamento"
+    },
+    "aposta": {
+      "universo": "01 a 80",
+      "dezenas_sorteadas": 7,
+      "marcacao_min": 10,
+      "marcacao_max": 10,
+      "extra": "Time do Coração"
+    },
+    "bolao": {
+      "regras": "Bolão mínimo 2 cotas. Inclui dezenas e times.",
+      "cotas_min": 2,
+      "cotas_max": 100,
+      "valor_minimo_nota": "Referência: 10× aposta simples"
+    },
+    "tabela_precos": [
+      {"dezenas": 10, "valor": 3.5, "obs": "Aposta única + time"}
+    ],
+    "probabilidades": [
+      {"faixa": "7 acertos + time", "probabilidade": "Consulte regulamento"},
+      {"faixa": "Faixas parciais", "probabilidade": "Dezenas e time separados"}
+    ],
+    "premiacao": [
+      {"faixa": "7 + Time", "descricao": "Faixa principal"},
+      {"faixa": "6 a 3", "descricao": "Faixas de dezenas"},
+      {"faixa": "Time", "descricao": "Prêmio do time"},
+      {"faixa": "Mensal time", "descricao": "Sorteio mensal time — consulte Caixa"}
+    ],
+    "regras_especificas": [
+      "Marque exatamente 10 dezenas no volante.",
+      "Ranking de times na análise estatística."
+    ],
+    "fechamento": {
+      "padrao_sistema": "Volante 8×10, fechamento 16/4 colunas",
+      "cobertura": "8 prêmios possíveis no backtesting"
+    },
+    "institucional": {
+      "operador": "Caixa Econômica Federal",
+      "fonte": "Regulamento Timemania — loterias.caixa.gov.br"
+    }
+  },
+  "supersete": {
+    "api_slug": "supersete",
+    "sigla": "SS",
+    "descricao": "7 colunas (0–9). Aposta simples: 1 dígito por coluna (7 marcas). Apostas múltiplas: até 21 marcas no volante (limites por coluna conforme Caixa).",
+    "sorteios": {
+      "dias": ["Segunda", "Quarta", "Sexta"],
+      "horario": "21h",
+      "frequencia": "3 vezes por semana",
+      "acumulada": "Conforme regulamento"
+    },
+    "aposta": {
+      "universo": "7 colunas × (0 a 9)",
+      "dezenas_sorteadas": 7,
+      "marcacao_min": 7,
+      "marcacao_max": 7,
+      "marcacao_multipla_max": 21,
+      "por_coluna_min": 1,
+      "por_coluna_max": 3,
+      "extra": "Aposta simples = 1 dígito/coluna; múltiplas até 21 marcas (máx. 3/coluna) — ver Caixa"
+    },
+    "bolao": {
+      "regras": "Bolão mínimo 2 cotas. Combinações por coluna.",
+      "cotas_min": 2,
+      "cotas_max": 80,
+      "valor_minimo_nota": "Referência: 7× aposta simples"
+    },
+    "tabela_precos": [
+      {"dezenas": 7, "valor": 3.0, "obs": "7 colunas — 1 dígito cada"}
+    ],
+    "probabilidades": [
+      {"faixa": "7 colunas", "probabilidade": "1 em 10.000.000"},
+      {"faixa": "6 colunas", "probabilidade": "Faixa intermediária"},
+      {"faixa": "5 a 3 colunas", "probabilidade": "Faixas decrescentes"}
+    ],
+    "premiacao": [
+      {"faixa": "7", "descricao": "Acerto em todas as colunas"},
+      {"faixa": "6 a 3", "descricao": "Faixas por quantidade de colunas"}
+    ],
+    "regras_especificas": [
+      "Análise estatística por coluna (C1–C7).",
+      "Não utiliza volante numérico tradicional — estrutura columnar."
+    ],
+    "fechamento": {
+      "padrao_sistema": "Desdobramento por colunas / dígitos",
+      "cobertura": "Específico Super Sete"
+    },
+    "institucional": {
+      "operador": "Caixa Econômica Federal",
+      "fonte": "Regulamento Super Sete — loterias.caixa.gov.br"
+    }
+  }
+}

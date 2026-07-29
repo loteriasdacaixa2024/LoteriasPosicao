@@ -1,0 +1,655 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-xdark) 100%);
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .15);
+    }
+
+    .col-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+        overflow: hidden;
+        border-top: 4px solid var(--accent);
+    }
+
+    .col-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        color: #fff;
+        padding: .75rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .col-header .col-num {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: var(--accent);
+    }
+
+    .col-atual {
+        background: var(--accent);
+        color: #1a2600;
+        border-radius: 8px;
+        padding: .2rem .6rem;
+        font-weight: 800;
+        font-size: 1rem;
+    }
+
+    .digito-row {
+        display: grid;
+        grid-template-columns: 28px 1fr 60px 55px;
+        align-items: center;
+        gap: .4rem;
+        padding: .3rem .75rem;
+        font-size: .82rem;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .digito-row:last-child {
+        border-bottom: none;
+    }
+
+    .digito-ball {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--accent-light);
+        color: var(--primary);
+        font-weight: 800;
+        font-size: .8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .digito-ball.atual {
+        background: var(--accent);
+        color: #1a2600;
+    }
+
+    .freq-bar-wrap {
+        background: #f0f0f0;
+        border-radius: 4px;
+        height: 8px;
+    }
+
+    .freq-bar {
+        height: 8px;
+        border-radius: 4px;
+        background: var(--accent);
+    }
+
+    .atraso-tag {
+        font-size: .72rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .atraso-hot {
+        background: #fad7d7;
+        color: #8b1a1a;
+    }
+
+    .atraso-warm {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .atraso-cold {
+        background: #d7e2fa;
+        color: #1a3a8b;
+    }
+
+    .historico-table {
+        font-size: .8rem;
+    }
+
+    .digito-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: var(--accent-light);
+        color: var(--primary);
+        font-weight: 800;
+        margin: 1px;
+        font-size: .85rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #888;
+    }
+
+    .sniper-tabs .nav-link {
+        font-weight: 700;
+        color: var(--primary);
+        border-radius: 8px 8px 0 0;
+    }
+
+    .sniper-tabs .nav-link.active {
+        background: var(--accent);
+        color: #1a2600;
+        border-color: var(--accent);
+    }
+
+    .sniper-matrix-col {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 3px;
+    }
+
+    .sniper-matrix-cell {
+        border-radius: 6px;
+        padding: 4px 2px;
+        text-align: center;
+        font-size: .72rem;
+        border: 1px solid rgba(0, 0, 0, .06);
+    }
+
+    .sniper-matrix-cell.campeao {
+        box-shadow: 0 0 0 2px #708e25;
+    }
+
+    .sniper-matrix-dig {
+        display: block;
+        font-weight: 900;
+        color: var(--primary);
+    }
+
+    .sniper-matrix-n {
+        display: block;
+        font-size: .65rem;
+        color: #555;
+    }
+
+    #historicoSniperCard .hist-col-intrasorte,
+    #historicoSniperCard .hist-col-sequencial {
+        transition: background .2s;
+    }
+
+    #historicoSniperCard.hist-focus-volante .hist-col-sequencial,
+    #historicoSniperCard.hist-focus-sequencial .hist-col-intrasorte {
+        opacity: .45;
+    }
+
+    #historicoSniperCard.hist-focus-intrasorte .hist-col-sequencial {
+        opacity: .45;
+    }
+
+    #historicoSniperCard.hist-focus-sequencial .hist-col-sequencial,
+    #historicoSniperCard.hist-focus-intrasorte .hist-col-intrasorte {
+        background: rgba(112, 142, 37, .12) !important;
+    }
+
+    #historicoSniperCard.hist-focus-volante .hist-filter-sequencial,
+    #historicoSniperCard.hist-focus-sequencial .hist-filter-volante,
+    #historicoSniperCard.hist-focus-intrasorte .hist-filter-volante {
+        opacity: .55;
+    }
+
+    .hist-chip-qtd.active {
+        background: var(--accent) !important;
+        border-color: var(--accent) !important;
+        color: #1a2600 !important;
+    }
+
+    .tipo-sort-item {
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background .15s, box-shadow .15s;
+    }
+
+    .tipo-sort-item:hover,
+    .tipo-sort-item.tipo-sort-ativo {
+        background: rgba(169, 207, 70, .25);
+        box-shadow: inset 0 0 0 1px rgba(112, 142, 37, .35);
+    }
+
+    .tipo-exemplos-panel {
+        position: fixed;
+        z-index: 1085;
+        max-width: min(920px, calc(100vw - 24px));
+        min-width: 280px;
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: 0 12px 40px rgba(48, 61, 16, .28), 0 0 0 1px rgba(112, 142, 37, .2);
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(6px);
+        transition: opacity .18s ease, transform .18s ease, visibility .18s;
+        pointer-events: none;
+    }
+
+    .tipo-exemplos-panel.visivel {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    .tipo-exemplos-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        padding: .65rem 1rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-xdark) 100%);
+        color: #fff;
+    }
+
+    .tipo-exemplos-header strong {
+        font-weight: 800;
+        font-size: .9rem;
+    }
+
+    .tipo-exemplos-header .badge-total {
+        background: var(--accent);
+        color: #1a2600;
+        font-weight: 800;
+        border-radius: 20px;
+        padding: .2rem .65rem;
+        font-size: .75rem;
+        white-space: nowrap;
+    }
+
+    .tipo-exemplos-track-wrap {
+        background: var(--bg);
+        padding: .65rem .75rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        max-height: min(320px, 50vh);
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tipo-exemplos-track-wrap::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .tipo-exemplos-track-wrap::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
+    }
+
+    .tipo-exemplos-track-wrap::-webkit-scrollbar-track {
+        background: var(--accent-light);
+    }
+
+    .tipo-exemplos-track {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: .5rem;
+        width: 100%;
+    }
+
+    .tipo-ex-card {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 100%;
+        background: var(--surface);
+        border: 1px solid rgba(112, 142, 37, .25);
+        border-radius: 10px;
+        padding: .5rem .55rem;
+        box-shadow: 0 2px 8px rgba(112, 142, 37, .08);
+    }
+
+    .tipo-ex-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: .4rem;
+        padding-bottom: .35rem;
+        border-bottom: 1px solid var(--accent-light);
+    }
+
+    .tipo-ex-card-head .conc {
+        font-weight: 800;
+        font-size: .8rem;
+        color: var(--primary-xdark);
+    }
+
+    .tipo-ex-card-head .data {
+        font-size: .68rem;
+        color: #666;
+    }
+
+    .tipo-ex-cols {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 2px;
+        justify-content: center;
+    }
+
+    .tipo-ex-col-item {
+        text-align: center;
+        flex: 0 0 22px;
+    }
+
+    .tipo-ex-lbl {
+        display: block;
+        font-size: .55rem;
+        color: var(--primary);
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 1px;
+    }
+
+    .tipo-ex-dig {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 5px;
+        font-size: .72rem;
+        font-weight: 800;
+        background: var(--accent-light);
+        color: var(--primary);
+        border: 1px solid rgba(112, 142, 37, .2);
+    }
+
+    .tipo-ex-dig.rep {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: #fff;
+        border-color: var(--primary-xdark);
+        box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .tipo-ex-rep-line {
+        margin-top: .35rem;
+        font-size: .65rem;
+        color: var(--primary-dark);
+        font-weight: 600;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .tipo-exemplos-footer {
+        padding: .35rem .75rem;
+        background: var(--accent-light);
+        color: var(--primary-dark);
+        font-size: .68rem;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    .tipo-exemplos-vazio {
+        padding: 1rem;
+        text-align: center;
+        color: #666;
+        font-size: .85rem;
+    }
+</style>
+
+<div class="page-header">
+    <h2><i class="fas fa-crosshairs me-2"></i>{{ nav_cfg.sniper.title }}</h2>
+    <p class="mb-0" style="opacity:.85;font-size:.92rem;">
+        Volante 7×10 (freq/atraso) e repetição sequencial entre concursos · {{ analise[1].total if analise else 0 }} concursos
+    </p>
+</div>
+
+{% if not analise %}
+<div class="empty-state">
+    <i class="fas fa-database" style="font-size:3rem;margin-bottom:1rem;opacity:.3;display:block;"></i>
+    <h5>Base vazia</h5>
+    <p>Sincronize os dados via <a href="/">Painel Geral</a> primeiro.</p>
+</div>
+{% else %}
+
+<ul class="nav nav-tabs sniper-tabs mb-3" id="sniperTabNav" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-volante" data-bs-toggle="tab" data-bs-target="#pane-volante"
+            type="button" role="tab">Volante por coluna</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-sequencial" data-bs-toggle="tab" data-bs-target="#pane-sequencial"
+            type="button" role="tab">Repetição sequencial</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-intrasorte" data-bs-toggle="tab" data-bs-target="#pane-intrasorte"
+            type="button" role="tab">Repetição no sorteio</button>
+    </li>
+</ul>
+
+<div class="tab-content mb-4" id="sniperTabContent">
+<div class="tab-pane fade show active" id="pane-volante" role="tabpanel">
+
+<!-- GRID DE COLUNAS -->
+<div class="row g-3 mb-4">
+    {% for col_num, dados in analise.items() %}
+    <div class="col-md-6 col-xl-4">
+        <div class="col-card">
+            <div class="col-header">
+                <div>
+                    <span class="col-num">C{{ col_num }}</span>
+                    <small class="ms-2" style="opacity:.75;">Coluna {{ col_num }}</small>
+                </div>
+                <div>
+                    <span style="font-size:.72rem;opacity:.7;">Atual:</span>
+                    <span class="col-atual ms-1">{{ dados.digito_atual }}</span>
+                </div>
+            </div>
+            <div class="p-0">
+                <!-- Cabeçalho -->
+                <div class="digito-row" style="background:#f8f9fa;font-weight:700;font-size:.72rem;color:#666;">
+                    <span>Dig</span><span>Frequência</span><span>Freq</span><span>Atraso</span>
+                </div>
+                {% for dig in dados.rank_freq %}
+                {% set pct = ((dados.freq[dig] / dados.total) * 100)|round(1) %}
+                {% set atraso = dados.atraso[dig] %}
+                <div class="digito-row">
+                    <div class="digito-ball {% if dig == dados.digito_atual %}atual{% endif %}">{{ dig }}</div>
+                    <div class="freq-bar-wrap">
+                        <div class="freq-bar" style="width:{{ [pct * 6.5, 100]|min }}%;"></div>
+                    </div>
+                    <span style="font-size:.76rem;color:#555;">{{ pct }}%</span>
+                    <span
+                        class="atraso-tag {% if atraso == 0 %}atraso-hot{% elif atraso <= 3 %}atraso-warm{% else %}atraso-cold{% endif %}">
+                        {% if atraso == 0 %}SAIU{% else %}{{ atraso }}{% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% include 'analise_sniper_top_atraso.html' %}
+
+</div><!-- /pane-volante -->
+
+<div class="tab-pane fade" id="pane-sequencial" role="tabpanel">
+    {% include 'analise_sniper_sequencial.html' %}
+</div>
+
+<div class="tab-pane fade" id="pane-intrasorte" role="tabpanel">
+<!-- REPETIÇÃO DE DÍGITOS (mesmo sorteio) -->
+<div id="repeticoes" class="card border-0 shadow-sm mb-0">
+    <div class="card-header fw-bold" style="background:linear-gradient(135deg,#00695c,#004d40);color:#fff;">
+        <i class="fas fa-clone me-2"></i>Estatísticas de Repetição de Dígitos
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-stretch">
+            <!-- Normal repetir -->
+            <div class="col-md-6 col-lg-3">
+                <div class="h-100" style="background:#f6faeb; padding:1.25rem; border-radius:12px;">
+                    <h6 style="color:var(--primary);font-weight:800;">É normal repetir?</h6>
+                    <p class="mb-1 text-muted" style="font-size:.85rem;">
+                        A chance de haver pelo menos um dígito repetido é altíssima.
+                    </p>
+                    <div class="d-flex flex-column gap-2 mt-3">
+                        <div
+                            style="background:#ecf5d6;color:#303d10;border-radius:8px;padding:.5rem;text-align:center;">
+                            <span style="display:block;font-size:1.5rem;font-weight:900;">{{
+                                repeticoes.perc_com_repeticao }}%</span>
+                            <span style="font-size:.65rem;font-weight:700;text-transform:uppercase;">Têm
+                                repetição</span>
+                        </div>
+                        <div style="background:#fff;color:#666;border-radius:8px;padding:.5rem;text-align:center;">
+                            <span style="display:block;font-size:1.2rem;font-weight:900;">{{
+                                repeticoes.perc_sem_repeticao }}%</span>
+                            <span style="font-size:.65rem;font-weight:700;text-transform:uppercase;">Todos Únicos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tipos Sorteios (hover = exemplos históricos) -->
+            <div class="col-md-6 col-lg-3">
+                <div class="h-100" style="background:#ecf5d6; padding:1.25rem; border-radius:12px;">
+                    <h6 style="color:var(--primary);font-weight:800;">Tipos de Sorteios</h6>
+                    <p class="small text-muted mb-2 mb-md-1">
+                        <i class="fas fa-arrows-up-down me-1" style="color:var(--primary);"></i>
+                        Passe o mouse para ver exemplos (painel vertical com scroll).
+                    </p>
+                    <ul class="list-group list-group-flush" style="font-size:.85rem; background:transparent;">
+                        {% for tipo_key, tipo_label in [
+                            ('0_repeticao', 'Todos únicos'),
+                            ('1_dupla', '1 Dupla'),
+                            ('2_duplas', '2 Duplas'),
+                            ('1_trinca', '1 Trinca'),
+                            ('outros', 'Múltiplas (Quadras+)'),
+                        ] %}
+                        <li class="list-group-item d-flex justify-content-between px-2 py-2 tipo-sort-item"
+                            style="background:transparent; border-color:rgba(0,0,0,.05);"
+                            data-tipo-key="{{ tipo_key }}"
+                            data-tipo-label="{{ tipo_label }}"
+                            data-tipo-total="{{ repeticoes.tipos[tipo_key] }}"
+                            tabindex="0"
+                            role="button"
+                            aria-describedby="tipoExemplosPanel">
+                            <span>{{ tipo_label }} <i class="fas fa-circle-info ms-1 opacity-50" style="font-size:.7rem;"></i></span>
+                            <span class="fw-bold">{{ repeticoes.tipos[tipo_key] }}x</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% if repeticoes %}
+                    <script type="application/json" id="tiposExemplosJson">{{ {
+                        'exemplos': repeticoes.exemplos_por_tipo,
+                        'tipos': repeticoes.tipos
+                    } | tojson }}</script>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Top 3 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="h-100" style="background:#e3efc2; padding:1.25rem; border-radius:12px;">
+                    <h6 style="color:#303d10;font-weight:800;">Top 3 Mais Repetem</h6>
+                    <small class="d-block mb-3" style="font-size:.75rem; color:#50651a;">Dígitos que mais englobam
+                        duplas/trincas:</small>
+                    {% for item in repeticoes.top_3_repetidos %}
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="digito-ball atual"
+                            style="width:26px;height:26px;background:#303d10;color:#fff;font-size:.8rem;">{{ item.digito
+                            }}</div>
+                        <div style="font-size:.9rem; color:#20290a;">
+                            <span class="fw-bold">{{ item.qtd_sorteios }}</span>
+                            <span style="font-size:.7rem;">vezes</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Top Pares -->
+            <div class="col-md-6 col-lg-3">
+                <div class="h-100" style="background:#d9eaae; padding:1.25rem; border-radius:12px;">
+                    <h6 style="color:#20290a;font-weight:800;">Pares de Colunas Top</h6>
+                    <small class="d-block mb-3" style="font-size:.75rem; color:#405115;">Colunas que costumam sair
+                        iguais juntas:</small>
+                    {% for par in repeticoes.top_pares_colunas %}
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="d-flex gap-1"
+                            style="background:rgba(255,255,255,.5); padding:2px 6px; border-radius:6px;">
+                            <span class="fw-bold" style="color:#20290a; font-size:.85rem;">C{{ par.c1 }}</span>
+                            <span style="font-size:.75rem;color:#607a1f;">&amp;</span>
+                            <span class="fw-bold" style="color:#20290a; font-size:.85rem;">C{{ par.c2 }}</span>
+                        </div>
+                        <div style="font-size:.9rem; color:#101405;">
+                            <span class="fw-bold">{{ par.qtd }}</span>
+                            <span style="font-size:.7rem;">vezes</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Dica de ouro -->
+        <div class="mt-3 p-3"
+            style="background:#a9cf46; color:#1a2600; border-radius:12px; display:flex; gap:15px; align-items:center;">
+            <i class="fas fa-lightbulb" style="font-size:2rem; color:#405115;"></i>
+            <div>
+                <h6 style="font-weight:900; text-transform:uppercase; margin-bottom:5px;">Dica de Ouro</h6>
+                <p class="mb-0" style="font-size:.85rem; font-weight:600;">
+                    Como <strong>{{ repeticoes.perc_com_repeticao }}%</strong> dos sorteios da Super Sete têm dígitos
+                    repetidos, <strong>NUNCA jogue 7 números totalmente diferentes!</strong> Aja a favor da estatística:
+                    sempre garanta pelo menos uma dupla nas suas apostas. Tente, por exemplo, espelhar o dígito
+                    <strong>{{ repeticoes.top_3_repetidos[0].digito }}</strong> nas colunas <strong>C{{
+                        repeticoes.top_pares_colunas[0].c1 }} e C{{ repeticoes.top_pares_colunas[0].c2 }}</strong>, que
+                    possuem altíssima sinergia entre si!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+</div><!-- /pane-intrasorte -->
+</div><!-- /tab-content -->
+
+{% include 'analise_sniper_historico.html' %}
+
+<div class="card border-0 shadow-sm mb-4 mt-4">
+    <div class="card-body p-3 d-flex flex-wrap align-items-center gap-2" style="background:#f6faeb;border-radius:12px;">
+        <i class="fas fa-crosshairs fa-lg" style="color:var(--primary);"></i>
+        <div class="flex-grow-1 small">
+            <strong>Gerar apostas</strong> com base na repetição sequencial (Sniper) ou no fluxo genérico de repetição.
+        </div>
+        <a class="btn btn-sm fw-bold" style="background:var(--accent);color:#1a2600;"
+            href="/geradores-elite/apostas-inteligentes/">
+            Sniper → Apostas
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/repeticao-apostas/">
+            Repetição → Apostas
+        </a>
+    </div>
+</div>
+
+<div id="tipoExemplosPanel" class="tipo-exemplos-panel" role="dialog" aria-live="polite" hidden>
+    <div class="tipo-exemplos-header">
+        <strong class="tipo-exemplos-title">Exemplos históricos</strong>
+        <span class="badge-total tipo-exemplos-badge">0×</span>
+    </div>
+    <div class="tipo-exemplos-track-wrap" tabindex="0" aria-label="Lista vertical de exemplos — role para ver mais">
+        <div class="tipo-exemplos-track"></div>
+    </div>
+    <div class="tipo-exemplos-footer">
+        <i class="fas fa-arrows-up-down"></i>
+        <span>Role verticalmente · exemplos reais da base Super Sete</span>
+    </div>
+</div>
+
+{% include 'analise_sniper_script.html' %}
+
+{% endif %}
+
+{% endblock %}

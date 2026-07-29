@@ -1,0 +1,32 @@
+from flask import Blueprint, render_template, jsonify, request
+from services.modelos_service import ModelosSuperSeteService
+
+modelos_bp = Blueprint('modelos', __name__)
+
+@modelos_bp.route('/')
+def modelos_index():
+    modelos = ModelosSuperSeteService.listar_modelos()
+    return render_template('modelos.html', modelos=modelos)
+
+@modelos_bp.route('/api/gerar/<int:modelo_id>', methods=['POST'])
+def api_gerar_modelo(modelo_id: int):
+    """Gera 24 apostas para o modelo especificado (1-6)."""
+    if modelo_id not in range(1, 7):
+        return jsonify({"error": "Modelo inválido. Use 1-6."}), 400
+    try:
+        resultado = ModelosSuperSeteService.gerar_apostas_modelo(modelo_id)
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@modelos_bp.route('/api/backtesting', methods=['POST'])
+def api_backtesting():
+    """Executa o backtesting histórico para todos os 6 modelos."""
+    try:
+        resultado = ModelosSuperSeteService.backtesting_modelos()
+        res = jsonify(resultado)
+        import gc
+        gc.collect()
+        return res
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

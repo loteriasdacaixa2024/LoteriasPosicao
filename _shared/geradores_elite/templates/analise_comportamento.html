@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    .evid-box { background: var(--surface, #fff); border: 1px solid rgba(192,139,0,.2); border-radius: 10px; padding: .75rem; height: 100%; }
+    .evid-box h6 { font-size: .78rem; font-weight: 800; color: var(--primary-xdark); text-transform: uppercase; margin-bottom: .5rem; }
+    .evid-linha { display: flex; justify-content: space-between; font-size: .8rem; padding: .2rem 0; border-bottom: 1px solid rgba(0,0,0,.04); }
+    .evid-pct { font-weight: 800; color: var(--primary); }
+    .janela-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+    .base-tab-btn.active { background: var(--accent); color: #1a2600; border-color: var(--accent); font-weight: 800; }
+    .comp-tabela { font-size: .82rem; width: 100%; }
+    .comp-tabela th.comp-ind, .comp-tabela td.comp-ind { text-align: center; }
+    .comp-tabela th.filtro-ativo { background: #fff3cd; color: var(--primary-xdark); }
+    .comp-tabela th .filtro-badge { font-size: .65rem; background: var(--primary); color: #fff; border-radius: 4px; padding: 0 4px; margin-left: 2px; }
+    .mes-abrev-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.6rem;
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.12rem 0.4rem;
+        border-radius: 5px;
+        color: #fff !important;
+        margin-left: 0.2rem;
+        vertical-align: middle;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .mes-abrev-badge:not([class*="mes-nome-"]) { background: #6c757d; }
+    {% include 'comportamento_col_concurso_estilos.html' %}
+    .moda-inline-pct { opacity: 0.75; font-size: 0.92em; margin-left: 0.15rem; }
+    .insight-item { border-left: 3px solid var(--accent); padding: .35rem .65rem; margin-bottom: .35rem; background: var(--accent-light); font-size: .88rem; }
+    .comp-modas th, .comp-modas td { font-size: .8rem; text-align: center; }
+    .evid-toggle-btn { font-size: .78rem; font-weight: 800; color: var(--primary-xdark); border-color: rgba(192,139,0,.35); }
+    .evid-toggle-btn:hover { background: var(--accent-light); color: var(--primary-xdark); border-color: var(--accent); }
+    .evid-toggle-btn i { transition: transform .15s ease; }
+    .evid-toggle-btn[aria-expanded="true"] i { transform: rotate(180deg); }
+    .comp-dezenas { min-width: 11rem; white-space: nowrap; }
+    .comp-dezenas .dez-ball {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 22px; height: 22px; border-radius: 50%;
+        background: var(--accent); color: #1a0a00; font-weight: 800;
+        font-size: .62rem; margin: 1px;
+    }
+    .panorama-tabela { font-size: .82rem; }
+    .panorama-matriz { font-size: .78rem; }
+    .panorama-matriz th, .panorama-matriz td { vertical-align: middle; border-color: rgba(0,0,0,.08); }
+    .panorama-matriz thead th { background: var(--bg, #fffdf5); position: sticky; top: 0; z-index: 2; }
+    .panorama-matriz .panorama-rank-col { width: 3.2rem; text-align: center; font-weight: 800; background: #f8f9fa; white-space: nowrap; }
+    .panorama-col-hdr .sigla { font-weight: 800; color: var(--primary-xdark); font-size: .85rem; }
+    .panorama-col-hdr .legenda { font-size: .65rem; color: #6c757d; font-weight: 500; line-height: 1.1; }
+    .panorama-cel { text-align: center; padding: .35rem .25rem !important; min-width: 5.5rem; }
+    .panorama-cel-val { font-weight: 800; font-size: .9rem; color: var(--primary-xdark); line-height: 1.1; }
+    .panorama-cel-val.top1 { color: #b8860b; }
+    .panorama-cel-val.top2 { color: #708090; }
+    .panorama-cel-val.top3 { color: #cd7f32; }
+    .panorama-cel-meta { font-size: .65rem; color: #6c757d; white-space: nowrap; }
+    .panorama-cel-vazia { text-align: center; color: #ccc; }
+    .panorama-matriz tr.linha-top td { background: var(--accent-light); }
+    .panorama-tabela th { white-space: nowrap; }
+    .panorama-tabela td { vertical-align: middle; }
+    .panorama-tabela tr.panorama-grupo-ini td { border-top: 2px solid rgba(192,139,0,.35); }
+    .panorama-tabela tr.panorama-destaque { background: var(--accent-light); }
+    .panorama-ind-cell { background: var(--bg, #fffdf5); }
+    .panorama-ind-cell .sigla { font-weight: 800; color: var(--primary-xdark); font-size: .95rem; }
+    .panorama-ind-cell .legenda { font-size: .72rem; color: #6c757d; font-weight: 500; }
+    .panorama-total-badge { display: inline-block; font-size: .66rem; color: #6c757d; margin-top: .15rem; }
+    .panorama-rank { font-weight: 800; text-align: center; color: #6c757d; }
+    .panorama-rank.top1 { color: #b8860b; }
+    .panorama-rank.top2 { color: #708090; }
+    .panorama-rank.top3 { color: #cd7f32; }
+    .panorama-valor { font-weight: 700; color: var(--primary-xdark); }
+    .panorama-bar-td { min-width: 8rem; }
+    .panorama-bar-wrap { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+    .panorama-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 4px; }
+    .comp-toolbar-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: .45rem .65rem;
+    }
+    #tabsBase {
+        justify-content: center;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .comp-janela-toolbar {
+        background: var(--bg, #fffdf5);
+        border: 1px solid rgba(0,0,0,.07);
+        border-radius: 8px;
+        padding: .45rem .6rem;
+    }
+    .comp-toolbar-seg {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        flex-wrap: nowrap;
+    }
+    .comp-toolbar-lbl {
+        font-size: .66rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #6c757d;
+        white-space: nowrap;
+        margin: 0;
+    }
+    .comp-toolbar-seg .btn-group-sm > .btn { font-size: .7rem; padding: .18rem .4rem; }
+    @media (min-width: 992px) {
+        .comp-janela-toolbar { flex-wrap: nowrap; }
+    }
+</style>
+
+<div class="page-hdr">
+    <h2 class="h4 mb-1"><i class="fas fa-chart-pie me-2"></i>{{ page_title }}</h2>
+    <p class="mb-0 small opacity-90">{{ page_subtitle }}</p>
+    <p class="mb-0 small mt-1">
+        <a href="/geradores-elite/comportamento-apostas/" class="text-decoration-none">
+            <i class="fas fa-dice me-1"></i>Gerador por Comportamento
+        </a>
+        <span class="text-muted"> — consome estas análises na Fase 2</span>
+    </p>
+</div>
+
+{% include 'comportamento_bases_resumo.html' %}
+
+<ul class="nav nav-tabs mb-3" id="tabsBase" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link base-tab-btn active" data-base="geral" type="button">Geral</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link base-tab-btn" data-base="vencedores" type="button">Concursos com Vencedores</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link base-tab-btn" data-base="acumulados" type="button">Concursos Acumulados</button>
+    </li>
+</ul>
+
+<div class="comp-toolbar-row comp-janela-toolbar mb-3">
+    <div class="comp-toolbar-seg">
+        <span class="comp-toolbar-lbl">Período:</span>
+        <div class="btn-group btn-group-sm" role="group" id="grpJanela">
+            {% for j in comportamento_ui.janelas or [10, 20, 25, 0] %}
+            <button type="button" class="btn btn-outline-secondary janela-btn{% if j == (comportamento_ui.janela_default if comportamento_ui.janela_default is defined else comportamento_ui.janelas[0]) %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+            {% endfor %}
+        </div>
+    </div>
+    <span class="small text-muted" id="lblJanelaInfo">—</span>
+</div>
+
+<div class="alert alert-warning d-none py-2 small" id="avisoBase"></div>
+
+<div class="card shadow-sm mb-3 border-0" id="painelEvidencias" style="border-top:4px solid var(--accent)!important;">
+    <div class="card-header fw-bold py-2 d-flex flex-wrap align-items-center gap-2"
+        style="background:var(--bg);color:var(--primary-xdark);">
+        <span>
+            <i class="fas fa-chart-pie me-1"></i>Evidências — <span id="lblBaseAtiva">Geral</span>
+            <span class="spinner-border spinner-border-sm ms-2 d-none" id="evidLoader"></span>
+        </span>
+        <button type="button" class="btn btn-sm btn-outline-secondary evid-toggle-btn ms-auto"
+            id="btnToggleEvidencias" aria-expanded="false" aria-controls="evidCorpo">
+            <i class="fas fa-chevron-down me-1"></i><span id="lblToggleEvidencias">Mostrar</span>
+        </button>
+    </div>
+    <div class="card-body py-3 d-none" id="evidCorpo">
+        <p class="text-muted small mb-0">Carregando análises…</p>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3 border-0">
+    <div class="card-header fw-bold py-2 d-flex flex-wrap align-items-center gap-2"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-table me-1"></i>Histórico comportamental</span>
+        <span class="badge bg-light text-dark ms-auto" id="histContador">—</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="p-2 border-bottom bg-light small" id="filtrosAtivosBar">
+            <span class="text-muted">Clique no cabeçalho de uma coluna para filtrar.</span>
+        </div>
+        <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+            <table class="table table-sm table-hover mb-0 comp-tabela">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th class="comp-col-concurso-hdr">Concurso</th>
+                        <th>Data</th>
+                        <th>Dezenas</th>
+                        {% for cod in comportamento_ui.indicadores or ['PA','IM','PR','RT','MO','SQ','M3','FB','MS'] %}
+                        <th class="comp-ind" data-ind="{{ cod }}" title="{{ comportamento_ui.indicador_labels.get(cod, cod) }}">{{ cod }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody id="tbodyComportamento"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3 border-0">
+    <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
+        <i class="fas fa-lightbulb me-1"></i>Comparativo entre bases
+        <button type="button" class="btn btn-sm btn-outline-primary ms-2" id="btnAtualizarComparativo">
+            <i class="fas fa-sync-alt me-1"></i>Atualizar
+        </button>
+    </div>
+    <div class="card-body py-3">
+        <div id="insightsCorpo"><p class="text-muted small mb-0">Carregando conclusões…</p></div>
+        <div class="table-responsive mt-3">
+            <table class="table table-sm table-bordered comp-modas mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ind.</th>
+                        <th>Geral</th>
+                        <th>Vencedores</th>
+                        <th>Acumulados</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyModasComparativo"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3 border-0" id="cardPanoramaIndicadores" style="border-top:4px solid var(--primary)!important;">
+    <div class="card-header fw-bold py-2 d-flex flex-wrap align-items-center gap-2"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span>
+            <i class="fas fa-layer-group me-1"></i>Panorama Comportamental dos Indicadores
+            <span class="fw-normal opacity-75 ms-1">— <span id="lblPanoramaBase">Geral</span></span>
+        </span>
+        <span class="badge bg-light text-dark ms-auto" id="lblPanoramaTotal">—</span>
+        <button type="button" class="btn btn-sm btn-light" id="btnAtualizarPanoramaInd">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+    <div class="card-body py-3">
+        <p class="small text-muted mb-2">
+            Top 3 rankings por indicador (histórico completo da base).
+            Formato: <strong>valor · ocorrências · %</strong>.
+            MS lista apenas meses válidos (1–12); concursos sem mês no banco ficam fora do ranking.
+        </p>
+        <div id="panoramaAvisoMes" class="d-none alert alert-warning py-2 small mb-2"></div>
+        <div id="panoramaConclusoes" class="mb-2"></div>
+        <div id="panoramaIndCorpo">
+            <p class="text-muted small mb-0">Carregando panorama…</p>
+        </div>
+        <div class="mt-2 text-end">
+            <button type="button" class="btn btn-sm btn-outline-secondary evid-toggle-btn"
+                id="btnTogglePanoramaDetalhe" aria-expanded="false">
+                <i class="fas fa-chevron-down me-1"></i><span id="lblTogglePanoramaDetalhe">Mostrar detalhamento vertical</span>
+            </button>
+        </div>
+        <div id="panoramaIndDetalhe" class="d-none mt-2"></div>
+    </div>
+</div>
+
+<script>
+    window.__COMPORTAMENTO_UI__ = {{ comportamento_ui | tojson }};
+    window.__ANALISE_COMP_API__ = {{ api_base | tojson }};
+    window.__MESES_CORES__ = {{ meses_cores | default({}) | tojson }};
+</script>
+<script src="{{ url_for('geradores_elite.static', filename='comportamento_col_concurso.js') }}"></script>
+<script src="{{ url_for('geradores_elite.static', filename='comportamento_bases_resumo.js') }}"></script>
+<script src="{{ url_for('geradores_elite.static', filename='analise_comportamento.js') }}"></script>
+{% endblock %}

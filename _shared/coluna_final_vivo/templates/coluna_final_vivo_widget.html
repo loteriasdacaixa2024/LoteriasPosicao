@@ -1,0 +1,141 @@
+<!-- Painel: coluna final ao vivo (recalcula do banco a cada atualização) -->
+<div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" id="card-coluna-final-vivo">
+    <div class="card-header py-3 d-flex flex-wrap justify-content-between align-items-center gap-2"
+         style="background: linear-gradient(135deg, #1e3a5f, #0a6b1a); color: #fff;">
+        <div>
+            <h5 class="mb-0 fw-bold"><i class="fas fa-chart-line me-2"></i>Coluna final — ao vivo</h5>
+            <small class="opacity-75">Recalculado do banco · atualiza ao sincronizar</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-light text-dark" id="cfv-atualizado">—</span>
+            <button type="button" class="btn btn-sm btn-light fw-bold" id="cfv-btn-atualizar">
+                <i class="fas fa-sync-alt me-1"></i>Atualizar
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="small text-muted mb-3" id="cfv-legenda">Carregando…</p>
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <div class="p-3 rounded-3 border h-100 text-center" style="border-color:#bbf7d0!important;background:#f0fdf4">
+                    <div class="text-muted small fw-bold text-uppercase">Histórico (banco)</div>
+                    <div class="display-6 fw-extrabold text-success" id="cfv-pct-vivo">—%</div>
+                    <div class="small text-muted">concursos com <strong>2+ na mesma coluna</strong></div>
+                    <div class="small mt-1" id="cfv-qtd-vivo"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3 border h-100 text-center" style="background:#eff6ff">
+                    <div class="text-muted small fw-bold text-uppercase">Teórico (matemática)</div>
+                    <div class="display-6 fw-extrabold text-primary" id="cfv-pct-teorico">—%</div>
+                    <div class="small text-muted">expectativa fixa do modelo</div>
+                    <div class="small mt-1" id="cfv-delta"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3 border h-100" style="background:#fffbeb">
+                    <div class="text-muted small fw-bold text-uppercase mb-1">Último concurso</div>
+                    <div class="fw-bold" id="cfv-ultimo-concurso">—</div>
+                    <div class="small" id="cfv-ultimo-det"></div>
+                </div>
+            </div>
+        </div>
+        <h6 class="fw-bold small text-uppercase text-muted mb-2">Comparativo entre modalidades (teórico)</h6>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-0 align-middle" style="font-size:0.82rem">
+                <thead class="table-light">
+                    <tr>
+                        <th>Modalidade</th>
+                        <th class="text-center">Sorteadas</th>
+                        <th class="text-end">Teórico 2+ coluna</th>
+                        <th class="text-end">Ao vivo</th>
+                    </tr>
+                </thead>
+                <tbody id="cfv-tbody-comparativo"></tbody>
+            </table>
+        </div>
+        <p class="small text-muted mt-2 mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            A coluna “Ao vivo” desta linha só é preenchida para a modalidade atual;
+            as demais mostram apenas o referencial teórico.
+        </p>
+    </div>
+</div>
+<script>
+(function () {
+    const API_CFV = '/analise/api/coluna-final-vivo';
+    let cfvTimer = null;
+
+    async function carregarColunaFinalVivo() {
+        const btn = document.getElementById('cfv-btn-atualizar');
+        if (btn) {
+            btn.disabled = true;
+            btn.querySelector('i')?.classList.add('fa-spin');
+        }
+        try {
+            const r = await fetch(API_CFV);
+            const d = await r.json();
+            if (d.status !== 'success') return;
+            document.getElementById('cfv-atualizado').textContent = d.atualizado_em || '—';
+            document.getElementById('cfv-legenda').textContent = d.legenda || '';
+            const v = d.vivo || {};
+            document.getElementById('cfv-pct-vivo').textContent =
+                v.total_concursos ? v.pct_coluna_2plus + '%' : '—';
+            document.getElementById('cfv-qtd-vivo').textContent = v.total_concursos
+                ? `${v.qtd_coluna_2plus} de ${v.total_concursos} concursos`
+                : 'Sem sorteios no banco';
+            document.getElementById('cfv-pct-teorico').textContent =
+                (d.teorico?.pct_coluna_2plus ?? '—') + '%';
+            const delta = d.delta_vs_teorico;
+            document.getElementById('cfv-delta').textContent = delta == null
+                ? ''
+                : (delta >= 0 ? `+${delta}` : delta) + ' p.p. vs teórico';
+            const u = v.ultimo;
+            if (u) {
+                document.getElementById('cfv-ultimo-concurso').textContent =
+                    `#${u.concurso} · ${u.data || ''}`;
+                const cols = (u.colunas_com_2plus || []).map(c => c === 10 ? 0 : c).join(', ');
+                document.getElementById('cfv-ultimo-det').innerHTML = u.tem_coluna_2plus
+                    ? `<span class="text-success fw-bold">Sim</span> — coluna(s) com 2+: ${cols || '—'} (máx ${u.max_coluna})`
+                    : `<span class="text-secondary">Não</span> — finais todos diferentes`;
+            }
+            const tbody = document.getElementById('cfv-tbody-comparativo');
+            if (tbody && d.comparativo_modalidades) {
+                tbody.innerHTML = d.comparativo_modalidades.map(m => {
+                    const atual = m.slug === d.modalidade;
+                    const vivoCell = atual && v.total_concursos
+                        ? `<strong class="text-success">${v.pct_coluna_2plus}%</strong>`
+                        : '<span class="text-muted">—</span>';
+                    return `<tr class="${atual ? 'table-success' : ''}">
+                        <td class="fw-bold">${m.nome}${atual ? ' <span class="badge bg-success">esta</span>' : ''}</td>
+                        <td class="text-center">${m.sorteadas}</td>
+                        <td class="text-end">${m.teorico_pct_coluna_2plus}%</td>
+                        <td class="text-end">${vivoCell}</td>
+                    </tr>`;
+                }).join('');
+            }
+        } catch (e) {
+            console.error('coluna-final-vivo', e);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.querySelector('i')?.classList.remove('fa-spin');
+            }
+        }
+    }
+
+    function iniciarColunaFinalVivo() {
+        if (!document.getElementById('card-coluna-final-vivo')) return;
+        carregarColunaFinalVivo();
+        document.getElementById('cfv-btn-atualizar')?.addEventListener('click', carregarColunaFinalVivo);
+        if (cfvTimer) clearInterval(cfvTimer);
+        cfvTimer = setInterval(carregarColunaFinalVivo, 60000);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', iniciarColunaFinalVivo);
+    } else {
+        iniciarColunaFinalVivo();
+    }
+})();
+</script>

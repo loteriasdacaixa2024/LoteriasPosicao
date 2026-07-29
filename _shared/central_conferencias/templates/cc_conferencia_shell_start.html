@@ -1,0 +1,57 @@
+<style>
+    .conf-center-wide { max-width: 1200px; margin: 0 auto; }
+    .conf-tab-container {
+        background: #fff; border-radius: 12px; padding: 0.4rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        display: flex; gap: 6px; margin-bottom: 1.25rem; overflow-x: auto;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .conf-tab-btn {
+        padding: 0.65rem 1.2rem; border-radius: 10px; font-size: 0.85rem; font-weight: 700;
+        border: none; cursor: pointer; background: transparent; color: #555;
+        display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+    .conf-tab-btn:hover { background: rgba(0, 0, 0, 0.04); color: var(--primary); }
+    .conf-tab-btn.active {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        color: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    .conf-conversor-wrap { max-width: 1100px; margin: 0 auto; }
+    .conv-card {
+        background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 1.25rem 1.5rem; margin-bottom: 1rem; border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .conv-section-title {
+        color: var(--primary); font-weight: 700; margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary); font-size: 1rem;
+    }
+    .conv-upload-zone {
+        border: 3px dashed var(--primary); border-radius: 10px; padding: 2rem; text-align: center;
+        background: rgba(0, 0, 0, 0.02); cursor: pointer;
+    }
+    .conv-input-concurso {
+        border: 2px solid var(--primary); border-radius: 8px; padding: 0.5rem 0.75rem;
+        font-size: 1.1rem; font-weight: 700; width: 140px;
+    }
+    #panel-concursos.conf-panel-wide { max-width: 100%; }
+</style>
+
+<div class="conf-center-wide mb-4">
+    <div class="page-header" style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));border-radius:12px;padding:1.25rem 1.5rem;color:#fff;margin-bottom:1rem;">
+        <h2 class="h4 mb-1"><i class="fas fa-trophy me-2"></i>Central de Conferências</h2>
+        <p class="mb-0 small" style="opacity:.9;">{{ cc_cfg.nome }} — conferência, conversor e apostas em pasta</p>
+    </div>
+
+    <div class="conf-tab-container" id="confTabs">
+        <button type="button" class="conf-tab-btn active" data-tab="historico" onclick="setConfTab('historico')">
+            <i class="fas fa-history"></i> Conferência Histórica
+        </button>
+        <button type="button" class="conf-tab-btn" data-tab="conversor" onclick="setConfTab('conversor')">
+            <i class="fas fa-right-left"></i> Conversor de Apostas
+        </button>
+        <button type="button" class="conf-tab-btn" data-tab="concursos" onclick="setConfTab('concursos')">
+            <i class="fas fa-folder-open"></i> Concursos Disponíveis
+        </button>
+    </div>
+
+    <div class="conf-panel" id="panel-historico">

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Gerador Elite — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+#ge-elite .ai-hint {
+  font-size:.8rem; color:#6c757d; border-left:3px solid var(--accent,#ffd54f);
+  padding:.35rem .65rem; background:var(--accent-light);
+}
+#ge-elite .ai-table { font-size:.85rem; }
+#ge-elite .ai-table thead th {
+  background: var(--primary); color:#fff; font-weight:700; text-align:center;
+}
+#ge-elite .ai-table td { text-align:center; vertical-align:middle; }
+#ge-elite .perfil-box {
+  border:1px solid rgba(192,139,0,.28); border-radius:10px; padding:.75rem 1rem;
+  background:linear-gradient(145deg,#fffaf0,#fff); margin-bottom:1rem;
+}
+#ge-elite .perfil-box .lbl { font-size:.7rem; font-weight:700; color:#6c757d; text-transform:uppercase; }
+#ge-elite .perfil-box .val { font-weight:800; color:var(--primary-xdark); }
+</style>
+<div class="container-fluid py-3" id="ge-elite"
+     data-api="{{ api_base }}"
+     data-n="{{ n_inicial }}"
+     data-digitos="{{ digitos_inicial }}"
+     data-concurso="{{ concurso_inicial }}">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1"><i class="fas fa-brain text-warning"></i> Gerador Elite</h1>
+      <p class="text-muted small mb-0">{{ modality_nome }} — apostas compostas a partir do perfil dos resultados reais (Análises Inteligentes)</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/">Geradores Elite</a>
+      <a class="btn btn-sm btn-outline-success" href="/geradores-elite/gerador-gc/">Gerador Pro / GC</a>
+      <a class="btn btn-sm btn-outline-primary" href="/analise/analises-inteligentes/">Análises Inteligentes</a>
+    </div>
+  </div>
+
+  <div id="geElitePerfil" class="perfil-box d-none"></div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-2">
+      <label class="form-label small fw-bold">Concurso ref.</label>
+      <input type="number" id="geEliteConcurso" class="form-control form-control-sm" placeholder="ex: 1251" value="{{ concurso_inicial }}">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small fw-bold">Modo</label>
+      <select id="geEliteN" class="form-select form-select-sm">
+        {% for i in range(3, 10) %}<option value="{{ i }}">{{ i }}d</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label small fw-bold">Dígitos</label>
+      <input type="text" id="geEliteDigitos" class="form-control form-control-sm" placeholder="vazio = do concurso / automático">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small fw-bold">Qtd jogos</label>
+      <input type="number" id="geEliteQtd" class="form-control form-control-sm" value="10" min="1" max="200">
+    </div>
+    <div class="col-md-2 d-flex align-items-end gap-2">
+      <button type="button" class="btn btn-sm btn-primary" id="geBtnGerarElite"><i class="fas fa-brain"></i> Gerar</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="geBtnExportElite">TXT</button>
+    </div>
+  </div>
+  <div class="ai-hint mb-2" id="geEliteInfo">
+    Usa o <strong>comportamento dos resultados reais</strong> (dígitos, soma, pares/ímpares, base 16) vindos de
+    <a href="/analise/analises-inteligentes/">Análises Inteligentes</a> — não é o módulo Comportamental (PA/PR/RT).
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-bordered ai-table" id="geTabelaElite">
+      <thead><tr><th>#</th><th>Dezenas</th><th>Soma</th><th>Pares/Ímpares</th><th>Score perfil</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const root = document.getElementById('ge-elite');
+  if (!root) return;
+  const API = root.dataset.api;
+  let JOGOS = [];
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function parseDigitos(txt) {
+    return String(txt || '').split(/[,;\s]+/).map(x => x.trim()).filter(x => /^[0-9]$/.test(x));
+  }
+  function renderPerfil(p) {
+    const box = document.getElementById('geElitePerfil');
+    if (!p || !p.concurso) { box.classList.add('d-none'); box.innerHTML = ''; return; }
+    box.classList.remove('d-none');
+    box.innerHTML = `
+      <div class="fw-bold mb-2">Perfil do concurso real #${esc(p.concurso)}</div>
+      <div class="row g-2 small">
+        <div class="col-6 col-md-2"><div class="lbl">Dezenas</div><div class="val">${esc(p.dezenas_fmt||'')}</div></div>
+        <div class="col-6 col-md-2"><div class="lbl">Dígitos</div><div class="val">${esc((p.digitos||[]).join(','))}</div></div>
+        <div class="col-4 col-md-1"><div class="lbl">Soma</div><div class="val">${esc(p.soma)}</div></div>
+        <div class="col-4 col-md-1"><div class="lbl">P/I</div><div class="val">${esc(p.pares)}/${esc(p.impares)}</div></div>
+        <div class="col-4 col-md-1"><div class="lbl">Mês</div><div class="val">${esc(p.mes_nome||'—')}</div></div>
+        <div class="col-12 col-md-5"><div class="lbl">Base 16 (não saíram)</div><div class="val">${esc(p.nao_sairam_16_fmt||'—')}</div></div>
+      </div>`;
+  }
+  function renderJogos(jogos) {
+    document.querySelector('#geTabelaElite tbody').innerHTML = (jogos||[]).map(j => `
+      <tr>
+        <td>${esc(j.id)}</td>
+        <td class="text-start fw-bold">${esc(j.dezenas_fmt)}</td>
+        <td>${esc(j.soma)}</td>
+        <td>${esc(j.pares)}P / ${esc(j.impares)}I</td>
+        <td>${j.score_perfil != null ? esc(j.score_perfil) : '—'}</td>
+      </tr>`).join('') || '<tr><td colspan="5" class="text-muted">Nenhum jogo gerado</td></tr>';
+  }
+  async function gerarElite() {
+    const n = +document.getElementById('geEliteN').value;
+    const digitos = parseDigitos(document.getElementById('geEliteDigitos').value);
+    const qtd = +document.getElementById('geEliteQtd').value || 10;
+    const concRaw = document.getElementById('geEliteConcurso').value;
+    const concurso = concRaw ? +concRaw : null;
+    const r = await fetch(`${API}/gerar-elite`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        n_digitos: n,
+        digitos: digitos.length ? digitos : null,
+        qtd_jogos: qtd,
+        concurso: concurso || null,
+      })
+    });
+    const j = await r.json();
+    if (!j.sucesso) { alert(j.erro || 'Falha Elite'); return; }
+    JOGOS = j.jogos || [];
+    renderPerfil(j.perfil_analise);
+    const info = document.getElementById('geEliteInfo');
+    if (j.usa_perfil_real && j.perfil_analise) {
+      info.innerHTML = `Gerado com perfil real do concurso <strong>${esc(j.perfil_analise.concurso)}</strong> · dígitos <code>${esc(j.digitos_fmt)}</code> · pool ${j.qtd_pool}`;
+    } else {
+      info.innerHTML = `Dígitos <code>${esc(j.digitos_fmt)}</code> · pool ${j.qtd_pool} · sem concurso de referência (amostra livre no pool)`;
+    }
+    renderJogos(JOGOS);
+  }
+  document.getElementById('geBtnGerarElite').addEventListener('click', gerarElite);
+  document.getElementById('geBtnExportElite').addEventListener('click', () => {
+    const txt = (JOGOS||[]).map(j => j.dezenas_fmt).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([txt], {type:'text/plain'}));
+    a.download = 'elite_diadesorte.txt';
+    a.click();
+  });
+  const n0 = +(root.dataset.n || 0);
+  const dig0 = root.dataset.digitos || '';
+  const conc0 = root.dataset.concurso || '';
+  if (n0 >= 3 && n0 <= 9) document.getElementById('geEliteN').value = String(n0);
+  if (dig0) document.getElementById('geEliteDigitos').value = dig0;
+  if (conc0) document.getElementById('geEliteConcurso').value = conc0;
+  if (n0 >= 3 || dig0 || conc0) {
+    const nn = Math.max(3, Math.min(9, n0 || 6));
+    document.getElementById('geEliteN').value = String(nn);
+    gerarElite();
+  }
+})();
+</script>
+{% endblock %}

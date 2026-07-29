@@ -1,0 +1,1169 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --ds-primary: #d4b31a;
+        --ds-primary-light: #f9f2d2;
+        --ds-primary-dark: #b69816;
+        --ds-primary-xdark: #443908;
+        --ds-success: #2ecc71;
+        --ds-success-bg: #e8f8f0;
+        --ds-dark: #171303;
+        --ds-gray: #f4f5f7;
+        
+        /* Cores do Excel para os Grupos */
+        --group1-bg: #dce6f1;
+        --group1-text: #1f497d;
+        --group1-border: #b8cce4;
+        
+        --group2-bg: #b8cce4;
+        --group2-text: #1f497d;
+        --group2-border: #95b3d7;
+        
+        --group3-bg: #95b3d7;
+        --group3-text: #1f497d;
+        --group3-border: #76933c;
+        
+        --group4-bg: #366092;
+        --group4-text: #ffffff;
+        --group4-border: #16365c;
+
+        /* Cores das Linhas do Desdobramento */
+        --line-orange-bg: #f2a359;
+        --line-orange-light: #fce4cd;
+        --line-peach-bg: #f9cb9c;
+        --line-peach-light: #fdf1e6;
+    }
+
+    /* Tabs Horizontal Estilizada */
+    .tabs-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 6px;
+        padding: 8px 4px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid rgba(212, 179, 26, 0.15);
+    }
+    
+    .tab-item {
+        padding: 10px 16px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border-radius: 8px 8px 0 0;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #888;
+        background: #f1f1f1;
+        border: 1px solid #e0e0e0;
+        border-bottom: none;
+    }
+
+    .tab-item.active {
+        color: #fff;
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        border-color: var(--ds-primary-dark);
+        box-shadow: 0 -2px 10px rgba(212, 179, 26, 0.2);
+    }
+
+    .tab-item.locked {
+        opacity: 0.65;
+        cursor: not-allowed;
+        background: #e9ecef;
+        border-color: #dee2e6;
+    }
+
+    .tab-badge {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.1);
+        font-weight: 800;
+    }
+
+    .tab-item.active .tab-badge {
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Cabeçalho Premium */
+    .special-header {
+        background: linear-gradient(135deg, var(--ds-primary-dark) 0%, var(--ds-primary-xdark) 100%);
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border-left: 5px solid var(--ds-primary);
+    }
+
+    /* Card Informativo de Ciclo */
+    .cycle-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid rgba(212, 179, 26, 0.15);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    /* Volante Interativo */
+    .volante-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 480px) {
+        .volante-grid {
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+        }
+    }
+
+    .volante-btn {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: 2px solid #e2e8f0;
+        background: #fff;
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: #4a5568;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .volante-btn:hover {
+        transform: scale(1.08);
+        border-color: var(--ds-primary);
+        box-shadow: 0 4px 10px rgba(212, 179, 26, 0.25);
+    }
+
+    .volante-btn.selected {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        border-color: var(--ds-primary-dark);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(212, 179, 26, 0.4);
+    }
+
+    /* Destaque das dezenas que já saíram no ciclo */
+    .volante-btn.cycle-drawn {
+        border-color: var(--ds-success);
+        background: var(--ds-success-bg);
+    }
+    
+    .volante-btn.cycle-drawn.selected {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        border-color: var(--ds-primary-dark);
+    }
+
+    .cycle-check {
+        position: absolute;
+        bottom: 2px;
+        font-size: 0.62rem;
+        color: var(--ds-success);
+        font-weight: 900;
+    }
+    
+    .volante-btn.selected .cycle-check {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Mês da Sorte Pills */
+    .mes-selector-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    .mes-pill {
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+        opacity: 0.65;
+        background: #f1f3f5;
+        color: #495057;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .mes-pill:hover {
+        transform: translateY(-1px);
+        opacity: 0.9;
+    }
+
+    .mes-pill.active {
+        opacity: 1 !important;
+        transform: translateY(-2px);
+        border-color: var(--ds-primary-dark) !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Estilos dos Grupos */
+    .grupo-card {
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+        border: 2px solid transparent;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.04);
+    }
+
+    .grupo-1 {
+        background-color: var(--group1-bg);
+        color: var(--group1-text);
+        border-color: var(--group1-border);
+    }
+    .grupo-2 {
+        background-color: var(--group2-bg);
+        color: var(--group2-text);
+        border-color: var(--group2-border);
+    }
+    .grupo-3 {
+        background-color: var(--group3-bg);
+        color: var(--group3-text);
+        border-color: var(--group3-border);
+    }
+    .grupo-4 {
+        background-color: var(--group4-bg);
+        color: var(--group4-text);
+        border-color: var(--group4-border);
+    }
+
+    .number-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: 0.9rem;
+        margin: 2px;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .grupo-4 .number-badge {
+        color: #333;
+    }
+
+    /* Colunas de Pares */
+    .desdobramento-col {
+        background: #fff;
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    }
+    
+    .pairs-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+
+    .pairs-table td {
+        padding: 6px;
+        text-align: center;
+        vertical-align: middle;
+        font-weight: 700;
+        border-radius: 6px;
+    }
+
+    .row-index-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        background: var(--ds-gray);
+        color: #718096;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-weight: 800;
+    }
+
+    /* Apostas Resultantes */
+    .aposta-row {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 15px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .aposta-row:hover {
+        transform: translateX(3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .aposta-num-badge {
+        background: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-dark) 100%);
+        color: #fff;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        min-width: 32px;
+        text-align: center;
+    }
+
+    .aposta-subgroup {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--ds-gray);
+        padding: 4px 8px;
+        border-radius: 8px;
+        border: 1px dashed rgba(0,0,0,0.08);
+    }
+
+    .subgroup-label {
+        font-size: 0.65rem;
+        color: #718096;
+        font-weight: 700;
+        margin-right: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Mes da Sorte Pill Badge */
+    .mes-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: #fff;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 4px 10px;
+        font-size: 0.72rem;
+        margin-left: auto;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    /* Container de 7 Dezenas */
+    .linha-container {
+        border-radius: 12px;
+        border: 2px solid transparent;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    }
+    
+    .linha-container-orange {
+        background-color: var(--line-orange-light);
+        border-color: var(--line-orange-bg);
+    }
+    
+    .linha-container-peach {
+        background-color: var(--line-peach-light);
+        border-color: var(--line-peach-bg);
+    }
+
+    .linha-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .linha-title {
+        font-weight: 800;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .linha-title-orange {
+        color: #a04000;
+    }
+    .linha-title-peach {
+        color: #7d4b00;
+    }
+
+    .game-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: 0.85rem;
+        background: #fff;
+        color: #333;
+        border: 1px solid rgba(0,0,0,0.12);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .linha-ref-text {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #555;
+        background: rgba(255,255,255,0.6);
+        padding: 2px 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+</style>
+
+<!-- Barra Horizontal de Abas -->
+<div class="tabs-container">
+    {% for i in range(1, 11) %}
+    <a class="tab-item locked" href="#" onclick="event.preventDefault(); Swal.fire('Aba Bloqueada', 'As abas de 1 a 10 estarão disponíveis em breve. Use a Aba 11 atualmente ativa!', 'info');">
+        <i class="fas fa-lock" style="font-size: 0.75rem;"></i> Aba {{ i }}
+        <span class="tab-badge">🔒</span>
+    </a>
+    {% endfor %}
+    <a class="tab-item active" href="/gerador-especial/">
+        <i class="fas fa-magic"></i> Aba 11
+        <span class="tab-badge">Ativa</span>
+    </a>
+</div>
+
+<!-- Cabeçalho Especial -->
+<div class="special-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-magic me-2"></i>Aba 11 — Desdobrador de 16 Dezenas</h2>
+        <p class="mb-0" style="opacity: 0.85; font-size: 0.95rem;">Adaptação completa do modelo Mega Sena para o volante, mês da sorte e dezenas do Dia de Sorte.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-light" onclick="Swal.fire({
+            title: 'Ajuda — Aba 11',
+            html: '<div class=\'text-start\' style=\'font-size: 0.85rem;\'><p>Este sistema permite escolher exatamente 16 dezenas no volante do Dia de Sorte.</p><ul><li><b>Destaque de Ciclo:</b> Dezenas que já saíram no ciclo ativo possuem borda verde e ícone <code>✓</code>.</li><li><b>Agrupamento (4 em 4):</b> Divide as 16 dezenas nos grupos A, B, C e D.</li><li><b>Desdobramento de 2 em 2:</b> Gera as 6 combinações de pares para cada grupo.</li><li><b>Apostas de 8 Dezenas:</b> Combina os pares dos grupos linha a linha, formando 6 jogos de 8 dezenas (divididos em grupos de 3 + 3 + 2).</li><li><b>Apostas de 7 Dezenas:</b> Aplica rotação cíclica nas combinações gerando 24 apostas premium de 7 dezenas, exatamente como no modelo Excel fornecido.</li></ul></div>',
+            icon: 'info'
+        })"><i class="fas fa-question-circle me-1"></i>Como Funciona?</button>
+    </div>
+</div>
+
+<!-- Card Informativo do Ciclo -->
+<div class="cycle-card">
+    <div class="row align-items-center">
+        <div class="col-md-7">
+            <h5 class="mb-2 text-dark font-weight-800 d-flex align-items-center gap-2">
+                <i class="fas fa-sync fa-spin text-warning" style="font-size:1.1rem;"></i>
+                Ciclo Ativo Atual: nº <span class="badge bg-warning text-dark font-weight-800">{{ ciclo.ciclo_num }}</span>
+            </h5>
+            <p class="mb-2 text-secondary" style="font-size: 0.85rem;">
+                Todas as 31 dezenas do Dia de Sorte são sorteadas até o ciclo fechar. No momento, o ciclo possui <b>{{ ciclo.concursos_no_ciclo }}</b> concurso(s) acumulado(s).
+            </p>
+            <div class="progress mb-2" style="height: 10px; border-radius: 5px;">
+                {% set pct = (ciclo.total_sorteadas / 31 * 100)|round(0) %}
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ pct }}%; border-radius: 5px;" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <small class="text-muted d-block font-weight-600">
+                Progresso: {{ pct }}% — {{ ciclo.total_sorteadas }} sorteadas, {{ ciclo.total_faltantes }} faltantes para completar o ciclo.
+            </small>
+        </div>
+        <div class="col-md-5 mt-3 mt-md-0 border-start ps-md-4">
+            <span class="d-block mb-1 text-secondary font-weight-700" style="font-size: 0.75rem; text-transform: uppercase;">Ainda Faltam Sair no Ciclo:</span>
+            <div class="d-flex flex-wrap gap-1">
+                {% if ciclo.dezenas_faltantes %}
+                    {% for d in ciclo.dezenas_faltantes %}
+                    <span class="badge bg-light text-dark border font-weight-800" style="font-size: 0.8rem; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">{{ "%02d"|format(d) }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-success font-weight-700" style="font-size: 0.8rem;"><i class="fas fa-check-double me-1"></i>Todos os números já saíram!</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Coluna da Esquerda: Volante e Configurações -->
+    <div class="col-lg-5">
+        <!-- Card do Volante -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark font-weight-800"><i class="far fa-hand-pointer text-warning me-2"></i>Escolha exatamente 16 Dezenas</h5>
+                <span class="badge bg-dark font-weight-800" id="selection-counter" style="font-size: 0.85rem; padding: 5px 10px;">0 / 16</span>
+            </div>
+            <div class="card-body bg-light-subtle py-4">
+                <!-- Volante Grid -->
+                <div class="volante-grid">
+                    {% for d in range(1, 32) %}
+                    {% set is_drawn = d in ciclo.dezenas_sorteadas %}
+                    <button class="volante-btn {% if is_drawn %}cycle-drawn{% endif %}" 
+                            data-num="{{ d }}" 
+                            onclick="toggleNumero({{ d }})">
+                        <span>{{ "%02d"|format(d) }}</span>
+                        {% if is_drawn %}
+                        <span class="cycle-check">✓</span>
+                        {% endif %}
+                    </button>
+                    {% endfor %}
+                </div>
+                
+                <!-- Botões de Ações Rápidas -->
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <button class="btn btn-sm btn-outline-secondary font-weight-700" onclick="limparSelecao()"><i class="fas fa-trash-alt me-1"></i>Limpar</button>
+                    <button class="btn btn-sm btn-outline-success font-weight-700" onclick="selecionarFaltantesCiclo()"><i class="fas fa-sync me-1"></i>Selecionar Faltantes</button>
+                    <button class="btn btn-sm btn-outline-warning text-dark font-weight-700" onclick="completarComAleatorio()"><i class="fas fa-random me-1"></i>Completar Aleatório</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card de Configuração e Mês de Sorte -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 text-dark font-weight-800"><i class="fas fa-sliders-h text-warning me-2"></i>Configurações do Desdobramento</h5>
+            </div>
+            <div class="card-body">
+                <!-- Critério de Agrupamento -->
+                <div class="mb-4">
+                    <label class="form-label font-weight-700 text-secondary mb-2" style="font-size: 0.8rem; text-transform: uppercase;">Critério de Formação dos 4 Grupos:</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="groupMode" id="modeOrdenado" value="ordenado" checked onchange="recriarDesdobramento()">
+                        <label class="btn btn-outline-warning text-dark font-weight-700" for="modeOrdenado"><i class="fas fa-sort-amount-down-alt me-1"></i>Ordenado</label>
+                        
+                        <input type="radio" class="btn-check" name="groupMode" id="modeClique" value="clique" onchange="recriarDesdobramento()">
+                        <label class="btn btn-outline-warning text-dark font-weight-700" for="modeClique"><i class="far fa-hand-pointer me-1"></i>Ordem de Clique</label>
+                        
+                        <input type="radio" class="btn-check" name="groupMode" id="modeAleatorio" value="aleatorio" onchange="recriarDesdobramento()">
+                        <label class="btn btn-outline-warning text-dark font-weight-700" for="modeAleatorio"><i class="fas fa-random me-1"></i>Aleatório</label>
+                    </div>
+                </div>
+
+                <!-- Mês de Sorte -->
+                <div>
+                    <label class="form-label font-weight-700 text-secondary mb-2" style="font-size: 0.8rem; text-transform: uppercase;">Selecione o Mês da Sorte:</label>
+                    <div class="mes-selector-container">
+                        {% for mes, cor in cores_meses.items() %}
+                        <div class="mes-pill mes-nome-{{ mes }} {% if loop.first %}active{% endif %}" 
+                             id="mes-pill-{{ mes }}" 
+                             data-mes="{{ mes }}" 
+                             data-cor="{{ cor }}" 
+                             style="background-color: {{ cor }}; border-color: {{ cor }}; color: #fff;"
+                             onclick="selecionarMes('{{ mes }}')">
+                            {{ mes }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coluna da Direita: Grupos, Pares e Resultados -->
+    <div class="col-lg-7">
+        <!-- Placeholder - Mensagem informativa caso não selecione 16 dezenas -->
+        <div id="placeholder-container" class="card border-0 shadow-sm py-5 text-center text-muted">
+            <div class="card-body">
+                <i class="fas fa-info-circle fa-3x text-warning mb-3"></i>
+                <h4>Aguardando Seleção de Dezenas</h4>
+                <p class="mb-0 px-4">Por favor, escolha exatamente <b>16 dezenas</b> no volante à esquerda para visualizar a formação de grupos, desdobramentos de pares e geração automática de jogos.</p>
+            </div>
+        </div>
+
+        <!-- Container de Resultados (Oculto até completar 16 dezenas) -->
+        <div id="resultados-container" style="display: none;">
+            <!-- Painel 1: Visualização dos 4 Grupos de 4 -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 text-dark font-weight-800"><i class="fas fa-users text-warning me-2"></i>Formação dos 4 Grupos de 4</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2" id="grupos-wrapper">
+                        <!-- Gerado via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel 2: Desdobramento de 2 em 2 (Visualização em Colunas Estilo Excel) -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 text-dark font-weight-800"><i class="fas fa-columns text-warning me-2"></i>Desdobramento de 2 em 2 (Pares dos Grupos)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2" id="pares-wrapper">
+                        <!-- Gerado via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel 3: As 6 Apostas Principais com Oito Dezenas -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h5 class="mb-0 text-dark font-weight-800"><i class="fas fa-ticket-alt text-warning me-2"></i>6 Apostas Principais de 8 Dezenas (Subdivididas)</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-warning text-dark font-weight-700" onclick="copiarApostas(8)"><i class="far fa-copy me-1"></i>Copiar</button>
+                        <button class="btn btn-sm btn-warning text-dark font-weight-700" onclick="baixarTXT(8)"><i class="fas fa-download me-1"></i>Baixar TXT</button>
+                    </div>
+                </div>
+                <div class="card-body bg-light-subtle">
+                    <div class="alert alert-warning py-2 mb-3" style="font-size: 0.8rem; font-weight: 600;">
+                        <i class="fas fa-exclamation-triangle me-1"></i> Cada aposta de 8 dezenas abaixo está dividida em subgrupos de 3 + 3 + 2 dezenas cada e acompanhada do Mês de Sorte no final.
+                    </div>
+                    <div id="apostas-8-wrapper">
+                        <!-- Gerado via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel 4: Desdobramento Final Adaptado (24 Apostas Premium de 7 Dezenas) -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h5 class="mb-0 text-dark font-weight-800"><i class="fas fa-dice text-warning me-2"></i>24 Apostas Premium de 7 Dezenas (Adaptadas)</h5>
+                        <small class="text-muted font-weight-600">Combinação cíclica inspirada no modelo Mega Sena (Linhas 1 a 6)</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-warning text-dark font-weight-700" onclick="copiarApostas(7)"><i class="far fa-copy me-1"></i>Copiar</button>
+                        <button class="btn btn-sm btn-warning text-dark font-weight-700" onclick="baixarTXT(7)"><i class="fas fa-download me-1"></i>Baixar TXT</button>
+                    </div>
+                </div>
+                <div class="card-body bg-light-subtle" id="apostas-7-wrapper">
+                    <!-- Gerado via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    // Estado Geral da Página
+    let selectedDezenas = [];
+    let selecionadosOrdemClique = [];
+    let currentMes = 'Janeiro';
+    let currentCor = '#e74c3c';
+    
+    // Dados do Ciclo Injetados do Flask
+    const dezenasFaltantesCiclo = {{ ciclo.dezenas_faltantes|tojson }};
+    const dezenasSorteadasCiclo = {{ ciclo.dezenas_sorteadas|tojson }};
+    
+    // Configurações de Cores dos Meses salvas no sistema
+    const coresDosMeses = {{ cores_meses|tojson }};
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", () => {
+        // Encontra o mês ativo padrão e recupera sua cor
+        const activeMesPill = document.querySelector(".mes-pill.active");
+        if (activeMesPill) {
+            currentMes = activeMesPill.dataset.mes;
+            currentCor = activeMesPill.dataset.cor;
+        }
+        updateInterface();
+    });
+
+    // Ação ao clicar em número no volante
+    function toggleNumero(num) {
+        const idx = selectedDezenas.indexOf(num);
+        if (idx > -1) {
+            selectedDezenas.splice(idx, 1);
+            
+            const idxClique = selecionadosOrdemClique.indexOf(num);
+            if (idxClique > -1) selecionadosOrdemClique.splice(idxClique, 1);
+        } else {
+            if (selectedDezenas.length >= 16) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Limite Atingido!',
+                    text: 'Você já selecionou as 16 dezenas exigidas para o desdobramento.',
+                    timer: 2200,
+                    showConfirmButton: false
+                });
+                return;
+            }
+            selectedDezenas.push(num);
+            selecionadosOrdemClique.push(num);
+        }
+        updateInterface();
+    }
+
+    // Limpar volante
+    function limparSelecao() {
+        selectedDezenas = [];
+        selecionadosOrdemClique = [];
+        updateInterface();
+    }
+
+    // Selecionar dezenas faltantes do ciclo de sorteios
+    function selecionarFaltantesCiclo() {
+        limparSelecao();
+        
+        // Prioriza e seleciona todas as faltantes
+        const faltantes = [...dezenasFaltantesCiclo];
+        faltantes.forEach(num => {
+            if (selectedDezenas.length < 16) {
+                selectedDezenas.push(num);
+                selecionadosOrdemClique.push(num);
+            }
+        });
+        
+        // Se ainda faltar números para completar 16, preenche com aleatórios que já foram sorteados
+        if (selectedDezenas.length < 16) {
+            const jaSorteadas = [...dezenasSorteadasCiclo];
+            // Mistura
+            jaSorteadas.sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < jaSorteadas.length; i++) {
+                if (selectedDezenas.length >= 16) break;
+                if (!selectedDezenas.includes(jaSorteadas[i])) {
+                    selectedDezenas.push(jaSorteadas[i]);
+                    selecionadosOrdemClique.push(jaSorteadas[i]);
+                }
+            }
+        }
+        
+        updateInterface();
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Dezenas Selecionadas!',
+            text: 'Foram incluídas as dezenas faltantes para fechar o ciclo atual e preenchidas até somar 16.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+
+    // Preenche aleatoriamente com dezenas de 1 a 31 até somar exatamente 16
+    function completarComAleatorio() {
+        while (selectedDezenas.length < 16) {
+            const num = Math.floor(Math.random() * 31) + 1;
+            if (!selectedDezenas.includes(num)) {
+                selectedDezenas.push(num);
+                selecionadosOrdemClique.push(num);
+            }
+        }
+        updateInterface();
+    }
+
+    // Selecionar o Mês da Sorte
+    function selecionarMes(mes) {
+        document.querySelectorAll('.mes-pill').forEach(pill => pill.classList.remove('active'));
+        const pillActive = document.getElementById('mes-pill-' + mes);
+        if (pillActive) {
+            pillActive.classList.add('active');
+            currentMes = mes;
+            currentCor = pillActive.dataset.cor;
+        }
+        if (selectedDezenas.length === 16) {
+            recriarDesdobramento();
+        }
+    }
+
+    // Atualiza a visualização dos botões do volante
+    function updateInterface() {
+        const counterEl = document.getElementById("selection-counter");
+        counterEl.innerText = `${selectedDezenas.length} / 16`;
+        
+        // Remove cores antigas e adiciona as novas
+        if (selectedDezenas.length === 16) {
+            counterEl.className = "badge bg-success font-weight-800";
+        } else {
+            counterEl.className = "badge bg-dark font-weight-800";
+        }
+
+        document.querySelectorAll('.volante-btn').forEach(btn => {
+            const num = parseInt(btn.dataset.num);
+            if (selectedDezenas.includes(num)) {
+                btn.classList.add('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        });
+
+        // Toggle do container de resultados
+        const placeholderContainer = document.getElementById("placeholder-container");
+        const resultadosContainer = document.getElementById("resultados-container");
+
+        if (selectedDezenas.length === 16) {
+            placeholderContainer.style.display = "none";
+            resultadosContainer.style.display = "block";
+            recriarDesdobramento();
+        } else {
+            placeholderContainer.style.display = "block";
+            resultadosContainer.style.display = "none";
+        }
+    }
+
+    // Engine de desdobramento e agrupamento em JS
+    let globApostas8 = [];
+    let globApostas7 = [];
+
+    function recriarDesdobramento() {
+        if (selectedDezenas.length !== 16) return;
+
+        // 1. Decidir o critério de ordenação / agrupamento
+        const mode = document.querySelector('input[name="groupMode"]:checked').value;
+        let dezenasBase = [];
+        
+        if (mode === 'ordenado') {
+            dezenasBase = [...selectedDezenas].sort((a, b) => a - b);
+        } else if (mode === 'clique') {
+            dezenasBase = [...selecionadosOrdemClique];
+        } else if (mode === 'aleatorio') {
+            dezenasBase = [...selectedDezenas].sort(() => Math.random() - 0.5);
+        }
+
+        // 2. Dividir em 4 Grupos de 4 (Grupo A, B, C, D)
+        const grupoA = dezenasBase.slice(0, 4);
+        const grupoB = dezenasBase.slice(4, 8);
+        const grupoC = dezenasBase.slice(8, 12);
+        const grupoD = dezenasBase.slice(12, 16);
+
+        // Renderiza os Grupos na tela
+        const gruposWrapper = document.getElementById("grupos-wrapper");
+        gruposWrapper.innerHTML = `
+            <div class="col-6 col-md-3">
+                <div class="grupo-card grupo-1">
+                    <div class="fw-bold mb-1"><i class="fas fa-layer-group"></i> GRUPO 1 (A)</div>
+                    <div class="d-flex justify-content-center flex-wrap">
+                        ${grupoA.map(n => `<span class="number-badge">${String(n).padStart(2, '0')}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="grupo-card grupo-2">
+                    <div class="fw-bold mb-1"><i class="fas fa-layer-group"></i> GRUPO 2 (B)</div>
+                    <div class="d-flex justify-content-center flex-wrap">
+                        ${grupoB.map(n => `<span class="number-badge">${String(n).padStart(2, '0')}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="grupo-card grupo-3">
+                    <div class="fw-bold mb-1"><i class="fas fa-layer-group"></i> GRUPO 3 (C)</div>
+                    <div class="d-flex justify-content-center flex-wrap">
+                        ${grupoC.map(n => `<span class="number-badge">${String(n).padStart(2, '0')}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="grupo-card grupo-4">
+                    <div class="fw-bold mb-1"><i class="fas fa-layer-group"></i> GRUPO 4 (D)</div>
+                    <div class="d-flex justify-content-center flex-wrap">
+                        ${grupoD.map(n => `<span class="number-badge">${String(n).padStart(2, '0')}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // 3. Gerar as 6 combinações de 2 em 2 (pares) para cada grupo
+        // Fórmula combinatória de 4 dezenas agrupadas 2 a 2 = 6 pares
+        const obterPares = (grp) => [
+            [grp[0], grp[1]],
+            [grp[0], grp[2]],
+            [grp[0], grp[3]],
+            [grp[1], grp[2]],
+            [grp[1], grp[3]],
+            [grp[2], grp[3]]
+        ];
+
+        const paresA = obterPares(grupoA);
+        const paresB = obterPares(grupoB);
+        const paresC = obterPares(grupoC);
+        const paresD = obterPares(grupoD);
+
+        // Renderiza a visualização em colunas dos pares (Estilo Excel)
+        const paresWrapper = document.getElementById("pares-wrapper");
+        paresWrapper.innerHTML = `
+            <div class="col-6 col-md-3">
+                <div class="desdobramento-col" style="border-top: 4px solid var(--group1-border);">
+                    <div class="text-center fw-bold mb-2 text-primary" style="font-size:0.75rem;">PARES DO GRUPO 1</div>
+                    <table class="pairs-table">
+                        ${paresA.map((par, i) => `
+                            <tr>
+                                <td style="width:28px;"><span class="row-index-badge">${i+1}</span></td>
+                                <td style="background-color:var(--group1-bg); color:var(--group1-text); border:1px solid var(--group1-border);">
+                                    ${String(par[0]).padStart(2, '0')} - ${String(par[1]).padStart(2, '0')}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="desdobramento-col" style="border-top: 4px solid var(--group2-border);">
+                    <div class="text-center fw-bold mb-2 text-primary" style="font-size:0.75rem;">PARES DO GRUPO 2</div>
+                    <table class="pairs-table">
+                        ${paresB.map((par, i) => `
+                            <tr>
+                                <td style="width:28px;"><span class="row-index-badge">${i+1}</span></td>
+                                <td style="background-color:var(--group2-bg); color:var(--group2-text); border:1px solid var(--group2-border);">
+                                    ${String(par[0]).padStart(2, '0')} - ${String(par[1]).padStart(2, '0')}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="desdobramento-col" style="border-top: 4px solid var(--group3-border);">
+                    <div class="text-center fw-bold mb-2 text-primary" style="font-size:0.75rem;">PARES DO GRUPO 3</div>
+                    <table class="pairs-table">
+                        ${paresC.map((par, i) => `
+                            <tr>
+                                <td style="width:28px;"><span class="row-index-badge">${i+1}</span></td>
+                                <td style="background-color:var(--group3-bg); color:var(--group3-text); border:1px solid var(--group3-border);">
+                                    ${String(par[0]).padStart(2, '0')} - ${String(par[1]).padStart(2, '0')}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="desdobramento-col" style="border-top: 4px solid var(--group4-border);">
+                    <div class="text-center fw-bold mb-2 text-primary" style="font-size:0.75rem;">PARES DO GRUPO 4</div>
+                    <table class="pairs-table">
+                        ${paresD.map((par, i) => `
+                            <tr>
+                                <td style="width:28px;"><span class="row-index-badge">${i+1}</span></td>
+                                <td style="background-color:var(--group4-bg); color:var(--group4-text); border:1px solid var(--group4-border);">
+                                    ${String(par[0]).padStart(2, '0')} - ${String(par[1]).padStart(2, '0')}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+            </div>
+        `;
+
+        // 4. Montar os 6 Jogos Principais de 8 Dezenas
+        // Combinamos os pares da linha i (0 a 5) de cada grupo
+        globApostas8 = [];
+        for (let i = 0; i < 6; i++) {
+            const dezenasLinha = [
+                ...paresA[i], // 2 números
+                ...paresB[i], // 2 números
+                ...paresC[i], // 2 números
+                ...paresD[i]  // 2 números
+            ];
+            globApostas8.push(dezenasLinha);
+        }
+
+        // Renderiza os 6 Jogos de 8 Dezenas com visual subdividido em 3 + 3 + 2
+        const apostas8Wrapper = document.getElementById("apostas-8-wrapper");
+        apostas8Wrapper.innerHTML = "";
+        
+        globApostas8.forEach((ap, idx) => {
+            // Subdivide a linha de 8 dezenas em:
+            // Subgrupo 1 (3 dezenas): D0, D1, D2
+            // Subgrupo 2 (3 dezenas): D3, D4, D5
+            // Subgrupo 3 (2 dezenas): D6, D7
+            const sg1 = ap.slice(0, 3);
+            const sg2 = ap.slice(3, 6);
+            const sg3 = ap.slice(6, 8);
+
+            const rowHtml = `
+                <div class="aposta-row">
+                    <span class="aposta-num-badge">Jogo ${idx + 1}</span>
+                    
+                    <!-- Subgrupo 1 (3 dezenas) -->
+                    <div class="aposta-subgroup">
+                        <span class="subgroup-label">Bloco 1</span>
+                        ${sg1.map(n => `<span class="badge bg-white text-dark border font-weight-800" style="font-size:0.85rem; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%;">${String(n).padStart(2, '0')}</span>`).join('')}
+                    </div>
+
+                    <i class="fas fa-plus text-muted" style="font-size:0.75rem;"></i>
+
+                    <!-- Subgrupo 2 (3 dezenas) -->
+                    <div class="aposta-subgroup">
+                        <span class="subgroup-label">Bloco 2</span>
+                        ${sg2.map(n => `<span class="badge bg-white text-dark border font-weight-800" style="font-size:0.85rem; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%;">${String(n).padStart(2, '0')}</span>`).join('')}
+                    </div>
+
+                    <i class="fas fa-plus text-muted" style="font-size:0.75rem;"></i>
+
+                    <!-- Subgrupo 3 (2 dezenas) -->
+                    <div class="aposta-subgroup">
+                        <span class="subgroup-label">Bloco 3</span>
+                        ${sg3.map(n => `<span class="badge bg-white text-dark border font-weight-800" style="font-size:0.85rem; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%;">${String(n).padStart(2, '0')}</span>`).join('')}
+                    </div>
+                    
+                    <!-- Mês da Sorte -->
+                    <span class="mes-badge" style="background-color: ${currentCor};">
+                        <i class="far fa-calendar-alt"></i> ${currentMes}
+                    </span>
+                </div>
+            `;
+            apostas8Wrapper.innerHTML += rowHtml;
+        });
+
+        // 5. Montar as 24 Apostas Premium de 7 Dezenas (Padrão Excel Adaptado)
+        // Para cada uma das 6 Linhas:
+        // Temos os 4 números da esquerda (Pares A + B): [X1, X2, Y1, Y2]
+        // Temos os 4 números da direita (Pares C + D):  [Z1, Z2, W1, W2]
+        // Em cada Linha, geramos 4 jogos premium de 7 dezenas fazendo a rotação:
+        // Esquerda (4 números da rotação) + Direita (3 números da rotação) = 7 Dezenas
+        globApostas7 = [];
+        const apostas7Wrapper = document.getElementById("apostas-7-wrapper");
+        apostas7Wrapper.innerHTML = "";
+
+        for (let l = 0; l < 6; l++) {
+            const esq = [...paresA[l], ...paresB[l]]; // 4 dezenas [X1, X2, Y1, Y2]
+            const dir = [...paresC[l], ...paresD[l]]; // 4 dezenas [Z1, Z2, W1, W2]
+
+            // Rotações de 4 para a esquerda
+            const rotEsq = [
+                [esq[0], esq[1], esq[2], esq[3]],
+                [esq[1], esq[2], esq[3], esq[0]],
+                [esq[2], esq[3], esq[0], esq[1]],
+                [esq[3], esq[0], esq[1], esq[2]]
+            ];
+
+            // Rotações de 3 para a direita
+            const rotDir = [
+                [dir[0], dir[1], dir[2]],
+                [dir[1], dir[2], dir[3]],
+                [dir[2], dir[3], dir[0]],
+                [dir[3], dir[0], dir[1]]
+            ];
+
+            const jogosLinha = [];
+            for (let j = 0; j < 4; j++) {
+                const jogo7 = [...rotEsq[j], ...rotDir[j]];
+                // Ordena apenas para a gravação / visualização mais organizada
+                const jogo7Sorted = [...jogo7].sort((a,b) => a-b);
+                jogosLinha.push(jogo7Sorted);
+                globApostas7.push(jogo7Sorted);
+            }
+
+            // Define se o contêiner será Laranja ou Pêssego baseado na linha (Alternado)
+            const isOrange = (l % 2 === 0);
+            const containerClass = isOrange ? 'linha-container-orange' : 'linha-container-peach';
+            const titleClass = isOrange ? 'linha-title-orange' : 'linha-title-peach';
+            
+            // Monta o HTML do container da Linha
+            let jogosHtml = "";
+            jogosLinha.forEach((jg, idxJogo) => {
+                // Divisão visual dos 7 números em (3 dezenas) + (4 dezenas)
+                const g3 = jg.slice(0, 3);
+                const g4 = jg.slice(3, 7);
+
+                jogosHtml += `
+                    <div class="aposta-row border-0 shadow-none mb-2" style="background: rgba(255,255,255,0.7); margin-bottom: 6px;">
+                        <span class="badge font-weight-800 text-white" style="background-color: ${isOrange ? 'var(--line-orange-bg)' : 'var(--line-peach-bg)'}; min-width:65px;">Aposta ${idxJogo + 1}</span>
+                        
+                        <!-- Bloco 1 (3 dezenas) -->
+                        <div class="aposta-subgroup bg-white py-1 px-2 border-0">
+                            <span class="subgroup-label text-muted" style="font-size:0.58rem;">Par 1</span>
+                            ${g3.map(n => `<span class="badge bg-light text-dark border font-weight-800" style="font-size:0.8rem; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%;">${String(n).padStart(2, '0')}</span>`).join('')}
+                        </div>
+
+                        <i class="fas fa-plus text-muted" style="font-size:0.65rem;"></i>
+
+                        <!-- Bloco 2 (4 dezenas) -->
+                        <div class="aposta-subgroup bg-white py-1 px-2 border-0">
+                            <span class="subgroup-label text-muted" style="font-size:0.58rem;">Par 2</span>
+                            ${g4.map(n => `<span class="badge bg-light text-dark border font-weight-800" style="font-size:0.8rem; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%;">${String(n).padStart(2, '0')}</span>`).join('')}
+                        </div>
+
+                        <!-- Mês da Sorte Pill Badge -->
+                        <span class="mes-badge py-1 px-3" style="background-color: ${currentCor}; font-size:0.68rem; margin-left:auto;">
+                            <i class="far fa-calendar-alt"></i> ${currentMes}
+                        </span>
+                    </div>
+                `;
+            });
+
+            const refNumerosEsq = `${String(esq[0]).padStart(2, '0')} ${String(esq[1]).padStart(2, '0')} ${String(esq[2]).padStart(2, '0')} ${String(esq[3]).padStart(2, '0')}`;
+            const refNumerosDir = `${String(dir[0]).padStart(2, '0')} ${String(dir[1]).padStart(2, '0')} ${String(dir[2]).padStart(2, '0')} ${String(dir[3]).padStart(2, '0')}`;
+
+            const containerHtml = `
+                <div class="linha-container ${containerClass}">
+                    <div class="linha-header">
+                        <div class="linha-title ${titleClass}">
+                            <i class="fas fa-list-ol"></i> Desdobramento da Linha ${l + 1}
+                        </div>
+                        <span class="linha-ref-text">
+                            Pares Esq: [${refNumerosEsq}] | Pares Dir: [${refNumerosDir}]
+                        </span>
+                    </div>
+                    <div>
+                        ${jogosHtml}
+                    </div>
+                </div>
+            `;
+
+            apostas7Wrapper.innerHTML += containerHtml;
+        }
+    }
+
+    // Copiar apostas formatadas para a área de transferência
+    function copiarApostas(quantidade) {
+        let texto = "";
+        if (quantidade === 8) {
+            globApostas8.forEach((ap, idx) => {
+                const dezStr = ap.map(n => String(n).padStart(2, '0')).join(' ');
+                texto += `Jogo ${idx+1}: ${dezStr} | Mês: ${currentMes}\n`;
+            });
+        } else {
+            globApostas7.forEach((ap, idx) => {
+                const dezStr = ap.map(n => String(n).padStart(2, '0')).join(' ');
+                texto += `Jogo ${idx+1}: ${dezStr} | Mês: ${currentMes}\n`;
+            });
+        }
+
+        navigator.clipboard.writeText(texto).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Copiado!',
+                text: `As apostas de ${quantidade} dezenas foram copiadas para a área de transferência com sucesso.`,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }).catch(err => {
+            Swal.fire('Erro', 'Falha ao copiar: ' + err, 'error');
+        });
+    }
+
+    // Download em TXT das apostas
+    function baixarTXT(quantidade) {
+        let texto = "";
+        texto += `===============================================\n`;
+        texto += `DESDOBRAMENTO DIA DE SORTE (ABA 11) - ${quantidade} DEZENAS\n`;
+        texto += `Dezenas selecionadas: ${selectedDezenas.sort((a,b)=>a-b).map(n => String(n).padStart(2, '0')).join(', ')}\n`;
+        texto += `Mês da Sorte: ${currentMes}\n`;
+        texto += `===============================================\n\n`;
+
+        if (quantidade === 8) {
+            globApostas8.forEach((ap, idx) => {
+                const dezStr = ap.map(n => String(n).padStart(2, '0')).join(' ');
+                texto += `${dezStr}\n`;
+            });
+        } else {
+            globApostas7.forEach((ap, idx) => {
+                const dezStr = ap.map(n => String(n).padStart(2, '0')).join(' ');
+                texto += `${dezStr}\n`;
+            });
+        }
+
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Desdobramento_DiaDeSorte_${quantidade}_dezenas.txt`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+</script>
+{% endblock %}

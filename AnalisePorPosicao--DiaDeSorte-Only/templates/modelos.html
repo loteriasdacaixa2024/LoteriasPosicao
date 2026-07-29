@@ -1,0 +1,729 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+    }
+
+    .modelos-center {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .modelo-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: 2px solid rgba(0,0,0,0.1);
+        border-radius: 8px;
+        padding: .35rem .75rem;
+        font-weight: 600;
+        font-size: .85rem;
+        color: #555;
+        white-space: nowrap;
+        transition: all .2s;
+        line-height: 1.3;
+        background: transparent;
+        cursor: pointer;
+    }
+    .tab-btn:hover {
+        background: rgba(0,0,0,0.05);
+    }
+
+    .tab-btn.active {
+        color: #fff;
+    }
+
+    .modelo-panel {
+        display: none;
+    }
+
+    .modelo-panel.active {
+        display: block;
+    }
+
+    .modelo-header {
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        color: #fff;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .progress-banner {
+        background: linear-gradient(135deg, #664a00, #996e00);
+        border-radius: 10px;
+        color: #fff;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .prog-bar-wrap {
+        background: rgba(255, 255, 255, .2);
+        border-radius: 4px;
+        height: 6px;
+        margin-top: .5rem;
+    }
+
+    .prog-bar {
+        background: #fff;
+        height: 6px;
+        border-radius: 4px;
+    }
+
+    .aposta-row {
+    position: relative;
+        padding: .5rem .75rem;
+        border-bottom: 1px solid #fce7a2;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .aposta-row:hover {
+        background: var(--accent-light);
+    }
+
+    .aposta-num {
+        font-weight: 700;
+        color: #888;
+        font-size: .75rem;
+        min-width: 28px;
+        text-align: right;
+    }
+
+    .dez-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .8rem;
+    }
+
+    .aposta-dezenas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .aposta-row-tail {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    .mes-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--accent-mes);
+        color: #fff;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 4px 10px;
+        font-size: .7rem;
+    }
+
+    .mes-chip.mes-acerto {
+        box-shadow: 0 0 0 2px #198754;
+    }
+
+    .acertos-badge {
+        font-size: .65rem;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 10px;
+        letter-spacing: .02em;
+        opacity: .92;
+    }
+
+    .acertos-badge.ac-faixa-4 {
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .acertos-badge.ac-faixa-5 {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .acertos-badge.ac-faixa-6 {
+        background: #fff3cd;
+        color: #997404;
+    }
+
+    .acertos-badge.ac-faixa-7 {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    .acertos-badge.ac-faixa-out {
+        background: #f8f9fa;
+        color: #adb5bd;
+    }
+
+    .pool-section {
+        padding: .65rem 1rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .pool-groups {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pool-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .pool-group-label {
+        font-size: .62rem;
+        font-weight: 700;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .pool-dez-row {
+        display: flex;
+        gap: 3px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pool-dez {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .68rem;
+        border: 1.5px solid;
+    }
+
+    .bt-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, .07);
+        overflow: hidden;
+        border: 1px solid #e8e8e8;
+    }
+
+    .bt-header {
+        padding: .7rem 1rem;
+        color: #fff;
+        font-weight: 600;
+        font-size: .88rem;
+    }
+
+    .bt-body {
+        padding: .75rem 1rem;
+    }
+
+    .acertos-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: .4rem;
+    }
+
+    .chip {
+        font-size: .66rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 12px;
+    }
+
+    .score-bar-wrap {
+        background: #eee;
+        border-radius: 4px;
+        height: 6px;
+        margin-top: .4rem;
+    }
+
+    .score-bar {
+        height: 6px;
+        border-radius: 4px;
+    }
+
+    .btn-download {
+        display: none;
+    }
+
+    #btProgress {
+        display: none;
+    }
+
+    .ultimo-ref-strip {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: .55rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: .65rem 1rem;
+        font-size: .8rem;
+        color: #6c757d;
+    }
+
+    .ultimo-ref-strip .ultimo-ref-label {
+        font-weight: 600;
+        color: var(--primary, #664a00);
+        white-space: nowrap;
+    }
+
+    .ultimo-ref-strip .ultimo-ref-meta {
+        white-space: nowrap;
+    }
+
+    .ultimo-ref-strip .ultimo-ref-balls {
+        display: grid;
+        grid-template-columns: repeat(7, 28px);
+        column-gap: 4px;
+        justify-content: center;
+    }
+
+    .ultimo-ref-strip .ultimo-ref-dezenas-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .ultimo-ref-strip .ultimo-ref-ordem {
+        display: grid;
+        grid-template-columns: repeat(7, 28px);
+        column-gap: 4px;
+        justify-content: center;
+    }
+
+    .ultimo-ref-strip .ultimo-dez-ordem {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1.2px solid var(--accent, #ffd700);
+        color: var(--primary, #664a00);
+        font-weight: 800;
+        font-size: .62rem;
+        background: #fff;
+        justify-self: center;
+    }
+
+    .ultimo-ref-strip .ultimo-dez {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--accent, #ffd700);
+        color: #2d2d2d;
+        font-weight: 800;
+        font-size: .72rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+        justify-self: center;
+    }
+
+    .ultimo-ref-strip .ultimo-mes {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 4px 8px;
+        font-size: .72rem;
+        line-height: 1.2;
+        color: #fff !important;
+        white-space: nowrap;
+        width: fit-content;
+    }
+
+    .btn-destacar-acertos {
+        font-size: .72rem;
+        font-weight: 600;
+        padding: .25rem .55rem;
+        border-radius: 8px;
+        opacity: .85;
+    }
+
+    .btn-destacar-acertos.active {
+        background: #198754;
+        border-color: #198754;
+        color: #fff;
+        opacity: 1;
+    }
+
+    .dez-chip.dez-acerto {
+        background: #198754 !important;
+        color: #fff !important;
+        box-shadow: 0 0 0 2px rgba(25, 135, 84, .4);
+    }
+</style>
+
+<div class="progress-banner" id="autoBanner">
+    <div class="d-flex justify-content-between align-items-center">
+        <span id="autoMsg"><i class="fas fa-bolt me-2"></i>Automático...</span>
+        <span id="autoPct" style="font-weight:800;">0%</span>
+    </div>
+    <div class="prog-bar-wrap">
+        <div class="prog-bar" id="autoBar" style="width:0%"></div>
+    </div>
+</div>
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div>
+            <h2><i class="fas fa-layer-group me-2"></i>Central de Modelos — Dia de Sorte</h2>
+            <p class="mb-0" style="opacity:.85;font-size:.9rem;">14 apostas por modelo · 7 Dezenas + 1 Mês · Backtesting
+                integrando prêmios do mês</p>
+        </div>
+    </div>
+</div>
+
+<div id="ultimoSorteioRef" class="ultimo-ref-strip modelos-center">
+    <div id="ultimoSorteioConteudo" class="d-flex flex-wrap align-items-center justify-content-center gap-2 flex-grow-1">
+        <span class="text-muted small"><i class="fas fa-spinner fa-spin me-1"></i>Último sorteio…</span>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-success btn-destacar-acertos d-none" id="btnDestacarAcertos" title="Destacar dezenas acertadas no último sorteio">
+        <i class="fas fa-check-circle me-1"></i>Acertos
+    </button>
+</div>
+
+<div class="modelos-center">
+    <div class="modelo-tabs">
+        {% for m in modelos %}
+        <button class="tab-btn {% if loop.first %}active{% endif %}" id="tab-btn-{{ m.id }}"
+            style="{% if loop.first %}background:{{ m.cor }};{% endif %}" onclick="showModelo({{ m.id }})">{{ m.emoji }} M{{ m.id }} — {{ m.nome }}</button>
+        {% endfor %}
+        <button class="tab-btn" id="tab-btn-bt" onclick="showModelo('bt')" style="background:#555;color:#fff;"><i
+                class="fas fa-chart-bar me-1"></i>Backtesting</button>
+    </div>
+
+    {% for m in modelos %}
+    <div class="modelo-panel {% if loop.first %}active{% endif %}" id="pane-{{ m.id }}">
+        <div class="modelo-header" style="background:{{ m.cor }};">
+            <div style="font-size:1.8rem;">{{ m.emoji }}</div>
+            <div>
+                <strong style="font-size:1.05rem;">Modelo {{ m.id }} — {{ m.nome }}</strong><br>
+                <small style="opacity:.85;">{{ m.subtitulo }}</small>
+            </div>
+            <div class="ms-2"><span class="badge" style="background:rgba(255,255,255,.2);font-size:.72rem;">{{
+                    m.estrutura }}</span></div>
+        </div>
+        <div class="card border-0 shadow-sm mb-2">
+            <div class="pool-section d-none" id="pool-{{ m.id }}">
+                <div class="pool-groups">
+                    <div class="pool-group"><span class="pool-group-label">Top-7 Freq</span>
+                        <div id="poolFreq-{{ m.id }}" class="pool-dez-row"></div>
+                    </div>
+                    <div class="pool-group"><span class="pool-group-label">Top-7 Atr</span>
+                        <div id="poolAtr-{{ m.id }}" class="pool-dez-row"></div>
+                    </div>
+                    <div class="pool-group"><span class="pool-group-label">🗓️ Top Meses</span>
+                        <div id="poolMeses-{{ m.id }}" class="pool-dez-row" style="flex-direction:column;gap:2px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="aposta-row" style="background:#f8f9fa;font-size:.68rem;font-weight:700;color:#666;">
+                    <span class="aposta-num">#</span>
+                    <span style="display:inline-block;width:32px;text-align:center;">C1</span><span style="display:inline-block;width:32px;text-align:center;">C2</span><span style="display:inline-block;width:32px;text-align:center;">C3</span><span style="display:inline-block;width:32px;text-align:center;">C4</span><span style="display:inline-block;width:32px;text-align:center;">C5</span><span style="display:inline-block;width:32px;text-align:center;">C6</span><span style="display:inline-block;width:32px;text-align:center;">C7</span>
+                    <span class="aposta-row-tail" style="color:var(--accent-mes);"><span style="min-width:36px;text-align:center;opacity:0;">—</span>🗓️ Mês</span>
+                </div>
+                <div id="tbody-{{ m.id }}">
+                    <div class="text-center text-muted py-4"><i class="fas fa-clock me-2"></i>Aguardando geração...
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 text-center">
+                <button class="btn btn-sm btn-download" id="dlBtn-{{ m.id }}"
+                    style="background:var(--primary);color:#fff;font-weight:700;"
+                    onclick="downloadModelo({{ m.id }})"><i class="fas fa-download me-1"></i>Baixar TXT</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="max-width: 100%;margin:1rem auto 0;">
+    <div class="modelo-panel" id="pane-bt">
+        <div class="modelo-header" style="background:linear-gradient(135deg,#333,#555);">
+            <i class="fas fa-chart-bar" style="font-size:1.5rem;"></i>
+            <div><strong>Backtesting Histórico (Dia de Sorte)</strong><br><small style="opacity:.8;">Avalia 7, 6, 5 e 4
+                    acertos + bônus de acerto no mês (+2pts)</small></div>
+        </div>
+        <div id="btProgress">
+            <div class="text-center py-3 text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Analisando histórico...
+            </div>
+        </div>
+        <div id="btResultado"></div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    const TOTAL_MODELOS = 6;
+    const CORES = {
+        1: { bg: '#d39a00', light: '#fffaf0', text: '#4d3800' },
+        2: { bg: '#856404', light: '#fff3cd', text: '#3d2d00' },
+        3: { bg: '#b38000', light: '#fdf2cd', text: '#4d3800' },
+        4: { bg: '#e6ae00', light: '#fff9e6', text: '#4d3800' },
+        5: { bg: '#c08b00', light: '#fcf5e3', text: '#4d3800' },
+        6: { bg: '#9a6b00', light: '#f1ead3', text: '#332400' },
+    };
+    const MESES_ABREV = {
+        Janeiro: 'Jan', Fevereiro: 'Fev', Março: 'Mar', Abril: 'Abr',
+        Maio: 'Mai', Junho: 'Jun', Julho: 'Jul', Agosto: 'Ago',
+        Setembro: 'Set', Outubro: 'Out', Novembro: 'Nov', Dezembro: 'Dez',
+    };
+
+    let ultimoSorteioRef = null;
+    let destacarAcertosAtivo = false;
+
+    function mesAbrev(nome) {
+        if (!nome) return '—';
+        return MESES_ABREV[nome] || nome.substring(0, 3);
+    }
+
+    function faixaAcertosClass(ac) {
+        if (ac >= 7) return 'ac-faixa-7';
+        if (ac === 6) return 'ac-faixa-6';
+        if (ac === 5) return 'ac-faixa-5';
+        if (ac === 4) return 'ac-faixa-4';
+        return 'ac-faixa-out';
+    }
+
+    function aplicarDestaqueAcertos() {
+        for (let modeloId = 1; modeloId <= TOTAL_MODELOS; modeloId++) {
+            const pane = document.getElementById(`pane-${modeloId}`);
+            if (!pane) continue;
+            pane.querySelectorAll('.aposta-row[data-aposta]').forEach((row) => {
+                const chips = row.querySelectorAll('.dez-chip[data-dez]');
+                const badge = row.querySelector('.acertos-badge');
+                const mesChip = row.querySelector('.mes-chip[data-mes-num]');
+
+                if (!destacarAcertosAtivo || !ultimoSorteioRef) {
+                    chips.forEach((el) => el.classList.remove('dez-acerto'));
+                    if (badge) badge.classList.add('d-none');
+                    if (mesChip) mesChip.classList.remove('mes-acerto');
+                    return;
+                }
+
+                let ac = 0;
+                chips.forEach((el) => {
+                    const dez = parseInt(el.dataset.dez, 10);
+                    const hit = ultimoSorteioRef.dezenas.has(dez);
+                    el.classList.toggle('dez-acerto', hit);
+                    if (hit) ac++;
+                });
+
+                if (badge) {
+                    badge.textContent = `7/${ac}`;
+                    badge.className = `acertos-badge ${faixaAcertosClass(ac)}`;
+                    badge.classList.remove('d-none');
+                }
+
+                if (mesChip && ultimoSorteioRef.mes_num) {
+                    const mesNum = parseInt(mesChip.dataset.mesNum, 10);
+                    mesChip.classList.toggle('mes-acerto', mesNum === ultimoSorteioRef.mes_num);
+                }
+            });
+        }
+    }
+
+    function toggleDestacarAcertos() {
+        if (!ultimoSorteioRef) return;
+        destacarAcertosAtivo = !destacarAcertosAtivo;
+        const btn = document.getElementById('btnDestacarAcertos');
+        if (btn) btn.classList.toggle('active', destacarAcertosAtivo);
+        aplicarDestaqueAcertos();
+    }
+
+    function showModelo(id) {
+        document.querySelectorAll('.modelo-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.style.background = ''; b.style.color = ''; });
+        const panel = document.getElementById(`pane-${id}`), btn = document.getElementById(`tab-btn-${id}`);
+        if (panel) panel.classList.add('active');
+        if (btn) { btn.classList.add('active'); if (id === 'bt') { btn.style.background = '#555'; btn.style.color = '#fff'; } else if (CORES[id]) { btn.style.background = CORES[id].bg; btn.style.color = '#fff'; } }
+        if (destacarAcertosAtivo) requestAnimationFrame(() => aplicarDestaqueAcertos());
+    }
+
+    function setProgress(step, msg) {
+        const total = TOTAL_MODELOS + 1, pct = Math.round((step / total) * 100);
+        document.getElementById('autoBanner').style.display = 'block';
+        document.getElementById('autoMsg').innerHTML = `<i class="fas fa-bolt me-2"></i>${msg}`;
+        document.getElementById('autoPct').textContent = pct + '%';
+        document.getElementById('autoBar').style.width = pct + '%';
+    }
+
+    async function gerarModelo(modeloId) {
+        const tbody = document.getElementById(`tbody-${modeloId}`), dlBtn = document.getElementById(`dlBtn-${modeloId}`);
+        tbody.innerHTML = `<div class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-2"></i>Gerando...</div>`;
+        try {
+            const r = await fetch(`/modelos/api/gerar/${modeloId}`, { method: 'POST' }); const d = await r.json();
+            if (d.error) return tbody.innerHTML = `<div class="text-danger p-3">${d.error}</div>`;
+            const cor = CORES[modeloId] || CORES[1];
+            let html = '';
+            d.apostas.forEach(a => {
+                const mesLabel = a.mes_abrev || mesAbrev(a.mes_nome);
+                html += `<div class="aposta-row" data-aposta="${a.aposta_num}"><span class="aposta-num">${a.aposta_num}</span><div class="aposta-dezenas">`;
+                a.dezenas.forEach(dez => {
+                    html += `<span class="dez-chip" data-dez="${dez}" style="background:${cor.light};color:${cor.bg};">${String(dez).padStart(2, '0')}</span>`;
+                });
+                html += `</div><span class="aposta-row-tail"><span class="acertos-badge d-none">7/0</span>`;
+                html += `<span class="mes-chip mes-nome-${a.mes_nome}" data-mes-num="${a.mes_num || ''}"><i class="far fa-calendar-alt"></i> ${mesLabel}</span></span></div>`;
+            });
+            tbody.innerHTML = html;
+            aplicarDestaqueAcertos();
+            if (d.pool_info) {
+                document.getElementById(`poolFreq-${modeloId}`).innerHTML = (d.pool_info.top7_freq || []).map(d => `<span class="pool-dez" style="background:${cor.light};color:${cor.bg};border-color:${cor.bg};">${d}</span>`).join('');
+                document.getElementById(`poolAtr-${modeloId}`).innerHTML = (d.pool_info.top7_atr || []).map(d => `<span class="pool-dez" style="background:#f0f0f0;color:#555;border-color:#ccc;">${d}</span>`).join('');
+                document.getElementById(`poolMeses-${modeloId}`).innerHTML = (d.pool_info.top_meses || []).map(m => `<span style="font-size:.65rem;font-weight:600;" class="mes-text-${m.nome}"><i class="far fa-calendar-alt"></i> ${m.nome}</span>`).join('');
+                document.getElementById(`pool-${modeloId}`).classList.remove('d-none');
+            }
+            dlBtn.style.display = 'inline-block';
+            window[`apostasModelo${modeloId}`] = { apostas: d.apostas, nome: d.modelo_nome, concurso: d.ultimo_concurso };
+        } catch (e) { tbody.innerHTML = `<div class="text-danger p-3">${e.message}</div>`; }
+    }
+
+    async function executarBacktesting() {
+        const prog = document.getElementById('btProgress'), res = document.getElementById('btResultado');
+        prog.style.display = 'block'; res.innerHTML = '';
+        try {
+            const r = await fetch('/modelos/api/backtesting', { method: 'POST' }); const d = await r.json();
+            const ranking = d.ranking, maxScore = ranking[0].score || 1;
+            const medalhas = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
+            let html = `<div class="alert alert-info mb-3" style="border-radius:10px;border-left:4px solid var(--primary);"><i class="fas fa-database me-2"></i><strong>${d.total_sorteios.toLocaleString()}</strong> concursos processados</div><div class="row g-3 mb-3">`;
+            ranking.forEach(m => {
+                const cor = CORES[m.modelo_id], pct = (m.score / maxScore * 100).toFixed(1), med = medalhas[m.posicao - 1];
+                html += `<div class="col-md-6 col-lg-4"><div class="bt-card">
+                <div class="bt-header" style="background:${cor.bg};">${m.modelo_emoji} M${m.modelo_id} — ${m.modelo_nome} <span class="ms-auto bg-white text-dark px-2 rounded float-end">${m.posicao}</span></div>
+                <div class="bt-body">
+                    <div class="fw-bold mb-1" style="color:${cor.bg};">${m.total_premios} prêmios ${med}</div>
+                    <div class="acertos-chips">
+                        ${m.hits_7 > 0 ? `<span class="chip text-white bg-danger">7×${m.hits_7}</span>` : ''}
+                        ${m.hits_6 > 0 ? `<span class="chip bg-warning text-dark">6×${m.hits_6}</span>` : ''}
+                        ${m.hits_5 > 0 ? `<span class="chip" style="background:${cor.bg};color:#fff;">5×${m.hits_5}</span>` : ''}
+                        <span class="chip bg-light border text-muted">4×${m.hits_4}</span>
+                        <span class="chip text-white" style="background:var(--accent-mes);"><i class="far fa-calendar-alt"></i>×${m.hits_0}</span>
+                    </div>
+                    <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%;background:${cor.bg};"></div></div>
+                    <div class="text-muted mt-1" style="font-size:.7rem;">Score: ${m.score.toLocaleString()} pts</div>
+                </div>
+            </div></div>`;
+            });
+            html += `</div><div class="card border-0 shadow-sm"><div class="card-header fw-bold" style="color:var(--primary);"><i class="fas fa-table me-2"></i>Comparativo Detalhado</div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0" style="font-size:.75rem;"><thead class="table-dark"><tr><th>Pos</th><th>Modelo</th><th>7 Dz</th><th>6 Dz</th><th>5 Dz</th><th>4 Dz</th><th>Mês Sort.</th><th>Premios</th><th>Score</th></tr></thead><tbody>`;
+            ranking.forEach(m => {
+                const cor = CORES[m.modelo_id];
+                html += `<tr><td class="fw-bold text-center">${medalhas[m.posicao - 1] || m.posicao}</td><td class="text-start"><span class="badge" style="background:${cor.bg};">${m.modelo_emoji} M${m.modelo_id}</span></td><td class="fw-bold text-danger text-center">${m.hits_7}</td><td class="text-warning fw-bold text-center">${m.hits_6}</td><td class="text-success text-center">${m.hits_5}</td><td class="text-center">${m.hits_4}</td><td style="color:var(--accent-mes);font-weight:bold;" class="text-center">${m.hits_0}</td><td class="fw-bold text-center">${m.total_premios}</td><td class="fw-bold text-center" style="color:${cor.bg};">${m.score.toLocaleString()}</td></tr>`;
+            });
+            html += `</tbody></table></div></div></div>`;
+            res.innerHTML = html;
+        } catch (e) { res.innerHTML = `<div class="text-danger p-3">${e.message}</div>`; }
+        finally { prog.style.display = 'none'; }
+    }
+
+    function downloadModelo(id) {
+        const info = window[`apostasModelo${id}`];
+        if (!info) return Swal.fire('Aviso', 'Gere primeiro!', 'warning');
+        const linhas = info.apostas.map(a => a.dezenas.map(d => String(d).padStart(2, '0')).join(' ') + ` ${mesAbrev(a.mes_nome)}`);
+        const blob = new Blob([linhas.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob), link = document.createElement('a');
+        link.href = url; link.download = `[M${id}_${info.nome.replace(/ /g, '_')}]_DIADESORTE_${info.concurso}.txt`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+    }
+
+    async function carregarUltimoSorteioRef() {
+        const el = document.getElementById('ultimoSorteioConteudo');
+        if (!el) return;
+        try {
+            const r = await fetch('/analise/api/ultimos');
+            const d = await r.json();
+            if (d.status !== 'success' || !d.sorteios || !d.sorteios.length) {
+                el.innerHTML = '<span class="text-muted small">Nenhum sorteio no banco.</span>';
+                return;
+            }
+            const s = d.sorteios[0];
+            ultimoSorteioRef = {
+                concurso: s.concurso,
+                dezenas: new Set((s.dezenas || []).map(n => parseInt(n, 10))),
+                mes_num: s.mes_num,
+                mes_nome: s.mes_nome,
+            };
+            const btnAc = document.getElementById('btnDestacarAcertos');
+            if (btnAc) btnAc.classList.remove('d-none');
+            const fmt = (n) => String(n).padStart(2, '0');
+            const ordem = (s.dezenas_ordem && s.dezenas_ordem.length) ? s.dezenas_ordem : (s.dezenas || []);
+            const balls = (s.dezenas || []).map(n => `<span class="ultimo-dez">${fmt(n)}</span>`).join('');
+            const ordemBalls = ordem.map(n => `<span class="ultimo-dez-ordem">${fmt(n)}</span>`).join('');
+            const mesNome = s.mes_nome || '';
+            const mesLabel = s.mes_abrev || mesAbrev(mesNome);
+            const mesCls = mesNome ? `mes-nome-${mesNome}` : '';
+            const mesHtml = mesNome
+                ? `<span class="ultimo-mes ${mesCls}" title="${mesNome}"><i class="far fa-calendar-alt"></i> ${mesLabel}</span>`
+                : '';
+            el.innerHTML = `
+                <span class="ultimo-ref-label"><i class="fas fa-trophy me-1"></i>Último sorteio</span>
+                <span class="ultimo-ref-meta">#${s.concurso} · ${s.data || '—'}</span>
+                <div class="ultimo-ref-dezenas-col">
+                    <div class="ultimo-ref-balls">${balls}</div>
+                    <div class="ultimo-ref-ordem">${ordemBalls}</div>
+                </div>
+                ${mesHtml}`;
+        } catch (e) {
+            el.innerHTML = `<span class="text-danger small">${e.message || 'Erro ao carregar'}</span>`;
+        }
+    }
+
+    async function autoRunAll() {
+        for (let i = 1; i <= TOTAL_MODELOS; i++) { setProgress(i - 1, `Modelo ${i}...`); await gerarModelo(i); await new Promise(r => setTimeout(r, 150)); }
+        aplicarDestaqueAcertos();
+        setProgress(TOTAL_MODELOS, 'Backtesting...'); showModelo('bt'); await executarBacktesting();
+        setProgress(TOTAL_MODELOS + 1, 'Concluído!'); setTimeout(() => { document.getElementById('autoBanner').style.display = 'none'; }, 2000);
+    }
+    document.addEventListener('DOMContentLoaded', async () => {
+        document.getElementById('btnDestacarAcertos')?.addEventListener('click', toggleDestacarAcertos);
+        await carregarUltimoSorteioRef();
+        await autoRunAll();
+    });
+</script>
+{% endblock %}

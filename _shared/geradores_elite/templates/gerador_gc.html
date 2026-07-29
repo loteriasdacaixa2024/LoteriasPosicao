@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Gerador Pro / GC — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+#ge-gc .ai-hint {
+  font-size:.8rem; color:#6c757d; border-left:3px solid var(--accent,#ffd54f);
+  padding:.35rem .65rem; background:var(--accent-light);
+}
+#ge-gc .ai-table { font-size:.85rem; }
+#ge-gc .ai-table thead th {
+  background: var(--primary); color:#fff; font-weight:700; text-align:center;
+}
+#ge-gc .ai-table td { text-align:center; vertical-align:middle; }
+#ge-gc .perfil-box {
+  border:1px solid rgba(192,139,0,.28); border-radius:10px; padding:.75rem 1rem;
+  background:linear-gradient(145deg,#fffaf0,#fff); margin-bottom:1rem;
+}
+#ge-gc .perfil-box .lbl { font-size:.7rem; font-weight:700; color:#6c757d; text-transform:uppercase; }
+#ge-gc .perfil-box .val { font-weight:800; color:var(--primary-xdark); }
+</style>
+<div class="container-fluid py-3" id="ge-gc"
+     data-api="{{ api_base }}"
+     data-digitos="{{ digitos_inicial }}"
+     data-concurso="{{ concurso_inicial }}">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1"><i class="fas fa-magic text-success"></i> Gerador Pro / GC</h1>
+      <p class="text-muted small mb-0">{{ modality_nome }} — gcN orientado pelo perfil dos resultados reais</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/">Geradores Elite</a>
+      <a class="btn btn-sm btn-outline-primary" href="/geradores-elite/gerador-elite/">Gerador Elite</a>
+      <a class="btn btn-sm btn-outline-primary" href="/analise/analises-inteligentes/">Análises Inteligentes</a>
+    </div>
+  </div>
+
+  <div id="geGcPerfil" class="perfil-box d-none"></div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-2">
+      <label class="form-label small fw-bold">Concurso ref.</label>
+      <input type="number" id="geGcConcurso" class="form-control form-control-sm" placeholder="ex: 1251" value="{{ concurso_inicial }}">
+    </div>
+    <div class="col-md-5">
+      <label class="form-label small fw-bold">Dígitos (mín. 3)</label>
+      <input type="text" id="geGcDigitos" class="form-control form-control-sm" placeholder="ex: 0,1,2,5,8">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small fw-bold">Qtd jogos</label>
+      <input type="number" id="geGcQtd" class="form-control form-control-sm" value="10" min="1" max="200">
+    </div>
+    <div class="col-md-3 d-flex align-items-end gap-2">
+      <button type="button" class="btn btn-sm btn-primary" id="geBtnGerarGc"><i class="fas fa-magic"></i> Gerar gc</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="geBtnExportGc">TXT</button>
+    </div>
+  </div>
+  <div class="ai-hint mb-2" id="geGcInfo">
+    Com concurso de referência, prioriza jogos próximos da <strong>soma/pares</strong> e da base 16 do resultado real
+    (<a href="/analise/analises-inteligentes/">Análises Inteligentes</a>).
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-bordered ai-table" id="geTabelaGc">
+      <thead><tr><th>#</th><th>Dezenas</th><th>Soma</th><th>Pares/Ímpares</th><th>Score perfil</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const root = document.getElementById('ge-gc');
+  if (!root) return;
+  const API = root.dataset.api;
+  let JOGOS = [];
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function parseDigitos(txt) {
+    return String(txt || '').split(/[,;\s]+/).map(x => x.trim()).filter(x => /^[0-9]$/.test(x));
+  }
+  function fmtVol(n) {
+    return Number(n || 0).toLocaleString('pt-BR');
+  }
+  function renderPerfil(p) {
+    const box = document.getElementById('geGcPerfil');
+    if (!p || !p.concurso) { box.classList.add('d-none'); box.innerHTML = ''; return; }
+    box.classList.remove('d-none');
+    box.innerHTML = `
+      <div class="fw-bold mb-2">Perfil do concurso real #${esc(p.concurso)}</div>
+      <div class="row g-2 small">
+        <div class="col-6 col-md-3"><div class="lbl">Dezenas</div><div class="val">${esc(p.dezenas_fmt||'')}</div></div>
+        <div class="col-6 col-md-2"><div class="lbl">Dígitos</div><div class="val">${esc((p.digitos||[]).join(','))}</div></div>
+        <div class="col-4 col-md-1"><div class="lbl">Soma</div><div class="val">${esc(p.soma)}</div></div>
+        <div class="col-4 col-md-1"><div class="lbl">P/I</div><div class="val">${esc(p.pares)}/${esc(p.impares)}</div></div>
+        <div class="col-12 col-md-5"><div class="lbl">Base 16</div><div class="val">${esc(p.nao_sairam_16_fmt||'—')}</div></div>
+      </div>`;
+  }
+  function renderJogos(jogos) {
+    document.querySelector('#geTabelaGc tbody').innerHTML = (jogos||[]).map(j => `
+      <tr>
+        <td>${esc(j.id)}</td>
+        <td class="text-start fw-bold">${esc(j.dezenas_fmt)}</td>
+        <td>${esc(j.soma)}</td>
+        <td>${esc(j.pares)}P / ${esc(j.impares)}I</td>
+        <td>${j.score_perfil != null ? esc(j.score_perfil) : '—'}</td>
+      </tr>`).join('') || '<tr><td colspan="5" class="text-muted">Nenhum jogo gerado</td></tr>';
+  }
+  async function gerarGc() {
+    const digitos = parseDigitos(document.getElementById('geGcDigitos').value);
+    const qtd = +document.getElementById('geGcQtd').value || 10;
+    const concRaw = document.getElementById('geGcConcurso').value;
+    const concurso = concRaw ? +concRaw : null;
+    if (digitos.length < 3 && !concurso) { alert('Informe ao menos 3 dígitos ou um concurso de referência.'); return; }
+    const r = await fetch(`${API}/gerar-gc`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ digitos, qtd_jogos: qtd, concurso: concurso || null })
+    });
+    const j = await r.json();
+    if (!j.sucesso) { alert(j.erro || 'Falha ao gerar'); return; }
+    JOGOS = j.jogos || [];
+    renderPerfil(j.perfil_analise);
+    document.getElementById('geGcInfo').innerHTML = j.usa_perfil_real
+      ? `Perfil real #${esc(j.perfil_analise.concurso)} · dígitos <strong>${esc(j.digitos_fmt)}</strong> · pool ${j.qtd_pool} · gerados ${j.qtd_gerados}`
+      : `Dígitos <strong>${esc(j.digitos_fmt)}</strong> · pool ${j.qtd_pool} · volume ${fmtVol(j.volume_teorico)} · gerados ${j.qtd_gerados}`;
+    if (j.digitos_fmt && !document.getElementById('geGcDigitos').value.trim()) {
+      document.getElementById('geGcDigitos').value = j.digitos_fmt;
+    }
+    renderJogos(JOGOS);
+  }
+  document.getElementById('geBtnGerarGc').addEventListener('click', gerarGc);
+  document.getElementById('geBtnExportGc').addEventListener('click', () => {
+    const txt = (JOGOS||[]).map(j => j.dezenas_fmt).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([txt], {type:'text/plain'}));
+    a.download = 'gc_diadesorte.txt';
+    a.click();
+  });
+  const dig0 = root.dataset.digitos || '';
+  const conc0 = root.dataset.concurso || '';
+  if (dig0) document.getElementById('geGcDigitos').value = dig0;
+  if (conc0) document.getElementById('geGcConcurso').value = conc0;
+  if (dig0 || conc0) gerarGc();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,319 @@
+/* Visualização Tubular — cores idênticas à legenda "Cores e Significados" */
+:root {
+  /* Fallbacks = cores de referência (analiseprofissional / tubular) */
+  --cor-sequencia-1: #4ade80;
+  --cor-sequencia-1-texto: #14532d;
+  --cor-sequencia-2: #60a5fa;
+  --cor-sequencia-2-texto: #1e3a8a;
+  --cor-sequencia-3: #c084fc;
+  --cor-sequencia-3-texto: #581c87;
+  --cor-repetidos: #fbbf24;
+  --cor-repetidos-texto: #78350f;
+}
+
+#ai-tubular-root {
+  --tb-radius: 8px;
+  --tb-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+  font-size: .82rem;
+}
+
+#ai-tubular-root .tb-card {
+  background: var(--surface, #fff);
+  border: 1px solid rgba(192, 139, 0, .18);
+  border-radius: var(--tb-radius);
+  box-shadow: var(--tb-shadow);
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+
+#ai-tubular-root .tb-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: .65rem;
+  margin-bottom: .85rem;
+}
+#ai-tubular-root .tb-kpi {
+  border-radius: 8px;
+  padding: .65rem .75rem;
+  text-align: center;
+}
+#ai-tubular-root .tb-kpi .v { font-size: 1.25rem; font-weight: 800; line-height: 1.2; }
+#ai-tubular-root .tb-kpi .l { font-size: .72rem; font-weight: 600; opacity: .9; }
+#ai-tubular-root .tb-kpi-gold { background: #fff8e1; color: #664a00; border: 1px solid #ffe082; }
+#ai-tubular-root .tb-kpi-green { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+#ai-tubular-root .tb-kpi-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+#ai-tubular-root .tb-kpi-red { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+/* Legenda Cores e Significados */
+#ai-tubular-root .tb-legend {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: .85rem;
+}
+#ai-tubular-root .tb-legend-center {
+  text-align: center;
+}
+#ai-tubular-root .tb-legend-center h3,
+#ai-tubular-root .tb-legend-center h4 {
+  text-align: center;
+}
+#ai-tubular-root .tb-header-center {
+  text-align: center;
+}
+#ai-tubular-root .tb-legend h3 {
+  font-size: .95rem; font-weight: 800; margin: 0 0 .75rem; color: #1f2937;
+}
+#ai-tubular-root .tb-legend h4 {
+  font-size: .82rem; font-weight: 700; margin: 0 0 .5rem; color: #374151;
+}
+#ai-tubular-root .tb-swatch {
+  width: 1.5rem; height: 1.5rem; border-radius: 4px; border: 2px solid;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .65rem; font-weight: 800; flex-shrink: 0;
+}
+#ai-tubular-root .tb-swatch.seq-2 {
+  background-color: var(--cor-sequencia-1) !important;
+  color: var(--cor-sequencia-1-texto) !important;
+  border-color: #16a34a;
+}
+#ai-tubular-root .tb-swatch.seq-3 {
+  background-color: var(--cor-sequencia-2) !important;
+  color: var(--cor-sequencia-2-texto) !important;
+  border-color: #2563eb;
+}
+#ai-tubular-root .tb-swatch.seq-4 {
+  background-color: var(--cor-sequencia-3) !important;
+  color: var(--cor-sequencia-3-texto) !important;
+  border-color: #9333ea;
+}
+#ai-tubular-root .tb-swatch.repetition {
+  background-color: var(--cor-repetidos) !important;
+  color: var(--cor-repetidos-texto) !important;
+  border-color: #d97706;
+}
+#ai-tubular-root .tb-swatch-grad {
+  min-width: 3rem; height: 1.5rem; border-radius: 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .65rem; font-weight: 800; box-shadow: 0 1px 2px rgba(0,0,0,.12);
+}
+#ai-tubular-root .tb-legend-hint {
+  margin-top: .65rem; padding: .4rem .55rem; border-radius: 6px;
+  background: #fff8e1; color: #856404; font-size: .72rem; font-style: italic;
+}
+
+/* Células numéricas — juntas, sem grade entre dezenas */
+#ai-tubular-root .number-cell,
+#ai-tubular-root .tb-number {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.55rem; height: 1.55rem; padding: 0 .1rem;
+  border-radius: 3px; border: 1px solid transparent;
+  font-weight: 800; font-size: .72rem; background: transparent;
+  margin: 0;
+}
+#ai-tubular-root td.tb-dez {
+  padding: .15rem .05rem !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+#ai-tubular-root td.tb-dez-first {
+  border-left: 1px solid #dee2e6 !important;
+  padding-left: .25rem !important;
+}
+#ai-tubular-root td.tb-dez-last {
+  border-right: 1px solid #dee2e6 !important;
+  padding-right: .25rem !important;
+}
+#ai-tubular-root .tb-table thead th.tb-dez-h {
+  border-left: none !important;
+  border-right: none !important;
+  padding-left: .15rem !important;
+  padding-right: .15rem !important;
+}
+#ai-tubular-root .tb-table thead th.tb-dez-h-first {
+  border-left: 1px solid rgba(255,255,255,.35) !important;
+}
+#ai-tubular-root .tb-table thead th.tb-dez-h-last {
+  border-right: 1px solid rgba(255,255,255,.35) !important;
+}
+#ai-tubular-root .seq-2 {
+  background-color: var(--cor-sequencia-1) !important;
+  color: var(--cor-sequencia-1-texto) !important;
+  border-color: #16a34a !important;
+}
+#ai-tubular-root .seq-3 {
+  background-color: var(--cor-sequencia-2) !important;
+  color: var(--cor-sequencia-2-texto) !important;
+  border-color: #2563eb !important;
+}
+#ai-tubular-root .seq-4 {
+  background-color: var(--cor-sequencia-3) !important;
+  color: var(--cor-sequencia-3-texto) !important;
+  border-color: #9333ea !important;
+}
+#ai-tubular-root .repetition {
+  background-color: var(--cor-repetidos) !important;
+  color: var(--cor-repetidos-texto) !important;
+  border-color: #d97706 !important;
+}
+#ai-tubular-root .repetition.seq-2 {
+  background: linear-gradient(135deg, var(--cor-repetidos) 0%, var(--cor-repetidos) 50%, var(--cor-sequencia-1) 50%, var(--cor-sequencia-1) 100%) !important;
+  border-color: #d97706 !important;
+}
+#ai-tubular-root .repetition.seq-3 {
+  background: linear-gradient(135deg, var(--cor-repetidos) 0%, var(--cor-repetidos) 50%, var(--cor-sequencia-2) 50%, var(--cor-sequencia-2) 100%) !important;
+  border-color: #d97706 !important;
+}
+#ai-tubular-root .repetition.seq-4 {
+  background: linear-gradient(135deg, var(--cor-repetidos) 0%, var(--cor-repetidos) 50%, var(--cor-sequencia-3) 50%, var(--cor-sequencia-3) 100%) !important;
+  border-color: #d97706 !important;
+}
+#ai-tubular-root .seq-4.seq-3.seq-2 {
+  background: linear-gradient(135deg,
+    var(--cor-sequencia-3) 0%, var(--cor-sequencia-3) 33%,
+    var(--cor-sequencia-2) 33%, var(--cor-sequencia-2) 66%,
+    var(--cor-sequencia-1) 66%, var(--cor-sequencia-1) 100%) !important;
+  border-color: #9333ea !important;
+}
+
+#ai-tubular-root .tb-wrap {
+  max-height: 62vh; overflow: auto; border: 1px solid #e5e7eb; border-radius: 6px;
+}
+#ai-tubular-root .tb-table {
+  font-size: .72rem; margin: 0; white-space: nowrap;
+}
+#ai-tubular-root .tb-table thead th {
+  position: sticky; top: 0; z-index: 3;
+  background: var(--primary) !important; color: #fff !important;
+  font-weight: 700; text-align: center; vertical-align: middle;
+  padding: .35rem .3rem; font-size: .68rem;
+}
+#ai-tubular-root .tb-table td {
+  text-align: center; vertical-align: middle; padding: .2rem .25rem;
+}
+/* Inicial / Final / Números / Soma — alinhados à esquerda (reta vertical como no print) */
+#ai-tubular-root .tb-table td.tb-align-mono,
+#ai-tubular-root .tb-table th.tb-align-mono {
+  text-align: left !important;
+  padding-left: .45rem !important;
+  padding-right: .35rem !important;
+}
+#ai-tubular-root .tb-mono {
+  display: inline-block;
+  font-family: ui-monospace, "Cascadia Mono", "Consolas", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+  text-align: left;
+  white-space: pre;
+  line-height: 1.2;
+}
+#ai-tubular-root .tb-mono-soma {
+  min-width: 3ch;
+  font-weight: 800;
+}
+#ai-tubular-root .tb-mono-digs {
+  min-width: 19ch; /* "0 1 2 3 4 5 6 7 8 9" */
+}
+#ai-tubular-root .tb-rank {
+  display: inline-block;
+  margin-left: .25rem;
+  min-width: 2.75ch;
+  font-size: .62rem;
+  font-weight: 700;
+  color: #9ca3af;
+  vertical-align: baseline;
+  letter-spacing: .02em;
+}
+#ai-tubular-root .tb-rank-1 { color: #b45309; }
+#ai-tubular-root .tb-rank-2 { color: #6b7280; }
+#ai-tubular-root .tb-rank-3 { color: #a16207; }
+#ai-tubular-root .tb-table tbody tr:nth-child(even) { background: #fffaf0; }
+#ai-tubular-root .tb-table tbody tr:hover { background: #fff3cd; }
+#ai-tubular-root .mes-cor {
+  display: inline-block; min-width: 3.2rem; padding: .12rem .35rem;
+  border-radius: 5px; color: #fff !important; font-weight: 800; font-size: .7rem;
+}
+/* Qtde — cor por quantidade de dígitos únicos */
+#ai-tubular-root .tb-qtde {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.75rem; height: 1.55rem; padding: 0 .35rem;
+  border-radius: 5px; font-weight: 800; font-size: .75rem; border: 1px solid transparent;
+}
+#ai-tubular-root .tb-qtde-3  { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
+#ai-tubular-root .tb-qtde-4  { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+#ai-tubular-root .tb-qtde-5  { background: #fef3c7; color: #92400e; border-color: #fbbf24; }
+#ai-tubular-root .tb-qtde-6  { background: #ffedd5; color: #9a3412; border-color: #fb923c; }
+#ai-tubular-root .tb-qtde-7  { background: #d1fae5; color: #065f46; border-color: #34d399; }
+#ai-tubular-root .tb-qtde-8  { background: #e0f2fe; color: #075985; border-color: #38bdf8; }
+#ai-tubular-root .tb-qtde-9  { background: #f3e8ff; color: #6b21a8; border-color: #c084fc; }
+#ai-tubular-root .tb-qtde-10 { background: #fce7f3; color: #9d174d; border-color: #f472b6; }
+#ai-tubular-root .tb-qtde-legend h4 { margin-bottom: .4rem; }
+#ai-tubular-root .tb-qtde-legend .tb-qtde { cursor: default; }
+#ai-tubular-root .statistical-row td {
+  font-size: .62rem !important; padding: 2px 4px !important; font-weight: 600;
+}
+#ai-tubular-root .statistical-most td { background: rgba(34, 197, 94, .12) !important; color: #059669 !important; }
+#ai-tubular-root .statistical-least td { background: rgba(239, 68, 68, .1) !important; color: #b91c1c !important; }
+#ai-tubular-root .statistical-avg td { background: rgba(59, 130, 246, .1) !important; color: #1d4ed8 !important; }
+
+#ai-tubular-root .tb-drop {
+  border: 2px dashed rgba(192, 139, 0, .45); border-radius: 10px;
+  padding: 1.1rem; text-align: center; background: rgba(255, 250, 240, .65);
+  transition: background .15s, border-color .15s, box-shadow .15s;
+  min-height: 4.5rem;
+}
+#ai-tubular-root .tb-drop.dragover {
+  background: rgba(255, 213, 79, .28); border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(192, 139, 0, .15);
+}
+#ai-tubular-root .tb-subnav .nav-link {
+  font-size: .8rem; font-weight: 700; padding: .4rem .85rem;
+  border-radius: 8px; color: #6c757d;
+}
+#ai-tubular-root .tb-subnav .nav-link.active {
+  background: var(--primary); color: #fff;
+}
+#ai-tubular-root .tb-manual-input {
+  width: 2.1rem; text-align: center; font-weight: 700; font-size: .75rem;
+  border: 1px solid #ced4da; border-radius: 4px; padding: .15rem;
+}
+#ai-tubular-root .tb-stats-panel {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: .5rem; margin-top: .75rem;
+}
+#ai-tubular-root .tb-stats-item {
+  background: #f8f9fa; border-radius: 8px; padding: .5rem .65rem;
+  border-left: 3px solid var(--primary);
+  font-size: .78rem;
+}
+#ai-tubular-root .tb-stats-item strong { display: block; color: var(--primary-xdark); }
+#ai-tubular-root .btn:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 2px;
+}
+
+@media print {
+  body * { visibility: hidden !important; }
+  #tab-tubular, #tab-tubular * { visibility: visible !important; }
+  #tab-tubular {
+    position: absolute; left: 0; top: 0; width: 100%;
+  }
+  #ai-tubular-root {
+    font-size: .65rem;
+  }
+  #ai-tubular-root .tb-wrap { max-height: none !important; overflow: visible !important; }
+  #ai-tubular-root .tb-subnav,
+  #ai-tubular-root #tbBtnLoad,
+  #ai-tubular-root #tbViewDraw,
+  #ai-tubular-root #tbViewAsc,
+  #ai-tubular-root #tbBtnMark,
+  #ai-tubular-root #tbBtnReset,
+  #ai-tubular-root #tbPageSize,
+  #ai-tubular-root #tbExportTXT,
+  #ai-tubular-root #tbExportXLSX,
+  #ai-tubular-root #tbExportHTML,
+  #ai-tubular-root #tbPrint,
+  #ai-tubular-root #tbPager,
+  #ai-tubular-root label { display: none !important; }
+}
+

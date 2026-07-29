@@ -1,0 +1,38 @@
+import os
+from flask import Flask
+from models.shared import db
+from routes.index_routes import index_bp
+from routes.analise_routes import analise_bp
+from routes.conferencia_routes import conferencia_bp
+from routes.modelos_routes import modelos_bp
+
+def create_app():
+    app = Flask(__name__)
+    app.config['SECRET_KEY'] = 'sniper_quina_secret'
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = (
+        'sqlite:///' + os.path.join(basedir, 'instance', 'quina.db')
+    )
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    db.init_app(app)
+    app.register_blueprint(index_bp)
+    app.register_blueprint(analise_bp,     url_prefix='/analise')
+    app.register_blueprint(conferencia_bp, url_prefix='/central-conferencias')
+    app.register_blueprint(modelos_bp,     url_prefix='/modelos')
+    with app.app_context():
+        import models.sorteio_quina
+        db.create_all()
+    return app
+
+if __name__ == '__main__':
+    app = create_app()
+    porta = int(os.getenv('PORT', 5155))
+    print("===========================================================")
+    print(f"[OK] Servidor Quina rodando na porta {porta}")
+    print(f"[URL] Acesse:      http://localhost:{porta}")
+    print(f"[URL] Análise:     http://localhost:{porta}/analise/")
+    print(f"[URL] Modelos:     http://localhost:{porta}/modelos/")
+    print(f"[URL] Conferência: http://localhost:{porta}/central-conferencias/")
+    print("===========================================================")
+    app.run(host='0.0.0.0', port=porta, debug=True)

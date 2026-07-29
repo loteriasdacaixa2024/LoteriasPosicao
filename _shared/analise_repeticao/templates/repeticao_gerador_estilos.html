@@ -1,0 +1,194 @@
+<style>
+    .page-hdr {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-xdark) 100%);
+        color: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    }
+    .dez-ball {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 34px; height: 34px; border-radius: 50%;
+        background: var(--accent); color: #1a0a00; font-weight: 800; font-size: .85rem; margin: 2px;
+    }
+    .dez-ball.rep { box-shadow: 0 0 0 3px #198754; }
+    .dez-ball.dim { opacity: .35; }
+    .how-box { background: #f8f5fc; border: 1px solid #e8dff5; border-radius: 10px; }
+    .badge-perm { background: #198754; }
+    .badge-neu { background: #6c757d; }
+    .badge-sai { background: #dc3545; }
+    .modo-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .modo-legenda-wrap {
+        flex: 1; min-width: 200px; min-height: 1.4em; position: relative;
+    }
+    .modo-legenda-inline {
+        font-size: .84rem; color: #5c5c5c; line-height: 1.4; margin: 0;
+        opacity: 0; transform: translateY(4px);
+        transition: opacity .22s ease, transform .22s ease;
+        position: absolute; left: 0; right: 0; top: 0;
+        pointer-events: none;
+    }
+    .modo-legenda-inline.ativo {
+        opacity: 1; transform: translateY(0); position: relative; pointer-events: auto;
+    }
+    .modo-legenda-inline em { font-style: normal; font-weight: 600; color: var(--primary); }
+    .exibicao-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .exibicao-legenda-inline { flex: 1; min-width: 160px; font-size: .84rem; color: #5c5c5c; }
+
+    .lista-apostas-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .75rem 1rem;
+        align-items: start;
+    }
+    @media (max-width: 1100px) {
+        .lista-apostas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+        .lista-apostas-grid { grid-template-columns: 1fr; }
+    }
+    .lista-apostas-grid > .alert-warning { grid-column: 1 / -1; }
+    .lista-apostas-grid.lista-apostas-hibrido {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    @media (max-width: 1100px) {
+        .lista-apostas-grid.lista-apostas-hibrido { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+        .lista-apostas-grid.lista-apostas-hibrido { grid-template-columns: 1fr; }
+    }
+    .volante-oficial-wrap {
+        background: #fff9e6; border: 2px solid #e8d48a; border-radius: 10px;
+        padding: .45rem; width: 100%;
+        max-width: 100%; margin: .35rem auto 0;
+        box-sizing: border-box;
+    }
+    .volante-conf-resumo { text-align: center; }
+    {% set volante_cols = 10 if cfg.key == 'lotofacil' else (cfg.grid_cols | default(10)) %}
+    .volante-oficial-grid {
+        display: grid; grid-template-columns: repeat({{ volante_cols }}, 1fr); gap: 3px;
+    }
+    .volante-oficial-grid.volante-oficial-stacked {
+        display: flex; flex-direction: column; gap: 3px;
+        grid-template-columns: unset;
+    }
+    .volante-oficial-grid.volante-oficial-unified {
+        display: grid;
+        grid-template-columns: repeat({{ volante_cols }}, 1fr);
+        gap: 3px;
+        align-items: stretch;
+    }
+    .volante-oficial-row {
+        display: grid; gap: 3px;
+    }
+    .volante-cell {
+        aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: {{ cfg.cell_font_rem | default(0.62) }}rem; border-radius: 3px;
+        border: 1px solid #c9c9c9; background: #fff; color: #333;
+        cursor: default; transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .volante-cell:hover { transform: scale(1.08); z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+    .volante-cell.na-aposta {
+        background: var(--accent);
+        border-color: var(--primary);
+        color: var(--on-accent);
+    }
+    .volante-cell.acerto { background: #198754; border-color: #146c43; color: #fff; }
+    .volante-conf-resumo {
+        font-size: .65rem; color: #444; margin-top: .35rem; line-height: 1.35;
+    }
+    .volante-legenda-mini {
+        font-size: .7rem; color: #666; margin-top: .35rem;
+        display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .5rem;
+    }
+    .volante-legenda-mini .legenda-cor {
+        display: inline-block; width: 12px; height: 12px; border-radius: 2px;
+        vertical-align: middle; flex-shrink: 0;
+    }
+    .volante-legenda-mini .legenda-nota {
+        display: inline; white-space: normal; line-height: 1.35;
+    }
+    .rep-mes-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        font-weight: 700; border-radius: 12px; padding: 5px 12px; font-size: .82rem;
+        color: #fff !important;
+    }
+    .rep-time-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: #0d6efd; color: #fff; font-weight: 700;
+        border-radius: 12px; padding: 5px 12px; font-size: .82rem;
+    }
+    .rep-time-icon { font-size: .9rem; }
+    .rep-trevo-nums {
+        display: inline-flex; gap: .35rem; align-items: center;
+        font-weight: 800; font-size: .95rem; color: #59359a;
+    }
+    .rep-trevo-nums::before,
+    .rep-trevo-nums::after { content: none; }
+    .rep-extra-acerto { box-shadow: 0 0 0 3px #198754; }
+    .rep-extra-fora { box-shadow: 0 0 0 3px #dc3545; opacity: .85; }
+    .aposta-item {
+        background: #fff;
+        width: 100%;
+        max-width: none;
+        padding: .5rem .6rem !important;
+        margin: 0;
+        box-sizing: border-box;
+    }
+    .aposta-card-inner {
+        display: flex; flex-direction: column; gap: .35rem;
+        align-items: center; text-align: center;
+    }
+    .aposta-num-label {
+        font-size: .72rem; font-weight: 700; color: var(--primary, #672666);
+        text-transform: uppercase; letter-spacing: .03em; margin-bottom: .15rem;
+    }
+    .aposta-linear { width: 100%; max-width: 100%; text-align: center; }
+    .aposta-linear .my-1 { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; }
+    .aposta-linear .dez-ball {
+        width: 21px; height: 21px; font-size: .6rem; margin: 0;
+    }
+
+    /* Super Sete — volante por coluna (7 × dígitos 0–9) */
+    .volante-colunas-wrap {
+        background: #fff9e6; border: 2px solid #e8d48a; border-radius: 10px;
+        padding: .5rem .35rem; width: 100%;
+        max-width: {{ cfg.volante_max_width | default(400) }}px; margin: .35rem auto 0;
+        box-sizing: border-box;
+    }
+    .volante-colunas-grid {
+        display: flex; gap: .35rem; justify-content: center; flex-wrap: nowrap;
+        overflow-x: auto; padding-bottom: .15rem;
+    }
+    .coluna-aposta-box { text-align: center; min-width: 34px; flex-shrink: 0; }
+    .coluna-aposta-box .col-lbl {
+        font-size: .65rem; font-weight: 800; color: var(--primary);
+        margin-bottom: .2rem; letter-spacing: .02em;
+    }
+    .dig-cell-aposta {
+        width: 26px; height: 26px; margin: 1px auto; display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: .68rem; border-radius: 3px;
+        border: 1px solid #ccc; background: #f5f5f5; color: #aaa;
+    }
+    .dig-cell-aposta.na-aposta { background: var(--accent); border-color: var(--primary); color: var(--on-accent); }
+    .dig-cell-aposta.acerto { background: #198754; border-color: #146c43; color: #fff; }
+    .lista-apostas-grid.layout-colunas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    @media (max-width: 1100px) {
+        .lista-apostas-grid.layout-colunas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .coluna-ball-wrap { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+    .coluna-ball-item { text-align: center; }
+    .coluna-ball-item .col-mini-lbl { font-size: .6rem; font-weight: 700; color: var(--primary); line-height: 1; }
+
+    /* Dígito repetido dentro da mesma aposta (Super Sete) */
+    .dez-ball.rep-intra,
+    .dig-cell-aposta.na-aposta.rep-intra {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+        color: #fff !important;
+        border-color: var(--primary-xdark) !important;
+        box-shadow: 0 0 0 2px var(--accent);
+    }
+    .coluna-ball-item.rep-intra-col .col-mini-lbl {
+        color: var(--primary-xdark);
+        font-weight: 800;
+    }
+</style>

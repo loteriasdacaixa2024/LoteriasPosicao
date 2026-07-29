@@ -1,0 +1,385 @@
+<style>
+    /*
+     * Layout compacto Lotofácil — Sniper + Comportamento (mesma fonte, mesma prioridade).
+     * Carregado DEPOIS de repeticao_gerador_estilos para vencer regras globais (.dez-ball 34px, grid 3 col).
+     */
+    #listaApostas.lista-apostas-grid,
+    #listaApostas.lista-apostas-grid.lista-apostas-hibrido {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: .55rem .75rem !important;
+        align-items: start;
+    }
+    @media (max-width: 900px) {
+        #listaApostas.lista-apostas-grid,
+        #listaApostas.lista-apostas-grid.lista-apostas-hibrido {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+    }
+    @media (max-width: 520px) {
+        #listaApostas.lista-apostas-grid,
+        #listaApostas.lista-apostas-grid.lista-apostas-hibrido {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    #listaApostas .aposta-item {
+        padding: .38rem .42rem !important;
+    }
+    #listaApostas .dez-ball,
+    #listaApostas .aposta-linear .dez-ball,
+    #listaApostas .my-1 .dez-ball {
+        width: 21px !important;
+        height: 21px !important;
+        font-size: .6rem !important;
+        margin: 0 !important;
+    }
+    #listaApostas .aposta-linear .my-1 {
+        gap: 1px;
+        justify-content: center;
+    }
+
+    /* Volante — largura total do card */
+    .volante-lf-compacto.volante-oficial-wrap {
+        width: 100%;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        padding: .35rem;
+    }
+    .volante-lf-compacto .volante-oficial-grid {
+        grid-template-columns: repeat(10, 1fr) !important;
+        min-width: 0;
+    }
+    .volante-lf-compacto .volante-cell {
+        min-width: 0;
+        font-size: .56rem;
+    }
+    .volante-lf-compacto .volante-oficial-grid {
+        gap: 2px;
+    }
+    #listaApostas .aposta-num-label,
+    #listaApostas .aposta-item-head .aposta-num-label {
+        font-size: .65rem;
+        margin-bottom: .05rem;
+    }
+    #listaApostas .aposta-conf-mini {
+        font-size: .58rem;
+        margin-top: .15rem;
+    }
+    #listaApostas .aposta-conf-mini.aposta-conf-premio {
+        font-size: .66rem;
+        padding: .18rem .35rem;
+    }
+    .volante-lf-compacto .volante-cell.na-aposta {
+        background: var(--primary, #672666);
+        border-color: var(--primary-dark, #4a1c4a);
+        color: #fff;
+    }
+    .aposta-item-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .35rem;
+        width: 100%;
+        margin-bottom: .1rem;
+    }
+    .aposta-info-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.35rem;
+        height: 1.35rem;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        color: #9aa0a6;
+        font-size: .82rem;
+        line-height: 1;
+        cursor: pointer;
+        flex-shrink: 0;
+        opacity: .75;
+        transition: color .15s, opacity .15s;
+    }
+    .aposta-info-btn:hover,
+    .aposta-info-btn[aria-expanded="true"] {
+        color: var(--primary, #672666);
+        opacity: 1;
+    }
+    .aposta-info-panel {
+        display: none;
+        width: 100%;
+        margin-top: .35rem;
+        padding: .45rem .55rem;
+        font-size: .72rem;
+        text-align: left;
+        background: #f8f5fc;
+        border: 1px solid #e8dff5;
+        border-radius: 8px;
+        color: #444;
+    }
+    .aposta-info-panel.aberto { display: block; }
+    .aposta-info-panel .crit-line::before { content: '✓ '; color: var(--primary); font-weight: 800; }
+    .aposta-conf-mini {
+        font-size: .65rem;
+        color: #555;
+        margin-top: .25rem;
+        line-height: 1.35;
+        text-align: center;
+    }
+    .aposta-conf-mini.aposta-conf-premio {
+        font-size: .78rem;
+        font-weight: 700;
+        color: var(--primary-dark, #4a1c4a);
+        background: linear-gradient(135deg, #f3ecf8 0%, #e8dff5 100%);
+        border: 1px solid var(--primary, #672666);
+        border-radius: 6px;
+        padding: .25rem .45rem;
+        margin-top: .35rem;
+    }
+    .aposta-conf-mini.aposta-conf-premio .conf-acertos {
+        color: #146c43;
+        font-size: .85rem;
+    }
+    .conf-txt-tabela th, .conf-txt-tabela td { vertical-align: middle; }
+</style>
+<script>
+(function () {
+    window.__bindApostaInfoToggle = function (root) {
+        (root || document).querySelectorAll('.aposta-info-btn').forEach(btn => {
+            if (btn.dataset.bound) return;
+            btn.dataset.bound = '1';
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const item = btn.closest('.aposta-item');
+                const panel = item?.querySelector('.aposta-info-panel');
+                if (!panel) return;
+                const aberto = panel.classList.toggle('aberto');
+                btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+            });
+        });
+    };
+
+    window.__htmlApostaHead = function (numero) {
+        const n = String(numero).padStart(2, '0');
+        return `<div class="aposta-item-head">
+            <div class="aposta-num-label fw-bold text-muted mb-0">Aposta ${n}</div>
+            <button type="button" class="aposta-info-btn" title="Detalhes da aposta" aria-label="Detalhes" aria-expanded="false">
+                <i class="fas fa-circle-info"></i>
+            </button>
+        </div>`;
+    };
+
+    window.__htmlCriteriosColapsavel = function (a, extrasHtml) {
+        const criterios = a.criterios || [];
+        const extras = extrasHtml || '';
+        if (!criterios.length && !extras) return '';
+        const lines = criterios.map(c => `<div class="crit-line">${c.texto}</div>`).join('');
+        return `<div class="aposta-info-panel">
+            ${extras}
+            ${criterios.length ? `<div class="fw-bold small mb-1 mt-1">Critérios utilizados</div>${lines}` : ''}
+        </div>`;
+    };
+
+    window.__htmlConfMini = function (conf) {
+        if (!conf) return '';
+        const premio = conf.acertos === 14 || conf.acertos === 15;
+        const cls = premio ? ' aposta-conf-premio' : '';
+        const acertosCls = premio ? ' conf-acertos' : ' text-success';
+        return `<div class="aposta-conf-mini${cls}">
+            <strong class="${acertosCls.trim()}">${conf.acertos}</strong> acertos ·
+            <strong>${conf.fora != null ? conf.fora : (conf.totalOficial - conf.acertos)}</strong> fora ·
+            ${conf.pct}%
+        </div>`;
+    };
+
+    window.__repPadDezena = function (n, cfg) {
+        const c = cfg || {};
+        const w = (c.dezena_min === 0 || c.digito_min === 0 || c.layout === 'colunas' || c.key === 'supersete') ? 1 : 2;
+        return String(n).padStart(w, '0');
+    };
+
+    window.__repCalcConferencia = function (dezenasAposta, concursoConf, sorteadas, cfg) {
+        if (!concursoConf || !concursoConf.dezenas) return null;
+        const c = cfg || {};
+        const oficialArr = concursoConf.dezenas || [];
+        const apostaArr = dezenasAposta || [];
+        let acertos;
+        if (c.layout === 'colunas') {
+            const n = Math.min(apostaArr.length, oficialArr.length);
+            acertos = 0;
+            for (let i = 0; i < n; i++) {
+                if (apostaArr[i] === oficialArr[i]) acertos += 1;
+            }
+        } else {
+            const aposta = new Set(apostaArr);
+            const oficial = new Set(oficialArr);
+            acertos = [...aposta].filter(d => oficial.has(d)).length;
+        }
+        const n = sorteadas || (c.layout === 'colunas' ? (c.colunas || 7) : 15);
+        const fora = Math.max(0, n - acertos);
+        const pct = Math.round((acertos / n) * 1000) / 10;
+        return { acertos, fora, pct, totalOficial: n };
+    };
+
+    window.__repHtmlVolante = function (dezenasAposta, jogoId, cfg, concursoConf) {
+        const c = cfg || {};
+        const idAttr = jogoId != null ? ` id="volante-jogo-${jogoId}"` : '';
+
+        // Super Sete (e layouts por coluna): 7 colunas × dígitos 0–9 — nunca grade 01–25
+        if (c.layout === 'colunas' || c.key === 'supersete') {
+            const digMin = c.digito_min != null ? c.digito_min : (c.dezena_min != null ? c.dezena_min : 0);
+            const digMax = c.digito_max != null ? c.digito_max : (c.dezena_max != null ? c.dezena_max : 9);
+            const nCol = c.colunas || 7;
+            const cols = dezenasAposta || [];
+            const oficial = concursoConf && concursoConf.dezenas ? concursoConf.dezenas : null;
+            const cnt = {};
+            cols.forEach((d) => { if (d != null) cnt[d] = (cnt[d] || 0) + 1; });
+            const boxes = [];
+            for (let col = 0; col < nCol; col++) {
+                const valAposta = cols[col];
+                const valOf = oficial ? oficial[col] : null;
+                let digits = '';
+                for (let d = digMin; d <= digMax; d++) {
+                    let cls = 'dig-cell-aposta';
+                    const naAposta = valAposta === d;
+                    const acertou = naAposta && valOf != null && valOf === d;
+                    const intraRep = naAposta && cnt[d] > 1;
+                    if (acertou) cls += ' acerto';
+                    else if (naAposta) cls += intraRep ? ' na-aposta rep-intra' : ' na-aposta';
+                    digits += `<div class="${cls}">${d}</div>`;
+                }
+                boxes.push(`<div class="coluna-aposta-box"><div class="col-lbl">C${col + 1}</div>${digits}</div>`);
+            }
+            const conf = window.__repCalcConferencia(dezenasAposta, concursoConf, c.sorteadas || nCol, c);
+            const confHtml = window.__htmlConfMini ? window.__htmlConfMini(conf) : '';
+            return `<div class="volante-colunas-wrap"${idAttr}>
+                <div class="volante-colunas-grid">${boxes.join('')}</div>${confHtml}
+            </div>`;
+        }
+
+        const dezenaMin = c.dezena_min ?? 1;
+        const dezenaMax = c.dezena_max ?? 25;
+        const apostaSet = new Set(dezenasAposta);
+        const oficial = concursoConf && concursoConf.dezenas ? new Set(concursoConf.dezenas) : null;
+        const cells = [];
+        for (let d = dezenaMin; d <= dezenaMax; d++) {
+            let cls = 'volante-cell';
+            const naAposta = apostaSet.has(d);
+            const acertou = oficial && naAposta && oficial.has(d);
+            if (acertou) cls += ' acerto';
+            else if (naAposta) cls += ' na-aposta';
+            cells.push(`<div class="${cls}">${window.__repPadDezena(d, c)}</div>`);
+        }
+        const conf = window.__repCalcConferencia(dezenasAposta, concursoConf, c.sorteadas || 15, c);
+        const confHtml = window.__htmlConfMini ? window.__htmlConfMini(conf) : '';
+        const compactCls = (c.key === 'lotofacil' || c.dezena_max === 25) ? ' volante-lf-compacto' : '';
+        return `<div class="volante-oficial-wrap${compactCls}"${idAttr}>
+            <div class="volante-oficial-grid">${cells.join('')}</div>${confHtml}
+        </div>`;
+    };
+
+    window.__bindConferirTxtHistorico = function () {
+        const btnToggle = document.getElementById('btnToggleConfTxt');
+        const painel = document.getElementById('painelConfTxt');
+        const btnExec = document.getElementById('btnConfTxtExecutar');
+        const inp = document.getElementById('inpConfTxt');
+        const selMin = document.getElementById('selConfTxtMin');
+        const out = document.getElementById('confTxtResultado');
+        if (!btnToggle || !painel || !btnExec || !out) return;
+
+        btnToggle.addEventListener('click', () => {
+            const aberto = painel.classList.toggle('d-none');
+            btnToggle.setAttribute('aria-expanded', aberto ? 'false' : 'true');
+        });
+
+        btnExec.addEventListener('click', async () => {
+            const file = inp?.files?.[0];
+            if (!file) {
+                out.innerHTML = '<div class="alert alert-warning py-1 mb-0">Selecione um arquivo .txt</div>';
+                return;
+            }
+            out.innerHTML = '<span class="text-muted"><i class="fas fa-spinner fa-spin"></i> Conferindo…</span>';
+            try {
+                const texto = await file.text();
+                const minAc = parseInt(selMin?.value || '11', 10);
+                const urls = [
+                    '/central-conferencias/api/conferir-txt-historico',
+                    '/geradores-elite/api/conferir-txt-historico',
+                ];
+                let r = null;
+                let lastErr = null;
+                for (const url of urls) {
+                    try {
+                        const resp = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ texto, min_acertos: minAc }),
+                        });
+                        const ct = resp.headers.get('content-type') || '';
+                        if (!ct.includes('application/json')) {
+                            lastErr = new Error(`Resposta inválida (${resp.status}) em ${url}. Reinicie o servidor.`);
+                            continue;
+                        }
+                        r = resp;
+                        break;
+                    } catch (e) {
+                        lastErr = e;
+                    }
+                }
+                if (!r) throw lastErr || new Error('API indisponível. Reinicie o servidor.');
+                const data = await r.json();
+                if (!data.sucesso) {
+                    const erros = (data.erros || []).join('<br>');
+                    out.innerHTML = `<div class="alert alert-danger py-1 mb-0">${data.mensagem || 'Erro'}${erros ? '<br>' + erros : ''}</div>`;
+                    return;
+                }
+                const rows = (data.apostas || []).map(a => {
+                    const m = a.melhor;
+                    const melhorTxt = m
+                        ? `<strong class="text-success">${m.acertos}</strong> ac. (#${m.concurso} ${m.data || ''})`
+                        : '<span class="text-muted">—</span>';
+                    const r15 = a.resumo?.['15'] || 0;
+                    const r14 = a.resumo?.['14'] || 0;
+                    const dez = (a.dezenas || []).map(n => String(n).padStart(2, '0')).join(' ');
+                    const premioCls = r15 > 0 ? 'table-success' : (r14 > 0 ? 'table-warning' : '');
+                    return `<tr class="${premioCls}">
+                        <td>${String(a.numero).padStart(2, '0')}</td>
+                        <td class="text-start" style="font-size:.68rem">${dez}</td>
+                        <td>${r15}</td><td>${r14}</td><td>${a.total_premios || 0}</td>
+                        <td>${melhorTxt}</td>
+                    </tr>`;
+                }).join('');
+                out.innerHTML = `<div class="alert alert-light border py-1 mb-2">
+                    <strong>${data.total_apostas}</strong> apostas × <strong>${data.total_sorteios}</strong> concursos
+                    (mín. <strong>${data.min_acertos}</strong> acertos)
+                </div>
+                <div class="table-responsive" style="max-height:280px;overflow-y:auto">
+                    <table class="table table-sm table-bordered mb-0 text-center conf-txt-tabela">
+                        <thead class="table-light sticky-top">
+                            <tr><th>#</th><th>Dezenas</th><th>15</th><th>14</th><th>Total</th><th>Melhor</th></tr>
+                        </thead>
+                        <tbody>${rows || '<tr><td colspan="6" class="text-muted">Nenhum resultado no filtro.</td></tr>'}</tbody>
+                    </table>
+                </div>`;
+            } catch (err) {
+                out.innerHTML = `<div class="alert alert-danger py-1 mb-0">Falha: ${err.message || err}</div>`;
+            }
+        });
+    };
+
+    window.__repLegendaExibicao = function (cfg) {
+        if (cfg && cfg.layout === 'colunas') {
+            return {
+                numeros: 'Somente a lista por coluna (C1–C7).',
+                volante: 'Somente o volante por coluna (dígitos 0–9).',
+                hibrido: 'Lista por coluna e volante por coluna juntos.',
+            };
+        }
+        return {
+            numeros: 'Somente a lista linear em bolinhas.',
+            volante: 'Somente a grade do volante.',
+            hibrido: 'Lista em bolinhas e grade do volante juntas.',
+        };
+    };
+})();
+</script>

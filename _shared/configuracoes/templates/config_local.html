@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .cfg-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark, var(--primary-dark)));
+        border-radius: 12px; padding: 1.25rem 1.5rem; color: #fff; margin-bottom: 1.25rem;
+    }
+    .cfg-card { background: #fff; border-radius: 10px; padding: 1.25rem; border: 1px solid #eaeaea; margin-bottom: 1rem; }
+    .cfg-val { font-size: 1.35rem; font-weight: 800; color: var(--primary, #333); }
+    .cfg-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .5px; color: #888; font-weight: 700; }
+    .cfg-ro { background: #f8f9fa; }
+    .cfg-panel-main { background: #fff; border-radius: 12px; border: 1px solid #eaeaea; padding: 1.25rem; }
+</style>
+
+<div class="cfg-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+        <h2 class="mb-1 h4 fw-bold"><i class="fas fa-cog me-2"></i>Configurações — {{ perfil.nome }}</h2>
+        <p class="mb-0 small opacity-75">Informações oficiais, bolão, preços e dados ao vivo da Caixa.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-light btn-sm fw-bold" id="btnRefreshCaixa">
+            <i class="fas fa-sync me-1"></i> Atualizar API
+        </button>
+        <a href="{{ perfil.link_caixa }}" target="_blank" rel="noopener" class="btn btn-outline-light btn-sm fw-bold">
+            <i class="fas fa-external-link-alt me-1"></i> Site Caixa
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-info py-2 small">
+    Preços editáveis no <a href="{{ central_url }}" target="_blank" class="fw-bold">Painel Central de Configurações</a>.
+    Demais dados seguem catálogo oficial e API Caixa.
+</div>
+
+<div class="cfg-panel-main">
+    {% with perfil=perfil, theme='light', compact=false %}
+    {% include '_config_detalhe_sections.html' %}
+    {% endwith %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('btnRefreshCaixa')?.addEventListener('click', async () => {
+    const r = await fetch('/configuracoes/api/atualizar-caixa', { method: 'POST' });
+    const d = await r.json();
+    if (d.status === 'success') location.reload();
+});
+</script>
+{% endblock %}

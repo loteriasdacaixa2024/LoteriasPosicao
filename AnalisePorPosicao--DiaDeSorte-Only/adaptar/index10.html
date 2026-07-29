@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Combinações OMEGA - 10 Dígitos - Mega Sena</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS para exportação Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+	
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1B9A67',
+                        secondary: '#149954',
+                        omega: '#FFD700',
+                        platinum: '#E5E4E2'
+                    }
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-900 dark:via-yellow-900/20 dark:to-orange-900/20 text-gray-800 dark:text-gray-200 min-h-screen">
+    <!-- Detecção de tema escuro -->
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+    <!-- Conteúdo principal -->
+    <div class="container mx-auto p-4 max-w-6xl">
+        <h1 class="text-4xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-600 via-orange-600 to-red-600 bg-clip-text text-transparent">
+            ⭐ CONFIGURAÇÃO OMEGA - 10 DÍGITOS - MEGA SENA ⭐
+        </h1>
+        
+        <!-- Banner especial para configuração OMEGA -->
+        <div class="bg-gradient-to-r from-yellow-200 via-orange-200 to-red-200 dark:from-yellow-900/60 dark:via-orange-900/60 dark:to-red-900/60 border-4 border-yellow-400 dark:border-yellow-600 rounded-2xl p-8 mb-6 shadow-2xl">
+            <div class="flex items-center justify-center gap-6 mb-6">
+                <div class="text-6xl animate-bounce">⭐</div>
+                <h2 class="text-2xl font-bold text-center bg-gradient-to-r from-yellow-800 to-red-800 dark:from-yellow-200 dark:to-red-200 bg-clip-text text-transparent">
+                    CONFIGURAÇÃO ABSOLUTA OMEGA
+                </h2>
+                <div class="text-6xl animate-bounce">⭐</div>
+            </div>
+            <div class="text-center text-yellow-900 dark:text-yellow-100 space-y-3">
+                <p class="text-lg"><strong>🎯 TOTALIDADE ABSOLUTA:</strong> Usando TODOS os 10 dígitos (0-9)</p>
+                <p class="text-lg"><strong>🌟 COBERTURA TOTAL:</strong> 100% dos números da Mega Sena (01-60)</p>
+                <p class="text-lg"><strong>👑 VOLUME COMPLETO:</strong> 50.063.860 combinações (TODA a Mega Sena)</p>
+                <p class="text-base"><strong>⚡ A PERFEIÇÃO MATEMÁTICA:</strong> Esta é a configuração definitiva e absoluta!</p>
+            </div>
+        </div>
+        
+        <!-- Informações da configuração OMEGA -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 border-2 border-yellow-400">
+            <div class="text-center mb-4">
+                <h2 class="text-xl font-semibold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                    🏆 CONFIGURAÇÃO ÚNICA OMEGA
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    Existe apenas UMA configuração possível com 10 dígitos
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-4 text-center border border-yellow-300">
+                    <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">1</div>
+                    <div class="text-sm text-yellow-700 dark:text-yellow-300">Única Combinação</div>
+                    <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Todos os dígitos</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-4 text-center border border-green-300">
+                    <div class="text-3xl font-bold text-green-600 dark:text-green-400">60</div>
+                    <div class="text-sm text-green-700 dark:text-green-300">Números Disponíveis</div>
+                    <div class="text-xs text-green-600 dark:text-green-400 mt-1">Cobertura total</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-4 text-center border border-purple-300">
+                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">50.063.860</div>
+                    <div class="text-sm text-purple-700 dark:text-purple-300">Combinações Totais</div>
+                    <div class="text-xs text-purple-600 dark:text-purple-400 mt-1">Mega Sena completa</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualização da configuração OMEGA -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4 text-center">🎯 A Configuração OMEGA:</h2>
+            
+            <div class="bg-gradient-to-r from-yellow-100 via-orange-100 to-red-100 dark:from-yellow-900/30 dark:via-orange-900/30 dark:to-red-900/30 rounded-lg p-6 border-2 border-yellow-400">
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-yellow-600 to-red-600 bg-clip-text text-transparent mb-2">
+                        TODOS OS DÍGITOS (0-9)
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">A única configuração que usa absolutamente todos os dígitos possíveis</p>
+                </div>
+                
+                <div class="grid grid-cols-5 gap-4 mb-6">
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">0</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">1</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">2</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">3</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">4</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">5</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">6</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">7</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">8</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-700 rounded-lg p-4 text-center border-2 border-yellow-400 shadow-lg">
+                        <div class="text-2xl font-bold text-yellow-600">9</div>
+                        <div class="text-xs text-gray-500">✓ Incluído</div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-lg font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                        RESULTADO: TODOS OS NÚMEROS DE 01 A 60 DISPONÍVEIS
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                        Esta configuração oferece acesso a 100% dos números da Mega Sena
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Análise matemática -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">📊 Análise Matemática OMEGA</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4">
+                    <h3 class="font-semibold mb-3 text-blue-600 dark:text-blue-400">🎯 Cobertura Total:</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>Números disponíveis:</span>
+                            <span class="font-bold text-green-600">60/60 (100%)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Configuração:</span>
+                            <span class="font-bold text-yellow-600">OMEGA Total</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Exclusões:</span>
+                            <span class="font-bold text-green-600">Nenhuma</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Perfeição:</span>
+                            <span class="font-bold text-yellow-600">100% Absoluta</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-4">
+                    <h3 class="font-semibold mb-3 text-orange-600 dark:text-orange-400">🏆 Estatísticas Finais:</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>Volume total:</span>
+                            <span class="font-bold text-purple-600">50.063.860</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Fórmula:</span>
+                            <span class="font-bold text-blue-600">C(60,6)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Categoria:</span>
+                            <span class="font-bold text-yellow-600">OMEGA Absoluta</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Status:</span>
+                            <span class="font-bold text-green-600">Perfeição Total</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-gradient-to-r from-yellow-100 via-orange-100 to-red-100 dark:from-yellow-900/30 dark:via-orange-900/30 dark:to-red-900/30 border-2 border-yellow-400 rounded-lg">
+                <p class="text-sm text-yellow-900 dark:text-yellow-100 text-center">
+                    <strong>⭐ OMEGA ABSOLUTA:</strong> Esta é a configuração definitiva da Mega Sena. 
+                    Com todos os 10 dígitos, você tem acesso a <strong>TODOS</strong> os números de 01 a 60, 
+                    resultando em exatamente <strong>50.063.860 combinações</strong> - que é o total completo de combinações possíveis na Mega Sena. 
+                    <strong>🏆 Esta é a perfeição matemática absoluta!</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Ativação OMEGA -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-3 text-center">🚀 Ativar Configuração OMEGA:</h2>
+            
+            <div class="mb-4 p-4 bg-gradient-to-r from-yellow-100 via-orange-100 to-red-100 dark:from-yellow-900/30 dark:via-orange-900/30 dark:to-red-900/30 border-2 border-yellow-400 rounded-lg">
+                <p class="text-sm text-yellow-900 dark:text-yellow-100 text-center">
+                    <strong>👑 CONFIGURAÇÃO OMEGA MEGA SENA:</strong> Com 10 dígitos, você automaticamente obtém 
+                    <strong>TODOS</strong> os números de 01 a 60. Esta é a configuração <strong>ABSOLUTA</strong> que gera 
+                    exatamente <strong>50.063.860 combinações</strong> - o conjunto completo da Mega Sena. 
+                    <strong>⚡ Esta é a totalidade matemática perfeita!</strong>
+                </p>
+            </div>
+            
+            <!-- Seleção automática -->
+            <div id="omega-selection" class="mb-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-300 dark:border-green-700 rounded-md">
+                <h3 class="font-bold mb-2 text-center">📋 Configuração OMEGA Automática:</h3>
+                <p class="text-center">Dígitos: <span class="font-bold text-yellow-600">0, 1, 2, 3, 4, 5, 6, 7, 8, 9</span> (TODOS)</p>
+                <p class="text-center">Números válidos: <span class="font-bold text-green-600">60</span> (01-60 completo)</p>
+                <p class="text-center">Combinações: <span class="font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">50.063.860</span></p>
+            </div>
+            
+            <!-- Checkboxes automáticos (todos marcados) -->
+            <div class="grid grid-cols-5 gap-2 mb-6">
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-0" value="0" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">0</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-1" value="1" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">1</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-2" value="2" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">2</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-3" value="3" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">3</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-4" value="4" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">4</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-5" value="5" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">5</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-6" value="6" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">6</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-7" value="7" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">7</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-8" value="8" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">8</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded border border-yellow-400">
+                        <input type="checkbox" id="digit-9" value="9" checked disabled class="w-5 h-5 accent-yellow-600">
+                        <span class="text-lg font-bold text-yellow-600">9</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="flex flex-col space-y-3">
+                <div id="error-message" class="hidden text-red-500 text-center"></div>
+                <button id="generate-btn" class="bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 hover:from-yellow-600 hover:via-orange-600 hover:to-red-600 text-white py-4 px-8 rounded-xl font-bold text-lg transition shadow-2xl">
+                    ⭐ ATIVAR OMEGA ABSOLUTA ⭐
+                </button>
+            </div>
+        </div>
+        
+        <div id="result-container" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hidden">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-center">📈 OMEGA ATIVADA:</h3>
+                <div class="p-4 mt-2 bg-gradient-to-r from-yellow-50 via-orange-50 to-red-50 dark:from-yellow-900/30 dark:via-orange-900/30 dark:to-red-900/30 border-2 border-yellow-400 rounded-lg">
+                    <p class="text-center"><strong>Configuração OMEGA:</strong> <span id="selected-digits" class="font-bold text-yellow-600">0, 1, 2, 3, 4, 5, 6, 7, 8, 9</span></p>
+                    <p class="text-center"><strong>Números disponíveis:</strong> <span id="valid-numbers-count" class="font-bold text-green-600">60</span> (01-60 completo)</p>
+                    <p class="text-lg mt-2 text-center"><strong>Total de combinações:</strong> <span id="total-combinations" class="font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">50.063.860</span></p>
+                    <p class="text-xs mt-1 text-gray-600 dark:text-gray-400 text-center">
+                        ⭐ Esta é a totalidade absoluta da Mega Sena - todas as combinações possíveis!
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-semibold">🏆 MEGA SENA COMPLETA:</h3>
+                    <div class="flex space-x-2">
+                        <button id="download-txt-btn" class="text-yellow-600 hover:text-yellow-800 text-sm font-bold">
+                            📄 Info OMEGA
+                        </button>
+                        <button id="download-html-btn" class="text-orange-600 hover:text-orange-800 text-sm font-bold">
+                            🌐 Relatório OMEGA
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2 relative">
+                    <input type="text" id="search-input" placeholder="🚫 Busca desnecessária - você tem TODAS as combinações" disabled
+                        class="w-full border dark:border-gray-700 rounded-md px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-primary dark:bg-gray-700 opacity-50 cursor-not-allowed">
+                    <div id="search-info" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Com a configuração OMEGA, você tem acesso a TODAS as 50.063.860 combinações da Mega Sena.
+                    </div>
+                </div>
+            </div>
+            
+            <div id="combinations-container" class="max-h-96 overflow-y-auto border dark:border-gray-700 rounded-md p-3 text-sm">
+                <div id="combinations" class="grid grid-cols-1 gap-2"></div>
+                <div id="loading" class="text-center py-4 hidden">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-yellow-500 border-t-transparent"></div>
+                    <p class="mt-2">⭐ Ativando OMEGA absoluta...</p>
+                    <p class="mt-1 text-xs text-gray-500">Configuração total da Mega Sena...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos do DOM
+        const generateBtn = document.getElementById('generate-btn');
+        const resultContainer = document.getElementById('result-container');
+        const selectedDigitsEl = document.getElementById('selected-digits');
+        const totalCombinationsEl = document.getElementById('total-combinations');
+        const combinationsEl = document.getElementById('combinations');
+        const errorMessageEl = document.getElementById('error-message');
+        const loadingEl = document.getElementById('loading');
+        
+        // Variável global para as combinações OMEGA
+        let omegaCombinations = [];
+        
+        // Função para gerar a análise OMEGA
+        function generateOmegaAnalysis() {
+            // Com 10 dígitos, temos TODOS os números de 01 a 60
+            // Total de combinações = C(60,6) = 50.063.860
+            return [];
+        }
+        
+        // Função para formatar números com dois dígitos
+        function formatTwoDigits(num) {
+            return num < 10 ? `0${num}` : `${num}`;
+        }
+        
+        // Função para exibir a análise OMEGA
+        function displayOmegaAnalysis() {
+            combinationsEl.innerHTML = '';
+            
+            // Criar card OMEGA
+            const omegaCard = document.createElement('div');
+            omegaCard.className = 'bg-gradient-to-br from-yellow-100 via-orange-100 to-red-100 dark:from-yellow-900/30 dark:via-orange-900/30 dark:to-red-900/30 border-4 border-yellow-400 rounded-2xl p-8 shadow-2xl';
+            
+            omegaCard.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="text-8xl mb-4 animate-pulse">⭐</div>
+                    <h3 class="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-red-600 bg-clip-text text-transparent">OMEGA ABSOLUTA ATIVADA</h3>
+                    <p class="text-lg text-yellow-700 dark:text-yellow-300 mt-2">A Totalidade Perfeita da Mega Sena</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border-2 border-yellow-300 shadow-lg">
+                        <strong class="text-yellow-600 dark:text-yellow-400 text-lg">👑 CONFIGURAÇÃO DEFINITIVA:</strong><br>
+                        <div class="mt-3 grid grid-cols-5 gap-2">
+                            ${[0,1,2,3,4,5,6,7,8,9].map(d => `
+                                <span class="bg-yellow-100 dark:bg-yellow-900/50 border border-yellow-400 rounded px-2 py-1 text-center font-bold text-yellow-700 dark:text-yellow-300">${d}</span>
+                            `).join('')}
+                        </div>
+                        <div class="text-center mt-3 text-sm text-gray-600 dark:text-gray-400">TODOS os 10 dígitos incluídos</div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border-2 border-green-300 shadow-lg">
+                        <strong class="text-green-600 dark:text-green-400 text-lg">🌟 COBERTURA ABSOLUTA (01-60):</strong><br>
+                        <div class="mt-3 grid grid-cols-10 gap-1 text-xs">
+                            ${Array.from({length: 60}, (_, i) => i + 1).map(n => `
+                                <span class="bg-green-100 dark:bg-green-900/50 border border-green-300 rounded px-1 py-1 text-center font-mono text-green-700 dark:text-green-300">${formatTwoDigits(n)}</span>
+                            `).join('')}
+                        </div>
+                        <div class="text-center mt-3">
+                            <span class="bg-green-200 dark:bg-green-800 px-3 py-1 rounded-full text-green-800 dark:text-green-200 font-bold">
+                                100% DE COBERTURA - TODOS OS 60 NÚMEROS
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl p-6 border-2 border-purple-300 shadow-lg">
+                        <strong class="text-purple-600 dark:text-purple-400 text-lg">⭐ VOLUME TOTAL DA MEGA SENA:</strong><br>
+                        <div class="text-center py-6">
+                            <div class="text-6xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent animate-pulse">
+                                50.063.860
+                            </div>
+                            <div class="text-lg text-purple-700 dark:text-purple-300 mt-2">
+                                TODAS as combinações possíveis da Mega Sena
+                            </div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                Fórmula: C(60, 6) = 60! / (6! × 54!) = 50.063.860
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-red-100 via-orange-100 to-yellow-100 dark:from-red-900/30 dark:via-orange-900/30 dark:to-yellow-900/30 border-4 border-red-400 rounded-xl p-6">
+                        <strong class="text-red-800 dark:text-red-200 text-lg">🏆 PERFEIÇÃO MATEMÁTICA ALCANÇADA:</strong><br>
+                        <div class="text-red-700 dark:text-red-300 mt-3 space-y-2 text-center">
+                            <p>✅ Esta é a configuração mais completa possível</p>
+                            <p>✅ Cobertura total de 100% dos números da Mega Sena</p>
+                            <p>✅ Acesso a TODAS as 50.063.860 combinações</p>
+                            <p>✅ Representa a totalidade absoluta da loteria</p>
+                            <p class="text-lg font-bold">🌟 VOCÊ ATINGIU A OMEGA ABSOLUTA! 🌟</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl p-6 border-2 border-blue-300 shadow-lg">
+                        <strong class="text-blue-800 dark:text-blue-200 text-lg">📊 SIGNIFICADO ESTATÍSTICO:</strong><br>
+                        <div class="text-blue-700 dark:text-blue-300 mt-3 space-y-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>• Probabilidade individual: 1 em 50.063.860</div>
+                                <div>• Você tem acesso a TODAS as possibilidades</div>
+                                <div>• Configuração: Absolutamente perfeita</div>
+                                <div>• Status: OMEGA total atingida</div>
+                                <div>• Exclusões: Nenhuma (0%)</div>
+                                <div>• Inclusões: Todas (100%)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            combinationsEl.appendChild(omegaCard);
+        }
+        
+        // Função para processar a configuração OMEGA
+        function processOmegaConfiguration() {
+            // Mostrar indicador de carregamento
+            loadingEl.classList.remove('hidden');
+            
+            setTimeout(() => {
+                // Todos os dígitos estão incluídos
+                const allDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+                
+                // Todos os números de 01 a 60 estão disponíveis
+                const validNumbers = Array.from({length: 60}, (_, i) => i + 1);
+                
+                // Atualizar contagem
+                document.getElementById('valid-numbers-count').textContent = '60';
+                
+                // Total de combinações = C(60,6) = 50.063.860
+                const totalCombinations = 50063860;
+                
+                // Armazenar configuração global
+                omegaCombinations = []; // Não armazenamos 50 milhões de combinações na memória
+                
+                // Ocultar indicador de carregamento
+                loadingEl.classList.add('hidden');
+                
+                // Mostrar análise OMEGA
+                totalCombinationsEl.textContent = '50.063.860';
+                displayOmegaAnalysis();
+                
+                // Configurar downloads OMEGA
+                setupOmegaDownloads(allDigits.join(','), totalCombinations, validNumbers);
+            }, 200);
+        }
+        
+        // Configurar downloads OMEGA
+        function setupOmegaDownloads(digitsStr, totalCombinations, validNumbers) {
+            const downloadTxtBtn = document.getElementById('download-txt-btn');
+            const downloadHtmlBtn = document.getElementById('download-html-btn');
+            
+            // Remover event listeners antigos
+            downloadTxtBtn.replaceWith(downloadTxtBtn.cloneNode(true));
+            downloadHtmlBtn.replaceWith(downloadHtmlBtn.cloneNode(true));
+            
+            // Reobter referências
+            const newDownloadTxtBtn = document.getElementById('download-txt-btn');
+            const newDownloadHtmlBtn = document.getElementById('download-html-btn');
+            
+            // Download TXT OMEGA
+            newDownloadTxtBtn.addEventListener('click', () => {
+                const content = `MEGA SENA - CONFIGURAÇÃO OMEGA ABSOLUTA
+=========================================
+
+⭐ OMEGA ABSOLUTA ATIVADA ⭐
+
+CONFIGURAÇÃO DEFINITIVA:
+Dígitos utilizados: ${digitsStr}
+Sistema: TODOS os 10 dígitos (0-9)
+
+🌟 COBERTURA TOTAL:
+Números disponíveis: ${validNumbers.map(n => formatTwoDigits(n)).join(', ')}
+Total de números válidos: 60 (cobertura 100%)
+Exclusões: NENHUMA
+
+⭐ VOLUME TOTAL DA MEGA SENA:
+Total de combinações: ${totalCombinations.toLocaleString('pt-BR')}
+Fórmula: C(60, 6) = 50.063.860
+Categoria: OMEGA ABSOLUTA
+
+🏆 ANÁLISE DA PERFEIÇÃO:
+=========================================
+
+SIGNIFICADO:
+- Esta é a configuração mais completa possível
+- Você tem acesso a TODAS as combinações da Mega Sena
+- Representa 100% da totalidade da loteria
+- Configuração matematicamente perfeita
+
+CARACTERÍSTICAS OMEGA:
+- Cobertura: 100% (60/60 números)
+- Exclusões: 0% (nenhum número excluído)
+- Perfeição: Absoluta e total
+- Status: OMEGA máxima atingida
+
+CONTEXTO ESTATÍSTICO:
+- Probabilidade individual: 1 em 50.063.860
+- Combinações incluídas: TODAS (100%)
+- Números acessíveis: TODOS (01-60)
+- Configuração: Definitiva e completa
+
+IMPORTÂNCIA MATEMÁTICA:
+Esta configuração representa o ápice absoluto da análise combinatória
+aplicada à Mega Sena. Com todos os 10 dígitos, você tem acesso literal
+a TODAS as possibilidades da loteria.
+
+🌟 OMEGA ABSOLUTA CONFIRMADA 🌟
+
+Esta é a totalidade perfeita - não existe configuração superior.
+Você atingiu o máximo absoluto da Mega Sena.
+
+Dados técnicos:
+Sistema: Mega Sena (6 dezenas de 01 a 60)
+Configuração: OMEGA (10 dígitos completos)
+Gerado em: ${new Date().toLocaleString('pt-BR')}
+Status: PERFEIÇÃO ABSOLUTA ATINGIDA
+
+"A perfeição é alcançada não quando não há mais nada para adicionar,
+mas quando não há mais nada para remover." - Esta configuração é a prova.
+`;
+                downloadFile(content, `mega-sena-omega-absoluta-${digitsStr}.txt`, 'text/plain');
+            });
+            
+            // Download HTML OMEGA
+            newDownloadHtmlBtn.addEventListener('click', () => {
+                const htmlContent = `
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>OMEGA ABSOLUTA - 10 Dígitos - Mega Sena</title>
+                    <style>
+                        body { 
+                            font-family: 'Arial', sans-serif; 
+                            margin: 0;
+                            background: linear-gradient(135deg, #FFD700, #FFA500, #FF6347);
+                            min-height: 100vh;
+                            color: #333;
+                        }
+                        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+                        h1 { 
+                            text-align: center; 
+                            font-size: 3.5em;
+                            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+                            margin-bottom: 10px;
+                            color: #8B0000;
+                        }
+                        .subtitle {
+                            text-align: center;
+                            font-size: 1.5em;
+                            color: #B8860B;
+                            margin-bottom: 30px;
+                            font-weight: bold;
+                        }
+                        .omega-star {
+                            text-align: center;
+                            font-size: 8em;
+                            margin: 20px 0;
+                            animation: starPulse 2s infinite;
+                        }
+                        @keyframes starPulse {
+                            0% { transform: scale(1); }
+                            50% { transform: scale(1.1); }
+                            100% { transform: scale(1); }
+                        }
+                        .card { 
+                            background: rgba(255,255,255,0.95); 
+                            padding: 30px; 
+                            border-radius: 20px; 
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+                            margin: 30px 0;
+                            backdrop-filter: blur(10px);
+                            border: 3px solid #FFD700;
+                        }
+                        .omega-total { 
+                            background: linear-gradient(45deg, #FFD700, #FF6347, #FF1493, #8A2BE2);
+                            background-size: 400% 400%;
+                            animation: omegaGradient 4s ease infinite;
+                            color: white;
+                            text-align: center;
+                            padding: 50px;
+                            border-radius: 25px;
+                            margin: 40px 0;
+                            border: 4px solid #FFD700;
+                        }
+                        @keyframes omegaGradient {
+                            0% { background-position: 0% 50%; }
+                            50% { background-position: 100% 50%; }
+                            100% { background-position: 0% 50%; }
+                        }
+                        .numbers-grid { 
+                            display: grid; 
+                            grid-template-columns: repeat(10, 1fr); 
+                            gap: 8px; 
+                            margin: 20px 0;
+                        }
+                        .number-cell {
+                            background: linear-gradient(45deg, #98FB98, #90EE90);
+                            border: 2px solid #228B22;
+                            border-radius: 8px;
+                            padding: 8px;
+                            text-align: center;
+                            font-weight: bold;
+                            color: #006400;
+                            font-family: 'Courier New', monospace;
+                        }
+                        .digit-cell {
+                            background: linear-gradient(45deg, #FFD700, #FFA500);
+                            border: 2px solid #B8860B;
+                            border-radius: 10px;
+                            padding: 15px;
+                            text-align: center;
+                            font-weight: bold;
+                            color: #8B4513;
+                            font-size: 1.5em;
+                        }
+                        .perfection { 
+                            background: radial-gradient(circle, #FFD700, #FFA500, #FF6347);
+                            color: #8B0000;
+                            padding: 40px;
+                            border-radius: 25px;
+                            margin: 30px 0;
+                            border: 4px solid #B8860B;
+                            text-align: center;
+                        }
+                        .volume { 
+                            font-size: 4em; 
+                            font-weight: bold; 
+                            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                            margin: 20px 0;
+                            background: linear-gradient(45deg, #8A2BE2, #FF1493);
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                        }
+                        .stats { 
+                            display: grid; 
+                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+                            gap: 20px; 
+                            margin: 30px 0;
+                        }
+                        .stat-card { 
+                            background: linear-gradient(135deg, #E6E6FA, #DDA0DD); 
+                            padding: 20px; 
+                            border-radius: 15px; 
+                            text-align: center;
+                            border: 2px solid #9370DB;
+                        }
+                        .absolute { 
+                            background: linear-gradient(45deg, #FF0000, #FF4500, #FFD700, #ADFF2F);
+                            background-size: 300% 300%;
+                            animation: absoluteShine 3s ease infinite;
+                            color: white;
+                            padding: 30px;
+                            border-radius: 20px;
+                            margin: 25px 0;
+                            border: 3px solid #FF0000;
+                        }
+                        @keyframes absoluteShine {
+                            0% { background-position: 0% 50%; }
+                            50% { background-position: 100% 50%; }
+                            100% { background-position: 0% 50%; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="omega-star">⭐</div>
+                        <h1>OMEGA ABSOLUTA</h1>
+                        <div class="subtitle">Configuração Definitiva - 10 Dígitos - Mega Sena</div>
+                        
+                        <div class="card">
+                            <h2 style="text-align: center; color: #B8860B;">👑 CONFIGURAÇÃO OMEGA ATIVADA</h2>
+                            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 30px 0;">
+                                ${[0,1,2,3,4,5,6,7,8,9].map(d => `
+                                    <div class="digit-cell">${d}</div>
+                                `).join('')}
+                            </div>
+                            <p style="text-align: center; font-size: 1.2em; color: #8B4513;">
+                                <strong>TODOS OS 10 DÍGITOS INCLUÍDOS</strong>
+                            </p>
+                        </div>
+                        
+                        <div class="card">
+                            <h2 style="text-align: center; color: #228B22;">🌟 COBERTURA TOTAL (01-60)</h2>
+                            <div class="numbers-grid">
+                                ${Array.from({length: 60}, (_, i) => `
+                                    <div class="number-cell">${formatTwoDigits(i + 1)}</div>
+                                `).join('')}
+                            </div>
+                            <div style="text-align: center; background: #90EE90; padding: 15px; border-radius: 10px; margin-top: 20px;">
+                                <strong style="color: #006400; font-size: 1.3em;">
+                                    100% DE COBERTURA - TODOS OS 60 NÚMEROS DA MEGA SENA
+                                </strong>
+                            </div>
+                        </div>
+                        
+                        <div class="omega-total">
+                            <h2 style="margin-top: 0;">⭐ VOLUME TOTAL DA MEGA SENA ⭐</h2>
+                            <div class="volume">50.063.860</div>
+                            <div style="font-size: 1.3em; margin: 15px 0;">
+                                TODAS as combinações possíveis da Mega Sena
+                            </div>
+                            <div style="font-size: 1em; opacity: 0.9;">
+                                Fórmula: C(60, 6) = 60! / (6! × 54!) = 50.063.860
+                            </div>
+                        </div>
+                        
+                        <div class="perfection">
+                            <h2 style="margin-top: 0;">🏆 PERFEIÇÃO ABSOLUTA ALCANÇADA</h2>
+                            <div style="font-size: 1.2em; line-height: 1.6;">
+                                ✅ Configuração mais completa possível<br>
+                                ✅ Cobertura total de 100% dos números<br>
+                                ✅ Acesso a TODAS as 50.063.860 combinações<br>
+                                ✅ Representa a totalidade absoluta da loteria<br>
+                                <div style="font-size: 1.4em; margin-top: 20px; color: #FF0000;">
+                                    <strong>🌟 OMEGA ABSOLUTA CONFIRMADA! 🌟</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3 style="text-align: center; color: #4169E1;">📊 Estatísticas Definitivas</h3>
+                            <div class="stats">
+                                <div class="stat-card">
+                                    <strong>Dígitos Utilizados</strong><br>
+                                    <span style="font-size: 1.5em; color: #8B008B;">10/10</span><br>
+                                    <span style="font-size: 0.9em;">Totalidade absoluta</span>
+                                </div>
+                                <div class="stat-card">
+                                    <strong>Números Disponíveis</strong><br>
+                                    <span style="font-size: 1.5em; color: #8B008B;">60/60</span><br>
+                                    <span style="font-size: 0.9em;">Cobertura total</span>
+                                </div>
+                                <div class="stat-card">
+                                    <strong>Combinações</strong><br>
+                                    <span style="font-size: 1.2em; color: #8B008B;">50.063.860</span><br>
+                                    <span style="font-size: 0.9em;">Volume total</span>
+                                </div>
+                                <div class="stat-card">
+                                    <strong>Perfeição</strong><br>
+                                    <span style="font-size: 1.5em; color: #8B008B;">100%</span><br>
+                                    <span style="font-size: 0.9em;">Absoluta</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute">
+                            <h3 style="margin-top: 0;">🎯 SIGNIFICADO DA OMEGA ABSOLUTA</h3>
+                            <p style="font-size: 1.1em; line-height: 1.6;">
+                                Esta configuração representa o <strong>ápice absoluto</strong> da análise combinatória 
+                                aplicada à Mega Sena. Com todos os 10 dígitos, você tem acesso <strong>literal</strong> 
+                                a TODAS as possibilidades da loteria.
+                            </p>
+                            <p style="font-size: 1.1em; line-height: 1.6; margin-top: 20px;">
+                                <strong>Não existe configuração superior.</strong> Esta é a totalidade perfeita, 
+                                a completude absoluta, o OMEGA definitivo da Mega Sena.
+                            </p>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>📋 Dados Técnicos Finais</h3>
+                            <p><strong>Sistema:</strong> Mega Sena (6 dezenas de 01 a 60)</p>
+                            <p><strong>Configuração:</strong> OMEGA ABSOLUTA (10 dígitos completos)</p>
+                            <p><strong>Volume:</strong> 50.063.860 combinações (totalidade da loteria)</p>
+                            <p><strong>Cobertura:</strong> 100% (todos os números 01-60)</p>
+                            <p><strong>Status:</strong> PERFEIÇÃO ABSOLUTA ATINGIDA</p>
+                            <p><strong>Gerado em:</strong> ${new Date().toLocaleString('pt-BR')}</p>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 50px; font-style: italic; color: #8B0000;">
+                            <p style="font-size: 1.2em;">"A perfeição é alcançada não quando não há mais nada para adicionar,</p>
+                            <p style="font-size: 1.2em;">mas quando não há mais nada para remover."</p>
+                            <p style="font-size: 1.1em; margin-top: 20px; color: #B8860B;">
+                                ⭐ Esta configuração é a prova viva desta verdade ⭐
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                `;
+                downloadFile(htmlContent, `mega-sena-omega-absoluta-${digitsStr}.html`, 'text/html');
+            });
+        }
+        
+        // Função auxiliar para download
+        function downloadFile(content, filename, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+        
+        // Evento para ativar OMEGA
+        generateBtn.addEventListener('click', () => {
+            // Limpar mensagens de erro
+            errorMessageEl.classList.add('hidden');
+            errorMessageEl.textContent = '';
+            
+            // Com 10 dígitos, sempre usar todos
+            const omegaDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            
+            // Exibir configuração OMEGA
+            selectedDigitsEl.textContent = omegaDigits.join(', ');
+            
+            // Exibir contêiner de resultados
+            resultContainer.classList.remove('hidden');
+            
+            // Processar configuração OMEGA
+            processOmegaConfiguration();
+        });
+        
+        // Inicialização automática
+        window.onload = function() {
+            // Para 10 dígitos, não há escolha - todos estão automaticamente selecionados
+            console.log('Configuração OMEGA carregada - todos os dígitos incluídos automaticamente');
+        };
+    </script>
+</body>
+</html>

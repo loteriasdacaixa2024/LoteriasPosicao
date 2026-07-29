@@ -1,0 +1,226 @@
+{# perfil = montar_perfil_completo(); theme = dark|light; compact = true para accordion central #}
+{% set p = perfil %}
+{% set cat = p.catalogo or {} %}
+{% set live = p.caixa_live or {} %}
+{% set bol = cat.bolao or {} %}
+{% set sort = cat.sorteios or {} %}
+{% set ap = cat.aposta or {} %}
+
+{% include '_config_shared_styles.html' %}
+
+{% if not compact %}
+<ul class="nav nav-pills cfg-pills flex-wrap gap-1 mb-3" role="tablist">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#cfg-{{ p.key }}-resumo">Resumo</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#cfg-{{ p.key }}-bolao">Bolão</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#cfg-{{ p.key }}-precos">Preços</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#cfg-{{ p.key }}-prob">Probabilidades</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#cfg-{{ p.key }}-prem">Premiação</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#cfg-{{ p.key }}-sorteios">Sorteios</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#cfg-{{ p.key }}-regras">Regras</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#cfg-{{ p.key }}-api">API Caixa</a></li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane fade show active" id="cfg-{{ p.key }}-resumo">
+{% else %}
+<div class="cfg-detalhe-compact">
+{% endif %}
+
+<div class="cfg-section">
+    <div class="cfg-section-title"><i class="fas fa-info-circle me-1"></i> Resumo — {{ p.nome }}</div>
+    <p class="cfg-desc mb-2">{{ cat.descricao or 'Modalidade lotérica Caixa.' }}</p>
+    <div class="cfg-grid">
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Aposta simples</div>
+            <div class="cfg-mini-val text-success">{{ p.preco_simples_fmt }}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Bolão mínimo</div>
+            <div class="cfg-mini-val">{{ p.bolao_valor_minimo_fmt }}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Preço / cota</div>
+            <div class="cfg-mini-val">{{ p.bolao_preco_cota_fmt }}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Concurso (site)</div>
+            <div class="cfg-mini-val">{% if p.concurso_site %}#{{ p.concurso_site }}{% else %}—{% endif %}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Próximo Concurso</div>
+            <div class="cfg-mini-val">{% if p.concurso_app %}#{{ p.concurso_app }}{% else %}—{% endif %}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Universo</div>
+            <div class="cfg-mini-val" style="font-size:.85rem;">{{ ap.universo or p.aposta.universo }}</div>
+        </div>
+        {% if ap.extra or p.aposta.extra %}
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Extra</div>
+            <div class="cfg-mini-val" style="font-size:.85rem;">{{ ap.extra or p.aposta.extra }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if not compact %}
+</div>
+<div class="tab-pane fade" id="cfg-{{ p.key }}-bolao">
+{% endif %}
+<div class="cfg-section">
+    <div class="cfg-section-title"><i class="fas fa-users me-1"></i> Bolão</div>
+    <div class="cfg-grid mb-2">
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Cotas mín.</div>
+            <div class="cfg-mini-val">{{ p.bolao.cotas_min }}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Cotas máx.</div>
+            <div class="cfg-mini-val">{{ p.bolao.cotas_max }}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Valor mín. (painel)</div>
+            <div class="cfg-mini-val">{{ p.bolao_valor_minimo_fmt }}</div>
+        </div>
+    </div>
+    <p class="cfg-desc mb-1">{{ bol.regras or 'Bolão conforme regulamento oficial Caixa.' }}</p>
+    {% if bol.valor_minimo_nota %}<p class="small opacity-75 mb-0">{{ bol.valor_minimo_nota }}</p>{% endif %}
+</div>
+{% if not compact %}</div>
+<div class="tab-pane fade" id="cfg-{{ p.key }}-precos">{% endif %}
+<div class="cfg-section">
+    <div class="cfg-section-title"><i class="fas fa-tags me-1"></i> Tabela de preços (oficial)</div>
+    <div class="table-responsive">
+        <table class="table cfg-table-sm table-striped mb-0">
+            <thead><tr><th>Dezenas / estrutura</th><th>Valor (R$)</th><th>Obs.</th></tr></thead>
+            <tbody>
+            {% for row in cat.tabela_precos or [] %}
+            <tr>
+                <td>{{ row.dezenas }}</td>
+                <td class="fw-bold">{{ "%.2f"|format(row.valor)|replace(".", ",") if row.valor is number else row.valor }}</td>
+                <td class="small text-muted">{{ row.obs or '' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="text-muted">Consulte o site oficial.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if not compact %}</div>
+<div class="tab-pane fade" id="cfg-{{ p.key }}-prob">{% endif %}
+<div class="cfg-section">
+    <div class="cfg-section-title"><i class="fas fa-chart-line me-1"></i> Probabilidades (referência)</div>
+    <table class="table cfg-table-sm mb-0">
+        <thead><tr><th>Faixa</th><th>Probabilidade</th></tr></thead>
+        <tbody>
+        {% for pr in cat.probabilidades or [] %}
+        <tr><td>{{ pr.faixa }}</td><td>{{ pr.probabilidade }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% if not compact %}</div>
+<div class="tab-pane fade" id="cfg-{{ p.key }}-prem">{% endif %}
+<div class="cfg-section">
+    <div class="cfg-section-title"><i class="fas fa-trophy me-1"></i> Faixas de premiação</div>
+    <table class="table cfg-table-sm mb-0">
+        <thead><tr><th>Faixa</th><th>Descrição</th></tr></thead>
+        <tbody>
+        {% for pm in cat.premiacao or [] %}
+        <tr><td class="fw-semibold">{{ pm.faixa }}</td><td>{{ pm.descricao }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% if not compact %}</div>
+<div class="tab-pane fade" id="cfg-{{ p.key }}-sorteios">{% endif %}
+<div class="cfg-section">
+    <div class="cfg-section-title"><i class="fas fa-calendar-alt me-1"></i> Sorteios</div>
+    <div class="cfg-grid">
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Dias</div>
+            <div class="cfg-mini-val" style="font-size:.78rem;">{{ (sort.dias or [])|join(', ') }}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Horário</div>
+            <div class="cfg-mini-val">{{ sort.horario or '20h' }}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Frequência</div>
+            <div class="cfg-mini-val" style="font-size:.8rem;">{{ sort.frequencia or '—' }}</div>
+        </div>
+    </div>
+    {% if sort.acumulada %}<p class="small mt-2 mb-0 opacity-75"><i class="fas fa-layer-group me-1"></i>{{ sort.acumulada }}</p>{% endif %}
+</div>
+{% if not compact %}</div>
+<div class="tab-pane fade" id="cfg-{{ p.key }}-regras">{% endif %}
+<div class="cfg-section">
+    <div class="cfg-section-title"><i class="fas fa-gavel me-1"></i> Regras e fechamento</div>
+  <ul class="cfg-list mb-2">
+    {% for r in cat.regras_especificas or [] %}<li>{{ r }}</li>{% endfor %}
+  </ul>
+  {% if cat.fechamento %}
+  <p class="small mb-0"><strong>Sistema:</strong> {{ cat.fechamento.padrao_sistema }} — {{ cat.fechamento.cobertura }}</p>
+  {% endif %}
+  {% if cat.institucional %}
+  <p class="small mt-2 mb-0 opacity-75">{{ cat.institucional.operador }} · {{ cat.institucional.fonte }}</p>
+  {% endif %}
+</div>
+{% if not compact %}</div>
+<div class="tab-pane fade" id="cfg-{{ p.key }}-api">{% endif %}
+<div class="cfg-section">
+    <div class="cfg-section-title">
+        <i class="fas fa-cloud-download-alt me-1"></i> API Caixa (ao vivo)
+        <span class="cfg-api-badge {% if live and live.ok %}cfg-api-ok{% else %}cfg-api-off{% endif %} ms-2">
+            {% if live and live.ok %}Online{% else %}Offline{% endif %}
+        </span>
+    </div>
+    <div class="cfg-grid mb-2">
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Último concurso API</div>
+            <div class="cfg-mini-val">{% if live.numero %}#{{ live.numero }}{% else %}—{% endif %}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Próximo sorteio</div>
+            <div class="cfg-mini-val" style="font-size:.8rem;">{{ live.data_proximo or '—' }}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Estimativa prêmio</div>
+            <div class="cfg-mini-val" style="font-size:.85rem;">{{ live.valor_estimado_proximo_fmt or '—' }}</div>
+        </div>
+        <div class="cfg-mini-card">
+            <div class="cfg-mini-label">Acumulado</div>
+            <div class="cfg-mini-val" style="font-size:.85rem;">{{ live.valor_acumulado_fmt or '—' }}</div>
+        </div>
+    </div>
+    {% if live.rateio %}
+    <p class="small fw-bold mb-1">Rateio último concurso</p>
+    <table class="table cfg-table-sm mb-2">
+        <thead><tr><th>Faixa</th><th>Ganhadores</th><th>Prêmio</th></tr></thead>
+        <tbody>
+        {% for r in live.rateio %}
+        <tr>
+            <td>{{ r.faixa or '—' }}</td>
+            <td>{{ r.numero_ganhadores or '—' }}</td>
+            <td>{{ r.valor_premio_fmt or r.valor_premio or '—' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% if live.nome_mes_sorte or live.mes_sorte %}
+    <p class="small mb-2"><strong>Mês da Sorte (último):</strong> {{ live.nome_mes_sorte or live.mes_sorte }}</p>
+    {% endif %}
+    <p class="small mb-0 opacity-75">{{ live.mensagem }}</p>
+    <p class="small mb-0 opacity-75">
+        <a href="{{ live.api_url or p.link_caixa }}" target="_blank" rel="noopener">{{ live.api_url or 'API Caixa' }}</a>
+        · <a href="{{ p.link_caixa }}" target="_blank" rel="noopener">Site Caixa</a>
+    </p>
+</div>
+
+{% if not compact %}
+</div>
+</div>
+{% else %}
+</div>
+{% endif %}

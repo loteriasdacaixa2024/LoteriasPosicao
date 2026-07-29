@@ -1,0 +1,155 @@
+{% set mb = comportamento_ui.get('meta_bases', {}) if comportamento_ui else {} %}
+<style>
+    .bases-resumo-card {
+        background: linear-gradient(135deg, #fffdf5 0%, #fff 55%, #f8fff3 100%);
+        border: 1px solid rgba(112, 142, 37, 0.25);
+        border-radius: 12px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+    .bases-resumo-card.bases-incompletas {
+        border-color: rgba(255, 193, 7, 0.55);
+        background: linear-gradient(135deg, #fffdf5 0%, #fff8e1 100%);
+    }
+    .bases-resumo-titulo {
+        font-size: .72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: var(--primary-xdark, #3d4f1f);
+        margin-bottom: .35rem;
+    }
+    .bases-resumo-headline {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--primary-xdark, #2c3e12);
+        line-height: 1.25;
+        margin-bottom: .75rem;
+    }
+    .bases-split-bar {
+        display: flex;
+        height: 2.4rem;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+        margin-bottom: .5rem;
+    }
+    .bases-split-seg {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: .95rem;
+        color: #fff;
+        min-width: 2.5rem;
+        transition: flex-basis .25s ease;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+    .bases-split-seg.acum { background: linear-gradient(180deg, #e6a020, #c77800); }
+    .bases-split-seg.venc { background: linear-gradient(180deg, #5a9a2e, #4a7c23); }
+    .bases-split-legenda {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .75rem 1.25rem;
+        font-size: .82rem;
+        margin-bottom: .85rem;
+    }
+    .bases-split-legenda span { display: inline-flex; align-items: center; gap: .35rem; }
+    .bases-dot { width: .65rem; height: .65rem; border-radius: 50%; flex-shrink: 0; }
+    .bases-dot.acum { background: #c77800; }
+    .bases-dot.venc { background: #4a7c23; }
+    .bases-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: .5rem;
+    }
+    @media (max-width: 576px) {
+        .bases-stat-grid { grid-template-columns: 1fr; }
+        .bases-resumo-headline { font-size: .95rem; }
+        .bases-split-seg { font-size: .82rem; }
+    }
+    .bases-stat {
+        border-radius: 8px;
+        padding: .55rem .65rem;
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.07);
+        text-align: center;
+    }
+    .bases-stat.ativo {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(192, 139, 0, 0.25);
+        background: var(--accent-light);
+    }
+    .bases-stat-label {
+        font-size: .65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #6c757d;
+        line-height: 1.2;
+    }
+    .bases-stat-num {
+        font-size: 1.35rem;
+        font-weight: 900;
+        color: var(--primary-xdark, #2c3e12);
+        line-height: 1.15;
+    }
+    .bases-stat-pct {
+        font-size: .78rem;
+        font-weight: 800;
+        color: var(--primary, #708e25);
+    }
+    .bases-stat-pct.muted { color: #6c757d; font-weight: 600; }
+    .bases-resumo-aviso {
+        font-size: .78rem;
+        color: #856404;
+        margin-top: .65rem;
+        padding-top: .55rem;
+        border-top: 1px dashed rgba(133, 100, 4, 0.25);
+    }
+    .base-tab-count {
+        font-size: .68rem;
+        font-weight: 700;
+        opacity: .85;
+        margin-left: .15rem;
+    }
+</style>
+
+<div id="painelBasesResumo" class="bases-resumo-card mb-3{% if not mb.get('suporta_bases') %} d-none{% endif %}{% if mb.get('pendentes_ganhadores') %} bases-incompletas{% endif %}">
+    <div class="bases-resumo-titulo">
+        <i class="fas fa-trophy me-1"></i>Classificação histórica — faixa principal (7 acertos)
+    </div>
+    <div class="bases-resumo-headline" id="basesResumoHeadline">
+        {% if mb.get('bases_completas') and mb.get('pct_acumulados') is not none %}
+        Em <strong id="basesPctAcumHead">{{ mb.pct_acumulados }}%</strong> dos sorteios <strong>não houve ganhador</strong> (acumulou);
+        em <strong id="basesPctVencHead">{{ mb.pct_vencedores }}%</strong> houve <strong>pelo menos 1 vencedor</strong>.
+        {% else %}
+        Carregando distribuição vencedores × acumulados…
+        {% endif %}
+    </div>
+    <div class="bases-split-bar" id="basesSplitBar" aria-hidden="true">
+        <div class="bases-split-seg acum" id="basesBarAcum" style="flex: {{ mb.pct_acumulados or 50 }} 1 0;">{{ mb.pct_acumulados or '—' }}%</div>
+        <div class="bases-split-seg venc" id="basesBarVenc" style="flex: {{ mb.pct_vencedores or 50 }} 1 0;">{{ mb.pct_vencedores or '—' }}%</div>
+    </div>
+    <div class="bases-split-legenda">
+        <span><i class="bases-dot acum"></i> <strong>Acumulados</strong> — ninguém acertou os 7 (<span id="basesLegAcum">{{ mb.total_acumulados or '—' }}</span> concursos)</span>
+        <span><i class="bases-dot venc"></i> <strong>Vencedores</strong> — houve ganhador na faixa principal (<span id="basesLegVenc">{{ mb.total_vencedores or '—' }}</span> concursos)</span>
+    </div>
+    <div class="bases-stat-grid">
+        <div class="bases-stat ativo" data-base-stat="geral" id="basesStatGeral">
+            <div class="bases-stat-label">Geral</div>
+            <div class="bases-stat-num" id="basesNumGeral">{{ mb.total_geral or '—' }}</div>
+            <div class="bases-stat-pct muted">todos os sorteios</div>
+        </div>
+        <div class="bases-stat" data-base-stat="vencedores" id="basesStatVencedores">
+            <div class="bases-stat-label">Com vencedor</div>
+            <div class="bases-stat-num" id="basesNumVenc">{{ mb.total_vencedores or '—' }}</div>
+            <div class="bases-stat-pct" id="basesPctVenc">{% if mb.pct_vencedores is not none %}{{ mb.pct_vencedores }}% do histórico{% else %}—{% endif %}</div>
+        </div>
+        <div class="bases-stat" data-base-stat="acumulados" id="basesStatAcumulados">
+            <div class="bases-stat-label">Acumulados</div>
+            <div class="bases-stat-num" id="basesNumAcum">{{ mb.total_acumulados or '—' }}</div>
+            <div class="bases-stat-pct" id="basesPctAcum">{% if mb.pct_acumulados is not none %}{{ mb.pct_acumulados }}% do histórico{% else %}—{% endif %}</div>
+        </div>
+    </div>
+    <div class="bases-resumo-aviso d-none" id="basesResumoAviso"></div>
+</div>

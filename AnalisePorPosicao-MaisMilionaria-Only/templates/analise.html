@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .15);
+    }
+
+    .heatmap-center {
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    .heatmap-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 5px;
+    }
+
+    .hm-cell {
+        aspect-ratio: 1;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform .15s, box-shadow .15s;
+        border: 2px solid transparent;
+    }
+
+    .hm-cell:hover {
+        transform: scale(1.12);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+        z-index: 2;
+    }
+
+    .hm-dez {
+        font-size: .72rem;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .hm-pct {
+        font-size: .5rem;
+        font-weight: 600;
+        opacity: .8;
+        line-height: 1;
+        margin-top: 2px;
+    }
+
+    .heat-legend {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+        margin-top: .5rem;
+        font-size: .7rem;
+        color: #888;
+    }
+
+    .heat-swatch {
+        width: 18px;
+        height: 10px;
+        border-radius: 3px;
+    }
+
+    .stat-pills {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .stat-pill {
+        background: #fff;
+        border-radius: 10px;
+        padding: .45rem 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .07);
+        border: 1.5px solid #f0e0a0;
+        font-size: .78rem;
+    }
+
+    .stat-pill strong {
+        color: var(--primary);
+    }
+
+    .tab-btns {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+
+    .tab-btn-a {
+        padding: .35rem .9rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 700;
+        border: 2px solid transparent;
+        cursor: pointer;
+        background: #e8e8e8;
+        color: #555;
+        transition: all .15s;
+    }
+
+    .tab-btn-a.active {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    /* Painel de Trevos */
+    .trevos-panel {
+        max-width: 500px;
+        margin: 1.5rem auto 0;
+    }
+
+    .trevo-bar-wrap {
+        background: #f0f0f0;
+        border-radius: 6px;
+        height: 18px;
+        flex: 1;
+    }
+
+    .trevo-bar {
+        height: 18px;
+        border-radius: 6px;
+        background: var(--accent-trevo);
+        transition: width .4s;
+    }
+
+    .trevo-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: .5rem;
+        font-size: .82rem;
+    }
+
+    .trevo-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--accent-trevo);
+        color: #fff;
+        font-weight: 800;
+        font-size: .78rem;
+        flex-shrink: 0;
+    }
+
+    .rank-dez {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .8rem;
+    }
+</style>
+
+<div class="page-header">
+    <h2><i class="fas fa-crosshairs me-2"></i>Análise Estatística — +Milionária</h2>
+    <p class="mb-0" style="opacity:.85;font-size:.9rem;">Heatmap das 50 dezenas (01–50) + painel das 6 trevos (01–06)
+    </p>
+</div>
+
+<div class="stat-pills" id="statPills">
+    <div class="stat-pill"><i class="fas fa-spinner fa-spin me-1"></i>Carregando...</div>
+</div>
+
+<div class="tab-btns">
+    <button class="tab-btn-a active" id="tabFreq" onclick="setTab('freq')"><i class="fas fa-fire me-1"></i>Freq
+        Dezenas</button>
+    <button class="tab-btn-a" id="tabAtr" onclick="setTab('atr')"><i class="fas fa-clock me-1"></i>Atraso
+        Dezenas</button>
+    <button class="tab-btn-a" id="tabRank" onclick="setTab('rank')"><i class="fas fa-list-ol me-1"></i>Ranking</button>
+    <button class="tab-btn-a" id="tabTrevo" onclick="setTab('trevo')" style="border-color:var(--accent-trevo);">🍀
+        Trevos</button>
+</div>
+
+<!-- Heatmap dezenas -->
+<div class="heatmap-center" id="heatmapWrap">
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-3">
+            <div class="heatmap-grid" id="heatmapGrid">
+                <div class="text-center text-muted py-4" style="grid-column:1/-1;"><i
+                        class="fas fa-spinner fa-spin me-2"></i>Calculando...</div>
+            </div>
+            <div class="heat-legend mt-2" id="heatLegend"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Ranking -->
+<div class="card border-0 shadow-sm" id="rankWrap" style="display:none;max-width:680px;margin:0 auto;">
+    <div class="card-header fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;"><i
+            class="fas fa-list-ol me-2"></i>Ranking de Dezenas</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" style="font-size:.8rem;">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Dezena</th>
+                        <th>Freq</th>
+                        <th>%</th>
+                        <th>Atraso</th>
+                    </tr>
+                </thead>
+                <tbody id="rankBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Painel de Trevos -->
+<div id="trevoWrap" style="display:none;">
+    <div class="trevos-panel">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header fw-bold" style="background:var(--accent-trevo);color:#fff;">🍀 Análise de Trevos
+                (01–06)</div>
+            <div class="card-body" id="trevoBody">
+                <div class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-2"></i>Carregando...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    let _dados = [], _trevos = [], _tabAtual = 'freq';
+
+    function setTab(tab) {
+        _tabAtual = tab;
+        document.querySelectorAll('.tab-btn-a').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+        const hw = document.getElementById('heatmapWrap'), rw = document.getElementById('rankWrap'), tw = document.getElementById('trevoWrap');
+        hw.style.display = 'none'; rw.style.display = 'none'; tw.style.display = 'none';
+        if (tab === 'rank') { rw.style.display = 'block'; renderRank(); }
+        else if (tab === 'trevo') { tw.style.display = 'block'; renderTrevos(); }
+        else { hw.style.display = 'block'; renderHeatmap(tab); }
+    }
+
+    function heatColor(n) {
+        const cold = [255, 243, 200], hot = [139, 105, 20];
+        return `rgb(${Math.round(cold[0] + (hot[0] - cold[0]) * n)},${Math.round(cold[1] + (hot[1] - cold[1]) * n)},${Math.round(cold[2] + (hot[2] - cold[2]) * n)})`;
+    }
+    function textColor(n) { return n > 0.55 ? '#fff' : '#4a3508'; }
+
+    function renderHeatmap(tab) {
+        const grid = document.getElementById('heatmapGrid'), legend = document.getElementById('heatLegend');
+        if (!_dados.length) return;
+        const vals = _dados.map(d => tab === 'freq' ? d.freq : d.atraso);
+        const mn = Math.min(...vals), mx = Math.max(...vals);
+        const norm = v => mx === mn ? 0.5 : (v - mn) / (mx - mn);
+        let html = '';
+        _dados.forEach(d => {
+            const v = tab === 'freq' ? d.freq : d.atraso, n = norm(v), bg = heatColor(n), tc = textColor(n);
+            html += `<div class="hm-cell" style="background:${bg};" title="${d.dezena_fmt}: ${tab === 'freq' ? d.freq + ' vezes' : 'atraso ' + d.atraso}"><span class="hm-dez" style="color:${tc};">${d.dezena_fmt}</span><span class="hm-pct" style="color:${tc};">${tab === 'freq' ? d.pct + '%' : d.atraso + 'c'}</span></div>`;
+        });
+        grid.innerHTML = html;
+        legend.innerHTML = `<div class="heat-swatch" style="background:rgb(255,243,200);border:1px solid #ddd;"></div><span>${tab === 'freq' ? 'Menos freq.' : 'Mais atrasado'}</span><div style="flex:1;max-width:80px;height:10px;border-radius:3px;background:linear-gradient(to right,rgb(255,243,200),rgb(139,105,20));"></div><span>${tab === 'freq' ? 'Mais freq.' : 'Menos atrasado'}</span><div class="heat-swatch" style="background:rgb(139,105,20);"></div>`;
+    }
+
+    function renderRank() {
+        const tbody = document.getElementById('rankBody');
+        if (!_dados.length) return;
+        const sorted = [..._dados].sort((a, b) => _tabAtual === 'atr' ? b.atraso - a.atraso : b.freq - a.freq);
+        const max = _tabAtual === 'atr' ? sorted[0].atraso : sorted[0].freq;
+        tbody.innerHTML = sorted.map((d, i) => {
+            const v = _tabAtual === 'atr' ? d.atraso : d.freq, n = max > 0 ? v / max : 0, bg = heatColor(n), tc = textColor(n);
+            return `<tr><td class="fw-bold text-muted" style="font-size:.75rem;">${i + 1}º</td><td><span class="rank-dez" style="background:${bg};color:${tc};">${d.dezena_fmt}</span></td><td class="fw-bold">${d.freq}</td><td>${d.pct}%</td><td class="text-muted">${d.atraso}</td></tr>`;
+        }).join('');
+    }
+
+    function renderTrevos() {
+        const body = document.getElementById('trevoBody');
+        if (!_trevos.length) { body.innerHTML = '<div class="text-muted text-center">Sem dados.</div>'; return; }
+        const maxFreq = Math.max(..._trevos.map(t => t.freq)) || 1;
+        let html = '<div style="font-size:.82rem;font-weight:600;color:#888;margin-bottom:.75rem;">Frequência e atraso dos 6 trevos:</div>';
+        _trevos.forEach(t => {
+            const pct = Math.round(t.freq / maxFreq * 100);
+            html += `<div class="trevo-row">
+            <span class="trevo-ball">🍀${t.trevo_fmt}</span>
+            <div class="trevo-bar-wrap">
+                <div class="trevo-bar" style="width:${pct}%;"></div>
+            </div>
+            <span class="fw-bold" style="min-width:35px;color:var(--accent-trevo);">${t.freq}×</span>
+            <span class="text-muted" style="min-width:55px;font-size:.72rem;">${t.pct}% · −${t.atraso}c</span>
+        </div>`;
+        });
+        body.innerHTML = html;
+    }
+
+    async function carregar() {
+        try {
+            const r = await fetch('/analise/api/dados'); const d = await r.json();
+            if (d.status !== 'success') { document.getElementById('heatmapGrid').innerHTML = '<div class="text-danger p-3" style="grid-column:1/-1;">Sincronize os dados primeiro.</div>'; return; }
+            _dados = d.dados; _trevos = d.dados_trevos || [];
+            const topTrv = _trevos.length ? _trevos.reduce((a, b) => b.freq > a.freq ? b : a, _trevos[0]) : { trevo_fmt: '—' };
+            document.getElementById('statPills').innerHTML = `
+            <div class="stat-pill">💰 <strong>${d.total_sorteios.toLocaleString()}</strong> concursos</div>
+            <div class="stat-pill">📍 Até #<strong>${d.ultimo_concurso}</strong></div>
+            <div class="stat-pill">🎯 Esperado dez: <strong>${d.esperado_pct_dez}%</strong></div>
+            <div class="stat-pill">🍀 Esperado trevo: <strong>${d.esperado_pct_trv}%</strong></div>
+            <div class="stat-pill">🍀 Top trevo: <strong>${topTrv.trevo_fmt}</strong></div>`;
+            renderHeatmap('freq');
+        } catch (e) { document.getElementById('heatmapGrid').innerHTML = `<div class="text-danger p-3" style="grid-column:1/-1;">Erro: ${e.message}</div>`; }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        carregar().then(() => {
+            const h = (location.hash || '').replace(/^#/, '');
+            if (h === 'trevo') setTab('trevo');
+        });
+    });
+</script>
+{% endblock %}

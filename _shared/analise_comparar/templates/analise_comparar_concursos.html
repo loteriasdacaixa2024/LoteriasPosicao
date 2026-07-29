@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-hdr {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-xdark) 100%);
+        color: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    }
+    .how-box { background: #f8f5fc; border: 1px solid #e8dff5; border-radius: 10px; }
+    .modo-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .modo-legenda-wrap { flex: 1; min-width: 200px; min-height: 1.4em; position: relative; }
+    .modo-legenda-inline {
+        font-size: .84rem; color: #5c5c5c; line-height: 1.4; margin: 0;
+        opacity: 0; transform: translateY(4px);
+        transition: opacity .22s ease, transform .22s ease;
+        position: absolute; left: 0; right: 0; top: 0; pointer-events: none;
+    }
+    .modo-legenda-inline.ativo {
+        opacity: 1; transform: translateY(0); position: relative; pointer-events: auto;
+    }
+    .modo-legenda-inline em { font-style: normal; font-weight: 600; color: var(--primary); }
+    .comparar-grid {
+        display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start;
+    }
+    @media (max-width: 768px) {
+        .comparar-grid { grid-template-columns: 1fr; }
+        .comparar-meio { order: -1; }
+    }
+    .volante-sorteio-wrap {
+        background: #fff9e6; border: 2px solid #e8d48a; border-radius: 10px;
+        padding: .55rem; margin: 0 auto;
+        max-width: {{ cfg.volante_max_width | default(300) }}px;
+    }
+    .volante-sorteio-titulo {
+        text-align: center; font-size: .8rem; font-weight: 700; color: var(--primary);
+        margin-bottom: .4rem; line-height: 1.3;
+    }
+    .volante-sorteio-grid {
+        display: grid; grid-template-columns: repeat({{ cfg.grid_cols | default(10) }}, 1fr); gap: 3px;
+    }
+    .volante-sorteio-cell {
+        aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: {{ cfg.cell_font_rem | default(0.62) }}rem; border-radius: 4px;
+        border: 1px solid #d0d0d0; background: #f5f5f5; color: #aaa;
+    }
+    .volante-sorteio-cell.sorteado {
+        background: var(--accent); border-color: #c4a818; color: #1a0a00;
+    }
+    .volante-sorteio-cell.rep-v {
+        box-shadow: 0 0 0 3px #198754; background: #d4edda; border-color: #198754; color: #0f5132;
+    }
+    .volante-sorteio-cell.rep-p {
+        box-shadow: 0 0 0 3px #0d6efd; background: #cfe2ff; border-color: #0d6efd; color: #052c65;
+    }
+    .volante-sorteio-cell.rep-v.rep-p {
+        background: linear-gradient(135deg, #d4edda 50%, #cfe2ff 50%);
+        box-shadow: 0 0 0 2px #198754, 0 0 0 4px #0d6efd;
+    }
+    .comparar-meio { text-align: center; padding: .5rem .25rem; min-width: 140px; }
+    .resumo-qtd { font-size: 2rem; font-weight: 900; color: #198754; line-height: 1; }
+    .dez-ball {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; border-radius: 50%;
+        background: var(--accent); color: #1a0a00; font-weight: 800; font-size: .75rem; margin: 2px;
+    }
+    .dez-ball.rep-v { box-shadow: 0 0 0 3px #198754; }
+    .dez-ball.rep-p { box-shadow: 0 0 0 3px #0d6efd; }
+    .legenda-comp { font-size: .75rem; color: #666; }
+    .legenda-comp span {
+        display: inline-block; width: 14px; height: 14px; border-radius: 3px;
+        vertical-align: middle; margin-right: 4px; border: 1px solid #ccc;
+    }
+    .legenda-comp .lg-sort { background: var(--accent); border-color: #c4a818; }
+    .legenda-comp .lg-repv { box-shadow: 0 0 0 2px #198754; background: #d4edda; }
+    .legenda-comp .lg-repp { box-shadow: 0 0 0 2px #0d6efd; background: #cfe2ff; }
+    .colunas-wrap { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
+    .coluna-box { text-align: center; min-width: 52px; }
+    .coluna-box .lbl { font-size: .7rem; font-weight: 700; color: var(--primary); margin-bottom: .25rem; }
+    .dig-cell {
+        width: 28px; height: 28px; margin: 2px auto; display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: .72rem; border-radius: 4px; border: 1px solid #ccc; background: #f5f5f5; color: #aaa;
+    }
+    .dig-cell.ativo { background: var(--accent); color: #1a0a00; border-color: #c4a818; }
+    .dig-cell.rep { box-shadow: 0 0 0 3px #198754; background: #d4edda; }
+    .extra-panel { background: #f8f9fa; border-radius: 8px; padding: .75rem; margin-top: 1rem; }
+</style>
+
+<div class="page-hdr">
+    <h2 class="h4 mb-1"><i class="fas fa-columns me-2"></i>Comparar concursos — {{ cfg.nome }}</h2>
+    <p class="mb-0 small opacity-90">{{ cfg.subtitle }} · só sorteios reais</p>
+</div>
+
+<div class="how-box mb-3">
+    <button class="btn btn-link text-decoration-none w-100 text-start fw-bold" type="button"
+        data-bs-toggle="collapse" data-bs-target="#collapseComoUsar">
+        <i class="fas fa-circle-info me-1"></i> Como usar
+    </button>
+    <div class="collapse show" id="collapseComoUsar">
+        <div class="px-3 pb-3 small text-muted">
+            <p class="mb-0">Escolha dois concursos e compare visualmente. Esta página mostra apenas o que foi
+                <strong>sorteado</strong> — não gera apostas.</p>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="row g-2 align-items-end mb-3">
+            <div class="col-md-3">
+                <label class="form-label small mb-0">Concurso A (mais antigo)</label>
+                <select class="form-select form-select-sm" id="selConcursoA"></select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-0">Concurso B (mais recente)</label>
+                <select class="form-select form-select-sm" id="selConcursoB"></select>
+            </div>
+            {% if cfg.dual_sorteio %}
+            <div class="col-6 col-md-2">
+                <label class="form-label small mb-0">Sorteio A</label>
+                <select class="form-select form-select-sm" id="selSorteioA">
+                    <option value="1">1º sorteio</option>
+                    <option value="2">2º sorteio</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small mb-0">Sorteio B</label>
+                <select class="form-select form-select-sm" id="selSorteioB">
+                    <option value="1">1º sorteio</option>
+                    <option value="2">2º sorteio</option>
+                </select>
+            </div>
+            {% endif %}
+            <div class="col-md-2">
+                <button class="btn btn-primary btn-sm w-100" id="btnComparar">
+                    <i class="fas fa-sync-alt me-1"></i> Comparar
+                </button>
+            </div>
+        </div>
+
+        {% if cfg.modos | length > 1 %}
+        <div class="mb-3" id="wrapModos">
+            <span class="fw-bold small text-uppercase text-muted d-block mb-2">Modo de leitura</span>
+            <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
+                <div class="btn-group flex-shrink-0" role="group" id="grpModo">
+                    {% if 'volante' in cfg.modos %}
+                    <button type="button" class="btn btn-outline-secondary btn-sm modo-btn active" data-modo="volante">Volante</button>
+                    {% endif %}
+                    {% if 'posicional' in cfg.modos %}
+                    <button type="button" class="btn btn-outline-secondary btn-sm modo-btn{% if cfg.modos | length == 1 %} active{% endif %}" data-modo="posicional">Posicional</button>
+                    {% endif %}
+                    {% if 'hibrido' in cfg.modos %}
+                    <button type="button" class="btn btn-outline-secondary btn-sm modo-btn" data-modo="hibrido">Híbrido</button>
+                    {% endif %}
+                </div>
+                <div class="modo-legenda-wrap" id="modoLegendaWrap" aria-live="polite">
+                    <p class="modo-legenda-inline ativo" data-legenda="volante">
+                        <em>Volante</em> — mesma dezena nos dois concursos.
+                    </p>
+                    <p class="modo-legenda-inline" data-legenda="posicional">
+                        <em>Posicional</em> — mesma dezena na mesma coluna/posição.
+                    </p>
+                    <p class="modo-legenda-inline" data-legenda="hibrido">
+                        <em>Híbrido</em> — verde = volante · azul = posicional.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if cfg.layout == 'grid' %}
+        <div class="legenda-comp mb-3">
+            <span class="lg-sort"></span> Sorteada neste concurso
+            <span class="lg-repv" style="margin-left:12px"></span> Repetição (volante)
+            {% if cfg.modos | length > 1 %}
+            <span class="lg-repp" style="margin-left:12px"></span> Repetição (posicional)
+            {% endif %}
+            <span style="margin-left:12px;color:#aaa">□</span> Não sorteada
+        </div>
+        {% endif %}
+
+        <div id="loaderComp" class="text-center py-5 text-muted">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+        </div>
+        <div id="painelComp" style="display:none;">
+            <div class="comparar-grid" id="gridPadrao">
+                <div>
+                    <div class="volante-sorteio-wrap" id="wrapVolanteA">
+                        <div class="volante-sorteio-titulo" id="tituloA">Concurso A</div>
+                        <div class="volante-sorteio-grid" id="volanteA"></div>
+                    </div>
+                    <div class="colunas-wrap mt-2" id="colunasA" style="display:none;"></div>
+                    <div class="text-center small text-muted mt-2" id="listaLinearA"></div>
+                </div>
+                <div class="comparar-meio">
+                    <div class="small text-muted mb-1">Repetidas</div>
+                    <div class="resumo-qtd" id="resumoQtd">—</div>
+                    <div class="small fw-bold text-muted mb-2" id="resumoModoLbl">—</div>
+                    <div id="resumoBolas" class="mb-2"></div>
+                    <div class="small" id="resumoParImpar"></div>
+                    <div class="small text-muted mt-2" id="resumoPosicional"></div>
+                </div>
+                <div>
+                    <div class="volante-sorteio-wrap" id="wrapVolanteB">
+                        <div class="volante-sorteio-titulo" id="tituloB">Concurso B</div>
+                        <div class="volante-sorteio-grid" id="volanteB"></div>
+                    </div>
+                    <div class="colunas-wrap mt-2" id="colunasB" style="display:none;"></div>
+                    <div class="text-center small text-muted mt-2" id="listaLinearB"></div>
+                </div>
+            </div>
+            <div id="painelExtra"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const API = '/analise/comparar-concursos';
+    let modoAtual = (CFG.modos && CFG.modos[0]) || 'volante';
+    let concursosLista = [];
+    const params = new URLSearchParams(window.location.search);
+
+    function pad(n) {
+        const w = (CFG.dezena_min === 0 || CFG.layout === 'colunas') ? 2 : 2;
+        return String(n).padStart(w, '0');
+    }
+
+    function atualizarLegendaModo() {
+        document.querySelectorAll('.modo-legenda-inline').forEach(p => {
+            p.classList.toggle('ativo', p.dataset.legenda === modoAtual);
+        });
+    }
+
+    function classesCelula(cel, lado) {
+        const sorteado = lado === 'a' ? cel.em_a : cel.em_b;
+        let cls = 'volante-sorteio-cell';
+        if (!sorteado) return cls;
+        cls += ' sorteado';
+        const rv = cel.repetiu_volante;
+        const rp = cel.repetiu_posicional;
+        if (modoAtual === 'volante' && rv) cls += ' rep-v';
+        else if (modoAtual === 'posicional' && rp) cls += ' rep-p';
+        else if (modoAtual === 'hibrido') {
+            if (rv && rp) cls += ' rep-v rep-p';
+            else if (rv) cls += ' rep-v';
+            else if (rp) cls += ' rep-p';
+        }
+        return cls;
+    }
+
+    function htmlVolante(grade, elId, lado) {
+        const el = document.getElementById(elId);
+        const nums = grade.map(cel => {
+            const cls = classesCelula(cel, lado);
+            return `<div class="${cls}">${pad(cel.dezena)}</div>`;
+        }).join('');
+        el.innerHTML = nums;
+    }
+
+    function htmlColunas(gradeCol, elId, lado) {
+        const el = document.getElementById(elId);
+        el.innerHTML = gradeCol.map(col => {
+            const val = lado === 'a' ? col.valor_a : col.valor_b;
+            let digits = '';
+            for (let d = CFG.digito_min; d <= CFG.digito_max; d++) {
+                let c = 'dig-cell';
+                if (val === d) c += ' ativo';
+                if (col.repetiu && val === d) c += ' rep';
+                digits += `<div class="${c}">${d}</div>`;
+            }
+            return `<div class="coluna-box"><div class="lbl">Col ${col.coluna}</div>${digits}</div>`;
+        }).join('');
+    }
+
+    function renderLinear(dezenas, elId, repV, repP) {
+        const el = document.getElementById(elId);
+        el.innerHTML = (dezenas || []).map(n => {
+            let cls = 'dez-ball';
+            if (modoAtual === 'volante' && repV.has(n)) cls += ' rep-v';
+            else if (modoAtual === 'posicional' && repP.has(n)) cls += ' rep-p';
+            else if (modoAtual === 'hibrido') {
+                if (repV.has(n)) cls += ' rep-v';
+                if (repP.has(n)) cls += ' rep-p';
+            }
+            return `<span class="${cls}">${pad(n)}</span>`;
+        }).join('');
+    }
+
+    function renderExtra(data) {
+        const el = document.getElementById('painelExtra');
+        let html = '';
+        if (data.trevos) {
+            const t = data.trevos;
+            html += `<div class="extra-panel"><strong>Trevos</strong> — A: ${t.a.join(', ') || '—'} · B: ${t.b.join(', ') || '—'}<br>
+                Repetidos: <strong>${t.quantidade}</strong> ${t.repetidos.length ? '(' + t.repetidos.join(', ') + ')' : ''}</div>`;
+        }
+        if (data.time) {
+            const tm = data.time;
+            const rep = tm.repetiu ? ' <span class="text-success fw-bold">(mesmo time!)</span>' : '';
+            html += `<div class="extra-panel"><strong>Time do Coração</strong><br>
+                A: #${tm.a.num} ${tm.a.nome || ''}<br>
+                B: #${tm.b.num} ${tm.b.nome || ''}${rep}</div>`;
+        }
+        if (data.mes) {
+            const ms = data.mes;
+            const rep = ms.repetiu ? ' <span class="text-success fw-bold">(mesmo mês!)</span>' : '';
+            html += `<div class="extra-panel"><strong>Mês da Sorte</strong><br>
+                A: ${ms.a.num ? ms.a.num + ' — ' : ''}${ms.a.nome || '—'}<br>
+                B: ${ms.b.num ? ms.b.num + ' — ' : ''}${ms.b.nome || '—'}${rep}</div>`;
+        }
+        el.innerHTML = html;
+    }
+
+    function renderComparacao(data) {
+        document.getElementById('loaderComp').style.display = 'none';
+        document.getElementById('painelComp').style.display = 'block';
+
+        const a = data.concurso_a;
+        const b = data.concurso_b;
+        let titA = `#${a.concurso} · ${a.data || '—'}`;
+        let titB = `#${b.concurso} · ${b.data || '—'}`;
+        if (CFG.dual_sorteio) {
+            titA += ` · ${data.sorteio_a}º sort.`;
+            titB += ` · ${data.sorteio_b}º sort.`;
+        }
+        document.getElementById('tituloA').textContent = titA;
+        document.getElementById('tituloB').textContent = titB;
+
+        const wrapA = document.getElementById('wrapVolanteA');
+        const wrapB = document.getElementById('wrapVolanteB');
+        const colA = document.getElementById('colunasA');
+        const colB = document.getElementById('colunasB');
+
+        if (data.layout === 'colunas') {
+            wrapA.style.display = 'none';
+            wrapB.style.display = 'none';
+            colA.style.display = 'flex';
+            colB.style.display = 'flex';
+            htmlColunas(data.grade_colunas, 'colunasA', 'a');
+            htmlColunas(data.grade_colunas, 'colunasB', 'b');
+            document.getElementById('listaLinearA').textContent = (a.colunas || []).join(' · ');
+            document.getElementById('listaLinearB').textContent = (b.colunas || []).join(' · ');
+        } else {
+            wrapA.style.display = 'block';
+            wrapB.style.display = 'block';
+            colA.style.display = 'none';
+            colB.style.display = 'none';
+            htmlVolante(data.grade, 'volanteA', 'a');
+            htmlVolante(data.grade, 'volanteB', 'b');
+            const repV = new Set(data.resumo.volante.dezenas);
+            const repP = new Set((data.resumo.posicional.detalhe || []).map(x => x.dezena));
+            renderLinear(a.dezenas_exibicao || a.dezenas, 'listaLinearA', repV, repP);
+            renderLinear(b.dezenas_exibicao || b.dezenas, 'listaLinearB', repV, repP);
+        }
+
+        const rv = data.resumo.volante;
+        const rp = data.resumo.posicional;
+        let qtd = rv.quantidade;
+        let lbl = 'volante';
+        if (modoAtual === 'posicional') { qtd = rp.quantidade; lbl = 'posicional'; }
+        else if (modoAtual === 'hibrido') { lbl = 'volante + posicional'; }
+        if (data.layout === 'colunas') { qtd = rp.quantidade; lbl = 'por coluna'; }
+
+        document.getElementById('resumoQtd').textContent = qtd;
+        document.getElementById('resumoModoLbl').textContent = lbl;
+
+        const repV = new Set(rv.dezenas);
+        const repP = new Set((rp.detalhe || []).map(x => x.dezena));
+        const bolas = (modoAtual === 'posicional' || data.layout === 'colunas')
+            ? (rp.detalhe || []).map(x => x.dezena)
+            : rv.dezenas;
+        document.getElementById('resumoBolas').innerHTML = bolas.map(n => {
+            let cls = 'dez-ball';
+            if (repV.has(n)) cls += ' rep-v';
+            if (repP.has(n)) cls += ' rep-p';
+            return `<span class="${cls}">${pad(n)}</span>`;
+        }).join('') || '<span class="text-muted">Nenhuma</span>';
+
+        document.getElementById('resumoParImpar').innerHTML = data.layout === 'grid'
+            ? `Pares: <strong>${rv.pares}</strong> · Ímpares: <strong>${rv.impares}</strong> (grupo volante)`
+            : '';
+        document.getElementById('resumoPosicional').innerHTML =
+            (modoAtual !== 'volante' || data.layout === 'colunas')
+                ? `Posicional: <strong>${rp.quantidade}</strong> ${data.layout === 'colunas' ? 'colunas iguais' : 'posições iguais'}`
+                : '';
+
+        renderExtra(data);
+    }
+
+    async function carregarConcursos() {
+        const r = await fetch(`${API}/api/concursos?limit=150`);
+        const data = await r.json();
+        if (!data.sucesso) return;
+        concursosLista = data.concursos || [];
+        const opts = concursosLista.map(c => {
+            const extra = c.colunas ? ` · ${c.colunas.join('-')}` : '';
+            return `<option value="${c.concurso}">#${c.concurso} — ${c.data || ''}${extra}</option>`;
+        }).join('');
+        document.getElementById('selConcursoA').innerHTML = opts;
+        document.getElementById('selConcursoB').innerHTML = opts;
+
+        const qa = params.get('concurso_a');
+        const qb = params.get('concurso_b');
+        if (qa) document.getElementById('selConcursoA').value = qa;
+        else if (concursosLista.length >= 2) document.getElementById('selConcursoA').value = concursosLista[1].concurso;
+        if (qb) document.getElementById('selConcursoB').value = qb;
+        else if (concursosLista.length >= 1) document.getElementById('selConcursoB').value = concursosLista[0].concurso;
+    }
+
+    async function comparar() {
+        const ca = document.getElementById('selConcursoA').value;
+        const cb = document.getElementById('selConcursoB').value;
+        if (ca === cb) { alert('Selecione dois concursos diferentes.'); return; }
+        document.getElementById('loaderComp').style.display = 'block';
+        document.getElementById('painelComp').style.display = 'none';
+        let url = `${API}/api/comparar?modo=${modoAtual}&concurso_a=${ca}&concurso_b=${cb}`;
+        if (CFG.dual_sorteio) {
+            url += `&sorteio_a=${document.getElementById('selSorteioA').value}`;
+            url += `&sorteio_b=${document.getElementById('selSorteioB').value}`;
+        }
+        const r = await fetch(url);
+        const data = await r.json();
+        if (!data.sucesso) {
+            document.getElementById('loaderComp').innerHTML =
+                `<span class="text-danger">${data.erro || 'Erro ao comparar'}</span>`;
+            return;
+        }
+        renderComparacao(data);
+    }
+
+    document.querySelectorAll('.modo-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.modo-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            modoAtual = btn.dataset.modo;
+            atualizarLegendaModo();
+            comparar();
+        });
+    });
+    document.getElementById('btnComparar').addEventListener('click', comparar);
+
+    (async function init() {
+        const m = params.get('modo');
+        if (m && document.querySelector(`.modo-btn[data-modo="${m}"]`)) {
+            document.querySelectorAll('.modo-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.modo-btn[data-modo="${m}"]`).classList.add('active');
+            modoAtual = m;
+        }
+        atualizarLegendaModo();
+        await carregarConcursos();
+        await comparar();
+    })();
+})();
+</script>
+{% endblock %}

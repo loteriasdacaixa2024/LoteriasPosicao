@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+        border-left: 4px solid var(--accent);
+    }
+
+    .coluna-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        /* Slightly square for columns */
+        background: var(--accent);
+        color: #1a2600;
+        font-weight: 800;
+        font-size: .95rem;
+        box-shadow: 0 2px 6px rgba(116, 184, 21, .35);
+    }
+
+    .draw-dezenas-wrap {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+
+    .draw-dezenas-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .stat-num {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .stat-label {
+        font-size: .78rem;
+        color: #888;
+        font-weight: 500;
+        margin-top: 2px;
+    }
+
+    .route-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+        border-top: 3px solid var(--accent);
+        transition: transform .2s, box-shadow .2s;
+        text-decoration: none;
+        color: #333;
+        display: block;
+    }
+
+    .route-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .12);
+        color: #333;
+    }
+
+    .route-icon {
+        font-size: 1.8rem;
+        margin-bottom: .5rem;
+    }
+
+    .route-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: .25rem;
+        color: var(--primary);
+    }
+
+    .route-desc {
+        font-size: .8rem;
+        color: #666;
+    }
+
+    .tip-card {
+        background: linear-gradient(135deg, var(--primary-xdark), var(--primary-dark));
+        color: #fff;
+        border-radius: 14px;
+        padding: 1.5rem;
+        min-width: 260px;
+        max-width: 310px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
+    }
+
+    .tip-card h6 {
+        color: var(--accent);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .tip-step {
+        display: flex;
+        gap: .75rem;
+        margin-bottom: .85rem;
+        align-items: flex-start;
+    }
+
+    .tip-num {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #1a2600;
+        font-weight: 800;
+        font-size: .75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .tip-text {
+        font-size: .8rem;
+        opacity: .9;
+        line-height: 1.4;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-xdark) 100%);
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .15);
+    }
+
+    .coluna-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #1a2600;
+        font-weight: 900;
+        font-size: 1.1rem;
+        margin: 2px;
+    }
+</style>
+
+<!-- HEADER -->
+<div class="page-header">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+            <h2 class="mb-1"><i class="fas fa-dice me-2"></i>Super Sete — Painel Geral</h2>
+            <p class="mb-0" style="opacity:.85;font-size:.92rem;">
+                7 colunas · dígitos 0-9 · probabilidade 1 em 10.000.000 · análise posicional independente por coluna
+            </p>
+        </div>
+        <button class="btn text-dark fw-bold px-4" style="background:var(--accent);border-radius:20px;" id="btnSync"
+            onclick="sincronizar()">
+            <i class="fas fa-sync-alt me-2"></i>Sincronizar Dados
+        </button>
+    </div>
+</div>
+
+<div class="alert border mb-4 d-flex gap-3 align-items-start"
+    style="background:#fff;border-color:#d7e8ad !important;border-radius:12px;">
+    <div style="font-size:1.6rem;line-height:1;">⚡</div>
+    <div>
+        <div class="fw-bold" style="color:var(--primary);">Mecânica por Colunas</div>
+        <div style="font-size:.9rem;color:#555;">
+            No Super Sete, cada uma das 7 colunas sorteia 1 dígito (0–9) de forma independente. A análise ideal
+            considera frequência e atraso por coluna, sem misturar as posições.
+        </div>
+    </div>
+</div>
+
+<!-- HERO: stats + dica -->
+<div class="hero-grid mb-4">
+
+    <div>
+        <!-- Stats -->
+        <div class="row g-3 mb-3">
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-num">{{ stats.total_sorteios or 0 }}</div>
+                    <div class="stat-label">📊 Concursos no banco</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-num">#{{ stats.ultimo_concurso or '—' }}</div>
+                    <div class="stat-label">🎯 Último concurso</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-num">7</div>
+                    <div class="stat-label">📋 Colunas independentes</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-num">10M</div>
+                    <div class="stat-label">🎲 Combinações possíveis</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Como funciona -->
+        <div class="stat-card mb-3">
+            <h6 style="color:var(--primary);font-weight:700;"><i class="fas fa-info-circle me-2"></i>Como funciona a
+                Super Sete</h6>
+            <p class="mb-2" style="font-size:.85rem;color:#555;">
+                Cada coluna sorteia <strong>1 dígito de 0-9</strong> de forma completamente
+                independente. Para ganhar o prêmio máximo, você precisa acertar o dígito exato
+                das <strong>7 colunas</strong>.
+            </p>
+            <div class="d-flex flex-wrap gap-1 mt-2">
+                {% for i in range(1, 8) %}
+                <div class="coluna-badge">C{{ i }}</div>
+                {% endfor %}
+                <div class="ms-2 d-flex align-items-center">
+                    <span style="font-size:.8rem;color:#666;">→ 1 dígito (0-9) cada</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dica estratégica -->
+    <div class="tip-card">
+        <h6><i class="fas fa-lightbulb me-2"></i>Dica Estratégica</h6>
+        <div class="tip-step">
+            <div class="tip-num">1</div>
+            <div class="tip-text">Sincronize a base com os últimos concursos oficiais da Caixa.</div>
+        </div>
+        <div class="tip-step">
+            <div class="tip-num">2</div>
+            <div class="tip-text">Analise a frequência e atraso de cada dígito por coluna separadamente.</div>
+        </div>
+        <div class="tip-step">
+            <div class="tip-num">3</div>
+            <div class="tip-text">Gere as apostas pelos 6 modelos e rode o backtesting histórico.</div>
+        </div>
+        <div class="tip-step">
+            <div class="tip-num">4</div>
+            <div class="tip-text">Faça 2-3 rodadas de teste em papel antes de apostar com dinheiro real.</div>
+        </div>
+    </div>
+</div>
+
+<!-- ROTAS -->
+<h5 class="fw-700 mb-3" style="color:var(--primary);"><i class="fas fa-map-signs me-2"></i>Ferramentas Disponíveis</h5>
+<div class="row g-3">
+
+    <div class="col-md-6 col-lg-3">
+        <a class="route-card" href="/analise/">
+            <div class="route-icon">📊</div>
+            <div class="route-title">{{ nav_cfg.sniper.title }}</div>
+            <div class="route-desc">Frequência, atraso e heatmap de dígitos 0-9 em cada uma das 7 colunas.</div>
+            <div class="mt-2">
+                <span class="badge" style="background:var(--accent-light);color:var(--primary);font-size:.7rem;">Freq /
+                    Atraso</span>
+                <span class="badge"
+                    style="background:var(--accent-light);color:var(--primary);font-size:.7rem;">Heatmap</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <a class="route-card" href="/modelos/">
+            <div class="route-icon">🎯</div>
+            <div class="route-title">Central de Modelos</div>
+            <div class="route-desc">6 modelos estratégicos para escolha de dígitos por coluna. 24 apostas cada.</div>
+            <div class="mt-2">
+                <span class="badge" style="background:var(--accent-light);color:var(--primary);font-size:.7rem;">6
+                    Modelos</span>
+                <span class="badge"
+                    style="background:var(--accent-light);color:var(--primary);font-size:.7rem;">Backtesting</span>
+                <span class="badge"
+                    style="background:var(--accent-light);color:var(--primary);font-size:.7rem;">Download TXT</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <a class="route-card" href="/central-conferencias/">
+            <div class="route-icon">🏆</div>
+            <div class="route-title">Conferência Histórica</div>
+            <div class="route-desc">Confere automaticamente o padrão sniper (top dígito por coluna) contra os concursos
+                reais.</div>
+            <div class="mt-2">
+                <span class="badge"
+                    style="background:var(--accent-light);color:var(--primary);font-size:.7rem;">Auto-Load</span>
+                <span class="badge"
+                    style="background:var(--accent-light);color:var(--primary);font-size:.7rem;">Histórico</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <a class="route-card" href="/">
+            <div class="route-icon">🔄</div>
+            <div class="route-title">Sincronizar Dados</div>
+            <div class="route-desc">Mantém o banco atualizado com todos os concursos oficiais via API da Caixa.</div>
+            <div class="mt-2">
+                <span class="badge" style="background:var(--accent-light);color:var(--primary);font-size:.7rem;">API
+                    Caixa</span>
+                <span class="badge"
+                    style="background:var(--accent-light);color:var(--primary);font-size:.7rem;">Automático</span>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Últimos sorteios -->
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <i class="fas fa-history me-2"></i>Últimos Sorteios
+    </div>
+    <div class="card-body p-0" id="ultimosSorteios">
+        <div class="text-center text-muted py-4">
+            <i class="fas fa-spinner fa-spin me-2"></i>Carregando...
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function sincronizar() {
+        const btn = document.getElementById('btnSync');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sincronizando...';
+        try {
+            const r = await fetch('/api/sincronizar', { method: 'POST' });
+            const d = await r.json();
+            Swal.fire({
+                icon: d.status === 'error' ? 'error' : 'success',
+                title: d.status === 'error' ? 'Erro' : (d.status === 'info' ? 'Info' : 'Concluído'),
+                text: d.message,
+                timer: 3000,
+                showConfirmButton: false,
+            }).then(() => { if (d.news > 0) location.reload(); else carregarUltimos(); });
+        } catch (e) {
+            Swal.fire('Erro', 'Falha na conexão com o servidor.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Sincronizar Dados';
+        }
+    }
+
+    async function carregarUltimos() {
+        const div = document.getElementById('ultimosSorteios');
+        // Super Sete: 1 linha só (C1–C7). Não há “ordenado × ordem do sorteio”.
+        const renderColunas = (digitos) => {
+            const cols = (digitos || []).map((d) =>
+                `<span class="coluna-badge">${d}</span>`
+            ).join('');
+            return `<div class="draw-dezenas-wrap"><div class="draw-dezenas-grid">${cols}</div></div>`;
+        };
+        try {
+            let r;
+            try {
+                r = await fetch('/analise/api/ultimos');
+            } catch (e) {
+                console.error("Endpoint não encontrado no analise, tentando na raiz");
+                r = await fetch('/api/ultimos');
+            }
+
+            const d = await r.json();
+            if (d.status !== 'success') { div.innerHTML = '<div class="text-danger p-3">Erro ao carregar.</div>'; return; }
+            let html = '';
+            d.sorteios.forEach(s => {
+                html += `<div class="px-3 py-3 border-bottom d-flex justify-content-center">
+                <div style="display:grid; grid-template-columns: 195px 1fr; gap: 2rem; align-items:center;">
+                <div class="fw-bold text-end" style="color:var(--primary); white-space:nowrap;">
+                    <span style="font-size:1.05rem;">#${s.concurso}</span> <span class="text-muted fw-normal mx-2">|</span> <span class="text-muted">${s.data}</span>
+                </div>
+                ${renderColunas(s.digitos)}
+            </div></div>`;
+            });
+            div.innerHTML = html || '<div class="text-muted p-3 text-center">Sincronize os dados primeiro.</div>';
+        } catch (e) { div.innerHTML = `<div class="text-danger p-3">${e.message}</div>`; }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await carregarUltimos();
+    });
+</script>
+{% endblock %}

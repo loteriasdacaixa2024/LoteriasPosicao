@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Gerador Inteligente por Dígitos — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+{{ ball_css or '' }}
+#ge-digitos-intel .cc-panel {
+    border-radius: var(--radius, 12px);
+    border: 1px solid rgba(0, 0, 0, .08);
+    background: var(--surface, #fff);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+    margin-bottom: 1rem;
+}
+#ge-digitos-intel .cc-step-card { border-left-width: 4px; border-left-style: solid; }
+#ge-digitos-intel .cc-step-1 {
+    background: var(--accent-light);
+    border-left-color: var(--primary);
+}
+#ge-digitos-intel .cc-step-2 {
+    background: color-mix(in srgb, var(--accent-light) 65%, #fff);
+    border-left-color: var(--primary);
+}
+#ge-digitos-intel .cc-step-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 1.55rem; height: 1.55rem; border-radius: 999px;
+    font-size: .72rem; font-weight: 800;
+    background: var(--primary); color: #fff;
+}
+#ge-digitos-intel .cc-step-title { display: flex; align-items: center; gap: .45rem; font-weight: 700; margin-bottom: .25rem; }
+#ge-digitos-intel .cc-step-hint { font-size: .82rem; color: #6c757d; }
+#ge-digitos-intel .cc-ball {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid #dee2e6; background: #f8f9fa;
+    font-weight: 700; font-size: .82rem; cursor: pointer; user-select: none;
+    color: var(--primary);
+}
+#ge-digitos-intel .cc-ball.selected {
+    background: var(--accent); color: var(--on-accent);
+    border-color: var(--accent);
+}
+#ge-digitos-intel .cc-volante { display: grid; gap: 6px; }
+
+/* Apostas geradas — colunas alinhadas em todas as modalidades */
+#ge-digitos-intel #ciResultado {
+    overflow-x: auto;
+}
+#ge-digitos-intel .ci-apostas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: min-content;
+}
+#ge-digitos-intel .ci-aposta-row {
+    display: grid;
+    grid-template-columns: 2.5rem repeat(var(--ci-cols, 15), 2rem);
+    gap: 4px;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+}
+#ge-digitos-intel .ci-aposta-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 1.55rem;
+    border-radius: 0.35rem;
+    background: #6c757d;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+#ge-digitos-intel .ci-dez {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 1.55rem;
+    border-radius: 0.35rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+@supports not (background: color-mix(in srgb, white, black)) {
+    #ge-digitos-intel .cc-step-2 {
+        background: var(--accent-light);
+    }
+}
+</style>
+
+<div id="ge-digitos-intel" class="container-fluid py-3"
+     data-api="{{ api_base }}">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1"><i class="fas fa-brain" style="color:var(--primary);"></i> Gerador Inteligente por Dígitos</h1>
+            <p class="text-muted small mb-0">{{ modality_nome }} — pool 0–9 · análise histórica completa · export TXT</p>
+            {% if modality_key == 'supersete' %}
+            <p class="small mb-0 mt-1" style="color:var(--primary);">
+                Super Sete: gera <strong>7 colunas</strong> a partir do pool; o mesmo dígito pode repetir entre colunas (regra Caixa).
+            </p>
+            {% endif %}
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('geradores_elite.index') }}">Geradores de Elite</a>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('geradores_elite.construtor_construcoes_page') }}">Construtor</a>
+            <a class="btn btn-sm btn-outline-secondary" href="/analise/somas-digitos/" target="_blank" rel="noopener"
+               style="border-color:var(--primary);color:var(--primary);">Análise Dígitos</a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="cc-panel cc-step-card cc-step-1 p-3">
+                <h2 class="h6 cc-step-title"><span class="cc-step-badge">1</span> Pool para gerar</h2>
+                <p class="cc-step-hint mb-2">
+                    {% if modality_key == 'supersete' %}
+                    Os <strong>10 dígitos (0–9)</strong> são candidatos para as
+                    <strong>7 colunas</strong>. O dígito <strong>0</strong> é válido
+                    (ex.: concurso 877 → <strong>0|0|5|5|1|7|3</strong>).
+                    Repetição entre colunas é permitida pela Caixa.
+                    {% else %}
+                    Os <strong>10 dígitos únicos (0–9)</strong> formam as dezenas
+                    (ex.: <strong>09</strong>, <strong>22</strong>, <strong>34</strong>).
+                    Padrão: todos marcados. Você pode desmarcar para restringir o pool.
+                    {% endif %}
+                </p>
+                <div class="cc-volante mb-2" id="ciVolante" style="grid-template-columns:repeat(5,1fr);max-width:280px;margin:0 auto;"></div>
+                <div class="d-flex flex-wrap gap-2 mb-2 justify-content-center">
+                    <button type="button" class="btn btn-sm btn-success" id="ciBtnTodos" title="Marca os 10 dígitos únicos 0–9"
+                            style="background:var(--primary);border-color:var(--primary);">Todos (0–9)</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="ciBtnFreq"
+                            style="border-color:var(--primary);color:var(--primary);">Top frequência</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="ciBtnAtraso"
+                            style="border-color:var(--primary);color:var(--primary);">Mais atrasados</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="ciBtnCopiarAba2" title="Importa pool salvo no Construtor (Aba Dígitos)">Importar do Construtor</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="ciBtnLimpar">Limpar</button>
+                </div>
+                <div class="small" id="ciResumoCombos">—</div>
+                <div class="small text-danger" id="ciAviso"></div>
+            </div>
+            <div class="cc-panel cc-step-card cc-step-2 p-3">
+                <h2 class="h6 cc-step-title"><span class="cc-step-badge">2</span> Geração</h2>
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label small mb-0">{% if modality_key == 'supersete' %}Colunas / aposta{% else %}Dezenas / aposta{% endif %}</label>
+                        <select class="form-select form-select-sm" id="ciDezenasAposta"></select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small mb-0">Qtd. apostas</label>
+                        <input type="number" class="form-control form-control-sm" id="ciQtdApostas" min="1" max="20" value="10">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small mb-0">Priorizar</label>
+                        <select class="form-select form-select-sm" id="ciModo">
+                            <option value="frequencia">Frequência</option>
+                            <option value="atraso">Atraso / frios</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small mb-0">Exigir qtd dígitos na aposta</label>
+                        <select class="form-select form-select-sm" id="ciExigirQtd" title="Quantos dígitos distintos (0–9) a aposta deve ter">
+                            <option value="">Não exigir</option>
+                            {% for q in range(0, 10) %}
+                            <option value="{{ q }}">{{ q }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="small text-muted mb-2" id="ciDiagPrev">{% if modality_key == 'supersete' %}7 colunas · dígitos 0–9 (inclui o 0) · repetição livre.{% else %}10 dígitos únicos (0–9) formam as dezenas (ex.: 09, 22, 34).{% endif %}</div>
+                <div class="form-check small mb-2">
+                    <input class="form-check-input" type="checkbox" id="ciSalvarSessao">
+                    <label class="form-check-label" for="ciSalvarSessao">Salvar sessão + construção (conferência)</label>
+                </div>
+                <input type="text" class="form-control form-control-sm mb-2" id="ciNomeSessao" placeholder="Nome da sessão (se salvar)">
+                <button type="button" class="btn w-100" id="ciBtnGerar"
+                        style="background:var(--primary);border-color:var(--primary);color:#fff;">
+                    <i class="fas fa-bolt"></i> Gerar palpites
+                </button>
+                <div class="mt-2 small" id="ciStatus"></div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="cc-panel p-3 mb-3">
+                <h2 class="h6 mb-2"><i class="fas fa-lightbulb" style="color:var(--primary);"></i> Insights (todos os sorteios)</h2>
+                <div id="ciInsights" class="small text-muted">Carregando…</div>
+            </div>
+            <div class="cc-panel p-3">
+                <h2 class="h6 mb-2"><i class="fas fa-ticket-alt text-success"></i> Apostas geradas</h2>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <button type="button" class="btn btn-sm btn-success" id="ciBtnExportLote" disabled>
+                        <i class="fas fa-file-export"></i> Exportar lote .TXT
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success" id="ciBtnExportTodas">
+                        <i class="fas fa-file-export"></i> Exportar todas .TXT
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="ciBtnListarTodas">
+                        <i class="fas fa-th-list"></i> Ver todas as combinações
+                    </button>
+                </div>
+                {% if ui_config.has_mes %}
+                <div class="mb-2" style="max-width:220px;">
+                    <label class="form-label small mb-0">Mês da Sorte (export)</label>
+                    <select class="form-select form-select-sm" id="ciMesExport">
+                        <option value="">— sem mês —</option>
+                        {% for m in (ui_config.meses or []) %}
+                        <option value="{{ m.num }}">{{ m.nome }} ({{ m.abrev }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div id="ciResultado" class="small text-muted">Nenhuma geração ainda.</div>
+                <hr class="my-2">
+                <div class="small text-muted mb-1" id="ciCombosMeta"></div>
+                <div id="ciCombosLista" class="small" style="max-height:240px;overflow:auto;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.__CC_UI__ = {{ ui_config | tojson }};
+window.__CC_API__ = {{ api_base | tojson }};
+window.__CC_DIGITOS__ = true;
+window.__CC_DIGITOS_PAGE__ = 'intel';
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=12"></script>
+{% endblock %}

@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .15);
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .07);
+        padding: 1.2rem 1.5rem;
+        border: 1px solid #d6f0da;
+        text-align: center;
+    }
+
+    .stat-card .sc-val {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--primary);
+    }
+
+    .stat-card .sc-lbl {
+        font-size: .75rem;
+        color: #888;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .sync-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .07);
+        border: 1px solid #d6f0da;
+    }
+
+    .last-draw-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: .75rem;
+    }
+
+    .dez-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 800;
+        font-size: .9rem;
+        box-shadow: 0 2px 8px rgba(30, 200, 58, .4);
+    }
+
+    .draw-dezenas-wrap {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+
+    .draw-dezenas-grid {
+        display: grid;
+        column-gap: 6px;
+        align-items: end;
+    }
+
+    .draw-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .dez-ball-ordem {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: transparent;
+        border: 1.5px solid var(--accent);
+        color: var(--primary);
+        font-weight: 800;
+        font-size: .72rem;
+    }
+</style>
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div style="font-size:2.5rem">🍀</div>
+        <div>
+            <h2 class="mb-0">Mega Sena Absoluta</h2>
+            <p class="mb-0" style="opacity:.85;font-size:.9rem;">60 dezenas · Sorteiam 6 · Você marca mínimo 6 · Prob: 1
+                em 50.063.860</p>
+        </div>
+        <div class="ms-auto">
+            <button class="btn btn-sm" id="btnSync"
+                style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:700;"
+                onclick="sincronizar()">
+                <i class="fas fa-satellite-dish me-1"></i>Sincronizar Dados
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="alert border mb-4 d-flex gap-3 align-items-start"
+    style="background:#fff;border-color:#cfe8d5 !important;border-radius:12px;">
+    <div style="font-size:1.6rem;line-height:1;">⚡</div>
+    <div>
+        <div class="fw-bold" style="color:var(--primary);">Mecânica da Mega-Sena</div>
+        <div style="font-size:.9rem;color:#555;">
+            A aposta mínima usa 6 dezenas entre 60. Estratégias de combinação e backtesting ajudam a equilibrar risco,
+            custo por volante e potencial nas faixas Sena, Quina e Quadra.
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="sc-val" id="statConcursos">—</div>
+            <div class="sc-lbl">Concursos</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="sc-val" id="statUltimo">—</div>
+            <div class="sc-lbl">Último Concurso</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="sc-val" style="color:var(--accent);">6</div>
+            <div class="sc-lbl">Dezenas Sorteadas</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="sc-val" style="color:var(--accent);">60</div>
+            <div class="sc-lbl">Total de Dezenas</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-5">
+        <div class="sync-card h-100">
+            <h5><i class="fas fa-satellite-dish me-2" style="color:var(--accent);"></i>Base de Dados</h5>
+            <p class="text-muted mb-3" style="font-size:.85rem;">
+                Importa <strong>todos</strong> os concursos faltantes da API oficial (concurso 1 até o último atual).
+            </p>
+            <div id="statusBanco" class="alert alert-warning py-2 small mb-3">Verificando base...</div>
+            <div class="progress mb-2 d-none" id="syncProgressWrap" style="height:8px;">
+                <div class="progress-bar bg-success" id="syncProgressBar" style="width:0%"></div>
+            </div>
+            <button class="btn w-100 fw-bold" id="btnSyncMain" style="background:var(--accent);color:#fff;"
+                onclick="sincronizar()">
+                <i class="fas fa-cloud-download-alt me-2"></i>Sincronizar histórico completo
+            </button>
+            <div id="syncLog" class="mt-3" style="font-size:.8rem;"></div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="sync-card h-100">
+            <h5><i class="fas fa-rocket me-2" style="color:var(--accent);"></i>Acessos Rápidos</h5>
+            <div class="row g-2 mt-1">
+                <div class="col-6"><a href="/analise/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-crosshairs me-2"></i>{{ nav_cfg.sniper.title }}<br><small
+                            class="fw-normal opacity-75">Heatmap 6×10</small></a></div>
+                <div class="col-6"><a href="/modelos/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-layer-group me-2"></i>6 Modelos<br><small class="fw-normal opacity-75">14
+                            apostas × modelo</small></a></div>
+                <div class="col-6"><a href="/central-conferencias/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-trophy me-2"></i>Conferência<br><small class="fw-normal opacity-75">Histórico
+                            de acertos</small></a></div>
+                <div class="col-6"><a href="/modelos/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-chart-bar me-2"></i>Backtesting<br><small class="fw-normal opacity-75">Sena ·
+                            Quina · Quadra</small></a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <i class="fas fa-history me-2"></i>Últimos Sorteios
+    </div>
+    <div class="card-body p-0" id="ultimosSorteios">
+        <div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Carregando...</div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    async function carregarStatusBanco() {
+        const box = document.getElementById('statusBanco');
+        if (!box) return null;
+        try {
+            const r = await fetch('/api/status-banco');
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message);
+            const api = d.ultimo_concurso_api || '—';
+            if (d.completo) {
+                box.className = 'alert alert-success py-2 small mb-3';
+                box.innerHTML = `<strong>Base completa:</strong> ${d.total_registros.toLocaleString()} concursos (1 a ${api}).`;
+            } else {
+                box.className = 'alert alert-warning py-2 small mb-3';
+                const alvo = d.alvo_sincronizacao || api || d.concurso_maximo;
+                let txt = `<strong>Atenção:</strong> só <strong>${d.total_registros.toLocaleString()}</strong> concursos gravados, `
+                    + `mas o intervalo vai até <strong>#${alvo}</strong>. `
+                    + `Faltam <strong>${d.concursos_faltantes.toLocaleString()}</strong> concursos no meio do histórico.`;
+                if (d.api_offline) txt += ` <span class="text-danger">(API Caixa indisponível agora — tente de novo.)</span>`;
+                txt += ` Clique em <strong>Sincronizar</strong> abaixo.`;
+                box.innerHTML = txt;
+            }
+            return d;
+        } catch (e) {
+            box.className = 'alert alert-danger py-2 small mb-3';
+            box.textContent = 'Erro ao verificar base: ' + e.message;
+            return null;
+        }
+    }
+
+    async function sincronizar() {
+        const btn = document.getElementById('btnSync'), btn2 = document.getElementById('btnSyncMain'), log = document.getElementById('syncLog');
+        const progWrap = document.getElementById('syncProgressWrap'), progBar = document.getElementById('syncProgressBar');
+        [btn, btn2].forEach(b => { if (b) { b.disabled = true; b.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sincronizando...'; } });
+        progWrap.classList.remove('d-none');
+        let continuar = true;
+        let totalImportado = 0;
+        let faltantesInicial = 0;
+
+        try {
+            while (continuar) {
+                log.innerHTML = '<i class="fas fa-spinner fa-spin me-2 text-warning"></i>Baixando lote da API Caixa...';
+                const r = await fetch('/api/sincronizar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ modo: 'completo', limite: 80 }),
+                });
+                const d = await r.json();
+                if (d.status === 'error') throw new Error(d.message);
+
+                if (!faltantesInicial && d.faltantes_total) faltantesInicial = d.faltantes_total;
+                totalImportado += d.news || 0;
+                continuar = !!d.continuar;
+
+                const total = faltantesInicial || d.faltantes_total || 1;
+                const feito = total - (d.faltantes_restantes || 0);
+                const pct = Math.min(100, Math.round((feito / total) * 100));
+                progBar.style.width = pct + '%';
+
+                log.innerHTML = `<span class="text-success"><i class="fas fa-cloud-download-alt me-1"></i>${d.message}</span>`;
+                await carregarStats();
+                if (!continuar) break;
+                await new Promise(res => setTimeout(res, 400));
+            }
+            await carregarStatusBanco();
+            await carregarUltimos();
+            log.innerHTML += `<br><span class="text-success fw-bold">Total importado nesta sessão: ${totalImportado}</span>`;
+        } catch (e) {
+            log.innerHTML = `<span class="text-danger">${e.message}</span>`;
+        } finally {
+            [btn, btn2].forEach(b => {
+                if (b) {
+                    b.disabled = false;
+                    b.innerHTML = b.id === 'btnSync'
+                        ? '<i class="fas fa-satellite-dish me-1"></i>Sincronizar Dados'
+                        : '<i class="fas fa-cloud-download-alt me-2"></i>Sincronizar histórico completo';
+                }
+            });
+        }
+    }
+
+    async function carregarStats() {
+        try {
+            const st = await fetch('/api/status-banco').then(r => r.json());
+            if (st.status === 'success') {
+                document.getElementById('statConcursos').textContent = st.total_registros.toLocaleString();
+                document.getElementById('statUltimo').textContent = '#' + (st.ultimo_concurso_api || st.concurso_maximo);
+            }
+        } catch (e) { }
+    }
+    async function carregarUltimos() {
+        const div = document.getElementById('ultimosSorteios');
+        const fmtDez = (n) => String(n).padStart(2, '0');
+        const renderDrawPairs = (sorted, ordem, topCls = 'dez-ball', botCls = 'dez-ball-ordem', colW = 40) => {
+            const n = Math.max((sorted || []).length, (ordem || []).length);
+            const cols = Array.from({ length: n }, (_, i) => `
+                <div class="draw-col">
+                    ${sorted && sorted[i] != null ? `<span class="${topCls}">${fmtDez(sorted[i])}</span>` : ''}
+                    ${ordem && ordem[i] != null ? `<span class="${botCls}">${fmtDez(ordem[i])}</span>` : ''}
+                </div>`).join('');
+            return `<div class="draw-dezenas-wrap"><div class="draw-dezenas-grid" style="grid-template-columns: repeat(${n}, ${colW}px)">${cols}</div></div>`;
+        };
+        try {
+            const r = await fetch('/analise/api/ultimos'); const d = await r.json();
+            if (d.status !== 'success') { div.innerHTML = '<div class="text-danger p-3">Erro.</div>'; return; }
+            let html = '';
+            d.sorteios.forEach(s => {
+                const ordem = s.dezenas_ordem && s.dezenas_ordem.length ? s.dezenas_ordem : s.dezenas;
+                html += `<div class="px-3 py-3 border-bottom d-flex justify-content-center">
+                    <div style="display:grid; grid-template-columns: 195px 1fr; gap: 2rem; align-items:center;">
+                    <div class="fw-bold text-end" style="color:var(--primary); white-space:nowrap;">
+                        <span style="font-size:1.05rem;">#${s.concurso}</span> <span class="text-muted fw-normal mx-2">|</span> <span class="text-muted">${s.data}</span>
+                    </div>
+                    ${renderDrawPairs(s.dezenas, ordem, 'dez-ball', 'dez-ball-ordem', 40)}
+                </div></div>`;
+            });
+            div.innerHTML = html || '<div class="text-muted p-3 text-center">Sincronize os dados primeiro.</div>';
+        } catch (e) { div.innerHTML = `<div class="text-danger p-3">${e.message}</div>`; }
+    }
+    document.addEventListener('DOMContentLoaded', async () => {
+        await carregarStatusBanco();
+        await carregarStats();
+        await carregarUltimos();
+    });
+</script>
+{% endblock %}

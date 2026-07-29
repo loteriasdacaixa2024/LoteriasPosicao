@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 border-top border-5" style="border-color: #672666 !important;">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <h4 class="mb-0" style="color: #672666;">
+                    <i class="fas fa-crosshairs"></i> Sniper Lotofácil - Rank Vertical Absoluto
+                </h4>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-dark fw-bold" id="btnDownloadTxt" style="display: none;">
+                        <i class="fas fa-download"></i> Baixar Arquivo .TXT
+                    </button>
+                    <a href="/central-conferencias/" class="btn text-white fw-bold" id="btnIrConferencia"
+                        style="background-color: var(--accent); display: none;">
+                        <i class="fas fa-trophy"></i> Ir para Conferência
+                    </a>
+                    <button class="btn text-white fw-bold" style="background-color: #672666;" id="btnGerarSniper">
+                        <i class="fas fa-bolt"></i> Extrair Matriz Sniper (24 Linhas)
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-center mb-0" style="font-size: 0.9rem;">
+                        <thead class="bg-dark text-white">
+                            <tr>
+                                <th rowspan="2" class="align-middle" style="width: 50px;">Atraso</th>
+                                <th rowspan="2" class="align-middle" style="width: 50px;">Rank</th>
+                                <th colspan="15" class="py-2" style="background-color: #4a1c4a;">15 Posições (Geração
+                                    Vertical)</th>
+                            </tr>
+                            <tr>
+                                {% for i in range(1, 16) %}
+                                <th style="background-color: #672666;">P{{i}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody id="tbodySniper">
+                            <tr>
+                                <td colspan="17" class="py-5 text-muted">Use o botão acima para extrair...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let matrizSniperAtual = [];
+    let ultimoConcursoSniper = 0;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("btnDownloadTxt").addEventListener("click", function () {
+            if (matrizSniperAtual.length === 0) return;
+
+            let conteudoTxt = "";
+            matrizSniperAtual.forEach(linha => {
+                const dezenasFormatadas = linha.dezenas_formatadas.map(d => String(d).padStart(2, '0'));
+                conteudoTxt += dezenasFormatadas.join(" ") + "\n";
+            });
+
+            const blob = new Blob([conteudoTxt], { type: "text/plain" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `[Rank_Vertical_Absoluto_Sniper_LOTOFACIL_SORTEIO]_${ultimoConcursoSniper}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        });
+
+        document.getElementById("btnGerarSniper").addEventListener("click", async function () {
+            const btn = this;
+            const tbody = document.getElementById("tbodySniper");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processando...';
+            document.getElementById("btnDownloadTxt").style.display = "none";
+            document.getElementById("btnIrConferencia").style.display = "none";
+            tbody.innerHTML = '<tr><td colspan="17" class="py-5 text-muted"><i class="fas fa-spinner fa-spin"></i> Calculando matriz sniper...</td></tr>';
+
+            try {
+                const response = await fetch("/analise/api/gerar-sniper", { method: "POST" });
+                const data = await response.json();
+
+                if (data.error) {
+                    Swal.fire("Erro", data.error, "error");
+                    tbody.innerHTML = `<tr><td colspan="17" class="py-5 text-danger">${data.error}</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = "";
+
+                if (data.matrizes && data.matrizes.length > 0) {
+                    matrizSniperAtual = data.matrizes;
+                    ultimoConcursoSniper = data.ultimo_concurso || 0;
+                    document.getElementById("btnDownloadTxt").style.display = "block";
+                    document.getElementById("btnIrConferencia").style.display = "block";
+
+                    data.matrizes.forEach(linha => {
+                        let dezenasHtml = "";
+                        linha.dezenas_formatadas.forEach(d => {
+                            dezenasHtml += `<td class="fw-bold">${String(d).padStart(2, '0')}</td>`;
+                        });
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>-</td>
+                                <td>#${linha.aposta_num}</td>
+                                ${dezenasHtml}
+                            </tr>
+                        `;
+                    });
+                    Swal.fire("Sucesso!", `${data.total_geradas || data.matrizes.length} apostas geradas! (${data.descartadas || 1} descartada por atraso=0)`, "success");
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="17" class="py-5 text-muted">Nenhum dado retornado.</td></tr>';
+                }
+            } catch (error) {
+                console.error("Erro ao gerar sniper:", error);
+                Swal.fire("Erro", "Erro ao comunicar com o servidor", "error");
+                tbody.innerHTML = '<tr><td colspan="17" class="py-5 text-danger">Erro de conexão.</td></tr>';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-bolt"></i> Extrair Matriz Sniper (24 Linhas)';
+            }
+        });
+    });
+</script>
+{% endblock %}

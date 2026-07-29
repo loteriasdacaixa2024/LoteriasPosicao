@@ -1,0 +1,1135 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<style>
+    :root {
+        --mega-green: #0a6b1a;
+        --mega-dark: #04250a;
+        --mega-light: #1ec83a;
+        --gold: #d97706;
+        --surface: #fff;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--mega-dark), var(--mega-green));
+        border-radius: 16px;
+        padding: 2rem 2.5rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 32px rgba(4, 37, 10, 0.15);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        right: -40px;
+        top: -40px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(30, 200, 58, 0.2), transparent 70%);
+    }
+
+    .dash-card {
+        background: var(--surface);
+        border-radius: 14px;
+        padding: 1.25rem;
+        border: 1px solid rgba(10, 107, 26, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        transition: var(--transition);
+        height: 100%;
+    }
+
+    .dash-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(10, 107, 26, 0.1);
+    }
+
+    .dash-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--mega-green);
+        line-height: 1.1;
+    }
+
+    .dash-label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        font-weight: 600;
+    }
+
+    .toggle-dezenas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .btn-dezena-opt {
+        border: 2px solid #e5e7eb;
+        background: #fff;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-dezena-opt:hover {
+        border-color: var(--mega-light);
+        background: #f0fdf4;
+    }
+
+    .btn-dezena-opt.active {
+        border-color: var(--mega-green);
+        background: linear-gradient(135deg, #e8faea, #d1fae5);
+        color: var(--mega-dark);
+        box-shadow: 0 4px 12px rgba(10, 107, 26, 0.2);
+    }
+
+    .progress-colunas {
+        height: 10px;
+        border-radius: 99px;
+        background: #e5e7eb;
+        overflow: hidden;
+    }
+
+    .progress-colunas .bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--mega-green), var(--mega-light));
+        border-radius: 99px;
+        transition: width 0.4s ease;
+    }
+
+    .status-banner {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 0.85rem 1.25rem;
+        font-weight: 600;
+        color: var(--mega-dark);
+    }
+
+    .status-banner.warn {
+        background: #fffbeb;
+        border-color: #fde68a;
+        color: #92400e;
+    }
+
+    .status-banner.ok {
+        background: #ecfdf5;
+        border-color: #6ee7b7;
+    }
+
+    .volante-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+
+    .coluna-card {
+        background: #fff;
+        border: 2px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: center;
+        position: relative;
+    }
+
+    .coluna-card:hover:not(.disabled) {
+        border-color: var(--mega-light);
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(10, 107, 26, 0.12);
+    }
+
+    .coluna-card.active {
+        border-color: var(--mega-green);
+        background: linear-gradient(180deg, #f0fdf4, #fff);
+        box-shadow: 0 6px 24px rgba(10, 107, 26, 0.2);
+        animation: pulseSel 0.4s ease;
+    }
+
+    .coluna-card.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    @keyframes pulseSel {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.04); }
+        100% { transform: scale(1); }
+    }
+
+    .dezena-ball {
+        display: inline-flex;
+        width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #f3f4f6;
+        border: 1.5px solid #e5e7eb;
+        font-weight: 800;
+        font-size: 0.72rem;
+        margin: 2px;
+    }
+
+    .coluna-card.active .dezena-ball {
+        background: var(--mega-green);
+        color: #fff;
+        border-color: var(--mega-dark);
+    }
+
+    .sugestao-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.4rem 0.85rem;
+        border-radius: 99px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        margin: 4px;
+    }
+
+    .sugestao-chip:hover {
+        background: #f0fdf4;
+        border-color: var(--mega-green);
+    }
+
+    .sugestao-bloco {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.65rem;
+    }
+
+    .sugestao-bloco .sugestao-motivo {
+        font-size: 0.78rem;
+        color: #6b7280;
+        margin-top: 0.35rem;
+        line-height: 1.4;
+    }
+
+    .sugestao-bloco .sugestao-stats {
+        font-size: 0.75rem;
+        color: var(--mega-dark);
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+
+    .jogo-row {
+        border-bottom: 1px solid #f3f4f6;
+        padding: 0.6rem 0;
+        transition: background 0.15s;
+    }
+
+    .jogo-row:hover {
+        background: #f9fafb;
+    }
+
+    .num-chip {
+        display: inline-flex;
+        width: 34px;
+        height: 34px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--mega-green);
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.8rem;
+        margin: 2px;
+    }
+
+    .premio-badge {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-weight: 700;
+    }
+
+    .premio-quadra { background: #dbeafe; color: #1e40af; }
+    .premio-quina { background: #fef3c7; color: #92400e; }
+    .premio-sena { background: #d1fae5; color: #065f46; }
+
+    .section-title {
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: var(--mega-dark);
+        margin-bottom: 1rem;
+    }
+
+    .btn-action {
+        border-radius: 10px;
+        font-weight: 700;
+        padding: 0.55rem 1.1rem;
+    }
+
+    #chartColunas { max-height: 280px; }
+
+    .desdob-col-card {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .desdob-col-head {
+        font-weight: 800;
+        color: var(--mega-dark);
+        margin-bottom: 0.35rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .desdob-pares-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .par-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #fff;
+        border: 1.5px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-weight: 700;
+        font-size: 0.78rem;
+        color: var(--mega-dark);
+    }
+
+    .par-chip .par-num {
+        background: var(--mega-green);
+        color: #fff;
+        font-size: 0.65rem;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dupla-chip {
+        display: inline-block;
+        background: #ecfdf5;
+        border: 1.5px solid var(--mega-green);
+        border-radius: 8px;
+        padding: 2px 10px;
+        font-weight: 800;
+        font-size: 0.85rem;
+        color: var(--mega-dark);
+    }
+
+    .formula-box {
+        background: linear-gradient(90deg, #ecfdf5, #f0fdf4);
+        border: 1px solid #86efac;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: var(--mega-dark);
+    }
+
+    .instrucoes-fixas {
+        background: linear-gradient(135deg, #f0fdf4 0%, #fff 50%, #eff6ff 100%);
+        border: 2px solid rgba(10, 107, 26, 0.2);
+        border-left: 5px solid var(--mega-green);
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(10, 107, 26, 0.06);
+    }
+
+    .instrucoes-fixas .instr-titulo {
+        font-weight: 800;
+        color: var(--mega-dark);
+        font-size: 1.05rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .instrucoes-fixas ol {
+        margin: 0 0 1rem 0;
+        padding-left: 1.25rem;
+        font-size: 0.92rem;
+        line-height: 1.55;
+    }
+
+    .instrucoes-fixas ol li { margin-bottom: 0.35rem; }
+
+    .instr-tabela {
+        width: 100%;
+        font-size: 0.82rem;
+        margin-bottom: 1rem;
+    }
+
+    .instr-tabela th {
+        background: var(--mega-green);
+        color: #fff;
+        padding: 6px 10px;
+        font-weight: 700;
+    }
+
+    .instr-tabela td {
+        padding: 5px 10px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #fff;
+    }
+
+    .instr-tabela tr.destaque td {
+        background: #ecfdf5;
+        font-weight: 700;
+        color: var(--mega-dark);
+    }
+
+    .instr-exemplo {
+        background: #fff;
+        border: 1px dashed var(--mega-green);
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
+        font-size: 0.88rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .instr-ao-vivo {
+        background: #fffbeb;
+        border: 1.5px solid #fbbf24;
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .instr-ao-vivo strong { color: #92400e; }
+</style>
+
+<div class="page-header animate__animated animate__fadeIn">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+            <span class="badge bg-light text-dark mb-2">Módulo Des2 · Independente do Des1</span>
+            <h2 class="mb-1 fw-extrabold text-uppercase">Desdobramento Estrutural por Colunas</h2>
+            <p class="mb-0 opacity-90" style="font-size:.95rem;">
+                Cada coluna escolhida é desdobrada <strong>de 2 em 2</strong> (15 pares).
+                Cada jogo = 1 par de cada coluna → 3 colunas = 2+2+2 = 6 dezenas.
+            </p>
+        </div>
+        <div class="text-end">
+            <div class="fw-bold fs-4" id="hdrTotalJogos">15</div>
+            <small class="opacity-75">jogos estruturais</small>
+        </div>
+    </div>
+</div>
+
+<!-- Instruções fixas — sempre visíveis -->
+<div class="instrucoes-fixas" id="painelInstrucoesFixas" role="region" aria-label="Como funciona o Des2">
+    <div class="instr-titulo">
+        <i class="fas fa-circle-info text-success"></i> Como funciona — leia antes de jogar
+    </div>
+    <ol>
+        <li><strong>Escolha quantas dezenas</strong> terá cada jogo (6, 8, 10… só valores pares).</li>
+        <li><strong>Selecione as colunas (finais)</strong> no volante — cada coluna tem 6 dezenas.</li>
+        <li>O sistema <strong>desdobra cada coluna de 2 em 2</strong> → são <strong>15 pares</strong> por coluna (C(6,2)).</li>
+        <li>Cada <strong>jogo</strong> usa <strong>1 par de cada coluna escolhida</strong>, sempre o <strong>mesmo número do par</strong> (alinhamento horizontal).</li>
+        <li>Total de dezenas no jogo = <strong>colunas × 2</strong> (cada coluna entra com uma dupla).</li>
+    </ol>
+
+    <table class="instr-tabela table table-sm mb-3">
+        <thead>
+            <tr><th>Dezenas no jogo</th><th>Colunas a escolher</th><th>Fórmula (duplas)</th></tr>
+        </thead>
+        <tbody>
+            <tr data-dezenas="6"><td>6</td><td>3 colunas</td><td>2 + 2 + 2</td></tr>
+            <tr data-dezenas="8" class="destaque"><td>8</td><td>4 colunas</td><td>2 + 2 + 2 + 2</td></tr>
+            <tr data-dezenas="10"><td>10</td><td>5 colunas</td><td>2 + 2 + 2 + 2 + 2</td></tr>
+            <tr data-dezenas="12"><td>12</td><td>6 colunas</td><td>6 duplas</td></tr>
+            <tr data-dezenas="14"><td>14</td><td>7 colunas</td><td>7 duplas</td></tr>
+            <tr data-dezenas="16"><td>16</td><td>8 colunas</td><td>8 duplas</td></tr>
+            <tr data-dezenas="18"><td>18</td><td>9 colunas</td><td>9 duplas</td></tr>
+            <tr data-dezenas="20"><td>20</td><td>10 colunas</td><td>10 duplas</td></tr>
+        </tbody>
+    </table>
+
+    <div class="instr-exemplo">
+        <strong>Exemplo (6 dezenas — colunas 1, 0 e 7):</strong><br>
+        Coluna 1 → 15 pares (01-11, 01-21, …) · Coluna 0 (final 10) → 15 pares (10-20, …) · Coluna 7 → 15 pares (07-17, …)<br>
+        <strong>Jogo 1:</strong> par #1 da col.1 + par #1 da col.0 + par #1 da col.7 → <code>01-11 + 10-20 + 07-17</code><br>
+        <strong>Jogo 2:</strong> par #2 + par #2 + par #2 · … até <strong>15 jogos</strong> (par #15 de cada coluna).
+    </div>
+
+    <div class="instr-ao-vivo" id="instrucaoAoVivo">
+        <i class="fas fa-hand-pointer me-1"></i>
+        <strong>Sua seleção agora:</strong>
+        <span id="instrucaoAoVivoTexto">Escolha a quantidade de dezenas e selecione as colunas no volante abaixo.</span>
+    </div>
+</div>
+
+<!-- Dashboard -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="dash-card">
+            <div class="dash-label">Dezenas / Jogo</div>
+            <div class="dash-value" id="dashDezenas">8</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="dash-card">
+            <div class="dash-label">Colunas necessárias</div>
+            <div class="dash-value" id="dashColunasNec">4</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="dash-card">
+            <div class="dash-label">Valor unitário</div>
+            <div class="dash-value" id="dashValorUnit">R$ 140</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="dash-card">
+            <div class="dash-label">Valor total (15 jogos)</div>
+            <div class="dash-value" id="dashValorTotal">R$ 2.100</div>
+        </div>
+    </div>
+</div>
+
+<!-- Config dezenas -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="section-title"><i class="fas fa-sliders me-2"></i>Quantidade de dezenas por jogo</div>
+        <p class="text-muted small mb-3">Apenas quantidades pares. Cada coluna contribui com 1 par (2 dezenas).</p>
+        <div class="toggle-dezenas" id="toggleDezenas"></div>
+    </div>
+</div>
+
+<!-- Status seleção -->
+<div class="mb-3">
+    <div class="status-banner warn" id="statusBanner">
+        Selecione 4 colunas para 8 dezenas.
+    </div>
+    <div class="mt-2">
+        <div class="d-flex justify-content-between small fw-semibold text-muted mb-1">
+            <span id="lblProgresso">0 de 4 colunas</span>
+            <span id="lblFaltam">Faltam 4</span>
+        </div>
+        <div class="progress-colunas">
+            <div class="bar" id="barProgresso" style="width:0%"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Sugestões inteligentes -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <div class="section-title mb-0"><i class="fas fa-wand-magic-sparkles me-2"></i>Modo inteligente</div>
+            <button class="btn btn-outline-success btn-sm btn-action" id="btnRecarregarSugestoes">
+                <i class="fas fa-sync-alt me-1"></i> Atualizar sugestões
+            </button>
+        </div>
+        <p class="text-muted small mb-2">
+            Análise sobre o <strong>universo de 60 dezenas</strong> (histórico real do banco).
+            As colunas são <strong>finais</strong> (1–9 e 0): cada uma reúne 6 dezenas
+            de 01 a 60 — ex. coluna 3 → 03, <strong>13</strong>, <strong>23</strong>, <strong>33</strong>, <strong>43</strong>, <strong>53</strong>.
+        </p>
+        <div id="sugestoesUniverso60" class="formula-box mb-3 d-none small"></div>
+        <div id="sugestoesArea" class="mb-2">
+            <span class="text-muted small">Carregando sugestões...</span>
+        </div>
+    </div>
+</div>
+
+<!-- Volante -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="section-title"><i class="fas fa-table-cells me-2"></i>Volante — Selecione as colunas (finais)</div>
+        <div class="volante-grid" id="volanteGrid"></div>
+    </div>
+</div>
+
+<!-- Desdobramento 2 em 2 de cada coluna -->
+<div class="card border-0 shadow-sm mb-4 d-none" id="cardDesdobramentoColunas">
+    <div class="card-body">
+        <div class="section-title"><i class="fas fa-layer-group me-2"></i>Desdobramento de cada coluna (2 em 2)</div>
+        <p class="text-muted small mb-2">
+            Cada coluna tem 6 dezenas → combinadas de 2 em 2 geram <strong>15 pares</strong> (C(6,2)).
+            Nos jogos, o par #1 de todas as colunas forma o jogo 1, o par #2 forma o jogo 2, e assim por diante.
+        </p>
+        <div class="formula-box mb-3" id="lblFormulaDesdob"></div>
+        <div id="areaDesdobramentoColunas"></div>
+    </div>
+</div>
+
+<!-- Ações -->
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <button class="btn btn-success btn-action" id="btnGerar" disabled>
+        <i class="fas fa-bolt me-1"></i> Gerar 15 jogos
+    </button>
+    <button class="btn btn-outline-primary btn-action" id="btnConferir" disabled>
+        <i class="fas fa-history me-1"></i> Backtest histórico
+    </button>
+    <button class="btn btn-outline-secondary btn-action" id="btnCopiar" disabled>
+        <i class="fas fa-copy me-1"></i> Copiar
+    </button>
+    <button class="btn btn-outline-secondary btn-action" id="btnTxt" disabled>
+        <i class="fas fa-file-alt me-1"></i> TXT
+    </button>
+    <button class="btn btn-outline-secondary btn-action" id="btnCsv" disabled>
+        <i class="fas fa-file-excel me-1"></i> Excel (CSV)
+    </button>
+    <button class="btn btn-outline-secondary btn-action" id="btnPrint" disabled>
+        <i class="fas fa-print me-1"></i> Imprimir
+    </button>
+    <button class="btn btn-outline-warning btn-action" id="btnSalvar" disabled>
+        <i class="fas fa-save me-1"></i> Salvar estratégia
+    </button>
+    <button class="btn btn-outline-danger btn-action" id="btnLimpar">
+        <i class="fas fa-eraser me-1"></i> Limpar
+    </button>
+</div>
+
+<!-- Resultados -->
+<div class="card border-0 shadow-sm mb-4 d-none" id="cardResultados">
+    <div class="card-body">
+        <div class="section-title"><i class="fas fa-list-ol me-2"></i>15 jogos — duplas alinhadas</div>
+        <div class="formula-box mb-3 d-none" id="resumoJogos"></div>
+        <div id="listaJogos" style="max-height:500px;overflow-y:auto"></div>
+    </div>
+</div>
+
+<!-- Backtest -->
+<div class="card border-0 shadow-sm mb-4 d-none" id="cardBacktest">
+    <div class="card-body">
+        <div class="section-title"><i class="fas fa-chart-line me-2"></i>Conferência histórica</div>
+        <div class="row g-3 mb-3" id="statsBacktest"></div>
+        <canvas id="chartColunas" height="120"></canvas>
+        <div class="mt-3 table-responsive" style="max-height:300px;overflow-y:auto">
+            <table class="table table-sm table-hover">
+                <thead><tr><th>Jogo</th><th>Quadras</th><th>Quinas</th><th>Senas</th><th>Melhor</th></tr></thead>
+                <tbody id="tbodyBacktestJogos"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Estratégias salvas -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="section-title"><i class="fas fa-folder-open me-2"></i>Estratégias salvas (Des2)</div>
+        <div id="listaEstrategias" class="text-muted small">Nenhuma estratégia salva.</div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const API = '/des2/api';
+    let config = null;
+    let qtdDezenas = 8;
+    let colunasSel = [];
+    let ultimoResultado = null;
+    let chartInst = null;
+
+    const fmtMoeda = v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+    async function carregarConfig() {
+        const r = await fetch(API + '/config');
+        const d = await r.json();
+        if (d.status !== 'success') throw new Error(d.message);
+        config = d;
+        renderToggleDezenas();
+        renderVolante();
+        atualizarDashboard();
+        carregarSugestoes();
+        carregarEstrategias();
+    }
+
+    function colunasNecessarias() { return qtdDezenas / 2; }
+
+    function atualizarInstrucaoAoVivo(extra) {
+        const el = document.getElementById('instrucaoAoVivoTexto');
+        if (!el) return;
+        const nec = colunasNecessarias();
+        const qtd = colunasSel.length;
+        const colsLbl = colunasSel.map(c => (c === 10 ? '0' : c)).join(', ') || '—';
+        const formula = nec > 0 ? Array(nec).fill('2').join(' + ') : '?';
+        let txt = `Modo <strong>${qtdDezenas} dezenas</strong>: selecione <strong>${nec} coluna(s)</strong> ` +
+            `(${qtd} selecionada(s): ${colsLbl}). ` +
+            `Cada coluna gera <strong>15 pares (2 em 2)</strong>; no jogo entra <strong>1 par por coluna</strong> ` +
+            `→ fórmula <strong>${formula} = ${qtdDezenas} dezenas</strong>.`;
+        if (qtd === nec && qtd > 0) {
+            txt += ` <span class="text-success">Pronto: ${nec}×2 = ${qtdDezenas} dezenas · 15 jogos alinhados (par #1…#15).</span>`;
+        } else if (qtd > 0) {
+            txt += ` Faltam <strong>${nec - qtd}</strong> coluna(s).`;
+        }
+        if (extra) txt += ' ' + extra;
+        el.innerHTML = txt;
+        document.querySelectorAll('.instr-tabela tbody tr').forEach(tr => {
+            tr.classList.toggle('destaque', +tr.dataset.dezenas === qtdDezenas);
+        });
+    }
+
+    function labelColuna(c) {
+        return c === 10
+            ? 'Coluna 0 (final 0) — 10, 20, 30, 40, 50, 60'
+            : `Coluna ${c}`;
+    }
+
+    function paresCombinacoes(dezenas) {
+        const p = [];
+        for (let i = 0; i < dezenas.length; i++) {
+            for (let j = i + 1; j < dezenas.length; j++) {
+                p.push([dezenas[i], dezenas[j]]);
+            }
+        }
+        return p;
+    }
+
+    function renderDesdobramentoColunas() {
+        const card = document.getElementById('cardDesdobramentoColunas');
+        const area = document.getElementById('areaDesdobramentoColunas');
+        const lbl = document.getElementById('lblFormulaDesdob');
+        if (!colunasSel.length) {
+            card.classList.add('d-none');
+            return;
+        }
+        card.classList.remove('d-none');
+        const nec = colunasNecessarias();
+        const qtd = colunasSel.length;
+        const dezenasJogo = qtd * 2;
+        const soma = Array(qtd).fill('2').join(' + ');
+        lbl.innerHTML =
+            `<strong>${qtd} coluna(s) × 2 dezenas = ${dezenasJogo} dezenas por jogo</strong> (${soma})` +
+            (qtd === nec
+                ? ' · <span class="text-success">Seleção completa — cada jogo usa 1 par de cada coluna (mesmo número do par).</span>'
+                : ` · Faltam <strong>${nec - qtd}</strong> coluna(s) para atingir ${qtdDezenas} dezenas.`);
+
+        const vol = config.colunas_volante || {};
+        area.innerHTML = colunasSel.map(c => {
+            const info = vol[String(c)] || { dezenas: [] };
+            const pares = paresCombinacoes(info.dezenas);
+            const paresHtml = pares.map((p, i) =>
+                `<span class="par-chip" title="Par ${i + 1} da coluna ${c === 10 ? 0 : c}">
+                    <span class="par-num">${i + 1}</span>${String(p[0]).padStart(2, '0')}-${String(p[1]).padStart(2, '0')}
+                </span>`
+            ).join('');
+            return `<div class="desdob-col-card animate__animated animate__fadeIn">
+                <div class="desdob-col-head">${labelColuna(c)}
+                    <span class="badge bg-success">C(6,2) = 15 pares</span></div>
+                <div class="small text-muted mb-2">Desdobramento 2 em 2 das dezenas:
+                    ${info.dezenas.map(d => String(d).padStart(2, '0')).join(' · ')}</div>
+                <div class="desdob-pares-grid">${paresHtml}</div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderToggleDezenas() {
+        const el = document.getElementById('toggleDezenas');
+        el.innerHTML = '';
+        (config.dezenas_permitidas || [6,8,10,12,14,16,18,20]).forEach(n => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'btn-dezena-opt' + (n === qtdDezenas ? ' active' : '');
+            b.textContent = n + ' dezenas';
+            b.dataset.n = n;
+            b.title = `Selecione ${n/2} colunas`;
+            b.onclick = () => {
+                qtdDezenas = n;
+                colunasSel = [];
+                document.querySelectorAll('.btn-dezena-opt').forEach(x => x.classList.toggle('active', +x.dataset.n === n));
+                renderVolante();
+                atualizarDashboard();
+                atualizarStatus();
+                carregarSugestoes();
+                resetResultados();
+                atualizarInstrucaoAoVivo();
+            };
+            el.appendChild(b);
+        });
+    }
+
+    function renderVolante() {
+        const grid = document.getElementById('volanteGrid');
+        grid.innerHTML = '';
+        const vol = config.colunas_volante || {};
+        for (let c = 1; c <= 10; c++) {
+            const info = vol[String(c)] || { dezenas: [] };
+            const card = document.createElement('div');
+            card.className = 'coluna-card' + (colunasSel.includes(c) ? ' active' : '');
+            card.dataset.col = c;
+            const label = c === 10 ? 'Col. 0' : 'Col. ' + c;
+            card.innerHTML = `<div class="fw-bold mb-1">${label}</div>
+                <div>${info.dezenas.map(d => `<span class="dezena-ball">${String(d).padStart(2,'0')}</span>`).join('')}</div>`;
+            card.onclick = () => toggleColuna(c);
+            grid.appendChild(card);
+        }
+        atualizarStatus();
+    }
+
+    function toggleColuna(c) {
+        const nec = colunasNecessarias();
+        const idx = colunasSel.indexOf(c);
+        if (idx >= 0) {
+            colunasSel.splice(idx, 1);
+        } else {
+            if (colunasSel.length >= nec) {
+                Swal.fire({ icon: 'info', title: 'Limite atingido', text: `Para ${qtdDezenas} dezenas, selecione no máximo ${nec} colunas.`, timer: 2200, showConfirmButton: false });
+                return;
+            }
+            colunasSel.push(c);
+        }
+        colunasSel.sort((a, b) => a - b);
+        renderVolante();
+        atualizarStatus();
+    }
+
+    function aplicarSugestao(cols) {
+        colunasSel = [...cols].sort((a, b) => a - b);
+        renderVolante();
+        atualizarStatus();
+    }
+
+    function atualizarDashboard() {
+        const nec = colunasNecessarias();
+        const preco = (config.tabela_precos || {})[qtdDezenas] || 0;
+        const total = preco * 15;
+        document.getElementById('dashDezenas').textContent = qtdDezenas;
+        document.getElementById('dashColunasNec').textContent = nec;
+        document.getElementById('dashValorUnit').textContent = fmtMoeda(preco);
+        document.getElementById('dashValorTotal').textContent = fmtMoeda(total);
+        document.getElementById('hdrTotalJogos').textContent = '15';
+        atualizarInstrucaoAoVivo();
+    }
+
+    function atualizarStatus() {
+        const nec = colunasNecessarias();
+        const qtd = colunasSel.length;
+        const faltam = Math.max(0, nec - qtd);
+        const pct = nec ? Math.min(100, (qtd / nec) * 100) : 0;
+        const banner = document.getElementById('statusBanner');
+        document.getElementById('lblProgresso').textContent = `${qtd} de ${nec} colunas selecionadas`;
+        document.getElementById('lblFaltam').textContent = faltam ? `Faltam ${faltam}` : 'Pronto para gerar';
+        document.getElementById('barProgresso').style.width = pct + '%';
+        const ok = qtd === nec;
+        document.getElementById('btnGerar').disabled = !ok;
+        if (ok) {
+            banner.className = 'status-banner ok';
+            banner.innerHTML = `✓ <strong>${nec} colunas</strong> (${colunasSel.map(c => c === 10 ? '0' : c).join(', ')}): ` +
+                `cada uma com 15 pares → jogo = ${Array(nec).fill('2').join('+')} = <strong>${qtdDezenas} dezenas</strong>. Gere os 15 jogos.`;
+        } else {
+            banner.className = 'status-banner warn';
+            banner.textContent =
+                `Para ${qtdDezenas} dezenas, selecione ${nec} coluna(s) (${qtd} selecionada(s)). ` +
+                `Cada coluna = 1 dupla (2 dezenas) no jogo.`;
+        }
+        document.querySelectorAll('.coluna-card').forEach(card => {
+            const c = +card.dataset.col;
+            const sel = colunasSel.includes(c);
+            const bloq = !sel && colunasSel.length >= nec;
+            card.classList.toggle('active', sel);
+            card.classList.toggle('disabled', bloq);
+        });
+        renderDesdobramentoColunas();
+        atualizarInstrucaoAoVivo();
+    }
+
+    function fmtColsLista(cols) {
+        return cols.map(c => (c === 10 ? '0' : c)).join(', ');
+    }
+
+    async function carregarSugestoes() {
+        const area = document.getElementById('sugestoesArea');
+        const box60 = document.getElementById('sugestoesUniverso60');
+        try {
+            const r = await fetch(`${API}/sugestoes?dezenas=${qtdDezenas}`);
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message);
+
+            if (box60) {
+                box60.classList.remove('d-none');
+                let stHtml = '';
+                try {
+                    const st = await fetch('/api/status-banco').then(r => r.json());
+                    if (st.status === 'success') {
+                        if (st.concursos_faltantes > 0) {
+                            stHtml = `<div class="alert alert-danger py-2 mb-2 small">
+                                <strong>Base incompleta:</strong> ${st.total_registros.toLocaleString()} registros,
+                                faltam <strong>${st.concursos_faltantes.toLocaleString()}</strong> concursos até o #${st.ultimo_concurso_api}.
+                                <a href="/" class="alert-link">Sincronizar na página inicial</a>.
+                            </div>`;
+                        } else {
+                            stHtml = `<span class="text-success"><strong>${st.total_registros.toLocaleString()} concursos completos</strong> (1 a ${st.ultimo_concurso_api}) · </span>`;
+                        }
+                    }
+                } catch (_) {}
+                box60.innerHTML = stHtml
+                    + (d.total_concursos ? `${d.total_concursos} concursos usados na análise · ` : '')
+                    + `Top 60 quentes: <span class="text-success">${(d.top_60_quentes || []).join(', ')}</span> · `
+                    + `Top atrasadas: <span class="text-warning">${(d.top_60_atrasadas || []).join(', ')}</span>`;
+            }
+
+            const tipos = [
+                { key: 'quentes', label: '🔥 Quentes', cor: 'success' },
+                { key: 'atrasadas', label: '⏳ Atrasadas', cor: 'warning' },
+                { key: 'balanceadas', label: '⚖️ Balanceadas', cor: 'primary' },
+            ];
+            area.innerHTML = tipos.map(t => {
+                const cols = d.sugestoes[t.key] || [];
+                const perfil = (d.perfis && d.perfis[t.key]) || {};
+                const motivo = perfil.motivo || '';
+                const dezDest = (perfil.dezenas_destaque || []).join(', ');
+                const ref60 = (perfil.universo_60_referencia || []).join(', ');
+                const linhasDet = (perfil.detalhe || []).map(x => {
+                    const finais = (x.dezenas_coluna || []).join(' ');
+                    const quentes = (x.top_quentes || []).join(', ');
+                    const atr = (x.top_atrasadas || []).join(', ');
+                    return `<div class="mb-1"><strong>${x.label}</strong> (${finais})<br>
+                        <span class="text-success">quentes: ${quentes}</span> ·
+                        <span class="text-warning">atrasadas: ${atr}</span></div>`;
+                }).join('');
+                return `<div class="sugestao-bloco border-${t.cor}">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <span class="small fw-bold">${t.label}</span>
+                        <span class="sugestao-chip" data-cols='${JSON.stringify(cols)}'>
+                            Aplicar colunas (finais) [${fmtColsLista(cols)}]
+                        </span>
+                    </div>
+                    ${dezDest ? `<div class="sugestao-stats">Dezenas fortes nesta seleção: <strong>${dezDest}</strong></div>` : ''}
+                    ${ref60 ? `<div class="sugestao-stats text-muted fw-normal">Referência universo 60: ${ref60}</div>` : ''}
+                    <div class="sugestao-stats text-muted fw-normal">${linhasDet}</div>
+                    ${motivo ? `<div class="sugestao-motivo">${motivo}</div>` : ''}
+                </div>`;
+            }).join('');
+            area.querySelectorAll('.sugestao-chip').forEach(chip => {
+                chip.onclick = () => aplicarSugestao(JSON.parse(chip.dataset.cols));
+            });
+        } catch (e) {
+            area.innerHTML = '<span class="text-danger small">Erro ao carregar sugestões.</span>';
+        }
+    }
+
+    function resetResultados() {
+        ultimoResultado = null;
+        document.getElementById('cardResultados').classList.add('d-none');
+        document.getElementById('cardBacktest').classList.add('d-none');
+        document.getElementById('resumoJogos').classList.add('d-none');
+        ['btnConferir','btnCopiar','btnTxt','btnCsv','btnPrint','btnSalvar'].forEach(id => document.getElementById(id).disabled = true);
+    }
+
+    function renderJogos(res) {
+        const lista = document.getElementById('listaJogos');
+        const resumo = document.getElementById('resumoJogos');
+        if (res.resumo) {
+            resumo.textContent = res.resumo;
+            resumo.classList.remove('d-none');
+        }
+        lista.innerHTML = res.jogos_detalhe.map(j => {
+            const duplas = (j.pares || []).map(p => {
+                const colLbl = p.coluna === 10 ? 'Col.0' : `Col.${p.coluna}`;
+                const fmt = p.fmt || p.par.map(x => String(x).padStart(2, '0')).join('-');
+                return `<span class="dupla-chip" title="${colLbl}">${colLbl}: ${fmt}</span>`;
+            }).join(' <span class="text-muted fw-bold">+</span> ');
+            const seq = (j.dezenas_fmt_sequencia || j.dezenas_fmt).map(n =>
+                `<span class="num-chip">${n}</span>`
+            ).join('');
+            return `<div class="jogo-row animate__animated animate__fadeIn">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="fw-bold text-success">Jogo ${String(j.numero).padStart(2, '0')}</span>
+                    <span class="badge bg-secondary">Par alinhado #${j.indice_par || j.numero}</span>
+                </div>
+                <div class="mb-1">${duplas}</div>
+                <div>${seq}</div>
+            </div>`;
+        }).join('');
+        document.getElementById('cardResultados').classList.remove('d-none');
+        if (res.desdobramento_colunas && res.desdobramento_colunas.length) {
+            colunasSel = [...res.colunas];
+            renderDesdobramentoColunas();
+        }
+    }
+
+    async function gerarJogos() {
+        Swal.fire({ title: 'Gerando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        try {
+            const r = await fetch(API + '/gerar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ colunas: colunasSel, qtd_dezenas: qtdDezenas }),
+            });
+            const d = await r.json();
+            Swal.close();
+            if (d.status !== 'success') throw new Error(d.message);
+            ultimoResultado = d;
+            renderJogos(d);
+            ['btnConferir','btnCopiar','btnTxt','btnCsv','btnPrint','btnSalvar'].forEach(id => document.getElementById(id).disabled = false);
+            Swal.fire({ icon: 'success', title: '15 jogos gerados!', timer: 1800, showConfirmButton: false });
+            atualizarInstrucaoAoVivo('Jogos gerados: cada linha mostra as duplas por coluna e o par alinhado (#1 a #15).');
+        } catch (e) {
+            Swal.close();
+            Swal.fire({ icon: 'error', title: 'Erro', text: e.message });
+        }
+    }
+
+    async function conferirHistorico() {
+        if (!ultimoResultado) return;
+        Swal.fire({ title: 'Conferindo histórico...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        try {
+            const r = await fetch(API + '/conferir', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jogos: ultimoResultado.jogos }),
+            });
+            const d = await r.json();
+            Swal.close();
+            if (d.status !== 'success') throw new Error(d.message);
+            renderBacktest(d.conferencia);
+        } catch (e) {
+            Swal.close();
+            Swal.fire({ icon: 'error', title: 'Erro', text: e.message });
+        }
+    }
+
+    function renderBacktest(c) {
+        document.getElementById('cardBacktest').classList.remove('d-none');
+        document.getElementById('statsBacktest').innerHTML = `
+            <div class="col-6 col-md-3"><div class="dash-card"><div class="dash-label">Quadras</div><div class="dash-value">${c.quadra}</div></div></div>
+            <div class="col-6 col-md-3"><div class="dash-card"><div class="dash-label">Quinas</div><div class="dash-value">${c.quina}</div></div></div>
+            <div class="col-6 col-md-3"><div class="dash-card"><div class="dash-label">Senas</div><div class="dash-value">${c.sena}</div></div></div>
+            <div class="col-6 col-md-3"><div class="dash-card"><div class="dash-label">Taxa quadra</div><div class="dash-value">${c.taxa_quadra_pct}%</div></div></div>`;
+        document.getElementById('tbodyBacktestJogos').innerHTML = c.por_jogo.map((j, i) =>
+            `<tr><td>#${i+1}</td><td>${j.quadra}</td><td>${j.quina}</td><td>${j.sena}</td><td>${j.melhor_acerto}</td></tr>`
+        ).join('');
+        const labels = c.ranking_colunas.map(x => 'Col ' + (x.coluna === 10 ? '0' : x.coluna));
+        const data = c.ranking_colunas.map(x => x.premios);
+        if (chartInst) chartInst.destroy();
+        chartInst = new Chart(document.getElementById('chartColunas'), {
+            type: 'bar',
+            data: { labels, datasets: [{ label: 'Prêmios (acertos em coluna)', data, backgroundColor: '#0a6b1a' }] },
+            options: { responsive: true, plugins: { legend: { display: false } } },
+        });
+    }
+
+    function copiarJogos() {
+        if (!ultimoResultado) return;
+        const txt = ultimoResultado.jogos_detalhe.map(j => j.dezenas_fmt.join(' ')).join('\n');
+        navigator.clipboard.writeText(txt).then(() => Swal.fire({ icon: 'success', title: 'Copiado!', timer: 1200, showConfirmButton: false }));
+    }
+
+    async function exportar(tipo) {
+        const r = await fetch(API + '/exportar/' + tipo, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resultado: ultimoResultado, nome: 'Des2_Estrutural' }),
+        });
+        const blob = await r.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'Des2_Estrutural.' + (tipo === 'txt' ? 'txt' : 'csv');
+        a.click();
+    }
+
+    function imprimirJogos() {
+        if (!ultimoResultado) return;
+        const w = window.open('', '_blank');
+        w.document.write('<html><head><title>Des2</title></head><body><h2>Des2 — Jogos</h2><pre>' +
+            ultimoResultado.jogos_detalhe.map(j => `Jogo ${j.numero}: ${j.dezenas_fmt.join(' ')}`).join('\n') + '</pre></body></html>');
+        w.print();
+    }
+
+    async function salvarEstrategia() {
+        const { value: nome } = await Swal.fire({ title: 'Nome da estratégia', input: 'text', inputValue: 'Des2 ' + new Date().toLocaleString('pt-BR') });
+        if (!nome) return;
+        const r = await fetch(API + '/salvar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, colunas: colunasSel, qtd_dezenas: qtdDezenas, resultado: ultimoResultado }),
+        });
+        const d = await r.json();
+        if (d.status === 'success') {
+            Swal.fire({ icon: 'success', title: 'Salvo!', timer: 1500, showConfirmButton: false });
+            carregarEstrategias();
+        } else Swal.fire({ icon: 'error', text: d.message });
+    }
+
+    async function carregarEstrategias() {
+        const el = document.getElementById('listaEstrategias');
+        try {
+            const r = await fetch(API + '/estrategias');
+            const d = await r.json();
+            if (!d.estrategias || !d.estrategias.length) {
+                el.innerHTML = '<span class="text-muted small">Nenhuma estratégia salva.</span>';
+                return;
+            }
+            el.innerHTML = d.estrategias.map(e =>
+                `<div class="d-flex align-items-center justify-content-between border-bottom py-2">
+                    <div><strong>${e.nome}</strong><br><small class="text-muted">${e.qtd_dezenas} dez. · cols ${e.colunas} · ${fmtMoeda(e.valor_total)}</small></div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-1" data-load="${e.id}">Carregar</button>
+                        <button class="btn btn-sm btn-outline-danger" data-del="${e.id}">×</button>
+                    </div>
+                </div>`
+            ).join('');
+            el.querySelectorAll('[data-load]').forEach(btn => btn.onclick = async () => {
+                const id = btn.dataset.load;
+                const res = await fetch(`${API}/estrategia/${id}`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    const e = data.estrategia;
+                    qtdDezenas = e.qtd_dezenas;
+                    colunasSel = e.colunas;
+                    document.querySelectorAll('.btn-dezena-opt').forEach(x => x.classList.toggle('active', +x.dataset.n === qtdDezenas));
+                    renderVolante();
+                    atualizarDashboard();
+                    ultimoResultado = { jogos: e.jogos, jogos_detalhe: e.jogos.map((j, i) => ({ numero: i+1, dezenas: j, dezenas_fmt: j.map(n => String(n).padStart(2,'0')), pares: [] })), qtd_dezenas: e.qtd_dezenas, colunas: e.colunas };
+                    renderJogos(ultimoResultado);
+                    ['btnConferir','btnCopiar','btnTxt','btnCsv','btnPrint','btnSalvar'].forEach(id => document.getElementById(id).disabled = false);
+                }
+            });
+            el.querySelectorAll('[data-del]').forEach(btn => btn.onclick = async () => {
+                await fetch(`${API}/estrategia/${btn.dataset.del}`, { method: 'DELETE' });
+                carregarEstrategias();
+            });
+        } catch (_) {
+            el.innerHTML = '<span class="text-muted small">Erro ao listar.</span>';
+        }
+    }
+
+    document.getElementById('btnGerar').onclick = gerarJogos;
+    document.getElementById('btnConferir').onclick = conferirHistorico;
+    document.getElementById('btnCopiar').onclick = copiarJogos;
+    document.getElementById('btnTxt').onclick = () => exportar('txt');
+    document.getElementById('btnCsv').onclick = () => exportar('csv');
+    document.getElementById('btnPrint').onclick = imprimirJogos;
+    document.getElementById('btnSalvar').onclick = salvarEstrategia;
+    document.getElementById('btnRecarregarSugestoes').onclick = carregarSugestoes;
+    document.getElementById('btnLimpar').onclick = () => {
+        colunasSel = [];
+        renderVolante();
+        resetResultados();
+        atualizarInstrucaoAoVivo();
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarConfig().then(() => atualizarInstrucaoAoVivo());
+    });
+})();
+</script>
+{% endblock %}

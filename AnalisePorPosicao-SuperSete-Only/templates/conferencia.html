@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+{% block content %}
+{% include 'cc_conferencia_shell_start.html' %}
+
+<style>
+    /* ── Layout central ── */
+    .conf-center {
+        max-width: 860px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-xdark) 100%);
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .15);
+    }
+
+    /* ── Estatísticas resumo ── */
+    .stats-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+
+    .stat-pill {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+        border-radius: 10px;
+        padding: .45rem .9rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .07);
+        min-width: 70px;
+        border: 1.5px solid #eee;
+    }
+
+    .stat-pill .sp-val {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--primary);
+    }
+
+    .stat-pill .sp-lbl {
+        font-size: .6rem;
+        font-weight: 700;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    /* ── Filtros de acertos totais ── */
+    .filter-bar {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: .75rem;
+        justify-content: center;
+    }
+
+    .filter-bar .fb-label {
+        font-size: .72rem;
+        font-weight: 700;
+        color: #777;
+        margin-right: 4px;
+    }
+
+    .ac-filter-btn {
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 700;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all .15s;
+        background: #f0f0f0;
+        color: #555;
+    }
+
+    .ac-filter-btn.active {
+        color: #fff;
+    }
+
+    .ac-filter-btn[data-ac="all"].active {
+        background: var(--primary);
+    }
+
+    .ac-filter-btn[data-ac="7"].active {
+        background: #155724;
+    }
+
+    .ac-filter-btn[data-ac="6"].active {
+        background: #1a5c6e;
+    }
+
+    .ac-filter-btn[data-ac="5"].active {
+        background: #5a6e1a;
+    }
+
+    .ac-filter-btn[data-ac="4"].active {
+        background: #856404;
+        color: #fff3cd;
+    }
+
+    .ac-filter-btn[data-ac="3"].active {
+        background: #555;
+    }
+
+    .ac-filter-btn[data-ac="0"].active {
+        background: #aaa;
+    }
+
+    /* ── Grid de resultados ── */
+    .result-row {
+        display: grid;
+        grid-template-columns: 68px 72px repeat(7, 1fr) 58px;
+        align-items: center;
+        gap: 3px;
+        padding: .28rem .4rem;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: .8rem;
+    }
+
+    .result-row:hover {
+        background: var(--accent-light);
+    }
+
+    /* ── Cabeçalho de colunas com filtro ── */
+    .col-header-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 5px 2px;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        transition: all .15s;
+        user-select: none;
+        gap: 2px;
+        background: #f8f9fa;
+    }
+
+    .col-header-btn:hover {
+        background: var(--accent-light);
+        border-color: var(--primary);
+    }
+
+    .col-header-btn.col-active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary-xdark);
+    }
+
+    .col-header-btn .ch-label {
+        font-size: .65rem;
+        font-weight: 800;
+    }
+
+    .col-header-btn .ch-sniper {
+        font-size: .7rem;
+        font-weight: 900;
+        background: rgba(0, 0, 0, .08);
+        border-radius: 4px;
+        padding: 1px 5px;
+        min-width: 22px;
+        text-align: center;
+    }
+
+    .col-header-btn.col-active .ch-sniper {
+        background: rgba(255, 255, 255, .25);
+    }
+
+    .col-header-btn .ch-hits {
+        font-size: .55rem;
+        opacity: .7;
+        font-weight: 600;
+    }
+
+    .digito-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 7px;
+        font-weight: 800;
+        font-size: .88rem;
+        margin: auto;
+    }
+
+    .dg-hit {
+        background: var(--accent);
+        color: #1a2600;
+    }
+
+    .dg-miss {
+        background: #f0f0f0;
+        color: #aaa;
+    }
+
+    .acertos-tag {
+        font-weight: 800;
+        text-align: center;
+        border-radius: 8px;
+        padding: 3px 5px;
+        font-size: .78rem;
+    }
+
+    .ac-7 {
+        background: #155724;
+        color: #d4edda;
+    }
+
+    .ac-6 {
+        background: #1a5c6e;
+        color: #c8eaf2;
+    }
+
+    .ac-5 {
+        background: var(--accent);
+        color: #1a2600;
+    }
+
+    .ac-4 {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .ac-3 {
+        background: #e8e8e8;
+        color: #555;
+    }
+
+    .ac-0 {
+        background: #f8f8f8;
+        color: #ccc;
+    }
+
+    /* ── Linhas ocultas pelo filtro ── */
+    .result-row.hidden {
+        display: none;
+    }
+
+    /* ── Sem resultados ── */
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #aaa;
+        font-size: .85rem;
+        display: none;
+    }
+</style>
+
+<!-- CONTEÚDO CENTRALIZADO -->
+<div class="conf-center">
+
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div>
+                <h2><i class="fas fa-trophy me-2"></i>Conferência Histórica — Super Sete</h2>
+                <p class="mb-0" style="opacity:.85;font-size:.9rem;">
+                    Padrão Sniper (top-freq por coluna) vs. últimos 200 concursos reais.
+                </p>
+            </div>
+            <div class="ms-auto">
+                <button class="btn btn-sm" style="background:var(--accent);color:#1a2600;font-weight:700;"
+                    id="btnRecarregar" onclick="carregar()">
+                    <i class="fas fa-sync-alt me-1"></i>Recarregar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas resumo -->
+    <div class="stats-bar" id="statsBar" style="display:none!important;"></div>
+
+    <!-- Filtro de acertos totais -->
+    <div class="filter-bar" id="filterBar" style="display:none;">
+        <span class="fb-label"><i class="fas fa-filter me-1"></i>Filtrar acertos:</span>
+        <button class="ac-filter-btn active" data-ac="all" onclick="setFiltroAc(this)">Todos</button>
+        <button class="ac-filter-btn" data-ac="7" onclick="setFiltroAc(this)">7 col</button>
+        <button class="ac-filter-btn" data-ac="6" onclick="setFiltroAc(this)">6 col</button>
+        <button class="ac-filter-btn" data-ac="5" onclick="setFiltroAc(this)">5 col</button>
+        <button class="ac-filter-btn" data-ac="4" onclick="setFiltroAc(this)">4 col</button>
+        <button class="ac-filter-btn" data-ac="3" onclick="setFiltroAc(this)">3 col</button>
+        <button class="ac-filter-btn" data-ac="0" onclick="setFiltroAc(this)">0-2 col</button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header fw-bold"
+            style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;padding:.7rem 1rem;">
+            <i class="fas fa-history me-2"></i>Resultados Históricos
+        </div>
+        <div class="card-body p-0">
+            <!-- Cabeçalho com filtros por coluna -->
+            <div class="result-row" style="background:#f8f9fa;" id="headerRow">
+                <span style="font-size:.7rem;font-weight:700;color:#666;text-align:center;">#</span>
+                <span style="font-size:.7rem;font-weight:700;color:#666;">Data</span>
+                <!-- C1–C7 injetados via JS após carregar os dados -->
+                <span id="colHeaders" style="display:contents;"></span>
+                <span style="font-size:.65rem;font-weight:700;color:#666;text-align:center;">Acertos</span>
+            </div>
+
+            <div id="conferencia-corpo">
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-spinner fa-spin me-2"></i>Carregando conferência...
+                </div>
+            </div>
+            <div class="no-results" id="noResults">
+                <i class="fas fa-search me-2"></i>Nenhum resultado para este filtro.
+            </div>
+        </div>
+    </div>
+
+</div><!-- /conf-center -->
+
+{% include 'cc_conferencia_shell_end.html' %}
+{% endblock %}
+
+{% block scripts %}
+{% include 'cc_conferencia_scripts.html' %}
+<script>
+    // ── Estado global ──
+    let _dados = [];          // todos os resultados
+    let _sniper = [];         // dígito sniper por coluna [c0..c6]
+    let _colFilter = -1;      // índice de coluna filtrada (-1 = nenhuma)
+    let _acFilter = 'all';   // filtro de acertos totais
+
+    // ── Carregar dados ──
+    async function carregar() {
+        const corpo = document.getElementById('conferencia-corpo');
+        const btn = document.getElementById('btnRecarregar');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Carregando...'; }
+        corpo.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Calculando...</div>';
+        document.getElementById('filterBar').style.display = 'none';
+        document.getElementById('statsBar').style.removeProperty('display');
+        document.getElementById('statsBar').style.display = 'none';
+
+        try {
+            const r = await fetch('/central-conferencias/api/conferir', { method: 'POST' });
+            const d = await r.json();
+
+            if (d.status !== 'success') {
+                corpo.innerHTML = `<div class="text-danger p-3">${d.message}</div>`;
+                return;
+            }
+
+            _dados = d.resultados;
+            _sniper = d.resultados[0]?.aposta_sniper || [];
+            _colFilter = -1;
+            _acFilter = 'all';
+
+            // Reseta filtro aba
+            document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.ac-filter-btn[data-ac="all"]').classList.add('active');
+
+            renderColHeaders();
+            renderStats();
+            renderTabela();
+
+            document.getElementById('filterBar').style.display = 'flex';
+
+        } catch (e) {
+            corpo.innerHTML = `<div class="text-danger p-3">Erro: ${e.message}</div>`;
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Recarregar'; }
+        }
+    }
+
+    // ── Cabeçalhos C1–C7 com filtro e dígito sniper ──
+    function renderColHeaders() {
+        // Conta acertos por coluna
+        const hitsPerCol = Array(7).fill(0);
+        _dados.forEach(res => {
+            res.digitos.forEach((dig, i) => {
+                if (dig === _sniper[i]) hitsPerCol[i]++;
+            });
+        });
+
+        const container = document.getElementById('colHeaders');
+        container.innerHTML = '';
+        for (let i = 0; i < 7; i++) {
+            const pct = _dados.length > 0 ? ((hitsPerCol[i] / _dados.length) * 100).toFixed(0) : 0;
+            const btn = document.createElement('div');
+            btn.className = 'col-header-btn' + (_colFilter === i ? ' col-active' : '');
+            btn.id = `colBtn-${i}`;
+            btn.title = `Filtrar coluna ${i + 1} — acertou ${hitsPerCol[i]}x (${pct}%)`;
+            btn.onclick = () => toggleColFilter(i);
+            btn.innerHTML = `
+            <span class="ch-label">C${i + 1}</span>
+            <span class="ch-sniper">${_sniper[i] ?? '?'}</span>
+            <span class="ch-hits">${pct}%</span>`;
+            container.appendChild(btn);
+        }
+    }
+
+    // ── Toggle filtro por coluna ──
+    function toggleColFilter(colIdx) {
+        _colFilter = (_colFilter === colIdx) ? -1 : colIdx;
+        // Reseta filtro de acertos ao usar filtro de coluna
+        _acFilter = 'all';
+        document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.ac-filter-btn[data-ac="all"]').classList.add('active');
+        renderColHeaders();
+        renderTabela();
+    }
+
+    // ── Filtro de acertos totais ──
+    function setFiltroAc(btn) {
+        _acFilter = btn.dataset.ac;
+        _colFilter = -1;  // reseta filtro de coluna ao usar filtro de acertos
+        document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderColHeaders();
+        renderTabela();
+    }
+
+    // ── Estatísticas resumo ──
+    function renderStats() {
+        const total = _dados.length;
+        const contagem = { 7: 0, 6: 0, 5: 0, 4: 0, 3: 0, menor: 0 };
+        _dados.forEach(r => {
+            if (r.acertos >= 7) contagem[7]++;
+            else if (r.acertos >= 6) contagem[6]++;
+            else if (r.acertos >= 5) contagem[5]++;
+            else if (r.acertos >= 4) contagem[4]++;
+            else if (r.acertos >= 3) contagem[3]++;
+            else contagem.menor++;
+        });
+
+        const bar = document.getElementById('statsBar');
+        bar.style.display = 'flex';
+        bar.innerHTML = `
+        <div class="stat-pill"><span class="sp-val">${total}</span><span class="sp-lbl">Concursos</span></div>
+        <div class="stat-pill" style="border-color:#155724;"><span class="sp-val" style="color:#155724;">${contagem[7]}</span><span class="sp-lbl">7 cols</span></div>
+        <div class="stat-pill" style="border-color:#1a5c6e;"><span class="sp-val" style="color:#1a5c6e;">${contagem[6]}</span><span class="sp-lbl">6 cols</span></div>
+        <div class="stat-pill" style="border-color:#5a6e1a;"><span class="sp-val" style="color:#5a6e1a;">${contagem[5]}</span><span class="sp-lbl">5 cols</span></div>
+        <div class="stat-pill" style="border-color:#856404;"><span class="sp-val" style="color:#856404;">${contagem[4]}</span><span class="sp-lbl">4 cols</span></div>
+        <div class="stat-pill" style="border-color:#aaa;"><span class="sp-val" style="color:#aaa;">${contagem[3]}</span><span class="sp-lbl">3 cols</span></div>`;
+    }
+
+    // ── Renderizar tabela com filtros aplicados ──
+    function renderTabela() {
+        const corpo = document.getElementById('conferencia-corpo');
+        let html = '';
+
+        const filtrado = _dados.filter(res => {
+            // Filtro coluna específica
+            if (_colFilter >= 0) {
+                return res.digitos[_colFilter] === _sniper[_colFilter];
+            }
+            // Filtro acertos totais
+            if (_acFilter === 'all') return true;
+            if (_acFilter === '0') return res.acertos <= 2;
+            return res.acertos === parseInt(_acFilter);
+        });
+
+        filtrado.forEach(res => {
+            const ac = res.acertos;
+            const acClass = ac >= 7 ? 'ac-7' : ac >= 6 ? 'ac-6' : ac >= 5 ? 'ac-5' : ac >= 4 ? 'ac-4' : ac >= 3 ? 'ac-3' : 'ac-0';
+            html += `<div class="result-row">
+            <span class="fw-bold" style="font-size:.78rem;">${res.concurso}</span>
+            <span class="text-muted" style="font-size:.68rem;">${res.data}</span>`;
+
+            res.digitos.forEach((dig, i) => {
+                const hit = (dig === _sniper[i]);
+                const highlight = (_colFilter === i) ? 'outline:2px solid var(--primary);outline-offset:1px;border-radius:8px;' : '';
+                html += `<span><div class="digito-box ${hit ? 'dg-hit' : 'dg-miss'}" style="${highlight}">${dig}</div></span>`;
+            });
+
+            html += `<span><div class="acertos-tag ${acClass}">${ac}/7</div></span>`;
+            html += `</div>`;
+        });
+
+        corpo.innerHTML = html || '';
+
+        const noRes = document.getElementById('noResults');
+        noRes.style.display = filtrado.length === 0 ? 'block' : 'none';
+    }
+
+    // carregar via abas (cc_conferencia_scripts)
+</script>
+{% endblock %}

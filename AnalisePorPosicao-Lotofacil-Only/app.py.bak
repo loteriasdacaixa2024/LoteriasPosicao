@@ -1,0 +1,44 @@
+import os
+from flask import Flask
+from models.shared import db
+from routes.index_routes import index_bp
+from routes.analise_routes import analise_bp
+from routes.conferencia_routes import conferencia_bp
+from routes.modelos_routes import modelos_bp
+
+def create_app():
+    app = Flask(__name__)
+    
+    # Configurações do banco de dados e da aplicação
+    app.config['SECRET_KEY'] = 'sniper_lotofacil_secret'
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'lotofacil.db')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+    # Inicializa o banco de dados com a aplicação
+    db.init_app(app)
+
+    # Registra os blueprints
+    app.register_blueprint(index_bp)
+    app.register_blueprint(analise_bp, url_prefix='/analise')
+    app.register_blueprint(conferencia_bp, url_prefix='/central-conferencias')
+    app.register_blueprint(modelos_bp, url_prefix='/modelos')
+
+    # Criação do banco de dados caso não exista
+    with app.app_context():
+        import models.sorteio_lotofacil # Certificar que os modelos estão disponíveis
+        db.create_all()
+
+    return app
+
+if __name__ == '__main__':
+    app = create_app()
+    porta = int(os.getenv('PORT', 5152))
+    print(f"===========================================================")
+    print(f"[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta {porta}")
+    print(f"[URL] Acesse: http://localhost:{porta}")
+    print(f"[URL] Sniper: http://localhost:{porta}/analise/")
+    print(f"[URL] Conferência: http://localhost:{porta}/conferencia/")
+    print(f"===========================================================")
+    app.run(host='0.0.0.0', port=porta, debug=True)

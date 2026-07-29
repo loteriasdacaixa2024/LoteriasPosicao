@@ -1,0 +1,492 @@
+https://servicebus2.caixa.gov.br/portaldeloterias/api/diadesorte
+
+https://i.postimg.cc/3R2PytCp/diadesorte.png
+
+
+https://i.postimg.cc/kGmQNn0S/como-mostra-no-site-da-cef.jpg
+https://i.postimg.cc/7LzJKFMF/volante.jpg
+https://i.postimg.cc/SRxsb3CF/parte-do-volante.jpg
+
+
+
+
+<link rel="stylesheet" href="./css/styles.css">
+<script src="./js/scripts.js"></script>
+
+SEMPRE LOGO ABAIXO DO HEADER
+<div class="logo"></div>
+
+A aplicação deve buscar SEMPRE os dados reais da API e usar essas informações para gerar estratégias dinâmicas e inteligentes
+QUERO GERAR OS PALPITES baseados nos valores das estatiscicas reais... 
+
+#D4B31A (e variações de 0 a 100%)
+
+Lighter / Darker:
+100% 		 #ffffff
+95% 		 #fcf9e8
+90% 		 #f9f2d2
+85% 		 #f7ecbb
+80% 		 #f4e5a4
+75% 		 #f1df8e
+70% 		 #eed877
+65% 		 #ebd260
+60% 		 #e9cb49
+55% 		 #e6c533
+50% 		 #e3be1c
+47% 		 #d4b31a //cor pricipal
+45% 		 #ccab19
+40% 		 #b69816
+35% 		 #9f8514
+30% 		 #887211
+25% 		 #715f0e
+20% 		 #5b4c0b
+15% 		 #443908
+10% 		 #2d2606
+5% 		     #171303
+0% 		     #000000
+
+
+
+1 - Usa sempre 07 digitos para compor os sorteios num total de 120 combinações
+0,1,2,3,4,5,6
+0,1,2,3,4,5,7
+0,1,2,3,4,5,8
+0,1,2,3,4,5,9
+0,1,2,3,4,6,7
+0,1,2,3,4,6,8
+0,1,2,3,4,6,9
+0,1,2,3,4,7,8
+0,1,2,3,4,7,9
+0,1,2,3,4,8,9
+0,1,2,3,5,6,7
+0,1,2,3,5,6,8
+0,1,2,3,5,6,9
+0,1,2,3,5,7,8
+0,1,2,3,5,7,9
+0,1,2,3,5,8,9
+0,1,2,3,6,7,8
+0,1,2,3,6,7,9
+0,1,2,3,6,8,9
+0,1,2,3,7,8,9
+0,1,2,4,5,6,7
+0,1,2,4,5,6,8
+0,1,2,4,5,6,9
+0,1,2,4,5,7,8
+0,1,2,4,5,7,9
+0,1,2,4,5,8,9
+0,1,2,4,6,7,8
+0,1,2,4,6,7,9
+0,1,2,4,6,8,9
+0,1,2,5,6,7,8
+0,1,2,5,6,7,9
+0,1,2,5,6,8,9
+0,1,2,5,7,8,9
+0,1,2,6,7,8,9
+0,1,3,4,5,6,7
+0,1,3,4,5,6,8
+0,1,3,4,5,6,9
+0,1,3,4,5,7,8
+0,1,3,4,5,7,9
+0,1,3,4,5,8,9
+0,1,3,4,6,7,8
+0,1,3,4,6,7,9
+0,1,3,4,6,8,9
+0,1,3,4,7,8,9
+0,1,3,5,6,7,8
+0,1,3,5,6,7,9
+0,1,3,5,6,8,9
+0,1,3,5,7,8,9
+0,1,3,6,7,8,9
+0,1,4,5,6,7,8
+0,1,4,5,6,7,9
+0,1,4,5,6,8,9
+0,1,4,5,7,8,9
+0,1,4,6,7,8,9
+0,1,5,6,7,8,9
+0,2,3,4,5,6,7
+0,2,3,4,5,6,8
+0,2,3,4,5,6,9
+0,2,3,4,5,7,8
+0,2,3,4,5,7,9
+0,2,3,4,5,8,9
+0,2,3,4,6,7,8
+0,2,3,4,6,7,9
+0,2,3,4,6,8,9
+0,2,3,4,7,8,9
+0,2,3,5,6,7,8
+0,2,3,5,6,7,9
+0,2,3,5,6,8,9
+0,2,3,5,7,8,9
+0,2,3,6,7,8,9
+0,2,4,5,6,7,8
+0,2,4,5,6,7,9
+0,2,4,5,6,8,9
+0,2,4,5,7,8,9
+0,2,4,6,7,8,9
+0,2,5,6,7,8,9
+0,3,4,5,6,7,8
+0,3,4,5,6,7,9
+0,3,4,5,6,8,9
+0,3,4,5,7,8,9
+0,3,4,6,7,8,9
+0,3,5,6,7,8,9
+0,4,5,6,7,8,9
+1,2,3,4,5,6,7
+1,2,3,4,5,6,8
+1,2,3,4,5,6,9
+1,2,3,4,5,7,8
+1,2,3,4,5,7,9
+1,2,3,4,5,8,9
+1,2,3,4,6,7,8
+1,2,3,4,6,7,9
+1,2,3,4,6,8,9
+1,2,3,4,7,8,9
+1,2,3,5,6,7,8
+1,2,3,5,6,7,9
+1,2,3,5,6,8,9
+1,2,3,5,7,8,9
+1,2,3,6,7,8,9
+1,2,4,5,6,7,8
+1,2,4,5,6,7,9
+1,2,4,5,6,8,9
+1,2,4,5,7,8,9
+1,2,4,6,7,8,9
+1,2,5,6,7,8,9
+1,3,4,5,6,7,8
+1,3,4,5,6,7,9
+1,3,4,5,6,8,9
+1,3,4,5,7,8,9
+1,3,4,6,7,8,9
+1,3,5,6,7,8,9
+1,4,5,6,7,8,9
+2,3,4,5,6,7,8
+2,3,4,5,6,7,9
+2,3,4,5,6,8,9
+2,3,4,5,7,8,9
+2,3,4,6,7,8,9
+2,3,5,6,7,8,9
+2,4,5,6,7,8,9
+3,4,5,6,7,8,9
+0,1,2,4,7,8,9
+
+
+2 - Estas combinações nunca sairam
+0,3,4,5,6,7,9
+0,3,4,5,6,8,9
+1,3,4,5,6,8,9
+2,3,4,5,6,8,9
+
+3 - Estas sairam e aqui estão suar ordens/posições (focar nas 11 mais frequentes)
+0,1,2,3,5,7,9 24 vezes (5.04%)
+0,1,2,3,4,8,9 20 vezes (4.20%)
+0,1,2,3,5,6,7 19 vezes (3.99%)
+0,1,2,3,6,7,9 19 vezes (3.99%)
+0,1,2,3,7,8,9 19 vezes (3.99%)
+1,2,3,5,6,7,9 19 vezes (3.99%)
+0,1,2,3,4,6,8 18 vezes (3.78%)
+0,1,2,3,5,6,8 18 vezes (3.78%)
+0,1,2,3,5,7,8 18 vezes (3.78%)
+1,2,3,4,6,7,9 18 vezes (3.78%)
+1,2,3,6,7,8,9 18 vezes (3.78%)
+0,1,2,3,4,5,9 17 vezes (3.57%)
+0,1,2,3,6,7,8 17 vezes (3.57%)
+1,2,3,5,6,7,8 17 vezes (3.57%)
+0,1,2,3,6,8,9 15 vezes (3.15%)
+0,1,2,6,7,8,9 15 vezes (3.15%)
+0,1,2,3,4,7,9 14 vezes (2.94%)
+1,2,3,4,6,8,9 14 vezes (2.94%)
+0,1,2,3,4,5,8 13 vezes (2.73%)
+0,1,2,3,4,6,7 13 vezes (2.73%)
+0,1,2,3,4,7,8 13 vezes (2.73%)
+0,1,2,3,5,6,9 13 vezes (2.73%)
+0,1,2,3,5,8,9 13 vezes (2.73%)
+0,1,2,5,6,7,8 13 vezes (2.73%)
+0,1,2,5,7,8,9 13 vezes (2.73%)
+1,2,3,4,7,8,9 13 vezes (2.73%)
+0,1,2,4,6,7,9 12 vezes (2.52%)
+0,1,2,4,6,8,9 12 vezes (2.52%)
+0,1,2,4,7,8,9 12 vezes (2.52%)
+1,2,3,4,6,7,8 12 vezes (2.52%)
+1,2,3,5,6,8,9 12 vezes (2.52%)
+1,2,3,5,7,8,9 12 vezes (2.52%)
+0,1,2,3,4,5,6 11 vezes (2.31%)
+0,1,2,3,4,6,9 11 vezes (2.31%)
+0,1,2,5,6,7,9 11 vezes (2.31%)
+1,2,3,4,5,6,7 11 vezes (2.31%)
+1,2,3,4,5,7,9 11 vezes (2.31%)
+0,1,2,3,4,5,7 10 vezes (2.10%)
+0,1,2,4,6,7,8 10 vezes (2.10%)
+1,2,4,6,7,8,9 10 vezes (2.10%)
+0,1,2,4,5,6,9 9 vezes (1.89%)
+0,1,2,4,5,7,8 9 vezes (1.89%)
+1,2,3,4,5,6,9 9 vezes (1.89%)
+1,2,3,4,5,7,8 9 vezes (1.89%)
+1,2,5,6,7,8,9 9 vezes (1.89%)
+0,1,2,4,5,8,9 8 vezes (1.68%)
+1,2,3,4,5,6,8 8 vezes (1.68%)
+1,2,3,4,5,8,9 8 vezes (1.68%)
+1,2,4,5,7,8,9 8 vezes (1.68%)
+0,1,2,4,5,6,7 7 vezes (1.47%)
+0,1,2,4,5,6,8 7 vezes (1.47%)
+0,1,3,5,6,7,8 7 vezes (1.47%)
+0,1,3,5,6,7,9 7 vezes (1.47%)
+0,1,3,6,7,8,9 7 vezes (1.47%)
+0,2,3,5,6,7,8 7 vezes (1.47%)
+0,2,3,5,6,7,9 7 vezes (1.47%)
+0,2,3,6,7,8,9 7 vezes (1.47%)
+1,2,4,5,6,7,9 7 vezes (1.47%)
+0,1,2,4,5,7,9 6 vezes (1.26%)
+0,1,3,4,7,8,9 6 vezes (1.26%)
+0,1,3,5,7,8,9 6 vezes (1.26%)
+0,2,3,4,7,8,9 6 vezes (1.26%)
+0,2,3,5,7,8,9 6 vezes (1.26%)
+1,2,4,5,6,7,8 6 vezes (1.26%)
+1,3,5,6,7,8,9 6 vezes (1.26%)
+2,3,5,6,7,8,9 6 vezes (1.26%)
+0,1,2,5,6,8,9 5 vezes (1.05%)
+0,1,3,4,5,6,8 5 vezes (1.05%)
+0,1,3,4,5,7,8 5 vezes (1.05%)
+0,1,4,6,7,8,9 5 vezes (1.05%)
+0,2,4,6,7,8,9 5 vezes (1.05%)
+0,1,3,4,5,8,9 4 vezes (0.84%)
+0,1,3,4,6,7,8 4 vezes (0.84%)
+0,1,3,4,6,7,9 4 vezes (0.84%)
+0,1,3,4,6,8,9 4 vezes (0.84%)
+0,1,5,6,7,8,9 4 vezes (0.84%)
+0,2,3,4,5,6,8 4 vezes (0.84%)
+0,2,3,4,5,7,8 4 vezes (0.84%)
+0,2,3,4,5,8,9 4 vezes (0.84%)
+0,2,3,4,6,7,8 4 vezes (0.84%)
+0,2,3,4,6,7,9 4 vezes (0.84%)
+0,2,3,4,6,8,9 4 vezes (0.84%)
+0,2,5,6,7,8,9 4 vezes (0.84%)
+1,3,4,5,6,7,9 4 vezes (0.84%)
+1,3,4,6,7,8,9 4 vezes (0.84%)
+2,3,4,5,6,7,9 4 vezes (0.84%)
+2,3,4,6,7,8,9 4 vezes (0.84%)
+0,1,3,4,5,6,7 3 vezes (0.63%)
+0,1,3,5,6,8,9 3 vezes (0.63%)
+0,1,4,5,6,7,8 3 vezes (0.63%)
+0,1,4,5,7,8,9 3 vezes (0.63%)
+0,2,3,4,5,6,7 3 vezes (0.63%)
+0,2,3,5,6,8,9 3 vezes (0.63%)
+0,2,4,5,6,7,8 3 vezes (0.63%)
+0,2,4,5,7,8,9 3 vezes (0.63%)
+1,3,4,5,7,8,9 3 vezes (0.63%)
+0,1,3,4,5,6,9 2 vezes (0.42% 
+0,1,3,4,5,7,9 2 vezes (0.42%)
+0,1,4,5,6,7,9 2 vezes (0.42%)
+0,2,3,4,5,6,9 2 vezes (0.42%)
+0,2,3,4,5,7,9 2 vezes (0.42%)
+0,2,4,5,6,7,9 2 vezes (0.42%)
+0,3,5,6,7,8,9 2 vezes (0.42%)
+1,2,4,5,6,8,9 2 vezes (0.42%)
+1,3,4,5,6,7,8 2 vezes (0.42%)
+2,3,4,5,6,7,8 2 vezes (0.42%)
+2,3,4,5,7,8,9 2 vezes (0.42%)
+0,1,4,5,6,8,9 1 vezes (0.21%)
+0,2,4,5,6,8,9 1 vezes (0.21%)
+0,3,4,5,6,7,8 1 vezes (0.21%)
+0,3,4,5,7,8,9 1 vezes (0.21%)
+0,3,4,6,7,8,9 1 vezes (0.21%)
+0,4,5,6,7,8,9 1 vezes (0.21%)
+1,4,5,6,7,8,9 1 vezes (0.21%)
+2,4,5,6,7,8,9 1 vezes (0.21%) 
+
+
+4 - Os sorteios foram composto por 
+tres numeros 2, dois numeros 0 e dois numeros 1....
+
+Padrões iniciais
+3n 2 2n 0 2n 1 (86x, 7.9%)
+
+Padroes finais
+1n 0 1n 1 1n 3 1n 6 1n 7 1n 8 1n 9 (5x, 0.5%)
+
+Combinações de Dígitos
+
+Digitos		Frequenncia Porcentagems (focar nas cinco mais frequentes)
+0,1,2,3,7	436 de 1100	39.6%
+0,1,2,3,9	428 de 1100	38.9%
+0,1,2,3,8	410 de 1100	37.3%
+0,1,2,3,6	406 de 1100	36.9%
+0,1,2,3,4	401 de 1100	36.5%
+0,1,2,3,5	396 de 1100	36.0%
+0,1,2,6,7	315 de 1100	28.6%
+0,1,2,7,9	313 de 1100	28.5%
+0,1,2,7,8	307 de 1100	27.9%
+0,1,2,4,9	306 de 1100	27.8%
+0,1,2,4,7	305 de 1100	27.7%
+0,1,2,4,8	304 de 1100	27.6%
+0,1,2,6,8	303 de 1100	27.5%
+0,1,2,5,9	294 de 1100	26.7%
+0,1,2,8,9	294 de 1100	26.7%
+0,1,2,6,9	291 de 1100	26.5%
+0,1,2,5,7	286 de 1100	26.0%
+0,1,2,4,6	284 de 1100	25.8%
+0,1,2,5,6	278 de 1100	25.3%
+0,1,2,4,5	266 de 1100	24.2%
+0,1,2,5,8	261 de 1100	23.7%
+0,1,3,7,9	228 de 1100	20.7%
+0,1,3,6,7	225 de 1100	20.5%
+1,2,3,7,9	225 de 1100	20.5%
+0,2,3,7,9	224 de 1100	20.4%
+1,2,3,6,7	223 de 1100	20.3%
+0,1,3,6,8	220 de 1100	20.0%
+0,1,3,7,8	220 de 1100	20.0%
+0,2,3,6,7	219 de 1100	19.9%
+1,2,3,6,8	217 de 1100	19.7%
+0,2,3,6,8	216 de 1100	19.6%
+1,2,3,7,8	215 de 1100	19.5%
+0,2,3,7,8	212 de 1100	19.3%
+
+
+5 - 
+Combinação      Ocorrencias  Última aparição Média de intervalo Concurso sem Aparecer Status Probabilidade
+0,1,2,3,5,6,7	91	Concurso 1082	12 concursos	18 concursos	ALTO	100%
+0,1,2,3,5,6,8	87	Concurso 1071	12 concursos	29 concursos	ALTO	100%
+0,1,2,3,5,6,9	77	Concurso 1081	14 concursos	19 concursos	ALTO	100%
+0,1,2,3,5,7,8	72	Concurso 1078	15 concursos	22 concursos	ALTO	100%
+0,1,2,3,5,8,9	75	Concurso 1078	15 concursos	22 concursos	ALTO	100%
+
+
+6 - Frequência de Dígitos (focar nos cinco primeiros)
+1 1091 99.2%
+2 1084 98.5%
+0 1080 98.2%
+3 825 75.0%
+7 634 57.6%
+9 617 56.1%
+4 606 55.1%
+6 601 54.6%
+8 601 54.6%
+5 580 52.7%
+
+
+7 - Estatística de Dezenas nos Sorteios Anteriores
+33% 2515 dezenas baixas
+32% 2467 dezenas Médias
+35% 2718 dezenas Altas
+Baixas (1-10) 2515 dezenas (32.7%) 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+Médias (11-20) 2467 dezenas (32.0%) 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+Altas (21-31) 2718 dezenas (35.3%) 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+
+8  - Frequência de Cada Dezena
+Numeros Quandiade de vezes que saiu
+10 - 283
+07 - 271
+17 - 267
+20 - 266
+04 - 263
+08 - 261
+27 - 261
+29 - 260
+11 - 259
+09 - 258
+24 - 258
+06 - 252
+23 - 254
+21 - 254
+18 - 249
+05 - 246
+13 - 242
+25 - 241
+14 - 243
+19 - 243
+26 - 243
+03 - 240
+12 - 238
+30 - 236
+22 - 234
+02 - 235
+15 - 230
+16 - 230
+28 - 228
+01 - 206
+
+
+
+9 - Frequência do Mês da Sorte
+Novembro - 89 - 10,0%
+Fevereiro - 84 - 9,4%
+Abril - 83 - 9,3%
+Junho - 78 - 8,7%
+Agosto - 76 - 8,5%
+Dezembro - 73 - 8,2%
+Março - 71 - 8,0%
+Maio - 71 - 8,0%
+Julho - 71 - 8,0%
+Outubro - 71 - 8,0%
+Janeiro - 65 - 7,3%
+Setembro - 61 - 6,8%
+
+
+10 - Sempre tem 2 ou tres dezenas com finais iguais nos resultados ex: 12 22, 10 20, 05 25 quando não aparece tres aparece 4...
+
+
+
+
+11 - Sempre aparece sequencias nos resultados.. ex: 1 2, 20 21 22, 30 31 quando não é duas sequencias pode vir tres..
+FAZER UMA APP PARA CHECAR ISSO.. TIPO MARCAR A FONTE COM UMA COR E O FUNDO COM OUTRA.. ver arquivo excel
+
+
+12 - Nos resultados... https://resumodiadesorte.netlify.app/
+
+Prêmio Estimado:
+ex: 
+R$ 650.000,00 - 6 + 5 = 11 no sorteio do concurso seguinte sempre vem um a mais neste caso 12
+R$ 150.000,00 - 5 + 1 = 6 ao contrario 9 ou ainda  5 + 1 = 15 deu 14 por exemplo
+R$ 1.000.000,00 = 10 ou 01
+quando um cinco e um valor acima de cinco então uma ou duas casas do 12,13 
+ex: 7+5 12 entao duas dezenas que comecam com 1 
+ex: 7+8 13 entao tres dezenas que comecam com 1 
+
+
+
+Próximo Sorteio: 
+Concurso 1101 
+12/08/2025 (Terça)  
+ex: dia 12 vem um a mais tbm neste caso 13
+ex: mes 
+
+
+
+3	11	13	17	25	30	35
+1	6	9	23	30	31	42
+5	15	23	34	43	51	55
+10	25	27	33	40	56	58
+3	5	17	34	38	57	60
+7	9	23	26	30	38	41
+2	3	36	54	57	59	60
+13	17	25	26	30	38	41
+5	15	23	34	38	57	60
+3	11	23	34	38	57	59
+5	15	23	34	38	57	60
+3	5	23	26	30	59	60
+13	17	41	50	51	55	59
+
+
+
+
+CSS PARA A IMAGEM
+		img {
+			  display: block;
+			  margin: auto;
+			  width:200px;
+			  height:100px;
+			  opacity: 0.5;
+			}
+		img:hover {
+				opacity: 1.0;
+		}
+		
+		
+<div class="header">
+        <img src="https://i.postimg.cc/wBthkvvc/supersete.png" alt="Super Sete Logo" class="logo">
+        <h1>Gerador de Jogos da Super Sete</h1>
+</div>
+
+
+vou passar um codigo chamado indexV25.html anexo pra vc usar como exemplo.. 
+e passar um arquivo aqui no chat para vc usar o indexV25.html e aplicar nele
+foque apenas na questão da api.. use o anexo indexV25.html para ajustar o arquivo aqui no chat

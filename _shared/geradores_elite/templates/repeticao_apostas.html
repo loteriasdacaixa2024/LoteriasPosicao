@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Repetição → Apostas — {{ modality_nome }}{% endblock %}
+{% block content %}
+{% include 'repeticao_gerador_estilos.html' %}
+
+<div class="page-hdr">
+    <h2 class="h4 mb-1"><i class="fas fa-dice me-2"></i>Repetição entre concursos → Apostas</h2>
+    <p class="mb-0 small opacity-90">{{ cfg.nome }} · gerador baseado na análise de repetição entre concursos seguidos</p>
+</div>
+
+<p class="small text-muted mb-3">
+    <i class="fas fa-chart-line me-1"></i>
+    A análise completa continua em
+    <a href="/analise/repeticao-concursos/">Dados → Repetição entre concursos</a>.
+</p>
+
+{% include 'repeticao_analise_dom_stub.html' %}
+{% include 'repeticao_gerador_card.html' %}
+<script>window.__REP_EXTRA_UI__ = { meses_cores: {{ meses_cores | tojson }} };</script>
+{% include 'repeticao_gerador_page_script.html' %}
+{% endblock %}
