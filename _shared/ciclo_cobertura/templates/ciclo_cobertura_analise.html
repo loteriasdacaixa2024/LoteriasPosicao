@@ -1,0 +1,512 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Ciclos das Dezenas — {{ modality_nome }}{% endblock %}
+
+{% block content %}
+<style>
+    .volante-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 8px;
+        max-width: 600px;
+        margin: 20px auto;
+    }
+    .volante-numero {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: default;
+        transition: all 0.3s ease;
+        border: 2px solid #dee2e6;
+    }
+    .dezena-saida {
+        background-color: #28a745;
+        color: white;
+        border-color: #1e7e34;
+    }
+    .dezena-pendente {
+        background-color: #ff9800;
+        color: white;
+        border-color: #e68900;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    .info-card {
+        border-left: 4px solid #007bff;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    .progress-custom {
+        height: 30px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    .legenda-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-radius: 5px;
+        background: #f8f9fa;
+    }
+    .legenda-cor {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid #333;
+    }
+    .fluxo-ciclos {
+        background: linear-gradient(135deg, #f8f9fa 0%, #eef2f7 100%);
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 14px 16px;
+    }
+    .fluxo-passos { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+    .fluxo-passo {
+        flex: 1 1 160px; min-width: 140px; display: flex; align-items: flex-start; gap: 8px;
+        padding: 8px 10px; border-radius: 8px; text-decoration: none !important; color: inherit;
+        border: 2px solid transparent; background: #fff;
+    }
+    .fluxo-passo.ativo { border-color: #0d6efd; background: #e7f1ff; }
+    .fluxo-num {
+        flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; background: #dee2e6; color: #495057;
+    }
+    .fluxo-passo.ativo .fluxo-num { background: #0d6efd; color: #fff; }
+</style>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-0">
+                        <i class="fas fa-sync-alt text-primary me-2"></i>
+                        Análise de Ciclos das Dezenas
+                    </h2>
+                    <p class="text-muted mb-0 mt-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Acompanhe o estado atual do ciclo e identifique dezenas pendentes — {{ modality_nome }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include '_nav_ciclo_analise.html' %}
+
+    <div id="cicloAtualContent">
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-2">Carregando dados do ciclo atual...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalExplicaQtdEvolucao" tabindex="-1" aria-labelledby="modalExplicaQtdEvolucaoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 bg-secondary text-white pb-2">
+                    <h5 class="modal-title fs-6" id="modalExplicaQtdEvolucaoLabel">
+                        <i class="fas fa-question-circle me-2"></i>Como Funciona: Qtd. Evolução
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start pb-4">
+                    <p class="mb-3 text-muted" style="font-size: 0.95rem;">
+                        A <strong>Quantidade de Evolução</strong> mede <strong>quantas dezenas novas (inéditas)</strong>
+                        foram sorteadas em um determinado concurso e que ajudaram o ciclo atual a seguir em frente.
+                    </p>
+                    <ul class="list-group list-group-flush" style="font-size: 0.9rem;">
+                        <li class="list-group-item px-0">
+                            <strong><span class="text-danger">Qtd 0 (Evolução Nula):</span></strong>
+                            O sorteio só teve dezenas repetidas. O ciclo não avançou.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <strong><span class="text-warning">Qtd 1 a 2 (Baixa):</span></strong>
+                            Apenas 1 ou 2 dezenas novas saíram.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <strong><span class="text-info">Qtd 3 a 4 (Média):</span></strong>
+                            Avanço padrão / moderado.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <strong><span class="text-success">Qtd 5 a 7 (Alta):</span></strong>
+                            Evolução acelerada com muita renovação.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const API_CICLO = {{ (api_base + '/ciclo-atual')|tojson }};
+    const UNIVERSO = 31;
+
+    document.addEventListener('DOMContentLoaded', carregarCicloAtual);
+
+    function carregarCicloAtual() {
+        const cacheBuster = new Date().getTime();
+        fetch(API_CICLO + '?v=' + cacheBuster)
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    window.ciclo_data = data.dados;
+                    window.insights_data = data.inteligencia;
+                    window.motor_ciclo = data.motor_ciclo;
+                    window.comparacao = data.comparacao;
+                    window.top_3_data = data.top_3;
+                    window.sort_order = 'desc';
+                    renderizarCicloAtual();
+                } else {
+                    mostrarErro('Erro ao carregar ciclo atual: ' + (data.mensagem || data.erro || 'Erro desconhecido'));
+                }
+            })
+            .catch(err => mostrarErro('Erro na requisição: ' + err.message));
+    }
+
+    window.toggleSort = function () {
+        window.sort_order = window.sort_order === 'desc' ? 'asc' : 'desc';
+        renderizarCicloAtual();
+    };
+
+    function renderizarCicloAtual() {
+        const ciclo = window.ciclo_data;
+        const univ = ciclo.universo || UNIVERSO;
+        let detalhes_ordenados = [];
+        if (ciclo.detalhes_concursos) {
+            detalhes_ordenados = [...ciclo.detalhes_concursos];
+            detalhes_ordenados.sort((a, b) =>
+                window.sort_order === 'asc' ? a.concurso - b.concurso : b.concurso - a.concurso
+            );
+        }
+
+        const html = `
+        <div class="col-12">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card info-card h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Ciclo Atual</h6>
+                            <h2 class="mb-0 text-primary">#${ciclo.numero_ciclo}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card info-card h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Concursos no Ciclo</h6>
+                            <h2 class="mb-0 text-info">${ciclo.quantidade_concursos}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card info-card h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Dezenas Saídas</h6>
+                            <h2 class="mb-0 text-success">${ciclo.total_dezenas_saidas}/${univ}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card info-card h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Dezenas Pendentes</h6>
+                            <h2 class="mb-0 text-warning">${ciclo.total_dezenas_pendentes}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="inteligencia">
+                ${window.motor_ciclo ? renderInteligenciaCiclo(window.motor_ciclo) : ''}
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Progresso do Ciclo</h5>
+                    <div class="progress progress-custom">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: ${ciclo.percentual_completo}%"
+                             aria-valuenow="${ciclo.percentual_completo}" aria-valuemin="0" aria-valuemax="100">
+                            ${ciclo.percentual_completo}% completo
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-4">Volante do Dia de Sorte - Estado do Ciclo</h5>
+                    <div class="volante-grid">
+                        ${gerarVolante(ciclo.dezenas_saidas, ciclo.dezenas_pendentes, univ)}
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="legenda-item">
+                                <div class="legenda-cor dezena-saida"></div>
+                                <span><strong>Verde:</strong> Dezena já saiu no ciclo</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="legenda-item">
+                                <div class="legenda-cor dezena-pendente"></div>
+                                <span><strong>Laranja:</strong> Dezena pendente (não saiu)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <h5><i class="fas fa-lightbulb me-2"></i>Entenda o Ciclo</h5>
+                <p class="mb-0">
+                    Um ciclo representa o período completo até que TODAS as ${univ} dezenas
+                    saiam ao menos uma vez. O ciclo atual só será encerrado quando
+                    ${ciclo.total_dezenas_pendentes > 1 ? 'as dezenas pendentes saírem' : 'a dezena pendente sair'}.
+                </p>
+                ${ciclo.total_dezenas_pendentes > 0 ? `
+                <p class="mb-0 mt-2">
+                    <strong>Importante:</strong> Isso não garante saída no próximo concurso,
+                    mas ${ciclo.total_dezenas_pendentes === 1 ? 'essa dezena precisa' : 'essas dezenas precisam'}
+                    estar coberta(s) para o fechamento do ciclo.
+                </p>` : ''}
+            </div>
+
+            ${(window.top_3_data && window.top_3_data.length > 0 && window.insights_data) ? `
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="card h-100 shadow-sm border-warning">
+                        <div class="card-header bg-warning text-dark fw-bold">
+                            <i class="fas fa-star me-2"></i>Top 3 Sugestões para o Próximo Sorteio
+                        </div>
+                        <div class="card-body text-center d-flex flex-column justify-content-center">
+                            <p class="mb-3 text-muted">Dezenas mais recomendadas com base nas pendências do ciclo atual:</p>
+                            <div>
+                                ${window.top_3_data.map(n =>
+                                    `<span class="badge bg-warning text-dark p-3 m-1 fs-4 rounded-circle border border-dark shadow-sm" style="width: 60px; height: 60px; line-height: 30px;">${String(n).padStart(2, '0')}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm border-info" style="border-left: 4px solid #0dcaf0;">
+                        <div class="card-header bg-info text-white fw-bold">
+                            <i class="fas fa-lightbulb me-2 text-warning"></i>Insights Inteligentes
+                        </div>
+                        <div class="card-body text-start p-3">
+                            <ul class="list-group list-group-flush">
+                                ${(window.insights_data.insights || []).slice(0, 3).map(insight => `
+                                    <li class="list-group-item d-flex align-items-start border-0 px-0 pb-2 bg-transparent">
+                                        <div class="me-2 mt-1 text-${insight.ponto === 'positivo' ? 'success' : insight.ponto === 'alerta' ? 'danger' : insight.ponto === 'info' ? 'info' : 'secondary'}">
+                                            <i class="fas fa-${insight.ponto === 'positivo' ? 'check-circle' : insight.ponto === 'alerta' ? 'exclamation-triangle' : insight.ponto === 'info' ? 'info-circle' : 'dot-circle'}"></i>
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark">${insight.titulo}:</strong>
+                                            <span class="text-muted small">${insight.texto}</span>
+                                        </div>
+                                    </li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>` : ''}
+
+            <div class="card mb-4 mt-2 shadow-sm border-secondary">
+                <div class="card-header bg-secondary text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-chart-pie me-2"></i>Estudo: Qtd. Evolução (Frequência de Novas Dezenas)</span>
+                    <button class="btn btn-sm btn-outline-light border-0" data-bs-toggle="modal" data-bs-target="#modalExplicaQtdEvolucao" title="Como funciona?">
+                        <i class="fas fa-question-circle"></i> Entenda
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center" id="qtdEvolucaoStats"></div>
+                </div>
+            </div>
+
+            <div class="card mb-4 mt-2 shadow-sm" id="evolucao">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list-ol me-2"></i>Evolução do Ciclo por Concurso</h5>
+                    <button onclick="toggleSort()" class="btn btn-sm btn-outline-light">
+                        <i class="fas fa-sort me-1"></i> Ordenar (${window.sort_order === 'desc' ? 'Mais Recente' : 'Mais Antigo'})
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+                        <table class="table table-hover table-striped mb-0 text-center align-middle">
+                            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th>Ciclo</th>
+                                    <th>Cnc</th>
+                                    <th>Data</th>
+                                    <th><span class="text-success"><i class="fas fa-plus-circle"></i> Novas Dezenas (Preencheu)</span></th>
+                                    <th><span class="text-info"><i class="fas fa-chart-line"></i> Qtd. Evolução</span></th>
+                                    <th><span class="text-muted"><i class="fas fa-redo"></i> Repetidas no Ciclo</span></th>
+                                    <th>Progresso</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${detalhes_ordenados.length > 0 ? detalhes_ordenados.map(c => `
+                                <tr>
+                                    <td><span class="badge bg-dark fs-6 pb-2 pt-2">#${c.numero_ciclo || '-'}</span></td>
+                                    <td><strong>${c.concurso}</strong></td>
+                                    <td>${c.data || ''}</td>
+                                    <td>
+                                        ${c.novas && c.novas.length > 0
+                                            ? c.novas.map(n => `<span class="badge bg-success fs-6 m-1">${String(n).padStart(2, '0')}</span>`).join('')
+                                            : '<span class="text-muted small">Nenhuma nova</span>'}
+                                    </td>
+                                    <td>
+                                        ${c.qtd_novas > 0
+                                            ? `<div class="fs-6 text-info fw-bold">+${c.qtd_novas}</div>`
+                                            : '<div class="text-muted small">-</div>'}
+                                    </td>
+                                    <td>
+                                        ${c.repetidas && c.repetidas.length > 0
+                                            ? c.repetidas.map(n => `<span class="badge bg-secondary m-1">${String(n).padStart(2, '0')}</span>`).join('')
+                                            : '-'}
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold fs-5">${c.total_preenchido}/${univ}</div>
+                                        <small class="text-muted">${((c.total_preenchido / univ) * 100).toFixed(1)}%</small>
+                                    </td>
+                                </tr>`).join('') : '<tr><td colspan="7">Detalhes não encontrados</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        document.getElementById('cicloAtualContent').innerHTML = html;
+
+        const frequencias = {};
+        for (let i = 0; i <= 7; i++) frequencias[i] = 0;
+        let total_analisado = 0;
+        (ciclo.detalhes_concursos || []).forEach(c => {
+            if (c.qtd_novas !== undefined) {
+                const q = Math.min(7, Math.max(0, c.qtd_novas));
+                frequencias[q] = (frequencias[q] || 0) + 1;
+                total_analisado++;
+            }
+        });
+
+        const statsHtml = Object.keys(frequencias).map(qtd => {
+            const count = frequencias[qtd];
+            const percent = total_analisado > 0 ? ((count / total_analisado) * 100).toFixed(1) : '0.0';
+            let bgColor = 'bg-light', textColor = 'text-dark';
+            if (count > 0) {
+                if (qtd == 0) { bgColor = 'bg-danger'; textColor = 'text-white'; }
+                else if (qtd >= 1 && qtd <= 2) { bgColor = 'bg-warning'; textColor = 'text-dark'; }
+                else if (qtd >= 3 && qtd <= 4) { bgColor = 'bg-info'; textColor = 'text-white'; }
+                else { bgColor = 'bg-success'; textColor = 'text-white'; }
+            } else {
+                textColor = 'text-muted';
+            }
+            return `
+            <div class="col-6 col-md-3 col-lg-1 mb-2" style="flex: 1;">
+                <div class="card h-100 ${bgColor} ${textColor} border-0 shadow-sm" style="opacity: ${count > 0 ? '1' : '0.5'};">
+                    <div class="card-body p-2 d-flex flex-column justify-content-center">
+                        <small class="d-block fw-bold mb-1">Qtd ${qtd}</small>
+                        <span class="fs-4 fw-bold">${count}x</span>
+                        <small class="d-block mt-1">${percent}%</small>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        const freqArray = Object.entries(frequencias).filter(([, c]) => c > 0).sort((a, b) => b[1] - a[1]);
+        const maisUsada = freqArray.length > 0 ? freqArray[0][0] : '-';
+        const menosUsada = freqArray.length > 0 ? freqArray[freqArray.length - 1][0] : '-';
+        const resumoHtml = `
+            <div class="col-12 mt-3 text-start">
+                <div class="alert alert-secondary py-2 mb-0 border-0 d-flex flex-wrap justify-content-between">
+                    <div><strong>Total de Sorteios Analisados:</strong> ${total_analisado}</div>
+                    <div><span class="text-success"><i class="fas fa-arrow-up"></i> Mais Frequente:</span> Qtd ${maisUsada}</div>
+                    <div><span class="text-danger"><i class="fas fa-arrow-down"></i> Menos Frequente:</span> Qtd ${menosUsada}</div>
+                </div>
+            </div>`;
+
+        const statsContainer = document.getElementById('qtdEvolucaoStats');
+        if (statsContainer) statsContainer.innerHTML = statsHtml + resumoHtml;
+    }
+
+    function renderInteligenciaCiclo(m) {
+        const est = m.estado_atual;
+        const f = m.faltantes;
+        const dist = m.historico_semelhante.distribuicao_entrada || {};
+        const pressaoClass = {
+            extrema: 'danger', alta: 'warning', 'média': 'info', media: 'info', baixa: 'success'
+        }[est.pressao] || 'secondary';
+
+        return `
+        <div class="card mb-4 border-primary shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-brain me-2"></i>Inteligência de Ciclo
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-md-2"><small class="text-muted">Classificação</small><div class="fw-bold fs-5">${est.classificacao}</div></div>
+                    <div class="col-md-2"><small class="text-muted">Pressão</small><div><span class="badge bg-${pressaoClass}">${est.pressao}</span></div></div>
+                    <div class="col-md-2"><small class="text-muted">Fechamento</small><div class="fw-bold">${est.fechamento_percentual}%</div></div>
+                    <div class="col-md-2"><small class="text-muted">Média hist.</small><div>${est.media_historica_fechamento}</div></div>
+                    <div class="col-md-2"><small class="text-muted">Distância média</small><div class="${est.distancia_media > 0 ? 'text-danger' : 'text-success'} fw-bold">${est.distancia_media > 0 ? '+' : ''}${est.distancia_media}</div></div>
+                    <div class="col-md-2"><small class="text-muted">Faltantes</small><div class="fw-bold text-warning">${est.faltando}</div></div>
+                </div>
+                <div class="alert alert-light border mb-3">
+                    <i class="fas fa-robot me-2 text-primary"></i>${m.leitura_automatica}
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Faltantes por faixa</h6>
+                        <p class="small mb-1">Baixas (1-10): ${f.distribuicao.baixas} · Médias (11-20): ${f.distribuicao.medias} · Altas (21-31): ${f.distribuicao.altas}</p>
+                        <p class="small mb-0">Pares: ${f.pares.length} · Ímpares: ${f.impares.length} · Espaçamento médio: ${f.espacamento_medio}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Próximo concurso (cenários semelhantes, n=${m.historico_semelhante.amostras})</h6>
+                        <p class="small mb-0">1 faltante: ${dist['1']||0}% · 2: ${dist['2']||0}% · 3: ${dist['3']||0}% · 4+: ${dist['4+']||0}%</p>
+                        <p class="small text-muted">${m.fechamento.interpretacao}</p>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function gerarVolante(dezenas_saidas, dezenas_pendentes, univ) {
+        let html = '';
+        for (let i = 1; i <= univ; i++) {
+            const numero = String(i).padStart(2, '0');
+            let classe = '';
+            if (dezenas_saidas.includes(i)) classe = 'dezena-saida';
+            else if (dezenas_pendentes.includes(i)) classe = 'dezena-pendente';
+            html += `<div class="volante-numero ${classe}">${numero}</div>`;
+        }
+        return html;
+    }
+
+    function mostrarErro(mensagem) {
+        document.getElementById('cicloAtualContent').innerHTML = `
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>${mensagem}
+            </div>
+        </div>`;
+    }
+})();
+</script>
+{% endblock %}

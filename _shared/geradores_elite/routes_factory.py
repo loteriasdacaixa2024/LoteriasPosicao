@@ -138,6 +138,161 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             meses_cores=ui_ctx.get("meses_cores", {}),
         )
 
+    @bp.route("/ciclo-apostas/")
+    def ciclo_apostas_page():
+        from ciclo_cobertura.specs import get_ciclo_spec, tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return render_template(
+                "geradores_elite_index.html",
+                modality_key=modality_key,
+                modality_nome=cfg["nome"],
+                cfg=cfg,
+            ), 404
+        spec = get_ciclo_spec(modality_key)
+        meses_cores = {}
+        try:
+            from services.cores_meses_service import CoresMesesService
+            meses_cores = CoresMesesService.obter_cores() or {}
+        except Exception:
+            meses_cores = {}
+        meses = [
+            {"num": i, "abrev": a, "nome": n}
+            for i, (a, n) in enumerate([
+                ("Jan", "Janeiro"), ("Fev", "Fevereiro"), ("Mar", "Março"),
+                ("Abr", "Abril"), ("Mai", "Maio"), ("Jun", "Junho"),
+                ("Jul", "Julho"), ("Ago", "Agosto"), ("Set", "Setembro"),
+                ("Out", "Outubro"), ("Nov", "Novembro"), ("Dez", "Dezembro"),
+            ], start=1)
+        ]
+        return render_template(
+            "ciclo_apostas.html",
+            modality_key=modality_key,
+            modality_nome=spec.nome,
+            pick_default=spec.pick_default,
+            pick_min=spec.pick_min,
+            pick_max=spec.pick_max,
+            api_base="/geradores-elite/api/ciclo-apostas",
+            meses_cores=meses_cores,
+            meses=meses,
+            has_mes=True,
+        )
+
+    @bp.route("/api/ciclo-apostas/contexto")
+    def api_ciclo_apostas_contexto():
+        from ciclo_cobertura.service import contexto_dois_ultimos, metricas_padrao_2n1r
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        ctx = contexto_dois_ultimos(modality_key)
+        return jsonify({
+            "ok": bool(ctx.get("ok")),
+            "contexto": ctx,
+            "metricas": metricas_padrao_2n1r(modality_key),
+        })
+
+    @bp.route("/api/ciclo-apostas/gerar", methods=["POST"])
+    def api_ciclo_apostas_gerar():
+        from ciclo_cobertura.gerador import gerar_apostas_ciclo
+        from ciclo_cobertura.pos_geracao import pos_processar_geracao
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        data = request.get_json(silent=True) or {}
+        out = gerar_apostas_ciclo(
+            modality_key,
+            quantidade=int(data.get("quantidade") or 10),
+            pick=int(data["pick"]) if data.get("pick") is not None else None,
+            filtro_faixas=bool(data.get("filtro_faixas")),
+            filtro_soma=bool(data.get("filtro_soma")),
+            filtro_digitos=bool(data.get("filtro_digitos")),
+        )
+        if out.get("ok"):
+            out = pos_processar_geracao(
+                out,
+                modality_key,
+                mes_num=data.get("mes_num") or data.get("mes"),
+                descartar_historico=bool(data.get("descartar_historico")),
+            )
+        code = 200 if out.get("ok") else 400
+        return jsonify(out), code
+
+    @bp.route("/api/ciclo-apostas/ritmo/contexto")
+    def api_ciclo_ritmo_contexto():
+        from ciclo_cobertura.gerador_ritmo import contexto_ritmo
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        return jsonify(contexto_ritmo(modality_key))
+
+    @bp.route("/api/ciclo-apostas/ritmo/gerar", methods=["POST"])
+    def api_ciclo_ritmo_gerar():
+        from ciclo_cobertura.gerador_ritmo import gerar_apostas_ritmo
+        from ciclo_cobertura.pos_geracao import pos_processar_geracao
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        data = request.get_json(silent=True) or {}
+        out = gerar_apostas_ritmo(
+            modality_key,
+            quantidade=int(data.get("quantidade") or 10),
+            pick=int(data["pick"]) if data.get("pick") is not None else None,
+        )
+        if out.get("ok"):
+            out = pos_processar_geracao(
+                out,
+                modality_key,
+                mes_num=data.get("mes_num") or data.get("mes"),
+                descartar_historico=bool(data.get("descartar_historico")),
+            )
+        code = 200 if out.get("ok") else 400
+        return jsonify(out), code
+
+    @bp.route("/api/ciclo-apostas/export-txt", methods=["POST"])
+    def api_ciclo_export_txt():
+        try:
+            body = request.get_json(silent=True) or {}
+            apostas = body.get("apostas") or []
+            if not apostas:
+                return jsonify({"sucesso": False, "erro": "Nenhuma aposta para exportar."}), 400
+            mes_num = body.get("mes_num") or body.get("mes")
+            extra = body.get("extra") or {}
+            if mes_num and not extra:
+                from ciclo_cobertura.pos_geracao import MESES_ABREV
+                mn = int(mes_num)
+                extra = {"tipo": "mes", "num": mn, "label": MESES_ABREV.get(mn, str(mn))}
+            # garante extras por aposta
+            from ciclo_cobertura.pos_geracao import aplicar_mes_apostas
+            if mes_num:
+                apostas = aplicar_mes_apostas(apostas, int(mes_num))
+            texto = formatar_export_txt(modality_key, apostas, extra)
+            nome = f"ciclo_apostas_{modality_key}_{len(apostas)}jg.txt"
+            return jsonify({
+                "sucesso": True,
+                "texto": texto,
+                "nome_arquivo": nome,
+            })
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @bp.route("/api/ciclo-apostas/backtest", methods=["POST"])
+    def api_ciclo_backtest():
+        try:
+            body = request.get_json(silent=True) or {}
+            apostas = body.get("apostas") or []
+            limite = int(body.get("limite") or 30)
+            if not apostas:
+                return jsonify({"sucesso": False, "erro": "Nenhuma aposta informada."}), 400
+            resultado = backtest_apostas_engine(modality_key, apostas, limite=limite)
+            status = 200 if resultado.get("sucesso") else 400
+            return jsonify(resultado), status
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
     @bp.route("/engine-final/")
     def engine_final_page():
         meses_cores = {}

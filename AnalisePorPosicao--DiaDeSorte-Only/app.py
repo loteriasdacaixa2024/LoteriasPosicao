@@ -28,6 +28,7 @@ from analise_estudos.app_integration import extend_analise_estudos_app
 from analise_somas_digitos.app_integration import extend_analise_somas_digitos_app
 from analise_inteligentes_diadesorte.app_integration import extend_analise_inteligentes_app
 from configuracoes.app_integration import extend_config_app
+from ciclo_cobertura.app_integration import extend_ciclo_cobertura_app
 
 def create_app():
     app = Flask(__name__)
@@ -52,8 +53,10 @@ def create_app():
     extend_analise_estudos_app(app)
     extend_analise_somas_digitos_app(app)
     extend_analise_inteligentes_app(app)
+    extend_ciclo_cobertura_app(app, 'diadesorte')
     from menu.app_integration import _merge_template_dirs
     _merge_template_dirs(app, [os.path.join(_CC_ROOT, 'geradores_elite', 'templates')])
+    _merge_template_dirs(app, [os.path.join(_CC_ROOT, 'ciclo_cobertura', 'templates')])
     app.register_blueprint(index_bp)
     app.register_blueprint(analise_bp,     url_prefix='/analise')
     register_conferencia_extras(conferencia_bp, 'diasorte')
@@ -129,6 +132,8 @@ if __name__ == '__main__':
     print(f"[URL] Análise:     http://localhost:{porta}/analise/")
     print(f"[URL] Análise Comp: http://localhost:{porta}/analise/comportamento/")
     print(f"[URL] Análise Pos.: http://localhost:{porta}/analise/por-posicao/")
+    print(f"[URL] Ciclo Cob.:  http://localhost:{porta}/analise/ciclo-cobertura/")
+    print(f"[URL] Ciclo->Apostas: http://localhost:{porta}/geradores-elite/ciclo-apostas/")
     print(f"[URL] Modelos:     http://localhost:{porta}/modelos/")
     print(f"[URL] Conferência: http://localhost:{porta}/central-conferencias/")
     print(f"[URL] Desdobramento: http://localhost:{porta}/desdobramento/")

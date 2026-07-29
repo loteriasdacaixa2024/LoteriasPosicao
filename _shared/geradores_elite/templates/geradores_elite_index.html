@@ -11,6 +11,11 @@
         <a class="btn btn-outline-success me-2 mb-2" href="{{ url_for('geradores_elite.repeticao_apostas_page') }}">
             <i class="fas fa-dice"></i> Repetição → Apostas
         </a>
+        {% if modality_key == 'diadesorte' %}
+        <a class="btn btn-outline-primary me-2 mb-2" href="{{ url_for('geradores_elite.ciclo_apostas_page') }}">
+            <i class="fas fa-sync-alt"></i> Ciclo → Apostas
+        </a>
+        {% endif %}
         {% if modality_key in ['supersete', 'lotofacil', 'timemania', 'maismilionaria', 'megasena', 'quina', 'duplasena', 'lotomania', 'diadesorte'] %}
         <a class="btn me-2 mb-2" href="{{ url_for('geradores_elite.gerador_por_posicao_page') }}"
            style="border:1px solid var(--primary);color:var(--primary);background:transparent;">

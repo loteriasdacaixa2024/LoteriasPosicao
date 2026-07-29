@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Métricas Históricas de Ciclos — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+.metric-card { border-left: 4px solid; }
+.chart-bar { height: 30px; background: linear-gradient(90deg, #007bff 0%, #0056b3 100%); border-radius: 5px; }
+.intelligence-card { border-radius: 12px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,.08); overflow: hidden; }
+.intelligence-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 15px 20px; }
+.insight-item { padding: 15px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 15px; }
+.insight-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.recommendation-bubble { background: #f8f9fa; border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; border-left: 5px solid; }
+</style>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-0"><i class="fas fa-chart-bar text-primary me-2"></i>Métricas Históricas de Ciclos</h2>
+                    <p class="text-muted mb-0 mt-2">Análise estatística completa dos ciclos anteriores — {{ modality_nome }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include '_nav_ciclo_analise.html' %}
+    <div id="metricasContent">
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary"></div>
+            <p class="mt-2">Carregando métricas...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  const API = {{ (api_base + '/metricas-historicas')|tojson }};
+  document.addEventListener('DOMContentLoaded', () => {
+    fetch(API + '?v=' + Date.now()).then(r => r.json()).then(data => {
+      if (data.sucesso) renderizarMetricas(data.dados);
+      else mostrarErro(data.mensagem || data.erro || 'Erro ao carregar métricas');
+    }).catch(e => mostrarErro(e.message));
+  });
+
+  function renderizarMetricas(dados) {
+    const { metricas, comparacao, historico, inteligencia, estatisticas } = dados;
+    const configInsights = {
+      positivo: { bg: '#e6fffa', color: '#2c7a7b', icon: 'fa-check-circle', iconBg: '#b2f5ea' },
+      alerta: { bg: '#fffaf0', color: '#9c4221', icon: 'fa-exclamation-triangle', iconBg: '#feebc8' },
+      neutro: { bg: '#ebf8ff', color: '#2b6cb0', icon: 'fa-info-circle', iconBg: '#bee3f8' },
+      info: { bg: '#faf5ff', color: '#6b46c1', icon: 'fa-lightbulb', iconBg: '#e9d8fd' }
+    };
+    const curto = metricas.ciclo_mais_curto || {};
+    const longo = metricas.ciclo_mais_longo || {};
+    const html = `
+    <div class="row mb-5">
+      <div class="col-lg-8">
+        <div class="card intelligence-card h-100">
+          <div class="intelligence-header"><h5 class="mb-0"><i class="fas fa-robot me-2"></i>Inteligência de Ciclos (Auto-Insight)</h5></div>
+          <div class="card-body p-0">
+            ${inteligencia && inteligencia.insights ? inteligencia.insights.map(ins => {
+              const conf = configInsights[ins.ponto] || configInsights.info;
+              return `<div class="insight-item" style="background-color:${conf.bg}">
+                <div class="insight-icon" style="background-color:${conf.iconBg};color:${conf.color}"><i class="fas ${conf.icon}"></i></div>
+                <div><h6 class="mb-1" style="color:${conf.color}">${ins.titulo}</h6><p class="mb-0 small text-muted">${ins.texto}</p></div>
+              </div>`;
+            }).join('') : '<p class="p-4 text-center text-muted">Aguardando dados...</p>'}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card intelligence-card h-100">
+          <div class="intelligence-header" style="background:linear-gradient(135deg,#48bb78 0%,#38a169 100%)"><h5 class="mb-0"><i class="fas fa-bullseye me-2"></i>Recomendações</h5></div>
+          <div class="card-body">
+            ${inteligencia && inteligencia.recomendacoes && inteligencia.recomendacoes.length
+              ? inteligencia.recomendacoes.map(rec => `
+                <div class="recommendation-bubble" style="border-left-color:var(--bs-${rec.cor})">
+                  <div class="d-flex align-items-center mb-1"><i class="fas ${rec.icone} text-${rec.cor} me-2"></i>
+                  <small class="text-uppercase fw-bold text-${rec.cor}">Recomendação</small></div>
+                  <p class="mb-0 small">${rec.texto}</p></div>`).join('')
+              : '<p class="text-muted small mb-0">Sem recomendações adicionais.</p>'}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-4">
+      <div class="col-md-4"><div class="card metric-card h-100" style="border-left-color:#28a745"><div class="card-body">
+        <h6 class="text-muted">Média de Concursos</h6><h2 class="text-success">${metricas.media_concursos}</h2>
+        <small class="text-muted">Para fechar um ciclo · ${metricas.total_ciclos} ciclos</small></div></div></div>
+      <div class="col-md-4"><div class="card metric-card h-100" style="border-left-color:#17a2b8"><div class="card-body">
+        <h6 class="text-muted">Ciclo Mais Curto</h6><h2 class="text-info">${curto.concursos ?? '—'}</h2>
+        <small class="text-muted">Ciclo #${curto.numero ?? '—'}</small></div></div></div>
+      <div class="col-md-4"><div class="card metric-card h-100" style="border-left-color:#ffc107"><div class="card-body">
+        <h6 class="text-muted">Ciclo Mais Longo</h6><h2 class="text-warning">${longo.concursos ?? '—'}</h2>
+        <small class="text-muted">Ciclo #${longo.numero ?? '—'}</small></div></div></div>
+    </div>
+    ${estatisticas ? `
+    <div class="card mb-4 shadow-sm border-secondary">
+      <div class="card-header bg-secondary text-white fw-bold"><i class="fas fa-chart-pie me-2"></i>Comportamento Médio das Dezenas (ciclos completos)</div>
+      <div class="card-body"><div class="row text-center">
+        <div class="col-md-6 mb-3"><h5 class="text-success">Dezenas Novas no Ciclo</h5>
+          <h1 class="fw-bold text-success">${estatisticas.media_dezenas_novas}</h1>
+          <div class="progress mt-2" style="height:25px"><div class="progress-bar bg-success" style="width:${estatisticas.percentual_medio_novas}%">${estatisticas.percentual_medio_novas}% renovação</div></div></div>
+        <div class="col-md-6"><h5 class="text-secondary">Dezenas Repetidas no Ciclo</h5>
+          <h1 class="fw-bold text-secondary">${estatisticas.media_dezenas_repetidas}</h1>
+          <div class="progress mt-2" style="height:25px"><div class="progress-bar bg-secondary" style="width:${estatisticas.percentual_medio_repetidas}%">${estatisticas.percentual_medio_repetidas}% repetição</div></div></div>
+      </div></div></div>` : ''}
+    ${comparacao ? `
+    <div class="card mb-4"><div class="card-body">
+      <h5>Comparação do Ciclo Atual</h5>
+      <div class="alert alert-${comparacao.status === 'longo' ? 'warning' : comparacao.status === 'curto' ? 'info' : 'success'}">
+        <h6>${comparacao.insight}</h6>
+        <ul class="mb-0 mt-2">
+          <li>Concursos atuais: <strong>${comparacao.concursos_atual}</strong></li>
+          <li>Média histórica: <strong>${comparacao.media_historica}</strong></li>
+          <li>Percentil: <strong>${comparacao.percentil}%</strong></li>
+        </ul></div></div></div>` : ''}
+    <div class="card mb-4"><div class="card-body">
+      <h5>Distribuição de Duração dos Ciclos</h5>
+      <table class="table table-sm"><thead><tr><th>Faixa</th><th>Qtd</th><th>Visual</th></tr></thead>
+      <tbody>${Object.entries(metricas.distribuicao || {}).map(([faixa, qtd]) => `
+        <tr><td>${faixa} concursos</td><td><strong>${qtd}</strong></td>
+        <td><div style="width:${metricas.total_ciclos ? (qtd / metricas.total_ciclos) * 100 : 0}%" class="chart-bar"></div></td></tr>`).join('')}
+      </tbody></table></div></div>
+    <div class="card"><div class="card-body">
+      <h5>Últimos 10 Ciclos Completos</h5>
+      <table class="table table-hover"><thead><tr><th>Ciclo</th><th>Início</th><th>Fim</th><th>Concursos</th><th>Status</th></tr></thead>
+      <tbody>${(historico || []).map(ciclo => {
+        let statusClass = 'text-success', statusText = 'Normal';
+        if (ciclo.quantidade_concursos < metricas.media_concursos * 0.8) { statusClass = 'text-info'; statusText = 'Rápido'; }
+        else if (ciclo.quantidade_concursos > metricas.media_concursos * 1.2) { statusClass = 'text-warning'; statusText = 'Longo'; }
+        return `<tr><td><strong>#${ciclo.numero}</strong></td><td>${ciclo.concurso_inicio}</td>
+          <td>${ciclo.concurso_fim || '—'}</td><td>${ciclo.quantidade_concursos}</td>
+          <td><span class="badge bg-light ${statusClass}">${statusText}</span></td></tr>`;
+      }).join('')}</tbody></table></div></div>`;
+    document.getElementById('metricasContent').innerHTML = html;
+  }
+  function mostrarErro(m) {
+    document.getElementById('metricasContent').innerHTML = `<div class="alert alert-danger">${m}</div>`;
+  }
+})();
+</script>
+{% endblock %}

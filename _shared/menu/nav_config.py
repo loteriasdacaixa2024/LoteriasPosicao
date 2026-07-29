@@ -274,6 +274,14 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 "icon_color": "#664a00",
             },
             {
+                "title": "Análise de Ciclos das Dezenas",
+                "desc": "Ciclo atual · métricas · inteligência operacional",
+                "href": "/analise/ciclo-cobertura/",
+                "icon": "fas fa-sync-alt",
+                "icon_bg": "#e7f1ff",
+                "icon_color": "#0d6efd",
+            },
+            {
                 "title": "Análise Comportamental",
                 "desc": "Geral · Vencedores · Acumulados — PA/PR/RT/MO/MS",
                 "href": "/analise/comportamento/",
@@ -315,6 +323,12 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                     "title": "Repetição → Apostas",
                     "desc": "Gerador baseado na repetição entre concursos",
                     "icon": "fas fa-dice",
+                },
+                {
+                    "href": "/geradores-elite/ciclo-apostas/",
+                    "title": "Ciclo → Apostas",
+                    "desc": "2+1 · Ritmo de Evolução (análise oficial)",
+                    "icon": "fas fa-sync-alt",
                 },
                 {
                     "href": "/geradores-elite/gerador-por-posicao/",

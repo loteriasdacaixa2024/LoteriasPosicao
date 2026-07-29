@@ -616,10 +616,11 @@ def backtest_apostas_engine(
 
     for sorteio in rows:
         sorteadas = list(svc._dezenas_from_sorteio(sorteio))
+        sorteadas_cmp = sorteadas if positional else set(sorteadas)
         best_ac = 0
         teve_extra = False
         for ap in apostas or []:
-            ac = svc._contar_acertos(ap.get("dezenas") or [], sorteadas)
+            ac = svc._contar_acertos(ap.get("dezenas") or [], sorteadas_cmp)
             if ac > best_ac:
                 best_ac = ac
             ex = ap.get("extras") or {}

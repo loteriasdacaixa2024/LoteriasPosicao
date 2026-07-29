@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+{% block title %}Ciclo → Apostas — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+  {% if meses_cores %}
+  {% for nome, cor in meses_cores.items() %}
+  .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+  {% endfor %}
+  {% endif %}
+  .cc-ball{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:.7rem;font-weight:700;margin:1px}
+  .cc-ball.nova{background:#0d6efd;color:#fff}
+  .cc-ball.rep{background:#fd7e14;color:#fff}
+  .cc-ball.falt{background:#ff9800;color:#fff}
+  .cc-ball.saida{background:#198754;color:#fff}
+  .cc-ball.livre{background:#6c757d;color:#fff}
+  .cc-ball.dez{background:#e9ecef;color:#212529}
+  .cc-i{cursor:help;color:#6c757d;font-size:.78rem;margin-left:.2rem}
+  .cc-toggle{display:flex;align-items:center;gap:.4rem;padding:.45rem .65rem;border:1px solid #dee2e6;border-radius:8px;background:#fff}
+  .cc-aposta{border-left:4px solid #0d6efd;background:#fff;border-radius:8px;padding:.65rem .8rem;margin-bottom:.5rem;border:1px solid #e9ecef}
+  .cc-aposta.ritmo{border-left-color:#fd7e14}
+  .cc-aposta.ja-hist{border-left-color:#dc3545;background:#fff5f5}
+  .cc-legenda{display:flex;flex-wrap:wrap;gap:.75rem;font-size:.75rem;color:#6c757d;margin-top:.5rem}
+  .cc-legenda span{display:inline-flex;align-items:center;gap:.3rem}
+  .mes-badge{display:inline-block;padding:.15rem .45rem;border-radius:6px;font-size:.72rem;font-weight:700;background:#6c757d;color:#fff}
+  .cc-bt-box{border:1px solid #dee2e6;border-radius:8px;padding:.75rem;background:#fafafa}
+  .cc-bt-pill{display:inline-flex;flex-direction:column;align-items:center;min-width:3rem;padding:.2rem .5rem;border:1px solid #dee2e6;border-radius:8px;background:#fff;font-size:.72rem;margin:2px}
+  .cc-bt-pill strong{font-size:.95rem}
+</style>
+<div class="container-fluid py-3">
+  <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+      <div class="d-flex flex-wrap justify-content-between gap-2">
+        <div>
+          <h1 class="h4 mb-1"><i class="fas fa-magic text-success me-2"></i>Gerador Elite · Ciclo</h1>
+          <p class="text-muted small mb-0">{{ modality_nome }} · 7–{{ pick_max }} dezenas · histórico + back test · TXT</p>
+        </div>
+        <a class="btn btn-outline-primary btn-sm" href="/analise/ciclo-cobertura/"><i class="fas fa-chart-bar me-1"></i>Ver análise</a>
+      </div>
+    </div>
+  </div>
+
+  <ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-21" type="button" role="tab">Ciclo → Apostas</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ritmo" type="button" role="tab">Ciclo → Ritmo de Evolução</button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- ABA 1 -->
+    <div class="tab-pane fade show active" id="tab-21" role="tabpanel">
+      <details class="card shadow-sm border-0 mb-3">
+        <summary class="card-body py-2 fw-bold" style="cursor:pointer;font-size:.9rem">Como utilizar</summary>
+        <div class="card-body pt-0 small text-muted">
+          Pool = <strong>união</strong> das Novas e Repetidas dos 2 últimos concursos.
+          Cada jogo fixa <strong>2 novas</strong> + <strong>1 repetida</strong>; o restante completa até 7–{{ pick_max }} dezenas.
+          Após gerar, o sistema confere o histórico oficial e roda o back test automaticamente.
+        </div>
+      </details>
+      <div id="cc-ctx" class="mb-3"><div class="alert alert-light border small">Carregando contexto…</div></div>
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="small text-muted">Qtd. jogos</label>
+              <input type="number" id="cc-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="small text-muted">Dezenas ({{ pick_min }}–{{ pick_max }}) <i class="fas fa-info-circle cc-i" title="Quantidade de dezenas por aposta (limites Caixa)."></i></label>
+              <select id="cc-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="small text-muted">Mês da Sorte <i class="fas fa-info-circle cc-i" title="Mês exportado junto com cada aposta no TXT (padrão Dia de Sorte)."></i></label>
+              <select id="cc-mes" class="form-select form-select-sm">
+                <option value="">— selecionar —</option>
+                {% for m in meses %}
+                <option value="{{ m.num }}">{{ m.abrev }} — {{ m.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3 d-flex flex-wrap gap-2">
+              <label class="cc-toggle small mb-0"><input type="checkbox" id="cc-f-faixa"> Faixas</label>
+              <label class="cc-toggle small mb-0"><input type="checkbox" id="cc-f-soma"> Soma</label>
+              <label class="cc-toggle small mb-0"><input type="checkbox" id="cc-f-dig"> Dígitos</label>
+            </div>
+            <div class="col-md-3">
+              <label class="cc-toggle small mb-0 w-100">
+                <input type="checkbox" id="cc-descartar-hist" checked>
+                Descartar já sorteadas
+                <i class="fas fa-info-circle cc-i" title="Se marcado, remove automaticamente apostas idênticas a algum concurso do histórico oficial. Se desmarcado, mantém e destaca em vermelho."></i>
+              </label>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn btn-success btn-sm" id="cc-btn-gerar"><i class="fas fa-bolt me-1"></i>Gerar</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="cc-btn-export" disabled><i class="fas fa-file-export me-1"></i>Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="cc-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="cc-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball nova" style="width:18px;height:18px;font-size:.55rem">N</span> Novas <i class="fas fa-info-circle cc-i" title="Dezenas que ainda não tinham saído no ciclo aberto naquele concurso (união dos 2 últimos no pool)."></i></span>
+            <span><span class="cc-ball rep" style="width:18px;height:18px;font-size:.55rem">R</span> Repetidas <i class="fas fa-info-circle cc-i" title="Dezenas que já haviam aparecido no mesmo ciclo antes daquele concurso."></i></span>
+            <span><span class="cc-ball livre" style="width:18px;height:18px;font-size:.55rem">L</span> Complemento <i class="fas fa-info-circle cc-i" title="Dezenas que completam o jogo além das 2 novas + 1 repetida fixas."></i></span>
+          </div>
+        </div>
+      </div>
+      <div id="cc-hist-alert"></div>
+      <div id="cc-bt" class="mb-3"></div>
+      <div id="cc-out"></div>
+    </div>
+
+    <!-- ABA 2 -->
+    <div class="tab-pane fade" id="tab-ritmo" role="tabpanel">
+      <details class="card shadow-sm border-0 mb-3">
+        <summary class="card-body py-2 fw-bold" style="cursor:pointer;font-size:.9rem">Como utilizar</summary>
+        <div class="card-body pt-0 small text-muted">
+          Consome a análise oficial. O nº de <strong>faltantes (k)</strong> é amostrado pelos cenários semelhantes + teto de pressão.
+          Restante = dezenas já saídas no ciclo. Histórico e back test rodam após a geração.
+        </div>
+      </details>
+      <div id="cr-ctx" class="mb-3"><div class="alert alert-light border small">Carregando indicadores…</div></div>
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="small text-muted">Qtd. jogos</label>
+              <input type="number" id="cr-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="small text-muted">Dezenas ({{ pick_min }}–{{ pick_max }})</label>
+              <select id="cr-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="small text-muted">Mês da Sorte</label>
+              <select id="cr-mes" class="form-select form-select-sm">
+                <option value="">— selecionar —</option>
+                {% for m in meses %}
+                <option value="{{ m.num }}">{{ m.abrev }} — {{ m.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="cc-toggle small mb-0 w-100">
+                <input type="checkbox" id="cr-descartar-hist" checked>
+                Descartar já sorteadas
+              </label>
+            </div>
+            <div class="col-md-3 d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-warning btn-sm" id="cr-btn-gerar"><i class="fas fa-bolt me-1"></i>Gerar Ritmo</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="cr-btn-export" disabled><i class="fas fa-file-export me-1"></i>TXT</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" id="cr-btn-bt" disabled>Back Test</button>
+            </div>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="cr-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">P</span> Pendentes / faltantes <i class="fas fa-info-circle cc-i" title="Dezenas que ainda não saíram no ciclo atual (laranja no volante da análise)."></i></span>
+            <span><span class="cc-ball saida" style="width:18px;height:18px;font-size:.55rem">S</span> Já saídas <i class="fas fa-info-circle cc-i" title="Dezenas que já apareceram ao menos uma vez no ciclo aberto."></i></span>
+          </div>
+        </div>
+      </div>
+      <div id="cr-hist-alert"></div>
+      <div id="cr-bt" class="mb-3"></div>
+      <div id="cr-out"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const API = {{ api_base|tojson }};
+  const MESES_ABREV = {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+  const pad = n => String(n).padStart(2,'0');
+  const balls = (arr, cls) => (arr||[]).map(d=>`<span class="cc-ball ${cls}">${pad(d)}</span>`).join('') || '—';
+
+  let state21 = { apostas: [], mes: null };
+  let stateRitmo = { apostas: [], mes: null };
+
+  function mesBadge(ap){
+    const n = ap.mes_num || ap.mes;
+    if(!n) return '';
+    const ab = ap.mes_abrev || MESES_ABREV[n] || '';
+    const nome = (ap.mes_nome || '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'');
+    const cls = nome ? `mes-nome-${nome}` : '';
+    return `<span class="mes-badge ${cls}" title="Mês da Sorte">${ab}</span>`;
+  }
+
+  function renderHistAlert(elId, hist){
+    const el = document.getElementById(elId);
+    if(!hist || !hist.ja_sorteadas_count){ el.innerHTML = ''; return; }
+    const itens = (hist.itens||[]).map(it =>
+      `#${it.concurso}${it.data?(' ('+it.data+')'):''}: ${(it.dezenas||[]).map(pad).join(' ')}`
+    ).join('<br>');
+    el.innerHTML = `<div class="alert alert-warning small">
+      <strong><i class="fas fa-exclamation-triangle me-1"></i>${hist.ja_sorteadas_count} aposta(s) já sorteada(s) no histórico oficial</strong>
+      ${hist.descartadas ? `<div class="mt-1">${hist.descartadas} removida(s) automaticamente.</div>` : `<div class="mt-1">Mantidas e destacadas em vermelho — use Remover se desejar descartar.</div>`}
+      <div class="mt-2">${itens}</div>
+    </div>`;
+  }
+
+  function renderBacktest(elId, bt){
+    const el = document.getElementById(elId);
+    if(!bt){ el.innerHTML = ''; return; }
+    if(!bt.sucesso){
+      el.innerHTML = `<div class="alert alert-danger small">${bt.erro||'Falha no back test'}</div>`;
+      return;
+    }
+    el.innerHTML = `<div class="cc-bt-box small">
+      <div class="fw-bold mb-2"><i class="fas fa-chart-line me-1"></i>Back Test · últimos ${bt.concursos_analisados} concursos (#${bt.concurso_de}–#${bt.concurso_ate})</div>
+      <div class="d-flex flex-wrap gap-1 mb-2">
+        <span class="cc-bt-pill"><strong>${bt.media_max_acertos}</strong><span>média máx.</span></span>
+        <span class="cc-bt-pill"><strong>${bt.dist_4||0}</strong><span>4 acertos</span></span>
+        <span class="cc-bt-pill"><strong>${bt.dist_5||0}</strong><span>5 acertos</span></span>
+        <span class="cc-bt-pill"><strong>${bt.dist_6||0}</strong><span>6 acertos</span></span>
+        <span class="cc-bt-pill"><strong>${bt.dist_7||0}</strong><span>7 acertos</span></span>
+      </div>
+      ${(bt.destaques||[]).length ? `<div class="text-muted">Destaques: ${(bt.destaques||[]).slice(0,5).map(d=>`#${d.concurso} (${d.max_acertos} ac.)`).join(' · ')}</div>` : ''}
+    </div>`;
+  }
+
+  function renderCtx(c){
+    const box = document.getElementById('cc-ctx');
+    if(!c || !c.ok){
+      box.innerHTML = `<div class="alert alert-warning small">${(c&&c.erro)||'Contexto indisponível'}</div>`;
+      return;
+    }
+    const ant = (c.concursos||[]).find(x=>x.papel==='anterior') || {};
+    const ult = (c.concursos||[]).find(x=>x.papel==='ultimo') || {};
+    box.innerHTML = `
+      <div class="row g-2">
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Anterior ${ant.concurso||''}</div>
+          <div>Novas ${balls(ant.novas,'nova')}</div>
+          <div class="mt-1">Rep. ${balls(ant.repetidas,'rep')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Último ${ult.concurso||''} <span class="badge bg-primary">auto</span></div>
+          <div>Novas ${balls(ult.novas,'nova')}</div>
+          <div class="mt-1">Rep. ${balls(ult.repetidas,'rep')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Pool união</div>
+          <div>Novas ${balls(c.pool.novas,'nova')}</div>
+          <div class="mt-1">Rep. ${balls(c.pool.repetidas,'rep')}</div>
+          <div class="text-muted mt-2">Apto 2+1: <strong>${c.pool_ok?'sim':'não'}</strong></div>
+        </div></div></div>
+      </div>`;
+  }
+
+  function renderApostas21(j){
+    const out = document.getElementById('cc-out');
+    const st = document.getElementById('cc-status');
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      out.innerHTML = '';
+      state21.apostas = [];
+      document.getElementById('cc-btn-export').disabled = true;
+      document.getElementById('cc-btn-bt').disabled = true;
+      return;
+    }
+    state21.apostas = j.apostas || [];
+    state21.mes = j.mes_num || Number(document.getElementById('cc-mes').value) || null;
+    st.textContent = (j.aviso || (`${j.geradas} jogo(s) gerados`)) +
+      (j.contexto ? ` · concursos ${j.contexto.anterior_concurso}–${j.contexto.ultimo_concurso}` : '');
+    renderHistAlert('cc-hist-alert', j.historico);
+    document.getElementById('cc-btn-export').disabled = !state21.apostas.length;
+    document.getElementById('cc-btn-bt').disabled = !state21.apostas.length;
+    out.innerHTML = state21.apostas.map((a,i)=>`
+      <div class="cc-aposta ${a.ja_sorteada?'ja-hist':''}" data-idx="${i}">
+        <div class="d-flex justify-content-between small text-muted mb-1">
+          <span>#${a.numero||i+1} · soma ${a.soma} · dígitos ${a.digitos_distintos}
+            ${a.ja_sorteada?` · <span class="text-danger fw-bold">já sorteada #${a.concurso_historico}</span>`:''}
+            ${mesBadge(a)}
+          </span>
+          <span>
+            ${a.ja_sorteada?`<button type="button" class="btn btn-outline-danger btn-sm py-0 px-1 cc-rm" data-i="${i}">Remover</button>`:''}
+            ${a.dezenas.map(pad).join(' ')}
+          </span>
+        </div>
+        <div>${a.dezenas.map(d=>{
+          let cls='livre';
+          if((a.novas||[]).includes(d)) cls='nova';
+          else if((a.repetidas||[]).includes(d)) cls='rep';
+          return `<span class="cc-ball ${cls}">${pad(d)}</span>`;
+        }).join('')}</div>
+      </div>`).join('') || '<div class="text-muted small">Nenhum jogo.</div>';
+    out.querySelectorAll('.cc-rm').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.dataset.i);
+        state21.apostas.splice(i,1);
+        state21.apostas.forEach((a,n)=>a.numero=n+1);
+        renderApostas21({ok:true, geradas:state21.apostas.length, apostas:state21.apostas, historico:null, aviso:`${state21.apostas.length} jogo(s)`});
+      });
+    });
+  }
+
+  function renderRitmoCtx(c){
+    const box = document.getElementById('cr-ctx');
+    if(!c || !c.ok){
+      box.innerHTML = `<div class="alert alert-warning small">${(c&&c.erro)||'Indicadores indisponíveis'}</div>`;
+      return;
+    }
+    const dist = c.distribuicao_entrada || {};
+    box.innerHTML = `
+      <div class="row g-2">
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Ciclo #${c.ciclo} · ${c.classificacao||'—'} · pressão <span class="badge bg-secondary">${c.pressao||'—'}</span></div>
+          <div>Fechamento <strong>${c.percentual}%</strong> · ${c.quantidade_concursos} concursos</div>
+          <div class="mt-2 text-muted">${c.leitura||''}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Pendentes (${(c.pendentes||[]).length}) <i class="fas fa-info-circle cc-i" title="Ainda não saíram no ciclo atual."></i></div>
+          <div>${balls(c.pendentes,'falt')}</div>
+          <div class="fw-bold mt-2 mb-1">Top 3</div>
+          <div>${balls(c.top_3,'nova')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Próximo concurso (n=${c.amostras||0})</div>
+          <div>0: ${dist['0']||0}% · 1: ${dist['1']||0}% · 2: ${dist['2']||0}%</div>
+          <div>3: ${dist['3']||0}% · 4+: ${dist['4+']||0}%</div>
+          <div class="text-muted mt-2">Já saídas: <strong>${(c.saidas||[]).length}</strong></div>
+        </div></div></div>
+      </div>`;
+  }
+
+  function renderRitmoApostas(j){
+    const out = document.getElementById('cr-out');
+    const st = document.getElementById('cr-status');
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      out.innerHTML = '';
+      stateRitmo.apostas = [];
+      document.getElementById('cr-btn-export').disabled = true;
+      document.getElementById('cr-btn-bt').disabled = true;
+      return;
+    }
+    stateRitmo.apostas = j.apostas || [];
+    stateRitmo.mes = j.mes_num || Number(document.getElementById('cr-mes').value) || null;
+    const ind = j.indicadores || {};
+    st.textContent = (j.aviso || (`${j.geradas} jogo(s)`)) +
+      (ind.ciclo != null ? ` · k médio ${ind.media_k_gerado} · ciclo #${ind.ciclo}` : '');
+    renderHistAlert('cr-hist-alert', j.historico);
+    document.getElementById('cr-btn-export').disabled = !stateRitmo.apostas.length;
+    document.getElementById('cr-btn-bt').disabled = !stateRitmo.apostas.length;
+    out.innerHTML = stateRitmo.apostas.map((a,i)=>`
+      <div class="cc-aposta ritmo ${a.ja_sorteada?'ja-hist':''}">
+        <div class="d-flex justify-content-between small text-muted mb-1">
+          <span>#${a.numero||i+1} · k=${a.k_faltantes} · soma ${a.soma}
+            ${a.ja_sorteada?` · <span class="text-danger fw-bold">já sorteada #${a.concurso_historico}</span>`:''}
+            ${mesBadge(a)}
+          </span>
+          <span>
+            ${a.ja_sorteada?`<button type="button" class="btn btn-outline-danger btn-sm py-0 px-1 cr-rm" data-i="${i}">Remover</button>`:''}
+            ${a.dezenas.map(pad).join(' ')}
+          </span>
+        </div>
+        <div>${a.dezenas.map(d=>{
+          const cls = (a.faltantes||[]).includes(d) ? 'falt' : 'saida';
+          return `<span class="cc-ball ${cls}">${pad(d)}</span>`;
+        }).join('')}</div>
+      </div>`).join('') || '<div class="text-muted small">Nenhum jogo.</div>';
+    out.querySelectorAll('.cr-rm').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.dataset.i);
+        stateRitmo.apostas.splice(i,1);
+        stateRitmo.apostas.forEach((a,n)=>a.numero=n+1);
+        renderRitmoApostas({ok:true, geradas:stateRitmo.apostas.length, apostas:stateRitmo.apostas, aviso:`${stateRitmo.apostas.length} jogo(s)`});
+      });
+    });
+  }
+
+  async function runBacktest(apostas, elId){
+    if(!apostas.length) return;
+    renderBacktest(elId, {sucesso:true, concursos_analisados:'…', concurso_de:'', concurso_ate:'', media_max_acertos:'…', dist_4:0,dist_5:0,dist_6:0,dist_7:0, destaques:[]});
+    try{
+      const r = await fetch(API+'/backtest', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ apostas, limite: 30 })
+      });
+      renderBacktest(elId, await r.json());
+    }catch(e){
+      renderBacktest(elId, {sucesso:false, erro:e.message});
+    }
+  }
+
+  async function exportTxt(apostas, mes){
+    if(!apostas.length) return;
+    if(!mes){
+      alert('Selecione o Mês da Sorte para exportar o TXT.');
+      return;
+    }
+    const r = await fetch(API+'/export-txt', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ apostas, mes_num: mes })
+    });
+    const j = await r.json();
+    if(!j.sucesso){ alert(j.erro||'Falha no export'); return; }
+    const blob = new Blob([j.texto], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = j.nome_arquivo || 'ciclo_apostas.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  fetch(API+'/contexto').then(r=>r.json()).then(j=>renderCtx(j.contexto||j))
+    .catch(e=>{ document.getElementById('cc-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`; });
+  fetch(API+'/ritmo/contexto').then(r=>r.json()).then(renderRitmoCtx)
+    .catch(e=>{ document.getElementById('cr-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`; });
+
+  document.getElementById('cc-btn-gerar').addEventListener('click', async ()=>{
+    const st = document.getElementById('cc-status');
+    st.textContent = 'Gerando e conferindo histórico…';
+    const mes = Number(document.getElementById('cc-mes').value) || null;
+    const body = {
+      quantidade: Number(document.getElementById('cc-qtd').value||10),
+      pick: Number(document.getElementById('cc-pick').value||7),
+      filtro_faixas: document.getElementById('cc-f-faixa').checked,
+      filtro_soma: document.getElementById('cc-f-soma').checked,
+      filtro_digitos: document.getElementById('cc-f-dig').checked,
+      mes_num: mes,
+      descartar_historico: document.getElementById('cc-descartar-hist').checked,
+    };
+    try{
+      const r = await fetch(API+'/gerar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await r.json();
+      if(j.contexto) renderCtx(j.contexto);
+      renderApostas21(j);
+      if(j.ok && (j.apostas||[]).length) await runBacktest(j.apostas, 'cc-bt');
+    }catch(e){ st.textContent = 'Erro: '+e.message; }
+  });
+
+  document.getElementById('cr-btn-gerar').addEventListener('click', async ()=>{
+    const st = document.getElementById('cr-status');
+    st.textContent = 'Gerando ritmo e conferindo histórico…';
+    const mes = Number(document.getElementById('cr-mes').value) || null;
+    const body = {
+      quantidade: Number(document.getElementById('cr-qtd').value||10),
+      pick: Number(document.getElementById('cr-pick').value||7),
+      mes_num: mes,
+      descartar_historico: document.getElementById('cr-descartar-hist').checked,
+    };
+    try{
+      const r = await fetch(API+'/ritmo/gerar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await r.json();
+      renderRitmoApostas(j);
+      if(j.ok && (j.apostas||[]).length) await runBacktest(j.apostas, 'cr-bt');
+    }catch(e){ st.textContent = 'Erro: '+e.message; }
+  });
+
+  document.getElementById('cc-btn-export').addEventListener('click', ()=>exportTxt(state21.apostas, state21.mes || Number(document.getElementById('cc-mes').value)||null));
+  document.getElementById('cr-btn-export').addEventListener('click', ()=>exportTxt(stateRitmo.apostas, stateRitmo.mes || Number(document.getElementById('cr-mes').value)||null));
+  document.getElementById('cc-btn-bt').addEventListener('click', ()=>runBacktest(state21.apostas, 'cc-bt'));
+  document.getElementById('cr-btn-bt').addEventListener('click', ()=>runBacktest(stateRitmo.apostas, 'cr-bt'));
+})();
+</script>
+{% endblock %}
