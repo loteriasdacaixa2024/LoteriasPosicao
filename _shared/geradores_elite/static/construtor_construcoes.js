@@ -520,6 +520,24 @@
 
     function fillMesSelect(sel, selected) {
         if (!sel) return;
+        const prefer = selected != null && selected !== '' ? selected : 'atrasado';
+        if (window.MesSorteSelect) {
+            const apply = (data) => {
+                MesSorteSelect.fill(sel, data, { selected: prefer, defaultPrefer: 'atrasado' });
+            };
+            if (MesSorteSelect.cached) apply(MesSorteSelect.cached);
+            else MesSorteSelect.load(API).then(apply).catch(() => {
+                sel.innerHTML = '';
+                MESES.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.num;
+                    opt.textContent = `${m.nome} (${m.abrev})`;
+                    if (selected && parseInt(selected, 10) === m.num) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+            });
+            return;
+        }
         sel.innerHTML = '';
         MESES.forEach(m => {
             const opt = document.createElement('option');
@@ -528,6 +546,21 @@
             if (selected && parseInt(selected, 10) === m.num) opt.selected = true;
             sel.appendChild(opt);
         });
+    }
+
+    function mesNumFromSelect(sel) {
+        if (!sel || !sel.value) return null;
+        if (window.MesSorteSelect) {
+            return MesSorteSelect.resolveFromSelect(sel, MesSorteSelect.cached);
+        }
+        const n = parseInt(sel.value, 10);
+        return isNaN(n) ? null : n;
+    }
+
+    function mesPayloadFromSelect(sel) {
+        if (!sel || !sel.value) return null;
+        // Envia o valor do select (atrasado|frequente|aleatorio|N) — backend resolve
+        return sel.value;
     }
 
     function parseDezenasInput(txt) {
@@ -848,7 +881,7 @@
         editandoConstrucaoId = construcaoId;
         $('ccEditNumero').textContent = '#' + c.numero;
         $('ccEditPoolHint').textContent = (sessaoAtual.conjunto_base || []).map(fmt).join(' ');
-        fillMesSelect($('ccEditMes'), c.mes_num || 1);
+        fillMesSelect($('ccEditMes'), c.mes_num || 'atrasado');
         $('ccEditApostas').innerHTML = renderApostas(c.apostas, true);
         modalEditar?.show();
     }
@@ -863,7 +896,7 @@
         }
         const data = await apiPut(`/construcao/${editandoConstrucaoId}`, {
             apostas,
-            mes_num: parseInt($('ccEditMes').value, 10),
+            mes_num: mesPayloadFromSelect($('ccEditMes')),
         });
         if (!data.sucesso) {
             alert(data.erro || 'Erro ao salvar.');
@@ -896,7 +929,7 @@
         exportandoConstrucaoId = construcaoId;
         exportandoSessaoTodas = false;
         $('ccExportNumero').textContent = '#' + numero;
-        if (HAS_MES) fillMesSelect($('ccExportMes'), c?.mes_num || 1);
+        if (HAS_MES) fillMesSelect($('ccExportMes'), c?.mes_num || 'atrasado');
         modalExport?.show();
     }
 
@@ -909,14 +942,14 @@
         exportandoSessaoTodas = true;
         const n = sessaoAtual.construcoes.length;
         $('ccExportNumero').textContent = `1–${n} (todas)`;
-        if (HAS_MES) fillMesSelect($('ccExportMes'), sessaoAtual.construcoes[0]?.mes_num || 1);
+        if (HAS_MES) fillMesSelect($('ccExportMes'), sessaoAtual.construcoes[0]?.mes_num || 'atrasado');
         modalExport?.show();
     }
 
     async function confirmarExport() {
         const payload = {};
         if (HAS_MES) {
-            payload.mes_num = parseInt($('ccExportMes').value, 10);
+            payload.mes_num = mesPayloadFromSelect($('ccExportMes'));
         }
         let data;
         if (exportandoSessaoTodas) {
@@ -1527,8 +1560,8 @@
             if (elExp) modalExport = new bootstrap.Modal(elExp);
             if (elHist) modalConfHist = new bootstrap.Modal(elHist);
         }
-        fillMesSelect($('ccEditMes'), 1);
-        if (HAS_MES) fillMesSelect($('ccExportMes'), 1);
+        fillMesSelect($('ccEditMes'), 'atrasado');
+        if (HAS_MES) fillMesSelect($('ccExportMes'), 'atrasado');
 
         $('ccBtnSalvarEdicao')?.addEventListener('click', salvarEdicao);
         $('ccBtnConfirmarExport')?.addEventListener('click', confirmarExport);

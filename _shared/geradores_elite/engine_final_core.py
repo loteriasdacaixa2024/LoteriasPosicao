@@ -643,6 +643,53 @@ def backtest_apostas_engine(
 
     destaques.sort(key=lambda x: (-x["max_acertos"], -x["concurso"]))
     n = len(rows)
+
+    # Melhor concurso: devolve acertadas por aposta para destacar em verde na UI
+    melhor: Dict[str, Any] = {}
+    if rows:
+        melhor_row = max(
+            rows,
+            key=lambda s: max(
+                (
+                    svc._contar_acertos(
+                        ap.get("dezenas") or [],
+                        list(svc._dezenas_from_sorteio(s))
+                        if positional
+                        else set(svc._dezenas_from_sorteio(s)),
+                    )
+                    for ap in (apostas or [])
+                ),
+                default=0,
+            ),
+        )
+        sorteadas_m = list(svc._dezenas_from_sorteio(melhor_row))
+        sorteadas_m_cmp = sorteadas_m if positional else set(sorteadas_m)
+        apostas_det = []
+        for i, ap in enumerate(apostas or [], start=1):
+            dz = list(ap.get("dezenas") or [])
+            ac = svc._contar_acertos(dz, sorteadas_m_cmp)
+            if positional:
+                acertadas = [
+                    dz[j]
+                    for j in range(min(len(dz), len(sorteadas_m)))
+                    if dz[j] == sorteadas_m[j]
+                ]
+            else:
+                acertadas = sorted(set(dz) & set(sorteadas_m))
+            apostas_det.append({
+                "numero": ap.get("numero", i),
+                "dezenas": dz,
+                "acertos": ac,
+                "acertadas": acertadas,
+            })
+        melhor = {
+            "concurso": int(melhor_row.concurso),
+            "data": getattr(melhor_row, "data", "") or "",
+            "sorteadas": list(sorteadas_m) if positional else sorted(set(sorteadas_m)),
+            "max_acertos": max((a["acertos"] for a in apostas_det), default=0),
+            "apostas": apostas_det,
+        }
+
     out: Dict[str, Any] = {
         "sucesso": True,
         "limite": lim,
@@ -656,6 +703,7 @@ def backtest_apostas_engine(
         "dist_7": dist[7],
         "media_max_acertos": round(total_max / n, 2) if n else 0.0,
         "destaques": destaques[:8],
+        "melhor": melhor,
     }
     if extra_tipo == "mes":
         out["extras_acertados"] = extras_ok

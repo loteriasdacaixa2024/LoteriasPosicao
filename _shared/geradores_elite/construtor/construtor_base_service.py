@@ -588,8 +588,9 @@ class ConstrutorBaseService:
             return {"sucesso": False, "erro": err}
         sp = cls._spec()
         if sp.has_mes and mes_num is not None:
-            mes_num = int(mes_num)
-            if mes_num < 1 or mes_num > 12:
+            from diadesorte.mes_sorte_select import resolver_mes_sorte
+            mes_num = resolver_mes_sorte(mes_num)
+            if mes_num is None or mes_num < 1 or mes_num > 12:
                 return {"sucesso": False, "erro": "Mês da Sorte deve ser entre 1 e 12."}
             construcao.mes_num = mes_num
         if extra:
@@ -632,6 +633,9 @@ class ConstrutorBaseService:
         export_extra: Dict[str, Any] = {}
         if sp.has_mes:
             mn = mes_num if mes_num is not None else construcao.mes_num
+            if mn is not None and not isinstance(mn, int):
+                from diadesorte.mes_sorte_select import resolver_mes_sorte
+                mn = resolver_mes_sorte(mn)
             if mn is None and sp.modality_key == "diadesorte":
                 from diadesorte.meses_indicados import carregar_meses_indicados, mes_ciclo
                 from models.sorteio_diadesorte import SorteioDiaDeSorte

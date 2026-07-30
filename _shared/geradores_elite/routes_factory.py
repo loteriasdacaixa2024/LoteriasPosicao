@@ -37,6 +37,19 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
     )
     cfg = get_config(modality_key)
 
+    def _pipeline_elite(resultado, origem: str, data=None):
+        """Camada obrigatória: histórico oficial + back test (serviço global)."""
+        from geradores_elite.validacao.pipeline import pipeline_from_request
+
+        if not isinstance(resultado, dict):
+            return resultado
+        return pipeline_from_request(
+            resultado,
+            modality_key=modality_key,
+            origem=origem,
+            data=data if isinstance(data, dict) else {},
+        )
+
     @bp.route("/")
     def index():
         return render_template(
@@ -252,6 +265,76 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         code = 200 if out.get("ok") else 400
         return jsonify(out), code
 
+    @bp.route("/api/ciclo-apostas/operacional/contexto")
+    def api_ciclo_operacional_contexto():
+        from ciclo_cobertura.gerador_operacional import contexto_operacional
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        return jsonify(contexto_operacional(modality_key))
+
+    @bp.route("/api/ciclo-apostas/operacional/gerar", methods=["POST"])
+    def api_ciclo_operacional_gerar():
+        from ciclo_cobertura.gerador_operacional import gerar_apostas_operacional
+        from ciclo_cobertura.pos_geracao import pos_processar_geracao
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        data = request.get_json(silent=True) or {}
+        out = gerar_apostas_operacional(
+            modality_key,
+            quantidade=int(data.get("quantidade") or 10),
+            pick=int(data["pick"]) if data.get("pick") is not None else None,
+            modo=data.get("modo") or "auto",
+        )
+        if out.get("ok"):
+            out = pos_processar_geracao(
+                out,
+                modality_key,
+                mes_num=data.get("mes_num") or data.get("mes"),
+                descartar_historico=bool(data.get("descartar_historico")),
+                origem="ciclo_operacional",
+            )
+        code = 200 if out.get("ok") else 400
+        return jsonify(out), code
+
+    @bp.route("/api/ciclo-apostas/fechamento/contexto")
+    def api_ciclo_fechamento_contexto():
+        from ciclo_cobertura.gerador_fechamento import contexto_fechamento
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        return jsonify(contexto_fechamento(modality_key))
+
+    @bp.route("/api/ciclo-apostas/fechamento/gerar", methods=["POST"])
+    def api_ciclo_fechamento_gerar():
+        from ciclo_cobertura.gerador_fechamento import gerar_apostas_fechamento
+        from ciclo_cobertura.pos_geracao import pos_processar_geracao
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        data = request.get_json(silent=True) or {}
+        out = gerar_apostas_fechamento(
+            modality_key,
+            quantidade=int(data.get("quantidade") or 10),
+            pick=int(data["pick"]) if data.get("pick") is not None else None,
+            forcar=bool(data.get("forcar")),
+        )
+        if out.get("ok"):
+            out = pos_processar_geracao(
+                out,
+                modality_key,
+                mes_num=data.get("mes_num") or data.get("mes"),
+                descartar_historico=bool(data.get("descartar_historico")),
+                origem="ciclo_fechamento",
+            )
+        code = 200 if out.get("ok") else 400
+        return jsonify(out), code
+
     @bp.route("/api/ciclo-apostas/export-txt", methods=["POST"])
     def api_ciclo_export_txt():
         try:
@@ -261,20 +344,19 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 return jsonify({"sucesso": False, "erro": "Nenhuma aposta para exportar."}), 400
             mes_num = body.get("mes_num") or body.get("mes")
             extra = body.get("extra") or {}
-            if mes_num and not extra:
-                from ciclo_cobertura.pos_geracao import MESES_ABREV
-                mn = int(mes_num)
+            from ciclo_cobertura.pos_geracao import MESES_ABREV, aplicar_mes_apostas, resolver_mes_entrada
+            mn = resolver_mes_entrada(mes_num)
+            if mn and not extra:
                 extra = {"tipo": "mes", "num": mn, "label": MESES_ABREV.get(mn, str(mn))}
-            # garante extras por aposta
-            from ciclo_cobertura.pos_geracao import aplicar_mes_apostas
-            if mes_num:
-                apostas = aplicar_mes_apostas(apostas, int(mes_num))
+            if mn:
+                apostas = aplicar_mes_apostas(apostas, mn)
             texto = formatar_export_txt(modality_key, apostas, extra)
             nome = f"ciclo_apostas_{modality_key}_{len(apostas)}jg.txt"
             return jsonify({
                 "sucesso": True,
                 "texto": texto,
                 "nome_arquivo": nome,
+                "mes_num": mn,
             })
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
@@ -360,7 +442,8 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             if modality_key != "supersete":
                 if data.get("dezenas_por_jogo") is not None:
                     kwargs["dezenas_por_jogo"] = int(data["dezenas_por_jogo"])
-            return jsonify(svc.gerar(**kwargs))
+            out = svc.gerar(**kwargs)
+            return jsonify(_pipeline_elite(out, "inteligente", data))
         except ValueError as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 404
         except Exception as e:
@@ -431,7 +514,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             ui = svc.ui_config()
             dez_default = ui.get("dezenas_default", 15)
             filtros = data.get("filtros") or {}
-            return jsonify(svc.gerar(
+            return jsonify(_pipeline_elite(svc.gerar(
                 quantidade=int(data.get("quantidade", 10)),
                 perfil=data.get("perfil", "equilibrado"),
                 modo_geracao=data.get("modo_geracao", "automatico"),
@@ -441,7 +524,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 regras_manuais=data.get("regras_manuais") or {},
                 filtros=filtros or None,
                 base_estatistica=data.get("base") or data.get("base_estatistica", "geral"),
-            ))
+            ), "comportamento", data))
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
@@ -457,6 +540,17 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             if not dados.get("sucesso"):
                 return jsonify(dados), 404
             return jsonify(dados)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @bp.route("/api/mes-sorte-opcoes")
+    def api_mes_sorte_opcoes():
+        """Select padronizado: + Atrasado, + Frequente, meses, + Aleatório."""
+        if modality_key != "diadesorte":
+            return jsonify({"sucesso": False, "erro": "Disponível só para Dia de Sorte."}), 404
+        try:
+            from diadesorte.mes_sorte_select import opcoes_mes_sorte_diadesorte
+            return jsonify(opcoes_mes_sorte_diadesorte())
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
@@ -519,7 +613,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             manuais = data.get("dezenas_manuais")
             if manuais is not None:
                 manuais = [int(x) for x in manuais]
-            return jsonify(svc.gerar_panorama_top(
+            return jsonify(_pipeline_elite(svc.gerar_panorama_top(
                 quantidade=int(data.get("quantidade", 10)),
                 perfil=data.get("perfil", "equilibrado"),
                 dezenas_por_jogo=int(data["dezenas_por_jogo"]) if data.get("dezenas_por_jogo") is not None else dez_default,
@@ -529,7 +623,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 modo_validacao=data.get("modo_validacao", "estrito"),
                 modo_panorama=data.get("modo_panorama", "automatico"),
                 dezenas_manuais=manuais,
-            ))
+            ), "comportamento_panorama", data))
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
@@ -640,7 +734,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 mes_manual=body.get("mes_manual"),
                 sessao_id=body.get("sessao_id"),
             )
-            return jsonify(resultado), 200
+            return jsonify(_pipeline_elite(resultado, "engine_final", body)), 200
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
@@ -834,7 +928,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             out = _ai_service().gerar_gc(
                 digitos, qtd_jogos=qtd, seed=seed, concurso=concurso,
             )
-            return jsonify(out), (200 if out.get("sucesso") else 400)
+            return jsonify(_pipeline_elite(out, "inteligentes_gc", data)), (200 if out.get("sucesso") else 400)
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
@@ -853,7 +947,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             out = _ai_service().gerar_elite(
                 n_digitos=n, digitos=digitos, qtd_jogos=qtd, seed=seed, concurso=concurso,
             )
-            return jsonify(out), (200 if out.get("sucesso") else 400)
+            return jsonify(_pipeline_elite(out, "inteligentes_elite", data)), (200 if out.get("sucesso") else 400)
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
@@ -1069,7 +1163,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 exigir = int(exigir)
             else:
                 exigir = None
-            return jsonify(ConstrutorDigitosService.gerar_inteligente(
+            return jsonify(_pipeline_elite(ConstrutorDigitosService.gerar_inteligente(
                 modality_key,
                 data.get("pool") or [],
                 dezenas_por_aposta=data.get("dezenas_por_aposta"),
@@ -1079,7 +1173,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 salvar_sessao=bool(data.get("salvar_sessao")),
                 nome_sessao=data.get("nome", ""),
                 sessao_id=data.get("sessao_id"),
-            ))
+            ), "construtor_digitos", data))
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
@@ -1109,7 +1203,8 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             from geradores_elite.construtor.universes.digitos_service import ConstrutorDigitosService
             mes = data.get("mes_num")
             if mes is not None and mes != "":
-                mes = int(mes)
+                from diadesorte.mes_sorte_select import resolver_mes_sorte
+                mes = resolver_mes_sorte(mes)
             else:
                 mes = None
             return jsonify(ConstrutorDigitosService.exportar_txt(
@@ -1140,13 +1235,13 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             sim_min = data.get("similaridade_min_pct")
             if sim_min is not None:
                 sim_min = float(sim_min)
-            return jsonify(_construtor_svc().gerar_construcao(
+            return jsonify(_pipeline_elite(_construtor_svc().gerar_construcao(
                 sessao_id,
                 data.get("estrategia", "automatica"),
                 personalizada=personalizada,
                 janela_comportamento=int(data.get("janela_comportamento", 10)),
                 similaridade_min_pct=sim_min,
-            ))
+            ), "construtor_construcoes", data))
         except KeyError:
             return jsonify({"sucesso": False, "erro": "sessao_id obrigatório."}), 400
         except Exception as e:
@@ -1225,8 +1320,11 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         data = request.get_json(silent=True) or {}
         try:
             mes = data.get("mes_num")
-            if mes is not None:
-                mes = int(mes)
+            if mes is not None and mes != "":
+                from diadesorte.mes_sorte_select import resolver_mes_sorte
+                mes = resolver_mes_sorte(mes)
+            else:
+                mes = None
             extra = {}
             if data.get("time_num") is not None:
                 extra["time_num"] = int(data["time_num"])
@@ -1245,8 +1343,11 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         data = request.get_json(silent=True) or {}
         try:
             mes = data.get("mes_num")
-            if mes is not None:
-                mes = int(mes)
+            if mes is not None and mes != "":
+                from diadesorte.mes_sorte_select import resolver_mes_sorte
+                mes = resolver_mes_sorte(mes)
+            else:
+                mes = None
             ids = data.get("construcao_ids")
             return jsonify(_construtor_svc().exportar_sessao_txt(
                 sessao_id, mes_num=mes, construcao_ids=ids
@@ -1388,7 +1489,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         data = request.get_json(silent=True) or {}
         try:
             Svc = _posicao_service()
-            return jsonify(Svc.gerar_apostas(
+            return jsonify(_pipeline_elite(Svc.gerar_apostas(
                 quantidade=int(data.get("quantidade", 10)),
                 perfil=data.get("perfil", "equilibrado"),
                 janela=int(data.get("janela", 50)),
@@ -1399,7 +1500,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 usar_comportamento=bool(data.get("usar_comportamento", False)),
                 modo_comportamento=data.get("modo_comportamento", "relaxar"),
                 sorteio=int(data.get("sorteio", 1)),
-            ))
+            ), "posicao", data))
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 

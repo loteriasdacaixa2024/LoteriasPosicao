@@ -22,6 +22,7 @@
     const EXIGIR_QTD_MAX = 9;
     const PAD_WIDTH = Number(UI.pad_width) > 0 ? Number(UI.pad_width) : 2;
     const IS_COLUNAS = !!(UI.positional || UI.export_is_columns || UI.modality_key === 'supersete');
+    const HAS_MES = !!UI.has_mes;
     const UNIDADE = IS_COLUNAS
         ? (UI.unidade_label_plural || 'colunas')
         : 'dezenas';
@@ -163,7 +164,7 @@
             dezenas_por_aposta: k,
             apostas: apostas || undefined,
         };
-        if (mesEl && mesEl.value) body.mes_num = parseInt(mesEl.value, 10);
+        if (mesEl && mesEl.value) body.mes_num = mesEl.value;
         const data = await apiPost('/digitos/export-txt', body);
         if (!data.sucesso) {
             alert(data.erro || 'Erro ao exportar');
@@ -721,6 +722,9 @@
 
         carregarGuia();
         syncIntel();
+        if (HAS_MES && window.MesSorteSelect && $('ciMesExport')) {
+            MesSorteSelect.fillFromApi($('ciMesExport'), API, { defaultPrefer: 'atrasado' }).catch(() => {});
+        }
     }
 
     function bind() {

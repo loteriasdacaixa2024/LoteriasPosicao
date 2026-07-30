@@ -1,0 +1,336 @@
+﻿{% extends "base.html" %}
+{% block title %}Ciclo â†’ Apostas â€” {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+  {% if meses_cores %}
+  {% for nome, cor in meses_cores.items() %}
+  .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+  {% endfor %}
+  {% endif %}
+  .cc-ball{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:.7rem;font-weight:700;margin:1px}
+  .cc-ball.nova{background:#0d6efd;color:#fff}
+  .cc-ball.rep{background:#fd7e14;color:#fff}
+  .cc-ball.falt{background:#ff9800;color:#fff}
+  .cc-ball.saida{background:#198754;color:#fff}
+  .cc-ball.livre{background:#6c757d;color:#fff}
+  .cc-ball.dez{background:#e9ecef;color:#212529}
+  .cc-ball.acerto{background:#198754!important;color:#fff!important;box-shadow:0 0 0 2px #146c43}
+  .cc-i{cursor:help;color:#6c757d;font-size:.78rem;margin-left:.2rem}
+  .cc-toggle{display:flex;align-items:center;gap:.4rem;padding:.45rem .65rem;border:1px solid #dee2e6;border-radius:8px;background:#fff}
+  .cc-aposta{border-left:4px solid #0d6efd;background:#fff;border-radius:8px;padding:.65rem .8rem;margin-bottom:.5rem;border:1px solid #e9ecef}
+  .cc-aposta.ritmo{border-left-color:#fd7e14}
+  .cc-aposta.operacional{border-left-color:#6f42c1}
+  .cc-aposta.fechamento{border-left-color:#198754}
+  .cc-aposta.ja-hist{border-left-color:#dc3545;background:#fff5f5}
+  .cc-legenda{display:flex;flex-wrap:wrap;gap:.75rem;font-size:.75rem;color:#6c757d;margin-top:.5rem}
+  .cc-legenda span{display:inline-flex;align-items:center;gap:.3rem}
+  .mes-badge{display:inline-block;padding:.15rem .45rem;border-radius:6px;font-size:.72rem;font-weight:700;background:#6c757d;color:#fff}
+  .cc-bt-box{border:1px solid #dee2e6;border-radius:8px;padding:.75rem;background:#fafafa}
+  .cc-bt-pill{display:inline-flex;flex-direction:column;align-items:center;min-width:3rem;padding:.2rem .5rem;border:1px solid #dee2e6;border-radius:8px;background:#fff;font-size:.72rem;margin:2px}
+  .cc-bt-pill strong{font-size:.95rem}
+</style>
+<div class="container-fluid py-3">
+  <div class="page-hdr mb-3" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;border-radius:12px;padding:1.25rem 1.5rem;">
+    <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start">
+      <div>
+        <h1 class="h4 mb-1"><i class="fas fa-dice me-2"></i>Ciclo â†’ Apostas</h1>
+        <p class="mb-0 small opacity-90">{{ modality_nome }} Â· {{ pick_min }}â€“{{ pick_max }} dezenas Â· histÃ³rico + back test Â· TXT</p>
+      </div>
+      <a class="btn btn-sm fw-bold" style="background:var(--accent);color:#1a0a00;border:none;" href="/analise/ciclo-cobertura/">
+        <i class="fas fa-chart-bar me-1"></i>Ver anÃ¡lise
+      </a>
+    </div>
+  </div>
+
+  <ul class="nav nav-tabs mb-3 flex-wrap" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-21" type="button" role="tab">Ciclo â†’ Apostas</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ritmo" type="button" role="tab">Ciclo â†’ Ritmo de EvoluÃ§Ã£o</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-operacional" type="button" role="tab">Ciclo â†’ Modo Operacional</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fechamento" type="button" role="tab">Ciclo â†’ Fechamento</button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- ABA 1 -->
+    <div class="tab-pane fade show active" id="tab-21" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Pool = <strong>uniÃ£o</strong> das Novas e Repetidas dos 2 Ãºltimos concursos.
+          Cada jogo fixa <strong>2 novas</strong> + <strong>1 repetida</strong>; o restante completa atÃ© 7â€“{{ pick_max }} dezenas.
+          ApÃ³s gerar, o sistema confere o histÃ³rico oficial e roda o back test automaticamente.
+        </div>
+      </details>
+      <div id="cc-ctx" class="mb-3"><div class="alert alert-light border small">Carregando contextoâ€¦</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+          <i class="fas fa-dice me-2"></i>Gerar apostas a partir da anÃ¡lise
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="cc-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}â€“{{ pick_max }}) <i class="fas fa-info-circle cc-i" title="Quantidade de dezenas por aposta (limites Caixa)."></i></label>
+              <select id="cc-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">MÃªs da Sorte <i class="fas fa-info-circle cc-i" title="MÃªs exportado junto com cada aposta no TXT (padrÃ£o Dia de Sorte)."></i></label>
+              <select id="cc-mes" class="form-select form-select-sm">
+                <option value="">â€” selecionar â€”</option>
+                {% for m in meses %}
+                <option value="{{ m.num }}">{{ m.abrev }} â€” {{ m.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12 col-md-6 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cc-f-faixa">
+                <label class="form-check-label small" for="cc-f-faixa">Faixas</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cc-f-soma">
+                <label class="form-check-label small" for="cc-f-soma">Soma</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cc-f-dig">
+                <label class="form-check-label small" for="cc-f-dig">DÃ­gitos</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cc-descartar-hist" checked>
+                <label class="form-check-label small" for="cc-descartar-hist" title="Remove apostas idÃªnticas ao histÃ³rico oficial">Descartar jÃ¡ sorteadas</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="cc-btn-gerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar</button>
+            <button type="button" class="btn btn-outline-secondary" id="cc-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="cc-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="cc-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball nova" style="width:18px;height:18px;font-size:.55rem">N</span> Novas <i class="fas fa-info-circle cc-i" title="Dezenas que ainda nÃ£o tinham saÃ­do no ciclo aberto naquele concurso (uniÃ£o dos 2 Ãºltimos no pool)."></i></span>
+            <span><span class="cc-ball rep" style="width:18px;height:18px;font-size:.55rem">R</span> Repetidas <i class="fas fa-info-circle cc-i" title="Dezenas que jÃ¡ haviam aparecido no mesmo ciclo antes daquele concurso."></i></span>
+            <span><span class="cc-ball livre" style="width:18px;height:18px;font-size:.55rem">L</span> Complemento <i class="fas fa-info-circle cc-i" title="Dezenas que completam o jogo alÃ©m das 2 novas + 1 repetida fixas."></i></span>
+          </div>
+        </div>
+      </div>
+      <div id="cc-hist-alert"></div>
+      <div id="cc-bt" class="mb-3"></div>
+      <div id="cc-out"></div>
+    </div>
+
+    <!-- ABA 2 -->
+    <div class="tab-pane fade" id="tab-ritmo" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Consome a anÃ¡lise oficial. O nÂº de <strong>faltantes (k)</strong> Ã© amostrado pelos cenÃ¡rios semelhantes + teto de pressÃ£o.
+          Restante = dezenas jÃ¡ saÃ­das no ciclo. HistÃ³rico e back test rodam apÃ³s a geraÃ§Ã£o.
+        </div>
+      </details>
+      <div id="cr-ctx" class="mb-3"><div class="alert alert-light border small">Carregando indicadoresâ€¦</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+          <i class="fas fa-dice me-2"></i>Gerar apostas a partir da anÃ¡lise Â· Ritmo
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="cr-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}â€“{{ pick_max }})</label>
+              <select id="cr-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">MÃªs da Sorte</label>
+              <select id="cr-mes" class="form-select form-select-sm">
+                <option value="">â€” selecionar â€”</option>
+                {% for m in meses %}
+                <option value="{{ m.num }}">{{ m.abrev }} â€” {{ m.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cr-descartar-hist" checked>
+                <label class="form-check-label small" for="cr-descartar-hist">Descartar jÃ¡ sorteadas</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="cr-btn-gerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar Ritmo</button>
+            <button type="button" class="btn btn-outline-secondary" id="cr-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="cr-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="cr-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">P</span> Pendentes / faltantes <i class="fas fa-info-circle cc-i" title="Dezenas que ainda nÃ£o saÃ­ram no ciclo atual (laranja no volante da anÃ¡lise)."></i></span>
+            <span><span class="cc-ball saida" style="width:18px;height:18px;font-size:.55rem">S</span> JÃ¡ saÃ­das <i class="fas fa-info-circle cc-i" title="Dezenas que jÃ¡ apareceram ao menos uma vez no ciclo aberto."></i></span>
+          </div>
+        </div>
+      </div>
+      <div id="cr-hist-alert"></div>
+      <div id="cr-bt" class="mb-3"></div>
+      <div id="cr-out"></div>
+    </div>
+
+    <!-- ABA 3 â€” Modo Operacional -->
+    <div class="tab-pane fade" id="tab-operacional" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Segue a <strong>receita da InteligÃªncia Operacional</strong>: quantidade fixa de faltantes
+          (<em>faltantes_por_jogo</em>), 1 repetente do Ãºltimo concurso e complemento com jÃ¡ saÃ­das.
+          O modo (conservador / equilibrado / agressivo) ajusta o k. HistÃ³rico e back test rodam apÃ³s gerar.
+        </div>
+      </details>
+      <div id="co-ctx" class="mb-3"><div class="alert alert-light border small">Carregando estratÃ©giaâ€¦</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+          <i class="fas fa-dice me-2"></i>Gerar apostas a partir da anÃ¡lise Â· Operacional
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="co-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}â€“{{ pick_max }})</label>
+              <select id="co-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">MÃªs da Sorte</label>
+              <select id="co-mes" class="form-select form-select-sm">
+                <option value="">â€” selecionar â€”</option>
+                {% for m in meses %}
+                <option value="{{ m.num }}">{{ m.abrev }} â€” {{ m.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Modo</label>
+              <select id="co-modo" class="form-select form-select-sm">
+                <option value="auto" selected>Auto (recomendado)</option>
+                <option value="conservador">Conservador</option>
+                <option value="equilibrado">Equilibrado</option>
+                <option value="agressivo">Agressivo</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="co-descartar-hist" checked>
+                <label class="form-check-label small" for="co-descartar-hist">Descartar jÃ¡ sorteadas</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="co-btn-gerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar Operacional</button>
+            <button type="button" class="btn btn-outline-secondary" id="co-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="co-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="co-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">P</span> Pendentes / faltantes</span>
+            <span><span class="cc-ball rep" style="width:18px;height:18px;font-size:.55rem">R</span> Repetente (Ãºltimo)</span>
+            <span><span class="cc-ball saida" style="width:18px;height:18px;font-size:.55rem">S</span> JÃ¡ saÃ­das</span>
+          </div>
+        </div>
+      </div>
+      <div id="co-hist-alert"></div>
+      <div id="co-bt" class="mb-3"></div>
+      <div id="co-out"></div>
+    </div>
+
+    <!-- ABA 4 â€” Fechamento -->
+    <div class="tab-pane fade" id="tab-fechamento" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Especializado no <strong>fim de ciclo</strong>: cobre subconjuntos das pendentes (fechamento parcial)
+          e completa com jÃ¡ saÃ­das. SÃ³ libera quando a anÃ¡lise indica pressÃ£o/estado crÃ­tico â€” ou use
+          <em>ForÃ§ar mesmo assim</em>. HistÃ³rico e back test rodam apÃ³s gerar.
+        </div>
+      </details>
+      <div id="cf-ctx" class="mb-3"><div class="alert alert-light border small">Carregando elegibilidadeâ€¦</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+          <i class="fas fa-dice me-2"></i>Gerar apostas a partir da anÃ¡lise Â· Fechamento
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="cf-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}â€“{{ pick_max }})</label>
+              <select id="cf-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">MÃªs da Sorte</label>
+              <select id="cf-mes" class="form-select form-select-sm">
+                <option value="">â€” selecionar â€”</option>
+                {% for m in meses %}
+                <option value="{{ m.num }}">{{ m.abrev }} â€” {{ m.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12 col-md-5 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cf-descartar-hist" checked>
+                <label class="form-check-label small" for="cf-descartar-hist">Descartar jÃ¡ sorteadas</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cf-forcar">
+                <label class="form-check-label small" for="cf-forcar" title="Ignora o bloqueio quando a anÃ¡lise nÃ£o recomenda fechamento">ForÃ§ar mesmo assim</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="cf-btn-gerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar Fechamento</button>
+            <button type="button" class="btn btn-outline-secondary" id="cf-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="cf-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="cf-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">P</span> Pendentes cobertas</span>
+            <span><span class="cc-ball saida" style="width:18px;height:18px;font-size:.55rem">S</span> JÃ¡ saÃ­das</span>
+            <span><span class="cc-ball livre" style="width:18px;height:18px;font-size:.55rem">Â·</span> Pendentes deixadas de fora</span>
+          </div>
+        </div>
+      </div>
+      <div id="cf-hist-alert"></div>
+      <div id="cf-bt" class="mb-3"></div>
+      <div id="cf-out"></div>
+    </div>
+  </div>
+</div>

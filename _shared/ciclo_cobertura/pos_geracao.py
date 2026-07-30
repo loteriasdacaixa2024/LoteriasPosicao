@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Pós-geração Ciclo: histórico oficial, mês da sorte, export helpers."""
+"""Pós-geração Ciclo — delega ao pipeline global dos Geradores Elite."""
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Set, FrozenSet
+from typing import Any, Dict, Optional
 
-from .loaders import carregar_sorteios_asc
-from .specs import get_ciclo_spec
+from geradores_elite.validacao.pipeline import pipeline_pos_geracao
 
 MESES_ABREV = {
     1: "Jan", 2: "Fev", 3: "Mar", 4: "Abr", 5: "Mai", 6: "Jun",
@@ -18,92 +17,34 @@ MESES_NOME = {
 }
 
 
-def mapa_combinacoes_historico(modality_key: str) -> Dict[FrozenSet[int], Dict[str, Any]]:
-    """frozenset(dezenas) → {concurso, data} do sorteio oficial."""
-    mapa: Dict[FrozenSet[int], Dict[str, Any]] = {}
-    for s in carregar_sorteios_asc(modality_key):
-        dz = s.get("dezenas") or []
-        if not dz:
-            continue
-        key = frozenset(int(x) for x in dz)
-        # mantém o concurso mais recente se houver duplicata improvável
-        info = {"concurso": s["concurso"], "data": s.get("data") or ""}
-        prev = mapa.get(key)
-        if not prev or int(s["concurso"]) >= int(prev["concurso"]):
-            mapa[key] = info
-    return mapa
+def resolver_mes_entrada(mes_raw) -> Optional[int]:
+    """Aceita 1–12, atrasado/frequente/aleatorio ou nome do mês."""
+    if mes_raw is None or mes_raw == "":
+        return None
+    try:
+        from diadesorte.mes_sorte_select import resolver_mes_sorte
+        return resolver_mes_sorte(mes_raw)
+    except Exception:
+        try:
+            n = int(mes_raw)
+            return n if 1 <= n <= 12 else None
+        except (TypeError, ValueError):
+            return None
 
 
-def anotar_historico(
-    apostas: List[dict],
-    modality_key: str,
-    *,
-    descartar: bool = False,
-) -> Dict[str, Any]:
-    """
-    Anota cada aposta com ja_sorteada / concurso_historico.
-    Se descartar=True, remove as já sorteadas do retorno.
-    """
-    mapa = mapa_combinacoes_historico(modality_key)
-    mantidas: List[dict] = []
-    ja_sorteadas: List[dict] = []
-    for i, ap in enumerate(apostas or []):
-        dez = [int(x) for x in (ap.get("dezenas") or [])]
-        key = frozenset(dez)
-        hit = mapa.get(key)
-        item = dict(ap)
-        if hit:
-            item["ja_sorteada"] = True
-            item["concurso_historico"] = hit["concurso"]
-            item["data_historico"] = hit.get("data") or ""
-            ja_sorteadas.append(item)
-            if not descartar:
-                mantidas.append(item)
-        else:
-            item["ja_sorteada"] = False
-            item["concurso_historico"] = None
-            item["data_historico"] = ""
-            mantidas.append(item)
-
-    # renumerar
-    for idx, ap in enumerate(mantidas, 1):
-        ap["numero"] = idx
-
-    return {
-        "apostas": mantidas,
-        "ja_sorteadas_count": len(ja_sorteadas),
-        "ja_sorteadas": [
-            {
-                "dezenas": a.get("dezenas"),
-                "concurso": a.get("concurso_historico"),
-                "data": a.get("data_historico"),
-            }
-            for a in ja_sorteadas
-        ],
-        "descartadas": len(ja_sorteadas) if descartar else 0,
-        "total_antes": len(apostas or []),
-    }
-
-
-def aplicar_mes_apostas(
-    apostas: List[dict],
-    mes_num: Optional[int],
-) -> List[dict]:
-    if not mes_num or not (1 <= int(mes_num) <= 12):
+def aplicar_mes_apostas(apostas: list, mes_num=None) -> list:
+    mn = resolver_mes_entrada(mes_num)
+    if not mn or not (1 <= int(mn) <= 12):
         return apostas
-    mn = int(mes_num)
+    mn = int(mn)
     out = []
     for ap in apostas or []:
-        item = dict(ap)
+        item = dict(ap) if isinstance(ap, dict) else {"dezenas": ap}
         item["mes_num"] = mn
         item["mes"] = mn
         item["mes_abrev"] = MESES_ABREV[mn]
         item["mes_nome"] = MESES_NOME[mn]
-        item["extras"] = {
-            "tipo": "mes",
-            "num": mn,
-            "label": MESES_ABREV[mn],
-        }
+        item["extras"] = {"tipo": "mes", "num": mn, "label": MESES_ABREV[mn]}
         out.append(item)
     return out
 
@@ -112,44 +53,35 @@ def pos_processar_geracao(
     resultado: Dict[str, Any],
     modality_key: str,
     *,
-    mes_num: Optional[int] = None,
+    mes_num=None,
     descartar_historico: bool = False,
+    executar_backtest: bool = True,
+    limite_backtest: int = 30,
+    origem: str = "ciclo",
 ) -> Dict[str, Any]:
-    """Aplica histórico + mês sobre um resultado {ok, apostas, ...}."""
-    if not resultado.get("ok"):
+    """Compatível com a API do Ciclo; usa o pipeline global."""
+    if not resultado.get("ok") and resultado.get("sucesso") is not True:
         return resultado
-    out = dict(resultado)
-    anot = anotar_historico(
-        out.get("apostas") or [],
-        modality_key,
-        descartar=bool(descartar_historico),
+
+    payload = dict(resultado)
+    payload["sucesso"] = True
+
+    out = pipeline_pos_geracao(
+        payload,
+        modality_key=modality_key,
+        origem=origem,
+        descartar_historico=descartar_historico,
+        executar_backtest=executar_backtest,
+        limite_backtest=limite_backtest,
+        campo_lista="apostas",
     )
-    apostas = aplicar_mes_apostas(anot["apostas"], mes_num)
-    out["apostas"] = apostas
-    out["geradas"] = len(apostas)
-    out["historico"] = {
-        "ja_sorteadas_count": anot["ja_sorteadas_count"],
-        "descartadas": anot["descartadas"],
-        "total_antes": anot["total_antes"],
-        "itens": anot["ja_sorteadas"],
-    }
-    partes = []
-    if out.get("aviso"):
-        partes.append(str(out["aviso"]))
-    if anot["ja_sorteadas_count"]:
-        if descartar_historico:
-            partes.append(
-                f"{anot['descartadas']} aposta(s) descartada(s) por já existirem "
-                "no histórico oficial."
-            )
-        else:
-            partes.append(
-                f"{anot['ja_sorteadas_count']} aposta(s) já sorteada(s) no histórico "
-                "(marcadas — você pode removê-las)."
-            )
-    out["aviso"] = " ".join(partes) if partes else out.get("aviso")
-    if mes_num and 1 <= int(mes_num) <= 12:
-        out["mes_num"] = int(mes_num)
-        out["mes_abrev"] = MESES_ABREV[int(mes_num)]
-        out["mes_nome"] = MESES_NOME[int(mes_num)]
+
+    mn = resolver_mes_entrada(mes_num)
+    if mn:
+        out["apostas"] = aplicar_mes_apostas(out.get("apostas") or [], mn)
+        out["mes_num"] = mn
+        out["mes_abrev"] = MESES_ABREV[mn]
+        out["mes_nome"] = MESES_NOME[mn]
+
+    out["ok"] = True
     return out

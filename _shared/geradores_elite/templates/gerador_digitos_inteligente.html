@@ -199,13 +199,10 @@
                     </button>
                 </div>
                 {% if ui_config.has_mes %}
-                <div class="mb-2" style="max-width:220px;">
+                <div class="mb-2" style="max-width:260px;">
                     <label class="form-label small mb-0">Mês da Sorte (export)</label>
                     <select class="form-select form-select-sm" id="ciMesExport">
-                        <option value="">— sem mês —</option>
-                        {% for m in (ui_config.meses or []) %}
-                        <option value="{{ m.num }}">{{ m.nome }} ({{ m.abrev }})</option>
-                        {% endfor %}
+                        <option value="">Carregando…</option>
                     </select>
                 </div>
                 {% endif %}
@@ -227,5 +224,8 @@ window.__CC_DIGITOS_PAGE__ = 'intel';
 {% endblock %}
 
 {% block scripts %}
+{% if ui_config.has_mes %}
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=1"></script>
+{% endif %}
 <script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=12"></script>
 {% endblock %}

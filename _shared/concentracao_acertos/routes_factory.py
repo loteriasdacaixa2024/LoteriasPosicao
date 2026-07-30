@@ -167,4 +167,14 @@ def register_concentracao_gerador(bp: Blueprint, modality_key: str, cfg_nome: st
             }), 500
         if not res.get("sucesso"):
             return jsonify(res), 400
+        try:
+            from geradores_elite.validacao.pipeline import pipeline_from_request
+            res = pipeline_from_request(
+                res,
+                modality_key=modality_key,
+                origem="concentracao",
+                data=data,
+            )
+        except Exception:
+            pass
         return jsonify(res)

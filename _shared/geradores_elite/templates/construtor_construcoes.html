@@ -1275,6 +1275,9 @@ window.__CC_DIGITOS_PAGE__ = 'construtor';
 {% if ui_config.positional %}
 <script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes_ss.js') }}"></script>
 {% else %}
+{% if ui_config.has_mes %}
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=1"></script>
+{% endif %}
 <script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}"></script>
 {% if digitos_habilitado %}
 <script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=9"></script>

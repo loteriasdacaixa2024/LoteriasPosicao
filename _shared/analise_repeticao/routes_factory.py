@@ -81,7 +81,35 @@ def build_repeticao_blueprint(modality_key: str) -> Blueprint:
             "penultimo": analise["penultimo_concurso"],
             "repetidas": analise["resumo_ultimo_par"]["volante"]["dezenas"],
         }
+        # Mesmo pipeline global dos Geradores Elite: histórico oficial + Back Test
+        try:
+            from geradores_elite.validacao.pipeline import pipeline_from_request
+
+            resultado = pipeline_from_request(
+                resultado,
+                modality_key=modality_key,
+                origem="repeticao_apostas",
+                data=data,
+            )
+        except Exception as exc:
+            resultado["validacao_historico"] = {
+                "aplicada": False,
+                "erro": str(exc),
+            }
         return jsonify(resultado)
+
+    @bp.route("/api/backtest", methods=["POST"])
+    def api_backtest():
+        """Back Test manual — mesmo motor dos Geradores Elite."""
+        data = request.get_json(silent=True) or {}
+        apostas = data.get("apostas") or []
+        limite = int(data.get("limite") or 30)
+        try:
+            from geradores_elite.engine_final_core import backtest_apostas_engine
+
+            return jsonify(backtest_apostas_engine(modality_key, apostas, limite=limite))
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
 
     return bp
 
