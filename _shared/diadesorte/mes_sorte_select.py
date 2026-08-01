@@ -1,13 +1,51 @@
 # -*- coding: utf-8 -*-
-"""Select padronizado — Mês da Sorte (+ Atrasado / + Frequente / meses / + Aleatório)."""
+"""
+Select padronizado — Mês da Sorte (+ Atrasado / + Frequente / meses / + Aleatório).
+
+Regras de resolução (manutenção)
+================================
+Cada opção do select é independente; não há pesos cruzados entre critérios.
+
++ Atrasado
+    Resolve para o mês com maior atraso histórico (empate → menor mes_num).
+    Todas as apostas do lote recebem o MESMO mês.
+
++ Frequente
+    Resolve para o mês com maior frequência histórica (empate → menor mes_num).
+    Todas as apostas do lote recebem o MESMO mês.
+
+mês fixo (1–12 ou nome)
+    Usa exatamente o mês escolhido em todas as apostas.
+
++ Aleatório
+    NÃO sorteia um único mês para o lote inteiro.
+    Distribui meses 1–12 de forma equilibrada:
+      - embaralha blocos de 12 meses sem reposição;
+      - repete blocos até cobrir a quantidade de apostas;
+      - nenhum mês aparece mais que ceil(n/12) vezes;
+      - não favorece Dezembro nem qualquer outro mês.
+    Em export de várias construções, a distribuição é contínua
+    no total de apostas (não reinicia por construção).
+
+API pública
+-----------
+- montar_opcoes_mes_sorte / opcoes_mes_sorte_diadesorte  → opções do select
+- resolver_mes_sorte(valor)                             → 1 mês (critérios fixos
+                                                          ou 1 sorteio aleatório)
+- distribuir_meses_aleatorios(n)                        → n meses equilibrados
+- resolver_meses_para_lote(valor, n)                    → lista de n meses
+- eh_criterio_aleatorio(valor)                          → bool
+"""
 from __future__ import annotations
 
+import math
 import random
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 from geradores_elite.comportamento.specs import MESES_ABREV, MESES_NOME
 
 CRITERIOS_ESPECIAIS = ("atrasado", "frequente", "aleatorio")
+MesValor = Union[str, int, None]
 
 
 def _item(mn: int, extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -62,6 +100,7 @@ def carregar_estatisticas_meses(SorteioModel: Any) -> List[Dict[str, Any]]:
 def _pick_max(meses: Sequence[Dict[str, Any]], key: str) -> Dict[str, Any]:
     if not meses:
         return _item(1, {"freq": 0, "atraso": 0, "pct": 0.0})
+    # Empate: menor mes_num (evita favorecer Dezembro em empates).
     return max(meses, key=lambda m: (int(m.get(key, 0) or 0), -int(m.get("mes_num", 0) or 0)))
 
 
@@ -113,59 +152,4 @@ def montar_opcoes_mes_sorte(meses_stats: Sequence[Dict[str, Any]]) -> Dict[str, 
         "sucesso": True,
         "atrasado": atrasado,
         "frequente": frequente,
-        "meses": stats,
-        "opcoes": opcoes,
-        "default": "atrasado",
-    }
-
-
-def opcoes_mes_sorte_diadesorte() -> Dict[str, Any]:
-    from models.sorteio_diadesorte import SorteioDiaDeSorte
-
-    return montar_opcoes_mes_sorte(carregar_estatisticas_meses(SorteioDiaDeSorte))
-
-
-def resolver_mes_sorte(
-    valor: Union[str, int, None],
-    *,
-    opcoes_payload: Optional[Dict[str, Any]] = None,
-    SorteioModel: Any = None,
-) -> Optional[int]:
-    """
-    Converte valor do select em mes_num (1–12).
-    Aceita: atrasado | frequente | aleatorio | 1..12 | nome do mês.
-    """
-    if valor is None or valor == "":
-        return None
-
-    raw = str(valor).strip()
-    low = raw.lower()
-
-    if low.isdigit():
-        n = int(low)
-        return n if 1 <= n <= 12 else None
-
-    payload = opcoes_payload
-    if payload is None and SorteioModel is not None:
-        payload = montar_opcoes_mes_sorte(carregar_estatisticas_meses(SorteioModel))
-    if payload is None:
-        try:
-            payload = opcoes_mes_sorte_diadesorte()
-        except Exception:
-            payload = montar_opcoes_mes_sorte([])
-
-    if low == "atrasado":
-        return int((payload.get("atrasado") or {}).get("mes_num") or 1)
-    if low == "frequente":
-        return int((payload.get("frequente") or {}).get("mes_num") or 1)
-    if low == "aleatorio":
-        return random.randint(1, 12)
-
-    # Nome completo (Janeiro, Março, …)
-    for m in range(1, 13):
-        if MESES_NOME.get(m, "").lower() == low:
-            return m
-        if MESES_ABREV.get(m, "").lower() == low:
-            return m
-
-    return None
+        "meses": sta

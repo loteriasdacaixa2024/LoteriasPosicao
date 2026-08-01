@@ -8826,3 +8826,522 @@ Press CTRL+C to quit
 127.0.0.1 - - [29/Jul/2026 19:53:37] "GET /geradores-elite/api/ciclo-apostas/ritmo/contexto HTTP/1.1" 200 -
 127.0.0.1 - - [29/Jul/2026 19:53:37] "GET /geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 404 -
 127.0.0.1 - - [29/Jul/2026 19:53:37] "GET /geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 404 -
+
+--- iniciando 2026-07-30 06:17:51 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [30/Jul/2026 06:17:56] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:19] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:19] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:20] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:22] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:22] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:23] "GET /geradores-elite/engine-final/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:24] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:25] "GET /geradores-elite/static/engine_final.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:18:25] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:28] "GET /geradores-elite/gerador-gc/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:29] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:33] "GET /geradores-elite/gerador-elite/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:33] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:44] "GET /geradores-elite/repeticao-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:44] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:44] "GET /analise/repeticao-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:45] "GET /analise/repeticao-concursos/api/analise?modo=volante HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:51] "GET /geradores-elite/gerador-por-posicao/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:51] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:51] "GET /geradores-elite/api/posicao/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:18:52] "GET /geradores-elite/api/posicao/analise?janela=50 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:01] "GET /geradores-elite/gerador-concentracao/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:01] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:02] "GET /analise/api/meses-indicados?janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:02] "GET /geradores-elite/api/construtor-construcoes/analise-sugestao?quantidade=16&criterio=frequencia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:06] "GET /geradores-elite/gerador-concentracao/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:07] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:07] "GET /analise/api/meses-indicados?janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:07] "GET /geradores-elite/api/construtor-construcoes/analise-sugestao?quantidade=16&criterio=frequencia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:10] "GET /geradores-elite/apostas-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:10] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:11] "GET /geradores-elite/api/inteligente/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:11] "GET /geradores-elite/api/inteligente/analise HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:17] "GET /geradores-elite/comportamento-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:17] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:17] "GET /geradores-elite/static/comportamento_col_concurso.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:19:18] "GET /geradores-elite/static/comportamento_bases_resumo.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:19:18] "GET /geradores-elite/static/panorama_modos.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:19:18] "GET /geradores-elite/api/comportamento/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:18] "GET /geradores-elite/api/comportamento/panorama-estrategias HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:18] "GET /geradores-elite/api/comportamento/analise?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:23] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:23] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:23] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:23] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:23] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:24] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:24] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:24] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:24] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:24] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:24] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:24] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:24] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:57] "POST /geradores-elite/api/construtor-construcoes/sessao HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:58] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:19:58] "GET /geradores-elite/api/construtor-construcoes/sessao/17/analise-comparativa HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:03] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:04] "GET /geradores-elite/api/construtor-construcoes/sessao/17 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:17] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:17] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:17] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:20:17] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:20:17] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:20:18] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:18] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:18] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:18] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:18] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:18] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:18] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:18] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:22] "GET /geradores-elite/gerador-digitos-inteligente/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:22] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:22] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:20:22] "GET /geradores-elite/static/construtor_digitos.js?v=12 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:22] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:23] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:23] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:23] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:30] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:30] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:30] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:20:30] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:20:30] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:20:31] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:31] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:31] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:31] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:31] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:31] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:31] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:31] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:37] "GET /geradores-elite/ciclo-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:37] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:37] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:20:37] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:38] "GET /geradores-elite/api/ciclo-apostas/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:41] "GET /geradores-elite/api/ciclo-apostas/ritmo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:41] "GET /geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:20:41] "GET /geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:21:16] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 -
+127.0.0.1 - - [30/Jul/2026 06:21:17] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:25:52] "GET /geradores-elite/ciclo-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:25:52] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 06:25:52] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:25:53] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:25:53] "GET /geradores-elite/api/ciclo-apostas/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:25:57] "GET /geradores-elite/api/ciclo-apostas/ritmo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:25:59] "GET /geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:25:59] "GET /geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:26:13] "POST /geradores-elite/api/ciclo-apostas/fechamento/gerar HTTP/1.1" 400 -
+127.0.0.1 - - [30/Jul/2026 06:26:29] "POST /geradores-elite/api/ciclo-apostas/operacional/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:27:01] "POST /geradores-elite/api/ciclo-apostas/ritmo/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:27:03] "POST /geradores-elite/api/ciclo-apostas/backtest HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:27:23] "POST /geradores-elite/api/ciclo-apostas/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 06:27:25] "POST /geradores-elite/api/ciclo-apostas/backtest HTTP/1.1" 200 -
+
+--- iniciando 2026-07-30 07:00:27 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [30/Jul/2026 07:00:37] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-07-30 16:28:13 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [30/Jul/2026 16:28:26] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:11] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:11] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:11] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [30/Jul/2026 16:52:11] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:12] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:18] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:18] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:18] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 16:52:18] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 16:52:18] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 16:52:19] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:19] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:19] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:19] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:19] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:20] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:20] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 16:52:20] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+
+--- iniciando 2026-07-30 17:47:46 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [30/Jul/2026 17:48:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:08:58] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:08:58] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:08:59] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [30/Jul/2026 18:09:04] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:09:07] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:09:08] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:23] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:28] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:29] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:31] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:31] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:31] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:37] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:42] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:43] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:47] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:49] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:49] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:51] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:51] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:51] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:52] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:52] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:53] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:53] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:53] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:57] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:57] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:57] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:57] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:58] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:58] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:21:59] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 18:21:59] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 18:21:59] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:00] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 18:22:00] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 18:22:00] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 18:22:01] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:01] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 18:22:01] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:01] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:01] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:01] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:02] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:02] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:03] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:03] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:03] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:03] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:03] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:04] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:04] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:04] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:04] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:04] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 18:22:04] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 18:22:05] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 304 -
+127.0.0.1 - - [30/Jul/2026 18:22:05] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:05] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:06] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:06] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:06] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:07] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:07] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:07] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:07] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:07] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:09] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:09] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:22:10] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:16] "POST /geradores-elite/api/construtor-construcoes/sessao HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:16] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:16] "GET /geradores-elite/api/construtor-construcoes/sessao/18/analise-comparativa HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:20] "POST /geradores-elite/api/construtor-construcoes/sessao HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:20] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:20] "GET /geradores-elite/api/construtor-construcoes/sessao/19/analise-comparativa HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:23] "POST /geradores-elite/api/construtor-construcoes/sessao HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:23] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:24] "GET /geradores-elite/api/construtor-construcoes/sessao/20/analise-comparativa HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:26] "POST /geradores-elite/api/construtor-construcoes/sessao HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:27] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:27] "GET /geradores-elite/api/construtor-construcoes/sessao/21/analise-comparativa HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:29] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:29] "GET /geradores-elite/api/construtor-construcoes/sessao/21 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:30] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:31] "GET /geradores-elite/api/construtor-construcoes/sessao/20 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:33] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:33] "GET /geradores-elite/api/construtor-construcoes/sessao/19 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:34] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:33:35] "GET /geradores-elite/api/construtor-construcoes/sessao/18 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:06] "POST /geradores-elite/api/construtor-construcoes/construcao/37/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:06] "GET /geradores-elite/api/construtor-construcoes/sessao/18 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:23] "POST /geradores-elite/api/construtor-construcoes/construcao/36/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:24] "GET /geradores-elite/api/construtor-construcoes/sessao/19 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:33] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:33] "GET /geradores-elite/api/construtor-construcoes/sessao/20 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:36] "POST /geradores-elite/api/construtor-construcoes/construcao/35/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:36] "GET /geradores-elite/api/construtor-construcoes/sessao/20 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:42] "POST /geradores-elite/api/construtor-construcoes/construcao/34/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [30/Jul/2026 18:34:43] "GET /geradores-elite/api/construtor-construcoes/sessao/21 HTTP/1.1" 200 -
+
+--- iniciando 2026-07-30 20:03:04 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [30/Jul/2026 20:03:09] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-07-31 15:40:04 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [31/Jul/2026 15:40:08] "GET / HTTP/1.1" 200 -
+[API Caixa] Dia de Sorte 1259/1259...
+--- iniciando 2026-07-31 16:20:05 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [31/Jul/2026 16:20:09] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:18] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:18] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:19] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [31/Jul/2026 16:45:21] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:23] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:23] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:26] "GET /desdobramento/ HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:26] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:27] "GET /desdobramento/api/sugestoes-colunas HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:27] "GET /desdobramento/api/desdobramentos HTTP/1.1" 200 -
+127.0.0.1 - - [31/Jul/2026 16:45:27] "GET /analise/api/ultimos HTTP/1.1" 200 -
+
+--- iniciando 2026-08-01 10:17:47 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+[API Caixa] Dia de Sorte 1260/1260...127.0.0.1 - - [01/Aug/2026 10:18:11] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-01 10:35:37 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [01/Aug/2026 10:35:41] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:06] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:06] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:07] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [01/Aug/2026 11:41:08] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:09] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:09] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:09] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:10] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:10] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:10] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:10] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:10] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:10] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:10] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:11] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:11] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:11] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:41:11] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:53:58] "POST /geradores-elite/api/construtor-construcoes/sessao HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:53:58] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:53:59] "GET /geradores-elite/api/construtor-construcoes/sessao/22/analise-comparativa HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:54:01] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:54:01] "GET /geradores-elite/api/construtor-construcoes/sessao/22 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:54:28] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:54:29] "GET /geradores-elite/api/construtor-construcoes/sessao/22 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:54:42] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:54:42] "GET /geradores-elite/api/construtor-construcoes/sessao/22 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:54:49] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:54:49] "GET /geradores-elite/api/construtor-construcoes/sessao/22 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:41] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:43] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:44] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 304 -
+127.0.0.1 - - [01/Aug/2026 11:57:44] "GET /geradores-elite/static/construtor_construcoes.js HTTP/1.1" 304 -
+127.0.0.1 - - [01/Aug/2026 11:57:44] "GET /geradores-elite/static/mes_sorte_select.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [01/Aug/2026 11:57:44] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:45] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:46] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:46] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:46] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:46] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:48] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:57:54] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:58:23] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:58:26] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:58:31] "POST /geradores-elite/api/construtor-construcoes/sessao HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:58:31] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:58:32] "GET /geradores-elite/api/construtor-construcoes/sessao/23/analise-comparativa HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:58:35] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:58:35] "GET /geradores-elite/api/construtor-construcoes/sessao/23 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:58:41] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:58:41] "GET /geradores-elite/api/construtor-construcoes/sessao/23 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:59:10] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:59:11] "GET /geradores-elite/api/construtor-construcoes/sessao/23 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:59:13] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 11:59:34] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 12:02:11] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 12:02:12] "GET /geradores-elite/api/construtor-construcoes/sessao/23 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 12:05:38] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 12:05:38] "GET /geradores-elite/api/construtor-construcoes/sessao/23 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 12:09:21] "POST /geradores-elite/api/construtor-construcoes/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 12:09:22] "GET /geradores-elite/api/construtor-construcoes/sessao/23 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 12:11:22] "POST /geradores-elite/api/construtor-construcoes/sessao/23/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [01/Aug/2026 12:11:22] "GET /geradores-elite/api/construtor-construcoes/sessao/23 HTTP/1.1" 200 -
