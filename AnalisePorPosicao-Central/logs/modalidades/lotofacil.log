@@ -5225,3 +5225,68 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5152
 Press CTRL+C to quit
 127.0.0.1 - - [02/Aug/2026 14:13:16] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 14:25:51 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.0.10:5152
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 14:25:59] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 15:39:46 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.0.10:5152
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 15:40:04] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:41:48] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:41:49] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [02/Aug/2026 15:41:50] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:41:51] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:41:51] "GET /api/ultimos-sorteios HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:41:56] "GET /analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:41:57] "GET /analise/escolha-visual/static/analise_escolha_visual.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:41:57] "GET /analise/escolha-visual/static/analise_escolha_visual.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:41:57] "GET /analise/escolha-visual/static/analise_escolha_estatisticas.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:41:58] "GET /analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:42:21] "GET /analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:42:29] "GET /analise/escolha-visual/static/analise_escolha_visual.css HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 15:42:29] "GET /analise/escolha-visual/static/analise_escolha_visual.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 15:42:29] "GET /analise/escolha-visual/static/analise_escolha_estatisticas.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 15:42:30] "GET /analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:43:48] "GET /geradores-elite/escolha-tubular-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:43:49] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:43:49] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:43:54] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:48:48] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:48:50] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:48:50] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:48:51] "GET /api/ultimos-sorteios HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:48:56] "GET /analise/analise-tubular/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:48:56] "GET /analise/analise-tubular/static/analise_tubular_inteligente.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:48:57] "GET /analise/api/analise-tubular/dados?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:02] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:02] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:02] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:04] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:18] "GET /analise/api/inteligentes/catalogo?n=8 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:26] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:27] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -

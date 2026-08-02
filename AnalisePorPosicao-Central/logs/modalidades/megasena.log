@@ -5234,3 +5234,85 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5156
 Press CTRL+C to quit
 127.0.0.1 - - [02/Aug/2026 14:13:17] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 14:25:54 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 14:26:01] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 15:39:51 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 15:40:05] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:56] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:56] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [02/Aug/2026 15:49:57] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:59] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:49:59] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:50:07] "GET /analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:50:08] "GET /analise/escolha-visual/static/analise_escolha_visual.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:50:08] "GET /analise/escolha-visual/static/analise_escolha_estatisticas.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:50:08] "GET /analise/escolha-visual/static/analise_escolha_visual.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:50:08] "GET /analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:24] "GET /analise/analise-tubular/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:24] "GET /analise/analise-tubular/static/analise_tubular_inteligente.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:24] "GET /analise/api/analise-tubular/dados?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:28] "GET /analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:28] "GET /analise/escolha-visual/static/analise_escolha_visual.css HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 15:54:28] "GET /analise/escolha-visual/static/analise_escolha_visual.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 15:54:28] "GET /analise/escolha-visual/static/analise_escolha_estatisticas.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 15:54:29] "GET /analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:31] "GET /analise/analise-tubular/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:31] "GET /analise/analise-tubular/static/analise_tubular_inteligente.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 15:54:32] "GET /analise/api/analise-tubular/dados?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:36] "GET /geradores-elite/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:42] "GET /geradores-elite/escolha-tubular-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:42] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:42] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:54:50] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:55:34] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:55:58] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:57:08] "GET /geradores-elite/api/escolha-tubular/contexto?base=vencedores&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:57:09] "GET /geradores-elite/api/escolha-tubular/contexto?base=acumulados&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:57:11] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:57:13] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:59:06] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:59:08] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:59:43] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 16:00:47] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 16:01:00] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 16:02:27] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 16:20:01] "GET /analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 16:20:01] "GET /analise/escolha-visual/static/analise_escolha_visual.css HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 16:20:01] "GET /analise/escolha-visual/static/analise_escolha_visual.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 16:20:01] "GET /analise/escolha-visual/static/analise_escolha_estatisticas.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 16:20:01] "GET /analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 16:20:15] "GET /analise/analise-tubular/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 16:20:15] "GET /analise/analise-tubular/static/analise_tubular_inteligente.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 16:20:15] "GET /analise/api/analise-tubular/dados?base=geral&janela=0 HTTP/1.1" 200 -

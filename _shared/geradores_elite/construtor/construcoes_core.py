@@ -131,6 +131,7 @@ def selecionar_padroes_lote(
     qtd: int,
     rng: random.Random,
     padroes_evitar: Optional[Set[str]] = None,
+    permitir_sinteticos: bool = True,
 ) -> List[List[int]]:
     """Escolhe até qtd padrões distintos viáveis (histórico primeiro, depois sintéticos)."""
     evitar = set(padroes_evitar or ())
@@ -155,6 +156,9 @@ def selecionar_padroes_lote(
         viaveis.append(digs)
         if len(viaveis) >= qtd:
             return viaveis
+
+    if not permitir_sinteticos:
+        return viaveis
 
     # Completa com padrões sintéticos derivados do pool
     grupos = pool_por_digito_inicial(pool)

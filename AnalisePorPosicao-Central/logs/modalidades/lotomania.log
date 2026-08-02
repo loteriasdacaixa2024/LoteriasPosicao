@@ -4910,3 +4910,55 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5154
 Press CTRL+C to quit
 127.0.0.1 - - [02/Aug/2026 14:13:16] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 14:25:52 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 14:26:00] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 15:39:48 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 15:40:04] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:44:33] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:44:34] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [02/Aug/2026 15:44:35] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:44:37] "GET /analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:44:37] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:44:37] "GET /analise/escolha-visual/static/analise_escolha_visual.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:44:37] "GET /analise/escolha-visual/static/analise_escolha_visual.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:44:37] "GET /analise/escolha-visual/static/analise_escolha_estatisticas.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:44:38] "GET /analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:46:04] "GET /analise/api/escolha-visual/enriquecimento?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:46:34] "GET /analise/analise-tubular/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:46:34] "GET /analise/analise-tubular/static/analise_tubular_inteligente.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:46:35] "GET /analise/api/analise-tubular/dados?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:46:54] "GET /analise/api/analise-tubular/dados?base=geral&janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:46:58] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:46:58] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:46:58] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 15:47:00] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
