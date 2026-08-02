@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" id="ev-root"
+     data-api="{{ api_base }}"
+     data-pad-width="{{ escolha_ui.pad_width }}">
+
+    <div class="ev-header mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h1 class="h4 mb-1"><i class="fas fa-sliders-h"></i> {{ page_title }}</h1>
+            <p class="mb-0 small opacity-90">{{ page_subtitle }} — {{ modality_nome }}</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="badge bg-dark" id="evBadgeTotal">Carregando…</span>
+            <a class="btn btn-sm btn-light" href="{{ tubular_url }}">
+                <i class="fas fa-chart-line"></i> Análise Tubular
+            </a>
+            <a class="btn btn-sm btn-dark" href="{{ gerador_escolha_url }}">
+                <i class="fas fa-dice"></i> Gerar Apostas
+            </a>
+            <a class="btn btn-sm btn-outline-dark" href="{{ gerador_elite_url }}">
+                <i class="fas fa-brain"></i> Geradores Elite
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-2 mb-3 align-items-center">
+        <div class="col-md-3">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-sort"></i></span>
+                <select class="form-select" id="evSelectOrdem">
+                    <option value="desc" selected>Mais recente primeiro</option>
+                    <option value="asc">Mais antigo primeiro</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
+                <select class="form-select" id="evSelectLimite">
+                    <option value="50">Últimos 50</option>
+                    <option value="100">Últimos 100</option>
+                    <option value="200">Últimos 200</option>
+                    <option value="500">Últimos 500</option>
+                    <option value="0" selected>Todos</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6 d-flex flex-wrap align-items-center gap-2">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Ordem dos números">
+                <button type="button" class="btn btn-outline-secondary btn-ordem" id="evBtnOrdemSorteio"
+                        title="Ordem em que foram sorteados">
+                    <i class="fas fa-random"></i> Ordem Sorteio
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-ordem active" id="evBtnOrdemCrescente"
+                        title="Ordem crescente">
+                    <i class="fas fa-sort-numeric-up"></i> Ordem Crescente
+                </button>
+            </div>
+            <button class="btn btn-sm btn-primary" id="evBtnCarregar" type="button">
+                <i class="fas fa-sync-alt"></i> Carregar
+            </button>
+            <div class="ms-auto d-flex flex-wrap gap-1 align-items-center">
+                <span class="legenda-badge" style="background:var(--cor-pares)">Pares</span>
+                <span class="legenda-badge" style="background:var(--cor-impares)">Ímpares</span>
+                <span class="legenda-badge" style="background:var(--cor-repetidos)">Repetidos</span>
+                <span class="legenda-badge" style="background:var(--cor-sequencia-1);color:#14532d">Sequências</span>
+                <span class="legenda-badge" style="background:var(--cor-finais-iguais);color:#000">Finais</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-lg-8 mb-3">
+            <div class="toggles-sidebar h-100">
+                <div class="text-center mb-2">
+                    <small class="text-muted"><i class="fas fa-filter"></i> Destaques no Volante <span class="text-muted">(um por vez)</span></small>
+                </div>
+                <div class="d-flex justify-content-center gap-4 flex-wrap">
+                    <div class="toggle-item">
+                        <label class="toggle-wrapper">
+                            <input type="checkbox" class="toggle-escolha" data-tipo="pares">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <small>Pares</small>
+                        <small class="badge badge-contagem" id="ev-count-pares" style="display:none;background:var(--cor-pares);color:#fff;font-size:10px">0</small>
+                    </div>
+                    <div class="toggle-item">
+                        <label class="toggle-wrapper">
+                            <input type="checkbox" class="toggle-escolha" data-tipo="impares">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <small>Ímpares</small>
+                        <small class="badge badge-contagem" id="ev-count-impares" style="display:none;background:var(--cor-impares);color:#fff;font-size:10px">0</small>
+                    </div>
+                    <div class="toggle-item">
+                        <label class="toggle-wrapper">
+                            <input type="checkbox" class="toggle-escolha" data-tipo="repetidos">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <small>Repetidos</small>
+                        <small class="badge badge-contagem" id="ev-count-repetidos" style="display:none;background:var(--cor-repetidos);color:#fff;font-size:10px">0</small>
+                    </div>
+                    <div class="toggle-item">
+                        <label class="toggle-wrapper">
+                            <input type="checkbox" class="toggle-escolha" data-tipo="sequencias">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <small>Sequências</small>
+                        <small class="badge badge-contagem" id="ev-count-sequencias" style="display:none;background:var(--cor-sequencia-1);color:#14532d;font-size:10px">0</small>
+                    </div>
+                    <div class="toggle-item">
+                        <label class="toggle-wrapper">
+                            <input type="checkbox" class="toggle-escolha" data-tipo="finais">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <small>Finais Iguais</small>
+                        <small class="badge badge-contagem" id="ev-count-finais" style="display:none;background:var(--cor-finais-iguais);color:#000;font-size:10px">0</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <h6 class="text-center text-primary mb-3" style="font-size:.85rem;font-weight:700">
+                        <i class="fas fa-chart-pie"></i> Resumo (<span id="evTotalStats">0</span> sorteios)
+                    </h6>
+                    <div class="d-flex flex-column gap-2" style="font-size:.8rem">
+                        <div class="d-flex justify-content-between border-bottom pb-1">
+                            <span><i class="fas fa-circle" style="color:var(--cor-pares);font-size:.45rem;vertical-align:middle"></i> Pares:</span>
+                            <span id="ev-stat-pares" class="fw-bold">…</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1">
+                            <span><i class="fas fa-circle" style="color:var(--cor-impares);font-size:.45rem;vertical-align:middle"></i> Ímpares:</span>
+                            <span id="ev-stat-impares" class="fw-bold">…</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1">
+                            <span><i class="fas fa-circle" style="color:var(--cor-repetidos);font-size:.45rem;vertical-align:middle"></i> Repetidos:</span>
+                            <span id="ev-stat-repetidos" class="fw-bold">…</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-1">
+                            <span><i class="fas fa-circle" style="color:var(--cor-sequencia-1);font-size:.45rem;vertical-align:middle"></i> Sequências:</span>
+                            <span id="ev-stat-sequencias" class="fw-bold">…</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-circle" style="color:var(--cor-finais-iguais);font-size:.45rem;vertical-align:middle"></i> Finais Iguais:</span>
+                            <span id="ev-stat-finais" class="fw-bold">…</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="evDisplay" class="pb-4">
+        <div class="text-center text-muted py-4">
+            <div class="spinner-border spinner-border-sm text-primary"></div>
+            <p class="mt-2 small mb-0">Aguardando carregamento…</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/analise/escolha-visual/static/analise_escolha_visual.js"></script>
+{% endblock %}

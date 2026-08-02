@@ -290,12 +290,20 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 "icon_color": "#1565c0",
             },
             {
-                "title": "Comportamento DS",
-                "desc": "Gerador — PA · PR · RT · MO · MS → apostas",
-                "href": "/geradores-elite/comportamento-apostas/",
-                "icon": "fas fa-chart-line",
+                "title": "Escolha Visual",
+                "desc": "Destaques no volante — pares · ímpares · repetidos · sequências · finais",
+                "href": "/analise/escolha-visual/",
+                "icon": "fas fa-sliders-h",
                 "icon_bg": "#fff8e1",
-                "icon_color": "#f57f17",
+                "icon_color": "#c08b00",
+            },
+            {
+                "title": "Análise Tubular",
+                "desc": "Rankings e insights dos padrões da Visualização Tubular",
+                "href": "/analise/analise-tubular/",
+                "icon": "fas fa-chart-line",
+                "icon_bg": "#e8f5e9",
+                "icon_color": "#2e7d32",
             },
         ],
         "geradores_elite": {
@@ -353,6 +361,12 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                     "title": "Comportamento → Apostas",
                     "desc": "Padrões PA/PR/RT/MO/MS · inteligente",
                     "icon": "fas fa-chart-line",
+                },
+                {
+                    "href": "/geradores-elite/escolha-tubular-apostas/",
+                    "title": "Escolha/Tubular → Apostas",
+                    "desc": "Apostas a partir da Escolha Visual e Análise Tubular",
+                    "icon": "fas fa-dice",
                 },
                 {
                     "href": "/geradores-elite/construtor-construcoes/",

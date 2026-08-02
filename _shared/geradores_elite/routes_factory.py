@@ -1516,4 +1516,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
     from concentracao_acertos.routes_factory import register_concentracao_gerador
     register_concentracao_gerador(bp, modality_key, cfg["nome"])
 
+    from gerador_escolha_tubular.routes_factory import register_gerador_escolha_tubular
+    register_gerador_escolha_tubular(bp, modality_key, cfg["nome"])
+
     return bp

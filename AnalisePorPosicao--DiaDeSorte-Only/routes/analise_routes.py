@@ -153,3 +153,11 @@ wire_analise_somas_digitos(analise_bp, "diadesorte")
 # ANALISE_INTELIGENTES_WIRED
 from analise_inteligentes_diadesorte.app_integration import wire_analise_inteligentes
 wire_analise_inteligentes(analise_bp, "diadesorte")
+
+# ANALISE_ESCOLHA_VISUAL_WIRED
+from analise_escolha_visual.app_integration import wire_analise_escolha_visual
+wire_analise_escolha_visual(analise_bp, "diadesorte")
+
+# ANALISE_TUBULAR_INTELIGENTE_WIRED
+from analise_tubular_inteligente.app_integration import wire_analise_tubular_inteligente
+wire_analise_tubular_inteligente(analise_bp, "diadesorte")

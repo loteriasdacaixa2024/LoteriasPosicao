@@ -27,6 +27,8 @@ from concentracao_acertos.app_integration import extend_concentracao_app
 from analise_estudos.app_integration import extend_analise_estudos_app
 from analise_somas_digitos.app_integration import extend_analise_somas_digitos_app
 from analise_inteligentes_diadesorte.app_integration import extend_analise_inteligentes_app
+from analise_escolha_visual.app_integration import extend_analise_escolha_visual_app
+from analise_tubular_inteligente.app_integration import extend_analise_tubular_inteligente_app
 from configuracoes.app_integration import extend_config_app
 from ciclo_cobertura.app_integration import extend_ciclo_cobertura_app
 
@@ -53,6 +55,8 @@ def create_app():
     extend_analise_estudos_app(app)
     extend_analise_somas_digitos_app(app)
     extend_analise_inteligentes_app(app)
+    extend_analise_escolha_visual_app(app)
+    extend_analise_tubular_inteligente_app(app)
     extend_ciclo_cobertura_app(app, 'diadesorte')
     from menu.app_integration import _merge_template_dirs
     _merge_template_dirs(app, [os.path.join(_CC_ROOT, 'geradores_elite', 'templates')])
