@@ -30,7 +30,7 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
             modality_key=modality_key,
             modality_nome=modality_nome,
             page_title="Escolha/Tubular → Apostas",
-            page_subtitle="Gera apostas com base nos padrões da Escolha Visual e da Análise Tubular",
+            page_subtitle="Cada aposta reproduz o perfil completo de um concurso (pares, sequência, finais, repetidos…)",
             api_base="/geradores-elite/api/escolha-tubular",
             ctx=ctx if ctx.get("sucesso") else {},
             meses_cores=meses_cores,
@@ -42,7 +42,10 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
     def api_escolha_tubular_contexto():
         janela = request.args.get("janela", 0, type=int) or 0
         base = request.args.get("base", "geral")
-        out = contexto_gerador(modality_key, janela=janela, base=base)
+        concurso = request.args.get("concurso", type=int)
+        out = contexto_gerador(
+            modality_key, janela=janela, base=base, concurso_ref=concurso,
+        )
         return jsonify(out), (200 if out.get("sucesso") else 400)
 
     @bp.route("/api/escolha-tubular/gerar", methods=["POST"])
@@ -55,13 +58,16 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
                 pick=int(data["pick"]) if data.get("pick") is not None else None,
                 janela=int(data.get("janela") or 0),
                 base=data.get("base") or "geral",
+                concurso_ref=int(data["concurso_ref"]) if data.get("concurso_ref") not in (None, "", 0, "0") else None,
                 usar_pares_impares=bool(data.get("usar_pares_impares", True)),
-                usar_soma=bool(data.get("usar_soma", True)),
+                usar_soma=bool(data.get("usar_soma", False)),
                 usar_sequencia=bool(data.get("usar_sequencia", True)),
                 usar_finais=bool(data.get("usar_finais", True)),
                 usar_repetidos=bool(data.get("usar_repetidos", True)),
                 usar_digitos=bool(data.get("usar_digitos", True)),
                 mes_num=int(data["mes_num"]) if data.get("mes_num") not in (None, "", 0, "0") else None,
+                ancora_padrao=str(data.get("ancora_padrao") or "").strip().lower() or None,
+                dezenas_altas=bool(data.get("dezenas_altas", False)),
             )
         except Exception as e:
             return jsonify({"sucesso": False, "ok": False, "erro": str(e)}), 500

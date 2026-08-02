@@ -73,8 +73,10 @@ def build_repeticao_blueprint(modality_key: str) -> Blueprint:
             perfil=data.get("perfil", "equilibrado"),
             usar_ultimo_par=bool(data.get("usar_ultimo_par", True)),
             so_permanencia=bool(data.get("so_permanencia", False)),
-            respeitar_par_impar=bool(data.get("respeitar_par_impar", True)),
+            respeitar_par_impar=bool(data.get("respeitar_par_impar", False)),
             analise=analise,
+            ancora_padrao=str(data.get("ancora_padrao") or "").strip().lower() or None,
+            dezenas_altas=bool(data.get("dezenas_altas", False)),
         )
         resultado["analise_resumo"] = {
             "ultimo": analise["ultimo_concurso"],

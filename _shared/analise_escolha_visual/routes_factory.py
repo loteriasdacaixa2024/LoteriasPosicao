@@ -60,3 +60,21 @@ def register_analise_escolha_visual(analise_bp: Blueprint, modality_key: str) ->
             return jsonify(out), (200 if out.get("sucesso") else 400)
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @analise_bp.route("/api/escolha-visual/enriquecimento")
+    def api_escolha_visual_enriquecimento():
+        try:
+            ordem = request.args.get("ordem", "desc")
+            limite = request.args.get("limite", 0, type=int) or 0
+            base = request.args.get("base", "geral")
+            concurso = request.args.get("concurso", type=int)
+            out = AnaliseEscolhaVisualService.enriquecimento(
+                modality_key,
+                ordem=ordem,
+                limite=limite,
+                base_estatistica=base,
+                concurso=concurso,
+            )
+            return jsonify(out), (200 if out.get("sucesso") else 400)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500

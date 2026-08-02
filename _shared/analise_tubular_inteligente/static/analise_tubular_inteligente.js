@@ -154,7 +154,7 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function init() {
     document.getElementById('atiBtnAtualizar').addEventListener('click', carregar);
     document.querySelectorAll('#atiTabsBase .base-tab-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -173,5 +173,11 @@
       });
     });
     carregar();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

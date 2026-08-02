@@ -142,9 +142,16 @@
 
       const div = document.createElement('div');
       div.className = 'sorteio-escolha';
+      div.dataset.concurso = String(sorteio.concurso);
+      div.title = 'Clique para abrir Estatísticas deste concurso';
       div.innerHTML = `
         <div class="mb-2"><small class="text-muted">Concurso ${sorteio.concurso} — ${sorteio.data || ''}</small></div>
         <div class="numeros-sorteio">${htmlNums}</div>`;
+      div.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('ev:abrir-estatisticas', {
+          detail: { concurso: sorteio.concurso },
+        }));
+      });
       container.appendChild(div);
     });
 
@@ -189,7 +196,7 @@
     renderizar();
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function init() {
     document.getElementById('evBtnCarregar').addEventListener('click', carregar);
     document.getElementById('evSelectOrdem').addEventListener('change', carregar);
     document.getElementById('evSelectLimite').addEventListener('change', carregar);
@@ -209,5 +216,32 @@
 
     setOrdemNumeros('crescente');
     carregar();
-  });
+  }
+
+  // Expõe controles para a aba Estatísticas reutilizar a mesma janela
+  window.EvEscolha = {
+    getFiltros() {
+      return {
+        ordem: document.getElementById('evSelectOrdem').value,
+        limite: document.getElementById('evSelectLimite').value || '0',
+      };
+    },
+    onCarregado(cb) {
+      window.addEventListener('ev:sorteios-carregados', cb);
+    },
+  };
+
+  const _carregarOrig = carregar;
+  carregar = async function () {
+    await _carregarOrig();
+    window.dispatchEvent(new CustomEvent('ev:sorteios-carregados', {
+      detail: { total: sorteios.length },
+    }));
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

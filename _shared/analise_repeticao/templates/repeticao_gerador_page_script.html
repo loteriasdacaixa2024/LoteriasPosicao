@@ -540,7 +540,7 @@
         );
         el.innerHTML = avisoHtml + ultimasApostas.map(a => `
             <div class="border rounded p-2 mb-2 aposta-item${isColunas() ? ' item-colunas' : ''}${a.ja_sorteada ? ' ja-hist' : ''}" data-aposta="${a.numero}">
-                ${window.__htmlApostaHead ? window.__htmlApostaHead(a.numero) : `<div class="aposta-num-label fw-bold text-muted mb-1">Aposta ${String(a.numero).padStart(2, '0')}${a.ja_sorteada ? ` · <span class="text-danger">já sorteada #${a.concurso_historico || '?'}</span>` : ''}</div>`}
+                ${window.__htmlApostaHead ? window.__htmlApostaHead(a.numero) : `<div class="aposta-num-label fw-bold text-muted mb-1">Aposta ${String(a.numero).padStart(2, '0')}${a.ja_sorteada ? ` · <span class="text-danger">já sorteada #${a.concurso_historico || '?'}</span>` : ''}${a.padrao_inicial ? ` · <span class="text-primary">(${a.padrao_inicial})</span>` : ''}</div>`}
                 ${a.ja_sorteada && !window.__htmlApostaHead ? `<div class="small text-danger mb-1">Histórico oficial · ${a.data_historico || ''} · ${a.ocorrencias_historico || 1}×</div>` : ''}
                 <div class="aposta-card-inner ${exibicaoApostas === 'hibrido' ? 'modo-hibrido' : ''}">
                     ${showLinear ? `
@@ -585,6 +585,22 @@
         if (ultimasApostas.length) renderApostas(ultimasApostas);
     }
 
+    function ancoraPadraoSelecionada() {
+        const on = document.querySelector('.rep-tog-ancora:checked');
+        return on ? (on.getAttribute('data-ancora') || '') : '';
+    }
+
+    function bindTogglesAncora() {
+        document.querySelectorAll('.rep-tog-ancora').forEach((el) => {
+            el.addEventListener('change', () => {
+                if (!el.checked) return;
+                document.querySelectorAll('.rep-tog-ancora').forEach((other) => {
+                    if (other !== el) other.checked = false;
+                });
+            });
+        });
+    }
+
     async function gerar() {
         let body = {
             modo: modoAtual,
@@ -592,10 +608,11 @@
             dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || CFG.dezenas_default,
             perfil: document.getElementById('inpPerfil').value,
             usar_ultimo_par: document.getElementById('chkUltimoPar')?.checked !== false,
-            so_permanencia: document.getElementById('chkPermanencia').checked,
-            respeitar_par_impar: document.getElementById('chkParImpar') ? document.getElementById('chkParImpar').checked : false,
-            descartar_historico: !!document.getElementById('chkDescartarHist')?.checked,
-            politica_historico: document.getElementById('chkDescartarHist')?.checked ? 'descartar' : 'marcar',
+            ancora_padrao: ancoraPadraoSelecionada(),
+            dezenas_altas: !!document.getElementById('togDezenasAltas')?.checked,
+            // Histórico: mantém descarte por padrão (checkbox removido da UI)
+            descartar_historico: true,
+            politica_historico: 'descartar',
             executar_backtest: true,
         };
         if (window.__REP_SNIPER_INTELIGENTE__ && typeof window.__sniperBuildGerarBody === 'function') {
@@ -623,7 +640,10 @@
         const st = document.getElementById('rep-status');
         if (st) {
             const n = (data.apostas || []).length;
-            st.textContent = data.aviso || `${n} jogo(s) gerados` +
+            const padInfo = data.parametros && data.parametros.padrao_usado
+                ? ` · padrão ${data.parametros.padrao_usado}`
+                : '';
+            st.textContent = (data.aviso || `${n} jogo(s) gerados`) + padInfo +
                 (data.validacao_historico && data.validacao_historico.aplicada
                     ? ` · histórico + back test`
                     : '');
@@ -662,6 +682,7 @@
     if (btnAtualizar) btnAtualizar.addEventListener('click', carregarAnalise);
     const elGerar = document.getElementById('btnGerar');
     if (elGerar) {
+        bindTogglesAncora();
         elGerar.addEventListener('click', gerar);
         document.getElementById('btnExport').addEventListener('click', exportarTxt);
         const btnBt = document.getElementById('btnRepBacktest');

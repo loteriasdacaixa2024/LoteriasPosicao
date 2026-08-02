@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
+from analise_escolha_visual.enriquecimento import analisar_janela, gerar_insights
 from analise_estudos.service_factory import make_estudos_base
 from analise_estudos.specs import get_estudos_config, tem_analise_estudos
 
@@ -69,6 +70,39 @@ class AnaliseEscolhaVisualService:
             "total": len(sorteios),
             "sorteios": sorteios,
         }
+
+    @classmethod
+    def enriquecimento(
+        cls,
+        modality_key: str,
+        *,
+        ordem: str = "desc",
+        limite: int = 0,
+        base_estatistica: str = "geral",
+        concurso: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        lista = cls.listar_sorteios(
+            modality_key,
+            ordem=ordem,
+            limite=limite,
+            base_estatistica=base_estatistica,
+        )
+        if not lista.get("sucesso"):
+            return lista
+        payload = analisar_janela(
+            lista.get("sorteios") or [],
+            ordem=lista.get("ordem") or "desc",
+            concurso_foco=concurso,
+        )
+        if not payload.get("sucesso"):
+            return payload
+        payload["insights"] = gerar_insights(payload)
+        payload["modality_key"] = modality_key
+        payload["modality_nome"] = lista.get("modality_nome")
+        payload["pad_width"] = lista.get("pad_width")
+        payload["total_disponivel"] = lista.get("total_disponivel")
+        payload["limite"] = lista.get("limite")
+        return payload
 
     @classmethod
     def ui_meta(cls, modality_key: str) -> Dict[str, Any]:
