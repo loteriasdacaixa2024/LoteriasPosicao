@@ -791,6 +791,26 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
             "icon_color": "#1565c0",
         })
 
+    if tem_analise_estudos(modality_key):
+        novos_analise.extend([
+            {
+                "title": "Escolha Visual",
+                "desc": "Destaques no volante — pares · ímpares · repetidos · sequências · finais",
+                "href": "/analise/escolha-visual/",
+                "icon": "fas fa-sliders-h",
+                "icon_bg": accent_light,
+                "icon_color": accent,
+            },
+            {
+                "title": "Análise Tubular",
+                "desc": "Rankings e insights dos padrões da Visualização Tubular",
+                "href": "/analise/analise-tubular/",
+                "icon": "fas fa-chart-line",
+                "icon_bg": "#e8f5e9",
+                "icon_color": "#2e7d32",
+            },
+        ])
+
     # Inserir após Análise por Posição (se existir), senão no início
     insert_at = 0
     for i, it in enumerate(extras):
@@ -832,6 +852,19 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
             "desc": "Pool restrito · concentração de acertos",
             "icon": "fas fa-bullseye",
             "after": "/geradores-elite/gerador-por-posicao/",
+        })
+
+    try:
+        from gerador_escolha_tubular.service import tem_gerador_escolha_tubular as _tem_get
+    except ImportError:
+        _tem_get = lambda _k: False  # noqa: E731
+    if _tem_get(modality_key):
+        novos_ge.append({
+            "href": "/geradores-elite/escolha-tubular-apostas/",
+            "title": "Escolha/Tubular → Apostas",
+            "desc": "Apostas a partir da Escolha Visual e Análise Tubular",
+            "icon": "fas fa-dice",
+            "after": "/geradores-elite/comportamento-apostas/",
         })
 
     for item in novos_ge:

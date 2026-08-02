@@ -34,3 +34,10 @@ def api_ultimos():
 # POSICAO_ANALISE_WIRED
 from posicao_analise.app_integration import wire_posicao_analise
 wire_posicao_analise(analise_bp, "maismilionaria")
+
+from analise_estudos.app_integration import wire_analise_estudos
+wire_analise_estudos(analise_bp, "maismilionaria")
+from analise_escolha_visual.app_integration import wire_analise_escolha_visual
+wire_analise_escolha_visual(analise_bp, "maismilionaria")
+from analise_tubular_inteligente.app_integration import wire_analise_tubular_inteligente
+wire_analise_tubular_inteligente(analise_bp, "maismilionaria")

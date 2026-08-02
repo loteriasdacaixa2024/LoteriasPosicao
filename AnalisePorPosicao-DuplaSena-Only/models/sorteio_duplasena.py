@@ -65,6 +65,17 @@ class SorteiosDuplaSena(db.Model):
         """Ordem original do 2º sorteio (s2_d1–s2_d6)."""
         return [self.s2_d1, self.s2_d2, self.s2_d3, self.s2_d4, self.s2_d5, self.s2_d6]
 
+    def dezenas(self):
+        """Compatível com análises genéricas — usa o 1º sorteio."""
+        return self.sorteio1()
+
+    def dezenas_lista(self):
+        return self.sorteio1_lista()
+
+    def dezenas_ordem_lista(self):
+        """Perfil Escolha/Tubular e estudos — 1º sorteio (ordem oficial)."""
+        return self.sorteio1_ordem_lista()
+
     def todas_dezenas(self):
         """Union de ambos os sorteios (para análise de frequência combinada)."""
         return self.sorteio1() | self.sorteio2()

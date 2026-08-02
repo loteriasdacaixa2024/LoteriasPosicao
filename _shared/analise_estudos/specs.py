@@ -33,6 +33,8 @@ LINKS_MODALIDADE: Dict[str, Dict[str, str]] = {
         "timemania",
         "lotomania",
         "supersete",
+        "maismilionaria",
+        "duplasena",
     )
 }
 
@@ -51,6 +53,8 @@ def _estudos(
     *,
     janela_default: int = 10,
     extra_mes: bool = False,
+    extra_time: bool = False,
+    extra_trevo: bool = False,
     volante_cols: int = 10,
     volante_rows: Optional[int] = None,
     ganhadores_field: Optional[str] = None,
@@ -72,6 +76,8 @@ def _estudos(
         "janelas_ui": janelas,
         "janela_default": janela_default,
         "extra_mes": extra_mes,
+        "extra_time": extra_time,
+        "extra_trevo": extra_trevo,
         "volante_cols": volante_cols,
         "volante_rows": rows,
         "ganhadores_field": ganhadores_field,
@@ -105,13 +111,24 @@ ESTUDOS_MODALITIES: Dict[str, Dict[str, Any]] = {
     ),
     "timemania": _estudos(
         "timemania", "Timemania", 1, 80, 7, (10, 20, 50, 80, 0),
-        janela_default=50, volante_rows=8,
+        janela_default=50, volante_rows=8, extra_time=True,
         model_module="models.sorteio_timemania", model_class="SorteioTimemania",
     ),
     "lotomania": _estudos(
         "lotomania", "Lotomania", 0, 99, 20, (10, 20, 50, 100, 0),
         volante_rows=10,
         model_module="models.sorteio_lotomania", model_class="SorteioLotomania",
+    ),
+    "maismilionaria": _estudos(
+        "maismilionaria", "+Milionária", 1, 50, 6, (10, 20, 50, 0),
+        volante_rows=5, extra_trevo=True,
+        model_module="models.sorteio_maismilionaria", model_class="SorteioMaisMilionaria",
+    ),
+    "duplasena": _estudos(
+        "duplasena", "Dupla Sena", 1, 50, 6, (10, 20, 50, 0),
+        volante_rows=5,
+        model_module="models.sorteio_duplasena", model_class="SorteiosDuplaSena",
+        page_subtitle="Estudos exploratórios — perfil do 1º sorteio (aposta compete nos dois)",
     ),
     "supersete": _estudos(
         "supersete", "Super Sete", 0, 9, 7, (10, 20, 30, 0),

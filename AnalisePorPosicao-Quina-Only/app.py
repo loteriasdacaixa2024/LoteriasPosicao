@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 
 _CC_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "_shared"))
@@ -31,6 +31,8 @@ from posicao_analise.app_integration import extend_posicao_app
 from analise_repeticao_consecutiva.app_integration import extend_repconsec_app
 from concentracao_acertos.app_integration import extend_concentracao_app
 from analise_estudos.app_integration import extend_analise_estudos_app
+from analise_escolha_visual.app_integration import extend_analise_escolha_visual_app
+from analise_tubular_inteligente.app_integration import extend_analise_tubular_inteligente_app
 from geradores_elite.comportamento_analise_integration import extend_comportamento_analise_app
 from analise_somas_digitos.app_integration import extend_analise_somas_digitos_app
 from analise_inteligentes_diadesorte.app_integration import extend_analise_inteligentes_app
@@ -51,6 +53,8 @@ def create_app():
     extend_posicao_app(app, 'quina')
     extend_concentracao_app(app, 'quina')
     extend_analise_estudos_app(app)
+    extend_analise_escolha_visual_app(app)
+    extend_analise_tubular_inteligente_app(app)
     extend_comportamento_analise_app(app)
     extend_analise_somas_digitos_app(app)
     extend_analise_inteligentes_app(app)

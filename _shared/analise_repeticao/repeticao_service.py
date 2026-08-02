@@ -733,204 +733,6 @@ class RepeticaoConcursosService:
             aviso = f"Solicitados {quantidade}; gerados {len(apostas)}."
         return {"sucesso": True, "apostas": apostas, "total_geradas": len(apostas), "solicitados": quantidade, "aviso": aviso}
 
-    def _padroes_ancoras(self) -> Dict[str, Any]:
-        """Padrão inicial (ex.: '0 0 1 1 2 2 2') do último / penúltimo / antepenúltimo."""
-        from geradores_elite.construtor.construcoes_core import padrao_inicial_de
-
-        sorteios = self._carregar_sorteios_asc()
-        out: Dict[str, Any] = {
-            "ultimo": None,
-            "penultimo": None,
-            "antepenultimo": None,
-            "historicos": [],
-        }
-        if not sorteios:
-            return out
-        out["ultimo"] = {
-            "concurso": sorteios[-1].concurso,
-            "dezenas": self._ord_dezenas(sorteios[-1]),
-            "padrao": padrao_inicial_de(self._ord_dezenas(sorteios[-1])),
-        }
-        if len(sorteios) >= 2:
-            out["penultimo"] = {
-                "concurso": sorteios[-2].concurso,
-                "dezenas": self._ord_dezenas(sorteios[-2]),
-                "padrao": padrao_inicial_de(self._ord_dezenas(sorteios[-2])),
-            }
-        if len(sorteios) >= 3:
-            out["antepenultimo"] = {
-                "concurso": sorteios[-3].concurso,
-                "dezenas": self._ord_dezenas(sorteios[-3]),
-                "padrao": padrao_inicial_de(self._ord_dezenas(sorteios[-3])),
-            }
-        # histórico recente para misturar padrões (sem âncora forçada)
-        for s in sorteios[-250:]:
-            dz = self._ord_dezenas(s)
-            if dz:
-                out["historicos"].append(padrao_inicial_de(dz))
-        return out
-
-    def _gerar_por_padrao_inicial(
-        self,
-        quantidade: int,
-        k: int,
-        universo: List[int],
-        *,
-        ancora: Optional[str],
-        dezenas_altas: bool,
-        analise: Dict[str, Any],
-        modo: str,
-        perfil: str,
-        usar_ultimo_par: bool,
-    ) -> Dict[str, Any]:
-        """
-        Gera apostas respeitando padrão inicial (1º dígito de cada dezena).
-        - Com âncora: todas as apostas com o padrão daquele concurso.
-        - Sem âncora: até N padrões distintos (1 por aposta quando possível).
-        - dezenas_altas: min(aposta) >= 10.
-        """
-        from geradores_elite.construtor.construcoes_core import (
-            _montar_por_padrao,
-            padrao_viavel,
-            parse_padrao,
-            selecionar_padroes_lote,
-        )
-
-        rng = random.Random()
-        info = self._padroes_ancoras()
-        pool = list(universo)
-        if dezenas_altas:
-            pool = [d for d in pool if d >= 10]
-
-        padroes_digs: List[List[int]] = []
-        padrao_label = None
-        concurso_ref = None
-
-        if ancora in ("ultimo", "penultimo", "antepenultimo"):
-            ref = info.get(ancora)
-            if not ref or not ref.get("padrao"):
-                return {
-                    "sucesso": False,
-                    "erro": f"Âncora '{ancora}' indisponível (histórico insuficiente).",
-                }
-            digs = parse_padrao(ref["padrao"])
-            if len(digs) != k:
-                # ajusta: se o concurso-âncora tem slots diferentes de k, recorta/adapta
-                if len(digs) > k:
-                    digs = digs[:k]
-                else:
-                    return {
-                        "sucesso": False,
-                        "erro": (
-                            f"Padrão da âncora tem {len(parse_padrao(ref['padrao']))} slots; "
-                            f"pedido {k} dezenas."
-                        ),
-                    }
-            if dezenas_altas and any(d == 0 for d in digs):
-                return {
-                    "sucesso": False,
-                    "erro": (
-                        f"Padrão '{ref['padrao']}' exige dezena < 10, incompatível com "
-                        "Dezenas altas (≥10)."
-                    ),
-                }
-            if not padrao_viavel(digs, pool):
-                return {
-                    "sucesso": False,
-                    "erro": f"Pool insuficiente para montar o padrão '{ref['padrao']}'.",
-                }
-            padroes_digs = [digs] * quantidade
-            padrao_label = ref["padrao"]
-            concurso_ref = ref["concurso"]
-        else:
-            hist = list(info.get("historicos") or [])
-            if dezenas_altas:
-                hist = [p for p in hist if 0 not in parse_padrao(p)]
-            escolhidos = selecionar_padroes_lote(hist, pool, k, quantidade, rng)
-            if not escolhidos:
-                return {
-                    "sucesso": False,
-                    "erro": "Não foi possível obter padrões distintos viáveis para o lote.",
-                }
-            base = list(escolhidos)
-            i = 0
-            while len(escolhidos) < quantidade:
-                escolhidos.append(base[i % len(base)])
-                i += 1
-            padroes_digs = escolhidos[:quantidade]
-            padrao_label = "mix"
-            concurso_ref = None
-
-        apostas = []
-        vistos = set()
-        tentativas = 0
-        max_tent = max(quantidade * 400, 800)
-        idx_pad = 0
-
-        while len(apostas) < quantidade and tentativas < max_tent:
-            tentativas += 1
-            digs = padroes_digs[min(idx_pad, len(padroes_digs) - 1)]
-            pick = _montar_por_padrao(pool, digs, rng)
-            if not pick or len(pick) != k:
-                continue
-            if dezenas_altas and min(pick) < 10:
-                continue
-            chave = tuple(pick)
-            if chave in vistos:
-                continue
-            vistos.add(chave)
-            p, im = _pares_impares(pick)
-            rep_vol = analise["resumo_ultimo_par"]["volante"]["dezenas"]
-            do_ult = len(set(pick) & set(rep_vol))
-            extra_fields = gerar_extra(
-                self.cfg, analise, usar_ultimo_par, perfil, self._time_names, aposta_idx=len(apostas),
-            )
-            from geradores_elite.construtor.construcoes_core import padrao_inicial_de
-
-            pstr = padrao_inicial_de(pick)
-            texto = formatar_texto_aposta(self.cfg, pick, extra_fields)
-            item = {
-                "numero": len(apostas) + 1,
-                "dezenas": pick,
-                "quantidade": k,
-                "pares": p,
-                "impares": im,
-                "do_ultimo_par": do_ult,
-                "texto": texto,
-                "padrao_inicial": pstr,
-                "ancora_padrao": ancora or "mix",
-                "concurso_ancora": concurso_ref,
-            }
-            item.update(extra_fields)
-            apostas.append(item)
-            idx_pad += 1
-
-        aviso = None
-        if len(apostas) < quantidade:
-            aviso = (
-                f"Solicitados {quantidade} apostas; gerados {len(apostas)}. "
-                "Tente desmarcar Dezenas altas ou outra âncora."
-            )
-
-        return {
-            "sucesso": True,
-            "apostas": apostas,
-            "total_geradas": len(apostas),
-            "solicitados": quantidade,
-            "aviso": aviso,
-            "parametros": {
-                "quantidade": quantidade,
-                "dezenas_por_jogo": k,
-                "modo": modo,
-                "perfil": perfil,
-                "usar_ultimo_par": usar_ultimo_par,
-                "ancora_padrao": ancora or "",
-                "dezenas_altas": dezenas_altas,
-                "padrao_usado": padrao_label,
-                "concurso_ancora": concurso_ref,
-            },
-        }
-
     def gerar_apostas(
         self,
         quantidade: int = 10,
@@ -944,8 +746,6 @@ class RepeticaoConcursosService:
         volante_colunas: Optional[Dict[Any, Any]] = None,
         sniper_opts: Optional[Dict[str, Any]] = None,
         intrasorte: Optional[Dict[str, Any]] = None,
-        ancora_padrao: Optional[str] = None,
-        dezenas_altas: bool = False,
     ) -> Dict[str, Any]:
         cfg = self.cfg
         if analise is None:
@@ -976,26 +776,83 @@ class RepeticaoConcursosService:
             }
             return r
 
-        ancora = (ancora_padrao or "").strip().lower() or None
-        if ancora and ancora not in ("ultimo", "penultimo", "antepenultimo"):
-            ancora = None
+        rep_vol = analise["resumo_ultimo_par"]["volante"]["dezenas"]
+        alvo_pares = analise["resumo_ultimo_par"]["volante"]["pares"]
+        if respeitar_par_impar and not rep_vol:
+            alvo_pares = round(analise["padroes_grupo"]["media_pares_quando_repete"])
 
         universo = list(range(cfg["dezena_min"], cfg["dezena_max"] + 1))
-        out = self._gerar_por_padrao_inicial(
-            quantidade,
-            k,
-            universo,
-            ancora=ancora,
-            dezenas_altas=bool(dezenas_altas),
-            analise=analise,
-            modo=modo,
-            perfil=perfil,
-            usar_ultimo_par=usar_ultimo_par,
-        )
-        if not out.get("sucesso"):
-            return out
-        # Mantém compat: pesos/sniper legado não se aplicam no modo padrão-inicial
-        _ = (so_permanencia, respeitar_par_impar, sniper_opts)
+        apostas = []
+        vistos = set()
+        tentativas = 0
+        max_tent = max(quantidade * 400, 800)
+
+        while len(apostas) < quantidade and tentativas < max_tent:
+            tentativas += 1
+            jitter = random.random() * 12
+            pesos = self._pool_dezenas(
+                analise, modo, usar_ultimo_par, so_permanencia, jitter, sniper_opts=sniper_opts,
+            )
+            if perfil == "conservador":
+                pesos = sorted(pesos, key=lambda x: -x[1])
+            elif perfil == "agressivo":
+                pesos = sorted(pesos, key=lambda x: x[1] + random.random() * 25)
+            else:
+                random.shuffle(pesos)
+
+            pick = self._sorteio_ponderado(pesos, k)
+            if len(pick) < k:
+                continue
+            if respeitar_par_impar:
+                pick = self._ajustar_par_impar(pick, k, alvo_pares, universo)
+            else:
+                pick = sorted(pick)
+
+            chave = tuple(pick)
+            if len(pick) != k or chave in vistos:
+                continue
+            vistos.add(chave)
+            p, im = _pares_impares(pick)
+            do_ult = len(set(pick) & set(rep_vol))
+            extra_fields = gerar_extra(
+                cfg, analise, usar_ultimo_par, perfil, self._time_names, aposta_idx=len(apostas),
+            )
+            texto = formatar_texto_aposta(cfg, pick, extra_fields)
+            item = {
+                "numero": len(apostas) + 1,
+                "dezenas": pick,
+                "quantidade": k,
+                "pares": p,
+                "impares": im,
+                "do_ultimo_par": do_ult,
+                "texto": texto,
+            }
+            item.update(extra_fields)
+            apostas.append(item)
+
+        aviso = None
+        if len(apostas) < quantidade:
+            aviso = (
+                f"Solicitados {quantidade} apostas; gerados {len(apostas)}. "
+                "Tente desmarcar filtros restritivos ou mude o perfil."
+            )
+
+        out = {
+            "sucesso": True,
+            "apostas": apostas,
+            "total_geradas": len(apostas),
+            "solicitados": quantidade,
+            "aviso": aviso,
+            "parametros": {
+                "quantidade": quantidade,
+                "dezenas_por_jogo": k,
+                "modo": modo,
+                "perfil": perfil,
+                "usar_ultimo_par": usar_ultimo_par,
+                "so_permanencia": so_permanencia,
+                "respeitar_par_impar": respeitar_par_impar,
+            },
+        }
         try:
             from geradores_elite.validacao.validador_global import ValidadorGeradoresElite
             out = ValidadorGeradoresElite.aplicar(

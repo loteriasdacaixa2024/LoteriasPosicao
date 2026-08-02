@@ -50,3 +50,8 @@ from geradores_elite.comportamento_analise_integration import wire_analise_compo
 wire_analise_comportamento(analise_bp, "quina")
 from analise_somas_digitos.app_integration import wire_analise_somas_digitos
 wire_analise_somas_digitos(analise_bp, "quina")
+
+from analise_escolha_visual.app_integration import wire_analise_escolha_visual
+wire_analise_escolha_visual(analise_bp, "quina")
+from analise_tubular_inteligente.app_integration import wire_analise_tubular_inteligente
+wire_analise_tubular_inteligente(analise_bp, "quina")

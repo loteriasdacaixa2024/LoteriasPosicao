@@ -30,7 +30,7 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
             modality_key=modality_key,
             modality_nome=modality_nome,
             page_title="Escolha/Tubular → Apostas",
-            page_subtitle="Cada aposta reproduz o perfil completo de um concurso (pares, sequência, finais, repetidos…)",
+            page_subtitle="Padrão de gerador da modalidade · âncoras de padrão inicial · perfil completo numa aposta",
             api_base="/geradores-elite/api/escolha-tubular",
             ctx=ctx if ctx.get("sucesso") else {},
             meses_cores=meses_cores,
@@ -65,7 +65,7 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
                 usar_finais=bool(data.get("usar_finais", True)),
                 usar_repetidos=bool(data.get("usar_repetidos", True)),
                 usar_digitos=bool(data.get("usar_digitos", True)),
-                mes_num=int(data["mes_num"]) if data.get("mes_num") not in (None, "", 0, "0") else None,
+                mes_num=data.get("mes_num") if data.get("mes_num") not in (None, "", 0, "0") else None,
                 ancora_padrao=str(data.get("ancora_padrao") or "").strip().lower() or None,
                 dezenas_altas=bool(data.get("dezenas_altas", False)),
             )

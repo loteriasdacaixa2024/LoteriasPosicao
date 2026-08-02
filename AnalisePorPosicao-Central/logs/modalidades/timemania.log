@@ -4857,3 +4857,20 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5159
 Press CTRL+C to quit
 127.0.0.1 - - [02/Aug/2026 10:45:03] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 14:13:10 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 14:13:18] "GET / HTTP/1.1" 200 -

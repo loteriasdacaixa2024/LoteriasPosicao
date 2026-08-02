@@ -27,27 +27,19 @@
                     <input class="form-check-input" type="checkbox" id="chkUltimoPar" checked>
                     <label class="form-check-label small" for="chkUltimoPar" title="Dá mais peso às repetidas">Priorizar repetidas do último par</label>
                 </div>
-                <div class="rep-tog-group d-flex flex-wrap gap-3 align-items-center" role="group" aria-label="Âncora de padrão inicial">
-                    <label class="rep-toggle mb-0" title="Todas as apostas com o padrão do antepenúltimo concurso">
-                        <input type="checkbox" id="togAncoraAnte" class="rep-tog-ancora" data-ancora="antepenultimo">
-                        <span class="rep-tog-track" aria-hidden="true"><span class="rep-tog-thumb"></span></span>
-                        <span class="rep-tog-label">Antepenúltimo</span>
-                    </label>
-                    <label class="rep-toggle mb-0" title="Todas as apostas com o padrão do penúltimo concurso (padrão recomendado se forçar âncora)">
-                        <input type="checkbox" id="togAncoraPen" class="rep-tog-ancora" data-ancora="penultimo">
-                        <span class="rep-tog-track" aria-hidden="true"><span class="rep-tog-thumb"></span></span>
-                        <span class="rep-tog-label">Penúltimo</span>
-                    </label>
-                    <label class="rep-toggle mb-0" title="Só use se quiser forçar o padrão do último concurso">
-                        <input type="checkbox" id="togAncoraUlt" class="rep-tog-ancora" data-ancora="ultimo">
-                        <span class="rep-tog-track" aria-hidden="true"><span class="rep-tog-thumb"></span></span>
-                        <span class="rep-tog-label">Último</span>
-                    </label>
-                    <label class="rep-toggle mb-0" title="Primeira dezena da aposta ≥ 10">
-                        <input type="checkbox" id="togDezenasAltas">
-                        <span class="rep-tog-track" aria-hidden="true"><span class="rep-tog-thumb"></span></span>
-                        <span class="rep-tog-label">Dezenas altas (≥10)</span>
-                    </label>
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="chkPermanencia">
+                    <label class="form-check-label small" for="chkPermanencia">Só tendência permanência</label>
+                </div>
+                {% if cfg.layout != 'colunas' %}
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="chkParImpar" checked>
+                    <label class="form-check-label small" for="chkParImpar">Respeitar par/ímpar do grupo</label>
+                </div>
+                {% endif %}
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="chkDescartarHist" checked>
+                    <label class="form-check-label small" for="chkDescartarHist">Descartar já sorteadas</label>
                 </div>
             </div>
         </div>
@@ -85,9 +77,13 @@
         <div class="d-flex flex-wrap gap-2 mt-3">
             <button class="btn fw-bold" id="btnGerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar</button>
             <button class="btn btn-outline-secondary" id="btnExport" disabled><i class="fas fa-download"></i> Exportar TXT</button>
-            <button type="button" class="btn btn-outline-primary" id="btnRepBacktest" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+            <button type="button" class="btn btn-outline-secondary" id="btnRepBacktest" disabled
+                style="border-color:var(--primary);color:var(--primary);">
+                <i class="fas fa-chart-line me-1"></i>Back Test
+            </button>
             {% if cfg.key == 'lotofacil' %}
-            <button class="btn btn-outline-primary btn-sm" type="button" id="btnToggleConfTxt" aria-expanded="false">
+            <button class="btn btn-outline-secondary btn-sm" type="button" id="btnToggleConfTxt" aria-expanded="false"
+                style="border-color:var(--primary);color:var(--primary);">
                 <i class="fas fa-file-import"></i> Conferir TXT no histórico
             </button>
             {% endif %}

@@ -12,6 +12,9 @@ from geradores_elite.modality_config import MODALITIES
 
 
 def tem_gerador_escolha_tubular(modality_key: str) -> bool:
+    # Super Sete (colunas) fica para depois
+    if modality_key == "supersete":
+        return False
     return tem_analise_estudos(modality_key) and modality_key in MODALITIES
 
 
@@ -110,6 +113,7 @@ def contexto_gerador(
         lista.append({
             "concurso": int(r.concurso),
             "data": getattr(r, "data", "") or "",
+            "dezenas": [int(x) for x in Base.dezenas_ordem(r)],
         })
 
     # índice do concurso de referência no histórico ascendente
@@ -146,11 +150,15 @@ def contexto_gerador(
         "pick_max": mod["pick_max"],
         "sorteadas": mod["sorteadas"],
         "extra_mes": bool(cfg.get("extra_mes")),
+        "extra_time": bool(cfg.get("extra_time")),
+        "extra_trevo": bool(cfg.get("extra_trevo")),
+        "volante_cols": int(cfg.get("volante_cols") or 10),
         "janela": janela,
         "base": base,
         "concursos": lista,
         "concurso_ref": int(row_ref.concurso),
         "concurso_ref_data": getattr(row_ref, "data", "") or "",
+        "dezenas_ref": nums_ref,
         "perfil": perfil,
         "ancoras": ancoras,
         "padroes_historicos": padroes_hist,
@@ -387,7 +395,7 @@ def gerar_apostas(
     usar_finais: bool = True,
     usar_repetidos: bool = True,
     usar_digitos: bool = True,
-    mes_num: Optional[int] = None,
+    mes_num: Any = None,
     seed: Optional[int] = None,
     ancora_padrao: Optional[str] = None,
     dezenas_altas: bool = False,
@@ -540,6 +548,77 @@ def gerar_apostas(
     for i, a in enumerate(apostas, start=1):
         a["indice"] = i
 
+    mes_criterio = mes_num
+    mes_resolvido = None
+    if mes_criterio not in (None, "", 0, "0") and ctx.get("extra_mes"):
+        try:
+            from diadesorte.mes_sorte_select import (
+                MESES_ABREV,
+                MESES_NOME,
+                eh_criterio_aleatorio,
+                resolver_meses_para_lote,
+            )
+            meses_lote = resolver_meses_para_lote(mes_criterio, len(apostas))
+            for a, mn in zip(apostas, meses_lote):
+                a["mes_num"] = int(mn)
+                a["mes_abrev"] = MESES_ABREV.get(int(mn), "")
+                a["mes_nome"] = MESES_NOME.get(int(mn), "")
+            if meses_lote:
+                mes_resolvido = int(meses_lote[0]) if not eh_criterio_aleatorio(mes_criterio) else None
+        except Exception:
+            pass
+
+    # Time do Coração (Timemania) — automático (sem select +Atrasado/+Frequente; isso é só Mês)
+    if ctx.get("extra_time") and apostas:
+        try:
+            catalog: List[Dict[str, Any]] = []
+            try:
+                from models.sorteio_timemania import TIMES_DO_CORACAO
+                if isinstance(TIMES_DO_CORACAO, dict):
+                    catalog = [
+                        {"num": int(k), "nome": str(v)}
+                        for k, v in TIMES_DO_CORACAO.items()
+                    ]
+            except Exception:
+                catalog = []
+            if not catalog:
+                catalog = [{"num": i, "nome": f"Time {i}"} for i in range(1, 81)]
+            for a in apostas:
+                escolha = rng.choice(catalog)
+                tnum = int(escolha.get("num") or 1)
+                tnome = escolha.get("nome") or f"Time {tnum}"
+                a["time_num"] = tnum
+                a["time_nome"] = tnome
+                a["extras"] = dict(a.get("extras") or {}, time_num=tnum, time_nome=tnome)
+        except Exception:
+            for a in apostas:
+                a.setdefault("time_num", 1)
+                a.setdefault("time_nome", "Time")
+
+    # Trevos (+Milionária) — 2 trevos por aposta
+    if ctx.get("extra_trevo") and apostas:
+        try:
+            from geradores_elite.engine_final_core import _pick_extra_trevos
+            meta = {}
+            try:
+                mod_path, cls_name, _ = MODALITIES[modality_key]["service_import"]
+                svc_mod = __import__(mod_path, fromlist=[cls_name])
+                Svc = getattr(svc_mod, cls_name)
+                if hasattr(Svc, "analise_geral"):
+                    raw = Svc.analise_geral() or {}
+                    meta["trevos_stats"] = raw.get("dados_trevos") or []
+            except Exception:
+                pass
+            qtd_t = int((MODALITIES.get(modality_key) or {}).get("trevo_pick") or 2)
+            for a in apostas:
+                trevos = _pick_extra_trevos(meta, qtd_t)
+                a["trevos"] = trevos
+                a["extras"] = dict(a.get("extras") or {}, trevos=trevos)
+        except Exception:
+            import random as _rnd
+            for a in apostas:
+                a["trevos"] = sorted(_rnd.sample(range(1, 7), 2))
+
     return {
         "sucesso": True,
         "ok": True,
@@ -555,7 +634,8 @@ def gerar_apostas(
         "dezenas_altas": bool(dezenas_altas),
         "padrao_usado": padrao_label,
         "alvo": {"padroes_resumo": perfil.get("padroes_resumo"), "mes_sugerido": None},
-        "mes_num": mes_num,
+        "mes_num": mes_resolvido,
+        "mes_criterio": str(mes_criterio) if mes_criterio not in (None, "") else None,
         "apostas": apostas,
         "contexto": {
             "padroes_resumo": perfil.get("padroes_resumo"),

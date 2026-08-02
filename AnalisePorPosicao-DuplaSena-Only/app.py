@@ -1,4 +1,4 @@
-import os
+﻿import os
 from flask import Flask
 from models.shared import db
 from routes.index_routes import index_bp
@@ -22,6 +22,9 @@ from configuracoes.app_integration import extend_config_app
 from auto_sync import start_auto_sync_once
 from analise_comparar.routes_factory import register_comparar
 from analise_repeticao.routes_factory import register_repeticao
+from analise_estudos.app_integration import extend_analise_estudos_app
+from analise_escolha_visual.app_integration import extend_analise_escolha_visual_app
+from analise_tubular_inteligente.app_integration import extend_analise_tubular_inteligente_app
 from menu.app_integration import extend_nav_app
 from posicao_analise.app_integration import extend_posicao_app
 from services.analise_duplasena_service import AnaliseDuplaSenaService
@@ -42,6 +45,9 @@ def create_app():
     extend_config_app(app)
     cc_extend_app(app, 'duplasena')
     extend_nav_app(app, 'duplasena')
+    extend_analise_estudos_app(app)
+    extend_analise_escolha_visual_app(app)
+    extend_analise_tubular_inteligente_app(app)
     extend_posicao_app(app, 'duplasena')
     app.register_blueprint(index_bp)
     app.register_blueprint(analise_bp,     url_prefix='/analise')
