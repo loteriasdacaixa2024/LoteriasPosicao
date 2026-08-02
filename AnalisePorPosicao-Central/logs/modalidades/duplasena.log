@@ -5037,3 +5037,21 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5158
 Press CTRL+C to quit
 127.0.0.1 - - [01/Aug/2026 13:16:03] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 08:12:57 ---
+===========================================================
+[OK] Servidor Dupla Sena rodando na porta 5158
+[URL] Acesse:      http://localhost:5158
+[URL] Análise:     http://localhost:5158/analise/
+[URL] Modelos:     http://localhost:5158/modelos/
+[URL] Conferência: http://localhost:5158/central-conferencias/
+[URL] Desdobramento: http://localhost:5158/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5158
+ * Running on http://10.0.0.10:5158
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 08:13:05] "GET / HTTP/1.1" 200 -
