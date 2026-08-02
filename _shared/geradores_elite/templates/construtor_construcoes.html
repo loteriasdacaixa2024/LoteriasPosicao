@@ -123,6 +123,47 @@
         background: var(--primary-dark);
         color: #fff;
     }
+    #ge-construtor .cc-gerar-progress {
+        display: none;
+        margin-top: .65rem;
+        max-width: 420px;
+    }
+    #ge-construtor .cc-gerar-progress.is-active {
+        display: block;
+    }
+    #ge-construtor .cc-gerar-progress-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: .3rem;
+        font-size: .8rem;
+        color: #495057;
+    }
+    #ge-construtor .cc-gerar-progress-meta .cc-gerar-pct {
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        color: var(--primary-dark, #0d6efd);
+        min-width: 3.2rem;
+        text-align: right;
+    }
+    #ge-construtor .cc-gerar-progress .progress {
+        height: 0.65rem;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, .08);
+        overflow: hidden;
+    }
+    #ge-construtor .cc-gerar-progress .progress-bar {
+        border-radius: 999px;
+        transition: width .25s ease;
+        background: linear-gradient(90deg, var(--primary, #0d6efd), var(--primary-dark, #0a58ca));
+    }
+    #ge-construtor .cc-gerar-progress.is-done .progress-bar {
+        background: #198754;
+    }
+    #ge-construtor .cc-gerar-progress.is-error .progress-bar {
+        background: #dc3545;
+    }
     #ge-construtor .cc-step-4 {
         background: linear-gradient(145deg, #fafdf8 0%, #eef6f0 100%);
         border-left-color: var(--accent-mes, #196f3d);
@@ -970,6 +1011,15 @@
                 <div class="mt-2 small text-muted" id="ccGerarHint">
                     Salve o conjunto-base (sessão) para liberar a geração.
                 </div>
+                <div class="cc-gerar-progress" id="ccGerarProgress" aria-hidden="true">
+                    <div class="cc-gerar-progress-meta">
+                        <span id="ccGerarProgressLabel">Gerando construção…</span>
+                        <span class="cc-gerar-pct" id="ccGerarProgressPct">0%</span>
+                    </div>
+                    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ccGerarProgressBarWrap">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" id="ccGerarProgressBar" style="width:0%"></div>
+                    </div>
+                </div>
                 <div class="mt-2 small" id="ccGerarStatus"></div>
             </div>
 
@@ -1276,9 +1326,9 @@ window.__CC_DIGITOS_PAGE__ = 'construtor';
 <script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes_ss.js') }}"></script>
 {% else %}
 {% if ui_config.has_mes %}
-<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=1"></script>
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
-<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}?v=4"></script>
 {% if digitos_habilitado %}
 <script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=9"></script>
 {% endif %}

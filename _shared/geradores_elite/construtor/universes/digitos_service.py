@@ -822,13 +822,19 @@ class ConstrutorDigitosService:
         sp = cls._spec(modality_key)
         modo = (modo or "lote").strip().lower()
         export_extra: Dict[str, Any] = {}
-        if sp.has_mes and mes_num is not None:
-            mn = int(mes_num)
-            export_extra = {
-                "tipo": "mes",
-                "num": mn,
-                "label": MESES_ABREV.get(mn, str(mn)),
-            }
+        usar_aleatorio = False
+        if sp.has_mes and mes_num is not None and mes_num != "":
+            from diadesorte.mes_sorte_select import eh_criterio_aleatorio, resolver_mes_sorte
+            if eh_criterio_aleatorio(mes_num):
+                usar_aleatorio = True
+            else:
+                mn = resolver_mes_sorte(mes_num) if not isinstance(mes_num, int) else int(mes_num)
+                if mn is not None:
+                    export_extra = {
+                        "tipo": "mes",
+                        "num": int(mn),
+                        "label": MESES_ABREV.get(int(mn), str(mn)),
+                    }
 
         linhas_apostas: List[Dict[str, Any]] = []
         sufixo = "lote"
@@ -899,11 +905,19 @@ class ConstrutorDigitosService:
                 return {"sucesso": False, "erro": "Nenhuma aposta no lote para exportar. Gere antes."}
             sufixo = f"lote_{len(linhas_apostas)}"
 
-        texto = formatar_export_txt(
-            modality_key,
-            [{"dezenas": a["dezenas"]} for a in linhas_apostas],
-            export_extra,
-        )
+        linhas_fmt: List[Dict[str, Any]] = [{"dezenas": a["dezenas"]} for a in linhas_apostas]
+        if usar_aleatorio:
+            from diadesorte.mes_sorte_select import resolver_meses_para_lote
+            meses = resolver_meses_para_lote("aleatorio", len(linhas_fmt))
+            for ap, mn in zip(linhas_fmt, meses):
+                ap["extras"] = {
+                    "tipo": "mes",
+                    "num": int(mn),
+                    "label": MESES_ABREV.get(int(mn), str(mn)),
+                }
+            export_extra = {}
+
+        texto = formatar_export_txt(modality_key, linhas_fmt, export_extra)
         pool_tag = "".join(str(d) for d in pool_n) if pool_n else "x"
         nome = f"digitos_{sufixo}_pool_{pool_tag}.txt"
         return {

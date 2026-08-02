@@ -401,57 +401,134 @@ class ConstrutorBaseService:
         padroes_hist = cls._padroes_iniciais_historicos()
         sim_min = similaridade_min_pct if similaridade_min_pct is not None else 80.0
         sim_max = 1.0 - (sim_min / 100.0)
-        resultado = gerar_construcao(
-            pool, k, estrategia,
-            personalizada=personalizada,
-            comportamento_moda=comportamento_moda,
-            construcoes_anteriores=anteriores,
-            similaridade_max=sim_max,
-            limites=limites,
-            historico_sorteados=historico,
-            apostas_excluidas=excluidas,
-            padroes_historicos=padroes_hist,
-        )
-        if not resultado.get("sucesso"):
-            return resultado
-        # Segurança extra: nunca persistir aposta já sorteada
-        apostas_ok = []
-        for ap in resultado["apostas"]:
-            if aposta_ja_sorteada(ap, historico):
+
+        # Preenche até QTD_APOSTAS_FIXA com retry + sobregeneração (sobrevive à validação global)
+        MAX_ROUNDS = 10
+        apostas_ok: List[List[int]] = []
+        ultimo_resultado: Optional[Dict[str, Any]] = None
+        rejeitadas_vg = 0
+        modality_key = cls._spec().modality_key
+
+        try:
+            from geradores_elite.validacao.validador_global import ValidadorGeradoresElite
+        except Exception:
+            ValidadorGeradoresElite = None  # type: ignore
+
+        for round_i in range(MAX_ROUNDS):
+            faltam = QTD_APOSTAS_FIXA - len(apostas_ok)
+            if faltam <= 0:
+                break
+            # Pede extras para compensar rejeições de histórico/memória
+            pedir = min(24, max(faltam + 8, faltam * 2))
+            tentativas_core = 80 if round_i > 0 else 220
+
+            resultado = gerar_construcao(
+                pool, k, estrategia,
+                personalizada=personalizada,
+                comportamento_moda=comportamento_moda,
+                construcoes_anteriores=anteriores,
+                similaridade_max=sim_max,
+                limites=limites,
+                historico_sorteados=historico,
+                apostas_excluidas=excluidas,
+                padroes_historicos=padroes_hist,
+                quantidade=pedir,
+                max_tentativas=tentativas_core,
+            )
+            if not resultado.get("sucesso") and pedir != faltam:
+                resultado = gerar_construcao(
+                    pool, k, estrategia,
+                    personalizada=personalizada,
+                    comportamento_moda=comportamento_moda,
+                    construcoes_anteriores=anteriores,
+                    similaridade_max=sim_max,
+                    limites=limites,
+                    historico_sorteados=historico,
+                    apostas_excluidas=excluidas,
+                    padroes_historicos=padroes_hist,
+                    quantidade=faltam,
+                    max_tentativas=tentativas_core + 80,
+                )
+            if not resultado.get("sucesso"):
+                if apostas_ok:
+                    continue
+                return resultado
+            ultimo_resultado = resultado
+
+            candidatas: List[List[int]] = []
+            for ap in resultado.get("apostas") or []:
+                dz = [int(x) for x in ap]
+                chave = frozenset(dz)
+                if chave in excluidas:
+                    continue
+                if aposta_ja_sorteada(dz, historico):
+                    excluidas.add(chave)
+                    continue
+                candidatas.append(dz)
+
+            if not candidatas:
                 continue
-            if frozenset(ap) in excluidas:
-                continue
-            apostas_ok.append(ap)
+
+            if ValidadorGeradoresElite is not None:
+                vg = ValidadorGeradoresElite.validar_lote(
+                    candidatas,
+                    origem="construtor_construcoes",
+                    modality_key=modality_key,
+                    sorteio_model=cls._model(),
+                    dezenas_fn=cls._dezenas_from_sorteio,
+                    registrar_aprovadas=False,
+                )
+                rejeitadas_vg += len(vg.get("rejeitadas") or [])
+                for rej in vg.get("rejeitadas") or []:
+                    ch = rej.get("chave")
+                    if ch:
+                        excluidas.add(frozenset(int(x) for x in ch))
+                novos = vg.get("aprovados") or []
+            else:
+                novos = candidatas
+
+            for ap in novos:
+                dz = [int(x) for x in ap]
+                chave = frozenset(dz)
+                if chave in excluidas:
+                    continue
+                apostas_ok.append(dz)
+                excluidas.add(chave)
+                if len(apostas_ok) >= QTD_APOSTAS_FIXA:
+                    break
+
         if len(apostas_ok) < QTD_APOSTAS_FIXA:
             return {
                 "sucesso": False,
                 "erro": (
-                    "Após filtrar jogos já sorteados/usados, restaram menos de "
-                    f"{QTD_APOSTAS_FIXA} apostas. Amplie o conjunto-base ou gere novamente."
+                    "Não foi possível completar "
+                    f"{QTD_APOSTAS_FIXA} apostas inéditas após novas tentativas "
+                    f"(obtidas {len(apostas_ok)}). "
+                    "Amplie o conjunto-base ou gere novamente."
                 ),
+                "qtd_obtidas": len(apostas_ok),
+                "rejeitadas_validacao": rejeitadas_vg,
             }
-        # Memória compartilhada + auditoria global (sem alterar o motor)
-        try:
-            from geradores_elite.validacao.validador_global import ValidadorGeradoresElite
-            vg = ValidadorGeradoresElite.validar_lote(
-                apostas_ok,
-                origem="construtor_construcoes",
-                modality_key=cls._spec().modality_key,
-                sorteio_model=cls._model(),
-                dezenas_fn=cls._dezenas_from_sorteio,
-            )
-            apostas_ok = vg["aprovados"]
-            if len(apostas_ok) < QTD_APOSTAS_FIXA:
-                return {
-                    "sucesso": False,
-                    "erro": (
-                        "Validação global rejeitou apostas (histórico/outro gerador). "
-                        f"Restaram {len(apostas_ok)} de {QTD_APOSTAS_FIXA}. Gere novamente."
-                    ),
-                    "validacao_global": vg.get("stats"),
-                }
-        except Exception:
-            pass
+
+        apostas_ok = apostas_ok[:QTD_APOSTAS_FIXA]
+        resultado = ultimo_resultado or {}
+
+        # Registra só o lote final na memória compartilhada
+        if ValidadorGeradoresElite is not None:
+            try:
+                ValidadorGeradoresElite.validar_lote(
+                    apostas_ok,
+                    origem="construtor_construcoes",
+                    modality_key=modality_key,
+                    sorteio_model=cls._model(),
+                    dezenas_fn=cls._dezenas_from_sorteio,
+                    registrar_aprovadas=True,
+                    checar_historico=False,
+                    checar_memoria=False,
+                )
+            except Exception:
+                pass
+
         numero = len(sessao.construcoes) + 1
         params = {
             "personalizada": personalizada,
@@ -473,22 +550,34 @@ class ConstrutorBaseService:
         )
         db.session.add(construcao)
         db.session.flush()
-        for i, ap in enumerate(apostas_ok[:QTD_APOSTAS_FIXA], start=1):
+        for i, ap in enumerate(apostas_ok, start=1):
             db.session.add(ConstrutorAposta(
                 construcao_id=construcao.id,
                 linha=i,
                 dezenas=",".join(cls._fmt_dezena(d) for d in ap),
             ))
         db.session.commit()
+        qtd_sessao = numero
+        aviso = resultado.get("aviso")
+        if rejeitadas_vg:
+            extra = (
+                f"{rejeitadas_vg} candidata(s) trocadas automaticamente "
+                "(histórico/outro gerador)."
+            )
+            aviso = f"{aviso} {extra}".strip() if aviso else extra
         return {
             "sucesso": True,
             "construcao": cls._serializar_construcao(construcao),
-            "aviso": resultado.get("aviso"),
+            "aviso": aviso,
             "distribuicao": dist,
             "pool_faixas": pool_por_faixa(pool, limites),
             "padroes_iniciais": resultado.get("padroes_iniciais"),
             "qtd_padroes_distintos": resultado.get("qtd_padroes_distintos"),
             "matriz_similaridade": cls._matriz_similaridade(sessao),
+            "qtd_apostas": len(apostas_ok),
+            "qtd_construcoes": qtd_sessao,
+            "qtd_construcoes_sessao": qtd_sessao,
+            "rejeitadas_validacao_trocadas": rejeitadas_vg,
         }
 
     @classmethod
@@ -619,24 +708,33 @@ class ConstrutorBaseService:
         }
 
     @classmethod
-    def exportar_txt(
+    def _resolver_meses_export(
         cls,
-        construcao_id: int,
-        mes_num: Optional[int] = None,
-        extra: Optional[Dict[str, Any]] = None,
+        mes_raw: Any,
+        qtd_apostas: int,
+        construcao: Any,
+        *,
+        meses_pre: Optional[List[int]] = None,
     ) -> Dict[str, Any]:
+        """
+        Resolve critério do select → lista de meses (1 por aposta).
+        meses_pre: fatia já distribuída (export de sessão com + Aleatório).
+        """
+        from diadesorte.mes_sorte_select import (
+            eh_criterio_aleatorio,
+            resolver_mes_sorte,
+            resolver_meses_para_lote,
+        )
+
         sp = cls._spec()
-        construcao = db.session.get(ConstrutorConstrucao, construcao_id)
-        if not construcao:
-            return {"sucesso": False, "erro": "Construção não encontrada."}
-        apostas = [{"dezenas": a.dezenas_lista()} for a in construcao.apostas]
-        export_extra: Dict[str, Any] = {}
-        if sp.has_mes:
-            mn = mes_num if mes_num is not None else construcao.mes_num
-            if mn is not None and not isinstance(mn, int):
-                from diadesorte.mes_sorte_select import resolver_mes_sorte
-                mn = resolver_mes_sorte(mn)
-            if mn is None and sp.modality_key == "diadesorte":
+        if meses_pre is not None:
+            if len(meses_pre) != qtd_apostas:
+                return {"sucesso": False, "erro": "Distribuição de meses inconsistente."}
+            return {"sucesso": True, "meses": [int(m) for m in meses_pre], "criterio": "aleatorio"}
+
+        raw = mes_raw if mes_raw is not None and mes_raw != "" else construcao.mes_num
+        if raw is None or raw == "":
+            if sp.modality_key == "diadesorte":
                 from diadesorte.meses_indicados import carregar_meses_indicados, mes_ciclo
                 from models.sorteio_diadesorte import SorteioDiaDeSorte
 
@@ -651,21 +749,75 @@ class ConstrutorBaseService:
                     }
                 nums = analise_ms.get("meses_indicados_nums") or []
                 mn = mes_ciclo(nums, max(0, int(construcao.numero) - 1))
-            if mn is None and sp.modality_key != "diadesorte":
-                analise = cls._dados_analise_dezenas()
-                meses = (analise or {}).get("dados_meses") or []
-                if meses:
-                    mn = int(max(meses, key=lambda m: m.get("atraso", 0)).get("mes_num", 1))
-                else:
-                    mn = 1
-            if mn is None:
-                return {"sucesso": False, "erro": "Selecione o Mês da Sorte para exportar."}
-            mn = int(mn)
-            if mn < 1 or mn > 12:
+                if mn is None:
+                    return {"sucesso": False, "erro": "Selecione o Mês da Sorte para exportar."}
+                return {"sucesso": True, "meses": [int(mn)] * qtd_apostas, "criterio": "indicado"}
+            analise = cls._dados_analise_dezenas()
+            meses = (analise or {}).get("dados_meses") or []
+            if meses:
+                mn = int(max(meses, key=lambda m: m.get("atraso", 0)).get("mes_num", 1))
+            else:
+                mn = 1
+            return {"sucesso": True, "meses": [mn] * qtd_apostas, "criterio": "atrasado"}
+
+        if isinstance(raw, (list, tuple)):
+            meses = [int(m) for m in raw]
+            if len(meses) != qtd_apostas or any(m < 1 or m > 12 for m in meses):
                 return {"sucesso": False, "erro": "Mês da Sorte inválido."}
-            export_extra = {"tipo": "mes", "num": mn, "label": MESES_ABREV.get(mn, str(mn))}
-            if construcao.mes_num != mn:
-                construcao.mes_num = mn
+            return {"sucesso": True, "meses": meses, "criterio": "lista"}
+
+        if eh_criterio_aleatorio(raw):
+            meses = resolver_meses_para_lote(raw, qtd_apostas)
+            return {"sucesso": True, "meses": meses, "criterio": "aleatorio"}
+
+        mn = resolver_mes_sorte(raw) if not isinstance(raw, int) else int(raw)
+        if mn is None or mn < 1 or mn > 12:
+            return {"sucesso": False, "erro": "Mês da Sorte inválido."}
+        criterio = "fixo"
+        if isinstance(raw, str):
+            low = raw.strip().lower()
+            if low in ("atrasado", "frequente"):
+                criterio = low
+        return {"sucesso": True, "meses": [int(mn)] * qtd_apostas, "criterio": criterio}
+
+    @classmethod
+    def exportar_txt(
+        cls,
+        construcao_id: int,
+        mes_num: Any = None,
+        extra: Optional[Dict[str, Any]] = None,
+        *,
+        meses_pre: Optional[List[int]] = None,
+    ) -> Dict[str, Any]:
+        sp = cls._spec()
+        construcao = db.session.get(ConstrutorConstrucao, construcao_id)
+        if not construcao:
+            return {"sucesso": False, "erro": "Construção não encontrada."}
+        apostas = [{"dezenas": a.dezenas_lista()} for a in construcao.apostas]
+        export_extra: Dict[str, Any] = {}
+        meses_export: Optional[List[int]] = None
+        if sp.has_mes:
+            resolvido = cls._resolver_meses_export(
+                mes_num, len(apostas), construcao, meses_pre=meses_pre
+            )
+            if not resolvido.get("sucesso"):
+                return resolvido
+            meses_export = resolvido["meses"]
+            for ap, mn in zip(apostas, meses_export):
+                ap["extras"] = {
+                    "tipo": "mes",
+                    "num": int(mn),
+                    "label": MESES_ABREV.get(int(mn), str(mn)),
+                }
+            # Persistência: critério fixo → mês único; aleatório → 1º do lote
+            mn_store = int(meses_export[0]) if meses_export else None
+            if mn_store and construcao.mes_num != mn_store:
+                construcao.mes_num = mn_store
+            export_extra = {
+                "tipo": "mes",
+                "num": mn_store,
+                "label": MESES_ABREV.get(mn_store, str(mn_store)) if mn_store else "",
+            }
         elif sp.has_time:
             tn = (extra or {}).get("time_num") or construcao.mes_num
             if tn is None:
@@ -687,10 +839,11 @@ class ConstrutorBaseService:
         sessao = construcao.sessao
         nome_arq = f"construcao_{construcao.numero}_{sessao.nome[:30].replace(' ', '_')}.txt"
         out = {"sucesso": True, "texto": texto, "nome_arquivo": nome_arq, "construcao_numero": construcao.numero}
-        if sp.has_mes and export_extra:
+        if sp.has_mes and meses_export:
             out.update({
-                "mes_num": export_extra["num"],
-                "mes_abrev": export_extra.get("label"),
+                "mes_num": meses_export[0],
+                "mes_abrev": MESES_ABREV.get(meses_export[0], ""),
+                "meses_por_aposta": meses_export,
             })
         return out
 
@@ -698,10 +851,12 @@ class ConstrutorBaseService:
     def exportar_sessao_txt(
         cls,
         sessao_id: int,
-        mes_num: Optional[int] = None,
+        mes_num: Any = None,
         construcao_ids: Optional[List[int]] = None,
     ) -> Dict[str, Any]:
         """Exporta uma ou todas as construções da sessão em um único TXT."""
+        from diadesorte.mes_sorte_select import eh_criterio_aleatorio, resolver_meses_para_lote
+
         sessao = db.session.get(ConstrutorSessao, sessao_id)
         if not sessao:
             return {"sucesso": False, "erro": "Sessão não encontrada."}
@@ -712,9 +867,24 @@ class ConstrutorBaseService:
         if not construcoes:
             return {"sucesso": False, "erro": "Nenhuma construção para exportar."}
 
+        # + Aleatório: distribuição contínua no total de apostas da sessão
+        fatias: Optional[List[List[int]]] = None
+        if eh_criterio_aleatorio(mes_num):
+            counts = [len(list(c.apostas or [])) for c in construcoes]
+            total = sum(counts)
+            todos = resolver_meses_para_lote("aleatorio", total)
+            fatias = []
+            i = 0
+            for n in counts:
+                fatias.append(todos[i:i + n])
+                i += n
+
         blocos: List[str] = []
-        for c in construcoes:
-            r = cls.exportar_txt(c.id, mes_num=mes_num)
+        for idx, c in enumerate(construcoes):
+            kwargs: Dict[str, Any] = {"mes_num": mes_num}
+            if fatias is not None:
+                kwargs["meses_pre"] = fatias[idx]
+            r = cls.exportar_txt(c.id, **kwargs)
             if not r.get("sucesso"):
                 return r
             blocos.append(f"# Construção {c.numero}\n{r['texto'].rstrip()}")

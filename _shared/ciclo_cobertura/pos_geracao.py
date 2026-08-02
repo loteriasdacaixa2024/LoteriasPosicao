@@ -32,20 +32,44 @@ def resolver_mes_entrada(mes_raw) -> Optional[int]:
             return None
 
 
-def aplicar_mes_apostas(apostas: list, mes_num=None) -> list:
-    mn = resolver_mes_entrada(mes_num)
-    if not mn or not (1 <= int(mn) <= 12):
-        return apostas
+def _aplicar_um_mes(item: dict, mn: int) -> dict:
     mn = int(mn)
+    item["mes_num"] = mn
+    item["mes"] = mn
+    item["mes_abrev"] = MESES_ABREV[mn]
+    item["mes_nome"] = MESES_NOME[mn]
+    item["extras"] = {"tipo": "mes", "num": mn, "label": MESES_ABREV[mn]}
+    return item
+
+
+def aplicar_mes_apostas(apostas: list, mes_num=None) -> list:
+    """
+    Aplica Mês da Sorte às apostas.
+    Em + Aleatório, distribui meses de forma equilibrada (1 por aposta).
+    Demais critérios: mesmo mês em todas.
+    """
+    if mes_num is None or mes_num == "":
+        return apostas
+    raw = list(apostas or [])
+    if not raw:
+        return apostas
+
+    try:
+        from diadesorte.mes_sorte_select import eh_criterio_aleatorio, resolver_meses_para_lote
+        meses = resolver_meses_para_lote(mes_num, len(raw))
+    except Exception:
+        meses = []
+        mn = resolver_mes_entrada(mes_num)
+        if mn:
+            meses = [mn] * len(raw)
+
+    if not meses or len(meses) != len(raw):
+        return apostas
+
     out = []
-    for ap in apostas or []:
+    for ap, mn in zip(raw, meses):
         item = dict(ap) if isinstance(ap, dict) else {"dezenas": ap}
-        item["mes_num"] = mn
-        item["mes"] = mn
-        item["mes_abrev"] = MESES_ABREV[mn]
-        item["mes_nome"] = MESES_NOME[mn]
-        item["extras"] = {"tipo": "mes", "num": mn, "label": MESES_ABREV[mn]}
-        out.append(item)
+        out.append(_aplicar_um_mes(item, mn))
     return out
 
 
@@ -76,12 +100,25 @@ def pos_processar_geracao(
         campo_lista="apostas",
     )
 
-    mn = resolver_mes_entrada(mes_num)
-    if mn:
-        out["apostas"] = aplicar_mes_apostas(out.get("apostas") or [], mn)
-        out["mes_num"] = mn
-        out["mes_abrev"] = MESES_ABREV[mn]
-        out["mes_nome"] = MESES_NOME[mn]
+    if mes_num is not None and mes_num != "":
+        out["apostas"] = aplicar_mes_apostas(out.get("apostas") or [], mes_num)
+        apostas_out = out.get("apostas") or []
+        if apostas_out:
+            # Representativo: 1º mês do lote (em aleatório cada linha pode diferir).
+            mn0 = int(apostas_out[0].get("mes_num") or 0)
+            if 1 <= mn0 <= 12:
+                out["mes_num"] = mn0
+                out["mes_abrev"] = MESES_ABREV[mn0]
+                out["mes_nome"] = MESES_NOME[mn0]
+                try:
+                    from diadesorte.mes_sorte_select import eh_criterio_aleatorio
+                    if eh_criterio_aleatorio(mes_num):
+                        out["mes_criterio"] = "aleatorio"
+                        out["meses_distribuidos"] = [
+                            int(a.get("mes_num")) for a in apostas_out if a.get("mes_num")
+                        ]
+                except Exception:
+                    pass
 
     out["ok"] = True
     return out

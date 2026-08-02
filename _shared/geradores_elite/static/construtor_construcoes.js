@@ -447,13 +447,20 @@
     function fillEstrategias() {
         const sel = $('ccEstrategia');
         sel.innerHTML = '';
+        const DEFAULT_ESTRATEGIA = 'conforme_comportamento';
         (UI.estrategias || []).forEach(e => {
             const opt = document.createElement('option');
             opt.value = e.id;
             opt.textContent = e.label;
             opt.title = e.desc || '';
+            if (e.id === DEFAULT_ESTRATEGIA) opt.selected = true;
             sel.appendChild(opt);
         });
+        if (![...sel.options].some(o => o.value === DEFAULT_ESTRATEGIA) && sel.options.length) {
+            sel.selectedIndex = 0;
+        } else {
+            sel.value = DEFAULT_ESTRATEGIA;
+        }
         sel.addEventListener('change', onEstrategiaChange);
         onEstrategiaChange();
     }
@@ -686,18 +693,115 @@
         carregarAnaliseHistorica();
     }
 
+    let gerarProgressTimer = null;
+    let gerarProgressPct = 0;
+
+    function setGerarProgress(pct, opts) {
+        opts = opts || {};
+        const wrap = $('ccGerarProgress');
+        const bar = $('ccGerarProgressBar');
+        const barWrap = $('ccGerarProgressBarWrap');
+        const label = $('ccGerarProgressLabel');
+        const pctEl = $('ccGerarProgressPct');
+        if (!wrap || !bar) return;
+        const n = Math.max(0, Math.min(100, Math.round(pct)));
+        gerarProgressPct = n;
+        bar.style.width = n + '%';
+        if (pctEl) pctEl.textContent = n + '%';
+        if (barWrap) {
+            barWrap.setAttribute('aria-valuenow', String(n));
+        }
+        if (opts.label && label) label.textContent = opts.label;
+        wrap.classList.toggle('is-active', !!opts.active || n > 0);
+        wrap.classList.toggle('is-done', !!opts.done);
+        wrap.classList.toggle('is-error', !!opts.error);
+        wrap.setAttribute('aria-hidden', wrap.classList.contains('is-active') ? 'false' : 'true');
+        if (opts.animated === false) {
+            bar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+        } else if (opts.active) {
+            bar.classList.add('progress-bar-animated', 'progress-bar-striped');
+        }
+    }
+
+    function startGerarProgress() {
+        stopGerarProgress(false);
+        gerarProgressPct = 0;
+        setGerarProgress(2, {
+            active: true,
+            done: false,
+            error: false,
+            label: 'Gerando construção…',
+            animated: true,
+        });
+        const status = $('ccGerarStatus');
+        if (status) {
+            status.className = 'mt-2 small text-muted';
+            status.textContent = 'Gerando construção… aguarde, o processo está em andamento.';
+        }
+        // Avanço assintótico até ~92% enquanto a API responde (sem parecer travado)
+        gerarProgressTimer = setInterval(() => {
+            const atual = gerarProgressPct;
+            if (atual >= 92) return;
+            let passo;
+            if (atual < 25) passo = 3.2;
+            else if (atual < 50) passo = 2.1;
+            else if (atual < 75) passo = 1.2;
+            else passo = 0.45;
+            setGerarProgress(Math.min(92, atual + passo), {
+                active: true,
+                label: atual < 40
+                    ? 'Montando apostas…'
+                    : (atual < 70 ? 'Validando histórico…' : 'Finalizando construção…'),
+                animated: true,
+            });
+        }, 220);
+    }
+
+    function stopGerarProgress(ok, finalLabel) {
+        if (gerarProgressTimer) {
+            clearInterval(gerarProgressTimer);
+            gerarProgressTimer = null;
+        }
+        if (ok === true) {
+            setGerarProgress(100, {
+                active: true,
+                done: true,
+                error: false,
+                label: finalLabel || 'Construção gerada',
+                animated: false,
+            });
+            setTimeout(() => {
+                const wrap = $('ccGerarProgress');
+                if (wrap && wrap.classList.contains('is-done')) {
+                    wrap.classList.remove('is-active', 'is-done');
+                    wrap.setAttribute('aria-hidden', 'true');
+                }
+            }, 1800);
+        } else if (ok === false) {
+            setGerarProgress(Math.max(gerarProgressPct, 8), {
+                active: true,
+                done: false,
+                error: true,
+                label: finalLabel || 'Falha na geração',
+                animated: false,
+            });
+        }
+    }
+
     async function gerarConstrucao() {
         if (!sessaoAtual) {
             alert('Salve a sessão antes de gerar.');
             return;
         }
-        $('ccGerarStatus').textContent = 'Gerando…';
-        $('ccGerarStatus').className = 'mt-2 small text-muted';
+        const btn = $('ccBtnGerar');
+        if (btn) btn.disabled = true;
+        startGerarProgress();
         const body = {
             sessao_id: sessaoAtual.id,
             estrategia: $('ccEstrategia').value,
             similaridade_min_pct: parseFloat($('ccSimMin').value),
             janela_comportamento: parseInt($('ccJanela').value, 10),
+            executar_backtest: false,
         };
         if (body.estrategia === 'personalizada') {
             body.personalizada = {
@@ -706,28 +810,54 @@
                 altas: parseInt($('ccPersA').value, 10) || 0,
             };
         }
-        const data = await apiPost('/gerar', body);
-        if (!data.sucesso) {
+        const t0 = performance.now();
+        let data;
+        try {
+            data = await apiPost('/gerar', body);
+        } catch (e) {
+            stopGerarProgress(false, 'Falha na requisição');
             $('ccGerarStatus').className = 'mt-2 small text-danger';
-            $('ccGerarStatus').textContent = data.erro || 'Erro na geração.';
+            $('ccGerarStatus').textContent = 'Falha na requisição: ' + (e.message || e);
+            atualizarEstadoGerar();
             return;
         }
-        $('ccGerarStatus').className = 'mt-2 small text-success';
-        let msg = `Construção #${data.construcao.numero} gerada`;
-        if (data.construcao.diferenca_pct != null) {
-            msg += ` — ${data.construcao.diferenca_pct}% diferente da anterior`;
+        if (!data.sucesso) {
+            stopGerarProgress(false, 'Não foi possível gerar');
+            $('ccGerarStatus').className = 'mt-2 small text-danger';
+            $('ccGerarStatus').textContent = data.erro || 'Erro na geração.';
+            atualizarEstadoGerar();
+            return;
         }
-        if (data.qtd_padroes_distintos != null) {
-            msg += ` · ${data.qtd_padroes_distintos} padrões iniciais distintos`;
-        }
-        if (data.aviso) msg += '. ' + data.aviso;
-        $('ccGerarStatus').textContent = msg;
+        const ms = Math.round(performance.now() - t0);
+        stopGerarProgress(true, 'Construção gerada');
         const refreshed = await apiGet('/sessao/' + sessaoAtual.id);
         if (refreshed.sucesso) {
             sessaoAtual = refreshed.sessao;
             atualizarBotoesSessaoConstrucoes();
             renderConstrucoes(sessaoAtual);
         }
+        const totalSessao = data.qtd_construcoes_sessao
+            ?? data.qtd_construcoes
+            ?? (sessaoAtual && sessaoAtual.construcoes ? sessaoAtual.construcoes.length : data.construcao.numero);
+        $('ccGerarStatus').className = 'mt-2 small text-success';
+        let msg = `Construção #${data.construcao.numero} gerada`;
+        msg += ` · ${totalSessao} construção(ões) na sessão`;
+        if (data.qtd_apostas != null) {
+            msg += ` · ${data.qtd_apostas} apostas`;
+        }
+        if (data.construcao.diferenca_pct != null) {
+            msg += ` — ${data.construcao.diferenca_pct}% diferente da anterior`;
+        }
+        if (data.qtd_padroes_distintos != null) {
+            msg += ` · ${data.qtd_padroes_distintos} padrões iniciais distintos`;
+        }
+        if (data.rejeitadas_validacao_trocadas) {
+            msg += ` · ${data.rejeitadas_validacao_trocadas} candidata(s) trocadas auto.`;
+        }
+        if (data.aviso) msg += '. ' + data.aviso;
+        msg += ` (${ms} ms)`;
+        $('ccGerarStatus').textContent = msg;
+        atualizarEstadoGerar();
     }
 
     function renderMatrizSim(matriz) {

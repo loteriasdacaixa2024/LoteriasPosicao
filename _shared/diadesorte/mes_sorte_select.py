@@ -42,7 +42,15 @@ import math
 import random
 from typing import Any, Dict, List, Optional, Sequence, Union
 
-from geradores_elite.comportamento.specs import MESES_ABREV, MESES_NOME
+MESES_NOME = {
+    1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
+    5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
+    9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro",
+}
+MESES_ABREV = {
+    1: "Jan", 2: "Fev", 3: "Mar", 4: "Abr", 5: "Mai", 6: "Jun",
+    7: "Jul", 8: "Ago", 9: "Set", 10: "Out", 11: "Nov", 12: "Dez",
+}
 
 CRITERIOS_ESPECIAIS = ("atrasado", "frequente", "aleatorio")
 MesValor = Union[str, int, None]
@@ -152,4 +160,129 @@ def montar_opcoes_mes_sorte(meses_stats: Sequence[Dict[str, Any]]) -> Dict[str, 
         "sucesso": True,
         "atrasado": atrasado,
         "frequente": frequente,
-        "meses": sta
+        "meses": stats,
+        "opcoes": opcoes,
+        "default": "atrasado",
+    }
+
+
+def opcoes_mes_sorte_diadesorte() -> Dict[str, Any]:
+    from models.sorteio_diadesorte import SorteioDiaDeSorte
+
+    return montar_opcoes_mes_sorte(carregar_estatisticas_meses(SorteioDiaDeSorte))
+
+
+def eh_criterio_aleatorio(valor: MesValor) -> bool:
+    if valor is None or valor == "":
+        return False
+    return str(valor).strip().lower() in ("aleatorio", "aleatório", "random")
+
+
+def distribuir_meses_aleatorios(quantidade: int, *, rng: Optional[random.Random] = None) -> List[int]:
+    """
+    Distribuição equilibrada de meses 1–12 para `quantidade` apostas.
+
+    Usa blocos embaralhados sem reposição: em cada bloco de 12, cada mês
+    aparece no máximo 1 vez. Assim, para n apostas, a frequência máxima
+    de qualquer mês é ceil(n/12) e a mínima é floor(n/12).
+    """
+    n = max(0, int(quantidade or 0))
+    if n == 0:
+        return []
+    r = rng or random
+    out: List[int] = []
+    while len(out) < n:
+        bloco = list(range(1, 13))
+        r.shuffle(bloco)
+        out.extend(bloco)
+    return out[:n]
+
+
+def _payload_opcoes(
+    opcoes_payload: Optional[Dict[str, Any]] = None,
+    SorteioModel: Any = None,
+) -> Dict[str, Any]:
+    if opcoes_payload is not None:
+        return opcoes_payload
+    if SorteioModel is not None:
+        return montar_opcoes_mes_sorte(carregar_estatisticas_meses(SorteioModel))
+    try:
+        return opcoes_mes_sorte_diadesorte()
+    except Exception:
+        return montar_opcoes_mes_sorte([])
+
+
+def resolver_mes_sorte(
+    valor: MesValor,
+    *,
+    opcoes_payload: Optional[Dict[str, Any]] = None,
+    SorteioModel: Any = None,
+) -> Optional[int]:
+    """
+    Converte valor do select em um único mes_num (1–12).
+
+    Aceita: atrasado | frequente | aleatorio | 1..12 | nome do mês.
+    Para lotes (export/TXT), prefira resolver_meses_para_lote — em
+    aleatorio um único sorteio NÃO deve ser reutilizado em todas as linhas.
+    """
+    if valor is None or valor == "":
+        return None
+
+    raw = str(valor).strip()
+    low = raw.lower()
+
+    if low.isdigit():
+        n = int(low)
+        return n if 1 <= n <= 12 else None
+
+    payload = _payload_opcoes(opcoes_payload, SorteioModel)
+
+    if low == "atrasado":
+        return int((payload.get("atrasado") or {}).get("mes_num") or 1)
+    if low == "frequente":
+        return int((payload.get("frequente") or {}).get("mes_num") or 1)
+    if eh_criterio_aleatorio(low):
+        return random.randint(1, 12)
+
+    for m in range(1, 13):
+        if MESES_NOME.get(m, "").lower() == low:
+            return m
+        if MESES_ABREV.get(m, "").lower() == low:
+            return m
+
+    return None
+
+
+def resolver_meses_para_lote(
+    valor: MesValor,
+    quantidade: int,
+    *,
+    opcoes_payload: Optional[Dict[str, Any]] = None,
+    SorteioModel: Any = None,
+    rng: Optional[random.Random] = None,
+) -> List[int]:
+    """
+    Resolve o critério do select em uma lista com `quantidade` meses (1–12).
+
+    - atrasado / frequente / fixo → mesmo mês repetido
+    - aleatorio → distribuição equilibrada (ver distribuir_meses_aleatorios)
+    """
+    n = max(0, int(quantidade or 0))
+    if n == 0:
+        return []
+
+    if eh_criterio_aleatorio(valor):
+        return distribuir_meses_aleatorios(n, rng=rng)
+
+    mn = resolver_mes_sorte(valor, opcoes_payload=opcoes_payload, SorteioModel=SorteioModel)
+    if mn is None:
+        return []
+    return [int(mn)] * n
+
+
+def max_freq_esperada(quantidade: int) -> int:
+    """Teto teórico de frequência de um mês em distribuição equilibrada."""
+    n = max(0, int(quantidade or 0))
+    if n <= 0:
+        return 0
+    return int(math.ceil(n / 12.0))

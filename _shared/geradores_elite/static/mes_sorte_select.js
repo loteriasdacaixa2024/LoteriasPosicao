@@ -1,6 +1,11 @@
 /**
  * Select padronizado — Mês da Sorte
  * Ordem: + Atrasado (X) → + Frequente (Y) → meses restantes → + Aleatório
+ *
+ * Regras (espelho do backend diadesorte/mes_sorte_select.py):
+ * - atrasado / frequente / fixo → um mês; o backend aplica o mesmo em todas as linhas
+ * - aleatorio → NÃO sortear um único mês no front para o lote;
+ *   enviar "aleatorio" e deixar o backend distribuir de forma equilibrada
  */
 (function (global) {
   'use strict';
@@ -96,20 +101,65 @@
     if (selectEl.options.length) selectEl.selectedIndex = opts.includeEmpty ? 1 : 0;
   }
 
+  function isAleatorio(value) {
+    const v = String(value == null ? '' : value).trim().toLowerCase();
+    return v === 'aleatorio' || v === 'aleatório' || v === 'random';
+  }
+
+  /**
+   * Distribuição equilibrada (espelho do backend).
+   * Blocos de 1–12 embaralhados sem reposição.
+   */
+  function distribuirAleatorio(quantidade) {
+    const n = Math.max(0, parseInt(quantidade, 10) || 0);
+    const out = [];
+    while (out.length < n) {
+      const bloco = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+      for (let i = bloco.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = bloco[i];
+        bloco[i] = bloco[j];
+        bloco[j] = t;
+      }
+      out.push.apply(out, bloco);
+    }
+    return out.slice(0, n);
+  }
+
+  /**
+   * Resolve 1 mês (preview / edição).
+   * Para lotes com aleatorio, use distribuirAleatorio ou envie "aleatorio" ao backend.
+   */
   function resolveSync(value, data) {
     if (value == null || value === '') return null;
     const v = String(value).trim().toLowerCase();
     if (v === 'atrasado') return Number((data && data.atrasado && data.atrasado.mes_num) || 1);
     if (v === 'frequente') return Number((data && data.frequente && data.frequente.mes_num) || 1);
-    if (v === 'aleatorio') return Math.floor(Math.random() * 12) + 1;
+    if (isAleatorio(v)) return Math.floor(Math.random() * 12) + 1;
     const n = parseInt(v, 10);
     if (!isNaN(n) && n >= 1 && n <= 12) return n;
     return null;
   }
 
+  /** Resolve lista para lote: aleatorio → equilibrado; demais → mês repetido. */
+  function resolveLote(value, quantidade, data) {
+    const n = Math.max(0, parseInt(quantidade, 10) || 0);
+    if (n === 0) return [];
+    if (isAleatorio(value)) return distribuirAleatorio(n);
+    const mn = resolveSync(value, data);
+    if (mn == null) return [];
+    return Array(n).fill(mn);
+  }
+
   function resolveFromSelect(selectEl, data) {
     if (!selectEl) return null;
     return resolveSync(selectEl.value, data || CACHE.data);
+  }
+
+  /** Valor bruto do select para enviar à API (atrasado|frequente|aleatorio|N). */
+  function payloadFromSelect(selectEl) {
+    if (!selectEl || !selectEl.value) return null;
+    return selectEl.value;
   }
 
   async function fillFromApi(selectEl, apiBase, opts) {
@@ -128,8 +178,12 @@
     fill,
     fillFromApi,
     resolveSync,
+    resolveLote,
     resolveFromSelect,
     resolveFromSelectAsync,
+    payloadFromSelect,
+    isAleatorio,
+    distribuirAleatorio,
     get cached() { return CACHE.data; },
   };
 })(typeof window !== 'undefined' ? window : globalThis);

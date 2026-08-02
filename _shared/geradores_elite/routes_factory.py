@@ -345,11 +345,21 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             mes_num = body.get("mes_num") or body.get("mes")
             extra = body.get("extra") or {}
             from ciclo_cobertura.pos_geracao import MESES_ABREV, aplicar_mes_apostas, resolver_mes_entrada
-            mn = resolver_mes_entrada(mes_num)
-            if mn and not extra:
+            from diadesorte.mes_sorte_select import eh_criterio_aleatorio
+
+            # Critério bruto para + Aleatório (distribuição por aposta)
+            if mes_num is not None and mes_num != "":
+                apostas = aplicar_mes_apostas(apostas, mes_num)
+            mn = None
+            if apostas and isinstance(apostas[0], dict) and apostas[0].get("mes_num"):
+                mn = int(apostas[0]["mes_num"])
+            elif not eh_criterio_aleatorio(mes_num):
+                mn = resolver_mes_entrada(mes_num)
+            if mn and not extra and not eh_criterio_aleatorio(mes_num):
                 extra = {"tipo": "mes", "num": mn, "label": MESES_ABREV.get(mn, str(mn))}
-            if mn:
-                apostas = aplicar_mes_apostas(apostas, mn)
+            # Em aleatório, extras já vão por aposta — não forçar extra global
+            if eh_criterio_aleatorio(mes_num):
+                extra = {}
             texto = formatar_export_txt(modality_key, apostas, extra)
             nome = f"ciclo_apostas_{modality_key}_{len(apostas)}jg.txt"
             return jsonify({
@@ -357,6 +367,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 "texto": texto,
                 "nome_arquivo": nome,
                 "mes_num": mn,
+                "mes_criterio": "aleatorio" if eh_criterio_aleatorio(mes_num) else None,
             })
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
@@ -1201,11 +1212,9 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         data = request.get_json(silent=True) or {}
         try:
             from geradores_elite.construtor.universes.digitos_service import ConstrutorDigitosService
+            # Mantém critério bruto (atrasado|frequente|aleatorio|N) — serviço resolve
             mes = data.get("mes_num")
-            if mes is not None and mes != "":
-                from diadesorte.mes_sorte_select import resolver_mes_sorte
-                mes = resolver_mes_sorte(mes)
-            else:
+            if mes == "":
                 mes = None
             return jsonify(ConstrutorDigitosService.exportar_txt(
                 modality_key,
@@ -1235,13 +1244,15 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             sim_min = data.get("similaridade_min_pct")
             if sim_min is not None:
                 sim_min = float(sim_min)
-            return jsonify(_pipeline_elite(_construtor_svc().gerar_construcao(
+            # Validação histórico/memória já feita em gerar_construcao — resposta direta (rápido)
+            out = _construtor_svc().gerar_construcao(
                 sessao_id,
-                data.get("estrategia", "automatica"),
+                data.get("estrategia", "conforme_comportamento"),
                 personalizada=personalizada,
                 janela_comportamento=int(data.get("janela_comportamento", 10)),
                 similaridade_min_pct=sim_min,
-            ), "construtor_construcoes", data))
+            )
+            return jsonify(out)
         except KeyError:
             return jsonify({"sucesso": False, "erro": "sessao_id obrigatório."}), 400
         except Exception as e:
@@ -1288,8 +1299,11 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         data = request.get_json(silent=True) or {}
         try:
             mes = data.get("mes_num")
-            if mes is not None:
-                mes = int(mes)
+            if mes is not None and mes != "":
+                from diadesorte.mes_sorte_select import resolver_mes_sorte
+                mes = resolver_mes_sorte(mes)
+            else:
+                mes = None
             extra = {}
             if data.get("time_num") is not None:
                 extra["time_num"] = int(data["time_num"])
@@ -1319,11 +1333,9 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             return jsonify({"sucesso": False, "erro": "Indisponível."}), 404
         data = request.get_json(silent=True) or {}
         try:
+            # Critério bruto: atrasado|frequente|aleatorio|N — serviço distribui
             mes = data.get("mes_num")
-            if mes is not None and mes != "":
-                from diadesorte.mes_sorte_select import resolver_mes_sorte
-                mes = resolver_mes_sorte(mes)
-            else:
+            if mes == "":
                 mes = None
             extra = {}
             if data.get("time_num") is not None:
@@ -1343,10 +1355,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         data = request.get_json(silent=True) or {}
         try:
             mes = data.get("mes_num")
-            if mes is not None and mes != "":
-                from diadesorte.mes_sorte_select import resolver_mes_sorte
-                mes = resolver_mes_sorte(mes)
-            else:
+            if mes == "":
                 mes = None
             ids = data.get("construcao_ids")
             return jsonify(_construtor_svc().exportar_sessao_txt(
