@@ -120,7 +120,9 @@
      data-digitos="{{ digitos_inicial }}"
      data-concurso="{{ concurso_inicial }}"
      data-gc-url="{{ gerador_gc_url }}"
-     data-elite-url="{{ gerador_elite_url }}">
+     data-elite-url="{{ gerador_elite_url }}"
+     data-extra-mes="{{ '1' if extra_mes else '0' }}"
+     data-sorteadas="{{ sorteadas }}">
 
   <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
@@ -173,12 +175,14 @@
               <th class="ai-sort" data-sort="concurso" data-table="res">Concurso <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="data" data-table="res">Data <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dezenas" data-sort="dezenas_fmt" data-table="res">Dezenas <span class="ai-sort-ind">⇅</span></th>
+              {% if extra_mes %}
               <th class="ai-sort" data-sort="mes_num" data-table="res">Mês <span class="ai-sort-ind">⇅</span></th>
+              {% endif %}
               <th class="ai-sort" data-sort="digitos_fmt" data-table="res">Dígitos (I\|F) <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-digitos-unicos" data-sort="digitos_ordenados_fmt" data-table="res">Dígitos Ord. <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="qtd_digitos" data-table="res">Qtd <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="soma" data-table="res">Soma <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort" data-sort="volume_combinacoes" data-table="res">Volume C(n,7) <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="volume_combinacoes" data-table="res">Volume C(n,{{ sorteadas }}) <span class="ai-sort-ind">⇅</span></th>
               <th class="col-gerar">Ações</th>
             </tr>
           </thead>
@@ -209,7 +213,7 @@
       <div class="table-responsive">
         <table class="table table-sm table-bordered ai-table" id="aiTabelaCatalogo">
           <thead>
-            <tr><th>#</th><th>Dígitos</th><th>Nº válidos</th><th>Volume C(n,7)</th><th>Gerar apostas em…</th></tr>
+            <tr><th>#</th><th>Dígitos</th><th>Nº válidos</th><th>Volume C(n,{{ sorteadas }})</th><th>Gerar apostas em…</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -219,7 +223,7 @@
     <!-- ABA 3 — Padrões -->
     <div class="tab-pane fade" id="tab-padroes">
       <p class="small text-muted mb-2">
-        Padrões derivados dos mesmos concursos (mês, inicial/final, pares/ímpares, não saíram).
+        Padrões derivados dos mesmos concursos ({% if extra_mes %}mês, {% endif %}inicial/final, pares/ímpares, não saíram).
         Em <strong>Não Saíram</strong>: quantidade = {{ dezena_max }} − {{ sorteadas }} = <strong>{{ nao_sairam_qtd }}</strong> ·
         <span class="text-muted">↓ todos</span> baixa a lista ·
         <span class="text-muted">↓ 16</span> gera conjunto-base para o
@@ -233,7 +237,9 @@
               <th class="ai-sort" data-sort="concurso" data-table="pad">Concurso <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="data" data-table="pad">Data <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dezenas" data-sort="dezenas_fmt" data-table="pad">Dezenas <span class="ai-sort-ind">⇅</span></th>
+              {% if extra_mes %}
               <th class="ai-sort" data-sort="mes_num" data-table="pad">Mês <span class="ai-sort-ind">⇅</span></th>
+              {% endif %}
               <th class="ai-sort" data-sort="padrao_inicial" data-table="pad">Padrão Inicial <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="padrao_final" data-table="pad">Padrão Final <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-digitos-unicos" data-sort="digitos_ordenados_fmt" data-table="pad">Dígitos Únicos <span class="ai-sort-ind">⇅</span></th>
@@ -255,6 +261,7 @@
       <div id="ai-tubular-root"
            data-api="{{ api_base }}"
            data-meses-cores='{{ (meses_cores or {})|tojson }}'
+           data-extra-mes="{{ '1' if extra_mes else '0' }}"
            data-dezena-min="{{ dezena_min }}"
            data-dezena-max="{{ dezena_max }}"
            data-sorteadas="{{ sorteadas }}">
@@ -296,7 +303,7 @@
 
             <div class="tb-kpi-grid" id="tbKpis"></div>
 
-            <!-- Legenda idêntica à referência -->
+            <!-- Legenda idêntica à referência (acima da tabela) -->
             <div class="tb-legend tb-legend-center">
               <h3>📊 Cores e Significados:</h3>
               <div class="row g-3 justify-content-center">
@@ -342,14 +349,11 @@
                 <thead>
                   <tr>
                     <th>Concurso</th><th>Data</th>
-                    <th class="tb-dez-h tb-dez-h-first">1º</th>
-                    <th class="tb-dez-h">2º</th>
-                    <th class="tb-dez-h">3º</th>
-                    <th class="tb-dez-h">4º</th>
-                    <th class="tb-dez-h">5º</th>
-                    <th class="tb-dez-h">6º</th>
-                    <th class="tb-dez-h tb-dez-h-last">7º</th>
-                    <th>Mês</th><th>SEQ</th><th>FINAIS</th><th>Rept</th>
+                    {% for i in range(1, sorteadas + 1) %}
+                    <th class="tb-dez-h{% if i == 1 %} tb-dez-h-first{% endif %}{% if i == sorteadas %} tb-dez-h-last{% endif %}">{{ i }}º</th>
+                    {% endfor %}
+                    {% if extra_mes %}<th>Mês</th>{% endif %}
+                    <th>SEQ</th><th>FINAIS</th><th>Rept</th>
                     <th>DEZENAS<br>Soma</th><th>Pares</th><th>Ímpares</th>
                     <th>Inicial</th><th>Final</th>
                     <th>Qtde</th><th>Números</th>
@@ -359,6 +363,31 @@
               </table>
             </div>
             <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-2" id="tbPager"></div>
+
+            <!-- Só o resumo fica embaixo -->
+            <div class="tb-cond-stats tb-cond-stats-below" id="tbCondStats">
+              <button type="button" class="tb-cond-stats-toggle" id="tbCondStatsToggle" aria-expanded="false">
+                <span class="tb-cond-stats-arrow" aria-hidden="true">▶</span>
+                <span>Porcentagem e ocorrências das condições</span>
+                <span class="tb-cond-stats-meta" id="tbCondStatsMeta"></span>
+              </button>
+              <div class="tb-cond-stats-body d-none" id="tbCondStatsBody">
+                <div class="table-responsive">
+                  <table class="table table-sm table-bordered mb-0 tb-cond-stats-table" id="tbCondStatsTable">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Condição</th>
+                        <th>Ocorrências</th>
+                        <th>%</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div class="tb-cond-stats-hint">Base: todos os concursos carregados</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -368,7 +397,7 @@
             <h2 class="h5 fw-bold">🎯 SEÇÃO 10 — Análise Manual (ordem crescente)</h2>
             <p class="small text-muted">Crie jogos manualmente, cole texto ou arraste arquivos. Stats em tempo real. Hook futuro: apostas do Gerador Elite.</p>
             <div class="tb-drop mb-2" id="tbDrop10" data-ai-compare="s10">Arraste TXT/CSV aqui · ou cole abaixo</div>
-            <textarea id="tbPaste10" class="form-control form-control-sm mb-2" rows="3" placeholder="FORMATOS: 01 02 03 04 05 06 07 · 01 02 03 04 05 06 07 - Jul · 01 02 03 04 05 06 07 - Julho"></textarea>
+            <textarea id="tbPaste10" class="form-control form-control-sm mb-2" rows="3" placeholder="{% if extra_mes %}FORMATOS: 01 02 03 04 05 06 07 · 01 02 03 04 05 06 07 - Jul · 01 02 03 04 05 06 07 - Julho{% else %}FORMATO: dezenas separadas por espaço (ex.: 01 05 12 23 34 45){% endif %}"></textarea>
             <div class="d-flex flex-wrap gap-2 mb-2">
               <button type="button" class="btn btn-sm btn-success" id="tbProcess10">✓ Processar Jogos</button>
               <button type="button" class="btn btn-sm btn-primary" id="tbAdd10">+ Adicionar Linha</button>
@@ -392,7 +421,7 @@
             <h2 class="h5 fw-bold">🎯 SEÇÃO 11 — Análise Manual (ordem de sorteio)</h2>
             <p class="small text-muted">Mesma UX da Seção 10, comparando repetições na ordem oficial do sorteio.</p>
             <div class="tb-drop mb-2" id="tbDrop11" data-ai-compare="s11">Arraste TXT/CSV aqui · ou cole abaixo</div>
-            <textarea id="tbPaste11" class="form-control form-control-sm mb-2" rows="3" placeholder="Ex: 19 01 25 04 12 06 09 JUL"></textarea>
+            <textarea id="tbPaste11" class="form-control form-control-sm mb-2" rows="3" placeholder="{% if extra_mes %}Ex: 19 01 25 04 12 06 09 JUL{% else %}Ex: 19 01 25 04 12 45{% endif %}"></textarea>
             <div class="d-flex flex-wrap gap-2 mb-2">
               <button type="button" class="btn btn-sm btn-success" id="tbProcess11">✓ Processar Jogos</button>
               <button type="button" class="btn btn-sm btn-primary" id="tbAdd11">+ Adicionar Linha</button>
@@ -415,9 +444,11 @@
 </div>
 <link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css">
 <style>
+  {% if extra_mes %}
   {% for nome, cor in (meses_cores or {}).items() %}
   #ai-tubular-root .mes-cor.mes-nome-{{ nome }} { background-color: {{ cor }} !important; }
   {% endfor %}
+  {% endif %}
 </style>
 {% endblock %}
 
@@ -430,6 +461,7 @@
   const API = root.dataset.api;
   const GC_URL = root.dataset.gcUrl || '/geradores-elite/gerador-gc/';
   const ELITE_URL = root.dataset.eliteUrl || '/geradores-elite/gerador-elite/';
+  const EXTRA_MES = String(root.dataset.extraMes || '') === '1';
   let CACHE = [];
   let CAT = [];
   let SORT = { res: { key: 'concurso', dir: 'desc' }, pad: { key: 'concurso', dir: 'desc' } };
@@ -597,19 +629,21 @@
     const metaRes = slicePagina(linhasRes, 'res');
     const metaPad = slicePagina(linhasPad, 'pad');
     renderKpis(CACHE);
+    const colRes = EXTRA_MES ? 10 : 9;
+    const colPad = EXTRA_MES ? 12 : 11;
     document.querySelector('#aiTabelaResultados tbody').innerHTML = metaRes.rows.map(l => `
       <tr>
         <td><strong>${esc(l.concurso)}</strong></td>
         <td>${esc(l.data)}</td>
         <td class="td-left text-start td-dezenas">${esc(l.dezenas_fmt)}</td>
-        <td>${mesBadge(l)}</td>
+        ${EXTRA_MES ? `<td>${mesBadge(l)}</td>` : ''}
         <td class="td-left text-start">${esc(l.digitos_fmt)}</td>
         <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
         <td><strong>${esc(l.qtd_digitos)}</strong></td>
         <td><strong>${esc(l.soma)}</strong></td>
         <td class="td-left text-start">${fmtVol(l.volume_combinacoes)}</td>
         <td class="text-nowrap td-gerar">${acoesHtml(l)}</td>
-      </tr>`).join('') || '<tr><td colspan="10" class="text-muted">Sem dados</td></tr>';
+      </tr>`).join('') || `<tr><td colspan="${colRes}" class="text-muted">Sem dados</td></tr>`;
     document.querySelector('#aiTabelaPadroes tbody').innerHTML = metaPad.rows.map(l => {
       const dez = dezenasOrdenadasDe(l);
       const dezFmt = l.dezenas_fmt || dez.map(fmtDezena).join(' ');
@@ -620,7 +654,7 @@
         <td><strong>${esc(l.concurso)}</strong></td>
         <td>${esc(l.data)}</td>
         <td class="td-left text-start td-dezenas">${esc(dezFmt)}</td>
-        <td>${mesBadge(l)}</td>
+        ${EXTRA_MES ? `<td>${mesBadge(l)}</td>` : ''}
         <td class="text-nowrap">${esc(pi)}</td>
         <td class="text-nowrap">${esc(pf)}</td>
         <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
@@ -630,7 +664,7 @@
         <td class="td-nao-sairam">${naoSairamHtml(l)}</td>
         <td class="td-gerar">${geLinksHtml(l.qtd_digitos, (l.digitos_ordenados||[]).join(','), l.concurso)}</td>
       </tr>`;
-    }).join('') || '<tr><td colspan="12" class="text-muted">Sem dados</td></tr>';
+    }).join('') || `<tr><td colspan="${colPad}" class="text-muted">Sem dados</td></tr>`;
     const concs = CACHE.map(x => +x.concurso).filter(Number.isFinite);
     const prim = concs.length ? Math.min(...concs) : null;
     const ult = concs.length ? Math.max(...concs) : null;

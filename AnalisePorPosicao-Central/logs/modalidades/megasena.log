@@ -5316,3 +5316,264 @@ Press CTRL+C to quit
 127.0.0.1 - - [02/Aug/2026 16:20:15] "GET /analise/analise-tubular/ HTTP/1.1" 200 -
 127.0.0.1 - - [02/Aug/2026 16:20:15] "GET /analise/analise-tubular/static/analise_tubular_inteligente.js HTTP/1.1" 304 -
 127.0.0.1 - - [02/Aug/2026 16:20:15] "GET /analise/api/analise-tubular/dados?base=geral&janela=0 HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 17:52:44 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 17:52:52] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 17:53:24] "GET /analise/analise-tubular/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 17:53:24] "GET /analise/analise-tubular/static/analise_tubular_inteligente.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 17:53:24] "GET /analise/api/analise-tubular/dados?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 17:55:29] "GET /geradores-elite/escolha-tubular-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 17:55:29] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 17:55:29] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 17:55:37] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0&concurso=3036 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 17:55:38] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0&concurso=3037 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 17:55:43] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 400 -
+127.0.0.1 - - [02/Aug/2026 17:55:55] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 17:56:42] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 18:01:46 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 18:01:55] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:04:21] "GET /analise/somas-digitos/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:04:21] "GET /analise/somas-digitos/static/analise_somas_digitos.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:04:21] "GET /analise/api/somas-digitos/somas?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:04:23] "GET /analise/api/somas-digitos/digitos?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:05:27] "GET /analise/analises-gerais/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:05:27] "GET /geradores-elite/static/comportamento_col_concurso.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:05:28] "GET /analise/analises-gerais/static/analise_estudos.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:05:28] "GET /analise/api/analises-gerais/classificacao-numeros?base=geral&janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:05:29] "GET /analise/api/analises-gerais/soma-digitos?base=geral&janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:05:32] "GET /analise/api/analises-gerais/diferencial-cruzado?base=geral&janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:05:33] "GET /analise/api/analises-gerais/digitos-utilizados?base=geral&janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:05:35] "GET /analise/api/analises-gerais/classificacao-numeros?base=geral&janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:05:38] "GET /analise/api/analises-gerais/soma-digitos?base=geral&janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:07:23] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:07:23] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:07:23] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:07:24] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:07:25] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:07:25] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:10:00] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:10:00] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:10:01] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:10:04] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:13:36] "GET /analise/analises-inteligentes/?aba=tubular HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:13:36] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 18:13:36] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:13:39] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:13:40] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:13:40] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:13:41] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 18:14:55 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 18:15:03] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:15:23] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:15:23] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 18:15:23] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:15:24] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:15:27] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:15:27] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:17:53] "GET /geradores-elite/escolha-tubular-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:17:53] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 18:17:53] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:17:57] "GET /geradores-elite/gerador-digitos-inteligente/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:17:57] "GET /geradores-elite/static/construtor_digitos.js?v=12 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:17:58] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:17:58] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:17:58] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:00] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:01] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:01] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:01] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:02] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:02] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:02] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:03] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:03] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:03] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:06] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:18:06] "POST /geradores-elite/api/construtor-construcoes/digitos/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:26:00] "POST /geradores-elite/api/construtor-construcoes/digitos/combinacoes HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:26:25] "POST /geradores-elite/api/construtor-construcoes/digitos/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:26:31] "POST /geradores-elite/api/construtor-construcoes/digitos/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:28:14] "GET /geradores-elite/gerador-digitos-inteligente/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:28:14] "GET /geradores-elite/static/construtor_digitos.js?v=12 HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 18:28:16] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:28:17] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:28:17] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:28:22] "GET /geradores-elite/escolha-tubular-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:28:22] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 18:28:22] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:28:47] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:29:04] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0&concurso=3036 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:29:09] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:30:02] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0&concurso=3036 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:30:08] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 400 -
+127.0.0.1 - - [02/Aug/2026 18:30:12] "POST /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:30:43] "GET /geradores-elite/escolha-tubular-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:30:43] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 18:30:44] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:30:47] "GET /geradores-elite/comportamento-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:30:47] "GET /geradores-elite/static/comportamento_bases_resumo.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:30:47] "GET /geradores-elite/static/comportamento_col_concurso.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 18:30:47] "GET /geradores-elite/static/panorama_modos.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:30:48] "GET /geradores-elite/api/comportamento/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:30:48] "GET /geradores-elite/api/comportamento/analise?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:31:13] "POST /geradores-elite/api/comportamento/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:10] "GET /geradores-elite/api/comportamento/panorama-indicadores?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:10] "GET /geradores-elite/api/comportamento/panorama-selecao-contexto?base=geral&rank=1 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:11] "GET /geradores-elite/api/comportamento/analise?janela=10&base=acumulados HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:14] "GET /geradores-elite/api/comportamento/analise?janela=10&base=vencedores HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:15] "GET /geradores-elite/api/comportamento/analise?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:17] "GET /geradores-elite/api/comportamento/analise?janela=10&base=vencedores HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:17] "GET /geradores-elite/api/comportamento/analise?janela=10&base=acumulados HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:21] "GET /geradores-elite/api/comportamento/analise?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:25] "GET /geradores-elite/api/comportamento/analise?janela=10&base=vencedores HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:30] "GET /geradores-elite/api/comportamento/analise?janela=10&base=acumulados HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:36] "GET /geradores-elite/api/comportamento/analise?janela=10&base=vencedores HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:32:47] "POST /geradores-elite/api/comportamento/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:36:23] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:36:23] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 18:36:23] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 304 -
+127.0.0.1 - - [02/Aug/2026 18:36:24] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:36:24] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 18:36:25] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+
+--- iniciando 2026-08-02 19:21:21 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [02/Aug/2026 19:21:31] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:21:39] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:21:40] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:21:40] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:21:41] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:21:42] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:21:42] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:23:00] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:23:30] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:23:30] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:24:41] "GET /analise/analises-inteligentes/?aba=tubular HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:25:16] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:25:16] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:25:17] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:25:19] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:25:19] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:25:20] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:27:33] "GET /analise/analises-inteligentes/?aba=tubular HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:29:48] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:29:48] "GET /analise/api/inteligentes/assets/tubular.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:29:48] "GET /analise/api/inteligentes/assets/tubular.js HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:29:49] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:29:50] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Aug/2026 19:29:51] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+
+--- iniciando 2026-08-03 07:12:32 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+[API Caixa] MegaSena 3039/3039...WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.1.218:5156
+Press CTRL+C to quit
+127.0.0.1 - - [03/Aug/2026 07:12:42] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-03 11:16:34 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.1.218:5156
+Press CTRL+C to quit
+127.0.0.1 - - [03/Aug/2026 11:16:46] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-03 16:26:03 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [03/Aug/2026 16:26:28] "GET / HTTP/1.1" 200 -

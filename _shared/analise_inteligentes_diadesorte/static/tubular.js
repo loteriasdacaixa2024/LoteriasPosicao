@@ -18,7 +18,12 @@
       dezenaMin: Number.isFinite(dmin) ? dmin : 1,
       dezenaMax: Number.isFinite(dmax) ? dmax : 31,
       sorteadas: Number.isFinite(sort) ? sort : 7,
+      extraMes: !!(root && String(root.dataset.extraMes || '') === '1'),
     };
+  }
+
+  function hasMes(root) {
+    return !!(root && String(root.dataset.extraMes || '') === '1');
   }
 
   function fmt2(n) { return String(Number(n)).padStart(2, '0'); }
@@ -178,18 +183,27 @@
     return String(txt || '').split(/\n+/).map(line => {
       const nums = (line.match(/\d{1,2}/g) || []).map(Number).filter(n => n >= L.dezenaMin && n <= L.dezenaMax);
       if (nums.length < L.sorteadas) return null;
-      let mes = 1;
-      const mName = line.match(/(Janeiro|Fevereiro|Março|Marco|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro|JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)/i);
-      if (mName) {
-        const raw = mName[1].toUpperCase().normalize('NFD').replace(/\p{M}/gu, '');
-        const idx = MESES_ABREV.findIndex(a => a === raw.slice(0, 3) || MESES[MESES_ABREV.indexOf(a)]?.toUpperCase().normalize('NFD').replace(/\p{M}/gu, '').startsWith(raw.slice(0, 3)));
-        const i2 = MESES.findIndex(m => m.toUpperCase().normalize('NFD').replace(/\p{M}/gu, '').startsWith(raw.slice(0, 3)));
-        mes = (idx >= 0 ? idx : i2) + 1 || 1;
-      } else {
-        const mNum = line.match(/-\s*(\d{1,2})\s*$/);
-        if (mNum) mes = Math.min(12, Math.max(1, +mNum[1]));
+      let mes = 0;
+      let monthName = '';
+      if (L.extraMes) {
+        mes = 1;
+        monthName = MESES[0];
+        const mName = line.match(/(Janeiro|Fevereiro|Março|Marco|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro|JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)/i);
+        if (mName) {
+          const raw = mName[1].toUpperCase().normalize('NFD').replace(/\p{M}/gu, '');
+          const idx = MESES_ABREV.findIndex(a => a === raw.slice(0, 3) || MESES[MESES_ABREV.indexOf(a)]?.toUpperCase().normalize('NFD').replace(/\p{M}/gu, '').startsWith(raw.slice(0, 3)));
+          const i2 = MESES.findIndex(m => m.toUpperCase().normalize('NFD').replace(/\p{M}/gu, '').startsWith(raw.slice(0, 3)));
+          mes = (idx >= 0 ? idx : i2) + 1 || 1;
+          monthName = MESES[mes - 1] || '';
+        } else {
+          const mNum = line.match(/-\s*(\d{1,2})\s*$/);
+          if (mNum) {
+            mes = Math.min(12, Math.max(1, +mNum[1]));
+            monthName = MESES[mes - 1] || '';
+          }
+        }
       }
-      return { numbers: nums.slice(0, L.sorteadas), month: mes, monthName: MESES[mes - 1] };
+      return { numbers: nums.slice(0, L.sorteadas), month: mes, monthName };
     }).filter(Boolean);
   }
 
@@ -203,6 +217,7 @@
   function TubularApp(root) {
     this.root = root;
     this.api = root.dataset.api || '/analise/api/inteligentes';
+    this.extraMes = hasMes(root);
     this.mesesCores = {};
     try { this.mesesCores = JSON.parse(root.dataset.mesesCores || '{}'); } catch (_) {}
     this.data = [];
@@ -243,6 +258,7 @@
     r.querySelector('#tbBtnLoad')?.addEventListener('click', () => this.load());
     r.querySelector('#tbBtnMark')?.addEventListener('click', () => { this.marked = true; this.renderTable(); });
     r.querySelector('#tbBtnReset')?.addEventListener('click', () => { this.marked = false; this.renderTable(); });
+    r.querySelector('#tbCondStatsToggle')?.addEventListener('click', () => this.toggleCondStats());
     r.querySelector('#tbViewDraw')?.addEventListener('click', () => this.setView('draw'));
     r.querySelector('#tbViewAsc')?.addEventListener('click', () => this.setView('asc'));
     r.querySelector('#tbPageSize')?.addEventListener('change', (e) => {
@@ -276,7 +292,12 @@
         const L = limitsFrom(this.root);
         const numbers = Array.isArray(j) ? j.map(Number).slice(0, L.sorteadas) : parseJogosTexto(String(j), L)[0]?.numbers;
         if (!numbers || numbers.length < L.sorteadas) return null;
-        return { numbers, month: 1, monthName: 'Janeiro', editable: true };
+        return {
+          numbers,
+          month: this.extraMes ? 1 : 0,
+          monthName: this.extraMes ? 'Janeiro' : '',
+          editable: true,
+        };
       }).filter(Boolean);
       if (section === 10) this.manual10 = this.manual10.concat(parsed);
       else this.manual11 = this.manual11.concat(parsed);
@@ -350,8 +371,12 @@
       this.data = (j.sorteios || []).map(s => {
         const asc = (s.listaDezenas || []).map(Number);
         const draw = (s.ordem_caixa || asc).map(Number);
-        const mesNum = s.mesSorte || s.mes_num || 1;
-        const mesNome = s.mesSorteNome || s.nomeMesSorte || MESES[(mesNum || 1) - 1] || '';
+        let mesNum = 0;
+        let mesNome = '';
+        if (this.extraMes) {
+          mesNum = s.mesSorte || s.mes_num || 0;
+          mesNome = s.mesSorteNome || s.nomeMesSorte || (mesNum ? (MESES[mesNum - 1] || '') : '') || '';
+        }
         return {
           contest: s.concurso || s.numero,
           date: s.data || s.dataApuracao || '',
@@ -363,6 +388,7 @@
       });
       this.page = 1;
       this.renderKpis();
+      this.renderCondStats();
       this.renderTable();
       if (st) st.textContent = this.data.length
         ? `${this.data[0].contest} → ${this.data[this.data.length - 1].contest} (${this.data.length})`
@@ -371,6 +397,102 @@
       if (st) st.textContent = 'Erro ao carregar';
       alert(e.message || e);
     }
+  };
+
+  TubularApp.prototype.toggleCondStats = function () {
+    const btn = this.root.querySelector('#tbCondStatsToggle');
+    const body = this.root.querySelector('#tbCondStatsBody');
+    if (!btn || !body) return;
+    const open = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+    body.classList.toggle('d-none', open);
+  };
+
+  TubularApp.prototype.computeConditionStats = function () {
+    const sorted = [...this.data].sort((a, b) => a.contest - b.contest);
+    const total = sorted.length;
+    const counts = {
+      seq2: 0,
+      seq3: 0,
+      seq4: 0,
+      repetition: 0,
+      seq2Rep: 0,
+      seq432: 0,
+    };
+    sorted.forEach((c, i) => {
+      const nums = c.numbersAscending || this.numsFor(c);
+      const prev = i > 0 ? (sorted[i - 1].numbersAscending || this.numsFor(sorted[i - 1])) : [];
+      const sequences = analyzeSequences(nums);
+      const rept = calculateRepetitions(nums, prev);
+      const hasSeq2 = sequences.some(s => s.length === 2);
+      const hasSeq3 = sequences.some(s => s.length === 3);
+      const hasSeq4 = sequences.some(s => s.length >= 4);
+      const hasRept = rept.count > 0;
+      if (hasSeq2) counts.seq2++;
+      if (hasSeq3) counts.seq3++;
+      if (hasSeq4) counts.seq4++;
+      if (hasRept) counts.repetition++;
+      let has2R = false;
+      nums.forEach(n => {
+        const cond = detectAllConditions(n, sequences, rept.list);
+        if (cond.includes('seq-2') && cond.includes('repetition')) has2R = true;
+      });
+      if (has2R) counts.seq2Rep++;
+      if (hasSeq2 && hasSeq3 && hasSeq4) counts.seq432++;
+    });
+    return { total, counts };
+  };
+
+  TubularApp.prototype.renderCondStats = function () {
+    const tbody = this.root.querySelector('#tbCondStatsTable tbody');
+    const meta = this.root.querySelector('#tbCondStatsMeta');
+    if (!tbody) return;
+    const { total, counts } = this.computeConditionStats();
+    if (meta) meta.textContent = total ? `· ${total} concursos` : '';
+    if (!total) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Carregue os dados do banco local</td></tr>';
+      return;
+    }
+    const pct = (n) => ((100 * n) / total).toFixed(1).replace('.', ',') + '%';
+    const rows = [
+      {
+        swatch: '<div class="tb-swatch seq-2">2</div>',
+        name: 'Sequência de 2',
+        n: counts.seq2,
+      },
+      {
+        swatch: '<div class="tb-swatch seq-3">3</div>',
+        name: 'Sequência de 3',
+        n: counts.seq3,
+      },
+      {
+        swatch: '<div class="tb-swatch seq-4">4+</div>',
+        name: 'Sequência de 4+',
+        n: counts.seq4,
+      },
+      {
+        swatch: '<div class="tb-swatch repetition">R</div>',
+        name: 'Repetição',
+        n: counts.repetition,
+      },
+      {
+        swatch: '<div class="tb-swatch-grad" style="background:linear-gradient(135deg,var(--cor-sequencia-1) 0%,var(--cor-sequencia-1) 50%,var(--cor-repetidos) 50%,var(--cor-repetidos) 100%);color:var(--cor-sequencia-1-texto)">2+R</div>',
+        name: 'Seq. 2 + Repetição',
+        n: counts.seq2Rep,
+      },
+      {
+        swatch: '<div class="tb-swatch-grad" style="background:linear-gradient(135deg,var(--cor-sequencia-3) 0%,var(--cor-sequencia-3) 33%,var(--cor-sequencia-2) 33%,var(--cor-sequencia-2) 66%,var(--cor-sequencia-1) 66%,var(--cor-sequencia-1) 100%);color:var(--cor-sequencia-3-texto)">4+3+2</div>',
+        name: 'Seq. 4+ + Seq. 3 + Seq. 2',
+        n: counts.seq432,
+      },
+    ];
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.swatch}</td>
+        <td class="tb-cond-name">${esc(r.name)}</td>
+        <td><strong>${r.n}</strong></td>
+        <td>${pct(r.n)}</td>
+      </tr>`).join('');
   };
 
   TubularApp.prototype.renderKpis = function () {
@@ -438,11 +560,14 @@
       const rankHtml = rank
         ? `<span class="tb-rank${rank <= 3 ? ` tb-rank-${rank}` : ''}" data-rank="${rank}" title="Classificação do padrão de dígitos únicos: ${rank}º lugar (${freqDig[an.digitosUnicos]}x)">${rank}º</span>`
         : '';
+      const mesTd = this.extraMes
+        ? `<td><span class="mes-cor ${esc(this.mesClass(c.monthName))}" style="${this.mesStyle(c.monthName)}">${esc((c.monthName || '—').slice(0, 3).toUpperCase())}</span></td>`
+        : '';
       return `<tr>
         <td><strong>${esc(c.contest)}</strong></td>
         <td class="small">${esc(c.date)}</td>
         ${tds}${pad}
-        <td><span class="mes-cor ${esc(this.mesClass(c.monthName))}" style="${this.mesStyle(c.monthName)}">${esc((c.monthName || '—').slice(0, 3).toUpperCase())}</span></td>
+        ${mesTd}
         <td title="${esc(an.sequencesInfo.quais)}">${seqEmoji.text}</td>
         <td title="${esc(an.finaisIguais.quais)}">${finEmoji.text}</td>
         <td title="${esc(rept.title)}">${rept.text}</td>
@@ -454,7 +579,7 @@
         <td><span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span></td>
         <td class="tb-align-mono"><span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span>${rankHtml}</td>
       </tr>`;
-    }).join('') || `<tr><td colspan="20" class="text-muted py-4">Carregue os dados do banco local</td></tr>`;
+    }).join('') || `<tr><td colspan="${2 + limitsFrom(this.root).sorteadas + (this.extraMes ? 1 : 0) + 10}" class="text-muted py-4">Carregue os dados do banco local</td></tr>`;
 
     this._appendStats(tbody, sortedAsc);
     this._renderPager(sortedAsc.length, pages, start, size);
@@ -462,8 +587,12 @@
 
   TubularApp.prototype._appendStats = function (tbody, sortedAsc) {
     if (!sortedAsc.length) return;
+    const nSorteadas = limitsFrom(this.root).sorteadas;
     const cols = {
-      concurso: [], num: [[], [], [], [], [], [], []], mes: [], seq: [], finais: [], rept: [],
+      concurso: [],
+      num: Array.from({ length: nSorteadas }, () => []),
+      mes: [],
+      seq: [], finais: [], rept: [],
       soma: [], pares: [], impares: [], inicial: [], final: [], qtde: [], numeros: [],
     };
     sortedAsc.forEach((c, i) => {
@@ -472,8 +601,8 @@
       const an = calculateCompleteAnalysis(nums, c.monthName);
       const rept = calculateRepetitions(nums, prev);
       cols.concurso.push(c.contest);
-      nums.forEach((n, k) => cols.num[k].push(n));
-      cols.mes.push(c.monthName);
+      for (let k = 0; k < nSorteadas; k++) cols.num[k].push(nums[k]);
+      if (this.extraMes) cols.mes.push(c.monthName);
       cols.seq.push(getEmojiByCount(an.sequencesInfo.qtde).text);
       cols.finais.push(getEmojiByCount(an.finaisIguais.qtde).text);
       cols.rept.push(rept.text);
@@ -489,7 +618,7 @@
       label,
       '',
       ...cols.num.map(getter),
-      getter(cols.mes),
+      ...(this.extraMes ? [getter(cols.mes)] : []),
       getter(cols.seq),
       getter(cols.finais),
       getter(cols.rept),
@@ -533,7 +662,13 @@
   };
 
   TubularApp.prototype.addManualRow = function (section) {
-    const row = { numbers: [0, 0, 0, 0, 0, 0, 0], month: 1, monthName: 'Janeiro', editable: true };
+    const L = limitsFrom(this.root);
+    const row = {
+      numbers: Array.from({ length: L.sorteadas }, () => 0),
+      month: this.extraMes ? 1 : 0,
+      monthName: this.extraMes ? 'Janeiro' : '',
+      editable: true,
+    };
     if (section === 10) this.manual10.push(row);
     else this.manual11.push(row);
     this.renderManual(section);
@@ -633,33 +768,46 @@
   TubularApp.prototype.exportMain = function (fmt) {
     // Exporta a mesma fatia visível (página atual / seletor 100·200·500·todos)
     const { rows } = this._visibleRows();
+    const nSort = limitsFrom(this.root).sorteadas;
+    const fname = 'tubular_analise';
     if (fmt === 'txt') {
       const lines = rows.map(c => {
         const n = this.numsFor(c);
-        return `${c.contest}\t${c.date}\t${n.map(fmt2).join(' ')}\t${c.monthName}`;
+        const base = `${c.contest}\t${c.date}\t${n.map(fmt2).join(' ')}`;
+        return this.extraMes ? `${base}\t${c.monthName || ''}` : base;
       });
-      downloadBlob(lines.join('\n') + '\n', 'tubular_diadesorte.txt', 'text/plain');
+      downloadBlob(lines.join('\n') + '\n', `${fname}.txt`, 'text/plain');
       return;
     }
     if (fmt === 'html') {
       const table = this.root.querySelector('#tbTabela')?.outerHTML || '';
-      downloadBlob(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Tubular</title></head><body>${table}</body></html>`, 'tubular_diadesorte.html', 'text/html');
+      downloadBlob(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Tubular</title></head><body>${table}</body></html>`, `${fname}.html`, 'text/html');
       return;
     }
     if (fmt === 'xlsx') {
+      const dezHeaders = Array.from({ length: nSort }, (_, i) => String(i + 1));
+      const header = [
+        'Concurso', 'Data', ...dezHeaders,
+        ...(this.extraMes ? ['Mes'] : []),
+        'SEQ', 'FINAIS', 'Soma', 'Pares', 'Impares', 'Inicial', 'Final', 'Qtde', 'Numeros',
+      ];
       const dataRows = rows.map(c => {
         const n = this.numsFor(c);
         const an = calculateCompleteAnalysis(n, c.monthName);
-        return [c.contest, c.date, ...n.map(fmt2), c.monthName, an.sequencesInfo.qtde, an.finaisIguais.qtde, an.soma, an.pares, an.impares, an.padroes.inicial, an.padroes.final, an.qtdeDigitos, an.digitosUnicos];
+        return [
+          c.contest, c.date, ...n.map(fmt2),
+          ...(this.extraMes ? [c.monthName || ''] : []),
+          an.sequencesInfo.qtde, an.finaisIguais.qtde, an.soma, an.pares, an.impares,
+          an.padroes.inicial, an.padroes.final, an.qtdeDigitos, an.digitosUnicos,
+        ];
       });
-      const header = ['Concurso','Data','1','2','3','4','5','6','7','Mes','SEQ','FINAIS','Soma','Pares','Impares','Inicial','Final','Qtde','Numeros'];
       let xml = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>';
       xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Tubular"><Table>';
       [header, ...dataRows].forEach(r => {
         xml += '<Row>' + r.map(c => `<Cell><Data ss:Type="String">${String(c).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</Data></Cell>`).join('') + '</Row>';
       });
       xml += '</Table></Worksheet></Workbook>';
-      downloadBlob(xml, 'tubular_diadesorte.xls', 'application/vnd.ms-excel');
+      downloadBlob(xml, `${fname}.xls`, 'application/vnd.ms-excel');
     }
   };
 

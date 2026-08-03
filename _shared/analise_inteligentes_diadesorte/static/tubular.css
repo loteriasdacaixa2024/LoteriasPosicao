@@ -103,6 +103,83 @@
   background: #fff8e1; color: #856404; font-size: .72rem; font-style: italic;
 }
 
+/* Resumo ocorrências / % das condições (recolhível, abaixo da tabela) */
+#ai-tubular-root .tb-cond-stats {
+  margin-top: .85rem;
+  text-align: center;
+}
+#ai-tubular-root .tb-cond-stats-below {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: .75rem 1rem;
+}
+#ai-tubular-root .tb-cond-stats-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  color: #1f2937;
+  font-size: .84rem;
+  font-weight: 700;
+  padding: .4rem .75rem;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+#ai-tubular-root .tb-cond-stats-toggle:hover {
+  color: var(--primary-xdark, #664a00);
+  border-color: #fbbf24;
+  background: #fffbeb;
+}
+#ai-tubular-root .tb-cond-stats-arrow {
+  display: inline-block;
+  width: 1rem;
+  font-size: .7rem;
+  transition: transform .15s ease;
+}
+#ai-tubular-root .tb-cond-stats-toggle[aria-expanded="true"] .tb-cond-stats-arrow {
+  transform: rotate(90deg);
+}
+#ai-tubular-root .tb-cond-stats-meta {
+  font-weight: 600;
+  font-size: .72rem;
+  color: #6b7280;
+}
+#ai-tubular-root .tb-cond-stats-body {
+  margin-top: .5rem;
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+#ai-tubular-root .tb-cond-stats-table {
+  font-size: .78rem;
+  background: #fff;
+}
+#ai-tubular-root .tb-cond-stats-table thead th {
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+#ai-tubular-root .tb-cond-stats-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+#ai-tubular-root .tb-cond-stats-table td.tb-cond-name {
+  text-align: left;
+  font-weight: 600;
+}
+#ai-tubular-root .tb-cond-stats-hint {
+  margin-top: .35rem;
+  font-size: .7rem;
+  color: #6b7280;
+  text-align: center;
+}
+
 /* Células numéricas — juntas, sem grade entre dezenas */
 #ai-tubular-root .number-cell,
 #ai-tubular-root .tb-number {

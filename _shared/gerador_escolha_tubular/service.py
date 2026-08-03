@@ -352,7 +352,7 @@ def gerar_apostas(
 
     pick_n = int(pick if pick is not None else ctx["pick_default"])
     pick_n = max(int(ctx["pick_min"]), min(int(ctx["pick_max"]), pick_n))
-    qtd = max(1, min(int(quantidade or 10), 100))
+    qtd = max(1, min(int(quantidade or 10), 500))
     perfil = ctx["perfil"]
     pool_rep = list(ctx.get("pool_repetidos") or [])
     dmin = int(ctx["dezena_min"])

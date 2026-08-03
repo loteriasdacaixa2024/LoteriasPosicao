@@ -20,8 +20,9 @@ def _page_context(modality_key: str) -> dict:
     dmax = int(mod.get("dezena_max", 31))
     sorteadas = int(mod.get("sorteadas", mod.get("pick_default", 7)))
     nao_sairam_qtd = max(0, dmax - dmin + 1 - sorteadas)
+    extra_mes = (mod.get("extra") == "mes") or (modality_key == "diadesorte")
     meses_cores = {}
-    if modality_key == "diadesorte":
+    if extra_mes:
         try:
             from services.cores_meses_service import CoresMesesService
             meses_cores = CoresMesesService.obter_cores() or {}
@@ -42,6 +43,7 @@ def _page_context(modality_key: str) -> dict:
         "geradores_elite_home": "/geradores-elite/",
         "construtor_url": "/geradores-elite/construtor-construcoes/",
         "meses_cores": meses_cores,
+        "extra_mes": bool(extra_mes),
         "dezena_min": dmin,
         "dezena_max": dmax,
         "sorteadas": sorteadas,
