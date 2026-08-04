@@ -241,3 +241,272 @@
   vertical-align: middle;
   white-space: nowrap;
 }
+
+/* ——— Aba Visualização (Círculos / Horizontal / Vertical) ——— */
+#ev-root {
+  --ev-viz-laranja: #f5a623;
+  --ev-viz-roxo: #9b59b6;
+  --ev-viz-card-bg: #fffaf0;
+}
+
+#ev-root .ev-viz-mode.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+#ev-root #ev-pane-visualizacao .d-flex.flex-wrap.align-items-center.gap-2.mb-3 {
+  justify-content: center;
+}
+
+#ev-root .ev-viz-content {
+  min-height: 240px;
+  width: 100%;
+  max-width: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#ev-root .ev-viz-content[data-ev-viz-mode="horizontal"] {
+  max-width: 720px;
+}
+
+#ev-root .ev-viz-content[data-ev-viz-mode="circulos"] {
+  max-width: 1180px;
+}
+
+#ev-root .ev-viz-content[data-ev-viz-mode="vertical"] {
+  max-width: none;
+}
+
+#ev-root .ev-viz-lista-h {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#ev-root .ev-viz-mes {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  min-width: 1.55rem;
+  padding: 0;
+  border-radius: 4px;
+  font-size: .58rem;
+  font-weight: 800;
+  color: #fff !important;
+  line-height: 1;
+  text-transform: capitalize;
+}
+
+#ev-root .ev-viz-data {
+  color: #6c757d;
+  font-weight: 500;
+  font-size: .78rem;
+}
+
+#ev-root .ev-viz-bola {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #fff;
+  border-radius: 6px;
+}
+
+#ev-root .ev-viz-bola.tom-laranja { background: var(--ev-viz-laranja); }
+#ev-root .ev-viz-bola.tom-roxo { background: var(--ev-viz-roxo); }
+
+/* —— Círculos —— */
+#ev-root .ev-viz-grid-circulos {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: .65rem;
+}
+
+@media (max-width: 1399.98px) {
+  #ev-root .ev-viz-grid-circulos { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 991.98px) {
+  #ev-root .ev-viz-grid-circulos { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 575.98px) {
+  #ev-root .ev-viz-grid-circulos { grid-template-columns: 1fr; }
+}
+
+#ev-root .ev-viz-card-circulo {
+  background: var(--ev-viz-card-bg);
+  border: 1px solid #f0e0c0;
+  border-radius: 10px;
+  padding: .55rem .6rem .7rem;
+}
+
+#ev-root .ev-viz-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .35rem;
+  margin-bottom: .45rem;
+  font-size: .78rem;
+}
+
+#ev-root .ev-viz-card-meta strong {
+  color: #1f2937;
+  margin-right: .25rem;
+}
+
+#ev-root .ev-viz-grid-dots {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+}
+
+#ev-root .ev-viz-dot {
+  aspect-ratio: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: .58rem;
+  font-weight: 700;
+  color: #c5c9ce;
+  background: transparent;
+  border: 1px solid #d8dde3;
+}
+
+#ev-root .ev-viz-dot.is-on {
+  background: var(--ev-viz-laranja);
+  border-color: var(--ev-viz-laranja);
+  color: #fff;
+  font-weight: 800;
+}
+
+/* —— Horizontal —— */
+#ev-root .ev-viz-lista-h {
+  background: #fff;
+  border: 1px solid #e8eaed;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#ev-root .ev-viz-row-h {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .85rem 1.25rem;
+  padding: .5rem .9rem;
+  border-bottom: 1px solid #eef0f2;
+}
+
+#ev-root .ev-viz-row-h:last-child { border-bottom: 0; }
+
+#ev-root .ev-viz-row-meta {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: .4rem;
+  min-width: 12.5rem;
+  flex-shrink: 0;
+  font-size: .84rem;
+  justify-content: flex-start;
+}
+
+#ev-root .ev-viz-row-meta strong { color: #111; }
+
+#ev-root .ev-viz-bolas-h {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: .32rem;
+}
+
+#ev-root .ev-viz-bolas-h .ev-viz-bola {
+  width: 34px;
+  height: 34px;
+  font-size: .78rem;
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+/* —— Vertical (grade densa como no exemplo) —— */
+#ev-root .ev-viz-grid-v {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 58px);
+  justify-content: center;
+  gap: 10px 8px;
+  background: transparent;
+  border-radius: 0;
+  padding: .15rem 0 .5rem;
+}
+
+#ev-root .ev-viz-card-v {
+  width: 58px;
+  background: #fff;
+  border: 1px solid #e8eaed;
+  border-radius: 5px;
+  padding: 4px 3px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: none;
+}
+
+#ev-root .ev-viz-card-v-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 1px 2px;
+  gap: 3px;
+  line-height: 1.15;
+}
+
+#ev-root .ev-viz-card-v-head strong {
+  font-size: .62rem;
+  font-weight: 800;
+  color: #222;
+  letter-spacing: -.02em;
+}
+
+#ev-root .ev-viz-card-v-head .ev-viz-data {
+  font-size: .52rem;
+  color: #9aa0a6;
+  font-weight: 500;
+}
+
+#ev-root .ev-viz-bolas-v {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  align-items: center;
+}
+
+#ev-root .ev-viz-bolas-v .ev-viz-bola {
+  width: 46px;
+  height: 26px;
+  font-size: .72rem;
+  font-weight: 800;
+  border-radius: 6px;
+  box-shadow: none;
+  letter-spacing: .02em;
+}
+
+#ev-root .ev-viz-card-v-foot {
+  min-height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+#ev-root .ev-viz-card-v-foot .ev-viz-mes {
+  width: 1.35rem;
+  height: 1.35rem;
+  min-width: 1.35rem;
+  font-size: .5rem;
+  border-radius: 3px;
+}

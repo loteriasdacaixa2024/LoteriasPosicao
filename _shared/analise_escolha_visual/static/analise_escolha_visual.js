@@ -218,12 +218,23 @@
     carregar();
   }
 
-  // Expõe controles para a aba Estatísticas reutilizar a mesma janela
+  // Expõe controles para a aba Estatísticas / Visualização reutilizarem a mesma janela
   window.EvEscolha = {
     getFiltros() {
       return {
         ordem: document.getElementById('evSelectOrdem').value,
         limite: document.getElementById('evSelectLimite').value || '0',
+      };
+    },
+    getSorteios() {
+      return sorteios.slice();
+    },
+    getMeta() {
+      return {
+        pad: PAD,
+        dezenaMin: parseInt(root.dataset.dezenaMin || '1', 10) || 1,
+        dezenaMax: parseInt(root.dataset.dezenaMax || '31', 10) || 31,
+        extraMes: String(root.dataset.extraMes || '') === '1',
       };
     },
     onCarregado(cb) {

@@ -5,7 +5,11 @@
 <link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css">
 <div class="container-fluid py-3" id="ev-root"
      data-api="{{ api_base }}"
-     data-pad-width="{{ escolha_ui.pad_width }}">
+     data-pad-width="{{ escolha_ui.pad_width }}"
+     data-dezena-min="{{ escolha_ui.dezena_min }}"
+     data-dezena-max="{{ escolha_ui.dezena_max }}"
+     data-extra-mes="{{ 1 if escolha_ui.extra_mes else 0 }}"
+     data-meses-cores='{{ (meses_cores or {}) | tojson }}'>
 
     <div class="ev-header mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
         <div>
@@ -37,6 +41,12 @@
             <button class="nav-link" id="ev-tab-estatisticas" data-bs-toggle="tab"
                     data-bs-target="#ev-pane-estatisticas" type="button" role="tab">
                 <i class="fas fa-chart-pie"></i> Estatísticas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ev-tab-visualizacao" data-bs-toggle="tab"
+                    data-bs-target="#ev-pane-visualizacao" type="button" role="tab">
+                <i class="fas fa-eye"></i> Visualização
             </button>
         </li>
     </ul>
@@ -270,9 +280,32 @@
                 </section>
             </div>
         </div>
+
+        <!-- ========== ABA VISUALIZAÇÃO ========== -->
+        <div class="tab-pane fade" id="ev-pane-visualizacao" role="tabpanel">
+            <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-3">
+                <span class="small text-muted fw-semibold me-1">Modo de exibição</span>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Modo de visualização" id="evVizModeGroup">
+                    <button type="button" class="btn btn-outline-secondary ev-viz-mode active"
+                            data-ev-viz-mode="circulos" id="evVizBtnCirculos" aria-pressed="true">
+                        <i class="fas fa-circle-notch"></i> Volante
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary ev-viz-mode"
+                            data-ev-viz-mode="horizontal" id="evVizBtnHorizontal" aria-pressed="false">
+                        <i class="fas fa-grip-lines"></i> Horizontal
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary ev-viz-mode"
+                            data-ev-viz-mode="vertical" id="evVizBtnVertical" aria-pressed="false">
+                        <i class="fas fa-grip-lines-vertical"></i> Vertical
+                    </button>
+                </div>
+            </div>
+            <div id="evVizContent" class="ev-viz-content" data-ev-viz-mode="circulos"></div>
+        </div>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visual.js"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js"></script>
+<script src="/analise/escolha-visual/static/analise_escolha_visualizacao.js"></script>
 {% endblock %}

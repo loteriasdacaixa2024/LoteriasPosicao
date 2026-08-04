@@ -16,6 +16,13 @@ _STATIC_DIR = os.path.join(_PKG_DIR, "static")
 def _page_context(modality_key: str) -> dict:
     cfg = get_estudos_config(modality_key)
     ui = AnaliseEscolhaVisualService.ui_meta(modality_key)
+    meses_cores = {}
+    if cfg.get("extra_mes"):
+        try:
+            from services.cores_meses_service import CoresMesesService
+            meses_cores = CoresMesesService.obter_cores() or {}
+        except Exception:
+            meses_cores = {}
     return {
         "modality_key": modality_key,
         "modality_nome": cfg["nome"],
@@ -23,6 +30,7 @@ def _page_context(modality_key: str) -> dict:
         "page_subtitle": "Destaques no volante — pares, ímpares, repetidos, sequências e finais",
         "api_base": "/analise/api/escolha-visual",
         "escolha_ui": ui,
+        "meses_cores": meses_cores,
         "gerador_elite_url": "/geradores-elite/",
         "gerador_escolha_url": "/geradores-elite/escolha-tubular-apostas/",
         "tubular_url": "/analise/analise-tubular/",
