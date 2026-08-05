@@ -754,6 +754,11 @@
                 <i class="fas fa-hashtag me-1"></i> Pool de Dígitos (0–9)
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ccTabDezenasEsp" data-bs-toggle="tab" data-bs-target="#ccPaneDezenasEsp" type="button" role="tab">
+                <i class="fas fa-star me-1"></i> Pool de Dezenas (01–31) Especial
+            </button>
+        </li>
     </ul>
     <div class="tab-content" id="ccMainTabContent">
         <div class="tab-pane fade show active" id="ccPaneDezenas" role="tabpanel">
@@ -1216,7 +1221,61 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div><!-- /ccPaneDigitos -->
+
+        <div class="tab-pane fade" id="ccPaneDezenasEsp" role="tabpanel">
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="cc-panel cc-step-card cc-step-1 p-3">
+                        <div class="d-flex align-items-start gap-2 mb-2">
+                            <h2 class="h6 cc-step-title mb-0 flex-grow-1">
+                                <span class="cc-step-badge">1</span> Distribuição especial (16 dezenas)
+                            </h2>
+                            <button type="button" class="btn btn-sm btn-link p-0 text-muted" id="ccEspInfoBtn"
+                                title="Como funciona" aria-label="Como funciona" aria-expanded="false"
+                                aria-controls="ccEspInfoBox">
+                                <i class="fas fa-circle-info fa-lg"></i>
+                            </button>
+                        </div>
+                        <div class="alert alert-light border small py-2 px-3 mb-3" id="ccEspInfoBox" style="display:none;" role="note">
+                            <strong>Como funciona:</strong> você escolhe uma distribuição fixa de
+                            <strong>exatamente 16 dezenas</strong>. Ao carregar, o sistema envia esse pool
+                            para a aba <em>Pool de Dezenas (01–31)</em> — o mesmo construtor, filtros e export.
+                            O confronto com ciclo/atraso abaixo é só informativo (não altera as 16 dezenas).
+                            Depois: <strong>Salvar conjunto-base</strong> → <strong>Gerar construção</strong>.
+                        </div>
+                        <label class="form-label small mb-1" for="ccEspSelect">Escolha a Distribuição</label>
+                        <select class="form-select form-select-sm mb-3" id="ccEspSelect">
+                            <option value="">— selecione —</option>
+                            <option value="1">Distribuição 1 — 6B / 5M / 5A</option>
+                            <option value="2">Distribuição 2 — 5B / 5M / 6A</option>
+                            <option value="3">Distribuição 3 — 6B / 5M / 5A</option>
+                            <option value="4">Distribuição 4 — mescla D1+D3 (6B / 5M / 5A)</option>
+                        </select>
+                        <div id="ccEspPreview" class="small text-muted mb-3">Selecione uma distribuição para ver o pool.</div>
+                        <div id="ccEspConfronto" class="small mb-3" style="display:none;"></div>
+                        <button type="button" class="btn btn-sm btn-success" id="ccEspBtnCarregar" disabled>
+                            <i class="fas fa-download"></i> Carregar no construtor (16 dezenas)
+                        </button>
+                        <p class="small text-muted mt-2 mb-0" id="ccEspStatus"></p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="cc-panel p-3">
+                        <h3 class="h6"><i class="fas fa-layer-group text-primary"></i> Faixas da distribuição</h3>
+                        <div class="cc-faixa-legend small mb-2">
+                            <span style="background:#0d6efd"></span> Baixas (01–10)
+                            <span style="background:#fd7e14"></span> Médias (11–20)
+                            <span style="background:#dc3545"></span> Altas (21–31)
+                        </div>
+                        <div id="ccEspBalls" class="d-flex flex-wrap gap-1 mb-2" style="min-height:2.5rem;"></div>
+                        <p class="small text-muted mb-0">
+                            Total obrigatório: <strong>16</strong> · universo Dia de Sorte (01–31).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /ccPaneDezenasEsp -->
     </div><!-- /ccMainTabContent -->
     {% endif %}
 </div>
@@ -1328,9 +1387,10 @@ window.__CC_DIGITOS_PAGE__ = 'construtor';
 {% if ui_config.has_mes %}
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
-<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}?v=4"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}?v=5"></script>
 {% if digitos_habilitado %}
 <script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=9"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_dezenas_especial.js') }}?v=1"></script>
 {% endif %}
 {% endif %}
 {% endblock %}

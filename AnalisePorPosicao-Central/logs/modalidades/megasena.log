@@ -5703,3 +5703,108 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5156
 Press CTRL+C to quit
 127.0.0.1 - - [04/Aug/2026 16:26:32] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:01] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [04/Aug/2026 19:44:02] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:05] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:05] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:09] "GET /geradores-elite/comportamento-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:09] "GET /geradores-elite/static/comportamento_bases_resumo.js HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:09] "GET /geradores-elite/static/comportamento_col_concurso.js HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:10] "GET /geradores-elite/static/panorama_modos.js HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:10] "GET /geradores-elite/api/comportamento/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:10] "GET /geradores-elite/api/comportamento/analise?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [04/Aug/2026 19:44:22] "POST /geradores-elite/api/comportamento/gerar HTTP/1.1" 200 -
+
+--- iniciando 2026-08-04 20:34:19 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [04/Aug/2026 20:34:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:30] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:30] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:30] "GET /geradores-elite/static/construtor_construcoes.js?v=5 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:30] "GET /geradores-elite/static/construtor_dezenas_especial.js?v=1 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:31] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 500 -
+127.0.0.1 - - [05/Aug/2026 06:06:31] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:31] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:31] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 500 -
+127.0.0.1 - - [05/Aug/2026 06:06:31] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:31] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:50] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:51] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:52] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:06:52] "GET /analise/api/ultimos HTTP/1.1" 200 -
+[API Caixa] MegaSena 3040/3040...127.0.0.1 - - [05/Aug/2026 06:07:00] "POST /api/sincronizar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:01] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:02] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:02] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:08] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:08] "GET /geradores-elite/static/construtor_construcoes.js?v=5 HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2026 06:07:08] "GET /geradores-elite/static/construtor_dezenas_especial.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2026 06:07:08] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2026 06:07:08] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 500 -
+127.0.0.1 - - [05/Aug/2026 06:07:08] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:08] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:08] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 500 -
+127.0.0.1 - - [05/Aug/2026 06:07:08] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:09] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:36] "GET /geradores-elite/api/construtor-construcoes/ciclo?tipo=sorteadas HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:37] "GET /geradores-elite/api/construtor-construcoes/ciclo?tipo=sorteadas HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:38] "GET /geradores-elite/api/construtor-construcoes/ciclo?tipo=faltantes HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:45] "GET /geradores-elite/api/construtor-construcoes/analise-sugestao?quantidade=24&criterio=atraso HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:52] "GET /geradores-elite/api/construtor-construcoes/analise-sugestao?quantidade=24&criterio=frequencia HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:07:55] "GET /geradores-elite/api/construtor-construcoes/analise-sugestao?quantidade=24&criterio=atraso HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:08:03] "POST /geradores-elite/api/construtor-construcoes/sessao HTTP/1.1" 500 -
+127.0.0.1 - - [05/Aug/2026 06:10:26] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:26] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 500 -
+127.0.0.1 - - [05/Aug/2026 06:10:38] "GET /geradores-elite/api/construtor-construcoes/digitos/sugerir?criterio=frequencia&quantidade=4 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:38] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:41] "GET /geradores-elite/api/construtor-construcoes/digitos/sugerir?criterio=atraso&quantidade=4 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:41] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:45] "GET /geradores-elite/api/construtor-construcoes/digitos/sugerir?criterio=pares&quantidade=5 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:45] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:47] "GET /geradores-elite/api/construtor-construcoes/digitos/sugerir?criterio=impares&quantidade=5 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:48] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:54] "GET /geradores-elite/api/construtor-construcoes/digitos/sugerir?criterio=frequencia&quantidade=4 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:10:55] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:11:53] "GET /geradores-elite/api/construtor-construcoes/digitos/sugerir?criterio=frequencia&quantidade=4 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:11:53] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:11:55] "GET /geradores-elite/api/construtor-construcoes/digitos/sugerir?criterio=atraso&quantidade=4 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:11:55] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:20:34] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:20:59] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:23:43] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:23:56] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:24:40] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:25:03] "GET /api/status-banco HTTP/1.1" 200 -
+
+--- iniciando 2026-08-05 06:57:15 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.1.218:5156
+Press CTRL+C to quit
+127.0.0.1 - - [05/Aug/2026 06:57:34] "GET / HTTP/1.1" 200 -

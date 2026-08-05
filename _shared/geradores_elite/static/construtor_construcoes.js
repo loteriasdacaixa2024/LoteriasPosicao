@@ -1792,5 +1792,21 @@
         } catch (_) {}
     }
 
+    /** Hook para a aba Especial carregar pool no motor atual (sem duplicar gerador). */
+    window.__CC_aplicarPoolDezenas = function (nums, origem, aviso) {
+        try {
+            const btnVol = document.getElementById('ccModoVolanteBtn');
+            if (btnVol && modoEntrada !== 'volante') {
+                setModoEntrada('volante', false);
+            }
+        } catch (_) {}
+        setSelecionadas(nums, origem || 'distribuicao-especial', aviso);
+        const tab = document.getElementById('ccTabDezenas');
+        if (tab && typeof bootstrap !== 'undefined') {
+            bootstrap.Tab.getOrCreateInstance(tab).show();
+        }
+        return true;
+    };
+
     init();
 })();

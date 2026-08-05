@@ -5530,3 +5530,41 @@ WARNING: This is a development server. Do not use it in a production deployment.
 Press CTRL+C to quit
 127.0.0.1 - - [04/Aug/2026 16:26:30] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [04/Aug/2026 16:26:31] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-04 20:34:17 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.0.10:5152
+Press CTRL+C to quit
+127.0.0.1 - - [04/Aug/2026 20:34:22] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:20:25] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:20:48] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:23:34] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:23:50] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:24:32] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2026 06:24:51] "GET /api/status-banco HTTP/1.1" 200 -
+
+--- iniciando 2026-08-05 06:57:10 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.1.218:5152
+Press CTRL+C to quit
+127.0.0.1 - - [05/Aug/2026 06:57:32] "GET / HTTP/1.1" 200 -
