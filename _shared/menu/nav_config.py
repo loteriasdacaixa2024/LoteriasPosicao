@@ -235,7 +235,7 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
         "analise_extras": [
             {
                 "title": "Resultados & Padrões",
-                "desc": "Concursos reais · perfil · combinações · tubular (abre GC/Elite)",
+                "desc": "Concursos · Padrões I/II · tubular · alimenta Construtor/Elite",
                 "href": "/analise/analises-inteligentes/",
                 "icon": "fas fa-table-list",
                 "icon_bg": "#e8f5e9",
@@ -747,7 +747,7 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
     # Paridade com Dia de Sorte: Resultados & Padrões
     novos_analise.append({
         "title": "Resultados & Padrões",
-        "desc": "Concursos reais · perfil · combinações · tubular (abre GC/Elite)",
+        "desc": "Concursos · Padrões I/II · tubular · alimenta Construtor/Elite",
         "href": "/analise/analises-inteligentes/",
         "icon": "fas fa-table-list",
         "icon_bg": "#e8f5e9",

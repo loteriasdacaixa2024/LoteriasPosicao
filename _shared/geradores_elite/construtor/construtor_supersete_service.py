@@ -18,6 +18,7 @@ from geradores_elite.construtor.construcoes_core_ss import (
     pool_por_faixa_colunas,
 )
 from geradores_elite.construtor.construtor_base_service import ConstrutorBaseService
+from geradores_elite.construtor.schema_ensure import ensure_construtor_schema
 from geradores_elite.construtor.construtor_specs import SUPERSETE_CONSTRUTOR
 from geradores_elite.construtor.models import ConstrutorAposta, ConstrutorConstrucao, ConstrutorSessao
 from geradores_elite.engine_final_core import formatar_export_txt
@@ -212,6 +213,7 @@ class ConstrutorSuperSeteService(ConstrutorBaseService):
         origem_conjunto: str = "manual",
         sessao_id: Optional[int] = None,
     ) -> Dict[str, Any]:
+        ensure_construtor_schema()
         pool = cls._parse_pool(conjunto_base)
         err = cls._validar_pool(pool)
         if err:

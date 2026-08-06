@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import math
 import random
-from itertools import combinations
+from collections import Counter, defaultdict
+from itertools import combinations, product
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
 
 from analise_estudos.service_factory import make_estudos_base
@@ -96,6 +97,167 @@ def padrao_inicial(dezenas: Sequence[int]) -> str:
 def padrao_final(dezenas: Sequence[int]) -> str:
     """Último dígito de cada dezena, na sequência recebida (sem reordenar de novo)."""
     return " ".join(str(int(d) % 10) for d in dezenas)
+
+
+def disponibilidade_digito_inicial(
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+) -> Dict[int, int]:
+    """Quantidade de dezenas por dígito inicial no universo."""
+    disp: Dict[int, int] = defaultdict(int)
+    for n in range(int(min_dezena), int(max_dezena) + 1):
+        disp[int(n) // 10] += 1
+    return dict(disp)
+
+
+def descricao_bma_do_padrao(padrao: str) -> str:
+    """Traduz padrão inicial em distribuição Baixas/Médias/Altas (0→B, 1→M, ≥2→A)."""
+    digs = [int(x) for x in str(padrao).replace(",", " ").split() if x.strip().isdigit()]
+    b = sum(1 for d in digs if d == 0)
+    m = sum(1 for d in digs if d == 1)
+    a = sum(1 for d in digs if d >= 2)
+    return f"{b}B + {m}M + {a}A"
+
+
+def jogos_possiveis_padrao(
+    padrao: str,
+    *,
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+) -> int:
+    """Volume teórico C por multiplicidade de dígito inicial no universo."""
+    digs = [int(x) for x in str(padrao).replace(",", " ").split() if x.strip().isdigit()]
+    if not digs:
+        return 0
+    disp = disponibilidade_digito_inicial(min_dezena, max_dezena)
+    need = Counter(digs)
+    total = 1
+    for dig, qtd in need.items():
+        disponivel = int(disp.get(dig, 0))
+        if qtd > disponivel:
+            return 0
+        total *= combinacoes_n(disponivel, qtd)
+    return int(total)
+
+
+def pool_por_digito_universo(
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+) -> Dict[int, List[int]]:
+    out: Dict[int, List[int]] = defaultdict(list)
+    for n in range(int(min_dezena), int(max_dezena) + 1):
+        out[int(n) // 10].append(int(n))
+    return dict(out)
+
+
+def expandir_jogos_padrao(
+    padrao: str,
+    *,
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+    limite: Optional[int] = None,
+    offset: int = 0,
+) -> Dict[str, Any]:
+    """
+    Lista as apostas (7 dezenas) que realizam o padrão inicial.
+    Ex.: '0 0 0 0 0 1 1' → todas C(01–09,5)×C(10–19,2).
+    """
+    digs = [int(x) for x in str(padrao).replace(",", " ").split() if x.strip().isdigit()]
+    padrao_norm = " ".join(str(d) for d in digs)
+    if not digs:
+        return {
+            "sucesso": False,
+            "erro": "Padrão inválido.",
+            "padrao": padrao_norm,
+            "total": 0,
+            "jogos": [],
+        }
+
+    need = Counter(digs)
+    pools = pool_por_digito_universo(min_dezena, max_dezena)
+    for dig, qtd in need.items():
+        if len(pools.get(dig) or []) < qtd:
+            return {
+                "sucesso": False,
+                "erro": f"Universo insuficiente para dígito {dig} (pede {qtd}).",
+                "padrao": padrao_norm,
+                "total": 0,
+                "jogos": [],
+            }
+
+    total = jogos_possiveis_padrao(padrao_norm, min_dezena=min_dezena, max_dezena=max_dezena)
+    digitos_ord = sorted(need.keys())
+    partes = [list(combinations(pools[d], need[d])) for d in digitos_ord]
+
+    off = max(0, int(offset or 0))
+    lim = int(limite) if limite not in (None, "", 0, "0") else None
+    jogos: List[Dict[str, Any]] = []
+    idx = 0
+    for combo_parts in product(*partes):
+        if idx < off:
+            idx += 1
+            continue
+        if lim is not None and len(jogos) >= lim:
+            break
+        dezenas = sorted(int(x) for part in combo_parts for x in part)
+        jogos.append({
+            "id": idx + 1,
+            "dezenas": dezenas,
+            "dezenas_fmt": " ".join(f"{d:02d}" for d in dezenas),
+            "soma": sum(dezenas),
+            "padrao_inicial": padrao_norm,
+        })
+        idx += 1
+
+    return {
+        "sucesso": True,
+        "padrao": padrao_norm,
+        "descricao": descricao_bma_do_padrao(padrao_norm),
+        "total": total,
+        "offset": off,
+        "limit": lim,
+        "retornados": len(jogos),
+        "tem_mais": (off + len(jogos)) < total,
+        "jogos": jogos,
+        "min_dezena": min_dezena,
+        "max_dezena": max_dezena,
+        "tamanho_jogo": len(digs),
+    }
+
+
+def _gerar_padroes_teoricos(
+    tamanho: int,
+    *,
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+) -> List[str]:
+    """Todos os padrões iniciais viáveis (dígitos não-decrescentes) no universo."""
+    disp = disponibilidade_digito_inicial(min_dezena, max_dezena)
+    digitos = sorted(disp.keys())
+    out: List[str] = []
+
+    def rec(i: int, restante: int, atual: List[int]) -> None:
+        if i == len(digitos):
+            if restante == 0 and atual:
+                out.append(" ".join(str(x) for x in atual))
+            return
+        dig = digitos[i]
+        max_n = min(restante, int(disp.get(dig, 0)))
+        for qtd in range(0, max_n + 1):
+            rec(i + 1, restante - qtd, atual + ([dig] * qtd))
+
+    rec(0, int(tamanho), [])
+    return out
+
+
+def status_padrao(frequencia: int, atraso: Optional[int], atraso_mediano: float) -> str:
+    if int(frequencia) <= 0:
+        return "faltante"
+    if atraso is None:
+        return "frequente"
+    if int(atraso) <= max(3, int(atraso_mediano)):
+        return "frequente"
+    return "atrasado"
 
 
 def pares_impares(dezenas: Sequence[int]) -> Dict[str, int]:
@@ -564,6 +726,137 @@ class AnaliseInteligentesService:
             "primeiro_concurso": dados.get("primeiro_concurso"),
             "ultimo_concurso": dados.get("ultimo_concurso"),
         }
+
+    @classmethod
+    def catalogo_padroes(cls, base: str = "geral") -> Dict[str, Any]:
+        """
+        Catálogo agregado de padrões iniciais (aba Padrões II).
+        Mesma fonte consumida pelo Construtor / Geradores Elite.
+        """
+        lim = cls._limites()
+        k = int(lim["tamanho_jogo"])
+        dmin = int(lim["min_dezena"])
+        dmax = int(lim["max_dezena"])
+
+        dados = cls.listar_resultados(janela=0, base=base)
+        linhas = list(dados.get("linhas") or [])
+        # listar_resultados vem mais recente primeiro
+        total_sorteios = len(linhas)
+
+        ocorrencias: Dict[str, List[int]] = defaultdict(list)
+        ultimo_resultado = None
+        atraso_por_padrao: Dict[str, int] = {}
+        for idx, l in enumerate(linhas):
+            p = str(l.get("padrao_inicial") or "").strip()
+            if not p:
+                dez = l.get("dezenas") or []
+                p = padrao_inicial(sorted(int(x) for x in dez))
+            if not p:
+                continue
+            ocorrencias[p].append(int(l.get("concurso") or 0))
+            if p not in atraso_por_padrao:
+                atraso_por_padrao[p] = idx
+            if idx == 0:
+                ultimo_resultado = {
+                    "concurso": l.get("concurso"),
+                    "data": l.get("data") or "",
+                    "dezenas": l.get("dezenas") or [],
+                    "dezenas_fmt": l.get("dezenas_fmt") or "",
+                    "numeros_formatados": [
+                        f"{int(x):02d}" for x in (l.get("dezenas") or [])
+                    ],
+                    "padrao": p,
+                    "descricao": descricao_bma_do_padrao(p),
+                    "mes_num": l.get("mes_num"),
+                    "mes_abrev": l.get("mes_abrev") or "",
+                    "mes_nome": l.get("mes_nome") or "",
+                }
+
+        atrasos_com_freq = list(atraso_por_padrao.values())
+        atraso_mediano = 10.0
+        if atrasos_com_freq:
+            orden = sorted(atrasos_com_freq)
+            mid = len(orden) // 2
+            atraso_mediano = float(orden[mid]) if len(orden) % 2 else (orden[mid - 1] + orden[mid]) / 2.0
+
+        teoricos = _gerar_padroes_teoricos(k, min_dezena=dmin, max_dezena=dmax)
+        padroes_set = set(teoricos) | set(ocorrencias.keys())
+
+        catalogo: List[Dict[str, Any]] = []
+        for p in sorted(padroes_set):
+            freq = len(ocorrencias.get(p) or [])
+            atraso = atraso_por_padrao.get(p) if freq > 0 else None
+            st = status_padrao(freq, atraso, atraso_mediano)
+            jogos = jogos_possiveis_padrao(p, min_dezena=dmin, max_dezena=dmax)
+            eh_ultimo = bool(ultimo_resultado and ultimo_resultado.get("padrao") == p)
+            catalogo.append({
+                "padrao": p,
+                "descricao": descricao_bma_do_padrao(p),
+                "jogos_possiveis": jogos,
+                "frequencia": freq,
+                "percentual_concursos": round(100.0 * freq / max(1, total_sorteios), 2),
+                "atraso": atraso,
+                "status": st,
+                "eh_padrao_ultimo_concurso": eh_ultimo,
+                "ultimo_concurso": max(ocorrencias[p]) if freq else None,
+            })
+
+        # Ordenação padrão: frequência desc, depois jogos
+        catalogo.sort(key=lambda r: (-int(r["frequencia"]), -int(r["jogos_possiveis"]), r["padrao"]))
+
+        top_frequencia = [
+            {
+                "padrao": r["padrao"],
+                "descricao": r["descricao"],
+                "frequencia": r["frequencia"],
+                "percentual_concursos": r["percentual_concursos"],
+                "atraso": r["atraso"],
+                "status": r["status"],
+            }
+            for r in catalogo if r["frequencia"] > 0
+        ][:3]
+
+        faltantes = sum(1 for r in catalogo if r["status"] == "faltante")
+        total_jogos = sum(int(r["jogos_possiveis"]) for r in catalogo)
+
+        return {
+            "sucesso": True,
+            "base": base,
+            "tamanho_jogo": k,
+            "min_dezena": dmin,
+            "max_dezena": dmax,
+            "total_sorteios_analisados": total_sorteios,
+            "total_padroes": len(catalogo),
+            "total_padroes_com_frequencia": sum(1 for r in catalogo if r["frequencia"] > 0),
+            "total_padroes_faltantes": faltantes,
+            "total_jogos_possiveis": total_jogos,
+            "ultimo_resultado": ultimo_resultado,
+            "top_frequencia": top_frequencia,
+            "padroes": catalogo,
+            "api": "/analise/api/inteligentes/catalogo-padroes",
+            "consumo": {
+                "construtor": "/geradores-elite/construtor-construcoes/",
+                "param_gerar": "padroes_selecionados",
+                "jogos_padrao": "/analise/api/inteligentes/jogos-padrao",
+            },
+        }
+
+    @classmethod
+    def listar_jogos_padrao(
+        cls,
+        padrao: str,
+        *,
+        limite: Optional[int] = None,
+        offset: int = 0,
+    ) -> Dict[str, Any]:
+        lim = cls._limites()
+        return expandir_jogos_padrao(
+            padrao,
+            min_dezena=lim["min_dezena"],
+            max_dezena=lim["max_dezena"],
+            limite=limite,
+            offset=offset,
+        )
 
 
 def make_inteligentes_service(modality_key: str):

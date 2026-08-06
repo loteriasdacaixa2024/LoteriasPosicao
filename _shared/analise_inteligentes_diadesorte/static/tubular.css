@@ -266,6 +266,22 @@
   font-weight: 700; text-align: center; vertical-align: middle;
   padding: .35rem .3rem; font-size: .68rem;
 }
+#ai-tubular-root .tb-table thead th.tb-sort {
+  cursor: pointer;
+  user-select: none;
+}
+#ai-tubular-root .tb-table thead th.tb-sort:hover {
+  filter: brightness(1.08);
+}
+#ai-tubular-root .tb-table thead th.tb-sort .tb-sort-ind {
+  font-size: .6rem;
+  opacity: .45;
+  margin-left: .15rem;
+}
+#ai-tubular-root .tb-table thead th.tb-sort.tb-sort-asc .tb-sort-ind,
+#ai-tubular-root .tb-table thead th.tb-sort.tb-sort-desc .tb-sort-ind {
+  opacity: 1;
+}
 #ai-tubular-root .tb-table td {
   text-align: center; vertical-align: middle; padding: .2rem .25rem;
 }

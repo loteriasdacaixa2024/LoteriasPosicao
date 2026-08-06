@@ -822,7 +822,7 @@
                             Conjunto-base (máx. {{ ui_config.max_conjunto_base }})
                         </button>
                         <button type="button" class="btn" id="ccModoApostasBtn" data-modo="apostas10x7">
-                            10 apostas × 7
+                            10 apostas × {{ ui_config.pick_default }}
                         </button>
                     </div>
                     {% endif %}
@@ -868,11 +868,11 @@
                     <div id="ccModoApostasWrap" style="display:none;">
                         <div class="cc-apostas-drop mb-2" id="ccApostasDrop">
                             <label class="form-label small mb-1 text-start d-block">
-                                Cole ou arraste <strong>exatamente 10 linhas</strong> com <strong>7 dezenas</strong> cada
+                                Cole ou arraste <strong>exatamente 10 linhas</strong> com <strong>{{ ui_config.pick_default }} dezenas</strong> cada
                                 (01–{{ ui_config.total_dezenas }}). O conjunto-base será a união das dezenas.
                             </label>
                             <textarea class="form-control form-control-sm cc-apostas-ta" id="ccApostasTexto"
-                                placeholder="01 02 03 04 05 06 07&#10;08 09 10 11 12 13 14&#10;… (10 linhas)"
+                                placeholder="{% for i in range(ui_config.pick_default) %}{{ '%02d'|format(i+1) }}{% if not loop.last %} {% endif %}{% endfor %}&#10;… (10 linhas)"
                                 spellcheck="false" autocomplete="off"></textarea>
                             <div class="d-flex flex-wrap gap-2 mt-2 justify-content-center">
                                 <button type="button" class="btn btn-sm btn-primary" id="ccBtnAplicarApostas">
@@ -1007,6 +1007,36 @@
                         <input type="number" class="form-control form-control-sm" id="ccPersA" min="0" value="0">
                     </div>
                 </div>
+                <div class="border rounded p-2 mb-2 bg-light" id="ccPadroesIIWrap">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                        <div class="small fw-bold mb-0">
+                            <i class="fas fa-cubes text-primary"></i> Padrões II
+                            <span class="fw-normal text-muted">— escolha 1 ou mais para orientar a geração</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="ccBtnPadIILoad" title="Carregar catálogo de /analise/api/inteligentes/catalogo-padroes">
+                                <i class="fas fa-sync"></i> Carregar
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="ccBtnPadIILimpar">Limpar</button>
+                            <a class="btn btn-outline-primary btn-sm" href="/analise/analises-inteligentes/?aba=padroes-ii" target="_blank" rel="noopener">
+                                Abrir análise
+                            </a>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mb-1 align-items-center">
+                        <input type="search" class="form-control form-control-sm" id="ccPadIIBusca" style="max-width:200px" placeholder="Filtrar padrão…">
+                        <select class="form-select form-select-sm" id="ccPadIIStatus" style="width:auto">
+                            <option value="">Todos</option>
+                            <option value="frequente">Frequente</option>
+                            <option value="atrasado">Atrasado</option>
+                            <option value="faltante">Faltante</option>
+                        </select>
+                        <span class="badge bg-secondary" id="ccPadIICount">0 selecionados</span>
+                    </div>
+                    <div id="ccPadIILista" class="small" style="max-height:160px;overflow:auto;">
+                        <span class="text-muted">Clique em Carregar para listar os padrões da análise Padrões II.</span>
+                    </div>
+                </div>
                 <div class="d-flex flex-wrap gap-2 align-items-center">
                     <button type="button" class="btn btn-primary" id="ccBtnGerar" disabled
                         title="Salve o conjunto-base antes de gerar">
@@ -1100,7 +1130,8 @@
                         <p class="small text-muted mb-2">
                             Compara construções da sessão com o mesmo conjunto-base. Resultados ficam salvos — use
                             <strong>Analisar todas no histórico</strong> (passo 4) ou o botão em cada construção.
-                            No Dia de Sorte o sorteio traz <strong>7 dezenas</strong> — o máximo de acertos por aposta é sempre <strong>7</strong>.
+                            Nesta modalidade o sorteio traz <strong>{{ ui_config.pick_default }} dezenas</strong>
+                            — o máximo de acertos por aposta é <strong>{{ ui_config.acertos_max_possivel }}</strong>.
                         </p>
                         <div class="text-center mb-2">
                             <div class="form-check form-check-inline small mb-0">

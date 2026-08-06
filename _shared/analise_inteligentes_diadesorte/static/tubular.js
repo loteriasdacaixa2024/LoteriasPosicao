@@ -221,10 +221,12 @@
     this.mesesCores = {};
     try { this.mesesCores = JSON.parse(root.dataset.mesesCores || '{}'); } catch (_) {}
     this.data = [];
-    this.view = 'draw'; // draw | asc
+    this.view = 'asc'; // draw | asc — Crescente por padrão
     this.marked = true;
     this.page = 1;
     this.pageSize = 100;
+    this.sortKey = 'contest';
+    this.sortDir = 'asc';
     this.manual10 = [];
     this.manual11 = [];
     this._bind();
@@ -236,13 +238,88 @@
     return n;
   };
 
-  TubularApp.prototype._visibleRows = function () {
-    const sortedAsc = [...this.data].sort((a, b) => a.contest - b.contest);
+  /** Última página = concursos mais recentes (ordem crescente por concurso). */
+  TubularApp.prototype._goLastPage = function () {
     const size = this._effectivePageSize();
-    const pages = Math.max(1, Math.ceil(sortedAsc.length / size) || 1);
+    const total = (this.data || []).length;
+    this.page = Math.max(1, Math.ceil(total / size) || 1);
+  };
+
+  TubularApp.prototype._chronoAsc = function () {
+    return [...this.data].sort((a, b) => a.contest - b.contest);
+  };
+
+  TubularApp.prototype._sortValue = function (c, chronoAsc, key, idxMap) {
+    const nums = this.numsFor(c);
+    const idx = idxMap ? idxMap.get(c.contest) : chronoAsc.findIndex(x => x.contest === c.contest);
+    const prev = idx > 0 ? this.numsFor(chronoAsc[idx - 1]) : [];
+    const an = calculateCompleteAnalysis(nums, c.monthName);
+    const rept = calculateRepetitions(nums, prev);
+    if (String(key || '').startsWith('dez')) {
+      const i = parseInt(String(key).slice(3), 10);
+      return Number.isFinite(i) ? (nums[i] || 0) : 0;
+    }
+    switch (key) {
+      case 'contest': return +c.contest || 0;
+      case 'date': return String(c.date || '');
+      case 'mes': return +c.month || 0;
+      case 'seq': return an.sequencesInfo.qtde || 0;
+      case 'finais': return an.finaisIguais.qtde || 0;
+      case 'rept': return (rept.list || []).length;
+      case 'soma': return an.soma || 0;
+      case 'pares': return an.pares || 0;
+      case 'impares': return an.impares || 0;
+      case 'inicial': return String(an.padroes.inicial || '');
+      case 'final': return String(an.padroes.final || '');
+      case 'qtde': return an.qtdeDigitos || 0;
+      case 'numeros': return String(an.digitosUnicos || '');
+      default: return +c.contest || 0;
+    }
+  };
+
+  TubularApp.prototype._visibleRows = function () {
+    const chronoAsc = this._chronoAsc();
+    const idxMap = new Map(chronoAsc.map((c, i) => [c.contest, i]));
+    const key = this.sortKey || 'contest';
+    const dir = this.sortDir === 'desc' ? -1 : 1;
+    let sortedDisplay;
+    if (key === 'contest') {
+      sortedDisplay = dir === 1 ? chronoAsc.slice() : chronoAsc.slice().reverse();
+    } else {
+      const decorated = chronoAsc.map(c => ({ c, val: this._sortValue(c, chronoAsc, key, idxMap) }));
+      decorated.sort((a, b) => {
+        const va = a.val;
+        const vb = b.val;
+        if (typeof va === 'string' || typeof vb === 'string') {
+          return dir * String(va).localeCompare(String(vb), 'pt-BR', { numeric: true });
+        }
+        return dir * ((+va || 0) - (+vb || 0));
+      });
+      sortedDisplay = decorated.map(x => x.c);
+    }
+    const size = this._effectivePageSize();
+    const pages = Math.max(1, Math.ceil(sortedDisplay.length / size) || 1);
     if (this.page > pages) this.page = pages;
     const start = (this.page - 1) * size;
-    return { sortedAsc, size, pages, start, rows: sortedAsc.slice(start, start + size) };
+    return {
+      chronoAsc,
+      sortedAsc: chronoAsc,
+      sortedDisplay,
+      size,
+      pages,
+      start,
+      rows: sortedDisplay.slice(start, start + size),
+    };
+  };
+
+  TubularApp.prototype._updateSortHeaders = function () {
+    const key = this.sortKey || 'contest';
+    const dir = this.sortDir || 'asc';
+    this.root.querySelectorAll('#tbTabela thead th.tb-sort').forEach(th => {
+      const active = th.dataset.sort === key;
+      th.classList.toggle('tb-sort-asc', active && dir === 'asc');
+      th.classList.toggle('tb-sort-desc', active && dir === 'desc');
+    });
   };
 
   TubularApp.prototype._qtdeClass = function (q) {
@@ -263,7 +340,7 @@
     r.querySelector('#tbViewAsc')?.addEventListener('click', () => this.setView('asc'));
     r.querySelector('#tbPageSize')?.addEventListener('change', (e) => {
       this.pageSize = +e.target.value || 0;
-      this.page = 1;
+      this._goLastPage();
       this.renderTable();
     });
     r.querySelector('#tbPrint')?.addEventListener('click', () => window.print());
@@ -271,6 +348,22 @@
       const b = ev.target.closest('[data-page]');
       if (!b) return;
       this.page = +b.dataset.page;
+      this.renderTable();
+    });
+    r.querySelector('#tbTabela thead')?.addEventListener('click', (ev) => {
+      const th = ev.target.closest('th.tb-sort');
+      if (!th || !th.dataset.sort) return;
+      const key = th.dataset.sort;
+      if (this.sortKey === key) {
+        this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortKey = key;
+        this.sortDir = (key === 'contest' || key === 'date' || key === 'soma' || key === 'qtde' || key.startsWith('dez'))
+          ? 'desc'
+          : 'asc';
+        if (key === 'contest') this.sortDir = 'asc';
+      }
+      this.page = 1;
       this.renderTable();
     });
     ['txt', 'xlsx', 'html'].forEach(fmt => {
@@ -363,7 +456,9 @@
 
   TubularApp.prototype.load = async function () {
     const st = this.root.querySelector('#tbStatus');
+    const stMini = this.root.querySelector('#tbStatusMini');
     if (st) st.textContent = 'Carregando…';
+    if (stMini) stMini.textContent = 'Carregando…';
     try {
       const r = await fetch(`${this.api}/tubular?base=geral`);
       const j = await r.json();
@@ -386,15 +481,18 @@
           monthName: mesNome,
         };
       });
-      this.page = 1;
+      this._goLastPage();
       this.renderKpis();
       this.renderCondStats();
       this.renderTable();
-      if (st) st.textContent = this.data.length
+      const statusTxt = this.data.length
         ? `${this.data[0].contest} → ${this.data[this.data.length - 1].contest} (${this.data.length})`
         : 'Sem dados';
+      if (st) st.textContent = statusTxt;
+      if (stMini) stMini.textContent = statusTxt;
     } catch (e) {
       if (st) st.textContent = 'Erro ao carregar';
+      if (stMini) stMini.textContent = 'Erro ao carregar';
       alert(e.message || e);
     }
   };
@@ -525,11 +623,13 @@
   TubularApp.prototype.renderTable = function () {
     const tbody = this.root.querySelector('#tbTabela tbody');
     if (!tbody) return;
-    const { sortedAsc, size, pages, start, rows } = this._visibleRows();
+    const { chronoAsc, sortedAsc, size, pages, start, rows } = this._visibleRows();
+    this._updateSortHeaders();
+    const idxMap = new Map(chronoAsc.map((c, i) => [c.contest, i]));
 
     // Ranking sutil dos padrões de dígitos únicos (mais frequente = 1º)
     const freqDig = {};
-    sortedAsc.forEach(c => {
+    chronoAsc.forEach(c => {
       const key = calculateCompleteAnalysis(this.numsFor(c), c.monthName).digitosUnicos;
       freqDig[key] = (freqDig[key] || 0) + 1;
     });
@@ -539,8 +639,8 @@
 
     tbody.innerHTML = rows.map(c => {
       const nums = this.numsFor(c);
-      const idx = sortedAsc.findIndex(x => x.contest === c.contest);
-      const prev = idx > 0 ? this.numsFor(sortedAsc[idx - 1]) : [];
+      const idx = idxMap.has(c.contest) ? idxMap.get(c.contest) : -1;
+      const prev = idx > 0 ? this.numsFor(chronoAsc[idx - 1]) : [];
       const an = calculateCompleteAnalysis(nums, c.monthName);
       const rept = calculateRepetitions(nums, prev);
       const seqEmoji = getEmojiByCount(an.sequencesInfo.qtde);

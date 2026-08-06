@@ -82,39 +82,13 @@ def create_app():
         db.create_all()
         try:
             db.session.execute(db.text(
-                "ALTER TABLE construtor_construcoes ADD COLUMN mes_num INTEGER"
-            ))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-        try:
-            db.session.execute(db.text(
                 "ALTER TABLE sorteio_diadesorte ADD COLUMN ganhadores_7 INTEGER"
             ))
             db.session.commit()
         except Exception:
             db.session.rollback()
-        try:
-            db.session.execute(db.text(
-                "ALTER TABLE construtor_construcoes ADD COLUMN extra_json TEXT DEFAULT '{}'"
-            ))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-        try:
-            db.session.execute(db.text(
-                "ALTER TABLE construtor_sessoes ADD COLUMN tipo_universo VARCHAR(20) DEFAULT 'dezenas'"
-            ))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-        try:
-            db.session.execute(db.text(
-                "ALTER TABLE construtor_sessoes ADD COLUMN meta_json TEXT DEFAULT '{}'"
-            ))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
+        from geradores_elite.construtor.schema_ensure import ensure_construtor_schema
+        ensure_construtor_schema()
 
     start_auto_sync_once(
         app,

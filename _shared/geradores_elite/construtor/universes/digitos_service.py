@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from geradores_elite.construtor.construcoes_core import QTD_APOSTAS_FIXA
 from geradores_elite.construtor.models import ConstrutorAposta, ConstrutorConstrucao, ConstrutorSessao
+from geradores_elite.construtor.schema_ensure import ensure_construtor_schema
 from geradores_elite.construtor.universes import (
     POOL_MIN_RECOMENDADO,
     dezena_compativel,
@@ -248,6 +249,7 @@ class ConstrutorDigitosService:
         origem_conjunto: str = "manual",
         sessao_id: Optional[int] = None,
     ) -> Dict[str, Any]:
+        ensure_construtor_schema()
         sp = cls._spec(modality_key)
         pool_n = normalizar_pool_digitos(pool)
         if not pool_n:
@@ -284,6 +286,7 @@ class ConstrutorDigitosService:
 
     @classmethod
     def listar_sessoes_digitos(cls, modality_key: str) -> List[Dict[str, Any]]:
+        ensure_construtor_schema()
         base = cls._base_svc(modality_key)
         rows = (
             db.session.query(ConstrutorSessao)

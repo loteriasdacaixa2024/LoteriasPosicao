@@ -1,0 +1,3819 @@
+{% extends "base.html" %}
+
+{% block title %}Gerador Completo por Padrões - Dia de Sorte{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/cores-meses.css">
+<style id="cores-meses-dinamicas">
+    /* As cores dos meses serão carregadas dinamicamente da API /api/cores-meses/listar */
+</style>
+<style>
+    /* =========================================
+       ESTILOS DO GERADOR DE PADRÕES
+       Identidade Visual Dia de Sorte #D4B31A
+       ========================================= */
+
+    /* Header com degradê Dia de Sorte */
+    .header-dia-sorte {
+        background: linear-gradient(135deg, #e6c533 0%, #D4B31A 50%, #b69816 100%);
+        color: #2d2606;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .header-dia-sorte h2 {
+        margin: 0;
+        text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+    }
+
+    /* Cards de estatísticas */
+    .stat-card {
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        color: white;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .stat-card h3 {
+        font-size: 2rem;
+        margin-bottom: 5px;
+    }
+
+    .stat-card p {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    /* Tabela de padrões */
+    .table-padroes th {
+        background: linear-gradient(135deg, #D4B31A 0%, #b69816 100%);
+        color: #2d2606;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table-padroes th.th-sortable {
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+    }
+
+    .table-padroes th.th-sortable:hover {
+        background: linear-gradient(135deg, #e0c42a 0%, #c4a818 100%);
+    }
+
+    .table-padroes th.th-sortable.sorted {
+        box-shadow: inset 0 -3px 0 #2d2606;
+    }
+
+    .table-padroes th .sort-icon {
+        margin-left: 4px;
+        opacity: 0.45;
+        font-size: 0.75rem;
+    }
+
+    .table-padroes th.th-sortable.sorted .sort-icon {
+        opacity: 1;
+    }
+
+    .table-padroes tbody tr:hover {
+        background-color: rgba(212, 179, 26, 0.1);
+    }
+
+    .table-padroes tbody tr.highlighted {
+        background-color: rgba(212, 179, 26, 0.3) !important;
+    }
+
+    .table-padroes tbody tr.tr-padrao-ultimo-concurso {
+        background-color: rgba(40, 167, 69, 0.18) !important;
+        box-shadow: inset 4px 0 0 #28a745;
+    }
+
+    .table-padroes tbody tr.tr-padrao-ultimo-concurso:hover {
+        background-color: rgba(40, 167, 69, 0.28) !important;
+    }
+
+    .card-ultimo-resultado {
+        border: 2px solid #D4B31A;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #fffdf5 0%, #fff 100%);
+    }
+
+    .dezena-ultimo-sorteio {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        margin: 2px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+        color: #D4B31A;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .badge-ultimo-padrao {
+        font-family: 'Consolas', 'Monaco', monospace;
+        letter-spacing: 1px;
+    }
+
+    .card-top-frequencia {
+        border: 2px solid #0d6efd;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f0f7ff 0%, #fff 100%);
+    }
+
+    .top-freq-item {
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 12px;
+        height: 100%;
+        background: #fff;
+        transition: box-shadow 0.2s;
+    }
+
+    .top-freq-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .top-freq-item.rank-1 {
+        border-color: #ffc107;
+        background: linear-gradient(180deg, #fff9e6 0%, #fff 100%);
+    }
+
+    .top-freq-rank {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.9rem;
+    }
+
+    .rank-1 .top-freq-rank { background: #ffc107; color: #2d2606; }
+    .rank-2 .top-freq-rank { background: #adb5bd; color: #fff; }
+    .rank-3 .top-freq-rank { background: #cd7f32; color: #fff; }
+
+    .table-padroes tbody tr.tr-top-frequencia {
+        box-shadow: inset 4px 0 0 #0d6efd;
+    }
+
+    /* Badge de padrão */
+    .badge-padrao {
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        padding: 8px 12px;
+        background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+    }
+
+    /* Status badges */
+    .badge-frequente {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    }
+
+    .badge-atrasado {
+        background: linear-gradient(135deg, #ffc107 0%, #d39e00 100%);
+        color: #212529;
+    }
+
+    .badge-faltante {
+        background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+    }
+
+    /* Área de geração */
+    .geracao-container {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        border: 2px solid #D4B31A;
+    }
+
+    .padrao-selecionado {
+        background: linear-gradient(135deg, #D4B31A 0%, #b69816 100%);
+        color: #2d2606;
+        padding: 15px 25px;
+        border-radius: 10px;
+        font-size: 1.5rem;
+        font-family: 'Consolas', 'Monaco', monospace;
+        letter-spacing: 3px;
+        display: inline-block;
+    }
+
+    /* Lista de jogos gerados */
+    .jogos-container {
+        max-height: 500px;
+        overflow-y: auto;
+        background: white;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    .jogo-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+        font-family: 'Consolas', 'Monaco', monospace;
+    }
+
+    .jogo-item:last-child {
+        border-bottom: none;
+    }
+
+    .jogo-item:hover {
+        background-color: rgba(212, 179, 26, 0.1);
+    }
+
+    .jogo-numero {
+        color: #6c757d;
+        font-size: 0.85rem;
+        min-width: 60px;
+    }
+
+    .jogo-numeros {
+        flex: 1;
+        letter-spacing: 2px;
+    }
+
+    .jogo-numeros span {
+        display: inline-block;
+        width: 28px;
+        text-align: center;
+        background: #0d6efd;
+        color: white;
+        border-radius: 4px;
+        margin: 0 2px;
+        padding: 2px 0;
+        font-size: 0.85rem;
+    }
+
+    /* Progress bar customizada */
+    .progress-geracao {
+        height: 30px;
+        border-radius: 15px;
+        background: #e9ecef;
+    }
+
+    .progress-geracao .progress-bar {
+        background: linear-gradient(135deg, #D4B31A 0%, #b69816 100%);
+        border-radius: 15px;
+        font-weight: bold;
+    }
+
+    /* Botões de ação */
+    .btn-gerar {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        border: none;
+        padding: 12px 30px;
+        font-size: 1.1rem;
+    }
+
+    .btn-gerar:hover {
+        background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+        transform: translateY(-2px);
+    }
+
+    .btn-exportar-txt {
+        background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+        border: none;
+    }
+
+    .btn-exportar-xlsx {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        border: none;
+    }
+
+    .btn-selecionar {
+        background: linear-gradient(135deg, #D4B31A 0%, #b69816 100%);
+        color: #2d2606;
+        border: none;
+        font-weight: 600;
+    }
+
+    .btn-selecionar:hover {
+        background: linear-gradient(135deg, #b69816 0%, #9f8514 100%);
+        color: #2d2606;
+    }
+
+    /* Tabs customizadas */
+    .nav-tabs-padroes .nav-link {
+        border: none;
+        color: #495057;
+        font-weight: 500;
+        padding: 12px 25px;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .nav-tabs-padroes .nav-link.active {
+        background: linear-gradient(135deg, #D4B31A 0%, #b69816 100%);
+        color: #2d2606;
+    }
+
+    .nav-tabs-padroes .nav-link:hover:not(.active) {
+        background: rgba(212, 179, 26, 0.2);
+    }
+
+    /* Filtros - Estilo Dia de Sorte */
+    .filtros-container {
+        background: linear-gradient(135deg, #f7ecbb 0%, #f4e5a4 100%);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border: 2px solid #D4B31A;
+    }
+
+    .filtros-container label {
+        color: #5b4c0b;
+        font-weight: 600;
+    }
+
+    .filtros-container .form-control,
+    .filtros-container .form-select {
+        border: 2px solid #D4B31A;
+        background-color: #fff;
+    }
+
+    .filtros-container .form-control:focus,
+    .filtros-container .form-select:focus {
+        border-color: #e6c533;
+        box-shadow: 0 0 0 0.2rem rgba(212, 179, 26, 0.25);
+    }
+
+    /* Busca inteligente */
+    .busca-inteligente {
+        position: relative;
+    }
+
+    .busca-inteligente input {
+        padding-left: 40px;
+    }
+
+    .busca-inteligente i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #D4B31A;
+    }
+
+    .busca-inteligente .limpar-busca {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #dc3545;
+        display: none;
+    }
+
+    .busca-inteligente .limpar-busca.visible {
+        display: block;
+    }
+
+    /* Mês selecionado display */
+    .mes-selecionado-container {
+        background: linear-gradient(135deg, #f7ecbb 0%, #f4e5a4 100%);
+        border-radius: 10px;
+        padding: 15px;
+        border: 2px solid #D4B31A;
+        margin-bottom: 15px;
+    }
+
+    .mes-selecionado-container label {
+        color: #5b4c0b;
+        font-weight: 600;
+    }
+
+    .info-mes-selecionado {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: white;
+    }
+
+    /* Contador de resultados */
+    .contador-resultados {
+        background: #fff;
+        padding: 8px 15px;
+        border-radius: 20px;
+        border: 2px solid #D4B31A;
+        font-weight: 600;
+        color: #5b4c0b;
+    }
+
+    /* 🆕 GRID DE DEZENAS - FORMATO VOLANTE DIA DE SORTE */
+    .dezenas-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr); /* 10 colunas como volante oficial */
+        gap: 8px;
+        padding: 10px;
+        max-width: 650px;
+        margin: 0 auto;
+    }
+
+    .dezena-btn {
+        aspect-ratio: 1;
+        border: 2px solid #dee2e6;
+        background: white;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #495057;
+    }
+
+    .dezena-btn:hover {
+        border-color: #6c757d;
+        background: #d3d3d3;
+        color: #2d3436;
+        transform: scale(1.05);
+    }
+
+    .dezena-btn.selected {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-color: #047857;
+        color: white;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Estilo azul para dezenas do último sorteio (igual à página /desdobramentos) */
+    .dezena-btn.grupo-a {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border-color: #1d4ed8;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        cursor: not-allowed;
+    }
+
+    /* Mantém o azul mesmo desabilitado e evita animação de hover */
+    .dezena-btn.grupo-a:disabled {
+        opacity: 1;
+    }
+    .dezena-btn.grupo-a:hover {
+        transform: none;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .alert-validacao {
+        padding: 10px 15px;
+        border-radius: 8px;
+        border-left: 4px solid;
+        font-size: 0.9rem;
+    }
+
+    .alert-validacao.warning {
+        background: #fff3cd;
+        border-color: #ffc107;
+        color: #856404;
+    }
+
+    .alert-validacao.success {
+        background: #d1e7dd;
+        border-color: #28a745;
+        color: #155724;
+    }
+
+    /* Núcleos Estratégicos */
+    .nucleo-chip {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 4px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #D4B31A 0%, #b69816 100%);
+        color: #2d2606;
+        font-weight: 700;
+        min-width: 46px;
+        text-align: center;
+    }
+
+    .nucleo-card {
+        border: 2px solid #D4B31A;
+        border-radius: 12px;
+    }
+
+    .nucleo-toggles .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        cursor: pointer;
+    }
+
+    .nucleo-score-bar {
+        height: 8px;
+        border-radius: 4px;
+        background: #e9ecef;
+    }
+
+    .nucleo-score-fill {
+        height: 8px;
+        border-radius: 4px;
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .padrao-selecionado {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .stat-card h3 {
+            font-size: 1.5rem;
+        }
+
+        .dezenas-grid {
+            grid-template-columns: repeat(10, 1fr); /* Manter 10 colunas no mobile */
+            gap: 5px;
+            max-width: 100%;
+        }
+        
+        .dezena-btn {
+            font-size: 0.75rem;
+            padding: 2px;
+        }
+    }
+
+    @media print {
+        .navbar, footer, .btn, .nav-tabs, .filtros-container {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="header-dia-sorte">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h2><i class="fas fa-cubes me-2"></i>Gerador Completo por Padrões</h2>
+                <p class="mb-0 mt-2">Gere TODAS as combinações possíveis para cada padrão de dezenas</p>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-dark fs-6" id="totalPadroesHeader">
+                    <i class="fas fa-layer-group me-1"></i>-- padrões
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4" id="cardsEstatisticas">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-primary">
+                <h3 id="statTotalPadroes">--</h3>
+                <p><i class="fas fa-layer-group me-1"></i>Padrões Viáveis</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-success">
+                <h3 id="statTotalJogos">--</h3>
+                <p><i class="fas fa-dice me-1"></i>Total de Jogos</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-warning">
+                <h3 id="statFaltantes">--</h3>
+                <p><i class="fas fa-exclamation-triangle me-1"></i>Padrões Faltantes</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-info">
+                <h3 id="statMediaJogos">--</h3>
+                <p><i class="fas fa-calculator me-1"></i>Média por Padrão</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs nav-tabs-padroes mb-3" id="tabsPadroes" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-listar" data-bs-toggle="tab" data-bs-target="#painel-listar">
+                <i class="fas fa-list me-2"></i>Lista de Padrões
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-gerar" data-bs-toggle="tab" data-bs-target="#painel-gerar">
+                <i class="fas fa-cogs me-2"></i>Geração de Apostas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-nucleos" data-bs-toggle="tab" data-bs-target="#painel-nucleos">
+                <i class="fas fa-bullseye me-2"></i>Núcleos Estratégicos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-exportar" data-bs-toggle="tab" data-bs-target="#painel-exportar">
+                <i class="fas fa-download me-2"></i>Exportação
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- ===================================
+             ABA 1: LISTA DE PADRÕES
+             =================================== -->
+        <div class="tab-pane fade show active" id="painel-listar" role="tabpanel">
+            <!-- Último resultado oficial (comparação de padrão) -->
+            <div class="card card-ultimo-resultado shadow-sm mb-3" id="cardUltimoResultado" style="display: none;">
+                <div class="card-header py-2 d-flex flex-wrap justify-content-between align-items-center"
+                     style="background: linear-gradient(135deg, #D4B31A 0%, #b69816 100%); color: #2d2606;">
+                    <strong><i class="fas fa-trophy me-2"></i>Último resultado oficial — compare com os padrões</strong>
+                    <button type="button" class="btn btn-sm btn-dark" onclick="irParaPadraoUltimoConcurso()" id="btnIrPadraoUltimo">
+                        <i class="fas fa-crosshairs me-1"></i>Destacar na tabela
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-lg-4">
+                            <div class="small text-muted mb-1">Concurso <strong id="ultResConcurso">—</strong>
+                                <span class="ms-2" id="ultResData"></span>
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary me-1">Mês da Sorte</span>
+                                <span id="ultResMes" class="fw-bold">—</span>
+                            </div>
+                            <div id="ultResDezenas" class="flex-wrap"></div>
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <div class="small text-muted mb-1">Padrão deste concurso</div>
+                            <span class="badge badge-padrao badge-ultimo-padrao fs-6" id="ultResPadrao">—</span>
+                            <div class="small text-muted mt-2" id="ultResDescricao">—</div>
+                            <div class="small text-muted" id="ultResLegenda">0=01-09 | 1=10-19 | 2=20-29 | 3=30-31</div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="alert alert-info mb-0 py-2 small" id="ultResMensagemSistema">
+                                <i class="fas fa-info-circle me-1"></i>
+                                O sistema destaca na tabela o padrão igual ao último sorteio.
+                                Ao selecionar outro padrão, você verá se coincide ou diverge do último resultado.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-success mt-3 mb-0 py-2 small d-none" id="alertComparacaoPadrao"></div>
+                </div>
+            </div>
+
+            <!-- Top 3 padrões que mais saíram no histórico -->
+            <div class="card card-top-frequencia shadow-sm mb-3" id="cardTopFrequencia" style="display: none;">
+                <div class="card-header py-2 d-flex flex-wrap justify-content-between align-items-center bg-primary text-white">
+                    <strong><i class="fas fa-chart-line me-2"></i>Padrões que mais saíram até hoje</strong>
+                    <span class="small" id="topFreqTotalConcursos">— concursos analisados</span>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3" id="topFreqResumoCampeao"></p>
+                    <div class="row g-3" id="topFreqLista"></div>
+                    <div class="mt-3 d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="ordenarTabelaPorFrequencia()">
+                            <i class="fas fa-sort-amount-down me-1"></i>Ver tabela por frequência
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="irParaTop1Frequencia()">
+                            <i class="fas fa-medal me-1"></i>Destacar o #1 na tabela
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros Avançados -->
+            <div class="filtros-container">
+                <div class="row g-3 align-items-end">
+                    <!-- Busca Inteligente -->
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="fas fa-search me-1"></i>Busca Inteligente
+                        </label>
+                        <div class="busca-inteligente">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="form-control" id="buscaInteligente"
+                                   placeholder="Digite padrão, status, distribuição..."
+                                   style="font-size: 16px;"
+                                   oninput="filtrarEmTempoReal()">
+                            <span class="limpar-busca" id="limparBusca" onclick="limparBusca()">
+                                <i class="fas fa-times-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Filtro Status -->
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            <i class="fas fa-filter me-1"></i>Status
+                        </label>
+                        <select class="form-select" id="filtroStatus" style="font-size: 16px;" onchange="filtrarEmTempoReal()">
+                            <option value="">Todos</option>
+                            <option value="frequente">✅ Frequentes</option>
+                            <option value="atrasado">⏳ Atrasados</option>
+                            <option value="faltante">❌ Faltantes</option>
+                        </select>
+                    </div>
+
+                    <!-- Mín. Jogos -->
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            <i class="fas fa-arrow-down me-1"></i>Mín. Jogos
+                        </label>
+                        <input type="number" class="form-control" id="filtroMinJogos"
+                               placeholder="0" style="font-size: 16px;"
+                               oninput="filtrarEmTempoReal()">
+                    </div>
+
+                    <!-- Máx. Jogos -->
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            <i class="fas fa-arrow-up me-1"></i>Máx. Jogos
+                        </label>
+                        <input type="number" class="form-control" id="filtroMaxJogos"
+                               placeholder="∞" style="font-size: 16px;"
+                               oninput="filtrarEmTempoReal()">
+                    </div>
+
+                    <!-- Ordenar -->
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            <i class="fas fa-sort me-1"></i>Ordenar
+                        </label>
+                        <select class="form-select" id="filtroOrdenar" style="font-size: 16px;" onchange="filtrarEmTempoReal()">
+                            <option value="jogos_possiveis">Jogos (↓)</option>
+                            <option value="frequencia">Frequência (↓)</option>
+                            <option value="atraso">Atraso (↓)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Contador e Limpar -->
+                <div class="row mt-3">
+                    <div class="col-12 d-flex justify-content-between align-items-center">
+                        <span class="contador-resultados" id="contadorResultados">
+                            <i class="fas fa-list-ol me-1"></i>
+                            Exibindo <strong id="qtdExibindo">--</strong> de <strong id="qtdTotal">--</strong> padrões
+                        </span>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="limparTodosFiltros()">
+                            <i class="fas fa-eraser me-1"></i>Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 🆕 TOGGLE MÚLTIPLOS PADRÕES -->
+                <div class="card mt-3 border-primary">
+                    <div class="card-body p-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="toggleMultiplosPadroes" 
+                                           style="width: 3rem; height: 1.5rem; cursor: pointer;" 
+                                           onchange="toggleMultiplosPadroes()">
+                                    <label class="form-check-label fw-bold ms-2" for="toggleMultiplosPadroes" style="cursor: pointer;">
+                                        <i class="fas fa-layer-group me-2"></i>Modo Múltiplos Padrões
+                                    </label>
+                                </div>
+                                <small class="text-muted ms-5 ps-2" id="toggleInfo">
+                                    <i class="fas fa-info-circle me-1"></i>Desligado: Selecione apenas um padrão por vez
+                                </small>
+                            </div>
+                            <div class="col-md-6 text-end" id="controlesMultiplos" style="display: none;">
+                                <span class="badge bg-primary fs-6 me-2">
+                                    <i class="fas fa-check-double me-1"></i>
+                                    <span id="qtdSelecionados">0</span> selecionados
+                                </span>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="selecionarTodosPadroes()">
+                                    <i class="fas fa-check-square me-1"></i>Todos
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary me-1" onclick="limparSelecaoPadroes()">
+                                    <i class="fas fa-times me-1"></i>Limpar
+                                </button>
+                                <button class="btn btn-sm btn-success" id="btnIrParaGeracao" onclick="irParaGeracao()" disabled>
+                                    <i class="fas fa-arrow-right me-1"></i>Ir para Geração
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Padrões -->
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                        <table class="table table-hover table-padroes mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 50px;">#</th>
+                                    <th class="th-sortable" data-sort="padrao" onclick="ordenarPorColuna('padrao')" title="Clique para ordenar">
+                                        Padrão <i class="fas fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="text-center th-sortable" data-sort="descricao" onclick="ordenarPorColuna('descricao')" title="Clique para ordenar">
+                                        Distribuição <i class="fas fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="text-center th-sortable sorted" data-sort="jogos_possiveis" onclick="ordenarPorColuna('jogos_possiveis')" title="Clique para ordenar">
+                                        Jogos Possíveis <i class="fas fa-sort-down sort-icon"></i>
+                                    </th>
+                                    <th class="text-center th-sortable" data-sort="frequencia" onclick="ordenarPorColuna('frequencia')" title="Clique para ordenar">
+                                        Frequência <i class="fas fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="text-center th-sortable" data-sort="atraso" onclick="ordenarPorColuna('atraso')" title="Clique para ordenar">
+                                        Atraso <i class="fas fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="text-center th-sortable" data-sort="status" onclick="ordenarPorColuna('status')" title="Clique para ordenar">
+                                        Status <i class="fas fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="text-center" style="width: 120px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaPadroes">
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="spinner-border text-warning" role="status"></div>
+                                        <p class="mt-2 mb-0">Carregando padrões...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span id="infoPadroesFiltrados" class="text-muted">
+                            Exibindo -- padrões
+                        </span>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="carregarPadroes()">
+                            <i class="fas fa-sync-alt me-1"></i>Atualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================
+             ABA 2: GERAÇÃO DE APOSTAS
+             =================================== -->
+        <div class="tab-pane fade" id="painel-gerar" role="tabpanel">
+            <div class="row">
+                <!-- Coluna Principal -->
+                <div class="col-md-8">
+                    <div class="geracao-container">
+                        <!-- Padrão Selecionado -->
+                        <div class="text-center mb-4">
+                            <h5 class="text-muted mb-3">Padrão Selecionado:</h5>
+                            <div class="padrao-selecionado" id="padraoSelecionadoDisplay">
+                                Nenhum padrão selecionado
+                            </div>
+                            <div class="mt-3" id="infoPadraoSelecionado" style="display: none;">
+                                <span class="badge bg-primary fs-6 me-2" id="infoJogosPossiveis">-- jogos</span>
+                                <span class="badge fs-6" id="infoStatusPadrao">--</span>
+                            </div>
+                        </div>
+
+                        <!-- Configurações de Geração -->
+                        <div class="row justify-content-center mb-4" id="configGeracao" style="display: none;">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Configurações</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- 🔹 MODO ÚNICO -->
+                                        <div id="configUnico">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold">Visualização</label>
+                                                    <select class="form-select" id="visualizacaoSelect" style="font-size: 16px;">
+                                                        <option value="100">Primeiros 100 jogos</option>
+                                                        <option value="500">Primeiros 500 jogos</option>
+                                                        <option value="1000">Primeiros 1.000 jogos</option>
+                                                        <option value="all">Todos os jogos ⚠️</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 d-flex align-items-end">
+                                                    <button class="btn btn-gerar btn-lg text-white w-100" onclick="gerarApostas()">
+                                                        <i class="fas fa-magic me-2"></i>Gerar Apostas
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 🆕 MODO MÚLTIPLO -->
+                                        <div id="configMultiplo" style="display: none;">
+                                            <div class="row g-3">
+                                                <!-- Quantidade de Apostas -->
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold">
+                                                        <i class="fas fa-calculator me-1"></i>Quantidade de Apostas
+                                                    </label>
+                                                    <input type="number" class="form-control" id="quantidadeApostasInput" 
+                                                           placeholder="Ex: 10, 50, 100..." min="1" max="10000" value="10"
+                                                           style="font-size: 16px;">
+                                                    <small class="text-muted">Quantas apostas deseja gerar?</small>
+                                                </div>
+
+                                                <!-- Botão Gerar -->
+                                                <div class="col-md-6 d-flex align-items-end">
+                                                    <button class="btn btn-gerar btn-lg text-white w-100" onclick="gerarApostas()">
+                                                        <i class="fas fa-magic me-2"></i>Gerar Apostas
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 🆕 GRID DE DEZENAS (Visível quando toggle está ligado) -->
+                                        <div id="dezenasSelecaoContainer" style="display: none;" class="mt-4">
+                                            <div class="card border-info">
+                                                <div class="card-header bg-info text-white">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-th me-2"></i>Seleção de Dezenas
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <!-- Checkbox Usar Todas -->
+                                                    <div class="form-check mb-3">
+                                                        <input class="form-check-input" type="checkbox" id="usarTodasDezenas" 
+                                                               onchange="toggleUsarTodasDezenas()">
+                                                        <label class="form-check-label fw-bold" for="usarTodasDezenas">
+                                                            <i class="fas fa-check-double me-1"></i>Usar todas as 31 dezenas
+                                                        </label>
+                                                    </div>
+
+                                                    <!-- Sugestão Automática -->
+                                                    <div class="alert alert-info mb-3" id="sugestaoDezenas" style="display: none;">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <div>
+                                                                <i class="fas fa-lightbulb me-2"></i>
+                                                                <strong>Sugestão:</strong> Para <span id="qtdPadroesSugestao">0</span> padrões, 
+                                                                recomendamos <span id="qtdDezenasSugeridas">0</span> dezenas
+                                                            </div>
+                                                            <button class="btn btn-sm btn-outline-primary" onclick="aplicarDezenasSugeridas()">
+                                                                <i class="fas fa-magic me-1"></i>Aplicar
+                                                            </button>
+                                                        </div>
+                                                        <!-- Distribuição sugerida -->
+                                                        <div id="distribuicaoSugeridaContainer" style="display: none;" class="mt-2 pt-2 border-top">
+                                                            <small class="text-muted">Distribuição recomendada:</small>
+                                                            <div class="row g-2 mt-1">
+                                                                <div class="col-4">
+                                                                    <div class="p-2 bg-primary bg-opacity-10 rounded text-center">
+                                                                        <div class="fw-bold small">BAIXAS</div>
+                                                                        <div class="small"><span id="sugestBaixas">0</span> (01-10)</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="p-2 bg-warning bg-opacity-10 rounded text-center">
+                                                                        <div class="fw-bold small">MÉDIAS</div>
+                                                                        <div class="small"><span id="sugestMedias">0</span> (11-20)</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="p-2 bg-danger bg-opacity-10 rounded text-center">
+                                                                        <div class="fw-bold small">ALTAS</div>
+                                                                        <div class="small"><span id="sugestAltas">0</span> (21-31)</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Contador de Dezenas -->
+                                                    <div class="mb-3" id="contadorDezenasContainer">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="badge bg-secondary fs-6" id="contadorDezenas">0 selecionadas</span>
+                                                            <div>
+                                                                <button class="btn btn-sm btn-outline-primary me-1" onclick="selecionarTodasDezenas()">
+                                                                    <i class="fas fa-check-square me-1"></i>Todas
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-secondary" onclick="limparSelecaoDezenas()">
+                                                                    <i class="fas fa-times me-1"></i>Limpar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Grid de Dezenas -->
+                                                    <div id="dezenasGridContainer">
+                                                        <div id="dezenasGrid" class="dezenas-grid">
+                                                            <!-- Grid será preenchido via JavaScript -->
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Validação -->
+                                                    <div class="mt-3" id="alertValidacaoDezenas">
+                                                        <!-- Alertas de validação -->
+                                                    </div>
+
+                                                    <!-- Campo Hidden -->
+                                                    <input type="hidden" id="dezenasSelecionadasInput" value="">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="alert alert-warning mt-3 mb-0" id="alertaJogos" style="display: none;">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <strong>Atenção:</strong> Este padrão possui <span id="qtdJogosAlerta">--</span> jogos.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="mb-4" id="progressContainer" style="display: none;">
+                            <div class="progress progress-geracao">
+                                <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                            <p class="text-center mt-2 text-muted" id="progressText">Gerando apostas...</p>
+                        </div>
+
+                        <!-- Resultado da Geração -->
+                        <div id="resultadoGeracao" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list-ol me-2"></i>Apostas Geradas
+                                    <span class="badge bg-success ms-2" id="totalGerado">--</span>
+                                </h5>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="voltarPaginaJogos()">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <span id="paginacaoInfo">Página 1 de 1</span>
+                                    <button class="btn btn-outline-primary btn-sm ms-2" onclick="avancarPaginaJogos()">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="jogos-container" id="listaJogosGerados">
+                                <!-- Jogos serão inseridos aqui -->
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <small class="text-muted" id="tempoGeracao">Tempo de geração: --</small>
+                            </div>
+                        </div>
+
+                        <!-- Mensagem de nenhum padrão -->
+                        <div class="text-center py-5" id="mensagemSelecionePadrao">
+                            <i class="fas fa-hand-pointer fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Selecione um padrão na aba "Lista de Padrões"</h5>
+                            <p class="text-muted">Clique no botão "Selecionar" ao lado do padrão desejado</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna Lateral - Mês da Sorte -->
+                <div class="col-md-4">
+                    <!-- Seletor de Mês -->
+                    <div class="mes-selecionado-container">
+                        <label class="form-label mb-2">
+                            Mês da Sorte
+                        </label>
+                        <select class="form-select mb-3" id="mesSorteSelect" style="font-size: 16px;" onchange="atualizarDisplayMes()">
+                            <!-- Opções serão preenchidas via JavaScript -->
+                            <option value="">Carregando...</option>
+                        </select>
+
+                        <label class="form-label mb-2">
+                            <i class="fas fa-star me-1"></i>Mês Selecionado:
+                        </label>
+                        <div id="displayMesSelecionado" class="info-mes-selecionado">
+                            
+                            <span id="nomeMesSelecionado">Selecione...</span>
+                        </div>
+                    </div>
+
+                    <!-- Info sobre o padrão -->
+                    <div class="card shadow-sm" id="cardInfoPadrao" style="display: none;">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <strong>Padrão:</strong>
+                                    <span id="infoPadraoTexto">--</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>Jogos Possíveis:</strong>
+                                    <span id="infoJogosTexto">--</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>Frequência:</strong>
+                                    <span id="infoFreqTexto">--</span>
+                                </li>
+                                <li class="mb-0">
+                                    <strong>Status:</strong>
+                                    <span id="infoStatusTexto">--</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 🆕 NÚCLEO ESTRATÉGICO -->
+                    <div class="card shadow-sm mt-3" id="cardNucleoEstrategico">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-target me-2"></i>Núcleo Estratégico</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <p class="text-muted">
+                                    <small><i class="fas fa-check-circle text-success me-1"></i>Núcleo principal disponível</small>
+                                </p>
+                                <div class="alert alert-light border border-info mb-3">
+                                    <strong>Números:</strong> <span id="numeroNucleoEstrategico">--</span>
+                                </div>
+                            </div>
+
+                            <!-- Toggle: Usar Núcleo Estratégico -->
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="toggleUsarNucleoEstrategico" 
+                                       style="width: 3rem; height: 1.5rem; cursor: pointer;"
+                                       onchange="toggleUsarNucleoEstrategico()">
+                                <label class="form-check-label fw-bold ms-2" for="toggleUsarNucleoEstrategico" style="cursor: pointer;">
+                                    <i class="fas fa-magic me-2"></i>Usar Núcleo na Geração
+                                </label>
+                            </div>
+                            <small class="text-muted ms-5">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Ao ativar, cada aposta conterá os números do núcleo estratégico
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- 🆕 NÍVEL DE DESDOBRAMENTO -->
+                    <div class="card shadow-sm mt-3" id="cardNivelDesdobramento" style="display: none;">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="fas fa-layer-group me-2"></i>Desdobramento do Último Concurso</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <p class="mb-2 text-muted">
+                                    <small><i class="fas fa-info-circle me-1"></i>Nível de Redução detectado:</small>
+                                </p>
+                                <div class="alert alert-light border border-warning mb-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong id="nivelDesdobramentoTexto">--</strong>
+                                            <br>
+                                            <small class="text-muted" id="detalhesNivelTexto">--</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-warning text-dark fs-6" id="badgeNivelDesdobramento">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Toggle: Usar Desdobramento -->
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="toggleUsarDesdobramento" 
+                                       style="width: 3rem; height: 1.5rem; cursor: pointer;"
+                                       onchange="toggleUsarDesdobramento()">
+                                <label class="form-check-label fw-bold ms-2" for="toggleUsarDesdobramento" style="cursor: pointer;">
+                                    <i class="fas fa-magic me-2"></i>Usar Desdobramento na Geração
+                                </label>
+                            </div>
+                            <small class="text-muted ms-5">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Gera automaticamente 21 jogos usando 2 dezenas do último sorteio e <strong>complementos pelas dezenas selecionadas</strong> (ignora quantidade). Selecione <strong>ao menos 5 dezenas</strong>.
+                            </small>
+
+                            <!-- Dezenas do último concurso (visualização discreta) -->
+                            <div class="mt-2 ms-5">
+                                <small class="text-muted">
+                                    
+                                    Dezenas do último concurso: <span id="dezenasUltimoSorteio">--</span>
+                                </small>
+                            </div>
+
+                            <!-- Toggle: Usar Sugestão de Dezenas (Automático) -->
+                            <div class="form-check form-switch mt-3">
+                                <input class="form-check-input" type="checkbox" id="toggleUsarSugestaoDezenas" 
+                                       style="width: 3rem; height: 1.5rem; cursor: pointer;"
+                                       onchange="toggleUsarSugestaoDezenas()">
+                                <label class="form-check-label fw-bold ms-2" for="toggleUsarSugestaoDezenas" style="cursor: pointer;">
+                                    <i class="fas fa-lightbulb me-2"></i>Usar Sugestão de Dezenas
+                                </label>
+                            </div>
+                            <small class="text-muted ms-5">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Seleciona automaticamente as dezenas mais recomendadas
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================
+             ABA 3: NÚCLEOS ESTRATÉGICOS
+             =================================== -->
+        <div class="tab-pane fade" id="painel-nucleos" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="card nucleo-card shadow-sm h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Configurar Núcleo</h5>
+                        </div>
+                        <div class="card-body nucleo-toggles">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold d-block">Tamanho do Núcleo</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="nucleoTamanho" id="nucleo3" value="3" checked>
+                                        <label class="form-check-label" for="nucleo3">3 dezenas (equilíbrio)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="nucleoTamanho" id="nucleo4" value="4">
+                                        <label class="form-check-label" for="nucleo4">4 dezenas (mais concentração)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold d-block">Filtros que alimentam o score</label>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="filtroFreq" checked>
+                                    <label class="form-check-label" for="filtroFreq">Frequência</label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="filtroAtraso" checked>
+                                    <label class="form-check-label" for="filtroAtraso">Atraso</label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="filtroPadroes" checked>
+                                    <label class="form-check-label" for="filtroPadroes">Padrões (par/ímpar, baixo/alto)</label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="filtroDistrib" checked>
+                                    <label class="form-check-label" for="filtroDistrib">Distribuições / quadrantes</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold d-block">Regras estruturais</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="regraSequencia" checked>
+                                    <label class="form-check-label" for="regraSequencia">Evitar 3 consecutivas (máx. 1 sequência curta)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="regraQuadrante" checked>
+                                    <label class="form-check-label" for="regraQuadrante">Espalhar quadrantes (evitar concentrar)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="regraParImpar" checked>
+                                    <label class="form-check-label" for="regraParImpar">Balancear par/ímpar</label>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-success w-100" onclick="gerarNucleosAutomaticos()">
+                                <i class="fas fa-bullseye me-2"></i>Gerar Núcleo Automático
+                            </button>
+                            <small class="text-muted d-block mt-2">Usa os filtros ativos e aplica regras estruturais antes de fechar o núcleo.</small>
+
+                            <div class="mt-4">
+                                <h6 class="fw-bold"><i class="fas fa-file-import me-2"></i>Importar Núcleo</h6>
+                                <div class="d-grid gap-2">
+                                    <input type="file" id="importNucleoFile" accept=".txt,.xls,.xlsx,.html" style="display: none;" onchange="importarNucleo()">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="document.getElementById('importNucleoFile').click()">
+                                        <i class="fas fa-upload me-1"></i>TXT / XLS / HTML
+                                    </button>
+                                </div>
+                                <small class="text-muted">Formatos aceitos: números separados por espaço, vírgula ou quebra de linha</small>
+                            </div>
+
+                            <div class="mt-4">
+                                <h6 class="fw-bold"><i class="fas fa-dice-d20 me-2"></i>Jogos Ampliados</h6>
+                                <label class="form-label">Gerar apostas com mais dezenas (até 15)</label>
+                                <input type="range" class="form-range" id="dezenasAmpliadas" min="7" max="15" value="7" oninput="atualizarLabelAmpliadas()">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">7 (padrão)</small>
+                                    <small class="fw-bold" id="labelDezenasAmpliadas">7 dezenas</small>
+                                    <small class="text-muted">15 (máx)</small>
+                                </div>
+                                <div class="alert alert-info mt-2 mb-0" id="alertCustoAmpliado" style="display: none;">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <small id="textoCustoAmpliado">Custo: R$ 3,00</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="card nucleo-card shadow-sm mb-3">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-crosshairs me-2"></i>Resultados do Núcleo</h5>
+                            <span class="badge bg-primary" id="badgeNucleoConfig">Tamanho 3 • Filtros ligados</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold text-success mb-2">Principal</h6>
+                                    <div id="nucleoPrincipal" class="mb-2"></div>
+                                    <small class="text-muted">Balanceado para concentração com segurança.</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold text-warning mb-2">Alternativo</h6>
+                                    <div id="nucleoAlternativo" class="mb-2"></div>
+                                    <small class="text-muted">Variação leve para cobertura do cluster.</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold text-info mb-2">Conservador</h6>
+                                    <div id="nucleoConservador" class="mb-2"></div>
+                                    <small class="text-muted">Mais espalhado para reduzir risco de falha estrutural.</small>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-3">
+                                <button class="btn btn-sm btn-outline-primary" onclick="exportarNucleoTXT()" id="btnExportNucleoTXT" disabled>
+                                    <i class="fas fa-file-alt me-1"></i>Exportar TXT
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="exportarNucleoXLS()" id="btnExportNucleoXLS" disabled>
+                                    <i class="fas fa-file-excel me-1"></i>Exportar XLS
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="exportarNucleoHTML()" id="btnExportNucleoHTML" disabled>
+                                    <i class="fas fa-file-code me-1"></i>Exportar HTML
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card nucleo-card shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"><i class="fas fa-list-ol me-2"></i>Top 10 por score</h6>
+                            <small class="text-muted">Score ponderado pelos filtros ativos</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 80px;">Dezena</th>
+                                            <th style="width: 100px;">Score</th>
+                                            <th>Notas rápidas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabelaRankingNucleos">
+                                        <tr><td colspan="3" class="text-muted">Clique em "Gerar Núcleo Automático" para ver os candidatos.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================
+             ABA 4: EXPORTAÇÃO
+             =================================== -->
+        <div class="tab-pane fade" id="painel-exportar" role="tabpanel">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-file-export me-2"></i>Exportar Apostas</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Padrão para exportar -->
+                            <div class="text-center mb-4">
+                                <label class="form-label fw-bold">Padrão Selecionado:</label>
+                                <div class="padrao-selecionado" id="padraoExportarDisplay">
+                                    Nenhum padrão selecionado
+                                </div>
+                                <p class="mt-2 mb-0">
+                                    <span class="badge bg-primary fs-6" id="exportJogosPossiveis">-- jogos</span>
+                                </p>
+                            </div>
+
+                            <!-- Configurações -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">
+                                        Mês da Sorte
+                                    </label>
+                                    <select class="form-select" id="mesExportarSelect" style="font-size: 16px;">
+                                        <option value="">Carregando...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Formato</label>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-exportar-txt btn-lg text-white" onclick="exportarTXT()" id="btnExportarTXT" disabled>
+                                            <i class="fas fa-file-alt me-2"></i>Exportar TXT
+                                        </button>
+                                        <button class="btn btn-exportar-xlsx btn-lg text-white" onclick="exportarXLSX()" id="btnExportarXLSX" disabled>
+                                            <i class="fas fa-file-excel me-2"></i>Exportar XLSX
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preview do formato -->
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Formato TXT:</strong>
+                                <code class="ms-2">01 05 07 12 25 28 31 Nov</code>
+                                <br>
+                                <strong>Formato XLSX:</strong> Planilha com colunas D1 a D7, Padrão e Mês
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Histórico de Exportações -->
+                    <div class="card shadow-sm mt-4" id="historicoExportacoes" style="display: none;">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-history me-2"></i>Exportações Recentes</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush" id="listaExportacoes">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // =========================================
+    // VARIÁVEIS GLOBAIS
+    // =========================================
+    let todosPadroes = [];
+    let padroesFiltrados = [];
+    let ordenacaoColuna = 'jogos_possiveis';
+    let ordenacaoDirecao = 'desc';
+    let ultimoResultadoPadrao = null;
+    let topFrequenciaPadroes = [];
+    let padroesTopFreqSet = new Set();
+    let padraoSelecionado = null;
+    let jogosGerados = [];
+    let paginaAtualJogos = 1;
+    const jogosPorPagina = 100;
+
+    // Dados de mês
+    let mesFrequente = null;
+    let mesAtrasado = null;
+
+    // 🆕 Dados de Desdobramento
+    let ultimoSorteio = null;
+    let nivelDesdobramento = 2;
+    let usarDesdobramentoAtivo = false;
+    let usarSugestaoDezenasAtivo = false;
+    
+    // 🆕 Dados de Núcleo Estratégico
+    let nucleoEstrategico = null;
+    let usarNucleoAtivo = false;
+
+    const MESES = {
+        1: { nome: 'Janeiro', abrev: 'Jan' },
+        2: { nome: 'Fevereiro', abrev: 'Fev' },
+        3: { nome: 'Março', abrev: 'Mar' },
+        4: { nome: 'Abril', abrev: 'Abr' },
+        5: { nome: 'Maio', abrev: 'Mai' },
+        6: { nome: 'Junho', abrev: 'Jun' },
+        7: { nome: 'Julho', abrev: 'Jul' },
+        8: { nome: 'Agosto', abrev: 'Ago' },
+        9: { nome: 'Setembro', abrev: 'Set' },
+        10: { nome: 'Outubro', abrev: 'Out' },
+        11: { nome: 'Novembro', abrev: 'Nov' },
+        12: { nome: 'Dezembro', abrev: 'Dez' }
+    };
+
+    // Núcleos
+    const NUCLEOS_DEZENAS = Array.from({ length: 31 }, (_, i) => i + 1);
+    const NUCLEOS_STATE = {
+        tamanho: 3,
+        usarFrequencia: true,
+        usarAtraso: true,
+        usarPadroes: true,
+        usarDistribuicao: true,
+        regraSequencia: true,
+        regraQuadrante: true,
+        regraParImpar: true
+    };
+    let NUCLEOS_DADOS_REAIS = null; // Cache dos dados da API
+    let NUCLEOS_GERADOS = {
+        principal: [],
+        alternativo: [],
+        conservador: []
+    };
+
+    // =========================================
+    // INICIALIZAÇÃO
+    // =========================================
+    document.addEventListener('DOMContentLoaded', async function() {
+        // 1. Carregar cores dinâmicas dos meses
+        await carregarCoresMeses();
+
+        // 2. Carregar dados de mês (frequente/atrasado)
+        await carregarDadosMes();
+
+        // 3. Carregar padrões
+        await carregarPadroes();
+
+        // 4. Preparar UI de Núcleos Estratégicos
+        inicializarNucleosUI();
+        
+        // 4.5. Verificar Núcleo Estratégico (localStorage)
+        verificarNucleoEstrategico();
+        
+        // 5. Pré-carregar preços de dezenas
+        await carregarPrecosDezenas();
+        
+        // 6. Inicializar controle de dezenas ampliadas
+        await atualizarLabelAmpliadas();
+    });
+
+    // =========================================
+    // CARREGAR CORES DOS MESES (API)
+    // =========================================
+    async function carregarCoresMeses() {
+        try {
+            const response = await fetch('/api/cores-meses/listar');
+            const data = await response.json();
+
+            if (response.ok && data.cores) {
+                // 🆕 Armazenar cores em variável global para uso posterior
+                window.coresMeses = {};
+                
+                let cssRules = '';
+                data.cores.forEach((cor) => {
+                    // Armazenar por nome do mês
+                    window.coresMeses[cor.nome_mes] = cor.cor_hex;
+                    
+                    cssRules += `
+                        .mes-cor-${cor.mes} {
+                            background-color: ${cor.cor_hex} !important;
+                            color: white !important;
+                            font-weight: bold;
+                        } /* ${cor.nome_mes} */
+                    `;
+                });
+                document.getElementById('cores-meses-dinamicas').innerHTML = cssRules;
+                console.log('✅ Cores dos meses carregadas dinamicamente');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar cores:', error);
+            aplicarCoresPadrao();
+        }
+    }
+
+    // Cores alternativas caso API não carregue
+    function aplicarCoresPadrao() {
+        const coresPadrao = {
+            1: '#8B4513', 2: '#4682B4', 3: '#228B22', 4: '#9370DB',
+            5: '#FF69B4', 6: '#008B8B', 7: '#B8860B', 8: '#DC143C',
+            9: '#4169E1', 10: '#FF8C00', 11: '#9932CC', 12: '#2F4F4F'
+        };
+
+        // 🆕 Armazenar também no cache local
+        window.coresMeses = {
+            'Janeiro': '#8B4513', 'Fevereiro': '#4682B4', 'Março': '#228B22',
+            'Abril': '#9370DB', 'Maio': '#FF69B4', 'Junho': '#008B8B',
+            'Julho': '#B8860B', 'Agosto': '#DC143C', 'Setembro': '#4169E1',
+            'Outubro': '#FF8C00', 'Novembro': '#9932CC', 'Dezembro': '#2F4F4F'
+        };
+
+        let cssRules = '';
+        for (let mes = 1; mes <= 12; mes++) {
+            cssRules += `.mes-cor-${mes} { background-color: ${coresPadrao[mes]} !important; color: white !important; font-weight: bold; }`;
+        }
+        document.getElementById('cores-meses-dinamicas').innerHTML = cssRules;
+    }
+
+    // =========================================
+    // CARREGAR DADOS DE MÊS (API)
+    // =========================================
+    async function carregarDadosMes() {
+        try {
+            const response = await fetch('/api/estatisticas/mes-sorte');
+            if (response.ok) {
+                const data = await response.json();
+
+                if (data.mais_sorteado) {
+                    mesFrequente = {
+                        numero: data.mais_sorteado.mes,
+                        nome: MESES[data.mais_sorteado.mes]?.nome || 'Desconhecido',
+                        frequencia: data.mais_sorteado.frequencia
+                    };
+                }
+
+                if (data.menos_sorteado) {
+                    mesAtrasado = {
+                        numero: data.menos_sorteado.mes,
+                        nome: MESES[data.menos_sorteado.mes]?.nome || 'Desconhecido',
+                        frequencia: data.menos_sorteado.frequencia
+                    };
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao carregar estatísticas de mês:', error);
+        }
+
+        // Atualizar selects de mês (sem duplicação)
+        atualizarSelectsMes();
+        atualizarDisplayMes();
+
+        // 🆕 Carregar dados do último sorteio + desdobramento
+        await carregarUltimoSorteioDesdobramento();
+    }
+
+    // =========================================
+    // 🆕 CARREGAR ÚLTIMO SORTEIO + DESDOBRAMENTO (API)
+    // =========================================
+    async function carregarUltimoSorteioDesdobramento() {
+        try {
+            const response = await fetch('/api/desdobramento/ultimo-sorteio-desdobramento');
+            if (response.ok) {
+                const data = await response.json();
+                
+                ultimoSorteio = {
+                    sorteio_base: data.sorteio_base || [],
+                    complementares: data.complementares || [],
+                    nivel: data.nivel || 2,
+                    total_jogos_desdobrados: data.total_jogos_desdobrados || 21,
+                    concurso: data.concurso,
+                    mes_sorteio: data.mes_sorteio,
+                    complemento_por_jogo: data.complemento_por_jogo || 5
+                };
+                
+                nivelDesdobramento = ultimoSorteio.nivel;
+                
+                // 🆕 Mostrar card de desdobramento
+                const cardDesdobramento = document.getElementById('cardNivelDesdobramento');
+                if (cardDesdobramento) {
+                    cardDesdobramento.style.display = 'block';
+                    
+                    // Preencher dados do desdobramento
+                    document.getElementById('nivelDesdobramentoTexto').textContent = `Nível ${ultimoSorteio.nivel} - ${ultimoSorteio.total_jogos_desdobrados} jogos`;
+                    document.getElementById('detalhesNivelTexto').textContent = `Concurso ${ultimoSorteio.concurso} (Mês da Sorte: ${ultimoSorteio.mes_sorteio})`;
+                    document.getElementById('badgeNivelDesdobramento').textContent = `${ultimoSorteio.complemento_por_jogo} dezenas`;
+                    const spanDezenas = document.getElementById('dezenasUltimoSorteio');
+                    if (spanDezenas) {
+                        spanDezenas.textContent = ultimoSorteio.sorteio_base.map(n => String(n).padStart(2, '0')).join(', ');
+                    }
+                }
+                
+                console.log('✅ Dados do último sorteio carregados:', ultimoSorteio);
+            } else {
+                console.warn('⚠️ Não foi possível carregar dados do último sorteio');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar último sorteio:', error);
+        }
+    }
+
+    // =========================================
+    // 🆕 FUNÇÕES DE NÚCLEO ESTRATÉGICO
+    // =========================================
+    function verificarNucleoEstrategico() {
+        const nucleoData = localStorage.getItem('nucleoEstrategico');
+        const cardNucleo = document.getElementById('cardNucleoEstrategico');
+        const toggleNucleo = document.getElementById('toggleUsarNucleoEstrategico');
+        const spanNumeros = document.getElementById('numeroNucleoEstrategico');
+        
+        if (nucleoData) {
+            try {
+                const nucleo = JSON.parse(nucleoData);
+                nucleoEstrategico = nucleo.principal || [];
+                
+                // Mostrar card e preencher números
+                if (cardNucleo) cardNucleo.style.display = 'block';
+                if (spanNumeros) {
+                    spanNumeros.textContent = nucleoEstrategico.map(n => String(n).padStart(2, '0')).join(', ');
+                }
+                if (toggleNucleo) {
+                    toggleNucleo.disabled = nucleoEstrategico.length === 0;
+                    toggleNucleo.title = '';
+                }
+                
+                console.log('✅ Núcleo estratégico detectado:', nucleoEstrategico);
+            } catch (e) {
+                console.warn('⚠️ Erro ao carregar núcleo:', e);
+            }
+        } else {
+            // Mantém card visível para facilitar testes; desabilita toggle
+            if (cardNucleo) cardNucleo.style.display = 'block';
+            if (spanNumeros) spanNumeros.textContent = '--';
+            if (toggleNucleo) {
+                toggleNucleo.checked = false;
+                toggleNucleo.disabled = true;
+                toggleNucleo.title = 'Gere um núcleo na aba "Núcleos Estratégicos" para habilitar';
+            }
+            nucleoEstrategico = [];
+        }
+    }
+
+    function toggleUsarNucleoEstrategico() {
+        const toggle = document.getElementById('toggleUsarNucleoEstrategico');
+        usarNucleoAtivo = toggle.checked;
+        
+        // Atualizar disponibilidade de dezenas no grid
+        atualizarDisponibilidadeDezenas();
+        
+        console.log('🎯 Núcleo estratégico ativado:', usarNucleoAtivo);
+        if (usarNucleoAtivo) {
+            console.log('✅ Núcleo ativo: dezenas fixas em todos os jogos:', nucleoEstrategico);
+        } else {
+            console.log('✅ Núcleo inativo: dezenas do grid re-habilitadas');
+        }
+    }
+
+    // =========================================
+    // 🆕 FUNÇÕES DE TOGGLE - DESDOBRAMENTO E SUGESTÃO
+    // =========================================
+    function atualizarDisponibilidadeDezenas() {
+        // Escopo restrito: apenas botões do grid principal de complementares
+        const botoes = document.querySelectorAll('#dezenasGrid .dezena-btn');
+        const dezenasUltimoSorteio = ultimoSorteio?.sorteio_base || [];
+        const dezenasNucleo = (usarNucleoAtivo && Array.isArray(nucleoEstrategico)) ? nucleoEstrategico : [];
+        
+        botoes.forEach((btn, index) => {
+            const dezena = index + 1; // dezenas são 1-31
+            const estaNoUltimoSorteio = dezenasUltimoSorteio.includes(dezena);
+            const estaNoNucleo = dezenasNucleo.includes(dezena);
+            
+            // Prioridade 1: Desdobramento (azul)
+            if (usarDesdobramentoAtivo && estaNoUltimoSorteio) {
+                // Desabilitar botão com estilo azul (como em /desdobramentos)
+                btn.disabled = true;
+                btn.classList.add('grupo-a'); // Adiciona o gradient azul
+                btn.classList.remove('selected'); // Remove seleção verde se houver
+                btn.style.cursor = 'not-allowed';
+                btn.title = `Dezena ${dezena.toString().padStart(2, '0')} - garantida no desdobramento`;
+                
+                // Remover da seleção se estava selecionada
+                dezenasSelecionadas = dezenasSelecionadas.filter(d => d !== dezena);
+            }
+            // Prioridade 2: Núcleo (azul também - padrão visual único)
+            else if (usarNucleoAtivo && estaNoNucleo) {
+                // Desabilitar botão com estilo azul (igual desdobramento)
+                btn.disabled = true;
+                btn.classList.add('grupo-a'); // Adiciona o gradient azul
+                btn.classList.remove('selected'); // Remove verde se houver
+                btn.style.cursor = 'not-allowed';
+                btn.title = `Dezena ${dezena.toString().padStart(2, '0')} - fixa no núcleo`;
+                
+                // Remover da seleção se estava selecionada
+                dezenasSelecionadas = dezenasSelecionadas.filter(d => d !== dezena);
+            } else {
+                // Re-abilitar botão
+                btn.disabled = false;
+                btn.classList.remove('grupo-a'); // Remove o gradient azul
+                btn.style.cursor = 'pointer';
+                btn.title = '';
+            }
+        });
+        
+        // Atualizar estado visual do grid
+        atualizarEstadoGrid();
+    }
+    
+    function toggleUsarDesdobramento() {
+        const toggle = document.getElementById('toggleUsarDesdobramento');
+        usarDesdobramentoAtivo = toggle.checked;
+        
+        if (usarDesdobramentoAtivo && !ultimoSorteio) {
+            showModal('Atenção', 'Dados do último sorteio não foram carregados. Recarregue a página.', 'warning');
+            toggle.checked = false;
+            usarDesdobramentoAtivo = false;
+            return;
+        }
+        
+        // Atualizar disponibilidade de dezenas no grid
+        atualizarDisponibilidadeDezenas();
+        
+        console.log('Toggle Desdobramento:', usarDesdobramentoAtivo);
+        if (usarDesdobramentoAtivo) {
+            console.log('✓ Desdobramento ativo: 21 jogos serão gerados automaticamente');
+            console.log('✓ Sorteio base:', ultimoSorteio?.sorteio_base);
+            console.log('✓ Dezenas desabilitadas no grid:', ultimoSorteio?.sorteio_base);
+        } else {
+            console.log('✓ Desdobramento inativo: dezenas do grid re-habilitadas');
+        }
+    }
+
+    function toggleUsarSugestaoDezenas() {
+        const toggle = document.getElementById('toggleUsarSugestaoDezenas');
+        usarSugestaoDezenasAtivo = toggle.checked;
+        
+        console.log('Toggle Sugestão Dezenas:', usarSugestaoDezenasAtivo);
+        
+        if (usarSugestaoDezenasAtivo) {
+            aplicarDezenasSugeridas();
+        } else {
+            // Opcional: limpar seleção ao desativar
+            // limparSelecaoDezenas();
+        }
+    }
+
+    // =========================================
+    // 🆕 ATUALIZAR DISPLAY DO NÍVEL DE DESDOBRAMENTO
+    // =========================================
+    function atualizarDisplayNivelDesdobramento() {
+        if (!ultimoSorteio) return;
+        
+        const cardNivel = document.getElementById('cardNivelDesdobramento');
+        const nivelTexto = document.getElementById('nivelDesdobramentoTexto');
+        const detalhesTexto = document.getElementById('detalhesNivelTexto');
+        const badgeNivel = document.getElementById('badgeNivelDesdobramento');
+        
+        if (cardNivel && ultimoSorteio) {
+            cardNivel.style.display = 'block';
+            
+            const nivel = ultimoSorteio.nivel;
+            const totalJogos = ultimoSorteio.total_jogos_desdobrados;
+            const sorteioBase = ultimoSorteio.sorteio_base.join(', ');
+            
+            nivelTexto.textContent = `Nível ${nivel} - C(7,${nivel}) = ${totalJogos}`;
+            detalhesTexto.innerHTML = `
+                <strong>Último concurso:</strong> ${ultimoSorteio.concurso}<br>
+                <strong>Números:</strong> ${sorteioBase}
+            `;
+            badgeNivel.textContent = `${nivel} dezenas`;
+        }
+    }
+
+    // =========================================
+    // ATUALIZAR SELECTS DE MÊS (SEM DUPLICAÇÃO)
+    // =========================================
+    function atualizarSelectsMes() {
+        const selects = ['mesSorteSelect', 'mesExportarSelect'];
+
+        selects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            select.innerHTML = '';
+
+            const mesesUsados = new Set();
+
+            // Opção: Sem mês / Selecione
+            const optSem = document.createElement('option');
+            optSem.value = '';
+            optSem.textContent = '-- Selecione um mês --';
+            select.appendChild(optSem);
+
+            // Opção: Mais Atrasado
+            if (mesAtrasado) {
+                const optAtraso = document.createElement('option');
+                optAtraso.value = mesAtrasado.numero;
+                optAtraso.textContent = `+ Atrasado (${mesAtrasado.nome})`;
+                optAtraso.dataset.mesNumero = mesAtrasado.numero;
+                select.appendChild(optAtraso);
+                mesesUsados.add(mesAtrasado.numero);
+            }
+
+            // Opção: Mais Frequente (se diferente do atrasado)
+            if (mesFrequente && mesFrequente.numero !== mesAtrasado?.numero) {
+                const optFreq = document.createElement('option');
+                optFreq.value = mesFrequente.numero;
+                optFreq.textContent = `+ Frequente (${mesFrequente.nome})`;
+                optFreq.dataset.mesNumero = mesFrequente.numero;
+                select.appendChild(optFreq);
+                mesesUsados.add(mesFrequente.numero);
+            }
+
+            // Todos os meses (exceto os já usados)
+            for (let i = 1; i <= 12; i++) {
+                if (!mesesUsados.has(i)) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = MESES[i].nome;
+                    opt.dataset.mesNumero = i;
+                    select.appendChild(opt);
+                }
+            }
+
+            // Opção: Aleatório
+            const optAleatorio = document.createElement('option');
+            optAleatorio.value = 'aleatorio';
+            optAleatorio.textContent = '+ Aleatório';
+            select.appendChild(optAleatorio);
+        });
+    }
+
+    // =========================================
+    // ATUALIZAR DISPLAY DO MÊS
+    // =========================================
+    function atualizarDisplayMes() {
+        const select = document.getElementById('mesSorteSelect');
+        const mesNumero = parseInt(select.value) || 0;
+
+        const displayEl = document.getElementById('nomeMesSelecionado');
+        const containerDisplay = document.getElementById('displayMesSelecionado');
+
+        // Remover classes anteriores
+        for (let i = 1; i <= 12; i++) {
+            containerDisplay.classList.remove(`mes-cor-${i}`);
+        }
+
+        if (mesNumero > 0) {
+            displayEl.textContent = MESES[mesNumero]?.nome || 'Selecione...';
+            containerDisplay.classList.add(`mes-cor-${mesNumero}`);
+        } else {
+            displayEl.textContent = 'Nenhum';
+            containerDisplay.style.backgroundColor = '#6c757d';
+        }
+    }
+
+    // =========================================
+    // CARREGAR PADRÕES
+    // =========================================
+    async function carregarPadroes() {
+        const tbody = document.getElementById('tabelaPadroes');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-5">
+                    <div class="spinner-border text-warning" role="status"></div>
+                    <p class="mt-2 mb-0">Carregando padrões...</p>
+                </td>
+            </tr>
+        `;
+
+        try {
+            const response = await fetch('/api/gerador-padroes/listar');
+            const data = await response.json();
+
+            if (response.ok && data.padroes) {
+                todosPadroes = data.padroes;
+                padroesFiltrados = aplicarOrdenacao([...todosPadroes]);
+
+                // Atualizar estatísticas
+                document.getElementById('statTotalPadroes').textContent = data.total_padroes.toLocaleString('pt-BR');
+                document.getElementById('statTotalJogos').textContent = formatarNumero(data.total_jogos_possiveis);
+                document.getElementById('statFaltantes').textContent = data.estatisticas.faltantes.toLocaleString('pt-BR');
+                document.getElementById('statMediaJogos').textContent = formatarNumero(Math.round(data.total_jogos_possiveis / data.total_padroes));
+                document.getElementById('totalPadroesHeader').innerHTML = `<i class="fas fa-layer-group me-1"></i>${data.total_padroes} padrões`;
+                document.getElementById('qtdTotal').textContent = data.total_padroes;
+
+                if (data.ultimo_resultado) {
+                    exibirUltimoResultado(data.ultimo_resultado);
+                }
+
+                if (data.top_frequencia && data.top_frequencia.length) {
+                    exibirTopFrequencia(data.top_frequencia, data.total_sorteios_analisados);
+                }
+
+                renderizarTabelaPadroes(padroesFiltrados);
+            } else {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Erro ao carregar padrões</td></tr>`;
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            document.getElementById('tabelaPadroes').innerHTML = `<tr><td colspan="8" class="text-center text-danger">Erro: ${error.message}</td></tr>`;
+        }
+    }
+
+    // =========================================
+    // ULTIMO RESULTADO / COMPARACAO DE PADRAO
+    // =========================================
+    function exibirUltimoResultado(dados) {
+        ultimoResultadoPadrao = dados;
+        const card = document.getElementById('cardUltimoResultado');
+        if (!card || !dados) return;
+
+        card.style.display = 'block';
+        document.getElementById('ultResConcurso').textContent = dados.concurso;
+        document.getElementById('ultResData').textContent = dados.data_sorteio ? ' — ' + dados.data_sorteio : '';
+        document.getElementById('ultResMes').textContent = (MESES[dados.mes_sorte] && MESES[dados.mes_sorte].nome) || ('Mês ' + dados.mes_sorte);
+        document.getElementById('ultResPadrao').textContent = dados.padrao;
+        document.getElementById('ultResDescricao').textContent = dados.descricao || '';
+        if (dados.legenda_faixas) {
+            document.getElementById('ultResLegenda').textContent = dados.legenda_faixas;
+        }
+
+        const boxDezenas = document.getElementById('ultResDezenas');
+        if (boxDezenas && dados.numeros_formatados) {
+            boxDezenas.innerHTML = dados.numeros_formatados.map(function (n) {
+                return '<span class="dezena-ultimo-sorteio">' + n + '</span>';
+            }).join('');
+        }
+
+        const msg = document.getElementById('ultResMensagemSistema');
+        if (msg) {
+            const idx = todosPadroes.findIndex(function (p) { return p.padrao === dados.padrao; });
+            if (idx >= 0) {
+                const p = todosPadroes[idx];
+                msg.className = 'alert alert-success mb-0 py-2 small';
+                msg.innerHTML = '<i class="fas fa-check-circle me-1"></i><strong>Sistema:</strong> O padrão <code>' + dados.padrao +
+                    '</code> do concurso ' + dados.concurso + ' está na sua lista (frequência ' + p.frequencia +
+                    'x, status: ' + p.status + '). Use a tabela para comparar estratégias.';
+            } else {
+                msg.className = 'alert alert-warning mb-0 py-2 small';
+                msg.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i><strong>Sistema:</strong> Padrão ' + dados.padrao +
+                    ' do último concurso não encontrado na lista viável (verifique filtros).';
+            }
+        }
+    }
+
+    function mostrarComparacaoComUltimo(padraoSel) {
+        const alerta = document.getElementById('alertComparacaoPadrao');
+        if (!alerta || !ultimoResultadoPadrao) return;
+
+        const ult = ultimoResultadoPadrao;
+        if (padraoSel === ult.padrao) {
+            alerta.className = 'alert alert-success mt-3 mb-0 py-2 small';
+            alerta.innerHTML = '<i class="fas fa-equals me-1"></i><strong>Coincide com o último concurso (' + ult.concurso + ').</strong> ' +
+                'O padrão selecionado <code>' + padraoSel + '</code> é o mesmo do sorteio mais recente (' + ult.descricao + ').';
+        } else {
+            alerta.className = 'alert alert-warning mt-3 mb-0 py-2 small';
+            alerta.innerHTML = '<i class="fas fa-not-equal me-1"></i><strong>Diferente do último concurso (' + ult.concurso + ').</strong> ' +
+                'Último sorteio: <code>' + ult.padrao + '</code> (' + ult.descricao + '). ' +
+                'Você selecionou: <code>' + padraoSel + '</code>.';
+        }
+        alerta.classList.remove('d-none');
+        document.getElementById('cardUltimoResultado').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function irParaPadraoUltimoConcurso() {
+        if (!ultimoResultadoPadrao) return;
+        document.getElementById('buscaInteligente').value = ultimoResultadoPadrao.padrao;
+        filtrarEmTempoReal();
+        setTimeout(function () {
+            const linha = document.querySelector('.table-padroes tbody tr.tr-padrao-ultimo-concurso');
+            if (linha) {
+                linha.classList.add('highlighted');
+                linha.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 200);
+    }
+
+    function exibirTopFrequencia(top3, totalConcursos) {
+        topFrequenciaPadroes = top3 || [];
+        padroesTopFreqSet = new Set(top3.map(function (t) { return t.padrao; }));
+
+        const card = document.getElementById('cardTopFrequencia');
+        const lista = document.getElementById('topFreqLista');
+        if (!card || !lista) return;
+
+        card.style.display = 'block';
+        document.getElementById('topFreqTotalConcursos').textContent =
+            (totalConcursos || 0).toLocaleString('pt-BR') + ' concursos analisados';
+
+        const campeao = top3[0];
+        const resumo = document.getElementById('topFreqResumoCampeao');
+        if (resumo && campeao) {
+            resumo.innerHTML = '<strong>Sistema:</strong> O padrão que mais saiu na história é <code>' + campeao.padrao +
+                '</code> com <strong>' + campeao.frequencia + ' vezes</strong> (' + campeao.percentual_concursos +
+                '% dos concursos). Última vez no concurso ' + (campeao.ultimo_concurso || '—') +
+                (campeao.atraso != null ? ', atraso atual: ' + campeao.atraso + ' concursos.' : '.');
+        }
+
+        const medalhas = ['🥇', '🥈', '🥉'];
+        lista.innerHTML = top3.map(function (item, i) {
+            const rankClass = 'rank-' + (i + 1);
+            const atrasoTxt = item.atraso != null ? item.atraso + ' conc.' : '—';
+            return '<div class="col-md-4">' +
+                '<div class="top-freq-item ' + rankClass + '">' +
+                '<div class="d-flex align-items-center gap-2 mb-2">' +
+                '<span class="top-freq-rank">' + item.posicao + '</span>' +
+                '<span class="fw-bold">' + medalhas[i] + ' ' + (i === 0 ? 'Mais saiu' : 'Top ' + item.posicao) + '</span>' +
+                '</div>' +
+                '<div class="mb-2"><span class="badge badge-padrao">' + item.padrao + '</span></div>' +
+                '<div class="small text-muted mb-2">' + (item.descricao || '') + '</div>' +
+                '<div class="small"><strong>Frequência:</strong> ' + item.frequencia + 'x (' + item.percentual_concursos + '%)</div>' +
+                '<div class="small"><strong>Último concurso:</strong> ' + (item.ultimo_concurso || '—') + '</div>' +
+                '<div class="small"><strong>Atraso:</strong> ' + atrasoTxt + ' · <span class="badge badge-' + item.status + '">' + item.status + '</span></div>' +
+                '<button type="button" class="btn btn-sm btn-outline-primary mt-2 w-100" onclick="destacarPadraoNaTabela(\'' + item.padrao.replace(/'/g, "\\'") + '\')">' +
+                '<i class="fas fa-search me-1"></i>Ver na tabela</button>' +
+                '</div></div>';
+        }).join('');
+    }
+
+    function ordenarTabelaPorFrequencia() {
+        ordenacaoColuna = 'frequencia';
+        ordenacaoDirecao = 'desc';
+        sincronizarSelectOrdenar();
+        atualizarCabecalhosOrdenacao();
+        aplicarFiltrosEOrdenacao();
+        document.querySelector('.table-padroes')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function irParaTop1Frequencia() {
+        if (!topFrequenciaPadroes.length) return;
+        destacarPadraoNaTabela(topFrequenciaPadroes[0].padrao);
+    }
+
+    function destacarPadraoNaTabela(padrao) {
+        document.getElementById('buscaInteligente').value = padrao;
+        filtrarEmTempoReal();
+        setTimeout(function () {
+            const linhas = document.querySelectorAll('.table-padroes tbody tr');
+            linhas.forEach(function (tr) { tr.classList.remove('highlighted'); });
+            const linha = document.querySelector('.table-padroes tbody tr[data-padrao="' + padrao + '"]');
+            if (linha) {
+                linha.classList.add('highlighted');
+                linha.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 200);
+    }
+
+    // =========================================
+    // ORDENACAO POR COLUNA (clique no cabecalho)
+    // =========================================
+    const ORDEM_STATUS = { frequente: 0, atrasado: 1, faltante: 2 };
+
+    function ordenarPorColuna(coluna) {
+        if (ordenacaoColuna === coluna) {
+            ordenacaoDirecao = ordenacaoDirecao === 'asc' ? 'desc' : 'asc';
+        } else {
+            ordenacaoColuna = coluna;
+            ordenacaoDirecao = (coluna === 'padrao' || coluna === 'descricao' || coluna === 'status') ? 'asc' : 'desc';
+        }
+        sincronizarSelectOrdenar();
+        atualizarCabecalhosOrdenacao();
+        aplicarFiltrosEOrdenacao();
+    }
+
+    function sincronizarSelectOrdenar() {
+        const sel = document.getElementById('filtroOrdenar');
+        if (!sel) return;
+        const colsSelect = ['jogos_possiveis', 'frequencia', 'atraso'];
+        if (colsSelect.includes(ordenacaoColuna)) {
+            sel.value = ordenacaoColuna;
+        }
+    }
+
+    function atualizarCabecalhosOrdenacao() {
+        document.querySelectorAll('.table-padroes thead .th-sortable').forEach(function (th) {
+            const col = th.dataset.sort;
+            const icon = th.querySelector('.sort-icon');
+            const ativo = col === ordenacaoColuna;
+            th.classList.toggle('sorted', ativo);
+            if (icon) {
+                icon.className = 'fas sort-icon ' + (
+                    ativo
+                        ? (ordenacaoDirecao === 'asc' ? 'fa-sort-up' : 'fa-sort-down')
+                        : 'fa-sort'
+                );
+            }
+        });
+    }
+
+    function compararPadroes(a, b) {
+        const dir = ordenacaoDirecao === 'asc' ? 1 : -1;
+        const col = ordenacaoColuna;
+
+        if (col === 'padrao') {
+            return dir * String(a.padrao).localeCompare(String(b.padrao), 'pt-BR');
+        }
+        if (col === 'descricao') {
+            return dir * String(a.descricao || '').localeCompare(String(b.descricao || ''), 'pt-BR');
+        }
+        if (col === 'jogos_possiveis') {
+            return dir * (a.jogos_possiveis - b.jogos_possiveis);
+        }
+        if (col === 'frequencia') {
+            return dir * (a.frequencia - b.frequencia);
+        }
+        if (col === 'atraso') {
+            if (a.atraso === null && b.atraso === null) return 0;
+            if (a.atraso === null) return 1;
+            if (b.atraso === null) return -1;
+            return dir * (a.atraso - b.atraso);
+        }
+        if (col === 'status') {
+            const oa = ORDEM_STATUS[a.status] ?? 99;
+            const ob = ORDEM_STATUS[b.status] ?? 99;
+            return dir * (oa - ob);
+        }
+        return 0;
+    }
+
+    function aplicarOrdenacao(lista) {
+        return lista.slice().sort(compararPadroes);
+    }
+
+    function aplicarFiltrosEOrdenacao() {
+        filtrarEmTempoReal();
+    }
+
+    // =========================================
+    // RENDERIZAR TABELA
+    // =========================================
+    function renderizarTabelaPadroes(padroes) {
+        const tbody = document.getElementById('tabelaPadroes');
+        tbody.innerHTML = '';
+
+        document.getElementById('qtdExibindo').textContent = padroes.length;
+
+        if (padroes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">
+                <i class="fas fa-search fa-2x mb-2"></i><br>
+                Nenhum padrão encontrado com os filtros aplicados
+            </td></tr>`;
+            document.getElementById('infoPadroesFiltrados').textContent = 'Nenhum padrão encontrado';
+            return;
+        }
+
+        padroes.forEach((p, idx) => {
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-padrao', p.padrao);
+            if (p.eh_padrao_ultimo_concurso || (ultimoResultadoPadrao && p.padrao === ultimoResultadoPadrao.padrao)) {
+                tr.classList.add('tr-padrao-ultimo-concurso');
+                tr.title = 'Padrão do último concurso oficial';
+            }
+            if (padroesTopFreqSet.has(p.padrao)) {
+                tr.classList.add('tr-top-frequencia');
+                const posTop = topFrequenciaPadroes.findIndex(function (t) { return t.padrao === p.padrao; }) + 1;
+                if (posTop > 0) {
+                    tr.title = (tr.title ? tr.title + ' | ' : '') + 'Top ' + posTop + ' frequência histórica';
+                }
+            }
+
+            // Status badge
+            let statusBadge = '';
+            if (p.status === 'frequente') {
+                statusBadge = '<span class="badge badge-frequente">Frequente</span>';
+            } else if (p.status === 'atrasado') {
+                statusBadge = '<span class="badge badge-atrasado">Atrasado</span>';
+            } else {
+                statusBadge = '<span class="badge badge-faltante">Faltante</span>';
+            }
+
+            // Atraso
+            const atrasoText = p.atraso !== null ? `${p.atraso} conc.` : '-';
+
+            // Coluna de ações - Checkbox se modo múltiplo, Botão se modo único
+            let acaoHtml = '';
+            if (multiplosPadroesAtivo) {
+                // MODO MÚLTIPLO - Checkbox
+                const isChecked = padroesSelecionados.some(ps => ps.padrao === p.padrao) ? 'checked' : '';
+                acaoHtml = `
+                    <td class="text-center">
+                        <input type="checkbox" class="form-check-input padrao-checkbox" 
+                               data-padrao="${p.padrao}" 
+                               data-jogos="${p.jogos_possiveis}" 
+                               data-frequencia="${p.frequencia}" 
+                               data-status="${p.status}"
+                               ${isChecked}
+                               onchange="togglePadraoSelecionado('${p.padrao}', ${p.jogos_possiveis}, ${p.frequencia}, '${p.status}')">
+                    </td>
+                `;
+            } else {
+                // MODO ÚNICO - Botão
+                acaoHtml = `
+                    <td class="text-center">
+                        <button class="btn btn-selecionar btn-sm" onclick="selecionarPadrao('${p.padrao}', ${p.jogos_possiveis}, ${p.frequencia}, '${p.status}')">
+                            <i class="fas fa-check me-1"></i>Selecionar
+                        </button>
+                    </td>
+                `;
+            }
+
+            const badgeUltimo = (p.eh_padrao_ultimo_concurso || (ultimoResultadoPadrao && p.padrao === ultimoResultadoPadrao.padrao))
+                ? ' <span class="badge bg-success ms-1" title="Último concurso">Último</span>' : '';
+            const idxTop = topFrequenciaPadroes.findIndex(function (t) { return t.padrao === p.padrao; });
+            const badgeTop = idxTop >= 0
+                ? ' <span class="badge bg-primary ms-1" title="Top frequência">Top ' + (idxTop + 1) + '</span>' : '';
+
+            tr.innerHTML = `
+                <td class="text-center fw-bold">${idx + 1}</td>
+                <td><span class="badge badge-padrao">${p.padrao}</span>${badgeUltimo}${badgeTop}</td>
+                <td class="text-center small">${p.descricao}</td>
+                <td class="text-center fw-bold">${p.jogos_possiveis.toLocaleString('pt-BR')}</td>
+                <td class="text-center">${p.frequencia}</td>
+                <td class="text-center">${atrasoText}</td>
+                <td class="text-center">${statusBadge}</td>
+                ${acaoHtml}
+            `;
+
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('infoPadroesFiltrados').textContent = `Exibindo ${padroes.length} padrões`;
+        atualizarCabecalhosOrdenacao();
+    }
+
+    // =========================================
+    // FILTROS EM TEMPO REAL
+    // =========================================
+    function filtrarEmTempoReal() {
+        const busca = document.getElementById('buscaInteligente').value.toLowerCase().trim();
+        const status = document.getElementById('filtroStatus').value;
+        const minJogos = parseInt(document.getElementById('filtroMinJogos').value) || 0;
+        const maxJogos = parseInt(document.getElementById('filtroMaxJogos').value) || Infinity;
+        const ordenarSelect = document.getElementById('filtroOrdenar').value;
+
+        // Mostrar/ocultar botão limpar busca
+        const limparBtn = document.getElementById('limparBusca');
+        if (busca.length > 0) {
+            limparBtn.classList.add('visible');
+        } else {
+            limparBtn.classList.remove('visible');
+        }
+
+        // Filtrar
+        padroesFiltrados = todosPadroes.filter(p => {
+            // Filtro de Status (CRÍTICO - deve funcionar corretamente)
+            if (status && p.status !== status) {
+                return false;
+            }
+
+            // Filtro de jogos
+            if (p.jogos_possiveis < minJogos) return false;
+            if (p.jogos_possiveis > maxJogos) return false;
+
+            // Busca inteligente
+            if (busca) {
+                const padraoBusca = p.padrao.toLowerCase();
+                const descricaoBusca = p.descricao.toLowerCase();
+                const statusBusca = p.status.toLowerCase();
+                const freqBusca = String(p.frequencia);
+                const jogosBusca = String(p.jogos_possiveis);
+
+                // Verificar em múltiplos campos
+                const match = padraoBusca.includes(busca) ||
+                              descricaoBusca.includes(busca) ||
+                              statusBusca.includes(busca) ||
+                              freqBusca.includes(busca) ||
+                              jogosBusca.includes(busca);
+
+                if (!match) return false;
+            }
+
+            return true;
+        });
+
+        // Select "Ordenar" (Jogos / Frequencia / Atraso) -> desc
+        if (['jogos_possiveis', 'frequencia', 'atraso'].includes(ordenarSelect)) {
+            if (ordenacaoColuna !== ordenarSelect) {
+                ordenacaoColuna = ordenarSelect;
+                ordenacaoDirecao = 'desc';
+                atualizarCabecalhosOrdenacao();
+            }
+        }
+        padroesFiltrados = aplicarOrdenacao(padroesFiltrados);
+
+        renderizarTabelaPadroes(padroesFiltrados);
+    }
+
+    function limparBusca() {
+        document.getElementById('buscaInteligente').value = '';
+        document.getElementById('limparBusca').classList.remove('visible');
+        filtrarEmTempoReal();
+    }
+
+    function limparTodosFiltros() {
+        document.getElementById('buscaInteligente').value = '';
+        document.getElementById('filtroStatus').value = '';
+        document.getElementById('filtroMinJogos').value = '';
+        document.getElementById('filtroMaxJogos').value = '';
+        document.getElementById('filtroOrdenar').value = 'jogos_possiveis';
+        document.getElementById('limparBusca').classList.remove('visible');
+        ordenacaoColuna = 'jogos_possiveis';
+        ordenacaoDirecao = 'desc';
+        atualizarCabecalhosOrdenacao();
+
+        padroesFiltrados = aplicarOrdenacao([...todosPadroes]);
+        renderizarTabelaPadroes(padroesFiltrados);
+    }
+
+    // =========================================
+    // SELECIONAR PADRÃO
+    // =========================================
+    function selecionarPadrao(padrao, jogos, frequencia, status) {
+        padraoSelecionado = { padrao, jogos, frequencia, status };
+        jogosGerados = [];
+        paginaAtualJogos = 1;
+
+        // Atualizar displays
+        document.getElementById('padraoSelecionadoDisplay').textContent = padrao;
+        document.getElementById('padraoExportarDisplay').textContent = padrao;
+        document.getElementById('infoJogosPossiveis').textContent = `${jogos.toLocaleString('pt-BR')} jogos`;
+        document.getElementById('exportJogosPossiveis').textContent = `${jogos.toLocaleString('pt-BR')} jogos`;
+
+        // Status
+        const statusEl = document.getElementById('infoStatusPadrao');
+        if (status === 'frequente') {
+            statusEl.className = 'badge badge-frequente fs-6';
+            statusEl.textContent = 'Frequente';
+        } else if (status === 'atrasado') {
+            statusEl.className = 'badge badge-atrasado fs-6';
+            statusEl.textContent = 'Atrasado';
+        } else {
+            statusEl.className = 'badge badge-faltante fs-6';
+            statusEl.textContent = 'Nunca saiu!';
+        }
+
+        // Card de info
+        document.getElementById('infoPadraoTexto').textContent = padrao;
+        document.getElementById('infoJogosTexto').textContent = jogos.toLocaleString('pt-BR');
+        document.getElementById('infoFreqTexto').textContent = frequencia + 'x';
+        document.getElementById('infoStatusTexto').textContent = status === 'faltante' ? 'Nunca saiu!' : status;
+        document.getElementById('cardInfoPadrao').style.display = 'block';
+
+        mostrarComparacaoComUltimo(padrao);
+
+        // 🆕 Atualizar display do nível de desdobramento
+        atualizarDisplayNivelDesdobramento();
+
+        // Mostrar/ocultar elementos
+        document.getElementById('mensagemSelecionePadrao').style.display = 'none';
+        document.getElementById('infoPadraoSelecionado').style.display = 'block';
+        document.getElementById('configGeracao').style.display = 'flex';
+        document.getElementById('resultadoGeracao').style.display = 'none';
+
+        // Alerta para muitos jogos
+        if (jogos > 10000) {
+            document.getElementById('alertaJogos').style.display = 'block';
+            document.getElementById('qtdJogosAlerta').textContent = jogos.toLocaleString('pt-BR');
+        } else {
+            document.getElementById('alertaJogos').style.display = 'none';
+        }
+
+        // Habilitar botões de exportação
+        document.getElementById('btnExportarTXT').disabled = false;
+        document.getElementById('btnExportarXLSX').disabled = false;
+
+        // Mudar para aba de geração
+        const tabGerar = new bootstrap.Tab(document.getElementById('tab-gerar'));
+        tabGerar.show();
+    }
+
+    // =========================================
+    // GERAR APOSTAS
+    // =========================================
+    async function gerarApostas() {
+        console.log('🚀 INÍCIO gerarApostas() - usarDesdobramentoAtivo:', usarDesdobramentoAtivo);
+        console.log('🚀 multiplosPadroesAtivo:', multiplosPadroesAtivo);
+        console.log('🚀 dezenasSelecionadas.length:', dezenasSelecionadas.length);
+        
+        // 🔥 PRIORIDADE MÁXIMA: Desdobramento automático
+        if (usarDesdobramentoAtivo) {
+            console.log('✅ Entrando no modo DESDOBRAMENTO (ignora tudo e gera 21 jogos)');
+            
+            if (!ultimoSorteio || !ultimoSorteio.sorteio_base || !ultimoSorteio.complementares) {
+                showModal('Erro', 'Dados do último sorteio não disponíveis. Recarregue a página.', 'error');
+                return;
+            }
+            
+            // Gerar pares automaticamente do último sorteio (C(7,2) = 21 pares)
+            const sorteioBase = ultimoSorteio.sorteio_base;
+            const pares = [];
+            for (let i = 0; i < sorteioBase.length; i++) {
+                for (let j = i + 1; j < sorteioBase.length; j++) {
+                    pares.push([sorteioBase[i], sorteioBase[j]]);
+                }
+            }
+            
+            // Complementos: OBRIGATÓRIO usar dezenas selecionadas pelo usuário (mínimo 5)
+            if (!Array.isArray(dezenasSelecionadas) || dezenasSelecionadas.length < 5) {
+                showModal('Atenção', 'Selecione pelo menos 5 dezenas para complementar os jogos do desdobramento.', 'warning');
+                document.getElementById('progressContainer').style.display = 'none';
+                return;
+            }
+            // Remover duplicados e ordenar
+            const selecionadas = Array.from(new Set(dezenasSelecionadas)).sort((a, b) => a - b);
+            console.log('📌 Pool de complementos usado: selecionadas pelo usuário', selecionadas);
+            
+            console.log('🔗 Pares gerados automaticamente:', pares.length, 'pares');
+            console.log('🎲 Dezenas complementares:', selecionadas.length, 'dezenas');
+            
+            // ⚠️ NÃO incluir núcleo na pool para API (deixar gerar com selecionadas do usuário)
+            // O núcleo será aplicado APÓS receber resposta
+            let poolParaAPI = [...selecionadas];
+            
+            // Chamar API de desdobramento com pares
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('resultadoGeracao').style.display = 'none';
+            
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressBar.style.width = '30%';
+            progressBar.textContent = '30%';
+            progressText.textContent = 'Gerando com desdobramento (21 jogos)...';
+            
+            try {
+                const resp = await fetch('/api/desdobramento/gerar-com-desdobradas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        dezenas_desdobradas: pares,
+                        dezenas_selecionadas: poolParaAPI,
+                        mes: 'Jan',
+                        ignorar_quantidade: true
+                    })
+                });
+                
+                progressBar.style.width = '70%';
+                progressBar.textContent = '70%';
+                progressText.textContent = 'Processando resultados...';
+                
+                const resultado = await resp.json();
+                
+                if (!resp.ok || !resultado.sucesso) {
+                    showModal('Erro', resultado.erro || 'Erro ao gerar por desdobramento', 'error');
+                    document.getElementById('progressContainer').style.display = 'none';
+                    return;
+                }
+                
+                // Converter formato para exibição
+                jogosGerados = (resultado.jogos || []).map((j, idx) => j.numeros_completos);
+                
+                // Aplicar núcleo se ativo (garantir NÚCLEO + 4 complementares, priorizando iniciais 3)
+                if (usarNucleoAtivo && Array.isArray(nucleoEstrategico) && nucleoEstrategico.length > 0) {
+                    jogosGerados = jogosGerados.map(numeros => {
+                        // Começar com o núcleo garantido
+                        let resultado = [...nucleoEstrategico];
+                        // Priorizar iniciais 3 (30, 31) na resposta
+                        let numerosOrd = numeros.sort((a, b) => {
+                            let aInicial3 = a >= 30 ? 0 : 1;
+                            let bInicial3 = b >= 30 ? 0 : 1;
+                            return aInicial3 - bInicial3;
+                        });
+                        // Adicionar apenas 4 números complementares (priorizando iniciais 3)
+                        let adicionados = 0;
+                        for (let n of numerosOrd) {
+                            if (!nucleoEstrategico.includes(n) && dezenasSelecionadas.includes(n) && adicionados < 4) {
+                                resultado.push(n);
+                                adicionados++;
+                            }
+                        }
+                        // Ordenar (agora sempre terá exatamente 7)
+                        return resultado.sort((a, b) => a - b);
+                    });
+                }
+                
+                paginaAtualJogos = 1;
+                
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+                progressText.textContent = 'Concluído!';
+                
+                setTimeout(() => {
+                    document.getElementById('progressContainer').style.display = 'none';
+                    document.getElementById('resultadoGeracao').style.display = 'block';
+                    document.getElementById('totalGerado').textContent = `21 jogos (desdobramento automático)`;
+                    document.getElementById('tempoGeracao').textContent = `Custo total: R$ ${resultado.custo_total.toFixed(2)}`;
+                    
+                    renderizarJogos();
+                }, 500);
+                
+                return;
+            } catch (error) {
+                showModal('Erro', 'Erro ao conectar ao servidor: ' + error.message, 'error');
+                document.getElementById('progressContainer').style.display = 'none';
+                return;
+            }
+        }
+        
+        // 🆕 Geração direta com NÚCLEO (sem necessidade de padrão)
+        if (usarNucleoAtivo && Array.isArray(nucleoEstrategico) && nucleoEstrategico.length > 0 && !multiplosPadroesAtivo && !padraoSelecionado) {
+            const complementoNecessario = 7 - nucleoEstrategico.length;
+            const pool = dezenasSelecionadas.filter(d => !nucleoEstrategico.includes(d)).sort((a,b)=>a-b);
+            if (pool.length < complementoNecessario) {
+                showModal('Atenção', `Selecione pelo menos ${complementoNecessario} dezenas no grid para complementar o núcleo (${nucleoEstrategico.length} fixas).`, 'warning');
+                return;
+            }
+            // Função auxiliar: combinações
+            function combinar(array, k) {
+                const resultados = [];
+                function rec(start, combo) {
+                    if (combo.length === k) { resultados.push(combo.slice()); return; }
+                    for (let i = start; i < array.length; i++) {
+                        combo.push(array[i]);
+                        rec(i + 1, combo);
+                        combo.pop();
+                    }
+                }
+                rec(0, []);
+                return resultados;
+            }
+            // Construir jogos
+            const quantidade = parseInt(document.getElementById('quantidadeApostasInput').value) || 10;
+            const complementos = combinar(pool, complementoNecessario);
+            const jogosLocais = [];
+            for (let i = 0; i < complementos.length && jogosLocais.length < quantidade; i++) {
+                const jogo = [...nucleoEstrategico, ...complementos[i]].sort((a,b)=>a-b);
+                jogosLocais.push(jogo);
+            }
+            if (jogosLocais.length === 0) {
+                showModal('Atenção', 'Não foi possível montar jogos com o núcleo e as dezenas selecionadas.', 'warning');
+                return;
+            }
+            // Exibir resultado
+            jogosGerados = jogosLocais;
+            paginaAtualJogos = 1;
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('resultadoGeracao').style.display = 'block';
+            document.getElementById('totalGerado').textContent = `${jogosGerados.length.toLocaleString('pt-BR')} jogos (núcleo + complementares)`;
+            document.getElementById('tempoGeracao').textContent = `Geração local (sem padrão)`;
+            renderizarJogos();
+            return;
+        }
+
+        // Validação: Modo único
+        if (!multiplosPadroesAtivo && !padraoSelecionado) {
+            showModal('Atenção', 'Selecione um padrão primeiro!', 'warning');
+            return;
+        }
+
+        // Validação: Modo múltiplo
+        if (multiplosPadroesAtivo && padroesSelecionados.length === 0) {
+            showModal('Atenção', 'Selecione pelo menos um padrão!', 'warning');
+            return;
+        }
+
+        // Validação: Dezenas selecionadas (apenas modo múltiplo)
+        if (multiplosPadroesAtivo) {
+            const usarTodas = document.getElementById('usarTodasDezenas')?.checked;
+            if (!usarTodas && dezenasSelecionadas.length === 0) {
+                showModal('Atenção', 'Selecione as dezenas que deseja usar na geração!', 'warning');
+                return;
+            }
+        }
+
+        // 🆕 Se Núcleo estiver ativo, adicionar as dezenas do núcleo às dezenas selecionadas
+        let dezenasParaGerar = [...dezenasSelecionadas];
+        if (usarNucleoAtivo && Array.isArray(nucleoEstrategico) && nucleoEstrategico.length > 0) {
+            // Adicionar dezenas do núcleo à lista (PRIORIDADE 1)
+            nucleoEstrategico.forEach(num => {
+                if (!dezenasParaGerar.includes(num)) {
+                    dezenasParaGerar.push(num);
+                }
+            });
+            dezenasParaGerar.sort((a, b) => a - b);
+            console.log('🎯 Dezenas ajustadas com NÚCLEO (obrigatório):', nucleoEstrategico);
+        }
+
+        // 🆕 Desdobramento será filtrado após geração (≥2 números)
+        // Não adicionamos aqui - deixamos para o filtro server-side
+        if (usarDesdobramentoAtivo && ultimoSorteio && Array.isArray(ultimoSorteio.sorteio_base)) {
+            console.log('📊 DESDOBRAMENTO (filtro ≥2 números):', ultimoSorteio.sorteio_base);
+        }
+
+        // 🆕 AJUSTAR QUANTIDADE BASEADO NO DESDOBRAMENTO
+        let quantidade = parseInt(document.getElementById('quantidadeApostasInput').value) || 10;
+        if (usarDesdobramentoAtivo && ultimoSorteio) {
+            // Se desdobramento está ativo, usar quantidade do desdobramento
+            quantidade = ultimoSorteio.total_jogos_desdobrados || 21;
+            console.log('📊 Quantidade ajustada para desdobramento:', quantidade);
+        }
+
+        const visualizacao = document.getElementById('visualizacaoSelect').value;
+        let limite = visualizacao === 'all' ? 0 : parseInt(visualizacao);
+
+        // Mostrar progress
+        document.getElementById('progressContainer').style.display = 'block';
+        document.getElementById('resultadoGeracao').style.display = 'none';
+
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        progressBar.style.width = '10%';
+        progressBar.textContent = '10%';
+        progressText.textContent = 'Conectando ao servidor...';
+
+        try {
+            progressBar.style.width = '30%';
+            progressBar.textContent = '30%';
+            progressText.textContent = 'Gerando combinações...';
+
+            let url;
+            if (multiplosPadroesAtivo) {
+                // Modo múltiplo - enviar múltiplos padrões e dezenas
+                const padroes = padroesSelecionados.map(p => p.padrao).join(',');
+                const quantidade = document.getElementById('quantidadeApostasInput').value || 10;
+                
+                // ⚠️ NÃO incluir núcleo na pool para API (deixar gerar com selecionadas do usuário)
+                // O núcleo será aplicado APÓS receber resposta
+                let poolParaAPI = [...dezenasParaGerar];
+                
+                const dezenas = document.getElementById('usarTodasDezenas')?.checked 
+                    ? 'todas' 
+                    : poolParaAPI.join(',');
+                
+                console.log('📊 DEBUG GERAÇÃO MÚLTIPLA:', {
+                    padroes,
+                    quantidade,
+                    dezenasParaGerar,
+                    poolParaAPI,
+                    dezenas,
+                    usarNucleoAtivo,
+                    nucleoEstrategico,
+                    usarDesdobramentoAtivo,
+                    sorteio_base: ultimoSorteio?.sorteio_base
+                });
+                
+                // 🆕 Adicionar suporte a desdobramento em modo múltiplo
+                if (usarDesdobramentoAtivo && ultimoSorteio) {
+                    const sorteioBase = ultimoSorteio.sorteio_base.join(',');
+                    url = `/api/gerador-padroes/gerar-multiplo?padroes=${encodeURIComponent(padroes)}&quantidade=${quantidade}&dezenas=${encodeURIComponent(dezenas)}&sorteio_base=${encodeURIComponent(sorteioBase)}`;
+                } else {
+                    url = `/api/gerador-padroes/gerar-multiplo?padroes=${encodeURIComponent(padroes)}&quantidade=${quantidade}&dezenas=${encodeURIComponent(dezenas)}`;
+                }
+            } else {
+                // 🆕 Modo único - verificar se desdobramento está ativo
+                if (usarDesdobramentoAtivo && ultimoSorteio) {
+                    // Usar rota com filtro de desdobramento
+                    const sorteioBase = ultimoSorteio.sorteio_base.join(',');
+                    url = `/api/gerador-padroes/gerar-com-desdobramento?padrao=${encodeURIComponent(padraoSelecionado.padrao)}&sorteio_base=${encodeURIComponent(sorteioBase)}${limite > 0 ? '&limite=' + limite : ''}`;
+                } else {
+                    // Usar rota padrão
+                    url = `/api/gerador-padroes/gerar?padrao=${encodeURIComponent(padraoSelecionado.padrao)}${limite > 0 ? '&limite=' + limite : ''}`;
+                }
+            }
+
+            const response = await fetch(url);
+
+            progressBar.style.width = '70%';
+            progressBar.textContent = '70%';
+            progressText.textContent = 'Processando resultados...';
+
+            const data = await response.json();
+
+            progressBar.style.width = '100%';
+            progressBar.textContent = '100%';
+            progressText.textContent = 'Concluído!';
+
+            // 🆕 DEBUG: Mostrar resposta completa
+            console.log('📨 RESPOSTA SERVIDOR:', data);
+
+            if (response.ok && data.jogos) {
+                // 🔥 Aplicar núcleo se ativo (garantir NÚCLEO + 4 complementares, priorizando iniciais 3)
+                if (usarNucleoAtivo && Array.isArray(nucleoEstrategico) && nucleoEstrategico.length > 0) {
+                    jogosGerados = data.jogos.map(numeros => {
+                        // Começar com o núcleo garantido
+                        let resultado = [...nucleoEstrategico];
+                        // Priorizar iniciais 3 (30, 31) na resposta
+                        let numerosOrd = numeros.sort((a, b) => {
+                            let aInicial3 = a >= 30 ? 0 : 1;
+                            let bInicial3 = b >= 30 ? 0 : 1;
+                            return aInicial3 - bInicial3;
+                        });
+                        // Adicionar apenas 4 números complementares (priorizando iniciais 3)
+                        let adicionados = 0;
+                        for (let n of numerosOrd) {
+                            if (!nucleoEstrategico.includes(n) && dezenasSelecionadas.includes(n) && adicionados < 4) {
+                                resultado.push(n);
+                                adicionados++;
+                            }
+                        }
+                        // Ordenar (agora sempre terá exatamente 7)
+                        return resultado.sort((a, b) => a - b);
+                    });
+                } else {
+                    jogosGerados = data.jogos;
+                }
+                paginaAtualJogos = 1;
+
+                setTimeout(() => {
+                    document.getElementById('progressContainer').style.display = 'none';
+                    document.getElementById('resultadoGeracao').style.display = 'block';
+                    document.getElementById('totalGerado').textContent = `${jogosGerados.length.toLocaleString('pt-BR')} jogos`;
+                    
+                    // 🆕 Mostrar aviso se houve filtragem por desdobramento
+                    if (data.filtrados_por_desdobramento) {
+                        const msgFiltro = `Gerados ${data.total} de ${data.total_original} jogos (${data.taxa_retencao}% com desdobramento)`;
+                        document.getElementById('tempoGeracao').textContent = `${msgFiltro} - Tempo: ${data.tempo_geracao}s`;
+                        
+                        // Adicionar alerta
+                        const alertFiltro = document.createElement('div');
+                        alertFiltro.className = 'alert alert-info mt-3';
+                        alertFiltro.innerHTML = `
+                            <i class="fas fa-filter me-2"></i>
+                            <strong>Filtro de Desdobramento Ativo:</strong> 
+                            Exibindo apenas apostas com ≥2 números do último concurso (${ultimoSorteio.sorteio_base.join(', ')})
+                        `;
+                        
+                        // 🆕 Corrigir: verificar se tempoGeracao existe e é filho de resultadoGeracao
+                        const tempoGeracaoEl = document.getElementById('tempoGeracao');
+                        const resultadoGeracaoEl = document.getElementById('resultadoGeracao');
+                        if (tempoGeracaoEl && resultadoGeracaoEl && tempoGeracaoEl.parentNode === resultadoGeracaoEl) {
+                            resultadoGeracaoEl.insertBefore(alertFiltro, tempoGeracaoEl);
+                        } else {
+                            resultadoGeracaoEl.insertBefore(alertFiltro, resultadoGeracaoEl.firstChild);
+                        }
+                    } else {
+                        document.getElementById('tempoGeracao').textContent = `Tempo de geração: ${data.tempo_geracao}s`;
+                    }
+
+
+                    renderizarJogos();
+                }, 500);
+            } else {
+                // Montar mensagem de erro detalhada
+                let mensagemErro = data.erro || 'Erro ao gerar apostas';
+                
+                // Se houver detalhes de erro, mostrar em lista
+                if (data.detalhes && Array.isArray(data.detalhes) && data.detalhes.length > 0) {
+                    mensagemErro += '\n\nDetalhes:\n' + data.detalhes.map((d, i) => `${i + 1}. ${d}`).join('\n');
+                }
+                
+                throw new Error(mensagemErro);
+            }
+        } catch (error) {
+            document.getElementById('progressContainer').style.display = 'none';
+            
+            // Formatar mensagem de erro com quebras de linha preservadas
+            const mensagemFormatada = error.message.replace(/\n/g, '<br>');
+            showModal('Erro na Geração', mensagemFormatada, 'danger');
+        }
+    }
+
+    // =========================================
+    // RENDERIZAR JOGOS
+    // =========================================
+    function renderizarJogos() {
+        const container = document.getElementById('listaJogosGerados');
+        const mesSelect = document.getElementById('mesSorteSelect').value;
+        const mesAbrev = mesSelect ? MESES[mesSelect].abrev : '';
+        const mesNome = mesSelect ? MESES[mesSelect].nome : '';
+
+        const inicio = (paginaAtualJogos - 1) * jogosPorPagina;
+        const fim = Math.min(inicio + jogosPorPagina, jogosGerados.length);
+        const totalPaginas = Math.ceil(jogosGerados.length / jogosPorPagina);
+
+        container.innerHTML = '';
+
+        for (let i = inicio; i < fim; i++) {
+            const jogo = jogosGerados[i];
+            const div = document.createElement('div');
+            div.className = 'jogo-item';
+
+            const numerosHtml = jogo.map(n => `<span>${String(n).padStart(2, '0')}</span>`).join('');
+
+            // 🆕 Adicionar badge do mês com cor (se selecionado)
+            let mesBadgeHtml = '';
+            if (mesAbrev && mesNome) {
+                // Buscar cor do mês da variável global coresMeses (carregada da API)
+                const corMes = window.coresMeses && window.coresMeses[mesNome] 
+                    ? window.coresMeses[mesNome] 
+                    : '#6c757d'; // Cor padrão se não encontrar
+
+                mesBadgeHtml = `<span class="badge ms-2" style="background-color: ${corMes}; color: white; font-weight: bold;">${mesAbrev}</span>`;
+            }
+
+            div.innerHTML = `
+                <span class="jogo-numero">#${(i + 1).toLocaleString('pt-BR')}</span>
+                <span class="jogo-numeros">${numerosHtml}</span>
+                ${mesBadgeHtml}
+            `;
+
+            container.appendChild(div);
+        }
+
+        document.getElementById('paginacaoInfo').textContent = `Página ${paginaAtualJogos} de ${totalPaginas}`;
+    }
+
+    function voltarPaginaJogos() {
+        if (paginaAtualJogos > 1) {
+            paginaAtualJogos--;
+            renderizarJogos();
+        }
+    }
+
+    function avancarPaginaJogos() {
+        const totalPaginas = Math.ceil(jogosGerados.length / jogosPorPagina);
+        if (paginaAtualJogos < totalPaginas) {
+            paginaAtualJogos++;
+            renderizarJogos();
+        }
+    }
+
+    // =========================================
+    // EXPORTAÇÃO TXT (FORMATO CORRETO)
+    // =========================================
+    async function exportarTXT() {
+        if (!padraoSelecionado) {
+            showModal('Atenção', 'Selecione um padrão primeiro!', 'warning');
+            return;
+        }
+
+        const mesSelect = document.getElementById('mesExportarSelect').value;
+        const mesAbrev = mesSelect ? MESES[mesSelect].abrev : '';
+
+        const btn = document.getElementById('btnExportarTXT');
+        const textoOriginal = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Gerando...';
+
+        try {
+            const response = await fetch(`/api/gerador-padroes/exportar-txt?padrao=${encodeURIComponent(padraoSelecionado.padrao)}&mes=${mesAbrev}`);
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `padrao_${padraoSelecionado.padrao.replace(/ /g, '')}_${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                adicionarHistoricoExportacao('TXT', padraoSelecionado.padrao, padraoSelecionado.jogos);
+            } else {
+                const data = await response.json();
+                throw new Error(data.erro || 'Erro ao exportar');
+            }
+        } catch (error) {
+            showModal('Erro', error.message, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        }
+    }
+
+    async function exportarXLSX() {
+        if (!padraoSelecionado) {
+            showModal('Atenção', 'Selecione um padrão primeiro!', 'warning');
+            return;
+        }
+
+        const mesSelect = document.getElementById('mesExportarSelect').value;
+        const mesNome = mesSelect ? MESES[mesSelect].nome : '';
+
+        const btn = document.getElementById('btnExportarXLSX');
+        const textoOriginal = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Gerando...';
+
+        try {
+            const response = await fetch(`/api/gerador-padroes/exportar-xlsx?padrao=${encodeURIComponent(padraoSelecionado.padrao)}&mes=${mesNome}`);
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `padrao_${padraoSelecionado.padrao.replace(/ /g, '')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                adicionarHistoricoExportacao('XLSX', padraoSelecionado.padrao, padraoSelecionado.jogos);
+            } else {
+                const data = await response.json();
+                throw new Error(data.erro || 'Erro ao exportar');
+            }
+        } catch (error) {
+            showModal('Erro', error.message, 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        }
+    }
+
+    function adicionarHistoricoExportacao(formato, padrao, jogos) {
+        const container = document.getElementById('historicoExportacoes');
+        const lista = document.getElementById('listaExportacoes');
+
+        container.style.display = 'block';
+
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.innerHTML = `
+            <span>
+                <i class="fas fa-file-${formato === 'TXT' ? 'alt' : 'excel'} me-2"></i>
+                <strong>${padrao}</strong> - ${jogos.toLocaleString('pt-BR')} jogos
+            </span>
+            <span class="badge bg-${formato === 'TXT' ? 'info' : 'success'}">${formato}</span>
+        `;
+
+        lista.insertBefore(li, lista.firstChild);
+
+        while (lista.children.length > 5) {
+            lista.removeChild(lista.lastChild);
+        }
+    }
+
+    // =========================================
+    // UTILITÁRIOS
+    // =========================================
+    function formatarNumero(num) {
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'K';
+        }
+        return num.toLocaleString('pt-BR');
+    }
+
+    function showModal(titulo, mensagem, tipo) {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-${tipo} text-white">
+                        <h5 class="modal-title"><i class="fas fa-${tipo === 'danger' ? 'exclamation-circle' : 'exclamation-triangle'} me-2"></i>${titulo}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">${mensagem}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        modal.addEventListener('hidden.bs.modal', () => modal.remove());
+    }
+
+    // =========================================
+    // NÚCLEOS ESTRATÉGICOS
+    // =========================================
+    function inicializarNucleosUI() {
+        renderNucleoResultado('nucleoPrincipal', []);
+        renderNucleoResultado('nucleoAlternativo', []);
+        renderNucleoResultado('nucleoConservador', []);
+        atualizarBadgeNucleo();
+    }
+
+    function coletarConfigNucleo() {
+        const tamanho = document.querySelector('input[name="nucleoTamanho"]:checked');
+        NUCLEOS_STATE.tamanho = tamanho ? Number(tamanho.value) : 3;
+        NUCLEOS_STATE.usarFrequencia = document.getElementById('filtroFreq')?.checked ?? true;
+        NUCLEOS_STATE.usarAtraso = document.getElementById('filtroAtraso')?.checked ?? true;
+        NUCLEOS_STATE.usarPadroes = document.getElementById('filtroPadroes')?.checked ?? true;
+        NUCLEOS_STATE.usarDistribuicao = document.getElementById('filtroDistrib')?.checked ?? true;
+        NUCLEOS_STATE.regraSequencia = document.getElementById('regraSequencia')?.checked ?? true;
+        NUCLEOS_STATE.regraQuadrante = document.getElementById('regraQuadrante')?.checked ?? true;
+        NUCLEOS_STATE.regraParImpar = document.getElementById('regraParImpar')?.checked ?? true;
+        atualizarBadgeNucleo();
+        return { ...NUCLEOS_STATE };
+    }
+
+    async function gerarNucleosAutomaticos() {
+        const config = coletarConfigNucleo();
+        
+        try {
+            // Carregar dados reais da API
+            if (!NUCLEOS_DADOS_REAIS) {
+                const response = await fetch('/api/estatisticas/nucleos-estrategicos');
+                const data = await response.json();
+                
+                if (data.erro) {
+                    showModal('Erro', data.erro, 'danger');
+                    return;
+                }
+                
+                NUCLEOS_DADOS_REAIS = data;
+            }
+            
+            // Filtrar candidatos com base nos filtros ativos
+            const candidatos = NUCLEOS_DADOS_REAIS.dezenas.map((info) => {
+                let score = 0;
+                
+                if (config.usarFrequencia) score += info.score_detalhes.frequencia;
+                if (config.usarAtraso) score += info.score_detalhes.atraso;
+                if (config.usarPadroes) score += info.score_detalhes.padrao;
+                if (config.usarDistribuicao) score += info.score_detalhes.distribuicao;
+                
+                return {
+                    dezena: info.dezena,
+                    score: Number(score.toFixed(2)),
+                    frequencia: info.frequencia,
+                    atraso: info.atraso,
+                    par_impar: info.par_impar,
+                    faixa: info.faixa,
+                    quadrante: info.quadrante
+                };
+            }).sort((a, b) => b.score - a.score);
+
+            const principal = montarNucleo(candidatos, config, 'balanceado');
+            const alternativo = montarNucleo(candidatos.slice(2), config, 'cluster');
+            const conservador = montarNucleo(candidatos, { ...config, regraQuadrante: true, regraParImpar: true, regraSequencia: true }, 'spread');
+
+            NUCLEOS_GERADOS.principal = principal;
+            NUCLEOS_GERADOS.alternativo = alternativo;
+            NUCLEOS_GERADOS.conservador = conservador;
+
+            renderNucleoResultado('nucleoPrincipal', principal);
+            renderNucleoResultado('nucleoAlternativo', alternativo);
+            renderNucleoResultado('nucleoConservador', conservador);
+            renderRankingNucleos(candidatos.slice(0, 10));
+            
+            // Habilitar botões de exportação
+            document.getElementById('btnExportNucleoTXT').disabled = false;
+            document.getElementById('btnExportNucleoXLS').disabled = false;
+            document.getElementById('btnExportNucleoHTML').disabled = false;
+            
+            // Salvar no localStorage para uso no Gerador Inteligente
+            localStorage.setItem('nucleoEstrategico', JSON.stringify({
+                principal: principal,
+                alternativo: alternativo,
+                conservador: conservador,
+                dataGeracao: new Date().toISOString(),
+                config: config
+            }));
+            
+            showModal('Sucesso', 'Núcleos gerados com sucesso! Agora você pode usá-los no Gerador Inteligente.', 'success');
+            
+        } catch (error) {
+            console.error('Erro ao gerar núcleos:', error);
+            showModal('Erro', 'Erro ao carregar dados dos núcleos: ' + error.message, 'danger');
+        }
+    }
+
+    function montarNucleo(listaOrdenada, config, modo) {
+        const alvo = config.tamanho;
+        const resultado = [];
+        let cursor = 0;
+
+        while (resultado.length < alvo && cursor < listaOrdenada.length) {
+            const candidato = listaOrdenada[cursor].dezena;
+            const tentativa = [...resultado, candidato];
+
+            if (validaRegrasNucleo(tentativa, config, modo)) {
+                resultado.push(candidato);
+            }
+            cursor++;
+        }
+
+        return resultado.sort((a, b) => a - b);
+    }
+
+    function validaRegrasNucleo(dezenas, config, modo) {
+        const ordenadas = [...dezenas].sort((a, b) => a - b);
+
+        if (config.regraSequencia && temSequenciaLonga(ordenadas)) return false;
+
+        if (config.regraQuadrante && ordenadas.length === config.tamanho) {
+            const quadrantes = new Set(ordenadas.map(quadranteDezena));
+            if (config.tamanho === 3 && quadrantes.size < 2) return false;
+            if (config.tamanho === 4 && quadrantes.size < 2) return false;
+        }
+
+        if (config.regraParImpar && ordenadas.length === config.tamanho) {
+            const pares = ordenadas.filter((d) => d % 2 === 0).length;
+            const impares = ordenadas.length - pares;
+            if (pares === 0 || impares === 0) return false;
+        }
+
+        if (modo === 'spread' && ordenadas.length === config.tamanho) {
+            const minimoGap = Math.min(...ordenadas.slice(1).map((d, i) => d - ordenadas[i]));
+            if (minimoGap < 2) return false; // tenta espaçar um pouco mais
+        }
+
+        return true;
+    }
+
+    function temSequenciaLonga(lista) {
+        let run = 1;
+        for (let i = 1; i < lista.length; i++) {
+            if (lista[i] === lista[i - 1] + 1) {
+                run += 1;
+                if (run >= 3) return true;
+            } else {
+                run = 1;
+            }
+        }
+        return false;
+    }
+
+    function quadranteDezena(d) {
+        if (d <= 8) return 1;
+        if (d <= 16) return 2;
+        if (d <= 24) return 3;
+        return 4;
+    }
+
+    function renderNucleoResultado(elementId, dezenas) {
+        const container = document.getElementById(elementId);
+        if (!container) return;
+
+        if (!dezenas || dezenas.length === 0) {
+            container.innerHTML = '<span class="text-muted">Aguarda geração</span>';
+            return;
+        }
+
+        container.innerHTML = dezenas
+            .map((d) => `<span class="nucleo-chip">${String(d).padStart(2, '0')}</span>`)
+            .join('');
+    }
+
+    function renderRankingNucleos(lista) {
+        const tbody = document.getElementById('tabelaRankingNucleos');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        if (!lista || lista.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-muted">Sem dados de score.</td></tr>';
+            return;
+        }
+
+        lista.forEach((item) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="badge bg-dark">${String(item.dezena).padStart(2, '0')}</span></td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <strong>${item.score.toFixed(2)}</strong>
+                        <div class="flex-grow-1 nucleo-score-bar">
+                            <div class="nucleo-score-fill" style="width: ${Math.min(100, item.score * 3)}%;"></div>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-muted">${notaRapida(item.dezena)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function notaRapida(d) {
+        const faixa = d <= 10 ? 'baixa' : d <= 20 ? 'média' : 'alta';
+        const paridade = d % 2 === 0 ? 'par' : 'ímpar';
+        return `${faixa}, ${paridade}`;
+    }
+
+    function atualizarBadgeNucleo() {
+        const badge = document.getElementById('badgeNucleoConfig');
+        if (!badge) return;
+        const filtros = ['F', 'A', 'P', 'D'].filter((_, idx) => {
+            return [NUCLEOS_STATE.usarFrequencia, NUCLEOS_STATE.usarAtraso, NUCLEOS_STATE.usarPadroes, NUCLEOS_STATE.usarDistribuicao][idx];
+        }).join('');
+        badge.textContent = `Tamanho ${NUCLEOS_STATE.tamanho} • Filtros ${filtros || 'off'}`;
+    }
+
+    // =========================================
+    // IMPORTAÇÃO/EXPORTAÇÃO DE NÚCLEOS
+    // =========================================
+    function importarNucleo() {
+        const input = document.getElementById('importNucleoFile');
+        const file = input.files[0];
+        
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const conteudo = e.target.result;
+            const numeros = extrairNumerosDeTexto(conteudo);
+            
+            if (numeros.length < 3 || numeros.length > 15) {
+                showModal('Atenção', `Importação resultou em ${numeros.length} números. Esperado: 3 a 15 números.`, 'warning');
+                return;
+            }
+            
+            // Validar range 1-31
+            const invalidos = numeros.filter(n => n < 1 || n > 31);
+            if (invalidos.length > 0) {
+                showModal('Erro', `Números inválidos encontrados: ${invalidos.join(', ')}`, 'danger');
+                return;
+            }
+            
+            NUCLEOS_GERADOS.principal = numeros.slice(0, NUCLEOS_STATE.tamanho);
+            NUCLEOS_GERADOS.alternativo = numeros.slice(1, NUCLEOS_STATE.tamanho + 1);
+            NUCLEOS_GERADOS.conservador = numeros.slice(0, NUCLEOS_STATE.tamanho);
+            
+            renderNucleoResultado('nucleoPrincipal', NUCLEOS_GERADOS.principal);
+            renderNucleoResultado('nucleoAlternativo', NUCLEOS_GERADOS.alternativo);
+            renderNucleoResultado('nucleoConservador', NUCLEOS_GERADOS.conservador);
+            
+            document.getElementById('btnExportNucleoTXT').disabled = false;
+            document.getElementById('btnExportNucleoXLS').disabled = false;
+            document.getElementById('btnExportNucleoHTML').disabled = false;
+            
+            showModal('Sucesso', `${numeros.length} números importados com sucesso!`, 'success');
+        };
+        
+        reader.readAsText(file);
+        input.value = ''; // Limpar input
+    }
+
+    function extrairNumerosDeTexto(texto) {
+        // Remove tags HTML
+        texto = texto.replace(/<[^>]*>/g, ' ');
+        // Extrai apenas números
+        const matches = texto.match(/\d+/g);
+        if (!matches) return [];
+        
+        const numeros = matches.map(n => parseInt(n)).filter(n => !isNaN(n) && n >= 1 && n <= 31);
+        // Remover duplicados
+        return [...new Set(numeros)].sort((a, b) => a - b);
+    }
+
+    function exportarNucleoTXT() {
+        const principal = NUCLEOS_GERADOS.principal;
+        if (!principal || principal.length === 0) {
+            showModal('Atenção', 'Gere um núcleo antes de exportar!', 'warning');
+            return;
+        }
+        
+        const conteudo = `Núcleo Principal: ${principal.map(n => String(n).padStart(2, '0')).join(' ')}\n` +
+                        `Núcleo Alternativo: ${NUCLEOS_GERADOS.alternativo.map(n => String(n).padStart(2, '0')).join(' ')}\n` +
+                        `Núcleo Conservador: ${NUCLEOS_GERADOS.conservador.map(n => String(n).padStart(2, '0')).join(' ')}\n\n` +
+                        `Gerado em: ${new Date().toLocaleString('pt-BR')}`;
+        
+        baixarArquivo(conteudo, `nucleo_estrategico_${new Date().toISOString().slice(0, 10)}.txt`, 'text/plain');
+    }
+
+    function exportarNucleoXLS() {
+        const principal = NUCLEOS_GERADOS.principal;
+        if (!principal || principal.length === 0) {
+            showModal('Atenção', 'Gere um núcleo antes de exportar!', 'warning');
+            return;
+        }
+        
+        // Criar CSV (compatível com Excel)
+        let csv = 'Tipo,Dezenas\n';
+        csv += `Principal,"${principal.join(', ')}"\n`;
+        csv += `Alternativo,"${NUCLEOS_GERADOS.alternativo.join(', ')}"\n`;
+        csv += `Conservador,"${NUCLEOS_GERADOS.conservador.join(', ')}"\n`;
+        
+        baixarArquivo(csv, `nucleo_estrategico_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv');
+    }
+
+    function exportarNucleoHTML() {
+        const principal = NUCLEOS_GERADOS.principal;
+        if (!principal || principal.length === 0) {
+            showModal('Atenção', 'Gere um núcleo antes de exportar!', 'warning');
+            return;
+        }
+        
+        const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Núcleo Estratégico - Dia de Sorte</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #D4B31A; text-align: center; }
+        .nucleo { margin: 20px 0; padding: 15px; border-radius: 8px; }
+        .nucleo h3 { margin: 0 0 10px 0; }
+        .chip { display: inline-block; padding: 8px 12px; margin: 4px; border-radius: 8px; background: #D4B31A; color: #2d2606; font-weight: bold; min-width: 40px; text-align: center; }
+        .principal { background: #d1e7dd; border-left: 4px solid #28a745; }
+        .alternativo { background: #fff3cd; border-left: 4px solid #ffc107; }
+        .conservador { background: #cff4fc; border-left: 4px solid #0dcaf0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Núcleo Estratégico - Dia de Sorte</h1>
+        <div class="nucleo principal">
+            <h3>Principal</h3>
+            ${principal.map(n => `<span class="chip">${String(n).padStart(2, '0')}</span>`).join('')}
+        </div>
+        <div class="nucleo alternativo">
+            <h3>Alternativo</h3>
+            ${NUCLEOS_GERADOS.alternativo.map(n => `<span class="chip">${String(n).padStart(2, '0')}</span>`).join('')}
+        </div>
+        <div class="nucleo conservador">
+            <h3>Conservador</h3>
+            ${NUCLEOS_GERADOS.conservador.map(n => `<span class="chip">${String(n).padStart(2, '0')}</span>`).join('')}
+        </div>
+        <p style="text-align: center; color: #666; margin-top: 30px;">Gerado em ${new Date().toLocaleString('pt-BR')}</p>
+    </div>
+</body>
+</html>`;
+        
+        baixarArquivo(html, `nucleo_estrategico_${new Date().toISOString().slice(0, 10)}.html`, 'text/html');
+    }
+
+    function baixarArquivo(conteudo, nomeArquivo, tipo) {
+        const blob = new Blob([conteudo], { type: tipo });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nomeArquivo;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // =========================================
+    // APOSTAS AMPLIADAS
+    // =========================================
+    let PRECOS_DEZENAS_CACHE = null; // Cache dos preços da API
+
+    async function carregarPrecosDezenas() {
+        if (PRECOS_DEZENAS_CACHE) return PRECOS_DEZENAS_CACHE;
+        
+        try {
+            const response = await fetch('/api/configuracoes/precos-dezenas');
+            const data = await response.json();
+            
+            if (data.sucesso) {
+                PRECOS_DEZENAS_CACHE = data.precos;
+                return PRECOS_DEZENAS_CACHE;
+            } else {
+                console.error('Erro ao carregar preços:', data.mensagem);
+                // Retornar valores padrão
+                return {
+                    '7': 2.50, '8': 20.00, '9': 90.00, '10': 300.00,
+                    '11': 825.00, '12': 1980.00, '13': 4290.00,
+                    '14': 8580.00, '15': 16087.50
+                };
+            }
+        } catch (error) {
+            console.error('Erro na requisição de preços:', error);
+            // Retornar valores padrão
+            return {
+                '7': 2.50, '8': 20.00, '9': 90.00, '10': 300.00,
+                '11': 825.00, '12': 1980.00, '13': 4290.00,
+                '14': 8580.00, '15': 16087.50
+            };
+        }
+    }
+
+    async function atualizarLabelAmpliadas() {
+        const slider = document.getElementById('dezenasAmpliadas');
+        const label = document.getElementById('labelDezenasAmpliadas');
+        const alert = document.getElementById('alertCustoAmpliado');
+        const texto = document.getElementById('textoCustoAmpliado');
+        
+        const qtd = parseInt(slider.value);
+        label.textContent = `${qtd} dezenas`;
+        
+        // Carregar preços reais da API
+        const precos = await carregarPrecosDezenas();
+        const custoTotal = precos[String(qtd)] || 0;
+        
+        // Se for 7 dezenas, é aposta simples (1 jogo)
+        if (qtd === 7) {
+            texto.innerHTML = `<i class="fas fa-info-circle me-1"></i>Aposta simples (1 jogo) • Custo: R$ ${custoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        } else {
+            // Calcular combinações
+            const combinacoes = calcularCombinacoes(qtd, 7);
+            const valorUnitario = precos['7'] || 2.50;
+            const custoCalculado = combinacoes * valorUnitario;
+            
+            texto.innerHTML = `<i class="fas fa-info-circle me-1"></i>Gera ${combinacoes.toLocaleString('pt-BR')} jogos • ` +
+                            `<strong>Custo Real: R$ ${custoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> ` +
+                            `<small class="text-muted">(calculado: R$ ${custoCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})</small>`;
+        }
+        
+        alert.style.display = qtd > 7 ? 'block' : 'none';
+    }
+
+    function calcularCombinacoes(n, k) {
+        if (k > n) return 0;
+        if (k === 0 || k === n) return 1;
+        
+        let result = 1;
+        for (let i = 1; i <= k; i++) {
+            result *= (n - k + i) / i;
+        }
+        return Math.round(result);
+    }
+
+    // =========================================
+    // TOGGLE MÚLTIPLOS PADRÕES
+    // =========================================
+    let multiplosPadroesAtivo = false;
+    let padroesSelecionados = [];
+
+    function toggleMultiplosPadroes() {
+        const toggle = document.getElementById('toggleMultiplosPadroes');
+        const info = document.getElementById('toggleInfo');
+        const controles = document.getElementById('controlesMultiplos');
+        const dezenasContainer = document.getElementById('dezenasSelecaoContainer');
+
+        multiplosPadroesAtivo = toggle.checked;
+
+        if (multiplosPadroesAtivo) {
+            info.innerHTML = '<i class="fas fa-info-circle me-1"></i>Ligado: Selecione múltiplos padrões simultaneamente';
+            controles.style.display = 'block';
+            dezenasContainer.style.display = 'block';
+            padraoSelecionado = null;
+            padroesSelecionados = [];
+            renderizarTabelaPadroes(padroesFiltrados);
+        } else {
+            info.innerHTML = '<i class="fas fa-info-circle me-1"></i>Desligado: Selecione apenas um padrão por vez';
+            controles.style.display = 'none';
+            dezenasContainer.style.display = 'none';
+            padroesSelecionados = [];
+            padraoSelecionado = null;
+            renderizarTabelaPadroes(padroesFiltrados);
+        }
+
+        atualizarDisplaysSelecao();
+        atualizarContadorSelecionados();
+    }
+
+    function togglePadraoSelecionado(padrao, jogos, frequencia, status) {
+        const checkbox = event.target;
+        const padraoObj = { padrao, jogos, frequencia, status };
+        const index = padroesSelecionados.findIndex(p => p.padrao === padrao);
+
+        if (checkbox.checked) {
+            if (index === -1) {
+                padroesSelecionados.push(padraoObj);
+            }
+        } else {
+            if (index > -1) {
+                padroesSelecionados.splice(index, 1);
+            }
+        }
+
+        jogosGerados = [];
+        paginaAtualJogos = 1;
+        atualizarDisplaysSelecao();
+        atualizarContadorSelecionados();
+    }
+
+    function atualizarDisplaysSelecao() {
+        if (multiplosPadroesAtivo) {
+            document.getElementById('configUnico').style.display = 'none';
+            document.getElementById('configMultiplo').style.display = 'block';
+            document.getElementById('alertaJogos').style.display = 'none';
+
+            if (padroesSelecionados.length === 0) {
+                document.getElementById('padraoSelecionadoDisplay').textContent = 'Nenhum padrão selecionado';
+                document.getElementById('padraoExportarDisplay').textContent = 'Nenhum padrão selecionado';
+                document.getElementById('infoPadraoSelecionado').style.display = 'none';
+                document.getElementById('configGeracao').style.display = 'none';
+                document.getElementById('mensagemSelecionePadrao').style.display = 'block';
+                document.getElementById('cardInfoPadrao').style.display = 'none';
+            } else {
+                const padroesText = padroesSelecionados.map(p => p.padrao).join(', ');
+                document.getElementById('padraoSelecionadoDisplay').textContent = `${padroesSelecionados.length} padrões: ${padroesText}`;
+                document.getElementById('padraoExportarDisplay').textContent = `${padroesSelecionados.length} padrões selecionados`;
+                document.getElementById('infoPadraoSelecionado').style.display = 'none';
+                document.getElementById('configGeracao').style.display = 'flex';
+                document.getElementById('mensagemSelecionePadrao').style.display = 'none';
+                document.getElementById('cardInfoPadrao').style.display = 'none';
+                atualizarSugestaoDezenas();
+            }
+        } else {
+            document.getElementById('configUnico').style.display = 'block';
+            document.getElementById('configMultiplo').style.display = 'none';
+
+            if (!padraoSelecionado) {
+                document.getElementById('padraoSelecionadoDisplay').textContent = 'Nenhum padrão selecionado';
+                document.getElementById('padraoExportarDisplay').textContent = 'Nenhum padrão selecionado';
+                document.getElementById('infoPadraoSelecionado').style.display = 'none';
+                document.getElementById('configGeracao').style.display = 'none';
+                document.getElementById('mensagemSelecionePadrao').style.display = 'block';
+                document.getElementById('cardInfoPadrao').style.display = 'none';
+            }
+        }
+    }
+
+    function atualizarContadorSelecionados() {
+        const contador = document.getElementById('qtdSelecionados');
+        const btnIrParaGeracao = document.getElementById('btnIrParaGeracao');
+
+        if (contador) contador.textContent = padroesSelecionados.length;
+        if (btnIrParaGeracao) btnIrParaGeracao.disabled = padroesSelecionados.length === 0;
+    }
+
+    function selecionarTodosPadroes() {
+        if (!multiplosPadroesAtivo) return;
+        padroesSelecionados = [...padroesFiltrados];
+        jogosGerados = [];
+        paginaAtualJogos = 1;
+        renderizarTabelaPadroes(padroesFiltrados);
+        atualizarDisplaysSelecao();
+        atualizarContadorSelecionados();
+    }
+
+    function limparSelecaoPadroes() {
+        if (!multiplosPadroesAtivo) return;
+        padroesSelecionados = [];
+        jogosGerados = [];
+        paginaAtualJogos = 1;
+        renderizarTabelaPadroes(padroesFiltrados);
+        atualizarDisplaysSelecao();
+        atualizarContadorSelecionados();
+    }
+
+    function irParaGeracao() {
+        if (padroesSelecionados.length === 0) return;
+        const tabGerar = new bootstrap.Tab(document.getElementById('tab-gerar'));
+        tabGerar.show();
+    }
+
+    function atualizarSugestaoDezenas() {
+        const qtdPadroes = padroesSelecionados.length;
+        if (qtdPadroes === 0) {
+            const sugestaoEl = document.getElementById('sugestaoDezenas');
+            if (sugestaoEl) sugestaoEl.style.display = 'none';
+            return;
+        }
+
+        const dezenasSugeridas = Math.min(qtdPadroes * 6, 31);
+        const qtdPadroesEl = document.getElementById('qtdPadroesSugestao');
+        const qtdDezenasEl = document.getElementById('qtdDezenasSugeridas');
+        const sugestaoEl = document.getElementById('sugestaoDezenas');
+        const distribuicaoEl = document.getElementById('distribuicaoSugeridaContainer');
+
+        if (qtdPadroesEl) qtdPadroesEl.textContent = qtdPadroes;
+        if (qtdDezenasEl) qtdDezenasEl.textContent = dezenasSugeridas;
+        if (sugestaoEl) sugestaoEl.style.display = 'block';
+
+        // 🆕 Calcular e exibir distribuição de baixas/médias/altas
+        if (distribuicaoEl && dezenasSugeridas > 0) {
+            const porFaixa = Math.floor(dezenasSugeridas / 3);
+            const resto = dezenasSugeridas % 3;
+            
+            const baixas = porFaixa + (resto > 0 ? 1 : 0);
+            const medias = porFaixa + (resto > 1 ? 1 : 0);
+            const altas = porFaixa;
+            
+            document.getElementById('sugestBaixas').textContent = baixas;
+            document.getElementById('sugestMedias').textContent = medias;
+            document.getElementById('sugestAltas').textContent = altas;
+            
+            distribuicaoEl.style.display = 'block';
+        }
+    }
+
+    // =========================================
+    // GRID DE DEZENAS INTERATIVO
+    // =========================================
+    let dezenasSelecionadas = [];
+    let gridInicializado = false;
+
+    function inicializarGridDezenas() {
+        if (gridInicializado) return;
+
+        const gridContainer = document.getElementById('dezenasGrid');
+        if (!gridContainer) return;
+
+        gridContainer.innerHTML = '';
+
+        for (let i = 1; i <= 31; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'dezena-btn';
+            btn.textContent = String(i).padStart(2, '0');
+            btn.dataset.dezena = i;
+            btn.onclick = () => toggleDezena(i);
+            gridContainer.appendChild(btn);
+        }
+
+        gridInicializado = true;
+        atualizarEstadoGrid();
+    }
+
+    function toggleDezena(dezena) {
+        const index = dezenasSelecionadas.indexOf(dezena);
+        if (index > -1) {
+            dezenasSelecionadas.splice(index, 1);
+        } else {
+            dezenasSelecionadas.push(dezena);
+        }
+        atualizarEstadoGrid();
+        atualizarValidacaoDezenas();
+    }
+
+    function atualizarEstadoGrid() {
+        const botoes = document.querySelectorAll('.dezena-btn');
+        botoes.forEach(btn => {
+            const dezena = parseInt(btn.dataset.dezena);
+            if (dezenasSelecionadas.includes(dezena)) {
+                btn.classList.add('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        });
+
+        const contador = document.getElementById('contadorDezenas');
+        if (contador) contador.textContent = dezenasSelecionadas.length + ' selecionadas';
+
+        const inputEl = document.getElementById('dezenasSelecionadasInput');
+        if (inputEl) inputEl.value = dezenasSelecionadas.join(',');
+    }
+
+    function atualizarValidacaoDezenas() {
+        const alertContainer = document.getElementById('alertValidacaoDezenas');
+        if (!alertContainer) return;
+
+        const qtdSelecionadas = dezenasSelecionadas.length;
+        alertContainer.innerHTML = '';
+
+        if (qtdSelecionadas === 0) {
+            alertContainer.innerHTML = `
+                <div class="alert-validacao warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Nenhuma dezena selecionada. Selecione as dezenas que deseja usar na geração.
+                </div>
+            `;
+        } else if (qtdSelecionadas < 6) {
+            alertContainer.innerHTML = `
+                <div class="alert-validacao warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${qtdSelecionadas} dezena(s) selecionada(s). Recomendamos pelo menos 6 dezenas para melhores resultados.
+                </div>
+            `;
+        } else if (qtdSelecionadas >= 6 && qtdSelecionadas <= 15) {
+            alertContainer.innerHTML = `
+                <div class="alert-validacao success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    ${qtdSelecionadas} dezenas selecionadas. Configuração ideal para geração de apostas.
+                </div>
+            `;
+        } else if (qtdSelecionadas > 15) {
+            alertContainer.innerHTML = `
+                <div class="alert-validacao warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${qtdSelecionadas} dezenas selecionadas. Considere reduzir para otimizar a geração.
+                </div>
+            `;
+        }
+    }
+
+    function limparSelecaoDezenas() {
+        dezenasSelecionadas = [];
+        atualizarEstadoGrid();
+        atualizarValidacaoDezenas();
+    }
+
+    function selecionarTodasDezenas() {
+        dezenasSelecionadas = Array.from({length: 31}, (_, i) => i + 1);
+        atualizarEstadoGrid();
+        atualizarValidacaoDezenas();
+    }
+
+    function toggleUsarTodasDezenas() {
+        const checkbox = document.getElementById('usarTodasDezenas');
+        if (!checkbox) return;
+
+        const gridContainer = document.getElementById('dezenasGridContainer');
+        const contadorContainer = document.getElementById('contadorDezenasContainer');
+
+        if (checkbox.checked) {
+            if (gridContainer) gridContainer.style.display = 'none';
+            if (contadorContainer) contadorContainer.style.display = 'none';
+            const inputEl = document.getElementById('dezenasSelecionadasInput');
+            if (inputEl) inputEl.value = 'todas';
+            const alertContainer = document.getElementById('alertValidacaoDezenas');
+            if (alertContainer) {
+                alertContainer.innerHTML = `
+                    <div class="alert-validacao success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Usando todas as 31 dezenas disponíveis.
+                    </div>
+                `;
+            }
+        } else {
+            if (gridContainer) gridContainer.style.display = 'block';
+            if (contadorContainer) contadorContainer.style.display = 'block';
+            const inputEl = document.getElementById('dezenasSelecionadasInput');
+            if (inputEl) inputEl.value = dezenasSelecionadas.join(',');
+            atualizarValidacaoDezenas();
+        }
+    }
+
+    function aplicarDezenasSugeridas() {
+        if (padroesSelecionados.length === 0) {
+            showModal('Atenção', 'Selecione padrões primeiro para obter sugestão!', 'warning');
+            return;
+        }
+
+        const qtdPadroes = padroesSelecionados.length;
+        const qtdSugeridas = Math.min(qtdPadroes * 6, 31);
+
+        const dezenasBaixas = Array.from({length: 10}, (_, i) => i + 1);
+        const dezenasMedias = Array.from({length: 10}, (_, i) => i + 11);
+        const dezenasAltas = Array.from({length: 11}, (_, i) => i + 21);
+
+        const terco = Math.ceil(qtdSugeridas / 3);
+        const baixas = Math.min(terco, dezenasBaixas.length);
+        const medias = Math.min(terco, dezenasMedias.length);
+        const altas = Math.min(qtdSugeridas - baixas - medias, dezenasAltas.length);
+
+        const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+
+        const selecionadasBaixas = shuffle(dezenasBaixas).slice(0, baixas);
+        const selecionadasMedias = shuffle(dezenasMedias).slice(0, medias);
+        const selecionadasAltas = shuffle(dezenasAltas).slice(0, altas);
+
+        dezenasSelecionadas = [...selecionadasBaixas, ...selecionadasMedias, ...selecionadasAltas].sort((a, b) => a - b);
+
+        const usarTodasEl = document.getElementById('usarTodasDezenas');
+        if (usarTodasEl) usarTodasEl.checked = false;
+        toggleUsarTodasDezenas();
+
+        atualizarEstadoGrid();
+        atualizarValidacaoDezenas();
+
+        showModal('Sucesso',
+            `Selecionadas ${qtdSugeridas} dezenas balanceadas:\n` +
+            `• ${selecionadasBaixas.length} baixas (01-10)\n` +
+            `• ${selecionadasMedias.length} médias (11-20)\n` +
+            `• ${selecionadasAltas.length} altas (21-31)`,
+            'success');
+    }
+
+    // Inicializar grid quando página carrega
+    document.addEventListener('DOMContentLoaded', function() {
+        inicializarGridDezenas();
+    });
+</script>
+{% endblock %}

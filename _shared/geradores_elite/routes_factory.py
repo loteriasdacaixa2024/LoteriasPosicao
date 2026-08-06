@@ -962,6 +962,29 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
+    @bp.route("/api/inteligentes/catalogo-padroes")
+    def api_ge_inteligentes_catalogo_padroes():
+        """Mesma API da Análise (Padrões II) — consumo pelos Geradores Elite."""
+        try:
+            base = request.args.get("base", "geral")
+            out = _ai_service().catalogo_padroes(base=base)
+            return jsonify(out), (200 if out.get("sucesso") else 400)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @bp.route("/api/inteligentes/jogos-padrao")
+    def api_ge_inteligentes_jogos_padrao():
+        try:
+            padrao = (request.args.get("padrao") or "").strip()
+            if not padrao:
+                return jsonify({"sucesso": False, "erro": "Informe padrao="}), 400
+            limite = request.args.get("limite", type=int)
+            offset = request.args.get("offset", 0, type=int) or 0
+            out = _ai_service().listar_jogos_padrao(padrao, limite=limite, offset=offset)
+            return jsonify(out), (200 if out.get("sucesso") else 400)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
     @bp.route("/api/construtor-construcoes/ciclo")
     def api_construtor_ciclo():
         if not _construtor_ok():
@@ -1227,6 +1250,16 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
+    @bp.route("/api/construtor-construcoes/catalogo-padroes")
+    def api_construtor_catalogo_padroes():
+        """Proxy da análise Padrões II — mesma lógica, rota do Construtor."""
+        try:
+            base = request.args.get("base", "geral")
+            out = _ai_service().catalogo_padroes(base=base)
+            return jsonify(out), (200 if out.get("sucesso") else 400)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
     @bp.route("/api/construtor-construcoes/gerar", methods=["POST"])
     def api_construtor_gerar():
         if not _construtor_ok():
@@ -1251,6 +1284,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 personalizada=personalizada,
                 janela_comportamento=int(data.get("janela_comportamento", 10)),
                 similaridade_min_pct=sim_min,
+                padroes_selecionados=data.get("padroes_selecionados") or data.get("padroes"),
             )
             return jsonify(out)
         except KeyError:

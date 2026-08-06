@@ -571,6 +571,7 @@ def gerar_construcao(
     historico_sorteados: Optional[Set[frozenset]] = None,
     apostas_excluidas: Optional[Set[frozenset]] = None,
     padroes_historicos: Optional[List[str]] = None,
+    padroes_selecionados: Optional[List[str]] = None,
     jaccard_max_lote: float = 0.85,
     quantidade: int = QTD_APOSTAS_FIXA,
 ) -> Dict[str, Any]:
@@ -580,6 +581,7 @@ def gerar_construcao(
     - rejeição de apostas já usadas na sessão (apostas_excluidas);
     - diversidade de padrão inicial dentro do lote (quando possível);
     - similaridade controlada vs construções anteriores da sessão.
+    - padroes_selecionados: força uso dos padrões da análise Padrões II (1 ou mais).
     """
     qtd_alvo = max(1, int(quantidade or QTD_APOSTAS_FIXA))
     pool = sorted(set(int(x) for x in pool))
@@ -591,8 +593,18 @@ def gerar_construcao(
 
     rng = random.Random(seed)
     construcoes_anteriores = construcoes_anteriores or []
-    padroes_hist = list(padroes_historicos or [])
-    usar_padroes = estrategia in ("automatica", "balanceada", "conforme_comportamento") and k >= 5
+    selecionados = [
+        " ".join(str(x) for x in parse_padrao(p))
+        for p in (padroes_selecionados or [])
+        if parse_padrao(p)
+    ]
+    # remove vazios / inválidos
+    selecionados = [p for p in selecionados if len(parse_padrao(p)) == k]
+    padroes_hist = list(selecionados) if selecionados else list(padroes_historicos or [])
+    usar_padroes = (
+        bool(selecionados)
+        or (estrategia in ("automatica", "balanceada", "conforme_comportamento") and k >= 5)
+    )
 
     # Padrões já usados em construções anteriores da sessão
     padroes_evitar: Set[str] = set()
@@ -612,9 +624,25 @@ def gerar_construcao(
 
         alvos_padrao: List[List[int]] = []
         if usar_padroes:
-            alvos_padrao = selecionar_padroes_lote(
-                padroes_hist, pool, k, qtd_alvo, rng, padroes_evitar
-            )
+            if selecionados:
+                # Cicla pelos padrões escolhidos na análise (Padrões II)
+                for i in range(qtd_alvo):
+                    pstr = selecionados[i % len(selecionados)]
+                    digs = parse_padrao(pstr)
+                    if padrao_viavel(digs, pool):
+                        alvos_padrao.append(digs)
+                if not alvos_padrao:
+                    return {
+                        "sucesso": False,
+                        "erro": (
+                            "Nenhum dos padrões selecionados é viável com este conjunto-base. "
+                            "Amplie o pool ou escolha outros padrões."
+                        ),
+                    }
+            else:
+                alvos_padrao = selecionar_padroes_lote(
+                    padroes_hist, pool, k, qtd_alvo, rng, padroes_evitar
+                )
 
         for i in range(qtd_alvo):
             ok_ap = False

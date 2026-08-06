@@ -63,13 +63,8 @@ def create_app():
         import models.sorteio_supersete
         import models.construtor_construcoes
         db.create_all()
-        try:
-            db.session.execute(db.text(
-                "ALTER TABLE construtor_construcoes ADD COLUMN extra_json TEXT DEFAULT '{}'"
-            ))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
+        from geradores_elite.construtor.schema_ensure import ensure_construtor_schema
+        ensure_construtor_schema()
 
     start_auto_sync_once(
         app,

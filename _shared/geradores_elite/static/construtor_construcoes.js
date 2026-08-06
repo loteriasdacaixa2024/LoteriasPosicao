@@ -13,7 +13,7 @@
     const CONJUNTO_MAX = parseInt(root.dataset.conjuntoMax, 10) || UI.max_conjunto_base || 16;
     const ORIGEM_APOSTAS_10X7 = 'apostas_10x7';
     const APOSTAS_LINHAS = 10;
-    const APOSTAS_POR_LINHA = 7;
+    const APOSTAS_POR_LINHA = PICK_DEFAULT;
     const DEZENA_MIN = UI.dezena_min != null ? UI.dezena_min : 1;
     const DEZENA_MAX = UI.total_dezenas || 31;
     const DEZENA_WIDTH = (UI.dezena_fmt_width != null ? UI.dezena_fmt_width : 2);
@@ -28,6 +28,9 @@
     const HAS_MES = !!UI.has_mes;
     const HAS_TIME = !!UI.has_time;
     const HAS_TREVOS = !!UI.has_trevos;
+    const PADROES_II_API = '/geradores-elite/api/construtor-construcoes/catalogo-padroes';
+    let padroesIICatalogo = [];
+    let padroesIISelecionados = new Set();
     const VOLANTE_COLS = UI.volante_cols || 10;
 
     let selecionadas = new Set();
@@ -108,7 +111,8 @@
         if (hint) {
             if (novo === 'apostas10x7') {
                 hint.textContent =
-                    'Cole exatamente 10 apostas com 7 dezenas. O conjunto-base será a união dessas dezenas (pode passar de ' +
+                    'Cole exatamente 10 apostas com ' + APOSTAS_POR_LINHA +
+                    ' dezenas. O conjunto-base será a união dessas dezenas (pode passar de ' +
                     CONJUNTO_MAX + ').';
             } else {
                 hint.textContent =
@@ -242,7 +246,7 @@
             if (info) {
                 info.className = 'small text-success';
                 info.textContent +=
-                    ` · 10×7 aplicadas (${r.pool.length} únicas). Salve o conjunto-base para gerar.`;
+                    ` · 10×${APOSTAS_POR_LINHA} aplicadas (${r.pool.length} únicas). Salve o conjunto-base para gerar.`;
             }
         }
         return true;
@@ -417,10 +421,10 @@
             const hd = data.historico_digitos || {};
             const topFaixa = (data.distribuicao_faixas || []).find((f) => f.destaque);
             el.innerHTML =
-                `<strong>Guia histórico (7 dezenas):</strong> ` +
+                `<strong>Guia histórico (${PICK_DEFAULT} dezenas):</strong> ` +
                 `min ${hs.soma_minima ?? '—'} · max ${hs.soma_maxima ?? '—'} · média ${hs.soma_media ?? '—'}` +
                 ` · faixa +freq: <strong>${hs.faixa_mais_frequente || (topFaixa && topFaixa.faixa) || '—'}</strong>` +
-                `<br><strong>★★ Recomendado:</strong> ${hd.qtd_recomendada ?? 7} dígitos distintos ` +
+                `<br><strong>★★ Recomendado:</strong> ${hd.qtd_recomendada ?? PICK_DEFAULT} dígitos distintos ` +
                 `(${(hd.qtd_recomendada_pct != null ? String(hd.qtd_recomendada_pct).replace('.', ',') : '—')}%)` +
                 ` · dígito +sai: <strong>${hd.digito_mais_frequente ?? '—'}</strong>`;
             const sel = $('ccDigitosExigidos');
@@ -637,7 +641,7 @@
             if (temTexto) {
                 if (!aplicarApostas10x7(true)) return;
             } else if (origemConjunto !== ORIGEM_APOSTAS_10X7 || selecionadas.size < PICK_MIN) {
-                alert('Cole as 10 apostas × 7 dezenas e clique em “Usar estas 10 apostas”, ou carregue uma sessão.');
+                alert(`Cole as 10 apostas × ${APOSTAS_POR_LINHA} dezenas e clique em “Usar estas 10 apostas”, ou carregue uma sessão.`);
                 return;
             }
         }
@@ -810,6 +814,9 @@
                 altas: parseInt($('ccPersA').value, 10) || 0,
             };
         }
+        if (padroesIISelecionados.size) {
+            body.padroes_selecionados = [...padroesIISelecionados];
+        }
         const t0 = performance.now();
         let data;
         try {
@@ -851,6 +858,9 @@
         if (data.qtd_padroes_distintos != null) {
             msg += ` · ${data.qtd_padroes_distintos} padrões iniciais distintos`;
         }
+        if (padroesIISelecionados.size) {
+            msg += ` · Padrões II: ${padroesIISelecionados.size}`;
+        }
         if (data.rejeitadas_validacao_trocadas) {
             msg += ` · ${data.rejeitadas_validacao_trocadas} candidata(s) trocadas auto.`;
         }
@@ -858,6 +868,87 @@
         msg += ` (${ms} ms)`;
         $('ccGerarStatus').textContent = msg;
         atualizarEstadoGerar();
+    }
+
+    function atualizarContadorPadII() {
+        const el = $('ccPadIICount');
+        if (el) el.textContent = `${padroesIISelecionados.size} selecionados`;
+    }
+
+    function renderListaPadroesII() {
+        const box = $('ccPadIILista');
+        if (!box) return;
+        const busca = (($('ccPadIIBusca') && $('ccPadIIBusca').value) || '').trim().toLowerCase();
+        const st = ($('ccPadIIStatus') && $('ccPadIIStatus').value) || '';
+        const rows = (padroesIICatalogo || []).filter((p) => {
+            if (st && p.status !== st) return false;
+            if (!busca) return true;
+            return `${p.padrao} ${p.descricao} ${p.status}`.toLowerCase().includes(busca);
+        }).slice(0, 80);
+        if (!rows.length) {
+            box.innerHTML = '<span class="text-muted">Nenhum padrão (carregue o catálogo ou ajuste o filtro).</span>';
+            return;
+        }
+        box.innerHTML = rows.map((p) => {
+            const checked = padroesIISelecionados.has(p.padrao) ? 'checked' : '';
+            const atraso = p.atraso == null ? '—' : `${p.atraso}c`;
+            return `<label class="d-flex align-items-center gap-2 border-bottom py-1 mb-0" style="cursor:pointer">
+                <input type="checkbox" class="form-check-input cc-pad-ii-chk" data-padrao="${String(p.padrao).replace(/"/g, '&quot;')}" ${checked}>
+                <code class="small">${p.padrao}</code>
+                <span class="text-muted">${p.descricao}</span>
+                <span class="ms-auto small">${p.frequencia}x · ${atraso} · ${p.status}</span>
+            </label>`;
+        }).join('');
+        atualizarContadorPadII();
+    }
+
+    async function carregarPadroesII(preselect) {
+        const box = $('ccPadIILista');
+        if (box) box.innerHTML = '<span class="text-muted">Carregando catálogo Padrões II…</span>';
+        try {
+            const r = await fetch(PADROES_II_API);
+            const d = await r.json();
+            if (!d.sucesso) throw new Error(d.erro || 'Falha ao carregar padrões');
+            padroesIICatalogo = d.padroes || [];
+            if (Array.isArray(preselect) && preselect.length) {
+                preselect.forEach((p) => {
+                    if (p) padroesIISelecionados.add(String(p).trim());
+                });
+            }
+            renderListaPadroesII();
+        } catch (e) {
+            if (box) box.innerHTML = `<span class="text-danger">${e.message || e}</span>`;
+        }
+    }
+
+    function initPadroesII() {
+        $('ccBtnPadIILoad')?.addEventListener('click', () => carregarPadroesII());
+        $('ccBtnPadIILimpar')?.addEventListener('click', () => {
+            padroesIISelecionados.clear();
+            renderListaPadroesII();
+        });
+        $('ccPadIIBusca')?.addEventListener('input', renderListaPadroesII);
+        $('ccPadIIStatus')?.addEventListener('change', renderListaPadroesII);
+        $('ccPadIILista')?.addEventListener('change', (ev) => {
+            const chk = ev.target.closest('.cc-pad-ii-chk');
+            if (!chk) return;
+            const p = chk.dataset.padrao;
+            if (!p) return;
+            if (chk.checked) padroesIISelecionados.add(p);
+            else padroesIISelecionados.delete(p);
+            atualizarContadorPadII();
+        });
+        // Deep-link: ?padroes=0+1+1+2+2+2+3|0+0+1+2+2+3+3
+        try {
+            const qs = new URLSearchParams(window.location.search);
+            const raw = qs.get('padroes') || '';
+            const lista = raw
+                ? raw.split('|').map((s) => s.replace(/\+/g, ' ').trim()).filter(Boolean)
+                : [];
+            if (qs.get('from') === 'padroes-ii' || lista.length) {
+                carregarPadroesII(lista);
+            }
+        } catch (_) { /* ignore */ }
     }
 
     function renderMatrizSim(matriz) {
@@ -1484,7 +1575,7 @@
             if (el) {
                 el.className = 'small text-muted mb-1';
                 el.textContent =
-                    `Sessão carregada com origem 10×7 — pool união: ${base.length} dezenas ` +
+                    `Sessão carregada com origem 10×${APOSTAS_POR_LINHA} — pool união: ${base.length} dezenas ` +
                     `(${base.map(fmt).join(' ')}). Cole as 10 apostas de novo só se quiser alterar.`;
             }
         } else if (base.length > CONJUNTO_MAX) {
@@ -1759,6 +1850,7 @@
         });
         carregarGuiaSomasDigitos();
         $('ccBtnGerar').addEventListener('click', gerarConstrucao);
+        initPadroesII();
         $('ccBtnConferir').addEventListener('click', conferir);
         $('ccBtnExportTodas')?.addEventListener('click', abrirExportTodas);
         $('ccBtnConferirTodas')?.addEventListener('click', conferirHistoricoTodas);

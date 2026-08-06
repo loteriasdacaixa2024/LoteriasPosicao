@@ -36,7 +36,7 @@ def _page_context(modality_key: str) -> dict:
         "modality_key": modality_key,
         "modality_nome": nome,
         "page_title": f"Resultados & Padrões — {nome}",
-        "page_subtitle": "Análise estatística · geração de apostas em Geradores Elite",
+        "page_subtitle": "Análise · Padrões II alimenta o Construtor e Geradores Elite",
         "api_base": "/analise/api/inteligentes",
         "gerador_gc_url": "/geradores-elite/gerador-gc/",
         "gerador_elite_url": "/geradores-elite/gerador-elite/",
@@ -76,13 +76,17 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
             qs = ("?" + "&".join(q)) if q else ""
             return redirect(f"/geradores-elite/gerador-elite/{qs}")
 
-        if aba in ("padroes", "padrões"):
+        if aba in ("padroes", "padrões", "padroes-i", "padroes1"):
             aba = "padroes"
+        elif aba in ("padroes-ii", "padroes2", "padrões-ii", "catalogo-padroes", "padroes_ii"):
+            aba = "padroes-ii"
+        elif aba in ("jogos-padrao", "jogos", "apostas-padrao"):
+            aba = "jogos-padrao"
         elif aba in ("tubular", "visualizacao", "visualizacao-tubular"):
             aba = "tubular"
         elif aba in ("combinacoes", "combinações"):
             aba = "combinacoes"
-        elif aba not in ("resultados", "combinacoes", "padroes", "tubular"):
+        elif aba not in ("resultados", "combinacoes", "padroes", "padroes-ii", "jogos-padrao", "tubular"):
             aba = "resultados"
 
         return render_template(
@@ -123,6 +127,54 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
         try:
             base = request.args.get("base", "geral")
             out = Svc.estatisticas_historico(base=base)
+            return jsonify(out)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @analise_bp.route("/api/inteligentes/catalogo-padroes")
+    def api_inteligentes_catalogo_padroes():
+        """Catálogo agregado (Padrões II) — mesma API para Análise e Construtor/Elite."""
+        try:
+            base = request.args.get("base", "geral")
+            out = Svc.catalogo_padroes(base=base)
+            return jsonify(out), (200 if out.get("sucesso") else 400)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @analise_bp.route("/api/inteligentes/jogos-padrao")
+    def api_inteligentes_jogos_padrao():
+        """Lista as apostas possíveis de um padrão (coluna Jogos → aba 6)."""
+        try:
+            padrao = (request.args.get("padrao") or "").strip()
+            if not padrao:
+                return jsonify({"sucesso": False, "erro": "Informe padrao="}), 400
+            limite = request.args.get("limite", type=int)
+            offset = request.args.get("offset", 0, type=int) or 0
+            formato = (request.args.get("formato") or "json").strip().lower()
+            out = Svc.listar_jogos_padrao(padrao, limite=limite, offset=offset)
+            if not out.get("sucesso"):
+                return jsonify(out), 400
+            if formato in ("txt", "text", "plain"):
+                out = Svc.listar_jogos_padrao(padrao, limite=None, offset=0)
+                if not out.get("sucesso"):
+                    return jsonify(out), 400
+                lines = [j["dezenas_fmt"] for j in (out.get("jogos") or [])]
+                header = (
+                    f"# Padrao: {out.get('padrao')} ({out.get('descricao')})\n"
+                    f"# Total: {out.get('total')}\n"
+                )
+                body = header + "\n".join(lines) + ("\n" if lines else "")
+                from flask import Response
+                return Response(
+                    body,
+                    mimetype="text/plain; charset=utf-8",
+                    headers={
+                        "Content-Disposition": (
+                            f"attachment; filename=jogos_padrao_"
+                            f"{str(out.get('padrao','')).replace(' ', '')}.txt"
+                        )
+                    },
+                )
             return jsonify(out)
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500

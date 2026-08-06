@@ -23,6 +23,7 @@ from geradores_elite.construtor.models import (
     ConstrutorConferenciaHistoricoItem,
     ConstrutorSessao,
 )
+from geradores_elite.construtor.schema_ensure import ensure_construtor_schema
 from geradores_elite.engine_final_core import formatar_export_txt
 from geradores_elite.modality_config import MESES_ABREV
 from geradores_elite.validacao.apostas_ineditas import (
@@ -151,7 +152,7 @@ class ConstrutorBaseService:
         cls, pool: List[int], origem_conjunto: str = "manual"
     ) -> Optional[str]:
         sp = cls._spec()
-        # Modo "10 apostas × 7": união das dezenas pode passar do máx. do volante.
+        # Modo "10 apostas × N" (N = pick_default): união pode passar do máx. do volante.
         max_ok = (
             sp.universo
             if (origem_conjunto or "").strip() == "apostas_10x7"
@@ -315,6 +316,7 @@ class ConstrutorBaseService:
         sessao_id: Optional[int] = None,
         regras_somas_digitos: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
+        ensure_construtor_schema()
         sp = cls._spec()
         pool = cls._parse_conjunto(conjunto_base)
         err = cls._validar_tamanho_conjunto(pool, origem_conjunto)
@@ -375,6 +377,7 @@ class ConstrutorBaseService:
         personalizada: Optional[Dict[str, int]] = None,
         janela_comportamento: int = 10,
         similaridade_min_pct: Optional[float] = None,
+        padroes_selecionados: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         limites = cls._faixa_limites()
         sessao = db.session.get(ConstrutorSessao, sessao_id)
@@ -399,6 +402,7 @@ class ConstrutorBaseService:
                 excluidas.add(frozenset(a.dezenas_lista()))
         historico = carregar_combinacoes_historicas(cls._model(), cls._dezenas_from_sorteio)
         padroes_hist = cls._padroes_iniciais_historicos()
+        padroes_sel = [str(p).strip() for p in (padroes_selecionados or []) if str(p).strip()]
         sim_min = similaridade_min_pct if similaridade_min_pct is not None else 80.0
         sim_max = 1.0 - (sim_min / 100.0)
 
@@ -432,6 +436,7 @@ class ConstrutorBaseService:
                 historico_sorteados=historico,
                 apostas_excluidas=excluidas,
                 padroes_historicos=padroes_hist,
+                padroes_selecionados=padroes_sel or None,
                 quantidade=pedir,
                 max_tentativas=tentativas_core,
             )
@@ -446,6 +451,7 @@ class ConstrutorBaseService:
                     historico_sorteados=historico,
                     apostas_excluidas=excluidas,
                     padroes_historicos=padroes_hist,
+                    padroes_selecionados=padroes_sel or None,
                     quantidade=faltam,
                     max_tentativas=tentativas_core + 80,
                 )
@@ -596,6 +602,7 @@ class ConstrutorBaseService:
     @classmethod
     def listar_sessoes(cls) -> List[Dict[str, Any]]:
         """Aba 1 — apenas sessões de dezenas (legado sem tipo = dezenas)."""
+        ensure_construtor_schema()
         from sqlalchemy import or_
         rows = (
             db.session.query(ConstrutorSessao)
