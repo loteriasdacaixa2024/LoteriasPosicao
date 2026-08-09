@@ -234,6 +234,10 @@
         <a href="/analise/comportamento/" class="text-decoration-none">
             <i class="fas fa-chart-pie me-1"></i>Análise Comportamental (3 bases)
         </a>
+        <span class="text-muted mx-1">·</span>
+        <a href="/analise/linhas-dd-du/" class="text-decoration-none">
+            <i class="fas fa-th me-1"></i>Linhas &amp; DD × DU
+        </a>
         <span class="text-muted"> — estatísticas calculadas antes da geração</span>
     </p>
 </div>
@@ -245,7 +249,74 @@
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="vencedores">Concursos com Vencedores</button></li>
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="acumulados">Concursos Acumulados</button></li>
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="panorama"><i class="fas fa-layer-group me-1"></i>Panorama Top-3</button></li>
+    <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="linhas"><i class="fas fa-bars me-1"></i>Linhas L1–L10</button></li>
 </ul>
+
+<div id="painelModoLinhas" class="d-none">
+    <div class="alert border-0 py-2 small mb-3" style="background:var(--accent-light);color:var(--primary-xdark);">
+        Usa o <strong>ranking de linhas</strong> de
+        <a href="/analise/linhas-dd-du/" class="fw-bold">Análise → Linhas &amp; DD × DU</a>
+        como indicador estatístico para ponderar a geração.
+        Frequência não garante resultado — é um critério comportamental.
+    </div>
+
+    <div class="comp-toolbar-row comp-panorama-toolbar mb-3">
+        <div class="comp-toolbar-seg">
+            <span class="comp-toolbar-lbl">Base:</span>
+            <div class="btn-group btn-group-sm" role="group" id="tabsLinhasBase">
+                <button type="button" class="btn btn-outline-secondary linhas-base-btn active" data-lbase="geral">Geral</button>
+                <button type="button" class="btn btn-outline-secondary linhas-base-btn" data-lbase="vencedores">Vencedores</button>
+                <button type="button" class="btn btn-outline-secondary linhas-base-btn" data-lbase="acumulados">Acumulados</button>
+            </div>
+            <span class="badge bg-light text-dark border" id="lblLinhasTotal">—</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-0" id="btnAtualizarLinhas" title="Atualizar ranking">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        <div class="comp-toolbar-seg">
+            <span class="comp-toolbar-lbl">Janela:</span>
+            <div class="btn-group btn-group-sm" role="group" id="grpJanelaLinhas">
+                {% for j in comportamento_ui.janelas or [10, 20, 25, 0] %}
+                <button type="button" class="btn btn-outline-secondary linhas-janela-btn{% if j == 0 %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="comp-toolbar-seg">
+            <label class="comp-toolbar-lbl mb-0" for="selTopNLinhas">Usar ranking:</label>
+            <select class="form-select form-select-sm comp-toolbar-select" id="selTopNLinhas">
+                <option value="1">Só 1º lugar</option>
+                <option value="2">Top 2</option>
+                <option value="3" selected>Top 3</option>
+                <option value="5">Top 5</option>
+                <option value="10">Todas (L1–L10)</option>
+            </select>
+        </div>
+        <div class="comp-toolbar-seg">
+            <span class="comp-toolbar-lbl">Peso:</span>
+            <div class="btn-group btn-group-sm" role="group" id="grpModoPesoLinhas">
+                <button type="button" class="btn btn-outline-secondary linhas-peso-btn active" data-peso="frequencia" title="Linhas mais frequentes pesam mais">Por frequência</button>
+                <button type="button" class="btn btn-outline-secondary linhas-peso-btn" data-peso="uniforme" title="Todas as linhas do Top-N com o mesmo peso">Uniforme</button>
+                <button type="button" class="btn btn-outline-secondary linhas-peso-btn" data-peso="so_top1" title="Apenas a linha do 1º lugar">Só 1º</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3 border-0" style="border-top:4px solid var(--accent)!important;">
+        <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
+            <i class="fas fa-trophy me-1"></i>Ranking das linhas — <span id="lblLinhasBase">Geral</span>
+        </div>
+        <div class="card-body py-3 px-2 px-sm-3">
+            <div id="linhasRankingTopo" class="mb-3"></div>
+            <div id="linhasRankingCorpo">
+                <p class="text-muted small mb-0">Carregando ranking…</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert border-0 py-2" style="background:var(--accent-light);color:var(--primary-xdark);" id="linhasCriteriosPreview">
+        <strong>Geração:</strong> <span id="linhasCriteriosTxt">—</span>
+    </div>
+</div>
 
 <div id="painelModoPanorama" class="d-none">
     <div class="alert alert-warning d-none py-2 small mb-3" id="avisoPanoramaGerador"></div>

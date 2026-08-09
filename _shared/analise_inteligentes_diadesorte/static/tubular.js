@@ -26,7 +26,13 @@
     return !!(root && String(root.dataset.extraMes || '') === '1');
   }
 
-  function fmt2(n) { return String(Number(n)).padStart(2, '0'); }
+  /** Dezena com zero à esquerda (01, 02…); aceita 0 → "00" quando a modalidade usa dezena 0. */
+  function fmt2(n) {
+    if (n === '' || n == null) return '';
+    const v = Number(n);
+    if (!Number.isFinite(v)) return '';
+    return String(Math.trunc(v)).padStart(2, '0');
+  }
   function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -62,7 +68,9 @@
     else if (sequences.length > 1) seqQtde = sequences.length;
     if (sequences.length) {
       seqQuais = sequences.map(seq =>
-        seq.length >= 3 ? `${seq.numbers[0]}-${seq.numbers[seq.numbers.length - 1]}` : seq.numbers.join(',')
+        seq.length >= 3
+          ? `${fmt2(seq.numbers[0])}-${fmt2(seq.numbers[seq.numbers.length - 1])}`
+          : seq.numbers.map(fmt2).join(',')
       ).join(' ');
     }
     const finais = {};
@@ -76,7 +84,7 @@
       finaisIguais: {
         tem: finRep.length > 0,
         qtde: finRep.length,
-        quais: finRep.length ? finRep.map(g => g.join(',')).join(' ') : '-',
+        quais: finRep.length ? finRep.map(g => g.map(fmt2).join(',')).join(' ') : '-',
       },
       soma: nums.reduce((a, b) => a + b, 0),
       pares,
@@ -100,10 +108,11 @@
     const count = list.length;
     const emojiData = getEmojiByCount(count);
     let title;
+    const listFmt = list.map(fmt2).join(', ');
     if (count === 0) title = 'Nenhuma repetição do concurso anterior';
-    else if (count <= 2) title = `${count} número(s) repetido(s): ${list.join(', ')}`;
-    else if (count <= 4) title = `${count} números repetiram (alta): ${list.join(', ')}`;
-    else title = `${count} números repetiram (extrema!): ${list.join(', ')}`;
+    else if (count <= 2) title = `${count} número(s) repetido(s): ${listFmt}`;
+    else if (count <= 4) title = `${count} números repetiram (alta): ${listFmt}`;
+    else title = `${count} números repetiram (extrema!): ${listFmt}`;
     return { count, text: emojiData.text, title, emoji: emojiData.emoji, list };
   }
 
@@ -333,8 +342,26 @@
       btn.addEventListener('click', () => this.showSub(btn.dataset.tbSub));
     });
     r.querySelector('#tbBtnLoad')?.addEventListener('click', () => this.load());
-    r.querySelector('#tbBtnMark')?.addEventListener('click', () => { this.marked = true; this.renderTable(); });
-    r.querySelector('#tbBtnReset')?.addEventListener('click', () => { this.marked = false; this.renderTable(); });
+    r.querySelector('#tbBtnMark')?.addEventListener('click', () => {
+      this.marked = true;
+      this.renderTable();
+      this.renderManual(10);
+    });
+    r.querySelector('#tbBtnReset')?.addEventListener('click', () => {
+      this.marked = false;
+      this.renderTable();
+      this.renderManual(10);
+    });
+    r.querySelector('#tbBtnMark10')?.addEventListener('click', () => {
+      this.marked = true;
+      this.renderManual(10);
+      this.renderTable();
+    });
+    r.querySelector('#tbBtnReset10')?.addEventListener('click', () => {
+      this.marked = false;
+      this.renderManual(10);
+      this.renderTable();
+    });
     r.querySelector('#tbCondStatsToggle')?.addEventListener('click', () => this.toggleCondStats());
     r.querySelector('#tbViewDraw')?.addEventListener('click', () => this.setView('draw'));
     r.querySelector('#tbViewAsc')?.addEventListener('click', () => this.setView('asc'));
@@ -431,6 +458,7 @@
       p.classList.toggle('d-none', p.dataset.tbPanel !== key);
     });
     if ((key === 's10' || key === 's11') && !this.data.length) this.load();
+    else if (key === 's10') this.renderUltimo10();
   };
 
   TubularApp.prototype.setView = function (view) {
@@ -485,6 +513,7 @@
       this.renderKpis();
       this.renderCondStats();
       this.renderTable();
+      this.renderUltimo10();
       const statusTxt = this.data.length
         ? `${this.data[0].contest} → ${this.data[this.data.length - 1].contest} (${this.data.length})`
         : 'Sem dados';
@@ -620,6 +649,56 @@
     return `<span class="number-cell tb-number ${esc(cls)}" ${inline} title="${esc(style.title || fmt2(n))}">${fmt2(n)}</span>`;
   };
 
+  /** Números da aposta na ordem de exibição da Seção 10 (crescente) / 11 (sorteio). */
+  TubularApp.prototype._manualNumsDisplay = function (g, mode, L) {
+    let nums = (g.numbers || []).map(n => (n === '' || n == null ? null : Number(n)));
+    if (mode === 'asc') {
+      const filled = nums.filter(n => n != null && Number.isFinite(n) && n >= L.dezenaMin && n <= L.dezenaMax)
+        .sort((a, b) => a - b);
+      nums = filled.slice();
+    }
+    while (nums.length < L.sorteadas) nums.push(null);
+    return nums.slice(0, L.sorteadas);
+  };
+
+  /** HTML da coluna Dezenas — Seção 10: P1–P7 com ↑↓ e cores existentes. */
+  TubularApp.prototype._manualPosControlsHtml = function (section, rowIdx, nums, sequences, reps, L) {
+    return `<div class="tb-pos-row">${nums.map((n, k) => {
+      const pos = `P${k + 1}`;
+      const cond = (this.marked && n != null) ? detectAllConditions(n, sequences || [], reps || []) : [];
+      const style = (this.marked && n != null) ? createGradientStyle(cond) : { background: '', title: '' };
+      const cls = cond.join(' ');
+      const inline = style.background ? `style="${style.background}"` : '';
+      const title = style.title || `${pos}: ${n == null ? '—' : fmt2(n)}`;
+      const val = n == null || n === '' ? '' : fmt2(n);
+      return `<div class="tb-pos-ctrl" title="${esc(title)}">
+        <button type="button" class="tb-pos-btn tb-pos-up" data-sec="${section}" data-row="${rowIdx}" data-col="${k}" data-delta="1" aria-label="Aumentar ${pos}">▲</button>
+        <span class="tb-pos-lbl">${pos}</span>
+        <input class="tb-manual-input number-cell ${esc(cls)}" ${inline}
+          data-sec="${section}" data-row="${rowIdx}" data-col="${k}"
+          value="${val}" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}"
+          aria-label="${pos}" title="${esc(title)}">
+        <button type="button" class="tb-pos-btn tb-pos-dn" data-sec="${section}" data-row="${rowIdx}" data-col="${k}" data-delta="-1" aria-label="Diminuir ${pos}">▼</button>
+      </div>`;
+    }).join('')}</div>`;
+  };
+
+  /** Atualiza posição Pk da aposta (grava array na ordem de exibição). */
+  TubularApp.prototype._setManualPos = function (sec, row, col, nextVal, L) {
+    const arr = sec === 10 ? this.manual10 : this.manual11;
+    if (!arr[row]) return;
+    const mode = sec === 10 ? 'asc' : 'draw';
+    const nums = this._manualNumsDisplay(arr[row], mode, L);
+    if (nextVal === null || nextVal === '') {
+      nums[col] = null;
+    } else {
+      let v = Math.trunc(Number(nextVal));
+      if (!Number.isFinite(v)) nums[col] = null;
+      else nums[col] = Math.min(L.dezenaMax, Math.max(L.dezenaMin, v));
+    }
+    arr[row].numbers = nums;
+  };
+
   TubularApp.prototype.renderTable = function () {
     const tbody = this.root.querySelector('#tbTabela tbody');
     if (!tbody) return;
@@ -717,7 +796,12 @@
     const pack = (label, getter) => ([
       label,
       '',
-      ...cols.num.map(getter),
+      ...cols.num.map((arr) => {
+        const v = getter(arr);
+        if (v === '-' || v == null || v === '') return '-';
+        const n = Number(v);
+        return Number.isFinite(n) ? fmt2(n) : String(v);
+      }),
       ...(this.extraMes ? [getter(cols.mes)] : []),
       getter(cols.seq),
       getter(cols.finais),
@@ -764,7 +848,7 @@
   TubularApp.prototype.addManualRow = function (section) {
     const L = limitsFrom(this.root);
     const row = {
-      numbers: Array.from({ length: L.sorteadas }, () => 0),
+      numbers: Array.from({ length: L.sorteadas }, () => null),
       month: this.extraMes ? 1 : 0,
       monthName: this.extraMes ? 'Janeiro' : '',
       editable: true,
@@ -782,30 +866,116 @@
     this.renderManual(section);
   };
 
+  TubularApp.prototype.renderUltimo10 = function () {
+    const tbody = this.root.querySelector('#tbUltimo10 tbody');
+    const lbl = this.root.querySelector('#tbUltimo10Lbl');
+    if (!tbody) return;
+    const L = limitsFrom(this.root);
+    const nCols = 2 + L.sorteadas + (this.extraMes ? 1 : 0) + 10;
+    if (!this.data.length) {
+      tbody.innerHTML = `<tr><td colspan="${nCols}" class="text-muted">Carregue os dados (aba Sequências) para ver o último concurso.</td></tr>`;
+      if (lbl) lbl.textContent = 'Último resultado (referência)';
+      return;
+    }
+    // Ordem cronológica → último sorteio
+    const chrono = this.data.slice().sort((a, b) => (+a.contest || 0) - (+b.contest || 0));
+    const c = chrono[chrono.length - 1];
+    const prev = chrono.length > 1 ? chrono[chrono.length - 2] : null;
+    const nums = (c.numbersAscending || c.numbersDrawOrder || []).map(Number);
+    const prevNums = prev ? (prev.numbersAscending || prev.numbersDrawOrder || []).map(Number) : [];
+    const an = calculateCompleteAnalysis(nums, c.monthName);
+    const rept = calculateRepetitions(nums, prevNums);
+    const seqEmoji = getEmojiByCount(an.sequencesInfo.qtde);
+    const finEmoji = getEmojiByCount(an.finaisIguais.qtde);
+    const qCls = this._qtdeClass(an.qtdeDigitos);
+    const tds = nums.map((n, i) => {
+      const edge = i === 0 ? ' tb-dez-first' : (i === nums.length - 1 ? ' tb-dez-last' : '');
+      return `<td class="tb-dez${edge}">${this._cellNum(n, an.sequences, rept.list)}</td>`;
+    }).join('');
+    const pad = Array.from({ length: Math.max(0, L.sorteadas - nums.length) }, (_, i) => {
+      const abs = nums.length + i;
+      const lastIdx = L.sorteadas - 1;
+      const edge = abs === 0 ? ' tb-dez-first' : (abs === lastIdx ? ' tb-dez-last' : '');
+      return `<td class="tb-dez${edge}">—</td>`;
+    }).join('');
+    const mesTd = this.extraMes
+      ? `<td><span class="mes-cor ${esc(this.mesClass(c.monthName))}" style="${this.mesStyle(c.monthName)}">${esc((c.monthName || '—').slice(0, 3).toUpperCase())}</span></td>`
+      : '';
+    if (lbl) {
+      lbl.textContent = `Último resultado — concurso ${c.contest} (ordem crescente · mesma config da aba Sequências)`;
+    }
+    tbody.innerHTML = `<tr class="tb-row-ultimo">
+      <td><strong>${esc(c.contest)}</strong></td>
+      <td class="small">${esc(c.date)}</td>
+      ${tds}${pad}
+      ${mesTd}
+      <td title="${esc(an.sequencesInfo.quais)}">${seqEmoji.text}</td>
+      <td title="${esc(an.finaisIguais.quais)}">${finEmoji.text}</td>
+      <td title="${esc(rept.title)}">${rept.text}</td>
+      <td class="tb-align-mono"><span class="tb-mono tb-mono-soma">${String(an.soma).padStart(3, ' ')}</span></td>
+      <td>${an.pares}</td>
+      <td>${an.impares}</td>
+      <td class="tb-align-mono"><span class="tb-mono">${esc(an.padroes.inicial)}</span></td>
+      <td class="tb-align-mono"><span class="tb-mono">${esc(an.padroes.final)}</span></td>
+      <td><span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span></td>
+      <td class="tb-align-mono"><span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span></td>
+    </tr>`;
+  };
+
   TubularApp.prototype.renderManual = function (section) {
     const list = section === 10 ? this.manual10 : this.manual11;
     const tbody = this.root.querySelector(section === 10 ? '#tbManual10 tbody' : '#tbManual11 tbody');
     const statsEl = this.root.querySelector(section === 10 ? '#tbStats10' : '#tbStats11');
     if (!tbody) return;
+    if (section === 10) this.renderUltimo10();
     const L = limitsFrom(this.root);
     const mode = section === 10 ? 'asc' : 'draw';
-    const last = this.data.length
-      ? (mode === 'asc' ? this.data[this.data.length - 1].numbersAscending : this.data[this.data.length - 1].numbersDrawOrder)
+    const chrono = this.data.slice().sort((a, b) => (+a.contest || 0) - (+b.contest || 0));
+    const last = chrono.length
+      ? (mode === 'asc'
+        ? (chrono[chrono.length - 1].numbersAscending || [])
+        : (chrono[chrono.length - 1].numbersDrawOrder || []))
       : [];
 
     tbody.innerHTML = list.map((g, i) => {
-      let nums = g.numbers.map(Number);
-      if (mode === 'asc') nums = [...nums].filter(n => n > 0).sort((a, b) => a - b);
-      while (nums.length < L.sorteadas) nums.push(0);
-      const valid = nums.filter(n => n >= L.dezenaMin && n <= L.dezenaMax);
+      const nums = this._manualNumsDisplay(g, mode, L);
+      const valid = nums.filter(n => n != null && n >= L.dezenaMin && n <= L.dezenaMax);
       const an = valid.length === L.sorteadas ? calculateCompleteAnalysis(valid, g.monthName) : null;
-      const rept = valid.length === L.sorteadas ? calculateRepetitions(valid, last) : { text: '—' };
-      const inputs = nums.map((n, k) =>
-        `<input class="tb-manual-input" data-sec="${section}" data-row="${i}" data-col="${k}" value="${n || ''}" maxlength="2">`
-      ).join(' ');
+      const rept = valid.length === L.sorteadas ? calculateRepetitions(valid, last) : { text: '—', list: [] };
+      const qCls = an ? this._qtdeClass(an.qtdeDigitos) : '';
+      const sequences = an ? an.sequences : [];
+      const repsList = rept.list || [];
+      const dezenasTd = section === 10
+        ? this._manualPosControlsHtml(section, i, nums, sequences, repsList, L)
+        : nums.map((n, k) =>
+          `<input class="tb-manual-input" data-sec="${section}" data-row="${i}" data-col="${k}" value="${n == null || n === '' ? '' : fmt2(n)}" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}">`
+        ).join(' ');
+      const mesTd = (section === 10 && this.extraMes)
+        ? `<td>${g.monthName
+          ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc((g.monthName || '').slice(0, 3).toUpperCase())}</span>`
+          : '—'}</td>`
+        : '';
+      if (section === 10) {
+        return `<tr>
+          <td>${i + 1}</td>
+          <td class="text-nowrap">${dezenasTd}</td>
+          ${mesTd}
+          <td>${an ? getEmojiByCount(an.sequencesInfo.qtde).text : '—'}</td>
+          <td>${an ? getEmojiByCount(an.finaisIguais.qtde).text : '—'}</td>
+          <td>${rept.text}</td>
+          <td>${an ? an.soma : '—'}</td>
+          <td>${an ? an.pares : '—'}</td>
+          <td>${an ? an.impares : '—'}</td>
+          <td>${an ? esc(an.padroes.inicial) : '—'}</td>
+          <td>${an ? esc(an.padroes.final) : '—'}</td>
+          <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
+          <td class="tb-align-mono">${an ? `<span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span>` : '—'}</td>
+          <td><button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}">×</button></td>
+        </tr>`;
+      }
       return `<tr>
         <td>${i + 1}</td>
-        <td class="text-nowrap">${inputs}</td>
+        <td class="text-nowrap">${dezenasTd}</td>
         <td>${an ? getEmojiByCount(an.sequencesInfo.qtde).text : '—'}</td>
         <td>${an ? getEmojiByCount(an.finaisIguais.qtde).text : '—'}</td>
         <td>${rept.text}</td>
@@ -816,16 +986,51 @@
         <td>${an ? an.qtdeDigitos : '—'}</td>
         <td><button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}">×</button></td>
       </tr>`;
-    }).join('') || `<tr><td colspan="11" class="text-muted">Clique em "+ Adicionar Linha" ou cole jogos acima</td></tr>`;
+    }).join('') || `<tr><td colspan="${section === 10 ? (12 + (this.extraMes ? 1 : 0)) : 11}" class="text-muted">Clique em "+ Adicionar Linha" ou cole jogos acima</td></tr>`;
 
     tbody.querySelectorAll('.tb-manual-input').forEach(inp => {
       inp.addEventListener('change', () => {
         const sec = +inp.dataset.sec;
         const row = +inp.dataset.row;
         const col = +inp.dataset.col;
+        const raw = String(inp.value || '').trim();
+        if (raw === '') this._setManualPos(sec, row, col, null, L);
+        else this._setManualPos(sec, row, col, raw, L);
+        this.renderManual(sec);
+      });
+      if (+inp.dataset.sec === 10) {
+        inp.addEventListener('keydown', (ev) => {
+          if (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown') return;
+          ev.preventDefault();
+          const sec = +inp.dataset.sec;
+          const row = +inp.dataset.row;
+          const col = +inp.dataset.col;
+          const cur = String(inp.value || '').trim();
+          let v = cur === '' ? null : Number(cur);
+          if (ev.key === 'ArrowUp') {
+            v = v == null ? L.dezenaMin : Math.min(L.dezenaMax, v + 1);
+          } else {
+            v = v == null ? L.dezenaMin : Math.max(L.dezenaMin, v - 1);
+          }
+          this._setManualPos(sec, row, col, v, L);
+          this.renderManual(sec);
+        });
+      }
+    });
+    tbody.querySelectorAll('.tb-pos-btn').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        const sec = +btn.dataset.sec;
+        const row = +btn.dataset.row;
+        const col = +btn.dataset.col;
+        const delta = +btn.dataset.delta || 0;
         const arr = sec === 10 ? this.manual10 : this.manual11;
         if (!arr[row]) return;
-        arr[row].numbers[col] = Math.min(L.dezenaMax, Math.max(0, +inp.value || 0));
+        const nums = this._manualNumsDisplay(arr[row], sec === 10 ? 'asc' : 'draw', L);
+        let cur = nums[col];
+        if (cur == null || cur === '') cur = delta > 0 ? L.dezenaMin - 1 : L.dezenaMin;
+        const next = Math.min(L.dezenaMax, Math.max(L.dezenaMin, cur + delta));
+        this._setManualPos(sec, row, col, next, L);
         this.renderManual(sec);
       });
     });
@@ -842,17 +1047,20 @@
     // Stats tempo real
     if (statsEl) {
       const validGames = list.map(g => {
-        let n = g.numbers.map(Number).filter(x => x >= L.dezenaMin && x <= L.dezenaMax);
+        let n = (g.numbers || [])
+          .filter(x => x !== '' && x != null)
+          .map(Number)
+          .filter(x => Number.isFinite(x) && x >= L.dezenaMin && x <= L.dezenaMax);
         if (mode === 'asc') n = [...n].sort((a, b) => a - b);
-        return n.length === L.sorteadas ? n : null;
+        return n.length === L.sorteadas ? { nums: n, month: g.monthName } : null;
       }).filter(Boolean);
       let sumSoma = 0, sumP = 0, sumI = 0, sumSeq = 0;
       const freq = {};
-      validGames.forEach(nums => {
-        const an = calculateCompleteAnalysis(nums, 'Janeiro');
+      validGames.forEach(g => {
+        const an = calculateCompleteAnalysis(g.nums, g.month || 'Janeiro');
         sumSoma += an.soma; sumP += an.pares; sumI += an.impares;
         sumSeq += an.sequencesInfo.qtde;
-        nums.forEach(n => { freq[n] = (freq[n] || 0) + 1; });
+        g.nums.forEach(n => { freq[n] = (freq[n] || 0) + 1; });
       });
       const n = validGames.length || 1;
       const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => `${fmt2(k)}(${v})`).join(' ') || '—';

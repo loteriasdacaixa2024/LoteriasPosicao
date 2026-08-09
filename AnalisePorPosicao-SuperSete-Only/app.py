@@ -1,4 +1,4 @@
-import os
+﻿import os
 from flask import Flask
 from models.shared import db
 from routes.index_routes import index_bp
@@ -23,6 +23,7 @@ from analise_repeticao.routes_factory import register_repeticao
 from menu.app_integration import extend_nav_app
 from posicao_analise.app_integration import extend_posicao_app
 from analise_estudos.app_integration import extend_analise_estudos_app
+from linhas_universo.app_integration import extend_camadas_linhas_dd_du_app
 from concentracao_acertos.app_integration import extend_concentracao_app
 from geradores_elite.comportamento_analise_integration import extend_comportamento_analise_app
 from analise_somas_digitos.app_integration import extend_analise_somas_digitos_app
@@ -46,6 +47,7 @@ def create_app():
     extend_posicao_app(app, 'supersete')
     extend_concentracao_app(app, 'supersete')
     extend_analise_estudos_app(app)
+    extend_camadas_linhas_dd_du_app(app)
     extend_comportamento_analise_app(app)
     extend_analise_somas_digitos_app(app)
     extend_analise_inteligentes_app(app)

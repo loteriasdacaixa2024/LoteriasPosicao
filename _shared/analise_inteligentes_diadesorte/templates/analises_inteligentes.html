@@ -30,19 +30,42 @@
   }
   #ai-root .ai-table td { text-align:center; vertical-align:middle; }
   #ai-root .ai-table td.td-left { text-align:left !important; }
-  /* Dezenas: sempre uma linha — ganha largura; outras colunas cedem espaço */
+  /* Dezenas: uma linha, largura um pouco menor para liberar espaço aos dígitos */
   #ai-root .ai-table th.col-dezenas,
   #ai-root .ai-table td.td-dezenas {
     white-space: nowrap !important;
-    min-width: 12.5rem;
-    width: 12.5rem;
+    min-width: 9.2rem;
+    width: 9.2rem;
+    max-width: 11rem;
     letter-spacing: .01em;
     font-variant-numeric: tabular-nums;
+    font-size: .78rem;
   }
+  /* Dígitos Ord. / Únicos: SEMPRE na mesma linha */
   #ai-root .ai-table th.col-digitos-unicos,
   #ai-root .ai-table td.td-digitos-unicos {
-    max-width: 6.5rem;
-    white-space: normal;
+    white-space: nowrap !important;
+    width: 1%;
+    max-width: none;
+    min-width: 0;
+  }
+  #ai-root .ai-table td.td-digitos-unicos .digitos-chip {
+    margin: 0 1px;
+    padding: .05rem .28rem;
+    font-size: .78rem;
+  }
+  /* Volume e Dígitos (I|F) cedem espaço */
+  #ai-root .ai-table th.col-volume,
+  #ai-root .ai-table td.td-volume {
+    white-space: nowrap;
+    max-width: 5.2rem;
+    font-size: .75rem;
+  }
+  #ai-root .ai-table th.col-digitos-if,
+  #ai-root .ai-table td.td-digitos-if {
+    white-space: nowrap;
+    max-width: 5.5rem;
+    font-size: .75rem;
   }
   #ai-root .ai-table th.col-nao-sairam,
   #ai-root .ai-table td.td-nao-sairam {
@@ -203,11 +226,11 @@
               {% if extra_mes %}
               <th class="ai-sort" data-sort="mes_num" data-table="res">Mês <span class="ai-sort-ind">⇅</span></th>
               {% endif %}
-              <th class="ai-sort" data-sort="digitos_fmt" data-table="res">Dígitos (I\|F) <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-digitos-if" data-sort="digitos_fmt" data-table="res">Dígitos (I\|F) <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-digitos-unicos" data-sort="digitos_ordenados_fmt" data-table="res">Dígitos Ord. <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="qtd_digitos" data-table="res">Qtd <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="soma" data-table="res">Soma <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort" data-sort="volume_combinacoes" data-table="res">Volume C(n,{{ sorteadas }}) <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-volume" data-sort="volume_combinacoes" data-table="res">Volume C(n,{{ sorteadas }}) <span class="ai-sort-ind">⇅</span></th>
               <th class="col-gerar">Ações</th>
             </tr>
           </thead>
@@ -583,13 +606,59 @@
             <div class="d-flex flex-wrap gap-2 mb-2">
               <button type="button" class="btn btn-sm btn-success" id="tbProcess10">✓ Processar Jogos</button>
               <button type="button" class="btn btn-sm btn-primary" id="tbAdd10">+ Adicionar Linha</button>
+              <button type="button" class="btn btn-sm btn-success" id="tbBtnMark10">🔍 Marcar Sequências</button>
+              <button type="button" class="btn btn-sm btn-secondary" id="tbBtnReset10">Resetar Marcações</button>
               <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear10">Limpar</button>
             </div>
             <div class="tb-stats-panel mb-2" id="tbStats10"></div>
+            <div class="small fw-bold text-muted mb-1" id="tbUltimo10Lbl">Último resultado (referência — mesma config da aba Sequências)</div>
+            <div class="table-responsive mb-3">
+              <table class="table table-sm table-bordered tb-table" id="tbUltimo10">
+                <thead>
+                  <tr>
+                    <th>Concurso</th>
+                    <th>Data</th>
+                    {% for i in range(1, sorteadas + 1) %}
+                    <th class="tb-dez-h{% if i == 1 %} tb-dez-h-first{% endif %}{% if i == sorteadas %} tb-dez-h-last{% endif %}">{{ i }}º</th>
+                    {% endfor %}
+                    {% if extra_mes %}<th>Mês</th>{% endif %}
+                    <th>SEQ</th>
+                    <th>FINAIS</th>
+                    <th>Rept</th>
+                    <th>Soma</th>
+                    <th>Pares</th>
+                    <th>Ímpares</th>
+                    <th>Inicial</th>
+                    <th>Final</th>
+                    <th>Qtde</th>
+                    <th>Números</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="{{ 2 + sorteadas + (1 if extra_mes else 0) + 10 }}" class="text-muted">Carregue os dados (aba Sequências) para ver o último concurso.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="small fw-semibold mb-1">Suas apostas (comparar com o último acima)</div>
             <div class="table-responsive">
               <table class="table table-sm table-bordered tb-table" id="tbManual10">
                 <thead>
-                  <tr><th>#</th><th>Dezenas</th><th>SEQ</th><th>FINAIS</th><th>Rept</th><th>Soma</th><th>P/I</th><th>Inicial</th><th>Final</th><th>Qtde</th><th></th></tr>
+                  <tr>
+                    <th>#</th>
+                    <th>Dezenas</th>
+                    {% if extra_mes %}<th>Mês</th>{% endif %}
+                    <th>SEQ</th>
+                    <th>FINAIS</th>
+                    <th>Rept</th>
+                    <th>Soma</th>
+                    <th>Pares</th>
+                    <th>Ímpares</th>
+                    <th>Inicial</th>
+                    <th>Final</th>
+                    <th>Qtde</th>
+                    <th>Números</th>
+                    <th></th>
+                  </tr>
                 </thead>
                 <tbody></tbody>
               </table>
@@ -624,7 +693,7 @@
     </div>
   </div>
 </div>
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260809p1">
 <style>
   {% if extra_mes %}
   {% for nome, cor in (meses_cores or {}).items() %}
@@ -635,7 +704,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/analise/api/inteligentes/assets/tubular.js"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260809p1"></script>
 <script>
 (function () {
   const root = document.getElementById('ai-root');
@@ -830,11 +899,11 @@
         <td>${esc(l.data)}</td>
         <td class="td-left text-start td-dezenas">${esc(l.dezenas_fmt)}</td>
         ${EXTRA_MES ? `<td>${mesBadge(l)}</td>` : ''}
-        <td class="td-left text-start">${esc(l.digitos_fmt)}</td>
+        <td class="td-left text-start td-digitos-if">${esc(l.digitos_fmt)}</td>
         <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
         <td><strong>${esc(l.qtd_digitos)}</strong></td>
         <td><strong>${esc(l.soma)}</strong></td>
-        <td class="td-left text-start">${fmtVol(l.volume_combinacoes)}</td>
+        <td class="td-left text-start td-volume">${fmtVol(l.volume_combinacoes)}</td>
         <td class="text-nowrap td-gerar">${acoesHtml(l)}</td>
       </tr>`).join('') || `<tr><td colspan="${colRes}" class="text-muted">Sem dados</td></tr>`;
     document.querySelector('#aiTabelaPadroes tbody').innerHTML = metaPad.rows.map(l => {

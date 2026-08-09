@@ -1,4 +1,4 @@
-import os
+﻿import os
 from flask import Flask
 from models.shared import db
 from routes.index_routes import index_bp
@@ -25,6 +25,7 @@ from menu.app_integration import extend_nav_app
 from posicao_analise.app_integration import extend_posicao_app
 from concentracao_acertos.app_integration import extend_concentracao_app
 from analise_estudos.app_integration import extend_analise_estudos_app
+from linhas_universo.app_integration import extend_camadas_linhas_dd_du_app
 from analise_somas_digitos.app_integration import extend_analise_somas_digitos_app
 from analise_inteligentes_diadesorte.app_integration import extend_analise_inteligentes_app
 from analise_escolha_visual.app_integration import extend_analise_escolha_visual_app
@@ -53,6 +54,7 @@ def create_app():
     extend_posicao_app(app, 'diadesorte')
     extend_concentracao_app(app, 'diadesorte')
     extend_analise_estudos_app(app)
+    extend_camadas_linhas_dd_du_app(app)
     extend_analise_somas_digitos_app(app)
     extend_analise_inteligentes_app(app)
     extend_analise_escolha_visual_app(app)

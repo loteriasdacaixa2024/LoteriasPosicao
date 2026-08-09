@@ -121,12 +121,18 @@
     const apostasPorBase = {
         geral: [], vencedores: [], acumulados: [],
         panorama_geral: [], panorama_vencedores: [], panorama_acumulados: [],
+        linhas: [],
     };
     let colecaoExport = [];
     let concursosLista = [];
     let concursoConf = null;
     let exibicaoApostas = 'hibrido';
     let modoMotor = UI.motor_default || 'perfil_sorteio';
+    let baseLinhas = 'geral';
+    let janelaLinhas = 0;
+    let topNLinhas = 3;
+    let modoPesoLinhas = 'frequencia';
+    let linhasDataGer = null;
 
     const MOTOR_EXPLICACOES = {
         perfil_sorteio: {
@@ -174,13 +180,22 @@
         return baseAtual === 'panorama';
     }
 
+    function isModoLinhas() {
+        return baseAtual === 'linhas';
+    }
+
     function chaveApostasAtual() {
-        return isModoPanorama() ? `panorama_${basePanorama}` : baseAtual;
+        if (isModoPanorama()) return `panorama_${basePanorama}`;
+        if (isModoLinhas()) return 'linhas';
+        return baseAtual;
     }
 
     function labelApostasAtual() {
         if (isModoPanorama()) {
             return `Panorama Top-3 — ${BASE_LABELS[basePanorama] || basePanorama}`;
+        }
+        if (isModoLinhas()) {
+            return `Linhas L1–L10 — ${BASE_LABELS[baseLinhas] || baseLinhas}`;
         }
         return BASE_LABELS[baseAtual] || baseAtual;
     }
@@ -304,6 +319,108 @@
                 if (msg) { avisoEl.textContent = msg; avisoEl.classList.remove('d-none'); }
                 else avisoEl.classList.add('d-none');
             }
+        } catch (e) {
+            if (corpo) corpo.innerHTML = `<p class="text-danger small">${e.message}</p>`;
+        }
+    }
+
+    function syncJanelaLinhasUI() {
+        document.querySelectorAll('#grpJanelaLinhas .linhas-janela-btn').forEach(b => {
+            b.classList.toggle('active', parseInt(b.dataset.janela, 10) === janelaLinhas);
+        });
+    }
+
+    function atualizarCriteriosLinhasTxt() {
+        const el = document.getElementById('linhasCriteriosTxt');
+        if (!el) return;
+        const pesoLbl = {
+            frequencia: 'peso por frequência',
+            uniforme: 'peso uniforme no Top-N',
+            so_top1: 'somente 1º lugar',
+        }[modoPesoLinhas] || modoPesoLinhas;
+        const topLbl = modoPesoLinhas === 'so_top1' ? '1º lugar' : `Top ${topNLinhas}`;
+        el.textContent = `${topLbl} · ${pesoLbl} · ${BASE_LABELS[baseLinhas] || baseLinhas}`;
+    }
+
+    function renderRankingLinhas(data) {
+        const topo = document.getElementById('linhasRankingTopo');
+        const corpo = document.getElementById('linhasRankingCorpo');
+        const lblBase = document.getElementById('lblLinhasBase');
+        const lblTotal = document.getElementById('lblLinhasTotal');
+        if (!corpo) return;
+
+        if (!data?.sucesso) {
+            linhasDataGer = null;
+            corpo.innerHTML = `<p class="text-danger small mb-0">${data?.erro || 'Erro ao carregar ranking.'}</p>`;
+            if (topo) topo.innerHTML = '';
+            return;
+        }
+        linhasDataGer = data;
+        const freq = [...(data.frequencia_linhas || [])].sort(
+            (a, b) => (b.ocorrencias || 0) - (a.ocorrencias || 0)
+            || String(a.linha || '').localeCompare(String(b.linha || ''))
+        );
+        freq.forEach((r, i) => { r.posicao = i + 1; });
+
+        if (lblBase) lblBase.textContent = data.base_label || BASE_LABELS[baseLinhas] || baseLinhas;
+        if (lblTotal) {
+            const tot = data.total_concursos != null ? data.total_concursos : freq.reduce((s, r) => s + (r.ocorrencias || 0), 0);
+            lblTotal.textContent = `${tot} concursos`;
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+        const labels = ['1º lugar', '2º lugar', '3º lugar'];
+        if (topo) {
+            topo.innerHTML = `<div class="row g-2 justify-content-center">${freq.slice(0, 3).map((r, i) => `
+                <div class="col-12 col-sm-4">
+                    <div class="border rounded p-2 h-100 text-center" style="background:#fff;">
+                        <div class="small fw-bold text-muted">${medals[i]} ${labels[i]}</div>
+                        <div class="fs-4 fw-bold" style="color:var(--primary-xdark)">${r.linha}</div>
+                        <div class="small text-muted">${r.label || ''}</div>
+                        <div class="small"><strong>${r.ocorrencias || 0}</strong> · ${r.pct != null ? r.pct + '%' : '—'}</div>
+                    </div>
+                </div>`).join('')}</div>`;
+        }
+
+        if (!freq.length) {
+            corpo.innerHTML = '<p class="text-muted small mb-0">Sem dados de ranking.</p>';
+            return;
+        }
+        const lim = modoPesoLinhas === 'so_top1' ? 1 : topNLinhas;
+        corpo.innerHTML = `<div class="table-responsive"><table class="table table-sm table-bordered panorama-matriz mb-0">
+            <thead><tr>
+                <th class="panorama-rank-col">Pos.</th>
+                <th>Linha</th>
+                <th>Faixa</th>
+                <th class="text-center">Ocorr.</th>
+                <th class="text-center">%</th>
+                <th class="text-center">Na geração</th>
+            </tr></thead>
+            <tbody>${freq.map((r, i) => {
+                const pos = r.posicao || (i + 1);
+                const medal = pos <= 3 ? `${medals[pos - 1]} ` : '';
+                const usada = pos <= lim;
+                return `<tr class="${usada ? 'linha-top' : ''}">
+                    <td class="panorama-rank-col ${rankClass(pos)}">${medal}${pos}º</td>
+                    <td class="fw-bold">${r.linha}</td>
+                    <td class="small text-muted">${r.label || '—'}</td>
+                    <td class="text-center">${r.ocorrencias || 0}</td>
+                    <td class="text-center">${r.pct != null ? r.pct + '%' : '—'}</td>
+                    <td class="text-center">${usada ? '✓' : '—'}</td>
+                </tr>`;
+            }).join('')}</tbody>
+        </table></div>`;
+        atualizarCriteriosLinhasTxt();
+    }
+
+    async function carregarRankingLinhas() {
+        const corpo = document.getElementById('linhasRankingCorpo');
+        if (corpo) corpo.innerHTML = '<p class="text-muted small mb-0">Carregando ranking…</p>';
+        try {
+            const url = `/analise/api/linhas-universo/analise?janela=${janelaLinhas}&base=${encodeURIComponent(baseLinhas)}`;
+            const r = await fetch(url);
+            const data = await r.json();
+            renderRankingLinhas(data);
         } catch (e) {
             if (corpo) corpo.innerHTML = `<p class="text-danger small">${e.message}</p>`;
         }
@@ -521,8 +638,10 @@
     function aplicarVisibilidadeModo() {
         const painelBase = document.getElementById('painelModoBase');
         const painelPan = document.getElementById('painelModoPanorama');
-        if (painelBase) painelBase.classList.toggle('d-none', isModoPanorama());
+        const painelLinhas = document.getElementById('painelModoLinhas');
+        if (painelBase) painelBase.classList.toggle('d-none', isModoPanorama() || isModoLinhas());
         if (painelPan) painelPan.classList.toggle('d-none', !isModoPanorama());
+        if (painelLinhas) painelLinhas.classList.toggle('d-none', !isModoLinhas());
     }
 
     function trocarBase(novaBase) {
@@ -530,7 +649,12 @@
         baseAtual = novaBase;
         ultimasApostas = (apostasPorBase[chaveApostasAtual()] || []).slice();
         aplicarVisibilidadeModo();
-        if (!isModoPanorama()) {
+        if (isModoLinhas()) {
+            window.ComportamentoBasesResumo?.render(metaBases, baseLinhas);
+            syncJanelaLinhasUI();
+            carregarRankingLinhas();
+            atualizarCriteriosLinhasTxt();
+        } else if (!isModoPanorama()) {
             atualizarLblBase();
             filtrosAtivos = {};
             window.ComportamentoBasesResumo?.render(metaBases, novaBase);
@@ -809,6 +933,9 @@
         } else if (a.modo_motor_aposta === 'panorama_guiado') {
             const rk = a.rank_escolhido_label || labelRankPanorama(a.rank_escolhido);
             html += `<div class="mb-1"><span class="badge bg-info text-dark">Guiado — ${rk}</span></div>`;
+        } else if (a.modo_motor_aposta === 'linhas_ranking') {
+            const linhas = (a.linhas_origem || []).join(', ') || '—';
+            html += `<div class="mb-1"><span class="badge bg-warning text-dark">Linhas ${linhas}</span></div>`;
         } else if (a.modo_motor_aposta === 'moda') {
             html += `<div class="mb-1"><strong>Moda</strong> — resumo da janela</div>`;
         }
@@ -844,7 +971,7 @@
         const pad = (n) => (window.__repPadDezena ? window.__repPadDezena(n, CFG) : String(n).padStart(2, '0'));
         const timeHtml = (a) => (CFG.extra_time && a.time_num) ? `<span class="badge bg-success ms-1">T${a.time_num}</span>` : '';
         const trevoHtml = (a) => (CFG.extra_trevos && a.trevos) ? `<span class="badge bg-purple ms-1">${a.trevos.join('-')}</span>` : '';
-        const labelLista = isModoPanorama() ? labelApostasAtual() : '';
+        const labelLista = (isModoPanorama() || isModoLinhas()) ? labelApostasAtual() : '';
         el.innerHTML = avisoHtml + ultimasApostas.map(a => {
             const linhaTxt = fmtLinhaDezenasMes(a);
             const headLista = labelLista
@@ -896,6 +1023,43 @@
         }
     }
 
+    async function gerarLinhas() {
+        const body = {
+            quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+            dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || DEZ_DEFAULT,
+            janela: janelaLinhas,
+            base: baseLinhas,
+            base_estatistica: baseLinhas,
+            top_n: topNLinhas,
+            modo_peso: modoPesoLinhas,
+        };
+        const r = await fetch(apiPath('/gerar-linhas'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!data.sucesso) {
+            alert(data.erro || data.validacao?.motivo || 'Erro ao gerar');
+            return;
+        }
+        if (data.criterios_modo_auto?.length) {
+            const el = document.getElementById('linhasCriteriosTxt');
+            if (el) el.textContent = data.criterios_modo_auto.join(' · ');
+        } else {
+            atualizarCriteriosLinhasTxt();
+        }
+        let aviso = data.aviso;
+        if (data.descartadas_historico > 0) {
+            aviso = (aviso ? aviso + ' ' : '') +
+                `(${data.descartadas_historico} descartada(s) por já existirem no histórico.)`;
+        }
+        if (data.linhas_usadas?.length && linhasDataGer?.sucesso) {
+            renderRankingLinhas(linhasDataGer);
+        }
+        renderApostas(data.apostas, aviso);
+    }
+
     async function gerarPanorama() {
         const extras = window.PanoramaModos?.getGerarExtras?.() || {};
         if (extras.erro) {
@@ -940,6 +1104,9 @@
     async function gerar() {
         if (isModoPanorama()) {
             return gerarPanorama();
+        }
+        if (isModoLinhas()) {
+            return gerarLinhas();
         }
         const body = {
             quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
@@ -1061,6 +1228,48 @@
             atualizarRankPanoramaUI();
             if (window.PanoramaModos) PanoramaModos.onPanoramaRefresh(basePanorama, rankPanorama);
         });
+        document.querySelectorAll('#tabsLinhasBase .linhas-base-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const b = btn.dataset.lbase;
+                if (!b || b === baseLinhas) return;
+                baseLinhas = b;
+                document.querySelectorAll('#tabsLinhasBase .linhas-base-btn').forEach(x => {
+                    x.classList.toggle('active', x.dataset.lbase === b);
+                });
+                window.ComportamentoBasesResumo?.render(metaBases, b);
+                carregarRankingLinhas();
+            });
+        });
+        document.getElementById('grpJanelaLinhas')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('.linhas-janela-btn');
+            if (!btn) return;
+            e.preventDefault();
+            janelaLinhas = parseInt(btn.dataset.janela, 10);
+            syncJanelaLinhasUI();
+            carregarRankingLinhas();
+        });
+        document.getElementById('selTopNLinhas')?.addEventListener('change', (e) => {
+            topNLinhas = parseInt(e.target.value, 10) || 3;
+            if (linhasDataGer?.sucesso) renderRankingLinhas(linhasDataGer);
+            else atualizarCriteriosLinhasTxt();
+        });
+        document.getElementById('grpModoPesoLinhas')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('.linhas-peso-btn');
+            if (!btn?.dataset.peso) return;
+            e.preventDefault();
+            modoPesoLinhas = btn.dataset.peso;
+            document.querySelectorAll('#grpModoPesoLinhas .linhas-peso-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.peso === modoPesoLinhas);
+            });
+            if (modoPesoLinhas === 'so_top1') {
+                const sel = document.getElementById('selTopNLinhas');
+                if (sel) sel.value = '1';
+                topNLinhas = 1;
+            }
+            if (linhasDataGer?.sucesso) renderRankingLinhas(linhasDataGer);
+            else atualizarCriteriosLinhasTxt();
+        });
+        document.getElementById('btnAtualizarLinhas')?.addEventListener('click', carregarRankingLinhas);
         document.getElementById('btnAddColecao')?.addEventListener('click', adicionarAColecao);
         document.getElementById('btnLimparColecao')?.addEventListener('click', () => {
             colecaoExport = [];
@@ -1125,6 +1334,16 @@
         if (document.getElementById('tbodyPanoramaEstrategias')) carregarPanorama();
         initTooltipsInd();
         if (window.__bindConferirTxtHistorico) window.__bindConferirTxtHistorico();
+
+        const tabParam = new URLSearchParams(window.location.search).get('tab');
+        if (tabParam === 'linhas') {
+            const btnLinhas = document.querySelector('#tabsBaseGerador .base-tab-btn[data-base="linhas"]');
+            if (btnLinhas) {
+                document.querySelectorAll('#tabsBaseGerador .base-tab-btn').forEach(x => x.classList.remove('active'));
+                btnLinhas.classList.add('active');
+                trocarBase('linhas');
+            }
+        }
     }
 
     if (document.readyState === 'loading') {

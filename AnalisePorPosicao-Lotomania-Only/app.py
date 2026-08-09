@@ -25,6 +25,7 @@ from posicao_analise.app_integration import extend_posicao_app
 from analise_repeticao_consecutiva.app_integration import extend_repconsec_app
 from concentracao_acertos.app_integration import extend_concentracao_app
 from analise_estudos.app_integration import extend_analise_estudos_app
+from linhas_universo.app_integration import extend_camadas_linhas_dd_du_app
 from analise_escolha_visual.app_integration import extend_analise_escolha_visual_app
 from analise_tubular_inteligente.app_integration import extend_analise_tubular_inteligente_app
 from geradores_elite.comportamento_analise_integration import extend_comportamento_analise_app
@@ -49,6 +50,7 @@ def create_app():
     extend_posicao_app(app, 'lotomania')
     extend_concentracao_app(app, 'lotomania')
     extend_analise_estudos_app(app)
+    extend_camadas_linhas_dd_du_app(app)
     extend_analise_escolha_visual_app(app)
     extend_analise_tubular_inteligente_app(app)
     extend_comportamento_analise_app(app)

@@ -280,6 +280,50 @@ class ComportamentoBaseInteligente:
         return out
 
     @classmethod
+    def gerar_linhas(
+        cls,
+        quantidade: int = 10,
+        dezenas_por_jogo: Optional[int] = None,
+        janela: int = 0,
+        base_estatistica: str = "geral",
+        top_n: int = 3,
+        linhas_ids: Optional[List[str]] = None,
+        modo_peso: str = "frequencia",
+    ) -> Dict[str, Any]:
+        """Geração por ranking L1–L10 — reutiliza LinhasUniversoService."""
+        raw = cls._svc().gerar_apostas_por_linhas(
+            quantidade=quantidade,
+            dezenas_por_jogo=dezenas_por_jogo,
+            janela=janela,
+            base_estatistica=base_estatistica,
+            top_n=top_n,
+            linhas_ids=linhas_ids,
+            modo_peso=modo_peso,
+        )
+        if not raw.get("sucesso"):
+            return raw
+        out = {
+            **raw,
+            "motor": cls.motor,
+            "modality": cls.modality_key,
+            "criterios_modo_auto": [
+                raw.get("modo_motor_label") or "Comportamento das Linhas",
+                f"Peso: {raw.get('modo_peso')}",
+                "Linhas: " + ", ".join(
+                    f"{x.get('linha')}({x.get('posicao')}º)" for x in (raw.get("linhas_usadas") or [])
+                ),
+            ],
+        }
+        try:
+            from geradores_elite.validacao.validador_global import ValidadorGeradoresElite
+            out = ValidadorGeradoresElite.aplicar(
+                out, origem="comportamento_linhas", modality_key=cls.modality_key, campo="apostas",
+            )
+        except Exception:
+            pass
+        return out
+
+    @classmethod
     def analise_completa_api(
         cls,
         janela: int = 10,

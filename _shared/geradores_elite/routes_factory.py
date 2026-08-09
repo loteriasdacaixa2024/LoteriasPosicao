@@ -539,6 +539,28 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
+    @bp.route("/api/comportamento/gerar-linhas", methods=["POST"])
+    def api_comportamento_gerar_linhas():
+        """Geração por ranking L1–L10 (reutiliza LinhasUniversoService)."""
+        if not tem_gerador_comportamento(modality_key):
+            return jsonify({"sucesso": False, "erro": "Comportamento indisponível."}), 404
+        data = request.get_json(silent=True) or {}
+        try:
+            svc = _comportamento_svc()
+            ui = svc.ui_config()
+            dez_default = ui.get("dezenas_default", 15)
+            return jsonify(_pipeline_elite(svc.gerar_linhas(
+                quantidade=int(data.get("quantidade", 10)),
+                dezenas_por_jogo=int(data["dezenas_por_jogo"]) if data.get("dezenas_por_jogo") is not None else dez_default,
+                janela=int(data.get("janela", 0)),
+                base_estatistica=data.get("base") or data.get("base_estatistica", "geral"),
+                top_n=int(data.get("top_n", 3)),
+                linhas_ids=data.get("linhas_ids") or None,
+                modo_peso=data.get("modo_peso") or "frequencia",
+            ), "comportamento_linhas", data))
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
     @bp.route("/api/meses-indicados")
     def api_meses_indicados():
         if modality_key != "diadesorte":

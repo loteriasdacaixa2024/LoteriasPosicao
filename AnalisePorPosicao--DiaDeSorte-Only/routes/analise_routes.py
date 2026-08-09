@@ -146,6 +146,9 @@ wire_concentracao_analise(analise_bp, "diadesorte")
 from analise_estudos.app_integration import wire_analise_estudos
 wire_analise_estudos(analise_bp, "diadesorte")
 
+from linhas_universo.app_integration import wire_camadas_linhas_dd_du
+wire_camadas_linhas_dd_du(analise_bp, "diadesorte")
+
 # ANALISE_SOMAS_DIGITOS_WIRED
 from analise_somas_digitos.app_integration import wire_analise_somas_digitos
 wire_analise_somas_digitos(analise_bp, "diadesorte")

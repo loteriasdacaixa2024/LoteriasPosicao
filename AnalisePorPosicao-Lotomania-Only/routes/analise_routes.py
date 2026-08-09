@@ -41,6 +41,9 @@ from concentracao_acertos.app_integration import wire_concentracao_analise
 wire_concentracao_analise(analise_bp, "lotomania")
 from analise_estudos.app_integration import wire_analise_estudos
 wire_analise_estudos(analise_bp, "lotomania")
+
+from linhas_universo.app_integration import wire_camadas_linhas_dd_du
+wire_camadas_linhas_dd_du(analise_bp, "lotomania")
 from analise_inteligentes_diadesorte.app_integration import wire_analise_inteligentes
 wire_analise_inteligentes(analise_bp, "lotomania")
 from geradores_elite.comportamento_analise_integration import wire_analise_comportamento

@@ -1311,3 +1311,166 @@ class ComportamentoBaseService:
         result["alvos"] = alvos
         result["mes_alvo"] = ctx.get("mes_alvo")
         return result
+
+    @classmethod
+    def gerar_apostas_por_linhas(
+        cls,
+        quantidade: int = 10,
+        dezenas_por_jogo: Optional[int] = None,
+        janela: int = 0,
+        base_estatistica: str = "geral",
+        top_n: int = 3,
+        linhas_ids: Optional[List[str]] = None,
+        modo_peso: str = "frequencia",
+    ) -> Dict[str, Any]:
+        """
+        Gera apostas ponderando dezenas pelas linhas L1–L10 mais frequentes.
+        Reutiliza LinhasUniversoService (mesma regra de /analise/linhas-dd-du/).
+        """
+        from linhas_universo.core import dezenas_da_linha, linhas_para_modalidade
+        from linhas_universo.service import LinhasUniversoService
+
+        sp = cls._spec()
+        base = cls._normalizar_base_estatistica(base_estatistica)
+        k = max(sp.dezenas_min, min(int(dezenas_por_jogo or sp.dezenas_default), sp.dezenas_max))
+        quantidade = max(1, min(int(quantidade), 200))
+        top_n = max(1, min(int(top_n or 3), 10))
+        if modo_peso not in ("frequencia", "uniforme", "so_top1"):
+            modo_peso = "frequencia"
+
+        analise = LinhasUniversoService.analisar(
+            sp.modality_key, janela=janela, base_estatistica=base,
+        )
+        if not analise.get("sucesso"):
+            return analise
+
+        freq = list(analise.get("frequencia_linhas") or [])
+        ranking = sorted(
+            freq,
+            key=lambda x: (-int(x.get("ocorrencias") or 0), str(x.get("linha") or "")),
+        )
+        for i, row in enumerate(ranking, start=1):
+            row["posicao"] = i
+
+        if linhas_ids:
+            ids = {str(x).upper() for x in linhas_ids if x}
+            selecionadas = [r for r in ranking if str(r.get("linha") or "").upper() in ids]
+        elif modo_peso == "so_top1":
+            selecionadas = ranking[:1]
+        else:
+            selecionadas = ranking[:top_n]
+
+        if not selecionadas:
+            return {
+                "sucesso": False,
+                "erro": "Nenhuma linha selecionada no ranking para gerar apostas.",
+            }
+
+        mapa = linhas_para_modalidade(sp.modality_key)
+        dmin, dmax = int(mapa["dezena_min"]), int(mapa["dezena_max"])
+
+        # peso por dezena (partição L1–L10 → cada dezena pertence a 1 linha)
+        peso_dez: Dict[int, float] = {}
+        linhas_usadas = []
+        for r in selecionadas:
+            lid = r["linha"]
+            occ = max(1, int(r.get("ocorrencias") or 1))
+            peso_linha = float(occ) if modo_peso == "frequencia" else 1.0
+            dezs = dezenas_da_linha(lid, dmin, dmax)
+            linhas_usadas.append({
+                "linha": lid,
+                "label": r.get("label"),
+                "posicao": r.get("posicao"),
+                "ocorrencias": occ,
+                "pct": r.get("pct"),
+                "qtd_dezenas": len(dezs),
+            })
+            for d in dezs:
+                peso_dez[int(d)] = max(peso_dez.get(int(d), 0.0), peso_linha)
+
+        pool = [(d, w) for d, w in peso_dez.items() if w > 0]
+        if len(pool) < k:
+            return {
+                "sucesso": False,
+                "erro": (
+                    f"Pool insuficiente: {len(pool)} dezenas nas linhas escolhidas "
+                    f"(precisa de pelo menos {k}). Amplie o Top-N ou selecione mais linhas."
+                ),
+                "linhas_usadas": linhas_usadas,
+            }
+
+        historico_combos = carregar_combinacoes_historicas(
+            cls.SorteioModel, cls._dezenas_from_sorteio,
+        )
+        ms_analise = cls._meses_indicados_analise() if cls._usa_meses_indicados() else None
+        fmt = lambda n: f"{int(n):02d}"
+        apostas: List[Dict[str, Any]] = []
+        vistos: Set[Tuple[int, ...]] = set()
+        descartadas_historico = 0
+
+        for idx in range(quantidade * 40):
+            if len(apostas) >= quantidade:
+                break
+            items = list(pool)
+            uniq: List[int] = []
+            for _ in range(k):
+                if not items:
+                    break
+                nums = [d for d, _ in items]
+                weights = [w for _, w in items]
+                pick = random.choices(nums, weights=weights, k=1)[0]
+                uniq.append(pick)
+                items = [(d, w) for d, w in items if d != pick]
+            if len(uniq) < k:
+                continue
+            uniq = sorted(uniq)
+            chave = tuple(uniq)
+            if chave in vistos:
+                continue
+            if aposta_ja_sorteada(uniq, historico_combos):
+                descartadas_historico += 1
+                continue
+            vistos.add(chave)
+            item: Dict[str, Any] = {
+                "numero": len(apostas) + 1,
+                "dezenas": uniq,
+                "quantidade": k,
+                "texto": " ".join(fmt(n) for n in uniq),
+                "modo_motor_aposta": "linhas_ranking",
+                "linhas_origem": [x["linha"] for x in linhas_usadas],
+                "criterios": [
+                    f"Linhas {', '.join(x['linha'] for x in linhas_usadas)}",
+                    f"Peso: {modo_peso}",
+                ],
+                "marcas": [],
+            }
+            if ms_analise:
+                cls._aplicar_mes_indicado_aposta(item, len(apostas), ms_analise)
+            apostas.append(item)
+
+        aviso = None
+        if len(apostas) < quantidade:
+            aviso = f"Geradas {len(apostas)} de {quantidade} apostas inéditas com o pool das linhas."
+
+        return {
+            "sucesso": True,
+            "apostas": apostas,
+            "total_geradas": len(apostas),
+            "solicitados": quantidade,
+            "aviso": aviso,
+            "modo_geracao": "linhas_ranking",
+            "modo_motor": "linhas_ranking",
+            "modo_motor_label": "Comportamento das Linhas (L1–L10)",
+            "modo_peso": modo_peso,
+            "top_n": top_n,
+            "linhas_usadas": linhas_usadas,
+            "ranking": ranking,
+            "descartadas_historico": descartadas_historico,
+            "base_estatistica": base,
+            "base_label": analise.get("base_label", base),
+            "janela": analise.get("janela", janela),
+            "primeiro_concurso": analise.get("primeiro_concurso"),
+            "ultimo_concurso": analise.get("ultimo_concurso"),
+            "total_concursos": analise.get("total_concursos"),
+            "link_analise": "/analise/linhas-dd-du/",
+        }

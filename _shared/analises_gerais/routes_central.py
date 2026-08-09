@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, render_template, request
 from _shared.analises_gerais.service import AnalisesGeraisService
 from _shared.analises_gerais.sync_all import sincronizar_todas_modalidades
 from _shared.analises_gerais.comportamento_panorama import ComportamentoCentralService
+from _shared.analises_gerais.linhas_ranking_panorama import LinhasRankingCentralService
 from _shared.diadesorte.meses_cores import obter_meses_cores
 
 analises_gerais_bp = Blueprint("analises_gerais", __name__)
@@ -70,6 +71,24 @@ def api_comportamento_panorama_mod(key):
         return jsonify({
             "status": "success",
             "modalidade": ComportamentoCentralService.panorama_modalidade(key, janela=janela),
+        })
+    except KeyError:
+        return jsonify({"status": "error", "message": "Modalidade inválida."}), 404
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@analises_gerais_bp.route("/api/linhas-ranking-panorama", methods=["GET"])
+def api_linhas_ranking_panorama():
+    """Ranking L1–L10 (frequência) para todas ou uma modalidade — aba Comportamento."""
+    try:
+        janela = request.args.get("janela", 0, type=int)
+        if janela is None:
+            janela = 0
+        key = (request.args.get("modalidade") or "").strip() or None
+        return jsonify({
+            "status": "success",
+            **LinhasRankingCentralService.panorama(janela=janela, modality_key=key),
         })
     except KeyError:
         return jsonify({"status": "error", "message": "Modalidade inválida."}), 404

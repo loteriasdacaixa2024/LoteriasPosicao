@@ -258,6 +258,14 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 "icon_color": "#c08b00",
             },
             {
+                "title": "Linhas & DD × DU",
+                "desc": "Padronização L1–L10 · Dígito da Dezena × Dígito da Unidade",
+                "href": "/analise/linhas-dd-du/",
+                "icon": "fas fa-th",
+                "icon_bg": "#e3f2fd",
+                "icon_color": "#1565c0",
+            },
+            {
                 "title": "Análise por Posição",
                 "desc": "Matriz 01–31 · ordem oficial · dígitos e soma",
                 "href": "/analise/por-posicao/",
@@ -770,6 +778,14 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
                 "icon": "fas fa-calculator",
                 "icon_bg": accent_light,
                 "icon_color": accent,
+            },
+            {
+                "title": "Linhas & DD × DU",
+                "desc": "Padronização L1–L10 · Dígito da Dezena × Dígito da Unidade",
+                "href": "/analise/linhas-dd-du/",
+                "icon": "fas fa-th",
+                "icon_bg": "#e3f2fd",
+                "icon_color": "#1565c0",
             },
         ])
     if tem_concentracao_acertos(modality_key):

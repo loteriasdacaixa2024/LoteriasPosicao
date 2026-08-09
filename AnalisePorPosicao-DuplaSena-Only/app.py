@@ -23,6 +23,7 @@ from auto_sync import start_auto_sync_once
 from analise_comparar.routes_factory import register_comparar
 from analise_repeticao.routes_factory import register_repeticao
 from analise_estudos.app_integration import extend_analise_estudos_app
+from linhas_universo.app_integration import extend_camadas_linhas_dd_du_app
 from analise_escolha_visual.app_integration import extend_analise_escolha_visual_app
 from analise_tubular_inteligente.app_integration import extend_analise_tubular_inteligente_app
 from menu.app_integration import extend_nav_app
@@ -46,6 +47,7 @@ def create_app():
     cc_extend_app(app, 'duplasena')
     extend_nav_app(app, 'duplasena')
     extend_analise_estudos_app(app)
+    extend_camadas_linhas_dd_du_app(app)
     extend_analise_escolha_visual_app(app)
     extend_analise_tubular_inteligente_app(app)
     extend_posicao_app(app, 'duplasena')

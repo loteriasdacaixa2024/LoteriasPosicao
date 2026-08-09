@@ -121,6 +121,39 @@
         .col-im { background: rgba(244,114,182,0.08); }
         .seq-pa-im { font-size: 0.72rem; letter-spacing: 0.02em; font-family: ui-monospace, monospace; }
         .th-modalidade { min-width: 140px; }
+        .linhas-rank-card {
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03); overflow: hidden; height: 100%;
+        }
+        .linhas-rank-card .lr-head {
+            padding: .55rem .85rem; font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center; gap: .5rem;
+        }
+        .linhas-rank-card .lr-body { padding: .75rem .85rem; }
+        .linhas-rank-card .lr-meta { font-size: .75rem; color: #9aa3af; margin-bottom: .55rem; }
+        .linhas-rank-podium {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; margin-bottom: .65rem;
+        }
+        @media (max-width: 576px) {
+            .linhas-rank-podium { grid-template-columns: 1fr; }
+        }
+        .linhas-rank-podium .pod {
+            border-radius: 8px; padding: .45rem .55rem; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.18); font-size: .78rem;
+        }
+        .linhas-rank-podium .pod.p1 { border-color: #c9a227; background: rgba(201,162,39,0.15); }
+        .linhas-rank-podium .pod.p2 { border-color: #9aa0a6; background: rgba(154,160,166,0.12); }
+        .linhas-rank-podium .pod.p3 { border-color: #c47b3a; background: rgba(196,123,58,0.12); }
+        .linhas-rank-podium .pod .pos { font-size: .68rem; opacity: .85; text-transform: uppercase; font-weight: 700; }
+        .linhas-rank-podium .pod .ln { font-size: 1.1rem; font-weight: 800; }
+        .tbl-linhas-rank { font-size: .75rem; margin: 0; }
+        .tbl-linhas-rank th, .tbl-linhas-rank td { padding: .25rem .4rem; white-space: nowrap; }
+        .tbl-linhas-rank tr.r1 { background: rgba(201,162,39,0.12); font-weight: 700; }
+        .tbl-linhas-rank tr.r2 { background: rgba(154,160,166,0.1); font-weight: 700; }
+        .tbl-linhas-rank tr.r3 { background: rgba(196,123,58,0.1); font-weight: 700; }
+        .linhas-rank-toolbar .form-select {
+            background: #1a2332; color: #e8edf5; border-color: #2a3548; font-size: .85rem;
+        }
     </style>
 </head>
 <body>
@@ -242,9 +275,44 @@
 
         <div class="tab-pane fade" id="pane-comportamento" role="tabpanel">
             <p class="small text-secondary mb-3">
-                Panorama dos indicadores comportamentais (PA, IM, PR, RT, MO, SQ, M3, FB e extras por modalidade).
-                Cada card usa a <strong>cor oficial da modalidade</strong> e mostra os <strong>últimos 10 concursos</strong>.
+                Panorama dos indicadores comportamentais (PA, IM, PR, RT, MO, SQ, M3, FB e extras por modalidade)
+                e do <strong>Ranking das Linhas L1–L10</strong> (frequência de presença por concurso).
+                Os cards de indicadores usam a <strong>cor oficial da modalidade</strong> e os <strong>últimos 10 concursos</strong>.
             </p>
+
+            <div class="mb-4" id="sec-linhas-ranking">
+                <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-2">
+                    <div>
+                        <h5 class="mb-1 fw-bold"><i class="fas fa-trophy text-warning me-2"></i>Ranking das Linhas (L1–L10)</h5>
+                        <p class="small text-secondary mb-0">
+                            Comportamento das linhas oficiais: quais mais aparecem no histórico.
+                            Mesma regra da página <code>/analise/linhas-dd-du/</code> de cada modalidade.
+                        </p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 linhas-rank-toolbar">
+                        <div>
+                            <label class="small text-secondary d-block mb-0" for="sel-linhas-mod">Modalidade</label>
+                            <select id="sel-linhas-mod" class="form-select form-select-sm" style="min-width:11rem">
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="small text-secondary d-block mb-0" for="sel-linhas-janela">Janela</label>
+                            <select id="sel-linhas-janela" class="form-select form-select-sm" style="min-width:8rem">
+                                <option value="0" selected>Todos</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3" id="grid-linhas-ranking">
+                    <div class="col-12 text-secondary small" id="linhas-ranking-loading">
+                        <i class="fas fa-spinner fa-spin me-1"></i>Carregando ranking das linhas…
+                    </div>
+                </div>
+            </div>
 
             <h5 class="mb-2 fw-bold"><i class="fas fa-balance-scale me-2"></i>Comparativo — Pares e Ímpares</h5>
             <p class="small text-secondary mb-2">
@@ -291,7 +359,10 @@
     const API_RESUMO = '/analises-gerais/api/resumo';
     const API_ATUALIZAR = '/analises-gerais/api/atualizar';
     const API_COMPORTAMENTO = '/analises-gerais/api/comportamento-panorama';
+    const API_LINHAS_RANKING = '/analises-gerais/api/linhas-ranking-panorama';
     let comportamentoCarregado = false;
+    let linhasRankingCarregado = false;
+    let linhasRankingCache = null;
     let MESES_CORES = window.__MESES_CORES__ || {};
     const MESES_NOME_NUM = {
         1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',
@@ -523,6 +594,132 @@
         }).join('');
     }
 
+    function fmtPctNum(v) {
+        if (v == null || v === undefined || Number.isNaN(Number(v))) return '—';
+        return Number(v).toLocaleString('pt-BR') + '%';
+    }
+
+    function fillLinhasModSelect(mods) {
+        const sel = document.getElementById('sel-linhas-mod');
+        if (!sel) return;
+        const cur = sel.value;
+        const opts = '<option value="">Todas</option>' + (mods || []).map(m =>
+            `<option value="${m.key}">${m.nome || m.key}</option>`
+        ).join('');
+        if (sel.dataset.filled !== '1') {
+            sel.innerHTML = opts;
+            sel.dataset.filled = '1';
+        }
+        if (cur) sel.value = cur;
+    }
+
+    function renderLinhasRankingCard(m) {
+        const th = m.theme || {};
+        const primary = th.primary || '#334155';
+        const text = th.text || '#fff';
+        const headStyle = `background:${primary};color:${text}`;
+        if (m.erro) {
+            return `<div class="col-md-6 col-xl-4">
+                <div class="linhas-rank-card">
+                    <div class="lr-head" style="${headStyle}"><span>${m.nome || m.key}</span>
+                        <span class="badge bg-danger">erro</span></div>
+                    <div class="lr-body"><p class="small text-warning mb-2">${m.erro}</p>
+                        <a class="btn btn-outline-light btn-sm" href="${m.link_linhas || '#'}" target="_blank">Abrir Linhas &amp; DD×DU</a>
+                    </div>
+                </div>
+            </div>`;
+        }
+        const medals = ['🥇', '🥈', '🥉'];
+        const labels = ['1º Lugar', '2º Lugar', '3º Lugar'];
+        const top = m.top3 || [];
+        const pods = [0, 1, 2].map(i => {
+            const t = top[i];
+            if (!t) return `<div class="pod p${i + 1}"><div class="pos">${medals[i]} ${labels[i]}</div><div class="text-secondary">—</div></div>`;
+            return `<div class="pod p${i + 1}" title="${t.linha} · ${t.ocorrencias} ocorrências · ${fmtPctNum(t.pct)}">
+                <div class="pos">${medals[i]} ${labels[i]}</div>
+                <div class="ln">${t.linha}</div>
+                <div>${t.ocorrencias} · ${fmtPctNum(t.pct)}</div>
+                <div class="small text-secondary">${t.label || ''}</div>
+            </div>`;
+        }).join('');
+        const rows = (m.ranking || []).map(r => {
+            const cls = r.posicao <= 3 ? ` class="r${r.posicao}"` : '';
+            const medal = r.posicao <= 3 ? medals[r.posicao - 1] + ' ' : '';
+            return `<tr${cls}>
+                <td>${medal}${r.posicao}º</td>
+                <td><strong>${r.linha}</strong></td>
+                <td>${r.label || '—'}</td>
+                <td class="text-end">${r.ocorrencias}</td>
+                <td class="text-end">${fmtPctNum(r.pct)}</td>
+                <td class="text-end">${r.atraso ?? '—'}</td>
+            </tr>`;
+        }).join('');
+        return `<div class="col-md-6 col-xl-4">
+            <div class="linhas-rank-card d-flex flex-column">
+                <div class="lr-head" style="${headStyle}">
+                    <span>${m.nome || m.key}</span>
+                    <a href="${m.link_linhas || '#'}" target="_blank" class="btn btn-sm btn-light py-0 px-2" title="Análise completa">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+                <div class="lr-body flex-grow-1 d-flex flex-column">
+                    <div class="lr-meta">Concursos ${m.primeiro_concurso ?? '—'} → ${m.ultimo_concurso ?? '—'}
+                        · ${m.total_concursos || 0} · ${m.qtd_linhas || 0} linhas</div>
+                    <div class="linhas-rank-podium">${pods}</div>
+                    <div class="table-responsive flex-grow-1">
+                        <table class="table table-sm table-dark tbl-linhas-rank mb-0">
+                            <thead><tr>
+                                <th>Pos.</th><th>Linha</th><th>Faixa</th>
+                                <th class="text-end">Ocorr.</th><th class="text-end">%</th><th class="text-end">Atraso</th>
+                            </tr></thead>
+                            <tbody>${rows || '<tr><td colspan="6" class="text-secondary">Sem dados</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                    <a href="${m.link_linhas || '#'}" target="_blank" class="btn btn-outline-light btn-sm w-100 mt-2">
+                        <i class="fas fa-th me-1"></i>Linhas &amp; DD × DU
+                    </a>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function renderLinhasRanking(d) {
+        const grid = document.getElementById('grid-linhas-ranking');
+        const mods = d.modalidades || [];
+        if (!mods.length) {
+            grid.innerHTML = '<div class="col-12 text-secondary small">Nenhuma modalidade carregada.</div>';
+            return;
+        }
+        grid.innerHTML = mods.map(renderLinhasRankingCard).join('');
+        linhasRankingCarregado = true;
+    }
+
+    async function carregarLinhasRanking() {
+        const grid = document.getElementById('grid-linhas-ranking');
+        const janela = document.getElementById('sel-linhas-janela')?.value || '0';
+        const mod = document.getElementById('sel-linhas-mod')?.value || '';
+        grid.innerHTML = '<div class="col-12 text-secondary small"><i class="fas fa-spinner fa-spin me-1"></i>Carregando ranking das linhas…</div>';
+        try {
+            const qs = new URLSearchParams({ janela: String(janela) });
+            if (mod) qs.set('modalidade', mod);
+            const r = await fetch(API_LINHAS_RANKING + '?' + qs.toString());
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Erro');
+            if (!mod) {
+                linhasRankingCache = d;
+                fillLinhasModSelect(d.modalidades || []);
+            } else if (linhasRankingCache && linhasRankingCache.modalidades) {
+                fillLinhasModSelect(linhasRankingCache.modalidades);
+            } else {
+                fillLinhasModSelect(d.modalidades || []);
+            }
+            renderLinhasRanking(d);
+        } catch (e) {
+            console.error(e);
+            grid.innerHTML = `<div class="col-12 alert alert-danger py-2 small">Erro no ranking das linhas: ${e.message}</div>`;
+        }
+    }
+
     function renderComportamento(d) {
         renderComparativoPaIm(d.comparativo_pa_im);
         const grid = document.getElementById('grid-comportamento');
@@ -686,10 +883,24 @@
     document.getElementById('btn-refresh').addEventListener('click', async () => {
         await carregarResumo();
         await carregarComportamento();
+        if (document.getElementById('pane-comportamento')?.classList.contains('active')
+            || document.getElementById('pane-comportamento')?.classList.contains('show')) {
+            await carregarLinhasRanking();
+        } else {
+            linhasRankingCarregado = false;
+        }
+    });
+
+    document.getElementById('sel-linhas-mod')?.addEventListener('change', () => carregarLinhasRanking());
+    document.getElementById('sel-linhas-janela')?.addEventListener('change', () => {
+        linhasRankingCache = null;
+        document.getElementById('sel-linhas-mod').dataset.filled = '';
+        carregarLinhasRanking();
     });
 
     document.getElementById('tab-comportamento').addEventListener('shown.bs.tab', () => {
         if (!comportamentoCarregado) carregarComportamento();
+        if (!linhasRankingCarregado) carregarLinhasRanking();
     });
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -698,6 +909,7 @@
             const tab = document.getElementById('tab-comportamento');
             bootstrap.Tab.getOrCreateInstance(tab).show();
             carregarComportamento();
+            carregarLinhasRanking();
         }
     });
     </script>

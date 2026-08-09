@@ -37,6 +37,9 @@ wire_posicao_analise(analise_bp, "maismilionaria")
 
 from analise_estudos.app_integration import wire_analise_estudos
 wire_analise_estudos(analise_bp, "maismilionaria")
+
+from linhas_universo.app_integration import wire_camadas_linhas_dd_du
+wire_camadas_linhas_dd_du(analise_bp, "maismilionaria")
 from analise_escolha_visual.app_integration import wire_analise_escolha_visual
 wire_analise_escolha_visual(analise_bp, "maismilionaria")
 from analise_tubular_inteligente.app_integration import wire_analise_tubular_inteligente
