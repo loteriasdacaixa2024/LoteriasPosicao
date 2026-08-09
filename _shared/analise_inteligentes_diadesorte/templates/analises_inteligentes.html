@@ -640,24 +640,25 @@
               </table>
             </div>
             <div class="small fw-semibold mb-1">Suas apostas (comparar com o último acima)</div>
+            <div id="tbDupMsg10" class="tb-dup-msg d-none mb-2" role="alert"></div>
             <div class="table-responsive">
               <table class="table table-sm table-bordered tb-table" id="tbManual10">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Dezenas</th>
-                    {% if extra_mes %}<th>Mês</th>{% endif %}
-                    <th>SEQ</th>
-                    <th>FINAIS</th>
-                    <th>Rept</th>
-                    <th>Soma</th>
-                    <th>Pares</th>
-                    <th>Ímpares</th>
-                    <th>Inicial</th>
-                    <th>Final</th>
-                    <th>Qtde</th>
-                    <th>Números</th>
-                    <th></th>
+                    <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
+                    {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
+                    <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="rept" title="Clique para ordenar">Rept <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="soma" title="Clique para ordenar">Soma <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="pares" title="Clique para ordenar">Pares <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="impares" title="Clique para ordenar">Ímpares <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="inicial" title="Clique para ordenar">Inicial <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="final" title="Clique para ordenar">Final <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="qtde" title="Clique para ordenar">Qtde <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="numeros" title="Clique para ordenar">Números <span class="tb-sort-ind">⇅</span></th>
+                    <th title="Remover"></th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -693,7 +694,7 @@
     </div>
   </div>
 </div>
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260809p1">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260809p4">
 <style>
   {% if extra_mes %}
   {% for nome, cor in (meses_cores or {}).items() %}
@@ -704,7 +705,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260809p1"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260809p4"></script>
 <script>
 (function () {
   const root = document.getElementById('ai-root');

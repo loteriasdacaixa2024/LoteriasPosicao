@@ -371,57 +371,117 @@
   width: 2.1rem; text-align: center; font-weight: 700; font-size: .75rem;
   border: 1px solid #ced4da; border-radius: 4px; padding: .15rem;
 }
-/* Seção 10 — controle interativo P1–P7 (somente coluna Dezenas) */
+/* Seção 10 — P1–P7: spinner interno, setas só no hover/focus */
 #ai-tubular-root .tb-pos-row {
   display: inline-flex;
   flex-wrap: nowrap;
   align-items: flex-end;
-  gap: .2rem;
+  gap: .28rem;
   vertical-align: middle;
 }
 #ai-tubular-root .tb-pos-ctrl {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
-  min-width: 2.35rem;
+  gap: 1px;
   line-height: 1;
 }
 #ai-tubular-root .tb-pos-lbl {
-  font-size: .58rem;
+  font-size: .55rem;
   font-weight: 800;
-  color: #6b7280;
+  color: #9ca3af;
   letter-spacing: .02em;
-  margin-bottom: 1px;
+  line-height: 1;
+}
+#ai-tubular-root .tb-pos-box {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  width: 2.55rem;
+  height: 1.55rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+#ai-tubular-root .tb-pos-box:hover,
+#ai-tubular-root .tb-pos-box:focus-within {
+  border-color: #adb5bd;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .04);
+}
+#ai-tubular-root .tb-pos-box .tb-manual-input {
+  width: 100%;
+  height: 100%;
+  border: none !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 .15rem 0 .2rem;
+  font-size: .72rem;
+  font-weight: 800;
+  text-align: center;
+  color: inherit;
+  outline: none;
+}
+#ai-tubular-root .tb-pos-box:hover .tb-manual-input,
+#ai-tubular-root .tb-pos-box:focus-within .tb-manual-input {
+  padding-right: .95rem;
+  text-align: left;
+}
+#ai-tubular-root .tb-pos-spin {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: .85rem;
+  display: none;
+  flex-direction: column;
+  border-left: 1px solid rgba(0, 0, 0, .12);
+  background: rgba(255, 255, 255, .55);
+}
+#ai-tubular-root .tb-pos-box:hover .tb-pos-spin,
+#ai-tubular-root .tb-pos-box:focus-within .tb-pos-spin {
+  display: flex;
 }
 #ai-tubular-root .tb-pos-btn {
-  display: inline-flex;
+  flex: 1 1 50%;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.55rem;
-  height: .72rem;
+  margin: 0;
   padding: 0;
-  border: 1px solid #ced4da;
-  background: #f8f9fa;
-  color: #374151;
-  font-size: .55rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: .42rem;
   line-height: 1;
   cursor: pointer;
   user-select: none;
 }
-#ai-tubular-root .tb-pos-btn:hover { background: #e9ecef; border-color: #adb5bd; }
-#ai-tubular-root .tb-pos-btn:active { background: #dee2e6; }
-#ai-tubular-root .tb-pos-btn.tb-pos-up { border-radius: 3px 3px 0 0; border-bottom: none; }
-#ai-tubular-root .tb-pos-btn.tb-pos-dn { border-radius: 0 0 3px 3px; border-top: none; }
-#ai-tubular-root .tb-pos-ctrl .tb-manual-input {
-  width: 1.7rem;
-  height: 1.45rem;
-  border-radius: 0;
-  padding: 0;
-  font-size: .72rem;
+#ai-tubular-root .tb-pos-btn:hover { background: rgba(0, 0, 0, .08); color: #111827; }
+#ai-tubular-root .tb-pos-btn:active { background: rgba(0, 0, 0, .14); }
+#ai-tubular-root .tb-pos-btn.tb-pos-up { border-bottom: 1px solid rgba(0, 0, 0, .1); }
+#ai-tubular-root .tb-pos-box.tb-pos-dup {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, .28);
 }
-#ai-tubular-root .tb-pos-ctrl .tb-manual-input.number-cell {
-  border-width: 1px;
+#ai-tubular-root .tb-pos-box.tb-pos-dup .tb-manual-input {
+  color: #842029;
+  font-weight: 900;
+}
+#ai-tubular-root .tb-dup-msg {
+  background: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+  border-radius: 8px;
+  padding: .5rem .75rem;
+  font-size: .8rem;
+  text-align: left;
+}
+#ai-tubular-root .tb-dup-msg strong { font-weight: 800; }
+#ai-tubular-root .tb-row-dup td:first-child {
+  box-shadow: inset 3px 0 0 #dc3545;
 }
 #ai-tubular-root .tb-stats-panel {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

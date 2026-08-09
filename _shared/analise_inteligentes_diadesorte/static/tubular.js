@@ -238,6 +238,10 @@
     this.sortDir = 'asc';
     this.manual10 = [];
     this.manual11 = [];
+    this._manualUid = 0;
+    this.manual10SortKey = null;
+    this.manual10SortDir = 'asc';
+    this.manual10BlockMsg = '';
     this._bind();
   }
 
@@ -400,8 +404,32 @@
     r.querySelector('#tbAdd11')?.addEventListener('click', () => this.addManualRow(11));
     r.querySelector('#tbProcess10')?.addEventListener('click', () => this.processPaste(10));
     r.querySelector('#tbProcess11')?.addEventListener('click', () => this.processPaste(11));
-    r.querySelector('#tbClear10')?.addEventListener('click', () => { this.manual10 = []; this.renderManual(10); });
+    r.querySelector('#tbClear10')?.addEventListener('click', () => {
+      this.manual10 = [];
+      this.manual10BlockMsg = '';
+      this.manual10SortKey = null;
+      this.manual10SortDir = 'asc';
+      this._manualUid = 0;
+      this.renderManual(10);
+    });
     r.querySelector('#tbClear11')?.addEventListener('click', () => { this.manual11 = []; this.renderManual(11); });
+    r.querySelector('#tbManual10 thead')?.addEventListener('click', (ev) => {
+      const th = ev.target.closest('th.tb-sort');
+      if (!th || !th.dataset.sort) return;
+      const key = th.dataset.sort;
+      // Ciclo alinhado ao pedido: ↑ → ↓ → ordem original (classes tb-sort da aba Sequências)
+      if (this.manual10SortKey === key) {
+        if (this.manual10SortDir === 'asc') this.manual10SortDir = 'desc';
+        else {
+          this.manual10SortKey = null;
+          this.manual10SortDir = 'asc';
+        }
+      } else {
+        this.manual10SortKey = key;
+        this.manual10SortDir = 'asc';
+      }
+      this.renderManual(10);
+    });
     this._setupDrop(r.querySelector('#tbDrop10'), 10);
     this._setupDrop(r.querySelector('#tbDrop11'), 11);
     // Futuro: apostas do Elite
@@ -417,6 +445,7 @@
           month: this.extraMes ? 1 : 0,
           monthName: this.extraMes ? 'Janeiro' : '',
           editable: true,
+          _uid: ++this._manualUid,
         };
       }).filter(Boolean);
       if (section === 10) this.manual10 = this.manual10.concat(parsed);
@@ -661,42 +690,168 @@
     return nums.slice(0, L.sorteadas);
   };
 
-  /** HTML da coluna Dezenas — Seção 10: P1–P7 com ↑↓ e cores existentes. */
-  TubularApp.prototype._manualPosControlsHtml = function (section, rowIdx, nums, sequences, reps, L) {
+  /** HTML da coluna Dezenas — Seção 10: P1–P7 com spinner interno (só no hover). */
+  TubularApp.prototype._manualPosControlsHtml = function (section, rowIdx, nums, sequences, reps, L, dupCols) {
+    const dups = dupCols || new Set();
     return `<div class="tb-pos-row">${nums.map((n, k) => {
       const pos = `P${k + 1}`;
-      const cond = (this.marked && n != null) ? detectAllConditions(n, sequences || [], reps || []) : [];
-      const style = (this.marked && n != null) ? createGradientStyle(cond) : { background: '', title: '' };
+      const cond = (this.marked && n != null && !dups.has(k)) ? detectAllConditions(n, sequences || [], reps || []) : [];
+      const style = (this.marked && n != null && !dups.has(k)) ? createGradientStyle(cond) : { background: '', title: '' };
       const cls = cond.join(' ');
+      const dupCls = dups.has(k) ? ' tb-pos-dup' : '';
       const inline = style.background ? `style="${style.background}"` : '';
-      const title = style.title || `${pos}: ${n == null ? '—' : fmt2(n)}`;
+      const title = dups.has(k)
+        ? `${pos}: ${fmt2(n)} — dezena repetida nesta aposta`
+        : (style.title || `${pos}: ${n == null ? '—' : fmt2(n)}`);
       const val = n == null || n === '' ? '' : fmt2(n);
       return `<div class="tb-pos-ctrl" title="${esc(title)}">
-        <button type="button" class="tb-pos-btn tb-pos-up" data-sec="${section}" data-row="${rowIdx}" data-col="${k}" data-delta="1" aria-label="Aumentar ${pos}">▲</button>
         <span class="tb-pos-lbl">${pos}</span>
-        <input class="tb-manual-input number-cell ${esc(cls)}" ${inline}
-          data-sec="${section}" data-row="${rowIdx}" data-col="${k}"
-          value="${val}" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}"
-          aria-label="${pos}" title="${esc(title)}">
-        <button type="button" class="tb-pos-btn tb-pos-dn" data-sec="${section}" data-row="${rowIdx}" data-col="${k}" data-delta="-1" aria-label="Diminuir ${pos}">▼</button>
+        <div class="tb-pos-box ${esc(cls)}${dupCls}" ${inline}>
+          <input class="tb-manual-input" data-sec="${section}" data-row="${rowIdx}" data-col="${k}"
+            value="${val}" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}"
+            aria-label="${pos}" title="${esc(title)}">
+          <span class="tb-pos-spin" aria-hidden="true">
+            <button type="button" class="tb-pos-btn tb-pos-up" data-sec="${section}" data-row="${rowIdx}" data-col="${k}" data-delta="1" tabindex="-1" aria-label="Aumentar ${pos}">▲</button>
+            <button type="button" class="tb-pos-btn tb-pos-dn" data-sec="${section}" data-row="${rowIdx}" data-col="${k}" data-delta="-1" tabindex="-1" aria-label="Diminuir ${pos}">▼</button>
+          </span>
+        </div>
       </div>`;
     }).join('')}</div>`;
   };
 
-  /** Atualiza posição Pk da aposta (grava array na ordem de exibição). */
+  /** Detecta dezenas repetidas dentro de uma aposta (só entre P1–P7 da mesma linha). */
+  TubularApp.prototype._manualDupInfo = function (nums) {
+    const map = {};
+    (nums || []).forEach((n, i) => {
+      if (n == null || n === '') return;
+      const k = Number(n);
+      if (!Number.isFinite(k)) return;
+      if (!map[k]) map[k] = [];
+      map[k].push(i);
+    });
+    const dupCols = new Set();
+    const messages = [];
+    Object.keys(map).forEach((dez) => {
+      const cols = map[dez];
+      if (cols.length < 2) return;
+      cols.forEach(c => dupCols.add(c));
+      const pos = cols.map(c => `P${c + 1}`).join(' e ');
+      messages.push(`Dezena ${fmt2(dez)} repetida em ${pos}.`);
+    });
+    return { dupCols, messages, hasDup: dupCols.size > 0 };
+  };
+
+  TubularApp.prototype._wouldManualDup = function (nums, col, val) {
+    if (val == null || val === '') return false;
+    const v = Number(val);
+    if (!Number.isFinite(v)) return false;
+    return (nums || []).some((n, i) => i !== col && n != null && n !== '' && Number(n) === v);
+  };
+
+  /** Atualiza posição Pk da aposta (grava array na ordem de exibição). Bloqueia duplicata na Seção 10. */
   TubularApp.prototype._setManualPos = function (sec, row, col, nextVal, L) {
     const arr = sec === 10 ? this.manual10 : this.manual11;
-    if (!arr[row]) return;
+    if (!arr[row]) return false;
     const mode = sec === 10 ? 'asc' : 'draw';
     const nums = this._manualNumsDisplay(arr[row], mode, L);
-    if (nextVal === null || nextVal === '') {
+    let value = nextVal;
+    if (value === null || value === '') {
       nums[col] = null;
     } else {
-      let v = Math.trunc(Number(nextVal));
-      if (!Number.isFinite(v)) nums[col] = null;
-      else nums[col] = Math.min(L.dezenaMax, Math.max(L.dezenaMin, v));
+      let v = Math.trunc(Number(value));
+      if (!Number.isFinite(v)) {
+        nums[col] = null;
+      } else {
+        v = Math.min(L.dezenaMax, Math.max(L.dezenaMin, v));
+        if (sec === 10 && this._wouldManualDup(nums, col, v)) {
+          const other = nums.findIndex((n, i) => i !== col && n != null && Number(n) === v);
+          const aposta = arr[row]._uid != null ? arr[row]._uid : (row + 1);
+          this.manual10BlockMsg =
+            `Dezena repetida na aposta ${aposta}: ${fmt2(v)} já está em P${other + 1}.`;
+          return false;
+        }
+        nums[col] = v;
+      }
     }
     arr[row].numbers = nums;
+    if (sec === 10) this.manual10BlockMsg = '';
+    return true;
+  };
+
+  TubularApp.prototype._manualSortValue = function (g, key, origIdx, L, last) {
+    const nums = this._manualNumsDisplay(g, 'asc', L);
+    const valid = nums.filter(n => n != null && n >= L.dezenaMin && n <= L.dezenaMax);
+    const uniqueOk = !this._manualDupInfo(nums).hasDup;
+    const an = (valid.length === L.sorteadas && uniqueOk)
+      ? calculateCompleteAnalysis(valid, g.monthName)
+      : null;
+    const rept = (valid.length === L.sorteadas && uniqueOk)
+      ? calculateRepetitions(valid, last)
+      : { list: [] };
+    switch (key) {
+      case 'idx': return g._uid != null ? g._uid : origIdx;
+      case 'dezenas': return valid.map(fmt2).join(' ') || '';
+      case 'mes': return String(g.monthName || '');
+      case 'seq': return an ? (an.sequencesInfo.qtde || 0) : -1;
+      case 'finais': return an ? (an.finaisIguais.qtde || 0) : -1;
+      case 'rept': return (rept.list || []).length;
+      case 'soma': return an ? an.soma : -1;
+      case 'pares': return an ? an.pares : -1;
+      case 'impares': return an ? an.impares : -1;
+      case 'inicial': return an ? String(an.padroes.inicial || '') : '';
+      case 'final': return an ? String(an.padroes.final || '') : '';
+      case 'qtde': return an ? an.qtdeDigitos : -1;
+      case 'numeros': return an ? String(an.digitosUnicos || '') : '';
+      default: return g._uid != null ? g._uid : origIdx;
+    }
+  };
+
+  TubularApp.prototype._orderedManual10 = function (list, L, last) {
+    const idxs = list.map((_, i) => i);
+    const key = this.manual10SortKey;
+    if (!key) {
+      return idxs.sort((a, b) => {
+        const ua = list[a]._uid != null ? list[a]._uid : a;
+        const ub = list[b]._uid != null ? list[b]._uid : b;
+        return ua - ub;
+      });
+    }
+    const dir = this.manual10SortDir === 'desc' ? -1 : 1;
+    return idxs.sort((a, b) => {
+      const va = this._manualSortValue(list[a], key, a, L, last);
+      const vb = this._manualSortValue(list[b], key, b, L, last);
+      if (typeof va === 'string' || typeof vb === 'string') {
+        return dir * String(va).localeCompare(String(vb), 'pt-BR', { numeric: true });
+      }
+      return dir * ((+va || 0) - (+vb || 0));
+    });
+  };
+
+  TubularApp.prototype._updateManual10SortHeaders = function () {
+    const key = this.manual10SortKey;
+    const dir = this.manual10SortDir || 'asc';
+    this.root.querySelectorAll('#tbManual10 thead th.tb-sort').forEach(th => {
+      const active = !!key && th.dataset.sort === key;
+      th.classList.toggle('tb-sort-asc', active && dir === 'asc');
+      th.classList.toggle('tb-sort-desc', active && dir === 'desc');
+      const ind = th.querySelector('.tb-sort-ind');
+      if (ind) ind.textContent = active ? (dir === 'asc' ? '↑' : '↓') : '⇅';
+    });
+  };
+
+  TubularApp.prototype._renderManual10DupMsg = function (alerts) {
+    const el = this.root.querySelector('#tbDupMsg10');
+    if (!el) return;
+    const parts = [];
+    if (this.manual10BlockMsg) parts.push(this.manual10BlockMsg);
+    (alerts || []).forEach(a => parts.push(a));
+    if (!parts.length) {
+      el.classList.add('d-none');
+      el.innerHTML = '';
+      return;
+    }
+    el.classList.remove('d-none');
+    el.innerHTML = parts.map(m => `<div>⚠ ${esc(m)}</div>`).join('');
   };
 
   TubularApp.prototype.renderTable = function () {
@@ -852,6 +1007,7 @@
       month: this.extraMes ? 1 : 0,
       monthName: this.extraMes ? 'Janeiro' : '',
       editable: true,
+      _uid: ++this._manualUid,
     };
     if (section === 10) this.manual10.push(row);
     else this.manual11.push(row);
@@ -860,7 +1016,11 @@
 
   TubularApp.prototype.processPaste = function (section) {
     const ta = this.root.querySelector(section === 10 ? '#tbPaste10' : '#tbPaste11');
-    const parsed = parseJogosTexto(ta?.value || '').map(p => ({ ...p, editable: true }));
+    const parsed = parseJogosTexto(ta?.value || '').map(p => ({
+      ...p,
+      editable: true,
+      _uid: ++this._manualUid,
+    }));
     if (section === 10) this.manual10 = this.manual10.concat(parsed);
     else this.manual11 = this.manual11.concat(parsed);
     this.renderManual(section);
@@ -927,7 +1087,10 @@
     const tbody = this.root.querySelector(section === 10 ? '#tbManual10 tbody' : '#tbManual11 tbody');
     const statsEl = this.root.querySelector(section === 10 ? '#tbStats10' : '#tbStats11');
     if (!tbody) return;
-    if (section === 10) this.renderUltimo10();
+    if (section === 10) {
+      this.renderUltimo10();
+      this._updateManual10SortHeaders();
+    }
     const L = limitsFrom(this.root);
     const mode = section === 10 ? 'asc' : 'draw';
     const chrono = this.data.slice().sort((a, b) => (+a.contest || 0) - (+b.contest || 0));
@@ -937,16 +1100,29 @@
         : (chrono[chrono.length - 1].numbersDrawOrder || []))
       : [];
 
-    tbody.innerHTML = list.map((g, i) => {
+    const order = section === 10
+      ? this._orderedManual10(list, L, last)
+      : list.map((_, i) => i);
+
+    const alertMsgs = [];
+    tbody.innerHTML = order.map((origIdx) => {
+      const g = list[origIdx];
+      const i = origIdx;
+      const apostaNum = (g && g._uid != null) ? g._uid : (origIdx + 1);
       const nums = this._manualNumsDisplay(g, mode, L);
+      const dup = section === 10 ? this._manualDupInfo(nums) : { dupCols: new Set(), messages: [], hasDup: false };
+      if (dup.hasDup) {
+        dup.messages.forEach(m => alertMsgs.push(`Aposta ${apostaNum}: ${m}`));
+      }
       const valid = nums.filter(n => n != null && n >= L.dezenaMin && n <= L.dezenaMax);
-      const an = valid.length === L.sorteadas ? calculateCompleteAnalysis(valid, g.monthName) : null;
-      const rept = valid.length === L.sorteadas ? calculateRepetitions(valid, last) : { text: '—', list: [] };
+      const completeOk = valid.length === L.sorteadas && !dup.hasDup;
+      const an = completeOk ? calculateCompleteAnalysis(valid, g.monthName) : null;
+      const rept = completeOk ? calculateRepetitions(valid, last) : { text: '—', list: [] };
       const qCls = an ? this._qtdeClass(an.qtdeDigitos) : '';
       const sequences = an ? an.sequences : [];
       const repsList = rept.list || [];
       const dezenasTd = section === 10
-        ? this._manualPosControlsHtml(section, i, nums, sequences, repsList, L)
+        ? this._manualPosControlsHtml(section, i, nums, sequences, repsList, L, dup.dupCols)
         : nums.map((n, k) =>
           `<input class="tb-manual-input" data-sec="${section}" data-row="${i}" data-col="${k}" value="${n == null || n === '' ? '' : fmt2(n)}" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}">`
         ).join(' ');
@@ -955,9 +1131,10 @@
           ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc((g.monthName || '').slice(0, 3).toUpperCase())}</span>`
           : '—'}</td>`
         : '';
+      const rowCls = dup.hasDup ? ' class="tb-row-dup"' : '';
       if (section === 10) {
-        return `<tr>
-          <td>${i + 1}</td>
+        return `<tr${rowCls}>
+          <td>${apostaNum}</td>
           <td class="text-nowrap">${dezenasTd}</td>
           ${mesTd}
           <td>${an ? getEmojiByCount(an.sequencesInfo.qtde).text : '—'}</td>
@@ -988,15 +1165,19 @@
       </tr>`;
     }).join('') || `<tr><td colspan="${section === 10 ? (12 + (this.extraMes ? 1 : 0)) : 11}" class="text-muted">Clique em "+ Adicionar Linha" ou cole jogos acima</td></tr>`;
 
+    if (section === 10) this._renderManual10DupMsg(alertMsgs);
+
     tbody.querySelectorAll('.tb-manual-input').forEach(inp => {
       inp.addEventListener('change', () => {
         const sec = +inp.dataset.sec;
         const row = +inp.dataset.row;
         const col = +inp.dataset.col;
         const raw = String(inp.value || '').trim();
-        if (raw === '') this._setManualPos(sec, row, col, null, L);
-        else this._setManualPos(sec, row, col, raw, L);
+        const ok = raw === ''
+          ? this._setManualPos(sec, row, col, null, L)
+          : this._setManualPos(sec, row, col, raw, L);
         this.renderManual(sec);
+        if (!ok) return;
       });
       if (+inp.dataset.sec === 10) {
         inp.addEventListener('keydown', (ev) => {
@@ -1044,7 +1225,7 @@
       });
     });
 
-    // Stats tempo real
+    // Stats tempo real — só apostas completas e sem duplicidade
     if (statsEl) {
       const validGames = list.map(g => {
         let n = (g.numbers || [])
@@ -1052,7 +1233,9 @@
           .map(Number)
           .filter(x => Number.isFinite(x) && x >= L.dezenaMin && x <= L.dezenaMax);
         if (mode === 'asc') n = [...n].sort((a, b) => a - b);
-        return n.length === L.sorteadas ? { nums: n, month: g.monthName } : null;
+        if (n.length !== L.sorteadas) return null;
+        if (this._manualDupInfo(n).hasDup) return null;
+        return { nums: n, month: g.monthName };
       }).filter(Boolean);
       let sumSoma = 0, sumP = 0, sumI = 0, sumSeq = 0;
       const freq = {};
