@@ -33,6 +33,41 @@
     if (!Number.isFinite(v)) return '';
     return String(Math.trunc(v)).padStart(2, '0');
   }
+
+  /** Combinação C(n,k) — inteiro seguro para n típico de loteria. */
+  function binom(n, k) {
+    n = Number(n); k = Number(k);
+    if (!Number.isFinite(n) || !Number.isFinite(k) || k < 0 || n < k) return 0;
+    if (k === 0 || k === n) return 1;
+    k = Math.min(k, n - k);
+    let r = 1;
+    for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i;
+    return Math.round(r);
+  }
+
+  function fmtIntBR(n) {
+    return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  function parityPool(L) {
+    let even = 0;
+    let odd = 0;
+    for (let n = L.dezenaMin; n <= L.dezenaMax; n++) {
+      if (n % 2 === 0) even++;
+      else odd++;
+    }
+    return { even, odd };
+  }
+
+  /** Combinações com exatamente `pares` pares e (sorteadas − pares) ímpares. */
+  function paresImparesCombos(pares, L) {
+    const nSort = L.sorteadas;
+    const p = Math.max(0, Math.min(nSort, Number(pares) || 0));
+    const imp = nSort - p;
+    const { even, odd } = parityPool(L);
+    return binom(even, p) * binom(odd, imp);
+  }
+
   function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -241,7 +276,13 @@
     this._manualUid = 0;
     this.manual10SortKey = null;
     this.manual10SortDir = 'asc';
+    this.manual11SortKey = null;
+    this.manual11SortDir = 'asc';
+    this.stats11Open = false;
     this.manual10BlockMsg = '';
+    this.auto11Janela = 10;
+    this.auto11SomaModo = 'padrao';
+    this.auto11ParesModo = 'fix_4';
     this._bind();
   }
 
@@ -401,9 +442,11 @@
       r.querySelector(`#tbExport${fmt.toUpperCase()}`)?.addEventListener('click', () => this.exportMain(fmt));
     });
     r.querySelector('#tbAdd10')?.addEventListener('click', () => this.addManualRow(10));
-    r.querySelector('#tbAdd11')?.addEventListener('click', () => this.addManualRow(11));
     r.querySelector('#tbProcess10')?.addEventListener('click', () => this.processPaste(10));
-    r.querySelector('#tbProcess11')?.addEventListener('click', () => this.processPaste(11));
+    r.querySelector('#tbExport10')?.addEventListener('click', () => this.exportManualApostas(10));
+    r.querySelector('#tbExport11')?.addEventListener('click', () => this.exportManualApostas(11));
+    r.querySelector('#tbGerar11')?.addEventListener('click', () => this.gerarAutomatico11(10));
+    r.querySelector('#tbGerarMais11')?.addEventListener('click', () => this.gerarMaisAutomatico11());
     r.querySelector('#tbClear10')?.addEventListener('click', () => {
       this.manual10 = [];
       this.manual10BlockMsg = '';
@@ -412,7 +455,40 @@
       this._manualUid = 0;
       this.renderManual(10);
     });
-    r.querySelector('#tbClear11')?.addEventListener('click', () => { this.manual11 = []; this.renderManual(11); });
+    r.querySelector('#tbAuto11Janela')?.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('[data-janela]');
+      if (!btn) return;
+      this.auto11Janela = parseInt(btn.dataset.janela, 10);
+      if (!Number.isFinite(this.auto11Janela)) this.auto11Janela = 10;
+      r.querySelectorAll('#tbAuto11Janela [data-janela]').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.janela, 10) === this.auto11Janela);
+      });
+      this._updateAuto11Hints();
+    });
+    r.querySelector('#tbAuto11SomaModo')?.addEventListener('change', (ev) => {
+      const inp = ev.target.closest('input[name="tbAuto11Soma"]');
+      if (!inp) return;
+      this.auto11SomaModo = inp.value || 'padrao';
+      this._updateAuto11Hints();
+    });
+    r.querySelector('#tbAuto11ParesModo')?.addEventListener('change', (ev) => {
+      const inp = ev.target.closest('input[name="tbAuto11Pares"]');
+      if (!inp) return;
+      this.auto11ParesModo = inp.value || 'fix_4';
+      this._updateAuto11Hints();
+    });
+    r.querySelector('#tbClear11')?.addEventListener('click', () => {
+      this.manual11 = [];
+      this.manual11SortKey = null;
+      this.manual11SortDir = 'asc';
+      this.renderManual(11);
+      const info = this.root.querySelector('#tbGerar11Info');
+      if (info) info.textContent = '—';
+    });
+    r.querySelector('#tbStats11Toggle')?.addEventListener('click', () => {
+      this.stats11Open = !this.stats11Open;
+      this._syncStats11Collapse();
+    });
     r.querySelector('#tbManual10 thead')?.addEventListener('click', (ev) => {
       const th = ev.target.closest('th.tb-sort');
       if (!th || !th.dataset.sort) return;
@@ -430,8 +506,23 @@
       }
       this.renderManual(10);
     });
+    r.querySelector('#tbManual11 thead')?.addEventListener('click', (ev) => {
+      const th = ev.target.closest('th.tb-sort');
+      if (!th || !th.dataset.sort) return;
+      const key = th.dataset.sort;
+      if (this.manual11SortKey === key) {
+        if (this.manual11SortDir === 'asc') this.manual11SortDir = 'desc';
+        else {
+          this.manual11SortKey = null;
+          this.manual11SortDir = 'asc';
+        }
+      } else {
+        this.manual11SortKey = key;
+        this.manual11SortDir = 'asc';
+      }
+      this.renderManual(11);
+    });
     this._setupDrop(r.querySelector('#tbDrop10'), 10);
-    this._setupDrop(r.querySelector('#tbDrop11'), 11);
     // Futuro: apostas do Elite
     r.addEventListener('ai-elite-compare', (ev) => {
       const jogos = (ev.detail && ev.detail.jogos) || [];
@@ -452,6 +543,8 @@
       else this.manual11 = this.manual11.concat(parsed);
       this.renderManual(section);
     });
+    this._syncStats11Collapse();
+    this._updateAuto11Hints();
   };
 
   TubularApp.prototype._setupDrop = function (el, section) {
@@ -487,7 +580,12 @@
       p.classList.toggle('d-none', p.dataset.tbPanel !== key);
     });
     if ((key === 's10' || key === 's11') && !this.data.length) this.load();
-    else if (key === 's10') this.renderUltimo10();
+    else if (key === 's10' || key === 's11') this.renderUltimo10();
+    if (key === 's10') this.renderManual(10);
+    if (key === 's11') {
+      this._updateAuto11Hints();
+      this.renderManual(11);
+    }
   };
 
   TubularApp.prototype.setView = function (view) {
@@ -791,7 +889,13 @@
     switch (key) {
       case 'idx': return g._uid != null ? g._uid : origIdx;
       case 'dezenas': return valid.map(fmt2).join(' ') || '';
-      case 'mes': return String(g.monthName || '');
+      case 'mes': {
+        const nome = String(g.monthName || '');
+        const idx = MESES.indexOf(nome);
+        if (idx >= 0) return idx;
+        if (g.month != null && g.month >= 1 && g.month <= 12) return g.month - 1;
+        return 99;
+      }
       case 'seq': return an ? (an.sequencesInfo.qtde || 0) : -1;
       case 'finais': return an ? (an.finaisIguais.qtde || 0) : -1;
       case 'rept': return (rept.list || []).length;
@@ -807,8 +911,16 @@
   };
 
   TubularApp.prototype._orderedManual10 = function (list, L, last) {
+    return this._orderedManualList(list, L, last, this.manual10SortKey, this.manual10SortDir);
+  };
+
+  TubularApp.prototype._orderedManual11 = function (list, L, last) {
+    return this._orderedManualList(list, L, last, this.manual11SortKey, this.manual11SortDir);
+  };
+
+  TubularApp.prototype._orderedManualList = function (list, L, last, sortKey, sortDir) {
     const idxs = list.map((_, i) => i);
-    const key = this.manual10SortKey;
+    const key = sortKey;
     if (!key) {
       return idxs.sort((a, b) => {
         const ua = list[a]._uid != null ? list[a]._uid : a;
@@ -816,7 +928,7 @@
         return ua - ub;
       });
     }
-    const dir = this.manual10SortDir === 'desc' ? -1 : 1;
+    const dir = sortDir === 'desc' ? -1 : 1;
     return idxs.sort((a, b) => {
       const va = this._manualSortValue(list[a], key, a, L, last);
       const vb = this._manualSortValue(list[b], key, b, L, last);
@@ -828,15 +940,32 @@
   };
 
   TubularApp.prototype._updateManual10SortHeaders = function () {
-    const key = this.manual10SortKey;
-    const dir = this.manual10SortDir || 'asc';
-    this.root.querySelectorAll('#tbManual10 thead th.tb-sort').forEach(th => {
+    this._updateManualSortHeaders('#tbManual10', this.manual10SortKey, this.manual10SortDir);
+  };
+
+  TubularApp.prototype._updateManual11SortHeaders = function () {
+    this._updateManualSortHeaders('#tbManual11', this.manual11SortKey, this.manual11SortDir);
+  };
+
+  TubularApp.prototype._updateManualSortHeaders = function (tableSel, sortKey, sortDir) {
+    const key = sortKey;
+    const dir = sortDir || 'asc';
+    this.root.querySelectorAll(`${tableSel} thead th.tb-sort`).forEach(th => {
       const active = !!key && th.dataset.sort === key;
       th.classList.toggle('tb-sort-asc', active && dir === 'asc');
       th.classList.toggle('tb-sort-desc', active && dir === 'desc');
       const ind = th.querySelector('.tb-sort-ind');
       if (ind) ind.textContent = active ? (dir === 'asc' ? '↑' : '↓') : '⇅';
     });
+  };
+
+  TubularApp.prototype._syncStats11Collapse = function () {
+    const btn = this.root.querySelector('#tbStats11Toggle');
+    const body = this.root.querySelector('#tbStats11Body');
+    if (!btn || !body) return;
+    const open = !!this.stats11Open;
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    body.classList.toggle('d-none', !open);
   };
 
   TubularApp.prototype._renderManual10DupMsg = function (alerts) {
@@ -1027,8 +1156,14 @@
   };
 
   TubularApp.prototype.renderUltimo10 = function () {
-    const tbody = this.root.querySelector('#tbUltimo10 tbody');
-    const lbl = this.root.querySelector('#tbUltimo10Lbl');
+    // Mesma prévia reutilizada na Seção 10 e Seção 11
+    this._fillUltimoPreview('#tbUltimo10', '#tbUltimo10Lbl');
+    this._fillUltimoPreview('#tbUltimo11', '#tbUltimo11Lbl');
+  };
+
+  TubularApp.prototype._fillUltimoPreview = function (tbodySel, lblSel) {
+    const tbody = this.root.querySelector(`${tbodySel} tbody`);
+    const lbl = this.root.querySelector(lblSel);
     if (!tbody) return;
     const L = limitsFrom(this.root);
     const nCols = 2 + L.sorteadas + (this.extraMes ? 1 : 0) + 10;
@@ -1037,7 +1172,6 @@
       if (lbl) lbl.textContent = 'Último resultado (referência)';
       return;
     }
-    // Ordem cronológica → último sorteio
     const chrono = this.data.slice().sort((a, b) => (+a.contest || 0) - (+b.contest || 0));
     const c = chrono[chrono.length - 1];
     const prev = chrono.length > 1 ? chrono[chrono.length - 2] : null;
@@ -1091,18 +1225,21 @@
       this.renderUltimo10();
       this._updateManual10SortHeaders();
     }
+    if (section === 11) {
+      this.renderUltimo10();
+      this._updateManual11SortHeaders();
+      this._syncStats11Collapse();
+    }
     const L = limitsFrom(this.root);
-    const mode = section === 10 ? 'asc' : 'draw';
+    const mode = 'asc';
     const chrono = this.data.slice().sort((a, b) => (+a.contest || 0) - (+b.contest || 0));
     const last = chrono.length
-      ? (mode === 'asc'
-        ? (chrono[chrono.length - 1].numbersAscending || [])
-        : (chrono[chrono.length - 1].numbersDrawOrder || []))
+      ? (chrono[chrono.length - 1].numbersAscending || [])
       : [];
 
     const order = section === 10
       ? this._orderedManual10(list, L, last)
-      : list.map((_, i) => i);
+      : this._orderedManual11(list, L, last);
 
     const alertMsgs = [];
     tbody.innerHTML = order.map((origIdx) => {
@@ -1110,8 +1247,8 @@
       const i = origIdx;
       const apostaNum = (g && g._uid != null) ? g._uid : (origIdx + 1);
       const nums = this._manualNumsDisplay(g, mode, L);
-      const dup = section === 10 ? this._manualDupInfo(nums) : { dupCols: new Set(), messages: [], hasDup: false };
-      if (dup.hasDup) {
+      const dup = this._manualDupInfo(nums);
+      if (section === 10 && dup.hasDup) {
         dup.messages.forEach(m => alertMsgs.push(`Aposta ${apostaNum}: ${m}`));
       }
       const valid = nums.filter(n => n != null && n >= L.dezenaMin && n <= L.dezenaMax);
@@ -1123,9 +1260,7 @@
       const repsList = rept.list || [];
       const dezenasTd = section === 10
         ? this._manualPosControlsHtml(section, i, nums, sequences, repsList, L, dup.dupCols)
-        : nums.map((n, k) =>
-          `<input class="tb-manual-input" data-sec="${section}" data-row="${i}" data-col="${k}" value="${n == null || n === '' ? '' : fmt2(n)}" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}">`
-        ).join(' ');
+        : nums.map((n) => (n == null ? '—' : this._cellNum(n, sequences, repsList))).join(' ');
       const mesTd = (section === 10 && this.extraMes)
         ? `<td>${g.monthName
           ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc((g.monthName || '').slice(0, 3).toUpperCase())}</span>`
@@ -1150,20 +1285,27 @@
           <td><button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}">×</button></td>
         </tr>`;
       }
-      return `<tr>
-        <td>${i + 1}</td>
+      const mesTd11 = this.extraMes
+        ? `<td>${g.monthName
+          ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc((g.monthName || '').slice(0, 3).toUpperCase())}</span>`
+          : '—'}</td>`
+        : '';
+      return `<tr${rowCls}>
+        <td>${apostaNum}</td>
         <td class="text-nowrap">${dezenasTd}</td>
+        ${mesTd11}
         <td>${an ? getEmojiByCount(an.sequencesInfo.qtde).text : '—'}</td>
         <td>${an ? getEmojiByCount(an.finaisIguais.qtde).text : '—'}</td>
         <td>${rept.text}</td>
         <td>${an ? an.soma : '—'}</td>
-        <td>${an ? `${an.pares}/${an.impares}` : '—'}</td>
+        <td>${an ? an.pares : '—'}</td>
+        <td>${an ? an.impares : '—'}</td>
         <td>${an ? esc(an.padroes.inicial) : '—'}</td>
         <td>${an ? esc(an.padroes.final) : '—'}</td>
-        <td>${an ? an.qtdeDigitos : '—'}</td>
+        <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
         <td><button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}">×</button></td>
       </tr>`;
-    }).join('') || `<tr><td colspan="${section === 10 ? (12 + (this.extraMes ? 1 : 0)) : 11}" class="text-muted">Clique em "+ Adicionar Linha" ou cole jogos acima</td></tr>`;
+    }).join('') || `<tr><td colspan="${section === 10 ? (12 + (this.extraMes ? 1 : 0)) : (11 + (this.extraMes ? 1 : 0))}" class="text-muted">${section === 11 ? 'Clique em «GERAR 10 APOSTAS»' : 'Clique em "+ Adicionar Linha" ou cole jogos acima'}</td></tr>`;
 
     if (section === 10) this._renderManual10DupMsg(alertMsgs);
 
@@ -1253,6 +1395,726 @@
         <div class="tb-stats-item"><strong>Pares / Ímpares méd.</strong>${validGames.length ? (sumP / n).toFixed(1) : 0} / ${validGames.length ? (sumI / n).toFixed(1) : 0}</div>
         <div class="tb-stats-item"><strong>Média SEQ</strong>${validGames.length ? (sumSeq / n).toFixed(1) : 0}</div>
         <div class="tb-stats-item"><strong>Top dezenas</strong>${top}</div>`;
+    }
+  };
+
+  TubularApp.prototype._mesAbrevExport = function (g) {
+    if (!this.extraMes) return '';
+    let idx = -1;
+    if (g.month != null && g.month >= 1 && g.month <= 12) idx = g.month - 1;
+    else if (g.monthName) {
+      const nome = String(g.monthName).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+      idx = MESES.findIndex(m => m.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase() === nome);
+    }
+    if (idx < 0) return '';
+    const a = MESES_ABREV[idx];
+    return a.charAt(0) + a.slice(1).toLowerCase();
+  };
+
+  /** Exporta somente dezenas + mês abreviado (reutiliza downloadBlob). */
+  TubularApp.prototype.exportManualApostas = function (section) {
+    const list = section === 10 ? this.manual10 : this.manual11;
+    const L = limitsFrom(this.root);
+    const lines = [];
+    list.forEach((g) => {
+      let nums = (g.numbers || [])
+        .filter(n => n !== '' && n != null)
+        .map(Number)
+        .filter(n => Number.isFinite(n) && n >= L.dezenaMin && n <= L.dezenaMax);
+      nums = [...new Set(nums)].sort((a, b) => a - b);
+      if (nums.length !== L.sorteadas) return;
+      if (this._manualDupInfo(nums).hasDup) return;
+      let line = nums.map(fmt2).join(' ');
+      if (this.extraMes) {
+        const ab = this._mesAbrevExport(g);
+        if (ab) line += ` ${ab}`;
+      }
+      lines.push(line);
+    });
+    if (!lines.length) {
+      alert('Nenhuma aposta válida para exportar.');
+      return;
+    }
+    downloadBlob(lines.join('\n') + '\n', `secao${section}_apostas.txt`, 'text/plain');
+  };
+
+  TubularApp.prototype._fpAposta = function (nums, monthName, prevNums) {
+    const sorted = [...nums].map(Number).sort((a, b) => a - b);
+    const an = calculateCompleteAnalysis(sorted, monthName || '');
+    const rept = calculateRepetitions(sorted, prevNums || []);
+    return {
+      key: sorted.map(fmt2).join('-'),
+      soma: an.soma,
+      pares: an.pares,
+      seq: an.sequencesInfo.qtde,
+      seqQuais: an.sequencesInfo.quais || '-',
+      finais: an.finaisIguais.qtde,
+      finaisQuais: an.finaisIguais.quais || '-',
+      reptKey: (rept.list || []).map(fmt2).sort().join(',') || '∅',
+      reptCount: rept.count || 0,
+      inicial: an.padroes.inicial,
+      final: an.padroes.final,
+      qtde: an.qtdeDigitos,
+      monthName: monthName || '',
+    };
+  };
+
+  TubularApp.prototype._fpTooSimilar = function (a, b) {
+    if (!a || !b) return false;
+    if (a.key === b.key) return true;
+    let hits = 0;
+    if (a.soma === b.soma) hits++;
+    if (a.pares === b.pares) hits++;
+    if (a.seq === b.seq) hits++;
+    if (a.finais === b.finais) hits++;
+    if (a.inicial === b.inicial) hits++;
+    if (a.final === b.final) hits++;
+    if (this.extraMes && a.monthName && b.monthName && a.monthName === b.monthName) hits++;
+    return hits >= 4;
+  };
+
+  /** Registro extensível de critérios de Soma (priorização na geração). */
+  TubularApp.prototype._somaCriterios = {
+    padrao: {
+      label: 'Padrão',
+      hint: 'Modo padrão — coerente com o histórico, sem forçar soma específica.',
+      resolve() {
+        return { target: null, tol: 35, mode: 'soft', label: 'padrão' };
+      },
+    },
+    frequente: {
+      label: 'Mais frequente',
+      hint: (ctx) => `Soma mais frequente na janela: ${ctx.target} (${ctx.freq}x).`,
+      resolve(somas) {
+        const f = {};
+        somas.forEach(s => { f[s] = (f[s] || 0) + 1; });
+        const best = Object.entries(f).sort((a, b) => b[1] - a[1] || Number(b[0]) - Number(a[0]))[0];
+        return { target: Number(best[0]), tol: 0, mode: 'exact', freq: best[1], label: 'mais frequente' };
+      },
+    },
+    alta: {
+      label: 'Mais alta',
+      hint: (ctx) => `Soma mais alta na janela: ${ctx.target} (±${ctx.tol}).`,
+      resolve(somas) {
+        const mx = Math.max(...somas);
+        const mn = Math.min(...somas);
+        const tol = Math.max(3, Math.floor((mx - mn) / 5) || 3);
+        return { target: mx, tol, mode: 'min', label: 'mais alta' };
+      },
+    },
+    baixa: {
+      label: 'Mais baixa',
+      hint: (ctx) => `Soma mais baixa na janela: ${ctx.target} (±${ctx.tol}).`,
+      resolve(somas) {
+        const mx = Math.max(...somas);
+        const mn = Math.min(...somas);
+        const tol = Math.max(3, Math.floor((mx - mn) / 5) || 3);
+        return { target: mn, tol, mode: 'max', label: 'mais baixa' };
+      },
+    },
+    media: {
+      label: 'Média',
+      hint: (ctx) => `Soma média na janela: ${ctx.target} (±${ctx.tol}).`,
+      resolve(somas) {
+        const avg = somas.reduce((a, b) => a + b, 0) / somas.length;
+        const mean = Math.round(avg);
+        const variance = somas.reduce((s, v) => s + (v - avg) ** 2, 0) / somas.length;
+        const std = Math.sqrt(variance);
+        const span = Math.max(...somas) - Math.min(...somas);
+        const tol = Math.max(2, Math.round(std || span / 4 || 4));
+        return { target: mean, tol, mode: 'near', label: 'média' };
+      },
+    },
+  };
+
+  TubularApp.prototype._somaAceita = function (soma, crit) {
+    if (!crit || crit.target == null || crit.mode === 'soft') return true;
+    if (crit.mode === 'exact') return soma === crit.target;
+    if (crit.mode === 'min') return soma >= crit.target - (crit.tol || 0);
+    if (crit.mode === 'max') return soma <= crit.target + (crit.tol || 0);
+    if (crit.mode === 'near') return Math.abs(soma - crit.target) <= (crit.tol || 0);
+    return true;
+  };
+
+  TubularApp.prototype._updateAuto11Hints = function () {
+    const janela = this.auto11Janela;
+    const badge = this.root.querySelector('#tbAuto11Badge');
+    if (badge) badge.textContent = janela === 0 ? 'janela: todos' : `janela ${janela}`;
+
+    const modo = this.auto11SomaModo || 'padrao';
+    const def = this._somaCriterios[modo] || this._somaCriterios.padrao;
+    const hint = this.root.querySelector('#tbAuto11SomaHint');
+    const paresHint = this.root.querySelector('#tbAuto11ParesHint');
+    const modoPares = this.auto11ParesModo || 'fix_4';
+    const L = limitsFrom(this.root);
+
+    if (!this.data.length) {
+      if (hint) hint.textContent = def.hint && typeof def.hint === 'string' ? def.hint : def.label;
+      if (paresHint) {
+        const crit0 = this._resolveParesCrit(modoPares, [], {}, L);
+        paresHint.textContent = crit0.hint || crit0.label;
+      }
+      this._decorateParesComboTitles(L);
+      return;
+    }
+    const chrono = this.data.slice().sort((a, b) => (+a.contest || 0) - (+b.contest || 0));
+    const recent = janela > 0 ? chrono.slice(-janela) : chrono.slice();
+    const somas = [];
+    const paresHist = [];
+    const freq = {};
+    recent.forEach((c) => {
+      const nums = (c.numbersAscending || c.numbersDrawOrder || []).map(Number);
+      const an = calculateCompleteAnalysis(nums, c.monthName);
+      somas.push(an.soma);
+      paresHist.push(an.pares);
+      nums.forEach((n) => { freq[n] = (freq[n] || 0) + 1; });
+    });
+
+    if (hint) {
+      if (!somas.length) {
+        hint.textContent = typeof def.hint === 'string' ? def.hint : def.label;
+      } else {
+        const crit = def.resolve(somas);
+        if (typeof def.hint === 'function') hint.textContent = def.hint(crit);
+        else if (crit.target != null) hint.textContent = `${def.label}: alvo ${crit.target}${crit.tol ? ` (±${crit.tol})` : ''}.`;
+        else hint.textContent = typeof def.hint === 'string' ? def.hint : def.label;
+      }
+    }
+
+    if (paresHint) {
+      const crit = this._resolveParesCrit(modoPares, paresHist, freq, L);
+      paresHint.textContent = crit.hint || crit.label;
+    }
+    this._decorateParesComboTitles(L);
+  };
+
+  TubularApp.prototype._decorateParesComboTitles = function (L) {
+    const totalUniv = binom(L.dezenaMax - L.dezenaMin + 1, L.sorteadas);
+    this.root.querySelectorAll('#tbAuto11ParesModo input[name="tbAuto11Pares"]').forEach((inp) => {
+      const lab = inp.closest('label');
+      if (!lab) return;
+      const nEl = lab.querySelector('[data-pares-n]');
+      const m = /^fix_(\d+)$/.exec(inp.value || '');
+      let n = 0;
+      let title = '';
+      if (m) {
+        n = paresImparesCombos(Number(m[1]), L);
+        title = `${m[1]}P / ${L.sorteadas - Number(m[1])}I → ${fmtIntBR(n)} combinações possíveis`;
+      } else if (inp.value === 'aleatorio') {
+        n = totalUniv;
+        title = `Universo total → ${fmtIntBR(n)} combinações possíveis`;
+      }
+      lab.title = title;
+      if (nEl) nEl.textContent = n ? fmtIntBR(n) : '—';
+    });
+  };
+
+  /**
+   * Resolve o critério de Pares/Ímpares escolhido pelo usuário.
+   * fix_N = distribuição fixa; aleatorio = uniforme; historico = pesos da janela.
+   */
+  TubularApp.prototype._resolveParesCrit = function (modo, paresHist, _freq, L) {
+    const nSort = (L && L.sorteadas) || 7;
+    const modoKey = modo || 'fix_4';
+    const totalUniverso = binom(
+      (L.dezenaMax - L.dezenaMin + 1),
+      nSort
+    );
+
+    if (modoKey === 'historico' || modoKey === 'padrao' || modoKey === 'frequente') {
+      const weights = this._paresWeightMap(paresHist);
+      const top = this._paresTopFromWeights(weights);
+      const weightTotal = Object.values(weights).reduce((s, w) => s + w, 0);
+      const parts = Object.entries(weights)
+        .sort((a, b) => b[1] - a[1] || Number(b[0]) - Number(a[0]))
+        .slice(0, 4)
+        .map(([p, w]) => {
+          const pp = Number(p);
+          const pct = weightTotal ? Math.round((100 * w) / weightTotal) : 0;
+          return `${pp}P/${nSort - pp}I ${pct}%`;
+        });
+      const topCombos = top != null ? paresImparesCombos(top, L) : 0;
+      return {
+        targetPares: top != null ? top : Math.floor(nSort / 2),
+        weights,
+        weightTotal,
+        mode: 'weighted',
+        label: 'histórico',
+        sorteadas: nSort,
+        combos: topCombos,
+        hint: parts.length
+          ? `Histórico ponderado: ${parts.join(' · ')} · universo ${fmtIntBR(totalUniverso)} combinações`
+          : `Histórico ponderado · universo ${fmtIntBR(totalUniverso)} combinações`,
+      };
+    }
+
+    if (modoKey === 'aleatorio') {
+      // Aleatório com viés dos resultados reais da janela (não uniforme extremo 0P/7P)
+      const hist = this._paresWeightMap(paresHist);
+      const weights = {};
+      for (let p = 0; p <= nSort; p++) {
+        weights[p] = Math.max(0.35, Number(hist[p]) || 0);
+      }
+      const top = this._paresTopFromWeights(weights);
+      return {
+        targetPares: top != null ? top : Math.floor(nSort / 2),
+        weights,
+        mode: 'weighted',
+        label: 'aleatório',
+        sorteadas: nSort,
+        combos: totalUniverso,
+        hint: `Aleatório com viés dos resultados reais · universo ${fmtIntBR(totalUniverso)}`,
+      };
+    }
+
+    if (modoKey === 'mais_sai') {
+      return this._resolveParesCrit('historico', paresHist, _freq, L);
+    }
+
+    const m = /^fix_(\d+)$/.exec(modoKey);
+    let tp = 4;
+    if (m) tp = Number(m[1]);
+    tp = Math.max(0, Math.min(nSort, Number.isFinite(tp) ? tp : 4));
+    const imp = nSort - tp;
+    const combos = paresImparesCombos(tp, L);
+    return {
+      targetPares: tp,
+      weights: { [tp]: 1 },
+      mode: 'exact',
+      label: `${tp}P / ${imp}I`,
+      sorteadas: nSort,
+      combos,
+      hint: `Fixo: ${tp} pares / ${imp} ímpares · ${fmtIntBR(combos)} combinações possíveis`,
+    };
+  };
+
+  /** Alias legado (evita quebras em referências antigas). */
+  TubularApp.prototype._paresCriterios = {};
+
+  /** Mapa frequência → peso a partir do histórico de contagens de pares. */
+  TubularApp.prototype._paresWeightMap = function (paresHist) {
+    const weights = {};
+    (paresHist || []).forEach((p) => {
+      const n = Number(p);
+      if (!Number.isFinite(n)) return;
+      weights[n] = (weights[n] || 0) + 1;
+    });
+    return weights;
+  };
+
+  TubularApp.prototype._paresTopFromWeights = function (weights) {
+    const entries = Object.entries(weights || {});
+    if (!entries.length) return null;
+    return Number(entries.sort((a, b) => b[1] - a[1] || Number(b[0]) - Number(a[0]))[0][0]);
+  };
+
+  /**
+   * Cota ponderada (método do maior resto) + embaralhamento.
+   * Garante variedade em lotes grandes alinhada aos pesos históricos.
+   */
+  TubularApp.prototype._paresQuotaBag = function (alvo, weights, opts) {
+    opts = opts || {};
+    const entries = Object.entries(weights || {})
+      .map(([p, w]) => ({ pares: Number(p), w: Number(w) }))
+      .filter(e => Number.isFinite(e.pares) && e.w > 0);
+    if (!entries.length || alvo < 1) {
+      const fallback = opts.fallback != null ? opts.fallback : 4;
+      return Array.from({ length: Math.max(0, alvo) }, () => fallback);
+    }
+    // Suavização só no modo histórico (evita monopólio da moda)
+    const damp = entries.map(e => ({
+      ...e,
+      w: opts.smooth ? e.w + 0.35 : e.w,
+    }));
+    if (opts.avoidPares != null) {
+      damp.forEach((e) => {
+        if (e.pares === opts.avoidPares) e.w *= 0.55;
+      });
+    }
+    const totalW = damp.reduce((s, e) => s + e.w, 0);
+    const exacts = damp.map(e => ({ pares: e.pares, exact: (alvo * e.w) / totalW }));
+    const quotas = exacts.map(e => ({
+      pares: e.pares,
+      n: Math.floor(e.exact),
+      frac: e.exact - Math.floor(e.exact),
+    }));
+    let assigned = quotas.reduce((s, q) => s + q.n, 0);
+    quotas.sort((a, b) => b.frac - a.frac || a.pares - b.pares);
+    let i = 0;
+    while (assigned < alvo && quotas.length) {
+      quotas[i % quotas.length].n += 1;
+      assigned += 1;
+      i += 1;
+    }
+    const bag = [];
+    quotas.forEach((q) => {
+      for (let k = 0; k < q.n; k++) bag.push(q.pares);
+    });
+    for (let a = bag.length - 1; a > 0; a--) {
+      const b = Math.floor(Math.random() * (a + 1));
+      const tmp = bag[a];
+      bag[a] = bag[b];
+      bag[b] = tmp;
+    }
+    return bag;
+  };
+
+  TubularApp.prototype._paresAceita = function (pares, crit, currentTarget) {
+    if (!crit || crit.mode === 'soft') return true;
+    if (crit.mode === 'weighted') {
+      if (currentTarget != null) return pares === currentTarget;
+      const w = crit.weights || {};
+      return w[pares] != null && w[pares] > 0;
+    }
+    if (crit.mode === 'exact') return pares === crit.targetPares;
+    if (crit.mode === 'near') return Math.abs(pares - crit.targetPares) <= (crit.tol || 1);
+    return true;
+  };
+
+  TubularApp.prototype._pickWeighted = function (items, weights) {
+    const total = weights.reduce((s, w) => s + w, 0);
+    if (total <= 0) return items[Math.floor(Math.random() * items.length)];
+    let r = Math.random() * total;
+    for (let i = 0; i < items.length; i++) {
+      r -= weights[i];
+      if (r <= 0) return items[i];
+    }
+    return items[items.length - 1];
+  };
+
+  TubularApp.prototype._modeNum = function (arr) {
+    if (!arr.length) return null;
+    const f = {};
+    arr.forEach(v => { f[v] = (f[v] || 0) + 1; });
+    return Number(Object.entries(f).sort((a, b) => b[1] - a[1] || a[0] - b[0])[0][0]);
+  };
+
+  /** Entrada separada: quantidade personalizada, mesma lógica de geração. */
+  TubularApp.prototype.gerarMaisAutomatico11 = async function () {
+    const inp = this.root.querySelector('#tbGerarMais11Qtd');
+    let qtd = parseInt(inp && inp.value, 10);
+    if (!Number.isFinite(qtd) || qtd < 1) qtd = 50;
+    // Limite técnico de segurança (UI/memória); geração continua acumulativa
+    const maxCap = 5000;
+    if (qtd > maxCap) {
+      alert(`Quantidade máxima por lote: ${maxCap}. Ajuste e tente novamente.`);
+      if (inp) inp.value = String(maxCap);
+      qtd = maxCap;
+    }
+    if (inp) inp.value = String(qtd);
+    await this.gerarAutomatico11(qtd, { maxCap, bulkBtn: '#tbGerarMais11' });
+  };
+
+  /**
+   * Gera +N apostas com janela configurável e critério de Soma.
+   * Obrigatório: SEQ, FINAIS e REPT ≠ padrões da janela.
+   * Chamada padrão (botão verde): gerarAutomatico11(10) — comportamento preservado.
+   */
+  TubularApp.prototype.gerarAutomatico11 = async function (qtd, opts) {
+    opts = opts || {};
+    const info = this.root.querySelector('#tbGerar11Info');
+    const btn = this.root.querySelector('#tbGerar11');
+    const bulkBtn = opts.bulkBtn ? this.root.querySelector(opts.bulkBtn) : null;
+    const L = limitsFrom(this.root);
+    // Botão verde: teto histórico 50; GERAR MAIS usa maxCap próprio
+    const maxCap = opts.maxCap != null ? opts.maxCap : 50;
+    const alvo = Math.max(1, Math.min(maxCap, Number(qtd) || 10));
+    const janela = this.auto11Janela;
+    const modoSoma = this.auto11SomaModo || 'padrao';
+    const modoPares = this.auto11ParesModo || 'fix_4';
+
+    if (!this.data.length) {
+      if (info) info.textContent = 'Carregando histórico…';
+      try { await this.load(); } catch (_) { /* ignore */ }
+    }
+    if (!this.data.length) {
+      alert('Carregue os dados (aba Sequências) antes de gerar.');
+      if (info) info.textContent = 'Sem dados históricos.';
+      return;
+    }
+
+    const chrono = this.data.slice().sort((a, b) => (+a.contest || 0) - (+b.contest || 0));
+    const recent = janela > 0 ? chrono.slice(-janela) : chrono.slice();
+    if (!recent.length) {
+      alert('Janela sem sorteios.');
+      return;
+    }
+    const lastC = chrono[chrono.length - 1];
+    const lastNums = (lastC.numbersAscending || lastC.numbersDrawOrder || []).map(Number).sort((a, b) => a - b);
+    const prevLast = chrono.length > 1
+      ? (chrono[chrono.length - 2].numbersAscending || []).map(Number)
+      : [];
+    const lastFp = this._fpAposta(lastNums, lastC.monthName, prevLast);
+
+    const forbidSeq = new Set();
+    const forbidFinais = new Set();
+    const forbidRept = new Set();
+    const freq = {};
+    const paresHist = [];
+    const somaHist = [];
+    const mesHist = [];
+
+    // Padrões reais da janela (mesma classificação SEQ / FINAIS / Rept da tabela)
+    const reptCountHist = [];
+    recent.forEach((c, i) => {
+      const nums = (c.numbersAscending || c.numbersDrawOrder || []).map(Number).sort((a, b) => a - b);
+      const prev = i > 0
+        ? (recent[i - 1].numbersAscending || []).map(Number)
+        : (chrono.length > recent.length
+          ? (chrono[chrono.length - recent.length - 1]?.numbersAscending || []).map(Number)
+          : []);
+      const fp = this._fpAposta(nums, c.monthName, prev);
+      forbidSeq.add(`${fp.seq}|${fp.seqQuais}`);
+      forbidFinais.add(`${fp.finais}|${fp.finaisQuais}`);
+      forbidRept.add(fp.reptKey);
+      reptCountHist.push(fp.reptCount);
+      nums.forEach((n) => { freq[n] = (freq[n] || 0) + 1; });
+      paresHist.push(fp.pares);
+      somaHist.push(fp.soma);
+      if (c.monthName) mesHist.push(c.monthName);
+    });
+
+    const somaDef = this._somaCriterios[modoSoma] || this._somaCriterios.padrao;
+    const somaCrit = somaDef.resolve(somaHist);
+    const paresCrit = this._resolveParesCrit(modoPares, paresHist, freq, L);
+
+    // Cotas Pares/Ímpares
+    const paresWeights = paresCrit.weights && Object.keys(paresCrit.weights).length
+      ? paresCrit.weights
+      : this._paresWeightMap(paresHist);
+    const paresBag = this._paresQuotaBag(alvo, paresWeights, {
+      fallback: paresCrit.targetPares != null ? paresCrit.targetPares : 4,
+      avoidPares: null,
+      smooth: false,
+    });
+    let paresBagIdx = 0;
+    let targetPares = paresBag.length
+      ? paresBag[0]
+      : (paresCrit.targetPares != null ? paresCrit.targetPares : 4);
+
+    // Cotas de Rept por frequência REAL da janela (1–2 comuns; 3+ raro)
+    const reptWeights = this._paresWeightMap(reptCountHist);
+    // ∅ proibido na janela → não gerar count 0
+    if (forbidRept.has('∅')) delete reptWeights[0];
+    // Se a janela não tiver contagem útil, prioriza 1 e 2 (padrão histórico geral)
+    if (!Object.keys(reptWeights).length) {
+      reptWeights[1] = 4;
+      reptWeights[2] = 4;
+      reptWeights[3] = 1;
+    }
+    const reptBag = this._paresQuotaBag(alvo, reptWeights, {
+      fallback: 1,
+      avoidPares: null,
+      smooth: true,
+    });
+    let reptBagIdx = 0;
+    let targetRept = reptBag.length ? reptBag[0] : 1;
+
+    const pool = [];
+    for (let n = L.dezenaMin; n <= L.dezenaMax; n++) pool.push(n);
+    const freqMul = paresCrit.boostFreq ? 4 : 2;
+    let weights = pool.map(n => 1 + (freq[n] || 0) * freqMul);
+    if (somaCrit.mode === 'min') weights = pool.map((n, i) => weights[i] * (1 + n / L.dezenaMax));
+    if (somaCrit.mode === 'max') weights = pool.map((n, i) => weights[i] * (1 + (L.dezenaMax - n + 1) / L.dezenaMax));
+
+    const lastSet = new Set(lastNums);
+
+    const existingKeys = new Set(
+      this.manual11.map((g) => {
+        const nums = (g.numbers || []).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+        return nums.length === L.sorteadas ? nums.map(fmt2).join('-') : '';
+      }).filter(Boolean)
+    );
+    recent.forEach((c) => {
+      const nums = (c.numbersAscending || []).map(Number).sort((a, b) => a - b);
+      if (nums.length === L.sorteadas) existingKeys.add(nums.map(fmt2).join('-'));
+    });
+
+    const pickMonth = () => {
+      if (!this.extraMes) return { month: 0, monthName: '' };
+      const cand = mesHist.filter(m => m && m !== lastC.monthName);
+      const nome = cand.length
+        ? cand[Math.floor(Math.random() * cand.length)]
+        : (mesHist[0] || lastC.monthName || 'Janeiro');
+      const idx = MESES.indexOf(nome);
+      return { month: idx >= 0 ? idx + 1 : 1, monthName: nome };
+    };
+
+    /** Monta aposta com exatamente wantRept overlaps com o último sorteio (padrão real). */
+    const tryBuild = (tp, wantRept) => {
+      const picked = [];
+      const localPool = pool.slice();
+      const localW = weights.slice();
+      const wantPares = tp != null ? tp : targetPares;
+      const needRept = Math.max(0, Math.min(wantRept != null ? wantRept : 1, lastNums.length, L.sorteadas));
+
+      // 1) Semeia EXATAMENTE needRept dezenas do último (não mais)
+      if (needRept > 0 && lastNums.length) {
+        const seeds = lastNums.slice().sort(() => Math.random() - 0.5);
+        for (let s = 0; s < seeds.length && picked.length < needRept; s++) {
+          const n = seeds[s];
+          const ix = localPool.indexOf(n);
+          if (ix < 0) continue;
+          const isPar = n % 2 === 0;
+          const needPar = picked.filter(x => x % 2 === 0).length;
+          if (isPar && needPar >= wantPares) continue;
+          if (!isPar && (picked.length - needPar) >= (L.sorteadas - wantPares)) continue;
+          picked.push(n);
+          localPool.splice(ix, 1);
+          localW.splice(ix, 1);
+        }
+      }
+
+      // 2) Remove o restante do último sorteio do pool → evita Rept 3/4/5 acidental
+      for (let i = localPool.length - 1; i >= 0; i--) {
+        if (lastSet.has(localPool[i])) {
+          localPool.splice(i, 1);
+          localW.splice(i, 1);
+        }
+      }
+
+      while (picked.length < L.sorteadas && localPool.length) {
+        const needPar = picked.filter(n => n % 2 === 0).length;
+        const remain = L.sorteadas - picked.length;
+        const needImp = L.sorteadas - wantPares - (picked.length - needPar);
+        let candidates = localPool.map((n, i) => ({ n, w: localW[i], i }));
+        if (needPar >= wantPares) candidates = candidates.filter(c => c.n % 2 === 1);
+        else if (needImp <= 0) candidates = candidates.filter(c => c.n % 2 === 0);
+        else if (remain === 1) {
+          if (needPar < wantPares) candidates = candidates.filter(c => c.n % 2 === 0);
+          else candidates = candidates.filter(c => c.n % 2 === 1);
+        }
+        if (!candidates.length) candidates = localPool.map((n, i) => ({ n, w: localW[i], i }));
+        const choice = this._pickWeighted(candidates.map(c => c.n), candidates.map(c => c.w));
+        const ix = localPool.indexOf(choice);
+        picked.push(choice);
+        if (ix >= 0) { localPool.splice(ix, 1); localW.splice(ix, 1); }
+      }
+      return picked.sort((a, b) => a - b);
+    };
+
+    if (btn) btn.disabled = true;
+    if (bulkBtn) bulkBtn.disabled = true;
+    if (info) info.textContent = 'Gerando…';
+    this._updateAuto11Hints();
+
+    const aprovadas = [];
+    const maxTries = Math.max(alvo * 4000, 20000);
+    let tries = 0;
+    let failStreak = 0;
+
+    while (aprovadas.length < alvo && tries < maxTries) {
+      tries++;
+      targetPares = paresBagIdx < paresBag.length
+        ? paresBag[paresBagIdx]
+        : (() => {
+          const ks = Object.keys(paresWeights).map(Number).filter(Number.isFinite);
+          if (!ks.length) return 4;
+          return this._pickWeighted(ks, ks.map(k => paresWeights[k] || 1));
+        })();
+      targetRept = reptBagIdx < reptBag.length
+        ? reptBag[reptBagIdx]
+        : (() => {
+          const ks = Object.keys(reptWeights).map(Number).filter(Number.isFinite);
+          if (!ks.length) return 1;
+          return this._pickWeighted(ks, ks.map(k => reptWeights[k] || 1));
+        })();
+
+      const nums = tryBuild(targetPares, targetRept);
+      if (nums.length !== L.sorteadas) { failStreak++; continue; }
+      if (this._manualDupInfo(nums).hasDup) { failStreak++; continue; }
+      const key = nums.map(fmt2).join('-');
+      if (existingKeys.has(key) || aprovadas.some(a => a.key === key)) {
+        failStreak++;
+        if (failStreak >= 120) {
+          paresBagIdx += 1;
+          reptBagIdx += 1;
+          failStreak = 0;
+        }
+        continue;
+      }
+
+      const mes = pickMonth();
+      const fp = this._fpAposta(nums, mes.monthName, lastNums);
+
+      // Rept deve seguir a cota do histórico real (1–2 predominante)
+      if (fp.reptCount !== targetRept) {
+        failStreak++;
+        if (failStreak >= 120) { paresBagIdx += 1; reptBagIdx += 1; failStreak = 0; }
+        continue;
+      }
+
+      // Obrigatório: padrões reais da janela (SEQ / FINAIS / REPT-lista)
+      const seqKey = `${fp.seq}|${fp.seqQuais}`;
+      const finKey = `${fp.finais}|${fp.finaisQuais}`;
+      if (forbidSeq.has(seqKey) || forbidFinais.has(finKey) || forbidRept.has(fp.reptKey)) {
+        failStreak++;
+        if (failStreak >= 120) { paresBagIdx += 1; reptBagIdx += 1; failStreak = 0; }
+        continue;
+      }
+
+      // Não copiar o padrão global do último sorteio
+      if (this._fpTooSimilar(fp, lastFp)) {
+        failStreak++;
+        if (failStreak >= 120) { paresBagIdx += 1; reptBagIdx += 1; failStreak = 0; }
+        continue;
+      }
+
+      // Pares/Ímpares (critério escolhido)
+      if (!this._paresAceita(fp.pares, paresCrit, targetPares)) {
+        failStreak++;
+        if (failStreak >= 120) { paresBagIdx += 1; reptBagIdx += 1; failStreak = 0; }
+        continue;
+      }
+
+      // Soma (critério escolhido)
+      if (!this._somaAceita(fp.soma, somaCrit)) {
+        failStreak++;
+        if (failStreak >= 120) { paresBagIdx += 1; reptBagIdx += 1; failStreak = 0; }
+        continue;
+      }
+      if (modoSoma === 'padrao' && somaHist.length) {
+        const soft = this._modeNum(somaHist);
+        if (soft != null && Math.abs(fp.soma - soft) > 35) {
+          failStreak++;
+          if (failStreak >= 120) { paresBagIdx += 1; reptBagIdx += 1; failStreak = 0; }
+          continue;
+        }
+      }
+
+      existingKeys.add(key);
+      aprovadas.push({
+        key,
+        numbers: nums,
+        month: mes.month,
+        monthName: mes.monthName,
+        editable: false,
+        _uid: ++this._manualUid,
+      });
+      paresBagIdx += 1;
+      reptBagIdx += 1;
+      failStreak = 0;
+
+      if (alvo > 30 && aprovadas.length % 25 === 0) {
+        if (info) info.textContent = `Gerando… ${aprovadas.length}/${alvo}`;
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
+
+    this.manual11 = this.manual11.concat(aprovadas);
+    this.renderManual(11);
+
+    if (btn) btn.disabled = false;
+    if (bulkBtn) bulkBtn.disabled = false;
+    const modoLbl = (this._somaCriterios[modoSoma] || {}).label || modoSoma;
+    const paresLbl = paresCrit.label || modoPares;
+    if (info) {
+      info.textContent = aprovadas.length === alvo
+        ? `+${aprovadas.length} (${modoLbl} · ${paresLbl}) · total ${this.manual11.length}`
+        : `Geradas ${aprovadas.length}/${alvo} (${modoLbl} · ${paresLbl}, limite). Total ${this.manual11.length}`;
+    }
+    if (aprovadas.length < alvo) {
+      alert(`Foram geradas ${aprovadas.length} de ${alvo} apostas válidas após ${tries} tentativas.\nSoma: ${modoLbl}. Pares/Ímpares: ${paresLbl}. Janela: ${janela === 0 ? 'todos' : janela}.`);
     }
   };
 
