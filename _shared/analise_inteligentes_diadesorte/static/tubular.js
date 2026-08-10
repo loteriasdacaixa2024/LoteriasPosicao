@@ -1302,7 +1302,7 @@
     const L = limitsFrom(this.root);
     const nCols = 2 + L.sorteadas + (this.extraMes ? 1 : 0) + 10;
     if (!this.data.length) {
-      tbody.innerHTML = `<tr><td colspan="${nCols}" class="text-muted">Carregue os dados (aba Sequências) para ver o último concurso.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${nCols}" class="text-muted">Carregando histórico tubular…</td></tr>`;
       if (lbl) lbl.textContent = 'Último resultado (referência)';
       return;
     }
@@ -1330,7 +1330,7 @@
       ? `<td><span class="mes-cor ${esc(this.mesClass(c.monthName))}" style="${this.mesStyle(c.monthName)}">${esc((c.monthName || '—').slice(0, 3).toUpperCase())}</span></td>`
       : '';
     if (lbl) {
-      lbl.textContent = `Último resultado — concurso ${c.contest} (ordem crescente · mesma config da aba Sequências)`;
+      lbl.textContent = `Último resultado — concurso ${c.contest} (ordem crescente · histórico tubular)`;
     }
     tbody.innerHTML = `<tr class="tb-row-ultimo">
       <td><strong>${esc(c.contest)}</strong></td>
@@ -1421,7 +1421,7 @@
       if (section === 10) {
         const acTitle = hitSet
           ? `Acertos vs último concurso`
-          : 'Carregue os dados (aba Sequências) para conferir';
+          : 'Carregue o histórico tubular para conferir';
         const acertosTd10 = `<td class="tb-acertos-td">${this._acertosSpan(acertos, acTitle)}</td>`;
         return `<tr${rowCls}>
           <td>${apostaNum}</td>
@@ -2006,7 +2006,7 @@
       try { await this.load(); } catch (_) { /* ignore */ }
     }
     if (!this.data.length) {
-      alert('Carregue os dados (aba Sequências) antes de gerar.');
+      alert('Não foi possível carregar o histórico tubular. Tente novamente.');
       if (info) info.textContent = 'Sem dados históricos.';
       return;
     }
@@ -2347,6 +2347,20 @@
     if (!root) return;
     const app = new TubularApp(root);
     global.AiTubular = app;
+    const mode = String(root.dataset.mode || 'analise');
+
+    if (mode === 'elite-gen') {
+      const initialSub = root.dataset.initialSub || 's10';
+      const start = async () => {
+        if (!app.data.length) {
+          try { await app.load(); } catch (_) { /* load já alerta */ }
+        }
+        app.showSub(initialSub);
+      };
+      start();
+      return;
+    }
+
     // auto-load when aba tubular opens or if already active
     const pane = document.getElementById('tab-tubular');
     if (pane && pane.classList.contains('active')) app.load();

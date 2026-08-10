@@ -450,11 +450,20 @@
            data-dezena-min="{{ dezena_min }}"
            data-dezena-max="{{ dezena_max }}"
            data-sorteadas="{{ sorteadas }}">
+        {% if modality_key != 'supersete' %}
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+          <span class="small text-muted fw-semibold">Análise de sequências</span>
+          <a class="btn btn-sm btn-success ms-auto" href="{{ escolha_tubular_url or '/geradores-elite/escolha-tubular-apostas/' }}?aba=manual">
+            <i class="fas fa-bolt me-1"></i>Gerar apostas (Elite) — Manual / Automático
+          </a>
+        </div>
+        {% else %}
         <ul class="nav nav-pills tb-subnav mb-3 gap-1">
           <li class="nav-item"><button type="button" class="nav-link active" data-tb-sub="seq">📊 Sequências</button></li>
           <li class="nav-item"><button type="button" class="nav-link" data-tb-sub="s10">📝 Seção 10 — MANUAL</button></li>
           <li class="nav-item"><button type="button" class="nav-link" data-tb-sub="s11">⚡ Seção 11 — AUTOMÁTICO</button></li>
         </ul>
+        {% endif %}
 
         <!-- Sub 1: Sequências -->
         <div data-tb-panel="seq">
@@ -596,267 +605,15 @@
           </div>
         </div>
 
-        <!-- Sub 2: Seção 10 -->
-        <div data-tb-panel="s10" class="d-none">
-          <div class="tb-card">
-            <h2 class="h5 fw-bold">📝 SEÇÃO 10 — MANUAL <span class="badge bg-secondary ms-1">ordem crescente</span></h2>
-            <p class="small text-muted">Crie jogos manualmente, cole texto ou arraste arquivos. Stats em tempo real. Exporta somente dezenas + mês.</p>
-            <div class="tb-drop mb-2" id="tbDrop10" data-ai-compare="s10">Arraste TXT/CSV aqui · ou cole abaixo</div>
-            <textarea id="tbPaste10" class="form-control form-control-sm mb-2" rows="3" placeholder="{% if extra_mes %}FORMATOS: 01 02 03 04 05 06 07 · 01 02 03 04 05 06 07 - Jul · 01 02 03 04 05 06 07 - Julho{% else %}FORMATO: dezenas separadas por espaço (ex.: 01 05 12 23 34 45){% endif %}"></textarea>
-            <div class="d-flex flex-wrap gap-2 mb-2">
-              <button type="button" class="btn btn-sm btn-success" id="tbProcess10">✓ Processar Jogos</button>
-              <button type="button" class="btn btn-sm btn-primary" id="tbAdd10">+ Adicionar Linha</button>
-              <button type="button" class="btn btn-sm btn-success" id="tbBtnMark10">🔍 Marcar (seq + faltantes)</button>
-              <button type="button" class="btn btn-sm btn-secondary" id="tbBtnReset10">Resetar Marcações</button>
-              <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport10">
-                <i class="fas fa-file-export me-1"></i>Exportar
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear10">Limpar</button>
-            </div>
-            <div class="tb-stats-panel mb-2" id="tbStats10"></div>
-            <div class="small fw-bold text-muted mb-1" id="tbUltimo10Lbl">Último resultado (referência — mesma config da aba Sequências)</div>
-            <div class="table-responsive mb-3">
-              <table class="table table-sm table-bordered tb-table" id="tbUltimo10">
-                <thead>
-                  <tr>
-                    <th>Concurso</th>
-                    <th>Data</th>
-                    {% for i in range(1, sorteadas + 1) %}
-                    <th class="tb-dez-h{% if i == 1 %} tb-dez-h-first{% endif %}{% if i == sorteadas %} tb-dez-h-last{% endif %}">{{ i }}º</th>
-                    {% endfor %}
-                    {% if extra_mes %}<th>Mês</th>{% endif %}
-                    <th>SEQ</th>
-                    <th>FINAIS</th>
-                    <th>Rept</th>
-                    <th>Soma</th>
-                    <th>Pares</th>
-                    <th>Ímpares</th>
-                    <th>Inicial</th>
-                    <th>Final</th>
-                    <th>Qtde</th>
-                    <th>Números</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td colspan="{{ 2 + sorteadas + (1 if extra_mes else 0) + 10 }}" class="text-muted">Carregue os dados (aba Sequências) para ver o último concurso.</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="small fw-semibold mb-1">Suas apostas (comparar com o último acima)</div>
-            <div id="tbFaltantesHint10" class="small text-muted mb-1 d-none"></div>
-            <div id="tbDupMsg10" class="tb-dup-msg d-none mb-2" role="alert"></div>
-            <div class="table-responsive">
-              <table class="table table-sm table-bordered tb-table" id="tbManual10">
-                <thead>
-                  <tr>
-                    <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="acertos" title="Acertos vs último concurso">Acertos <span class="tb-sort-ind">⇅</span></th>
-                    {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
-                    <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="rept" title="Clique para ordenar">Rept <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="soma" title="Clique para ordenar">Soma <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="pares" title="Clique para ordenar">Pares <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="impares" title="Clique para ordenar">Ímpares <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="inicial" title="Clique para ordenar">Inicial <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="final" title="Clique para ordenar">Final <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="qtde" title="Clique para ordenar">Qtde <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="numeros" title="Clique para ordenar">Números <span class="tb-sort-ind">⇅</span></th>
-                    <th title="Remover"></th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sub 3: Seção 11 — AUTOMÁTICO -->
-        <div data-tb-panel="s11" class="d-none">
-          <div class="tb-card">
-            <h2 class="h5 fw-bold">⚡ SEÇÃO 11 — AUTOMÁTICO
-              <span class="badge bg-primary ms-1" id="tbAuto11Badge">janela 10</span>
-            </h2>
-            <p class="small text-muted mb-2">
-              Gera apostas com base no histórico recente, com critérios de Soma opcionais.
-              <strong>SEQ, FINAIS e REPT</strong> devem ser diferentes dos padrões da janela selecionada.
-            </p>
-
-            <div class="small fw-bold text-muted mb-1" id="tbUltimo11Lbl">Último resultado (referência — mesma prévia da Seção 10)</div>
-            <div class="table-responsive mb-3">
-              <table class="table table-sm table-bordered tb-table" id="tbUltimo11">
-                <thead>
-                  <tr>
-                    <th>Concurso</th>
-                    <th>Data</th>
-                    {% for i in range(1, sorteadas + 1) %}
-                    <th class="tb-dez-h{% if i == 1 %} tb-dez-h-first{% endif %}{% if i == sorteadas %} tb-dez-h-last{% endif %}">{{ i }}º</th>
-                    {% endfor %}
-                    {% if extra_mes %}<th>Mês</th>{% endif %}
-                    <th>SEQ</th>
-                    <th>FINAIS</th>
-                    <th>Rept</th>
-                    <th>Soma</th>
-                    <th>Pares</th>
-                    <th>Ímpares</th>
-                    <th>Inicial</th>
-                    <th>Final</th>
-                    <th>Qtde</th>
-                    <th>Números</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td colspan="{{ 2 + sorteadas + (1 if extra_mes else 0) + 10 }}" class="text-muted">Carregue os dados (aba Sequências) para ver o último concurso.</td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="border rounded p-2 mb-3" style="background:var(--bg,#fffdf5);border-color:rgba(0,0,0,.08)!important;">
-              <div class="fw-bold small text-uppercase text-muted mb-2">Como gerar</div>
-              <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-                <span class="comp-toolbar-lbl mb-0" style="font-size:.7rem;font-weight:700;color:#6c757d;">Janela:</span>
-                <div class="btn-group btn-group-sm" role="group" id="tbAuto11Janela">
-                  <button type="button" class="btn btn-outline-secondary active" data-janela="10">10</button>
-                  <button type="button" class="btn btn-outline-secondary" data-janela="20">20</button>
-                  <button type="button" class="btn btn-outline-secondary" data-janela="31">31</button>
-                  <button type="button" class="btn btn-outline-secondary" data-janela="0">Todos</button>
-                </div>
-              </div>
-              <div class="fw-semibold small mb-1">Critério de Soma</div>
-              <div class="d-flex flex-wrap gap-3" id="tbAuto11SomaModo">
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="padrao" checked>
-                  <span class="form-check-label small">Padrão</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="frequente">
-                  <span class="form-check-label small">Mais frequente</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="alta">
-                  <span class="form-check-label small">Mais alta</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="baixa">
-                  <span class="form-check-label small">Mais baixa</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="media">
-                  <span class="form-check-label small">Média</span>
-                </label>
-              </div>
-              <div class="small text-muted mt-2" id="tbAuto11SomaHint">Modo padrão — coerente com o histórico, sem forçar soma específica.</div>
-              <div class="fw-semibold small mb-1 mt-3">Pares / Ímpares</div>
-              <div class="d-flex flex-wrap gap-2" id="tbAuto11ParesModo">
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_4" checked>
-                  <span class="form-check-label small"><strong>4P / 3I</strong> <span class="tb-pares-n" data-pares-n>764.400</span></span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_3">
-                  <span class="form-check-label small">3P / 4I <span class="tb-pares-n" data-pares-n>828.100</span></span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_5">
-                  <span class="form-check-label small">5P / 2I <span class="tb-pares-n" data-pares-n>360.360</span></span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_2">
-                  <span class="form-check-label small">2P / 5I <span class="tb-pares-n" data-pares-n>458.640</span></span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_6">
-                  <span class="form-check-label small">6P / 1I <span class="tb-pares-n" data-pares-n>80.080</span></span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_1">
-                  <span class="form-check-label small">1P / 6I <span class="tb-pares-n" data-pares-n>120.120</span></span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_7">
-                  <span class="form-check-label small">7P / 0I <span class="tb-pares-n" data-pares-n>6.435</span></span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_0">
-                  <span class="form-check-label small">0P / 7I <span class="tb-pares-n" data-pares-n>11.440</span></span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="aleatorio">
-                  <span class="form-check-label small">Aleatório (todas) <span class="tb-pares-n" data-pares-n>2.629.575</span></span>
-                </label>
-              </div>
-              <div class="small text-muted mt-2" id="tbAuto11ParesHint">Fixo: 4 pares / 3 ímpares · 764.400 combinações possíveis</div>
-            </div>
-
-            <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
-              <button type="button" class="btn btn-sm btn-success" id="tbGerar11">
-                <i class="fas fa-magic me-1"></i>GERAR 10 APOSTAS
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-success" id="tbGerarMais11">
-                <i class="fas fa-plus me-1"></i>GERAR MAIS APOSTAS
-              </button>
-              <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbGerarMais11Qtd">
-                Qtd:
-                <input type="number" class="form-control form-control-sm" id="tbGerarMais11Qtd"
-                       value="50" min="1" max="5000" step="1" style="width:5.5rem;">
-              </label>
-              <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport11">
-                <i class="fas fa-file-export me-1"></i>Exportar
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear11">Limpar</button>
-              <span class="small text-muted" id="tbGerar11Info">—</span>
-            </div>
-            <div class="d-flex flex-wrap gap-2 mb-2 align-items-center" id="tbConferir11Bar">
-              <label class="small mb-0 fw-semibold" for="tbConferir11Select">Conferir</label>
-              <select class="form-select form-select-sm" id="tbConferir11Select">
-                <option value="">— concurso apurado —</option>
-              </select>
-              <button type="button" class="btn btn-sm btn-success" id="tbConferir11">
-                <i class="fas fa-check-double me-1"></i>Conferir
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbConferir11Clear">Limpar conf.</button>
-              <span class="small text-muted" id="tbConferir11Info">Selecione um concurso e clique em Conferir</span>
-            </div>
-            <div class="tb-cond-stats mb-2" id="tbStats11Wrap">
-              <button type="button" class="tb-cond-stats-toggle" id="tbStats11Toggle" aria-expanded="false">
-                <span class="tb-cond-stats-arrow" aria-hidden="true">▶</span>
-                <span>Resumo estatístico</span>
-              </button>
-              <div class="tb-cond-stats-body d-none" id="tbStats11Body">
-                <div class="tb-stats-panel tb-stats-panel-inline" id="tbStats11"></div>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-sm table-bordered tb-table" id="tbManual11">
-                <thead>
-                  <tr>
-                    <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="acertos" title="Clique para ordenar">Acertos <span class="tb-sort-ind">⇅</span></th>
-                    {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
-                    <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="rept" title="Clique para ordenar">Rept <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="soma" title="Clique para ordenar">Soma <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="pares" title="Clique para ordenar">Pares <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="impares" title="Clique para ordenar">Ímpares <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="inicial" title="Clique para ordenar">Inicial <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="final" title="Clique para ordenar">Final <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="qtde" title="Clique para ordenar">Qtde <span class="tb-sort-ind">⇅</span></th>
-                    <th title="Remover"></th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        {% if modality_key == 'supersete' %}
+        {% set show_s10_first = false %}
+        {% include 'partials/tubular_secoes_geracao.html' with context %}
+        {% endif %}
       </div>
     </div>
   </div>
 </div>
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260810p2">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260810p3">
 <style>
   {% if extra_mes %}
   {% for nome, cor in (meses_cores or {}).items() %}
@@ -867,7 +624,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260810p2"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260810p3"></script>
 <script>
 (function () {
   const root = document.getElementById('ai-root');

@@ -32,6 +32,12 @@ def _page_context(modality_key: str) -> dict:
                 meses_cores = obter_meses_cores() or {}
             except Exception:
                 meses_cores = {}
+    try:
+        from gerador_escolha_tubular.service import tem_gerador_escolha_tubular as _tem_get
+        tubular_geracao_elite = bool(_tem_get(modality_key))
+    except Exception:
+        # Fallback: mesma regra do gerador Elite (Super Sete fica nas Análises).
+        tubular_geracao_elite = modality_key != "supersete"
     return {
         "modality_key": modality_key,
         "modality_nome": nome,
@@ -42,6 +48,8 @@ def _page_context(modality_key: str) -> dict:
         "gerador_elite_url": "/geradores-elite/gerador-elite/",
         "geradores_elite_home": "/geradores-elite/",
         "construtor_url": "/geradores-elite/construtor-construcoes/",
+        "escolha_tubular_url": "/geradores-elite/escolha-tubular-apostas/",
+        "tubular_geracao_elite": tubular_geracao_elite,
         "meses_cores": meses_cores,
         "extra_mes": bool(extra_mes),
         "dezena_min": dmin,

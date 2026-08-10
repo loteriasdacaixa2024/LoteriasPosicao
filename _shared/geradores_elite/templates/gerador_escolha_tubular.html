@@ -3,10 +3,12 @@
 
 {% block content %}
 <style>
-#get-root .page-links a {
+#get-root .page-links a,
+#get-hub .page-links a {
   border-color: var(--primary); color: var(--primary);
 }
-#get-root .page-links a:hover {
+#get-root .page-links a:hover,
+#get-hub .page-links a:hover {
   background: var(--primary); color: #fff;
 }
 #get-root .get-ball {
@@ -105,16 +107,38 @@
   margin-top: .4rem; padding-top: .35rem;
   border-top: 1px dashed #e5e7eb;
 }
+#get-hub .get-hub-tabs .nav-link {
+  font-weight: 600; color: #495057;
+  border: 1px solid rgba(0,0,0,.08); border-radius: 999px;
+  padding: .35rem .9rem; margin: 0 .15rem .35rem 0;
+  background: #fff;
+}
+#get-hub .get-hub-tabs .nav-link.active {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+}
+#get-hub .get-hub-tabs .nav-link:hover:not(.active) {
+  border-color: var(--primary); color: var(--primary);
+}
 </style>
 
-<div class="container-fluid py-3" id="get-root" data-api="{{ api_base }}"
-     data-dmin="{{ ctx.dezena_min or 1 }}" data-dmax="{{ ctx.dezena_max or 31 }}"
-     data-vcols="{{ ctx.volante_cols or 10 }}">
+<div class="container-fluid py-3" id="get-hub" data-aba-inicial="{{ aba_inicial or 'escolha' }}">
   <div class="d-flex flex-wrap gap-2 mb-3 page-links">
     <a class="btn btn-sm btn-outline-secondary" href="{{ escolha_url }}"><i class="fas fa-sliders-h"></i> Escolha Visual</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ sequencias_url or '/analise/analises-inteligentes/?aba=tubular' }}"><i class="fas fa-table"></i> Sequências (Análise)</a>
     <a class="btn btn-sm btn-outline-secondary" href="{{ tubular_url }}"><i class="fas fa-chart-line"></i> Análise Tubular</a>
     <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-brain"></i> Elite</a>
   </div>
+
+  <ul class="nav get-hub-tabs mb-3 flex-wrap" role="tablist">
+    <li class="nav-item"><button type="button" class="nav-link{% if (aba_inicial or 'escolha') == 'escolha' %} active{% endif %}" data-get-hub="escolha">Escolha/Tubular</button></li>
+    <li class="nav-item"><button type="button" class="nav-link{% if aba_inicial == 'manual' %} active{% endif %}" data-get-hub="manual">Seção 10 — Manual</button></li>
+    <li class="nav-item"><button type="button" class="nav-link{% if aba_inicial == 'automatico' %} active{% endif %}" data-get-hub="automatico">Seção 11 — Automático</button></li>
+  </ul>
+
+  <div id="get-hub-escolha"{% if aba_inicial in ('manual', 'automatico') %} class="d-none"{% endif %}>
+<div id="get-root" data-api="{{ api_base }}"
+     data-dmin="{{ ctx.dezena_min or dezena_min or 1 }}" data-dmax="{{ ctx.dezena_max or dezena_max or 31 }}"
+     data-vcols="{{ ctx.volante_cols or 10 }}">
 
   {# —— Opções (fora do card do gerador) —— #}
   <div class="card shadow-sm mb-3">
@@ -281,6 +305,80 @@
     </div>
   </div>
 </div>
+  </div>{# /get-hub-escolha #}
+
+  <div id="ai-tubular-root"
+       class="{% if aba_inicial not in ('manual', 'automatico') %}d-none {% endif %}"
+       data-mode="elite-gen"
+       data-api="{{ tubular_api_base or '/analise/api/inteligentes' }}"
+       data-meses-cores='{{ (meses_cores or {})|tojson }}'
+       data-extra-mes="{{ '1' if (extra_mes or (ctx.extra_mes if ctx is defined else false)) else '0' }}"
+       data-dezena-min="{{ dezena_min or ctx.dezena_min or 1 }}"
+       data-dezena-max="{{ dezena_max or ctx.dezena_max or 31 }}"
+       data-sorteadas="{{ sorteadas or ctx.sorteadas or 7 }}"
+       data-initial-sub="{{ 's11' if aba_inicial == 'automatico' else 's10' }}">
+    {% set show_s10_first = (aba_inicial != 'automatico') %}
+    {% set sorteadas = sorteadas or ctx.sorteadas or 7 %}
+    {% set extra_mes = extra_mes or (ctx.extra_mes if ctx is defined else false) %}
+    {% include 'partials/tubular_secoes_geracao.html' with context %}
+  </div>
+</div>{# /get-hub #}
+
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260810p3">
+<style>
+  :root {
+    --cor-sequencia-1: #86efac;
+    --cor-sequencia-1-texto: #14532d;
+    --cor-sequencia-2: #93c5fd;
+    --cor-sequencia-2-texto: #1e3a8a;
+    --cor-sequencia-3: #d8b4fe;
+    --cor-sequencia-3-texto: #581c87;
+    --cor-repetidos: #fcd34d;
+    --cor-repetidos-texto: #78350f;
+  }
+  {% if extra_mes %}
+  {% for nome, cor in (meses_cores or {}).items() %}
+  #ai-tubular-root .mes-cor.mes-nome-{{ nome }} { background-color: {{ cor }} !important; }
+  {% endfor %}
+  {% endif %}
+</style>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260810p3"></script>
+<script>
+(function () {
+  const hub = document.getElementById('get-hub');
+  if (!hub) return;
+  const panelEscolha = document.getElementById('get-hub-escolha');
+  const panelTubular = document.getElementById('ai-tubular-root');
+  function setHub(key, pushUrl) {
+    hub.querySelectorAll('[data-get-hub]').forEach(b => b.classList.toggle('active', b.dataset.getHub === key));
+    const isEscolha = key === 'escolha';
+    if (panelEscolha) panelEscolha.classList.toggle('d-none', !isEscolha);
+    if (panelTubular) panelTubular.classList.toggle('d-none', isEscolha);
+    if (!isEscolha && window.AiTubular) {
+      const sub = key === 'automatico' ? 's11' : 's10';
+      window.AiTubular.showSub(sub);
+    }
+    if (pushUrl !== false) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('aba', key);
+        history.replaceState(null, '', url.toString());
+      } catch (_) {}
+    }
+  }
+  hub.querySelectorAll('[data-get-hub]').forEach(btn => {
+    btn.addEventListener('click', () => setHub(btn.dataset.getHub));
+  });
+  // Garante aba correta mesmo se o servidor ainda não enviou aba_inicial
+  try {
+    const q = new URL(window.location.href).searchParams.get('aba') || hub.dataset.abaInicial || 'escolha';
+    const key = (q === 'manual' || q === 's10') ? 'manual'
+      : (q === 'automatico' || q === 'auto' || q === 's11') ? 'automatico'
+      : 'escolha';
+    setHub(key, false);
+  } catch (_) {}
+})();
+</script>
 
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 <script>

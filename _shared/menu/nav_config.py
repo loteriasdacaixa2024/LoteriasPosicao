@@ -373,7 +373,7 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 {
                     "href": "/geradores-elite/escolha-tubular-apostas/",
                     "title": "Escolha/Tubular → Apostas",
-                    "desc": "Apostas a partir da Escolha Visual e Análise Tubular",
+                    "desc": "Escolha Visual · Seção 10 Manual · Seção 11 Automático",
                     "icon": "fas fa-dice",
                 },
                 {
@@ -878,7 +878,7 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
         novos_ge.append({
             "href": "/geradores-elite/escolha-tubular-apostas/",
             "title": "Escolha/Tubular → Apostas",
-            "desc": "Apostas a partir da Escolha Visual e Análise Tubular",
+            "desc": "Escolha Visual · Seção 10 Manual · Seção 11 Automático",
             "icon": "fas fa-dice",
             "after": "/geradores-elite/comportamento-apostas/",
         })

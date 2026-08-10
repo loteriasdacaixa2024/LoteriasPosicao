@@ -18,6 +18,16 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
     @bp.route("/escolha-tubular-apostas/")
     def escolha_tubular_apostas_page():
         ctx = contexto_gerador(modality_key, janela=0, base="geral")
+        if not ctx.get("sucesso"):
+            from geradores_elite.modality_config import MODALITIES
+            mod = MODALITIES.get(modality_key) or {}
+            ctx = {
+                "dezena_min": int(mod.get("dezena_min", 1)),
+                "dezena_max": int(mod.get("dezena_max", 31)),
+                "sorteadas": int(mod.get("sorteadas", mod.get("pick_default", 7))),
+                "extra_mes": mod.get("extra") == "mes" or modality_key == "diadesorte",
+                "volante_cols": 10,
+            }
         meses_cores = {}
         if ctx.get("extra_mes"):
             try:
@@ -25,17 +35,31 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
                 meses_cores = CoresMesesService.obter_cores() or {}
             except Exception:
                 meses_cores = {}
+        aba_raw = (request.args.get("aba") or "escolha").strip().lower()
+        if aba_raw in ("manual", "s10", "secao10", "seção10", "secao-10"):
+            aba_inicial = "manual"
+        elif aba_raw in ("automatico", "automático", "s11", "secao11", "seção11", "secao-11", "auto"):
+            aba_inicial = "automatico"
+        else:
+            aba_inicial = "escolha"
         return render_template(
             "gerador_escolha_tubular.html",
             modality_key=modality_key,
             modality_nome=modality_nome,
             page_title="Escolha/Tubular → Apostas",
-            page_subtitle="Padrão de gerador da modalidade · âncoras de padrão inicial · perfil completo numa aposta",
+            page_subtitle="Escolha Visual · Seção 10 Manual · Seção 11 Automático",
             api_base="/geradores-elite/api/escolha-tubular",
-            ctx=ctx if ctx.get("sucesso") else {},
+            tubular_api_base="/analise/api/inteligentes",
+            ctx=ctx,
             meses_cores=meses_cores,
             escolha_url="/analise/escolha-visual/",
             tubular_url="/analise/analise-tubular/",
+            sequencias_url="/analise/analises-inteligentes/?aba=tubular",
+            dezena_min=int(ctx.get("dezena_min") or 1),
+            dezena_max=int(ctx.get("dezena_max") or 31),
+            sorteadas=int(ctx.get("sorteadas") or 7),
+            extra_mes=bool(ctx.get("extra_mes")),
+            aba_inicial=aba_inicial,
         )
 
     @bp.route("/api/escolha-tubular/contexto")
