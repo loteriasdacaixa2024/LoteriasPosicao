@@ -606,7 +606,7 @@
             <div class="d-flex flex-wrap gap-2 mb-2">
               <button type="button" class="btn btn-sm btn-success" id="tbProcess10">✓ Processar Jogos</button>
               <button type="button" class="btn btn-sm btn-primary" id="tbAdd10">+ Adicionar Linha</button>
-              <button type="button" class="btn btn-sm btn-success" id="tbBtnMark10">🔍 Marcar Sequências</button>
+              <button type="button" class="btn btn-sm btn-success" id="tbBtnMark10">🔍 Marcar (seq + faltantes)</button>
               <button type="button" class="btn btn-sm btn-secondary" id="tbBtnReset10">Resetar Marcações</button>
               <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport10">
                 <i class="fas fa-file-export me-1"></i>Exportar
@@ -643,6 +643,7 @@
               </table>
             </div>
             <div class="small fw-semibold mb-1">Suas apostas (comparar com o último acima)</div>
+            <div id="tbFaltantesHint10" class="small text-muted mb-1 d-none"></div>
             <div id="tbDupMsg10" class="tb-dup-msg d-none mb-2" role="alert"></div>
             <div class="table-responsive">
               <table class="table table-sm table-bordered tb-table" id="tbManual10">
@@ -650,6 +651,7 @@
                   <tr>
                     <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="acertos" title="Acertos vs último concurso">Acertos <span class="tb-sort-ind">⇅</span></th>
                     {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
                     <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>
@@ -805,6 +807,17 @@
               <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear11">Limpar</button>
               <span class="small text-muted" id="tbGerar11Info">—</span>
             </div>
+            <div class="d-flex flex-wrap gap-2 mb-2 align-items-center" id="tbConferir11Bar">
+              <label class="small mb-0 fw-semibold" for="tbConferir11Select">Conferir</label>
+              <select class="form-select form-select-sm" id="tbConferir11Select">
+                <option value="">— concurso apurado —</option>
+              </select>
+              <button type="button" class="btn btn-sm btn-success" id="tbConferir11">
+                <i class="fas fa-check-double me-1"></i>Conferir
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbConferir11Clear">Limpar conf.</button>
+              <span class="small text-muted" id="tbConferir11Info">Selecione um concurso e clique em Conferir</span>
+            </div>
             <div class="tb-cond-stats mb-2" id="tbStats11Wrap">
               <button type="button" class="tb-cond-stats-toggle" id="tbStats11Toggle" aria-expanded="false">
                 <span class="tb-cond-stats-arrow" aria-hidden="true">▶</span>
@@ -820,6 +833,7 @@
                   <tr>
                     <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="acertos" title="Clique para ordenar">Acertos <span class="tb-sort-ind">⇅</span></th>
                     {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
                     <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>
@@ -842,7 +856,7 @@
     </div>
   </div>
 </div>
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260809p20">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260810p2">
 <style>
   {% if extra_mes %}
   {% for nome, cor in (meses_cores or {}).items() %}
@@ -853,7 +867,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260809p20"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260810p2"></script>
 <script>
 (function () {
   const root = document.getElementById('ai-root');

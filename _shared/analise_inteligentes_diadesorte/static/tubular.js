@@ -279,6 +279,8 @@
     this.manual11SortKey = null;
     this.manual11SortDir = 'asc';
     this.stats11Open = false;
+    this.conferencia11 = null; // { contest, nums: number[] }
+    this.faltantesCiclo = new Set(); // dezenas pendentes do ciclo atual
     this.manual10BlockMsg = '';
     this.auto11Janela = 10;
     this.auto11SomaModo = 'padrao';
@@ -489,6 +491,8 @@
       this.stats11Open = !this.stats11Open;
       this._syncStats11Collapse();
     });
+    r.querySelector('#tbConferir11')?.addEventListener('click', () => this.conferir11());
+    r.querySelector('#tbConferir11Clear')?.addEventListener('click', () => this.limparConferencia11());
     r.querySelector('#tbManual10 thead')?.addEventListener('click', (ev) => {
       const th = ev.target.closest('th.tb-sort');
       if (!th || !th.dataset.sort) return;
@@ -584,6 +588,7 @@
     if (key === 's10') this.renderManual(10);
     if (key === 's11') {
       this._updateAuto11Hints();
+      this._fillConferir11Select();
       this.renderManual(11);
     }
   };
@@ -609,13 +614,49 @@
     return cor ? `background-color:${cor}` : 'background-color:#6c757d';
   };
 
+  TubularApp.prototype._loadFaltantesCiclo = async function () {
+    try {
+      const r = await fetch('/analise/api/ciclo-cobertura/ciclo-atual');
+      const j = await r.json();
+      const dados = (j && j.dados) || j || {};
+      const pend = dados.dezenas_pendentes || [];
+      this.faltantesCiclo = new Set((Array.isArray(pend) ? pend : []).map(Number).filter(Number.isFinite));
+    } catch (_) {
+      this.faltantesCiclo = new Set();
+    }
+  };
+
+  /** Hit-set do último concurso carregado (Seção 10 — comparar com a prévia). */
+  TubularApp.prototype._ultimoHitSet = function () {
+    const chrono = this._chronoAsc();
+    if (!chrono.length) return null;
+    const nums = chrono[chrono.length - 1].numbersAscending || [];
+    return nums.length ? new Set(nums.map(Number)) : null;
+  };
+
+  TubularApp.prototype._acertosSpan = function (acertos, title) {
+    if (acertos == null) return '—';
+    const n = Number(acertos);
+    let tier = 'tb-ac-0';
+    if (n >= 7) tier = 'tb-ac-7';
+    else if (n >= 6) tier = 'tb-ac-6';
+    else if (n >= 5) tier = 'tb-ac-5';
+    else if (n >= 4) tier = 'tb-ac-4';
+    else if (n >= 3) tier = 'tb-ac-3';
+    else if (n >= 1) tier = 'tb-ac-low';
+    return `<span class="tb-acertos ${tier}" title="${esc(title || `${n} acertos`)}">${n}</span>`;
+  };
+
   TubularApp.prototype.load = async function () {
     const st = this.root.querySelector('#tbStatus');
     const stMini = this.root.querySelector('#tbStatusMini');
     if (st) st.textContent = 'Carregando…';
     if (stMini) stMini.textContent = 'Carregando…';
     try {
-      const r = await fetch(`${this.api}/tubular?base=geral`);
+      const [r] = await Promise.all([
+        fetch(`${this.api}/tubular?base=geral`),
+        this._loadFaltantesCiclo(),
+      ]);
       const j = await r.json();
       if (!j.sucesso) throw new Error(j.erro || 'Falha');
       this.data = (j.sorteios || []).map(s => {
@@ -641,6 +682,8 @@
       this.renderCondStats();
       this.renderTable();
       this.renderUltimo10();
+      this.renderManual(10);
+      this._fillConferir11Select();
       const statusTxt = this.data.length
         ? `${this.data[0].contest} → ${this.data[this.data.length - 1].contest} (${this.data.length})`
         : 'Sem dados';
@@ -768,12 +811,16 @@
       <div class="tb-kpi tb-kpi-red"><div class="v">${pct}%</div><div class="l">% Repetição Entre Jogos</div></div>`;
   };
 
-  TubularApp.prototype._cellNum = function (n, sequences, reps) {
+  TubularApp.prototype._cellNum = function (n, sequences, reps, hitSet) {
     const cond = this.marked ? detectAllConditions(n, sequences, reps) : [];
     const style = this.marked ? createGradientStyle(cond) : { background: '', title: '' };
-    const cls = cond.join(' ');
-    const inline = style.background ? `style="${style.background}"` : '';
-    return `<span class="number-cell tb-number ${esc(cls)}" ${inline} title="${esc(style.title || fmt2(n))}">${fmt2(n)}</span>`;
+    const hit = hitSet && hitSet.has(Number(n));
+    const cls = `${cond.join(' ')}${hit ? ' tb-hit' : ''}`.trim();
+    const inline = (!hit && style.background) ? `style="${style.background}"` : '';
+    const title = hit
+      ? `${fmt2(n)} — acerto`
+      : (style.title || fmt2(n));
+    return `<span class="number-cell tb-number ${esc(cls)}" ${inline} title="${esc(title)}">${fmt2(n)}</span>`;
   };
 
   /** Números da aposta na ordem de exibição da Seção 10 (crescente) / 11 (sorteio). */
@@ -788,23 +835,36 @@
     return nums.slice(0, L.sorteadas);
   };
 
-  /** HTML da coluna Dezenas — Seção 10: P1–P7 com spinner interno (só no hover). */
-  TubularApp.prototype._manualPosControlsHtml = function (section, rowIdx, nums, sequences, reps, L, dupCols) {
+  /** HTML da coluna Dezenas — Seção 10: P1–P7 com spinner (labels só no aria; seleção = faltantes do ciclo). */
+  TubularApp.prototype._manualPosControlsHtml = function (section, rowIdx, nums, sequences, reps, L, dupCols, hitSet) {
     const dups = dupCols || new Set();
+    const hits = hitSet || null;
+    const falt = this.faltantesCiclo || new Set();
     return `<div class="tb-pos-row">${nums.map((n, k) => {
       const pos = `P${k + 1}`;
-      const cond = (this.marked && n != null && !dups.has(k)) ? detectAllConditions(n, sequences || [], reps || []) : [];
-      const style = (this.marked && n != null && !dups.has(k)) ? createGradientStyle(cond) : { background: '', title: '' };
-      const cls = cond.join(' ');
-      const dupCls = dups.has(k) ? ' tb-pos-dup' : '';
+      const isHit = hits && n != null && hits.has(Number(n));
+      const isFalt = this.marked && n != null && !dups.has(k) && !isHit && falt.has(Number(n));
+      const cond = (this.marked && n != null && !dups.has(k) && !isHit)
+        ? detectAllConditions(n, sequences || [], reps || [])
+        : [];
+      const style = (this.marked && n != null && !dups.has(k) && !isHit && !isFalt)
+        ? createGradientStyle(cond)
+        : { background: '', title: '' };
+      const cls = [
+        cond.join(' '),
+        isHit ? 'tb-hit' : '',
+        isFalt ? 'tb-faltante' : '',
+        dups.has(k) ? 'tb-pos-dup' : '',
+      ].filter(Boolean).join(' ');
       const inline = style.background ? `style="${style.background}"` : '';
-      const title = dups.has(k)
-        ? `${pos}: ${fmt2(n)} — dezena repetida nesta aposta`
-        : (style.title || `${pos}: ${n == null ? '—' : fmt2(n)}`);
+      let title;
+      if (dups.has(k)) title = `${pos}: ${fmt2(n)} — dezena repetida nesta aposta`;
+      else if (isHit) title = `${pos}: ${fmt2(n)} — acerto (último concurso)`;
+      else if (isFalt) title = `${pos}: ${fmt2(n)} — faltante do ciclo`;
+      else title = style.title || `${pos}: ${n == null ? '—' : fmt2(n)}`;
       const val = n == null || n === '' ? '' : fmt2(n);
       return `<div class="tb-pos-ctrl" title="${esc(title)}">
-        <span class="tb-pos-lbl">${pos}</span>
-        <div class="tb-pos-box ${esc(cls)}${dupCls}" ${inline}>
+        <div class="tb-pos-box ${esc(cls)}" ${inline}>
           <input class="tb-manual-input" data-sec="${section}" data-row="${rowIdx}" data-col="${k}"
             value="${val}" maxlength="2" inputmode="numeric" pattern="[0-9]{1,2}"
             aria-label="${pos}" title="${esc(title)}">
@@ -876,7 +936,7 @@
     return true;
   };
 
-  TubularApp.prototype._manualSortValue = function (g, key, origIdx, L, last) {
+  TubularApp.prototype._manualSortValue = function (g, key, origIdx, L, last, hitSet) {
     const nums = this._manualNumsDisplay(g, 'asc', L);
     const valid = nums.filter(n => n != null && n >= L.dezenaMin && n <= L.dezenaMax);
     const uniqueOk = !this._manualDupInfo(nums).hasDup;
@@ -906,19 +966,26 @@
       case 'final': return an ? String(an.padroes.final || '') : '';
       case 'qtde': return an ? an.qtdeDigitos : -1;
       case 'numeros': return an ? String(an.digitosUnicos || '') : '';
+      case 'acertos': {
+        if (!hitSet || !hitSet.size) return -1;
+        return valid.filter(n => hitSet.has(Number(n))).length;
+      }
       default: return g._uid != null ? g._uid : origIdx;
     }
   };
 
   TubularApp.prototype._orderedManual10 = function (list, L, last) {
-    return this._orderedManualList(list, L, last, this.manual10SortKey, this.manual10SortDir);
+    return this._orderedManualList(list, L, last, this.manual10SortKey, this.manual10SortDir, this._ultimoHitSet());
   };
 
   TubularApp.prototype._orderedManual11 = function (list, L, last) {
-    return this._orderedManualList(list, L, last, this.manual11SortKey, this.manual11SortDir);
+    const hitSet = (this.conferencia11 && this.conferencia11.nums)
+      ? new Set(this.conferencia11.nums.map(Number))
+      : null;
+    return this._orderedManualList(list, L, last, this.manual11SortKey, this.manual11SortDir, hitSet);
   };
 
-  TubularApp.prototype._orderedManualList = function (list, L, last, sortKey, sortDir) {
+  TubularApp.prototype._orderedManualList = function (list, L, last, sortKey, sortDir, hitSet) {
     const idxs = list.map((_, i) => i);
     const key = sortKey;
     if (!key) {
@@ -930,8 +997,8 @@
     }
     const dir = sortDir === 'desc' ? -1 : 1;
     return idxs.sort((a, b) => {
-      const va = this._manualSortValue(list[a], key, a, L, last);
-      const vb = this._manualSortValue(list[b], key, b, L, last);
+      const va = this._manualSortValue(list[a], key, a, L, last, hitSet);
+      const vb = this._manualSortValue(list[b], key, b, L, last, hitSet);
       if (typeof va === 'string' || typeof vb === 'string') {
         return dir * String(va).localeCompare(String(vb), 'pt-BR', { numeric: true });
       }
@@ -968,6 +1035,57 @@
     body.classList.toggle('d-none', !open);
   };
 
+  /** Select de concursos já apurados (dados tubulares carregados). */
+  TubularApp.prototype._fillConferir11Select = function () {
+    const sel = this.root.querySelector('#tbConferir11Select');
+    if (!sel) return;
+    const prev = sel.value;
+    const chrono = this.data.slice().sort((a, b) => (+b.contest || 0) - (+a.contest || 0));
+    const opts = ['<option value="">— concurso apurado —</option>'];
+    chrono.forEach((c) => {
+      const nums = (c.numbersAscending || c.numbersDrawOrder || []).map(Number).filter(Number.isFinite);
+      const label = `${c.contest} — ${nums.map(fmt2).join(' ')}${c.monthName ? ` (${c.monthName})` : ''}`;
+      opts.push(`<option value="${esc(String(c.contest))}">${esc(label)}</option>`);
+    });
+    sel.innerHTML = opts.join('');
+    if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+    else if (this.conferencia11) sel.value = String(this.conferencia11.contest);
+  };
+
+  TubularApp.prototype.conferir11 = function () {
+    const sel = this.root.querySelector('#tbConferir11Select');
+    const info = this.root.querySelector('#tbConferir11Info');
+    const contest = sel ? String(sel.value || '').trim() : '';
+    if (!contest) {
+      alert('Selecione um concurso apurado para conferir.');
+      return;
+    }
+    if (!this.data.length) {
+      alert('Carregue os dados antes de conferir.');
+      return;
+    }
+    const c = this.data.find(x => String(x.contest) === contest);
+    if (!c) {
+      alert('Concurso não encontrado nos resultados carregados.');
+      return;
+    }
+    const nums = (c.numbersAscending || c.numbersDrawOrder || []).map(Number).filter(Number.isFinite);
+    this.conferencia11 = { contest: c.contest, nums };
+    this.renderManual(11);
+    if (info) {
+      info.textContent = `Concurso ${c.contest}: ${nums.map(fmt2).join(' ')} — dezenas acertadas em verde`;
+    }
+  };
+
+  TubularApp.prototype.limparConferencia11 = function () {
+    this.conferencia11 = null;
+    const sel = this.root.querySelector('#tbConferir11Select');
+    const info = this.root.querySelector('#tbConferir11Info');
+    if (sel) sel.value = '';
+    if (info) info.textContent = 'Selecione um concurso e clique em Conferir';
+    this.renderManual(11);
+  };
+
   TubularApp.prototype._renderManual10DupMsg = function (alerts) {
     const el = this.root.querySelector('#tbDupMsg10');
     if (!el) return;
@@ -981,6 +1099,22 @@
     }
     el.classList.remove('d-none');
     el.innerHTML = parts.map(m => `<div>⚠ ${esc(m)}</div>`).join('');
+  };
+
+  TubularApp.prototype._renderFaltantesHint = function () {
+    const el = this.root.querySelector('#tbFaltantesHint10');
+    if (!el) return;
+    const n = this.faltantesCiclo ? this.faltantesCiclo.size : 0;
+    if (!n) {
+      el.classList.add('d-none');
+      el.textContent = '';
+      return;
+    }
+    const sample = [...this.faltantesCiclo].sort((a, b) => a - b).slice(0, 16).map(fmt2).join(' ');
+    el.classList.remove('d-none');
+    el.innerHTML = this.marked
+      ? `Seleção (laranja): <strong>${n} faltantes do ciclo</strong> · ${esc(sample)}${n > 16 ? '…' : ''} · acertos em verde vs último`
+      : `Ciclo: <strong>${n} faltantes</strong> · use «Marcar» para destacar na grade`;
   };
 
   TubularApp.prototype.renderTable = function () {
@@ -1236,12 +1370,22 @@
     const last = chrono.length
       ? (chrono[chrono.length - 1].numbersAscending || [])
       : [];
+    const hitSet = section === 11
+      ? ((this.conferencia11 && this.conferencia11.nums)
+        ? new Set(this.conferencia11.nums.map(Number))
+        : null)
+      : this._ultimoHitSet();
 
     const order = section === 10
       ? this._orderedManual10(list, L, last)
       : this._orderedManual11(list, L, last);
 
     const alertMsgs = [];
+    let sumAcertos = 0;
+    let nComAcertos = 0;
+    const emptyCols = section === 10
+      ? (14 + (this.extraMes ? 1 : 0))
+      : (13 + (this.extraMes ? 1 : 0));
     tbody.innerHTML = order.map((origIdx) => {
       const g = list[origIdx];
       const i = origIdx;
@@ -1258,9 +1402,16 @@
       const qCls = an ? this._qtdeClass(an.qtdeDigitos) : '';
       const sequences = an ? an.sequences : [];
       const repsList = rept.list || [];
+      const acertos = hitSet
+        ? valid.filter(n => hitSet.has(Number(n))).length
+        : null;
+      if (acertos != null && completeOk) {
+        sumAcertos += acertos;
+        nComAcertos += 1;
+      }
       const dezenasTd = section === 10
-        ? this._manualPosControlsHtml(section, i, nums, sequences, repsList, L, dup.dupCols)
-        : nums.map((n) => (n == null ? '—' : this._cellNum(n, sequences, repsList))).join(' ');
+        ? this._manualPosControlsHtml(section, i, nums, sequences, repsList, L, dup.dupCols, hitSet)
+        : nums.map((n) => (n == null ? '—' : this._cellNum(n, sequences, repsList, hitSet))).join(' ');
       const mesTd = (section === 10 && this.extraMes)
         ? `<td>${g.monthName
           ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc((g.monthName || '').slice(0, 3).toUpperCase())}</span>`
@@ -1268,9 +1419,14 @@
         : '';
       const rowCls = dup.hasDup ? ' class="tb-row-dup"' : '';
       if (section === 10) {
+        const acTitle = hitSet
+          ? `Acertos vs último concurso`
+          : 'Carregue os dados (aba Sequências) para conferir';
+        const acertosTd10 = `<td class="tb-acertos-td">${this._acertosSpan(acertos, acTitle)}</td>`;
         return `<tr${rowCls}>
           <td>${apostaNum}</td>
           <td class="text-nowrap">${dezenasTd}</td>
+          ${acertosTd10}
           ${mesTd}
           <td>${an ? getEmojiByCount(an.sequencesInfo.qtde).text : '—'}</td>
           <td>${an ? getEmojiByCount(an.finaisIguais.qtde).text : '—'}</td>
@@ -1290,9 +1446,14 @@
           ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc((g.monthName || '').slice(0, 3).toUpperCase())}</span>`
           : '—'}</td>`
         : '';
+      const acertosTd = `<td class="tb-acertos-td">${this._acertosSpan(
+        acertos,
+        this.conferencia11 ? `Acertos no concurso ${this.conferencia11.contest}` : 'Conferir um concurso'
+      )}</td>`;
       return `<tr${rowCls}>
         <td>${apostaNum}</td>
         <td class="text-nowrap">${dezenasTd}</td>
+        ${acertosTd}
         ${mesTd11}
         <td>${an ? getEmojiByCount(an.sequencesInfo.qtde).text : '—'}</td>
         <td>${an ? getEmojiByCount(an.finaisIguais.qtde).text : '—'}</td>
@@ -1305,9 +1466,21 @@
         <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
         <td><button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}">×</button></td>
       </tr>`;
-    }).join('') || `<tr><td colspan="${section === 10 ? (12 + (this.extraMes ? 1 : 0)) : (11 + (this.extraMes ? 1 : 0))}" class="text-muted">${section === 11 ? 'Clique em «GERAR 10 APOSTAS»' : 'Clique em "+ Adicionar Linha" ou cole jogos acima'}</td></tr>`;
+    }).join('') || `<tr><td colspan="${emptyCols}" class="text-muted">${section === 11 ? 'Clique em «GERAR 10 APOSTAS»' : 'Clique em "+ Adicionar Linha" ou cole jogos acima'}</td></tr>`;
 
-    if (section === 10) this._renderManual10DupMsg(alertMsgs);
+    if (section === 11 && hitSet) {
+      const info = this.root.querySelector('#tbConferir11Info');
+      if (info && this.conferencia11) {
+        const nums = this.conferencia11.nums.map(fmt2).join(' ');
+        const tot = sumAcertos;
+        const med = nComAcertos ? (sumAcertos / nComAcertos).toFixed(2) : '0';
+        info.textContent = `Conc. ${this.conferencia11.contest}: ${nums} · Σ acertos ${tot} · média ${med}`;
+      }
+    }
+    if (section === 10) {
+      this._renderManual10DupMsg(alertMsgs);
+      this._renderFaltantesHint();
+    }
 
     tbody.querySelectorAll('.tb-manual-input').forEach(inp => {
       inp.addEventListener('change', () => {
@@ -1389,12 +1562,17 @@
       });
       const n = validGames.length || 1;
       const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => `${fmt2(k)}(${v})`).join(' ') || '—';
-      statsEl.innerHTML = `
+      if (section === 11) {
+        const sep = '<span class="tb-stats-sep">·</span>';
+        statsEl.innerHTML = `<span class="tb-stats-line"><strong>Jogos válidos:</strong> ${validGames.length} / ${list.length}${sep}<strong>Soma média:</strong> ${validGames.length ? (sumSoma / n).toFixed(1) : 0}${sep}<strong>Pares / Ímpares méd.:</strong> ${validGames.length ? (sumP / n).toFixed(1) : 0} / ${validGames.length ? (sumI / n).toFixed(1) : 0}${sep}<strong>Média SEQ:</strong> ${validGames.length ? (sumSeq / n).toFixed(1) : 0}${sep}<strong>Top dezenas:</strong> ${top}</span>`;
+      } else {
+        statsEl.innerHTML = `
         <div class="tb-stats-item"><strong>Jogos válidos</strong>${validGames.length} / ${list.length}</div>
         <div class="tb-stats-item"><strong>Soma média</strong>${validGames.length ? (sumSoma / n).toFixed(1) : 0}</div>
         <div class="tb-stats-item"><strong>Pares / Ímpares méd.</strong>${validGames.length ? (sumP / n).toFixed(1) : 0} / ${validGames.length ? (sumI / n).toFixed(1) : 0}</div>
         <div class="tb-stats-item"><strong>Média SEQ</strong>${validGames.length ? (sumSeq / n).toFixed(1) : 0}</div>
         <div class="tb-stats-item"><strong>Top dezenas</strong>${top}</div>`;
+      }
     }
   };
 
