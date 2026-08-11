@@ -786,7 +786,7 @@
                 <li><strong>Conjunto-base</strong> — Escolha de {{ ui_config.pick_min }} a {{ ui_config.max_conjunto_base }} dezenas no volante (manual ou importação). É a matéria-prima fixa de todas as construções.</li>
                 <li><strong>Configuração da sessão</strong> — Dê um nome, defina quantas dezenas por aposta e clique em <strong>Salvar conjunto-base</strong>. Isso libera os passos seguintes.</li>
                 <li><strong>Nova construção</strong> — Escolha a estratégia (balanceada, personalizada, conforme comportamento etc.) e clique em <strong>Gerar construção</strong>. Repita para criar outras engenharias com as mesmas dezenas.</li>
-                <li><strong>Construções salvas</strong> — Revise as {{ ui_config.qtd_apostas_fixa }} apostas de cada construção. Edite, exclua ou exporte em .TXT{% if ui_config.has_mes %} com Mês da Sorte{% elif ui_config.has_time %} com Time do Coração{% elif ui_config.has_trevos %} com Trevos{% endif %}.</li>
+                <li><strong>Construções salvas</strong> — Revise as {{ ui_config.qtd_apostas_fixa }} apostas de cada construção. Edite, exclua, exporte em .TXT ou use <strong>Enviar → Manual S10</strong> para levar as apostas à Seção 10 Manual{% if ui_config.has_mes %} (com Mês da Sorte no export TXT){% elif ui_config.has_time %} (com Time do Coração){% elif ui_config.has_trevos %} (com Trevos){% endif %}.</li>
                 <li><strong>Conferir com sorteio</strong> — Compare todas as construções com um concurso real e veja qual pontuou mais (acertos em verde).</li>
             </ol>
         </div>
@@ -1037,10 +1037,20 @@
                         <span class="text-muted">Clique em Carregar para listar os padrões da análise Padrões II.</span>
                     </div>
                 </div>
-                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
                     <button type="button" class="btn btn-primary" id="ccBtnGerar" disabled
                         title="Salve o conjunto-base antes de gerar">
                         <i class="fas fa-magic"></i> Gerar construção
+                    </button>
+                    {% if ui_config.has_mes %}
+                    <select class="form-select form-select-sm" id="ccManualMes" style="max-width:220px;"
+                        title="Mês ao enviar para o Manual S10 (padrão: + Atrasado / + Frequente / Aleatório)">
+                        <option value="">Mês: da construção</option>
+                    </select>
+                    {% endif %}
+                    <button type="button" class="btn btn-success" id="ccBtnManualUltima" disabled
+                        title="Envia as apostas da última construção para a Seção 10 Manual">
+                        <i class="fas fa-share-from-square"></i> Enviar → Manual S10
                     </button>
                 </div>
                 <div class="mt-2 small text-muted" id="ccGerarHint">
@@ -1070,6 +1080,10 @@
                         <button type="button" class="btn btn-outline-secondary btn-sm" id="ccBtnExportTodas" disabled
                             title="Exportar todas as construções da sessão em um .TXT">
                             <i class="fas fa-file-export"></i> Exportar todas .TXT
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" id="ccBtnManualTodas" disabled
+                            title="Enviar todas as apostas das construções para a Seção 10 Manual">
+                            <i class="fas fa-share-from-square"></i> Enviar todas → Manual S10
                         </button>
                         <button type="button" class="btn btn-outline-success btn-sm" id="ccBtnConferirTodas" disabled
                             title="Conferir todas as construções contra o histórico completo">
@@ -1418,7 +1432,7 @@ window.__CC_DIGITOS_PAGE__ = 'construtor';
 {% if ui_config.has_mes %}
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
-<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}?v=5"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}?v=9"></script>
 {% if digitos_habilitado %}
 <script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=9"></script>
 <script src="{{ url_for('geradores_elite.static', filename='construtor_dezenas_especial.js') }}?v=1"></script>

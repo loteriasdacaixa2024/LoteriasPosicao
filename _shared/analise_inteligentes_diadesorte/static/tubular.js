@@ -527,28 +527,80 @@
       this.renderManual(11);
     });
     this._setupDrop(r.querySelector('#tbDrop10'), 10);
-    // Futuro: apostas do Elite
+    // Futuro: apostas do Elite / Construtor
     r.addEventListener('ai-elite-compare', (ev) => {
       const jogos = (ev.detail && ev.detail.jogos) || [];
       const section = (ev.detail && ev.detail.section) === 11 ? 11 : 10;
+      const replace = !!(ev.detail && ev.detail.replace);
+      const L = limitsFrom(this.root);
       const parsed = jogos.map(j => {
-        const L = limitsFrom(this.root);
-        const numbers = Array.isArray(j) ? j.map(Number).slice(0, L.sorteadas) : parseJogosTexto(String(j), L)[0]?.numbers;
+        let numbers = null;
+        let month = this.extraMes ? 1 : 0;
+        let monthName = this.extraMes ? 'Janeiro' : '';
+        if (j && typeof j === 'object' && !Array.isArray(j)) {
+          const raw = j.dezenas || j.numbers || j.nums;
+          numbers = Array.isArray(raw) ? raw.map(Number).slice(0, L.sorteadas) : null;
+          if (this.extraMes) {
+            const mn = parseInt(j.mes_num != null ? j.mes_num : j.month, 10);
+            if (Number.isFinite(mn) && mn >= 1 && mn <= 12) {
+              month = mn;
+              monthName = j.mes_nome || j.monthName || MESES[mn - 1] || '';
+            } else if (j.mes_nome || j.monthName) {
+              monthName = j.mes_nome || j.monthName;
+              const idx = MESES.findIndex(m => m === monthName);
+              if (idx >= 0) month = idx + 1;
+            }
+          }
+        } else {
+          numbers = Array.isArray(j) ? j.map(Number).slice(0, L.sorteadas) : parseJogosTexto(String(j), L)[0]?.numbers;
+        }
         if (!numbers || numbers.length < L.sorteadas) return null;
         return {
           numbers,
-          month: this.extraMes ? 1 : 0,
-          monthName: this.extraMes ? 'Janeiro' : '',
+          month,
+          monthName,
           editable: true,
           _uid: ++this._manualUid,
         };
       }).filter(Boolean);
-      if (section === 10) this.manual10 = this.manual10.concat(parsed);
-      else this.manual11 = this.manual11.concat(parsed);
+      if (!parsed.length) return;
+      if (section === 10) {
+        this.manual10 = replace ? parsed : this.manual10.concat(parsed);
+      } else {
+        this.manual11 = replace ? parsed : this.manual11.concat(parsed);
+      }
       this.renderManual(section);
+      if (ev.detail && ev.detail.aviso) {
+        const hint = this.root.querySelector(section === 10 ? '#tbFaltantesHint10' : '#tbFaltantesHint11');
+        if (hint) {
+          hint.textContent = ev.detail.aviso;
+          hint.classList.remove('d-none');
+        }
+      }
     });
     this._syncStats11Collapse();
     this._updateAuto11Hints();
+  };
+
+  TubularApp.prototype.consumeManualImport = function () {
+    const KEY = 'tb_manual10_import';
+    let raw;
+    try { raw = sessionStorage.getItem(KEY); } catch (_) { return false; }
+    if (!raw) return false;
+    try { sessionStorage.removeItem(KEY); } catch (_) { /* ignore */ }
+    let payload;
+    try { payload = JSON.parse(raw); } catch (_) { return false; }
+    const jogos = (payload && payload.jogos) || [];
+    if (!jogos.length) return false;
+    this.root.dispatchEvent(new CustomEvent('ai-elite-compare', {
+      detail: {
+        section: 10,
+        jogos,
+        replace: !!(payload && payload.replace),
+        aviso: (payload && payload.aviso) || `Importado (${jogos.length} apostas).`,
+      },
+    }));
+    return true;
   };
 
   TubularApp.prototype._setupDrop = function (el, section) {
@@ -877,6 +929,40 @@
     }).join('')}</div>`;
   };
 
+  /** HTML da coluna Mês — spinner ▲/▼ ciclando Jan–Dez (mesmo padrão das dezenas). */
+  TubularApp.prototype._manualMesControlHtml = function (section, rowIdx, g) {
+    let m = parseInt(g && g.month, 10);
+    if (!Number.isFinite(m) || m < 1 || m > 12) {
+      const idx = MESES.indexOf(g && g.monthName);
+      m = idx >= 0 ? idx + 1 : 1;
+    }
+    const nome = MESES[m - 1] || '';
+    const abrev = MESES_ABREV[m - 1] || '—';
+    return `<td class="tb-mes-td">
+      <div class="tb-mes-ctrl" title="${esc(nome || 'Mês da Sorte')}">
+        <div class="tb-pos-box tb-mes-box mes-cor ${esc(this.mesClass(nome))}" style="${this.mesStyle(nome)}">
+          <span class="tb-mes-label" aria-label="Mês ${esc(nome)}">${esc(abrev)}</span>
+          <span class="tb-pos-spin" aria-hidden="true">
+            <button type="button" class="tb-pos-btn tb-mes-btn" data-sec="${section}" data-row="${rowIdx}" data-mes-delta="1" tabindex="-1" aria-label="Mês seguinte">▲</button>
+            <button type="button" class="tb-pos-btn tb-mes-btn" data-sec="${section}" data-row="${rowIdx}" data-mes-delta="-1" tabindex="-1" aria-label="Mês anterior">▼</button>
+          </span>
+        </div>
+      </div>
+    </td>`;
+  };
+
+  TubularApp.prototype._setManualMes = function (sec, row, monthNum) {
+    const arr = sec === 10 ? this.manual10 : this.manual11;
+    if (!arr[row]) return false;
+    let m = parseInt(monthNum, 10);
+    if (!Number.isFinite(m)) m = 1;
+    // ciclo 1–12
+    m = ((m - 1) % 12 + 12) % 12 + 1;
+    arr[row].month = m;
+    arr[row].monthName = MESES[m - 1] || '';
+    return true;
+  };
+
   /** Detecta dezenas repetidas dentro de uma aposta (só entre P1–P7 da mesma linha). */
   TubularApp.prototype._manualDupInfo = function (nums) {
     const map = {};
@@ -975,7 +1061,7 @@
   };
 
   TubularApp.prototype._orderedManual10 = function (list, L, last) {
-    return this._orderedManualList(list, L, last, this.manual10SortKey, this.manual10SortDir, this._ultimoHitSet());
+    return this._orderedManualList(list, L, last, this.manual10SortKey, this.manual10SortDir, null);
   };
 
   TubularApp.prototype._orderedManual11 = function (list, L, last) {
@@ -1113,7 +1199,7 @@
     const sample = [...this.faltantesCiclo].sort((a, b) => a - b).slice(0, 16).map(fmt2).join(' ');
     el.classList.remove('d-none');
     el.innerHTML = this.marked
-      ? `Seleção (laranja): <strong>${n} faltantes do ciclo</strong> · ${esc(sample)}${n > 16 ? '…' : ''} · acertos em verde vs último`
+      ? `Seleção (laranja): <strong>${n} faltantes do ciclo</strong> · ${esc(sample)}${n > 16 ? '…' : ''}`
       : `Ciclo: <strong>${n} faltantes</strong> · use «Marcar» para destacar na grade`;
   };
 
@@ -1374,7 +1460,7 @@
       ? ((this.conferencia11 && this.conferencia11.nums)
         ? new Set(this.conferencia11.nums.map(Number))
         : null)
-      : this._ultimoHitSet();
+      : null;
 
     const order = section === 10
       ? this._orderedManual10(list, L, last)
@@ -1384,7 +1470,7 @@
     let sumAcertos = 0;
     let nComAcertos = 0;
     const emptyCols = section === 10
-      ? (14 + (this.extraMes ? 1 : 0))
+      ? (13 + (this.extraMes ? 1 : 0))
       : (13 + (this.extraMes ? 1 : 0));
     tbody.innerHTML = order.map((origIdx) => {
       const g = list[origIdx];
@@ -1410,23 +1496,16 @@
         nComAcertos += 1;
       }
       const dezenasTd = section === 10
-        ? this._manualPosControlsHtml(section, i, nums, sequences, repsList, L, dup.dupCols, hitSet)
+        ? this._manualPosControlsHtml(section, i, nums, sequences, repsList, L, dup.dupCols, null)
         : nums.map((n) => (n == null ? '—' : this._cellNum(n, sequences, repsList, hitSet))).join(' ');
       const mesTd = (section === 10 && this.extraMes)
-        ? `<td>${g.monthName
-          ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc((g.monthName || '').slice(0, 3).toUpperCase())}</span>`
-          : '—'}</td>`
+        ? this._manualMesControlHtml(section, i, g)
         : '';
       const rowCls = dup.hasDup ? ' class="tb-row-dup"' : '';
       if (section === 10) {
-        const acTitle = hitSet
-          ? `Acertos vs último concurso`
-          : 'Carregue o histórico tubular para conferir';
-        const acertosTd10 = `<td class="tb-acertos-td">${this._acertosSpan(acertos, acTitle)}</td>`;
         return `<tr${rowCls}>
           <td>${apostaNum}</td>
           <td class="text-nowrap">${dezenasTd}</td>
-          ${acertosTd10}
           ${mesTd}
           <td>${an ? getEmojiByCount(an.sequencesInfo.qtde).text : '—'}</td>
           <td>${an ? getEmojiByCount(an.finaisIguais.qtde).text : '—'}</td>
@@ -1442,9 +1521,7 @@
         </tr>`;
       }
       const mesTd11 = this.extraMes
-        ? `<td>${g.monthName
-          ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc((g.monthName || '').slice(0, 3).toUpperCase())}</span>`
-          : '—'}</td>`
+        ? this._manualMesControlHtml(section, i, g)
         : '';
       const acertosTd = `<td class="tb-acertos-td">${this._acertosSpan(
         acertos,
@@ -1518,6 +1595,19 @@
         ev.preventDefault();
         const sec = +btn.dataset.sec;
         const row = +btn.dataset.row;
+        if (btn.dataset.mesDelta != null) {
+          const delta = +btn.dataset.mesDelta || 0;
+          const arr = sec === 10 ? this.manual10 : this.manual11;
+          if (!arr[row]) return;
+          let cur = parseInt(arr[row].month, 10);
+          if (!Number.isFinite(cur) || cur < 1 || cur > 12) {
+            const idx = MESES.indexOf(arr[row].monthName);
+            cur = idx >= 0 ? idx + 1 : 1;
+          }
+          this._setManualMes(sec, row, cur + delta);
+          this.renderManual(sec);
+          return;
+        }
         const col = +btn.dataset.col;
         const delta = +btn.dataset.delta || 0;
         const arr = sec === 10 ? this.manual10 : this.manual11;
@@ -2356,6 +2446,10 @@
           try { await app.load(); } catch (_) { /* load já alerta */ }
         }
         app.showSub(initialSub);
+        if (!app.consumeManualImport()) {
+          // retry curto se o hub/aba ainda estiver montando
+          setTimeout(() => app.consumeManualImport(), 200);
+        }
       };
       start();
       return;

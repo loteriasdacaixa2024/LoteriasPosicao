@@ -555,6 +555,30 @@
 #ai-tubular-root .tb-pos-box.tb-faltante .tb-manual-input {
   color: #7c2d12 !important;
 }
+/* Mês editável (setas Jan–Dez) */
+#ai-tubular-root .tb-mes-td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+#ai-tubular-root .tb-mes-ctrl {
+  display: inline-flex;
+  align-items: center;
+}
+#ai-tubular-root .tb-mes-box {
+  min-width: 3.4rem;
+}
+#ai-tubular-root .tb-mes-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4rem;
+  padding: 0 .2rem;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .03em;
+  line-height: 1.2;
+  user-select: none;
+}
 #ai-tubular-root .tb-acertos-td {
   text-align: center;
   vertical-align: middle;

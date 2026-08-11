@@ -6504,3 +6504,39 @@ Press CTRL+C to quit
 127.0.0.1 - - [10/Aug/2026 19:41:39] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 404 -
 127.0.0.1 - - [10/Aug/2026 19:41:39] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
 127.0.0.1 - - [10/Aug/2026 19:41:41] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+
+--- iniciando 2026-08-11 05:06:07 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [11/Aug/2026 05:07:08] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-11 05:23:21 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [11/Aug/2026 05:23:52] "GET / HTTP/1.1" 200 -

@@ -7,7 +7,7 @@
         <div data-tb-panel="s10" class="{{ '' if show_s10_first else 'd-none' }}">
           <div class="tb-card">
             <h2 class="h5 fw-bold">📝 SEÇÃO 10 — MANUAL <span class="badge bg-secondary ms-1">ordem crescente</span></h2>
-            <p class="small text-muted">Crie jogos manualmente, cole texto ou arraste arquivos. Stats em tempo real. Exporta somente dezenas{% if extra_mes %} + mês{% endif %}.</p>
+            <p class="small text-muted">Crie jogos manualmente, cole texto ou arraste arquivos. Stats em tempo real. Exporta somente dezenas{% if extra_mes %} + mês (editável com ▲/▼){% endif %}.</p>
             <div class="tb-drop mb-2" id="tbDrop10" data-ai-compare="s10">Arraste TXT/CSV aqui · ou cole abaixo</div>
             <textarea id="tbPaste10" class="form-control form-control-sm mb-2" rows="3" placeholder="{% if extra_mes %}FORMATOS: 01 02 03 04 05 06 07 · 01 02 03 04 05 06 07 - Jul · 01 02 03 04 05 06 07 - Julho{% else %}FORMATO: dezenas separadas por espaço (ex.: 01 05 12 23 34 45){% endif %}"></textarea>
             <div class="d-flex flex-wrap gap-2 mb-2">
@@ -49,7 +49,7 @@
                 </tbody>
               </table>
             </div>
-            <div class="small fw-semibold mb-1">Suas apostas (comparar com o último acima)</div>
+            <div class="small fw-semibold mb-1">Suas apostas</div>
             <div id="tbFaltantesHint10" class="small text-muted mb-1 d-none"></div>
             <div id="tbDupMsg10" class="tb-dup-msg d-none mb-2" role="alert"></div>
             <div class="table-responsive">
@@ -58,7 +58,6 @@
                   <tr>
                     <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
-                    <th class="tb-sort" data-sort="acertos" title="Acertos vs último concurso">Acertos <span class="tb-sort-ind">⇅</span></th>
                     {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
                     <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>

@@ -482,6 +482,167 @@
         const has = !!(sessaoAtual && sessaoAtual.construcoes && sessaoAtual.construcoes.length);
         if ($('ccBtnConferirTodas')) $('ccBtnConferirTodas').disabled = !has;
         if ($('ccBtnExportTodas')) $('ccBtnExportTodas').disabled = !has;
+        if ($('ccBtnManualTodas')) $('ccBtnManualTodas').disabled = !has;
+        if ($('ccBtnManualUltima')) $('ccBtnManualUltima').disabled = !has;
+    }
+
+    const MANUAL_S10_URL = '/geradores-elite/escolha-tubular-apostas/?aba=manual';
+    const MANUAL_S10_KEY = 'tb_manual10_import';
+
+    function mesInfoConstrucao(c) {
+        const num = c && c.mes_num != null ? parseInt(c.mes_num, 10) : 0;
+        if (!HAS_MES || !num || num < 1 || num > 12) {
+            return { mes_num: 0, mes_nome: '' };
+        }
+        const found = MESES.find(m => parseInt(m.num, 10) === num);
+        return {
+            mes_num: num,
+            mes_nome: (found && found.nome) || '',
+        };
+    }
+
+    function nomeMesPorNum(num) {
+        const n = parseInt(num, 10);
+        if (!Number.isFinite(n) || n < 1 || n > 12) return '';
+        const found = MESES.find(m => parseInt(m.num, 10) === n);
+        if (found && found.nome) return found.nome;
+        const data = window.MesSorteSelect && MesSorteSelect.cached;
+        if (data && data.meses) {
+            const hit = data.meses.find(m => Number(m.mes_num || m.num) === n);
+            if (hit) return hit.nome || hit.mes_nome || '';
+        }
+        return '';
+    }
+
+    function jogosDeConstrucao(c) {
+        const mesDefault = mesInfoConstrucao(c);
+        const apostas = (c.apostas || []).filter(
+            a => (a.dezenas || []).map(Number).length >= PICK_MIN
+        );
+        let mesesLote = null;
+        if (HAS_MES) {
+            const sel = $('ccManualMes');
+            if (sel && String(sel.value || '').trim()) {
+                if (window.MesSorteSelect) {
+                    mesesLote = MesSorteSelect.resolveLote(
+                        sel.value,
+                        apostas.length,
+                        MesSorteSelect.cached
+                    );
+                } else {
+                    const n = parseInt(sel.value, 10);
+                    if (Number.isFinite(n) && n >= 1 && n <= 12) {
+                        mesesLote = Array(apostas.length).fill(n);
+                    }
+                }
+            }
+        }
+        return apostas.map((a, i) => {
+            const mesNum = (mesesLote && mesesLote[i])
+                ? parseInt(mesesLote[i], 10)
+                : mesDefault.mes_num;
+            return {
+                dezenas: (a.dezenas || []).map(Number),
+                mes_num: mesNum || 0,
+                mes_nome: mesNum ? nomeMesPorNum(mesNum) : (mesDefault.mes_nome || ''),
+            };
+        });
+    }
+
+    function fillManualMesSelect() {
+        if (!HAS_MES) return;
+        const sel = $('ccManualMes');
+        if (!sel) return;
+        // Mesmo padrão do export: + Atrasado → + Frequente → meses → + Aleatório
+        // + opção vazia = manter mês da construção
+        const applyPadrao = (data) => {
+            MesSorteSelect.fill(sel, data, {
+                includeEmpty: true,
+                emptyLabel: 'Mês: da construção',
+                selected: 'atrasado',
+                defaultPrefer: 'atrasado',
+            });
+            // mantém "da construção" como escolha inicial (padrão do sistema fica disponível no select)
+            sel.value = '';
+        };
+        const fallbackSimples = () => {
+            sel.innerHTML = '<option value="">Mês: da construção</option>';
+            MESES.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.num;
+                opt.textContent = `${m.nome} (${m.abrev})`;
+                sel.appendChild(opt);
+            });
+        };
+        if (window.MesSorteSelect) {
+            if (MesSorteSelect.cached) applyPadrao(MesSorteSelect.cached);
+            else MesSorteSelect.load(API).then(applyPadrao).catch(fallbackSimples);
+            return;
+        }
+        fallbackSimples();
+    }
+
+    function abrirManualS10() {
+        const w = window.open(MANUAL_S10_URL, '_blank');
+        if (!w) {
+            window.location.href = MANUAL_S10_URL;
+        }
+    }
+
+    function enviarParaManualS10(construcoes, aviso) {
+        const lista = Array.isArray(construcoes) ? construcoes : [construcoes];
+        const jogos = [];
+        lista.forEach(c => {
+            jogosDeConstrucao(c).forEach(j => jogos.push(j));
+        });
+        if (!jogos.length) {
+            alert('Nenhuma aposta para enviar ao Manual.\nGere uma construção primeiro (passo 3).');
+            return;
+        }
+        try {
+            sessionStorage.setItem(MANUAL_S10_KEY, JSON.stringify({
+                origem: 'construtor_construcoes',
+                replace: false,
+                jogos,
+                aviso: aviso || `Importado do Construtor (${jogos.length} apostas).`,
+            }));
+        } catch (e) {
+            alert('Não foi possível preparar o envio: ' + (e.message || e));
+            return;
+        }
+        abrirManualS10();
+    }
+
+    function enviarConstrucaoManual(construcaoId) {
+        if (!sessaoAtual) return;
+        const c = (sessaoAtual.construcoes || []).find(x => x.id === construcaoId);
+        if (!c) {
+            alert('Construção não encontrada.');
+            return;
+        }
+        enviarParaManualS10(c, `Importado da Construção #${c.numero} do Construtor.`);
+    }
+
+    function enviarUltimaManual() {
+        if (!sessaoAtual || !(sessaoAtual.construcoes || []).length) {
+            alert('Gere ao menos uma construção antes de enviar ao Manual S10.');
+            return;
+        }
+        const lista = sessaoAtual.construcoes;
+        const c = lista[lista.length - 1];
+        enviarParaManualS10(c, `Importado da Construção #${c.numero} (última) do Construtor.`);
+    }
+
+    function enviarTodasManual() {
+        if (!sessaoAtual || !(sessaoAtual.construcoes || []).length) {
+            alert('Não há construções para enviar.');
+            return;
+        }
+        const n = sessaoAtual.construcoes.length;
+        enviarParaManualS10(
+            sessaoAtual.construcoes,
+            `Importado de ${n} construção(ões) do Construtor.`
+        );
     }
 
     function atualizarEstadoGerar() {
@@ -1085,6 +1246,11 @@
                     <button type="button" class="btn btn-outline-secondary cc-btn-export" data-id="${c.id}" data-num="${c.numero}">
                         <i class="fas fa-file-export"></i> Exportar .TXT
                     </button>
+                    <button type="button" class="btn btn-success cc-btn-manual"
+                        data-id="${c.id}" data-num="${c.numero}"
+                        title="Enviar as apostas desta construção para a Seção 10 Manual">
+                        <i class="fas fa-share-from-square"></i> Enviar → Manual S10
+                    </button>
                 </div>
                 <div class="small text-muted mb-1">
                     Distribuição aplicada: B:${dist.baixas || 0} M:${dist.medias || 0} A:${dist.altas || 0}
@@ -1209,8 +1375,10 @@
             if (btn.classList.contains('cc-btn-editar')) abrirEditar(id);
             else if (btn.classList.contains('cc-btn-excluir')) {
                 excluirConstrucao(id, parseInt(btn.dataset.num, 10));
-            }             else if (btn.classList.contains('cc-btn-export')) {
+            } else if (btn.classList.contains('cc-btn-export')) {
                 abrirExport(id, parseInt(btn.dataset.num, 10));
+            } else if (btn.classList.contains('cc-btn-manual')) {
+                enviarConstrucaoManual(id);
             } else if (btn.classList.contains('cc-btn-conf-hist')) {
                 conferirHistoricoConstrucao(id, parseInt(btn.dataset.num, 10));
             }
@@ -1783,6 +1951,7 @@
         }
         fillMesSelect($('ccEditMes'), 'atrasado');
         if (HAS_MES) fillMesSelect($('ccExportMes'), 'atrasado');
+        if (HAS_MES) fillManualMesSelect();
 
         $('ccBtnSalvarEdicao')?.addEventListener('click', salvarEdicao);
         $('ccBtnConfirmarExport')?.addEventListener('click', confirmarExport);
@@ -1853,6 +2022,8 @@
         initPadroesII();
         $('ccBtnConferir').addEventListener('click', conferir);
         $('ccBtnExportTodas')?.addEventListener('click', abrirExportTodas);
+        $('ccBtnManualTodas')?.addEventListener('click', enviarTodasManual);
+        $('ccBtnManualUltima')?.addEventListener('click', enviarUltimaManual);
         $('ccBtnConferirTodas')?.addEventListener('click', conferirHistoricoTodas);
         $('ccBtnAtualizarPanorama')?.addEventListener('click', carregarPanoramaGeral);
         $('ccBtnIrPanorama')?.addEventListener('click', () => {
