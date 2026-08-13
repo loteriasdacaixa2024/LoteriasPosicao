@@ -16,6 +16,7 @@ COMPARE_MODALITIES = {
         "ordered_fields": [f"posicao_{i}" for i in range(1, 16)],
         "set_from_ordered": True,
         "subtitle": "15 dezenas (01–25) · ordem de sorteio",
+        "indicacao_max": 18,
     },
     "lotomania": {
         "nome": "Lotomania",
@@ -31,6 +32,7 @@ COMPARE_MODALITIES = {
         "ordered_fields": [f"d{i:02d}" for i in range(1, 21)],
         "set_from_ordered": True,
         "subtitle": "20 dezenas sorteadas (00–99) · grade 10×10",
+        "indicacao_max": 30,
     },
     "quina": {
         "nome": "Quina",
@@ -48,6 +50,7 @@ COMPARE_MODALITIES = {
         "set_method": "dezenas",
         "display_method": "dezenas_lista",
         "subtitle": "5 dezenas sorteadas (01–80) · comparação por conjunto",
+        "indicacao_max": 15,
     },
     "megasena": {
         "nome": "Mega-Sena",
@@ -65,6 +68,7 @@ COMPARE_MODALITIES = {
         "set_method": "dezenas",
         "display_method": "dezenas_lista",
         "subtitle": "6 dezenas sorteadas (01–60) · volante 6×10",
+        "indicacao_max": 15,
     },
     "duplasena": {
         "nome": "Dupla Sena",
@@ -83,6 +87,7 @@ COMPARE_MODALITIES = {
         "sorteio2_set": "sorteio2",
         "sorteio2_list": "sorteio2_lista",
         "subtitle": "6 dezenas por sorteio (01–50) · escolha 1º ou 2º sorteio",
+        "indicacao_max": 15,
     },
     "maismilionaria": {
         "nome": "+Milionária",
@@ -105,6 +110,7 @@ COMPARE_MODALITIES = {
         "trevo_set_method": "trevos",
         "trevo_list_method": "trevos_lista",
         "subtitle": "6 dezenas + 2 trevos · comparação separada",
+        "indicacao_max": 15,
     },
     "timemania": {
         "nome": "Timemania",
@@ -124,6 +130,7 @@ COMPARE_MODALITIES = {
         "extra_time": True,
         "time_max": 80,
         "subtitle": "Dezenas sorteadas + Time do Coração",
+        "indicacao_max": 20,
     },
     "supersete": {
         "nome": "Super Sete",
@@ -139,6 +146,7 @@ COMPARE_MODALITIES = {
         "ordered_fields": [f"coluna_{i}" for i in range(1, 8)],
         "set_from_ordered": True,
         "subtitle": "7 colunas · dígitos 0–9 · repetição por coluna",
+        "indicacao_max": 7,
     },
     "diadesorte": {
         "nome": "Dia de Sorte",
@@ -159,6 +167,7 @@ COMPARE_MODALITIES = {
         "mes_field": "mes_num",
         "mes_label_field": "mes_nome",
         "subtitle": "7 dezenas (01–31) + Mês da Sorte · ordem de sorteio",
+        "indicacao_max": 15,
     },
 }
 

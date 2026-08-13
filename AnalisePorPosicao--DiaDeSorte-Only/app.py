@@ -78,6 +78,7 @@ def create_app():
         return redirect('/desdobramento/' + subpath, code=302)
     with app.app_context():
         import models.sorteio_diadesorte
+        import models.caixa_excel_premiacao
         import models.desdobramento
         import models.construtor_construcoes
         import models.comportamento_estrategia

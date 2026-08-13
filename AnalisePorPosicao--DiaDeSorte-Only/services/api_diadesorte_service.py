@@ -152,6 +152,11 @@ class ApiDiaDeSorteService:
             mes_num=m_num, mes_nome=m_nome,
             ganhadores_7=g7,
         ))
+        try:
+            from services.caixa_excel_service import upsert_premiacao_from_api
+            upsert_premiacao_from_api(concurso, dados)
+        except Exception:
+            pass
         return True
 
     @classmethod

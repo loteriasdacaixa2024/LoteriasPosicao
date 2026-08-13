@@ -14105,3 +14105,536 @@ Press CTRL+C to quit
 127.0.0.1 - - [12/Aug/2026 19:52:53] "GET /api/status-banco HTTP/1.1" 200 -
 127.0.0.1 - - [12/Aug/2026 19:52:54] "GET /api/status-banco HTTP/1.1" 200 -
 127.0.0.1 - - [12/Aug/2026 19:52:55] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:52:19] "GET /api/premiacao-caixa?page=1&size=3 HTTP/1.1" 404 -
+
+--- iniciando 2026-08-12 20:56:36 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://192.168.11.212:5153
+Press CTRL+C to quit
+127.0.0.1 - - [12/Aug/2026 20:56:41] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:05] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:05] "GET /geradores-elite/static/construtor_dezenas_especial.js?v=1 HTTP/1.1" 304 -
+127.0.0.1 - - [12/Aug/2026 20:58:05] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/static/construtor_construcoes.js?v=9 HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 304 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 304 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:06] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:19] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:19] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:20] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:20] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:21] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:21] "GET /api/premiacao-caixa?page=1&size=50 HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:29] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:30] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:30] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:31] "GET /analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [12/Aug/2026 20:58:31] "GET /api/premiacao-caixa?page=1&size=50 HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 05:43:24 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 05:43:32] "GET / HTTP/1.1" 200 -
+[API Caixa] Dia de Sorte 1270/1270...127.0.0.1 - - [13/Aug/2026 05:43:43] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 05:43:43] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 05:43:44] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 05:43:46] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 05:43:46] "GET /api/premiacao-caixa?page=1&size=50 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 05:44:02] "POST /api/premiacao-caixa/atualizar HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 05:44:02] "GET /api/premiacao-caixa?page=1&size=50 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 05:54:50] "GET /analise/api/ciclo-cobertura/ciclo-atual?v=1786611286621 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:08:13] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:08:13] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:08:15] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:08:17] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:08:17] "GET /api/premiacao-caixa?page=1&size=50 HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 06:17:13 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 06:17:24] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:24:21] "GET /analise/api/ciclo-cobertura/ciclo-atual?v=1786613059263 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:24:26] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:24:27] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:24:29] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:24:31] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:24:32] "GET /api/premiacao-caixa?page=1&size=50 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:24:32] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:26:19] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:26:20] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:26:21] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:26:23] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:26:23] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:26:24] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:26:24] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:26:25] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:26:33] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:35:16] "GET /analise/comparar-concursos/api/comparar?modo=posicional&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 06:35:22] "GET /analise/comparar-concursos/api/comparar?modo=hibrido&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:39:34] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:39:35] "GET /api/premiacao-caixa?page=1&size=50 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:39:35] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:39:39] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:39:40] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:39:41] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:39:41] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:27] "GET /analise/ciclo-cobertura/metricas/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:27] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:28] "GET /analise/api/ciclo-cobertura/metricas-historicas?v=1786618227612 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:30] "GET /analise/ciclo-cobertura/inteligencia-operacional/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:30] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:31] "GET /analise/api/ciclo-cobertura/inteligencia-operacional?v=1786618230925 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:42] "GET /geradores-elite/ciclo-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:42] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:42] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 304 -
+127.0.0.1 - - [13/Aug/2026 07:50:43] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:43] "GET /geradores-elite/api/ciclo-apostas/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:47] "GET /geradores-elite/api/ciclo-apostas/ritmo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:48] "GET /geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:50:48] "GET /geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 07:53:05 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 07:53:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:53:27] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:53:27] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:53:27] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:53:28] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:53:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=15&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:53:29] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:54:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=15&offset=15 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:59:42] "GET /analise/concentracao-acertos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:59:43] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 07:59:43] "GET /analise/api/concentracao-acertos/status HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:00:30] "POST /analise/api/concentracao-acertos/backtest HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:00:31] "GET /analise/api/concentracao-acertos/comparar?criterio_pool=atraso&perfil=frequencia&limite=1000 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:01:02] "POST /analise/api/concentracao-acertos/backtest HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:01:03] "GET /analise/api/concentracao-acertos/comparar?criterio_pool=atraso&perfil=frequencia&limite=1000 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:01:37] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:01:37] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:01:37] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:01:38] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:01:38] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:01:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=15&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:09:37] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:09:37] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:09:38] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:09:38] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:09:38] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:09:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=15&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:12:48] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:14:51] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:15:15] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 08:16:52 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 08:17:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:17:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:17:36] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:17:36] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:17:36] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:17:37] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:17:37] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:17:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=15&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:21:55] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:21:55] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:21:55] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:21:56] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:21:56] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:21:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=15&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:22:34] "GET /analise/comparar-concursos/api/comparar?modo=posicional&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:22:37] "GET /analise/comparar-concursos/api/comparar?modo=hibrido&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 08:22:44 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 08:22:59] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:29:56] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:29:56] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:29:57] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:29:57] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:29:57] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:29:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=15&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:30:14] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1268&concurso_b=1265 HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 08:30:25 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 08:30:31] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:39:37] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:39:38] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:39:38] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:39:38] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:39:39] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:39:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=15&offset=0 HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 08:40:16 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 08:40:30] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:41:36] "GET /analise/comparar-concursos/api/comparar?modo=posicional&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:41:36] "GET /analise/comparar-concursos/api/comparar?modo=hibrido&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:41:39] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:47:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=15&offset=15 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:01] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:01] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:01] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:02] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:02] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:38] "GET /analise/comparar-concursos/api/comparar?modo=hibrido&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 08:50:42 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 08:50:57] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 08:50:57] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 09:08:19 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 09:08:27] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:33] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:33] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:33] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:33] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:34] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:08:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 09:43:11 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 09:43:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:12] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:13] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:13] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:14] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:14] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 09:44:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:03:25] "POST /analise/comparar-concursos/api/combinacoes-auto HTTP/1.1" 200 -
+
+--- iniciando 2026-08-13 10:16:15 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+127.0.0.1 - - [13/Aug/2026 10:16:34] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:37] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:37] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:38] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:38] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:38] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:43] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:43] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:16:52] "POST /analise/comparar-concursos/api/combinacoes-auto HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:33] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:33] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:34] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:34] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:34] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1269&concurso_b=1270 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:38] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:38] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:39] "GET /geradores-elite/static/construtor_construcoes.js?v=9 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:39] "GET /geradores-elite/static/construtor_digitos.js?v=9 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:39] "GET /geradores-elite/static/construtor_dezenas_especial.js?v=1 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:39] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:39] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:39] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:40] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:40] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:40] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:40] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:40] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2026 10:21:40] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -

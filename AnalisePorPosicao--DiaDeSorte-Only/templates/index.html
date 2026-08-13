@@ -42,51 +42,68 @@
     }
 
     .draw-dezenas-wrap {
-        overflow-x: auto;
         max-width: 100%;
     }
 
     .draw-dezenas-grid {
-        display: grid;
-        column-gap: 6px;
-        align-items: end;
-    }
-
-    .draw-col {
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        flex-wrap: nowrap;
         gap: 4px;
+        align-items: center;
+        justify-content: center;
     }
 
     .dez-ball {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: var(--accent);
         color: #2d2d2d;
         font-weight: 800;
-        font-size: .82rem;
+        font-size: .78rem;
         box-shadow: 0 2px 5px rgba(230, 168, 0, .4);
-        justify-self: center;
+        flex: 0 0 auto;
     }
 
-    .dez-ball-ordem {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: transparent;
-        border: 1.5px solid var(--accent);
-        color: var(--primary);
+    .ultimo-destaque {
+        padding: .9rem 1rem .75rem;
+        border-bottom: 1px solid #f0e2b8;
+        background: #fffdf8;
+        text-align: center;
+    }
+    .ultimo-destaque .ud-titulo {
         font-weight: 800;
-        font-size: .72rem;
-        justify-self: center;
+        color: var(--primary);
+        font-size: 1.05rem;
+        margin-bottom: .45rem;
+    }
+    .ultimo-destaque .ud-mes {
+        margin-top: .4rem;
+        font-size: .88rem;
+        color: #555;
+    }
+    .ultimo-destaque .ud-mes strong {
+        color: var(--accent-mes);
+    }
+
+    #premiacaoCaixaTabela thead th.px-sort {
+        cursor: pointer;
+        user-select: none;
+    }
+    #premiacaoCaixaTabela thead th.px-sort:hover {
+        filter: brightness(1.12);
+    }
+    #premiacaoCaixaTabela thead th.px-sort .px-sort-ind {
+        font-size: .65rem;
+        margin-left: .2rem;
+        opacity: .55;
+        font-weight: 700;
+    }
+    #premiacaoCaixaTabela thead th.px-sort.px-sort-on .px-sort-ind {
+        opacity: 1;
     }
 
     .mes-badge {
@@ -109,11 +126,128 @@
         display: none;
     }
 
-    .sorteio-row {
-        display: grid;
-        grid-template-columns: minmax(170px, 195px) minmax(280px, 1fr) auto;
-        gap: 1.25rem 1.25rem;
+    .mes-abrev {
+        font-weight: 700;
+        color: var(--accent-mes);
+    }
+
+    .premiacao-wrap {
+        max-height: 560px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: 100%;
+    }
+    #premiacaoCaixaTabela {
+        width: 100%;
+        table-layout: auto;
+        font-size: .78rem;
+        margin-bottom: 0;
+    }
+    #premiacaoCaixaTabela thead th {
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: .4rem .35rem;
+    }
+    #premiacaoCaixaTabela td {
+        vertical-align: middle;
+        font-variant-numeric: tabular-nums;
+        padding: .35rem .3rem;
+    }
+    #premiacaoCaixaTabela td.td-cidade,
+    #premiacaoCaixaTabela th.col-cidade {
+        text-align: left;
+        padding-left: .5rem;
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.25;
+        max-width: 9.5rem;
+    }
+    #premiacaoCaixaTabela td.td-uf,
+    #premiacaoCaixaTabela th.col-uf {
+        text-align: center;
+        white-space: normal;
+        line-height: 1.25;
+        width: 2.6rem;
+    }
+    #premiacaoCaixaTabela td.td-num,
+    #premiacaoCaixaTabela th.col-num {
+        text-align: center;
+        white-space: nowrap;
+    }
+    #premiacaoCaixaTabela td.td-reais {
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        padding-left: .25rem;
+        padding-right: .25rem;
+    }
+    #premiacaoCaixaTabela td.td-reais .rateio-val {
+        display: inline-block;
+        text-align: right;
+        min-width: 7.6em;
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+    }
+    #premiacaoCaixaTabela td.td-dezenas {
+        padding: .3rem .25rem;
+        white-space: nowrap;
+    }
+    #premiacaoCaixaTabela td.td-dezenas .dez-ball {
+        width: 22px;
+        height: 22px;
+        font-size: .62rem;
+        box-shadow: 0 1px 3px rgba(230, 168, 0, .35);
+    }
+    #premiacaoCaixaTabela td.td-dezenas .draw-dezenas-grid {
+        gap: 3px;
+    }
+    #premiacaoCaixaTabela td.td-mes {
+        text-align: center;
+        white-space: nowrap;
+    }
+    #premiacaoCaixaPager {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         align-items: center;
+        gap: .35rem;
+        font-size: .82rem;
+        padding: .75rem .85rem;
+        width: 100%;
+    }
+    #premiacaoCaixaPager .px-page {
+        min-width: 2rem;
+        font-weight: 700;
+    }
+    #premiacaoCaixaPager .px-page.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+    #rankingUfTabela {
+        font-size: .82rem;
+        width: 100%;
+        margin-bottom: 0;
+    }
+    #rankingUfTabela thead th {
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+    #rankingUfTabela td {
+        vertical-align: middle;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
     }
 </style>
 
@@ -216,12 +350,62 @@
 </div>
 
 <div class="card border-0 shadow-sm mt-4">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-history me-2"></i>Sorteios e premiação — Dia de Sorte</span>
+        <button type="button" class="btn btn-sm ms-auto" id="btnPremiacaoCaixa"
+            style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:700;"
+            title="Busca ganhadores, rateio, cidade e UF na API da CAIXA (mesma fonte das dezenas)">
+            <i class="fas fa-cloud-download-alt me-1"></i>Atualizar premiação (API)
+        </button>
+    </div>
+    <div id="ultimoResultadoDestaque" class="ultimo-destaque">
+        <div class="text-muted small">Carregando último resultado…</div>
+    </div>
+    <div class="px-3 pt-2 small text-muted" id="premiacaoCaixaStatus">Histórico completo · um concurso por linha · dezenas, mês, cidade/UF, ganhadores e rateio.</div>
+    <div class="premiacao-wrap">
+        <table class="table table-sm table-bordered mb-0" id="premiacaoCaixaTabela">
+            <thead>
+                <tr>
+                    <th class="col-num px-sort" data-sort="concurso" title="Clique para ordenar">Concurso <span class="px-sort-ind">⇅</span></th>
+                    <th class="col-num px-sort" data-sort="data" title="Clique para ordenar">Data <span class="px-sort-ind">⇅</span></th>
+                    <th class="px-sort" data-sort="dezenas" title="Clique para classificar as dezenas (ordem do sorteio ou crescente)">Dezenas <span class="px-sort-ind">⇅</span></th>
+                    <th class="px-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="px-sort-ind">⇅</span></th>
+                    <th class="col-cidade px-sort" data-sort="cidade" title="Clique para ordenar">Cidade <span class="px-sort-ind">⇅</span></th>
+                    <th class="col-uf px-sort" data-sort="uf" title="Clique para ordenar">UF <span class="px-sort-ind">⇅</span></th>
+                    <th class="col-num px-sort" data-sort="g7" title="Clique para ordenar">Ganh. 7 <span class="px-sort-ind">⇅</span></th>
+                    <th class="px-sort" data-sort="r7" title="Clique para ordenar">Rateio 7 <span class="px-sort-ind">⇅</span></th>
+                    <th class="col-num px-sort" data-sort="g6" title="Clique para ordenar">Ganh. 6 <span class="px-sort-ind">⇅</span></th>
+                    <th class="px-sort" data-sort="r6" title="Clique para ordenar">Rateio 6 <span class="px-sort-ind">⇅</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="10" class="text-muted text-center py-3">Carregando…</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="premiacaoCaixaPager"></div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
     <div class="card-header fw-bold"
         style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
-        <i class="fas fa-history me-2"></i>Últimos Sorteios
+        <i class="fas fa-trophy me-2"></i>Ranking de UF que mais paga
     </div>
-    <div class="card-body p-0" id="ultimosSorteios">
-        <div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Carregando...</div>
+    <div class="px-3 pt-2 small text-muted">Cada concurso conta no máximo 1 vez por UF (mesmo com várias cidades no estado).</div>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0" id="rankingUfTabela">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>UF</th>
+                    <th>Quantidade de registros</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="3" class="text-muted text-center py-3">Carregando…</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
@@ -300,7 +484,7 @@
                 await new Promise(res => setTimeout(res, 400));
             }
             await carregarStatusBanco();
-            await carregarUltimos();
+            await carregarPremiacaoCaixa(1);
             if (totalImportado > 0) log.innerHTML += `<br><span class="text-success fw-bold">Total importado nesta sessão: ${totalImportado}</span>`;
         } catch (e) {
             log.innerHTML = `<span class="text-danger">${e.message}</span>`;
@@ -325,50 +509,307 @@
             }
         } catch (e) { }
     }
-    async function carregarUltimos() {
-        const div = document.getElementById('ultimosSorteios');
-        const fmtDez = (n) => String(n).padStart(2, '0');
-        const renderDrawPairs = (sorted, ordem, topCls = 'dez-ball', botCls = 'dez-ball-ordem', colW = 36) => {
-            const n = Math.max((sorted || []).length, (ordem || []).length);
-            const cols = Array.from({ length: n }, (_, i) => `
-                <div class="draw-col">
-                    ${sorted && sorted[i] != null ? `<span class="${topCls}">${fmtDez(sorted[i])}</span>` : ''}
-                    ${ordem && ordem[i] != null ? `<span class="${botCls}">${fmtDez(ordem[i])}</span>` : ''}
-                </div>`).join('');
-            return `<div class="draw-dezenas-wrap"><div class="draw-dezenas-grid" style="grid-template-columns: repeat(${n}, ${colW}px)">${cols}</div></div>`;
-        };
-        const renderBalls = (dezenas, cls) => (dezenas || []).map(d => `<span class="${cls}">${fmtDez(d)}</span>`).join('');
-        const renderMesBadge = (s) => {
-            if (!s.mes_nome) return '';
-            const abrev = s.mes_abrev || s.mes_nome.substring(0, 3);
-            const badgeClass = `mes-nome-${s.mes_nome}`;
-            return `<span class="mes-badge ${badgeClass}" title="${s.mes_nome}"><i class="far fa-calendar-alt me-1"></i>${abrev}</span>`;
-        };
-        try {
-            const r = await fetch('/analise/api/ultimos'); const d = await r.json();
-            if (d.status !== 'success') { div.innerHTML = '<div class="text-danger p-3">Erro.</div>'; return; }
-            let html = '';
-            d.sorteios.forEach(s => {
-                const ordem = s.dezenas_ordem && s.dezenas_ordem.length ? s.dezenas_ordem : s.dezenas;
-                html += `<div class="px-3 py-3 border-bottom d-flex justify-content-center">
-                    <div class="sorteio-row">
-                        <div class="fw-bold text-end" style="color:var(--primary); white-space:nowrap;">
-                            <span style="font-size:1.05rem;">#${s.concurso}</span>
-                            <span class="text-muted fw-normal mx-2">|</span>
-                            <span class="text-muted">${s.data}</span>
-                        </div>
-                        ${renderDrawPairs(s.dezenas, ordem, 'dez-ball', 'dez-ball-ordem', 36)}
-                        ${renderMesBadge(s)}
-                    </div>
-                </div>`;
-            });
-            div.innerHTML = html || '<div class="text-muted p-3 text-center">Sincronize os dados primeiro.</div>';
-        } catch (e) { div.innerHTML = `<div class="text-danger p-3">${e.message}</div>`; }
+    let PREMIACAO_PAGE = 1;
+    const PREMIACAO_SIZE = 50;
+    let PREMIACAO_DEZ_CRESCENTE = false;
+    let PREMIACAO_LINHAS = [];
+    let PREMIACAO_SORT = { key: 'concurso', dir: 'desc' };
+    let PREMIACAO_ULTIMO = null;
+    function escHtml(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
+    const fmtDez = (n) => String(n).padStart(2, '0');
+    function htmlDezenas(nums) {
+        const balls = (nums || []).filter(n => n != null).map(d => `<span class="dez-ball">${fmtDez(d)}</span>`).join('');
+        return `<div class="draw-dezenas-wrap"><div class="draw-dezenas-grid">${balls}</div></div>`;
+    }
+    function htmlLocCampo(locs, campo) {
+        const vals = (locs || []).map(l => String((l && l[campo]) || '').trim());
+        if (!vals.some(v => v)) return '';
+        return vals.map(v => escHtml(v)).join('<br>');
+    }
+    function mesAbrevDe(r) {
+        const nome = (r && (r.mes_nome || r.mes_sorte)) || '';
+        if (!nome) return '';
+        return r.mes_abrev || nome.substring(0, 3);
+    }
+    function htmlMes(r) {
+        const nome = r.mes_nome || r.mes_sorte || '';
+        const abrev = mesAbrevDe(r);
+        if (!abrev) return '';
+        return `<span class="mes-badge mes-nome-${escHtml(nome)}" title="${escHtml(nome)}">${escHtml(abrev)}</span>`;
+    }
+    function htmlRateio(txt) {
+        if (!txt || txt === '—') return '—';
+        return `<span class="rateio-val">${escHtml(txt)}</span>`;
+    }
+    function renderUltimoDestaque() {
+        const box = document.getElementById('ultimoResultadoDestaque');
+        if (!box) return;
+        const r = PREMIACAO_ULTIMO;
+        if (!r) {
+            box.innerHTML = '<div class="text-muted small">Sincronize os dados para ver o último resultado.</div>';
+            return;
+        }
+        const dez = (r.dezenas && r.dezenas.length) ? r.dezenas : (r.dezenas_ordem || []);
+        const abrev = mesAbrevDe(r);
+        box.innerHTML = `
+            <div class="ud-titulo">Concurso ${escHtml(r.concurso)} — ${escHtml(r.data || '')}</div>
+            ${htmlDezenas(dez)}
+            ${abrev ? `<div class="ud-mes">Mês da Sorte: ${htmlMes(r)}</div>` : ''}`;
+    }
+    function dezenasDaLinha(l) {
+        return PREMIACAO_DEZ_CRESCENTE ? (l.dezenas || []) : (l.dezenas_ordem || l.dezenas || []);
+    }
+    function dataSortKey(s) {
+        const m = String(s || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (!m) return String(s || '');
+        return `${m[3]}${m[2].padStart(2,'0')}${m[1].padStart(2,'0')}`;
+    }
+    function valorSort(l, key) {
+        if (key === 'concurso') return Number(l.concurso) || 0;
+        if (key === 'data') return dataSortKey(l.data);
+        if (key === 'mes') return Number(l.mes_num) || String(l.mes_nome || '').toLowerCase();
+        if (key === 'cidade') return String(l.cidade || '').toLowerCase();
+        if (key === 'uf') return String(l.uf || '').toLowerCase();
+        if (key === 'g7') return Number(l.g7) || 0;
+        if (key === 'r7') return Number(l.r7n) || 0;
+        if (key === 'g6') return Number(l.g6) || 0;
+        if (key === 'r6') return Number(l.r6n) || 0;
+        return '';
+    }
+    function linhasExibicao() {
+        const { key, dir } = PREMIACAO_SORT;
+        const rows = PREMIACAO_LINHAS.slice();
+        if (!key || key === 'dezenas') return rows;
+        const mul = dir === 'asc' ? 1 : -1;
+        rows.sort((a, b) => {
+            const va = valorSort(a, key), vb = valorSort(b, key);
+            if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * mul;
+            return String(va).localeCompare(String(vb), 'pt-BR', { numeric: true, sensitivity: 'base' }) * mul;
+        });
+        return rows;
+    }
+    function atualizarIndicadoresSort() {
+        document.querySelectorAll('#premiacaoCaixaTabela th.px-sort').forEach(th => {
+            const key = th.dataset.sort;
+            const ind = th.querySelector('.px-sort-ind');
+            th.classList.remove('px-sort-on');
+            if (key === 'dezenas') {
+                if (PREMIACAO_DEZ_CRESCENTE) {
+                    th.classList.add('px-sort-on');
+                    if (ind) ind.textContent = '▲';
+                    th.title = 'Dezenas em ordem crescente — clique para voltar à ordem do sorteio';
+                } else {
+                    if (ind) ind.textContent = '⇅';
+                    th.title = 'Dezenas na ordem do sorteio — clique para classificar em ordem crescente';
+                }
+                return;
+            }
+            if (key === PREMIACAO_SORT.key) {
+                th.classList.add('px-sort-on');
+                if (ind) ind.textContent = PREMIACAO_SORT.dir === 'asc' ? '▲' : '▼';
+            } else if (ind) {
+                ind.textContent = '⇅';
+            }
+        });
+    }
+    function linhasPremiacao(registros) {
+        const rows = [];
+        const seen = new Set();
+        (registros || []).forEach(r => {
+            const conc = r.concurso;
+            if (conc == null || seen.has(conc)) return;
+            seen.add(conc);
+            const ordem = r.dezenas_ordem || r.bolas || [];
+            const sorted = (r.dezenas && r.dezenas.length)
+                ? r.dezenas
+                : [...ordem].filter(n => n != null).sort((a, b) => a - b);
+            const locs = (r.localidades && r.localidades.length) ? r.localidades : [];
+            rows.push({
+                concurso: conc,
+                data: r.data || '',
+                dezenas: sorted,
+                dezenas_ordem: ordem,
+                mes_nome: r.mes_nome || r.mes_sorte || '',
+                mes_abrev: r.mes_abrev || '',
+                mes_sorte: r.mes_sorte || '',
+                mes_num: r.mes_num || 0,
+                locs,
+                cidade: locs.map(l => l.cidade || '').filter(Boolean).join(' '),
+                uf: locs.map(l => l.uf || '').filter(Boolean).join(' '),
+                g7: r.ganhadores_7 ?? 0,
+                r7: r.rateio_7_fmt || '—',
+                r7n: Number(r.rateio_7) || 0,
+                g6: r.ganhadores_6 ?? 0,
+                r6: r.rateio_6_fmt || '—',
+                r6n: Number(r.rateio_6) || 0,
+            });
+        });
+        return rows;
+    }
+    function htmlPager(p, pages) {
+        let start = Math.max(1, p - 2);
+        let end = Math.min(pages, start + 4);
+        start = Math.max(1, end - 4);
+        const nums = [];
+        for (let i = start; i <= end; i++) nums.push(i);
+        return `
+            <button type="button" class="btn btn-sm btn-outline-secondary" ${p<=1?'disabled':''} data-px="${p-1}">‹ Anterior</button>
+            ${nums.map(n => `<button type="button" class="btn btn-sm btn-outline-secondary px-page${n===p?' active':''}" data-px="${n}">${n}</button>`).join('')}
+            <button type="button" class="btn btn-sm btn-outline-secondary" ${p>=pages?'disabled':''} data-px="${p+1}">Próximo ›</button>`;
+    }
+    async function carregarPremiacaoCaixa(page) {
+        PREMIACAO_PAGE = page || 1;
+        const tbody = document.querySelector('#premiacaoCaixaTabela tbody');
+        const status = document.getElementById('premiacaoCaixaStatus');
+        const pager = document.getElementById('premiacaoCaixaPager');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="10" class="text-muted text-center py-3">Carregando…</td></tr>';
+        try {
+            const r = await fetch(`/api/premiacao-caixa?page=${PREMIACAO_PAGE}&size=${PREMIACAO_SIZE}`);
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Falha');
+            const linhas = linhasPremiacao(d.registros || []);
+            if (!d.total) {
+                PREMIACAO_LINHAS = [];
+                PREMIACAO_ULTIMO = null;
+                renderUltimoDestaque();
+                tbody.innerHTML = '<tr><td colspan="10" class="text-muted text-center py-3">Sincronize os dados para ver os sorteios e a premiação.</td></tr>';
+                if (pager) pager.innerHTML = '';
+                return;
+            }
+            PREMIACAO_LINHAS = linhas;
+            if (PREMIACAO_PAGE === 1 && linhas.length) {
+                const top = linhas.reduce((a, b) => (Number(a.concurso) > Number(b.concurso) ? a : b));
+                if (!PREMIACAO_ULTIMO || Number(top.concurso) >= Number(PREMIACAO_ULTIMO.concurso)) {
+                    PREMIACAO_ULTIMO = top;
+                }
+            }
+            renderUltimoDestaque();
+            renderPremiacaoLinhas(tbody);
+            if (status) {
+                const modo = PREMIACAO_DEZ_CRESCENTE ? 'dezenas em ordem crescente' : 'dezenas na ordem do sorteio';
+                status.textContent = `Histórico: ${d.total} concursos (1 ao último) · um concurso por linha · pág. ${d.page}/${d.pages} · ${modo}.`;
+            }
+            if (pager) {
+                pager.innerHTML = htmlPager(d.page, d.pages);
+                pager.querySelectorAll('[data-px]').forEach(b => {
+                    b.addEventListener('click', () => carregarPremiacaoCaixa(+b.dataset.px));
+                });
+            }
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="10" class="text-danger text-center py-3">${escHtml(e.message || e)}</td></tr>`;
+        }
+    }
+    function renderPremiacaoLinhas(tbody) {
+        tbody = tbody || document.querySelector('#premiacaoCaixaTabela tbody');
+        if (!tbody) return;
+        const linhas = linhasExibicao();
+        tbody.innerHTML = linhas.map(l => `
+            <tr>
+                <td class="td-num"><strong>${escHtml(l.concurso)}</strong></td>
+                <td class="td-num">${escHtml(l.data)}</td>
+                <td class="td-dezenas">${htmlDezenas(dezenasDaLinha(l))}</td>
+                <td class="td-mes">${htmlMes(l)}</td>
+                <td class="td-cidade">${htmlLocCampo(l.locs, 'cidade')}</td>
+                <td class="td-uf">${htmlLocCampo(l.locs, 'uf')}</td>
+                <td class="td-num">${escHtml(l.g7)}</td>
+                <td class="td-reais">${htmlRateio(l.r7)}</td>
+                <td class="td-num">${escHtml(l.g6)}</td>
+                <td class="td-reais">${htmlRateio(l.r6)}</td>
+            </tr>`).join('');
+        atualizarIndicadoresSort();
+    }
+    function clicarTituloPremiacao(ev) {
+        const th = ev.target.closest('th.px-sort');
+        if (!th) return;
+        const key = th.dataset.sort;
+        if (key === 'dezenas') {
+            PREMIACAO_DEZ_CRESCENTE = !PREMIACAO_DEZ_CRESCENTE;
+        } else {
+            if (PREMIACAO_SORT.key === key) {
+                PREMIACAO_SORT.dir = PREMIACAO_SORT.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                PREMIACAO_SORT = { key, dir: (key === 'concurso' || key === 'data') ? 'desc' : 'asc' };
+            }
+        }
+        renderPremiacaoLinhas();
+        const status = document.getElementById('premiacaoCaixaStatus');
+        if (status && /dezenas/.test(status.textContent || '')) {
+            status.textContent = status.textContent
+                .replace('dezenas na ordem do sorteio', '§DEZ§')
+                .replace('dezenas em ordem crescente', '§DEZ§')
+                .replace('§DEZ§', PREMIACAO_DEZ_CRESCENTE ? 'dezenas em ordem crescente' : 'dezenas na ordem do sorteio');
+        }
+    }
+    async function atualizarPremiacaoCaixa() {
+        const btn = document.getElementById('btnPremiacaoCaixa');
+        const status = document.getElementById('premiacaoCaixaStatus');
+        const labelOk = '<i class="fas fa-cloud-download-alt me-1"></i>Atualizar premiação (API)';
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Buscando na API…'; }
+        if (status) status.textContent = 'Buscando ganhadores, rateio, cidade e UF na API da CAIXA…';
+        let continuar = true, totalOk = 0;
+        try {
+            while (continuar) {
+                const r = await fetch('/api/premiacao-caixa/atualizar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fonte: 'api', limite: 80 }),
+                });
+                const d = await r.json();
+                if (d.status === 'error') throw new Error(d.message || 'Falha ao atualizar');
+                totalOk += d.sucessos || 0;
+                continuar = !!d.continuar;
+                if (status) status.textContent = d.message || 'Atualizando…';
+                await carregarPremiacaoCaixa(1);
+                if (!continuar) break;
+                await new Promise(res => setTimeout(res, 400));
+            }
+            if (status && totalOk) {
+                status.textContent = `Premiação da API atualizada: ${totalOk} concurso(s) neste ciclo.`;
+            }
+            await carregarRankingUf();
+        } catch (e) {
+            if (status) status.textContent = 'Erro: ' + (e.message || e);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = labelOk;
+            }
+        }
+    }
+
+    async function carregarRankingUf() {
+        const tbody = document.querySelector('#rankingUfTabela tbody');
+        if (!tbody) return;
+        try {
+            const r = await fetch('/api/ranking-uf-pagamentos');
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Falha');
+            const itens = d.ranking || [];
+            if (!itens.length) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-muted text-center py-3">Sem registros de cidade/UF para montar o ranking.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = itens.map(it => `
+                <tr>
+                    <td>${escHtml(it.posicao)}º</td>
+                    <td><strong>${escHtml(it.uf)}</strong></td>
+                    <td>${escHtml(it.quantidade)}</td>
+                </tr>`).join('');
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center py-3">${escHtml(e.message || e)}</td></tr>`;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
         await carregarStatusBanco();
         await carregarStats();
-        await carregarUltimos();
+        await carregarPremiacaoCaixa(1);
+        await carregarRankingUf();
+        document.getElementById('btnPremiacaoCaixa')?.addEventListener('click', atualizarPremiacaoCaixa);
+        document.querySelector('#premiacaoCaixaTabela thead')?.addEventListener('click', clicarTituloPremiacao);
     });
 </script>
 {% endblock %}

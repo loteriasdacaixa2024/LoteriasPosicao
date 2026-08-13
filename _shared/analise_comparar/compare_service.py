@@ -274,3 +274,96 @@ class CompararConcursosService:
             },
             "grade_colunas": grade,
         }
+
+    def indicacao_padrao(self) -> Dict[str, Any]:
+        """Pool inicial da linha SUPER (rastreável) + faixa do volante."""
+        cfg = self.cfg
+        dmin = int(cfg["dezena_min"])
+        dmax = int(cfg["dezena_max"])
+        n_sort = len(cfg.get("ordered_fields") or []) or 7
+        max_ind = int(cfg.get("indicacao_max") or max(n_sort * 2, n_sort))
+        tamanho = min(dmax - dmin + 1, max_ind)
+        origem = {
+            "id": "frequencia",
+            "label": "Dezenas mais frequentes no histórico desta modalidade",
+            "url": "/analise/",
+        }
+        dados_freq = self._freq_dezenas()
+        try:
+            from concentracao_acertos.specs import (
+                get_concentracao_config,
+                tem_concentracao_acertos,
+            )
+            from concentracao_acertos.core import pool_sugerido
+            if tem_concentracao_acertos(self.modality_key):
+                cc = get_concentracao_config(self.modality_key)
+                ests = cc.get("estrategias") or []
+                size = min(int((ests[0] or {}).get("pool_size") or tamanho) if ests else tamanho, max_ind)
+                dezenas = pool_sugerido(
+                    dados_freq, size, "freq", dezena_min=dmin, dezena_max=dmax,
+                )
+                origem = {
+                    "id": "concentracao",
+                    "label": "Concentração de acertos — Estratégia A (frequência)",
+                    "url": "/analise/concentracao-acertos/",
+                }
+                return self._pack_indicacao(dezenas, origem, dmin, dmax, n_sort)
+        except Exception:
+            pass
+        ordenado = sorted(dados_freq, key=lambda r: (-int(r.get("freq") or 0), int(r.get("dezena") or 0)))
+        dezenas = [int(r["dezena"]) for r in ordenado[:tamanho]]
+        return self._pack_indicacao(dezenas, origem, dmin, dmax, n_sort)
+
+    def historico_indicados(self, limit: int = 15, offset: int = 0) -> Dict[str, Any]:
+        """Concursos para a grade Indicado × Sorteios (mais recente primeiro)."""
+        cfg = self.cfg
+        off = max(0, int(offset or 0))
+        q = db.session.query(self.Model).order_by(desc(self.Model.concurso))
+        total = q.count()
+        pedido = int(limit if limit is not None else 0)
+        if pedido <= 0:
+            rows = q.offset(off).all()
+        else:
+            lim = max(1, min(pedido, 8000))
+            rows = q.offset(off).limit(lim).all()
+        concursos = []
+        for s in rows:
+            concursos.append({
+                "concurso": s.concurso,
+                "data": getattr(s, "data", None) or "",
+                "dezenas": sorted(_dezenas_set(s, cfg)),
+                "dezenas_exibicao": _dezenas_ordered(s, cfg),
+            })
+        return {
+            "sucesso": True,
+            "total": total,
+            "offset": off,
+            "limit": len(concursos),
+            "tem_mais": off + len(concursos) < total,
+            "concursos": concursos,
+        }
+
+    def _freq_dezenas(self) -> List[Dict[str, Any]]:
+        cfg = self.cfg
+        dmin = int(cfg["dezena_min"])
+        dmax = int(cfg["dezena_max"])
+        freq = {d: 0 for d in range(dmin, dmax + 1)}
+        rows = db.session.query(self.Model).all()
+        for s in rows:
+            for d in _dezenas_set(s, cfg):
+                if dmin <= int(d) <= dmax:
+                    freq[int(d)] += 1
+        return [{"dezena": d, "freq": freq[d]} for d in range(dmin, dmax + 1)]
+
+    def _pack_indicacao(self, dezenas, origem, dmin, dmax, n_sort) -> Dict[str, Any]:
+        max_ind = int(self.cfg.get("indicacao_max") or 15)
+        nums = sorted({int(d) for d in (dezenas or []) if dmin <= int(d) <= dmax})[:max_ind]
+        return {
+            "sucesso": True,
+            "dezenas": nums,
+            "origem": origem,
+            "dezena_min": dmin,
+            "dezena_max": dmax,
+            "sorteadas": int(n_sort),
+            "indicacao_max": max_ind,
+        }

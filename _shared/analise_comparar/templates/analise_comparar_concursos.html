@@ -7,7 +7,19 @@
     }
     .how-box { background: #f8f5fc; border: 1px solid #e8dff5; border-radius: 10px; }
     .modo-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .modo-legenda-wrap { flex: 1; min-width: 200px; min-height: 1.4em; position: relative; }
+    .comp-bar {
+        display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: .5rem .85rem;
+    }
+    .comp-bar .comp-field { flex: 1 1 150px; min-width: 140px; max-width: 230px; }
+    .comp-bar .comp-field-sm { flex: 0 1 110px; min-width: 96px; max-width: 140px; }
+    .comp-bar .comp-btn { flex: 0 0 auto; }
+    .comp-bar .comp-modos { flex: 0 1 auto; text-align: center; }
+    .comp-meta {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+        gap: .45rem 1.2rem; text-align: center;
+        margin: .7rem 0 1rem; padding-top: .55rem; border-top: 1px solid #eee;
+    }
+    .modo-legenda-wrap { flex: 0 1 auto; min-width: 180px; min-height: 1.4em; position: relative; text-align: center; }
     .modo-legenda-inline {
         font-size: .84rem; color: #5c5c5c; line-height: 1.4; margin: 0;
         opacity: 0; transform: translateY(4px);
@@ -18,6 +30,17 @@
         opacity: 1; transform: translateY(0); position: relative; pointer-events: auto;
     }
     .modo-legenda-inline em { font-style: normal; font-weight: 600; color: var(--primary); }
+    .comp-meta .legenda-comp { margin: 0; flex: 0 1 auto; }
+    .volante-mes {
+        text-align: center; font-size: .78rem; font-weight: 700;
+        color: var(--primary); margin: .4rem 0 0; line-height: 1.35;
+    }
+    .volante-mes-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: .08rem .45rem; border-radius: 999px; margin-left: .15rem;
+        color: #fff; font-weight: 800; font-size: .72rem; line-height: 1.2;
+        vertical-align: middle;
+    }
     .comparar-grid {
         display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start;
     }
@@ -30,10 +53,12 @@
         padding: .55rem; margin: 0 auto;
         max-width: {{ cfg.volante_max_width | default(300) }}px;
     }
-    .volante-sorteio-titulo {
-        text-align: center; font-size: .8rem; font-weight: 700; color: var(--primary);
-        margin-bottom: .4rem; line-height: 1.3;
+    .volante-head {
+        max-width: {{ cfg.volante_max_width | default(300) }}px;
+        margin: 0 auto .45rem; text-align: center;
     }
+    .volante-head .form-label { color: var(--primary); font-weight: 700; }
+    .volante-head .form-select { font-weight: 700; text-align: center; }
     .volante-sorteio-grid {
         display: grid; grid-template-columns: repeat({{ cfg.grid_cols | default(10) }}, 1fr); gap: 3px;
     }
@@ -55,7 +80,13 @@
         background: linear-gradient(135deg, #d4edda 50%, #cfe2ff 50%);
         box-shadow: 0 0 0 2px #198754, 0 0 0 4px #0d6efd;
     }
-    .comparar-meio { text-align: center; padding: .5rem .25rem; min-width: 140px; }
+    .volante-bolas { text-align: center; margin-top: .45rem; }
+    .btn-ordem-bolas {
+        display: inline-block; border: 0; background: none; padding: 0; margin-top: .2rem;
+        font-size: .68rem; color: #8a8a8a; cursor: pointer; font-weight: 600;
+        text-decoration: underline; text-underline-offset: 2px;
+    }
+    .btn-ordem-bolas:hover { color: var(--primary); }
     .resumo-qtd { font-size: 2rem; font-weight: 900; color: #198754; line-height: 1; }
     .dez-ball {
         display: inline-flex; align-items: center; justify-content: center;
@@ -81,7 +112,137 @@
     }
     .dig-cell.ativo { background: var(--accent); color: #1a0a00; border-color: #c4a818; }
     .dig-cell.rep { box-shadow: 0 0 0 3px #198754; background: #d4edda; }
+    .volante-sorteio-cell { cursor: pointer; }
     .extra-panel { background: #f8f9fa; border-radius: 8px; padding: .75rem; margin-top: 1rem; }
+
+    .ix-wrap { overflow: auto; max-width: 100%; max-height: min(70vh, 56rem); }
+    .ix-table {
+        border-collapse: collapse; width: max-content; min-width: 100%;
+        font-size: .72rem; font-variant-numeric: tabular-nums;
+    }
+    .ix-table th, .ix-table td {
+        border: 1px solid #d9d9d9; text-align: center; vertical-align: middle;
+        padding: 0; line-height: 1;
+    }
+    .ix-table thead th {
+        background: #f3f3f3; font-weight: 800; color: #333;
+        padding: .35rem .25rem; white-space: nowrap;
+    }
+    .ix-sticky-col {
+        position: sticky; left: 0; z-index: 2; background: #fff;
+        min-width: 4.4rem; max-width: 6.5rem; padding: .35rem .4rem !important;
+        font-weight: 800; color: var(--primary); text-align: left !important;
+    }
+    thead .ix-sticky-col { z-index: 3; background: #f3f3f3; }
+    .ix-span-nums { letter-spacing: .04em; }
+    .ix-acertos-h {
+        background: #ececec; min-width: 4.6rem; padding: .35rem .3rem !important;
+        border-left: 3px solid #222 !important;
+    }
+    td.ix-acertos {
+        min-width: 4.6rem; font-weight: 800; font-size: .85rem;
+        border-left: 3px solid #222; padding: .25rem .35rem !important;
+    }
+    .ix-cell {
+        width: 1.7rem; min-width: 1.7rem; height: 1.55rem;
+        cursor: pointer; user-select: none; color: #333; background: #fff;
+    }
+    thead th.ix-cell {
+        cursor: default; background: #f3f3f3; font-weight: 700;
+    }
+    thead th.ix-cell:hover { filter: none; }
+    .ix-cell.ix-indicado { background: #ffe566; font-weight: 800; }
+    .ix-cell.ix-sorteado { background: #8fd19e; font-weight: 800; color: #0f3d1f; }
+    tbody .ix-cell:hover { filter: brightness(.96); }
+    .ix-super-link, .ix-super-btn {
+        color: var(--primary); font-weight: 800; text-decoration: none;
+        background: none; border: 0; padding: 0; cursor: pointer;
+    }
+    .ix-super-link:hover, .ix-super-btn:hover { text-decoration: underline; }
+    .ix-ellipsis { color: #888; letter-spacing: .15em; font-weight: 700; }
+    .ix-qtd { color: var(--primary); font-weight: 900; font-size: 1.08em; }
+    .ix-sort { cursor: pointer; user-select: none; }
+    .ix-sort:hover { filter: brightness(.96); }
+    .ix-sort .ix-sort-ind { font-size: .65rem; margin-left: .15rem; opacity: .5; }
+    .ix-sort.ix-sort-on { box-shadow: inset 0 -2px 0 var(--primary); }
+    .ix-sort.ix-sort-on .ix-sort-ind { opacity: 1; }
+    .ix-toast {
+        position: fixed; right: 1.2rem; bottom: 1.2rem; z-index: 1080;
+        max-width: 22rem; background: #fff; border: 1px solid #f0e2b8;
+        border-left: 4px solid var(--accent); border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.14); padding: .85rem 1rem;
+        font-size: .86rem; color: #333;
+    }
+    .ix-origem {
+        text-align: center; padding: .55rem 1rem .35rem;
+        font-size: .86rem; color: #666;
+    }
+    .ix-rank {
+        padding: .15rem 1rem .75rem; font-size: .8rem; text-align: center; color: #444;
+    }
+    .ix-rank-resumo { margin-bottom: .45rem; }
+    .ix-rank-resumo strong { color: var(--primary); }
+    .ix-cmp {
+        margin: .35rem auto 0; border-collapse: collapse;
+        font-size: .78rem; font-variant-numeric: tabular-nums;
+    }
+    .ix-cmp th, .ix-cmp td {
+        border: 1px solid #d9d9d9; padding: .28rem .75rem; text-align: right;
+        white-space: nowrap;
+    }
+    .ix-cmp th {
+        background: #f3f3f3; font-weight: 800; color: #333;
+    }
+    .ix-cmp td:nth-child(2) { background: #fffdf2; font-weight: 700; }
+    .ix-cmp td:nth-child(3) { background: #f7f8f9; font-weight: 700; }
+    .auto-wrap { overflow-x: auto; }
+    .auto-tbl {
+        border-collapse: collapse; width: 100%; min-width: 720px;
+        font-size: .78rem; font-variant-numeric: tabular-nums;
+    }
+    .auto-tbl th, .auto-tbl td {
+        border: 1px solid #d9d9d9; padding: .32rem .45rem; text-align: right; white-space: nowrap;
+    }
+    .auto-tbl th { background: #f3f3f3; font-weight: 800; color: #333; }
+    .auto-tbl td.auto-lbl, .auto-tbl th.auto-lbl { text-align: left; }
+    .auto-tbl .auto-col7 {
+        background: #fff3b0; font-weight: 900; color: #5c4300;
+        box-shadow: inset 0 0 0 2px #e6c200;
+    }
+    .auto-tbl th.auto-col7 { background: #ffe566; }
+    .auto-tbl .auto-col6 { background: #f7fbf8; font-weight: 800; }
+    .auto-tbl tr.auto-ref td { background: #f7f3ff; }
+    .auto-tbl tr.auto-open { cursor: pointer; }
+    .auto-tbl tr.auto-open:hover td { filter: brightness(.97); }
+    .auto-det {
+        font-size: .78rem; color: #555; padding: .55rem .75rem .7rem;
+        background: #fafafa; text-align: center;
+    }
+    .auto-det .mb-1 { margin-bottom: .45rem !important; }
+    .auto-conc-box {
+        margin: .55rem auto 0; padding: .55rem .7rem; max-width: 28rem;
+        background: #fff; border: 1px solid #ececec; border-radius: 8px;
+        text-align: center;
+    }
+    .auto-dez {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 1.7rem; height: 1.55rem; margin: 1px; padding: 0 .28rem;
+        border-radius: 4px; background: #ffe566; font-weight: 800; font-size: .72rem;
+    }
+    .auto-dez-miss {
+        background: #f0f0f0; color: #888; font-weight: 700;
+    }
+    .auto-dez-hit {
+        background: #8fd19e; color: #0f3d1f; font-weight: 800;
+    }
+    .auto-conc {
+        display: inline-block; margin: 0 .15rem .2rem; padding: .05rem .4rem;
+        border: 1px solid #d0d0d0; border-radius: 999px; background: #fff;
+        font-weight: 700; font-size: .75rem; color: var(--primary);
+        cursor: pointer; text-decoration: none;
+    }
+    .auto-conc:hover { background: #fff6c2; border-color: #e6c200; }
+    .auto-conc.auto-conc-on { background: #ffe566; border-color: #c4a818; }
 </style>
 
 <div class="page-hdr">
@@ -104,43 +265,11 @@
 
 <div class="card shadow-sm mb-3">
     <div class="card-body">
-        <div class="row g-2 align-items-end mb-3">
-            <div class="col-md-3">
-                <label class="form-label small mb-0">Concurso A (mais antigo)</label>
-                <select class="form-select form-select-sm" id="selConcursoA"></select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small mb-0">Concurso B (mais recente)</label>
-                <select class="form-select form-select-sm" id="selConcursoB"></select>
-            </div>
-            {% if cfg.dual_sorteio %}
-            <div class="col-6 col-md-2">
-                <label class="form-label small mb-0">Sorteio A</label>
-                <select class="form-select form-select-sm" id="selSorteioA">
-                    <option value="1">1º sorteio</option>
-                    <option value="2">2º sorteio</option>
-                </select>
-            </div>
-            <div class="col-6 col-md-2">
-                <label class="form-label small mb-0">Sorteio B</label>
-                <select class="form-select form-select-sm" id="selSorteioB">
-                    <option value="1">1º sorteio</option>
-                    <option value="2">2º sorteio</option>
-                </select>
-            </div>
-            {% endif %}
-            <div class="col-md-2">
-                <button class="btn btn-primary btn-sm w-100" id="btnComparar">
-                    <i class="fas fa-sync-alt me-1"></i> Comparar
-                </button>
-            </div>
-        </div>
-
         {% if cfg.modos | length > 1 %}
-        <div class="mb-3" id="wrapModos">
-            <span class="fw-bold small text-uppercase text-muted d-block mb-2">Modo de leitura</span>
-            <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
-                <div class="btn-group flex-shrink-0" role="group" id="grpModo">
+        <div class="comp-bar">
+            <div class="comp-modos" id="wrapModos">
+                <span class="fw-bold small text-uppercase text-muted d-block mb-1">Modo de leitura</span>
+                <div class="btn-group" role="group" id="grpModo">
                     {% if 'volante' in cfg.modos %}
                     <button type="button" class="btn btn-outline-secondary btn-sm modo-btn active" data-modo="volante">Volante</button>
                     {% endif %}
@@ -151,46 +280,69 @@
                     <button type="button" class="btn btn-outline-secondary btn-sm modo-btn" data-modo="hibrido">Híbrido</button>
                     {% endif %}
                 </div>
-                <div class="modo-legenda-wrap" id="modoLegendaWrap" aria-live="polite">
-                    <p class="modo-legenda-inline ativo" data-legenda="volante">
-                        <em>Volante</em> — mesma dezena nos dois concursos.
-                    </p>
-                    <p class="modo-legenda-inline" data-legenda="posicional">
-                        <em>Posicional</em> — mesma dezena na mesma coluna/posição.
-                    </p>
-                    <p class="modo-legenda-inline" data-legenda="hibrido">
-                        <em>Híbrido</em> — verde = volante · azul = posicional.
-                    </p>
-                </div>
             </div>
         </div>
         {% endif %}
-
-        {% if cfg.layout == 'grid' %}
-        <div class="legenda-comp mb-3">
-            <span class="lg-sort"></span> Sorteada neste concurso
-            <span class="lg-repv" style="margin-left:12px"></span> Repetição (volante)
+        <div class="comp-meta">
             {% if cfg.modos | length > 1 %}
-            <span class="lg-repp" style="margin-left:12px"></span> Repetição (posicional)
+            <div class="modo-legenda-wrap" id="modoLegendaWrap" aria-live="polite">
+                <p class="modo-legenda-inline ativo" data-legenda="volante">
+                    <em>Volante</em> — mesma dezena nos dois concursos.
+                </p>
+                <p class="modo-legenda-inline" data-legenda="posicional">
+                    <em>Posicional</em> — mesma dezena na mesma coluna/posição.
+                </p>
+                <p class="modo-legenda-inline" data-legenda="hibrido">
+                    <em>Híbrido</em> — verde = volante · azul = posicional.
+                </p>
+            </div>
             {% endif %}
-            <span style="margin-left:12px;color:#aaa">□</span> Não sorteada
+            {% if cfg.layout == 'grid' %}
+            <div class="legenda-comp">
+                <span class="lg-sort"></span> Sorteada neste concurso
+                <span class="lg-repv" style="margin-left:12px"></span> Repetição (volante)
+                {% if cfg.modos | length > 1 %}
+                <span class="lg-repp" style="margin-left:12px"></span> Repetição (posicional)
+                {% endif %}
+                <span style="margin-left:12px;color:#aaa">□</span> Não sorteada
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
 
-        <div id="loaderComp" class="text-center py-5 text-muted">
-            <i class="fas fa-spinner fa-spin fa-2x"></i>
+        <div id="loaderComp" class="text-center py-2 text-muted" style="display:none;">
+            <i class="fas fa-spinner fa-spin"></i>
         </div>
-        <div id="painelComp" style="display:none;">
+        <div id="painelComp">
             <div class="comparar-grid" id="gridPadrao">
                 <div>
+                    <div class="volante-head">
+                        <label class="form-label small mb-0" for="selConcursoA">Concurso A (mais antigo)</label>
+                        <select class="form-select form-select-sm" id="selConcursoA"></select>
+                        {% if cfg.dual_sorteio %}
+                        <label class="form-label small mb-0 mt-1" for="selSorteioA">Sorteio A</label>
+                        <select class="form-select form-select-sm" id="selSorteioA">
+                            <option value="1">1º sorteio</option>
+                            <option value="2">2º sorteio</option>
+                        </select>
+                        {% endif %}
+                        {% if cfg.extra_mes %}
+                        <div class="volante-mes" id="mesVolanteA">—</div>
+                        {% endif %}
+                    </div>
                     <div class="volante-sorteio-wrap" id="wrapVolanteA">
-                        <div class="volante-sorteio-titulo" id="tituloA">Concurso A</div>
+                        <div class="volante-sorteio-titulo" id="tituloA" style="display:none;"></div>
                         <div class="volante-sorteio-grid" id="volanteA"></div>
                     </div>
                     <div class="colunas-wrap mt-2" id="colunasA" style="display:none;"></div>
-                    <div class="text-center small text-muted mt-2" id="listaLinearA"></div>
+                    <div class="volante-bolas">
+                        <div id="listaLinearA"></div>
+                        <button type="button" class="btn-ordem-bolas" data-ordem-bolas>ordem de sorteio</button>
+                    </div>
                 </div>
                 <div class="comparar-meio">
+                    <button class="btn btn-primary btn-sm mb-3" id="btnComparar">
+                        <i class="fas fa-sync-alt me-1"></i> Comparar
+                    </button>
                     <div class="small text-muted mb-1">Repetidas</div>
                     <div class="resumo-qtd" id="resumoQtd">—</div>
                     <div class="small fw-bold text-muted mb-2" id="resumoModoLbl">—</div>
@@ -199,12 +351,29 @@
                     <div class="small text-muted mt-2" id="resumoPosicional"></div>
                 </div>
                 <div>
+                    <div class="volante-head">
+                        <label class="form-label small mb-0" for="selConcursoB">Concurso B (mais recente)</label>
+                        <select class="form-select form-select-sm" id="selConcursoB"></select>
+                        {% if cfg.dual_sorteio %}
+                        <label class="form-label small mb-0 mt-1" for="selSorteioB">Sorteio B</label>
+                        <select class="form-select form-select-sm" id="selSorteioB">
+                            <option value="1">1º sorteio</option>
+                            <option value="2">2º sorteio</option>
+                        </select>
+                        {% endif %}
+                        {% if cfg.extra_mes %}
+                        <div class="volante-mes" id="mesVolanteB">—</div>
+                        {% endif %}
+                    </div>
                     <div class="volante-sorteio-wrap" id="wrapVolanteB">
-                        <div class="volante-sorteio-titulo" id="tituloB">Concurso B</div>
+                        <div class="volante-sorteio-titulo" id="tituloB" style="display:none;"></div>
                         <div class="volante-sorteio-grid" id="volanteB"></div>
                     </div>
                     <div class="colunas-wrap mt-2" id="colunasB" style="display:none;"></div>
-                    <div class="text-center small text-muted mt-2" id="listaLinearB"></div>
+                    <div class="volante-bolas">
+                        <div id="listaLinearB"></div>
+                        <button type="button" class="btn-ordem-bolas" data-ordem-bolas>ordem de sorteio</button>
+                    </div>
                 </div>
             </div>
             <div id="painelExtra"></div>
@@ -212,12 +381,87 @@
     </div>
 </div>
 
+<div class="card shadow-sm mb-3" id="ixCard">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-table me-2"></i>Indicados × sorteios anteriores</span>
+        <button type="button" class="btn btn-sm ms-auto" id="ixBtnAjuda"
+            style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);"
+            title="Como ler esta análise">
+            <i class="fas fa-circle-question me-1"></i>Como usar
+        </button>
+    </div>
+    <div class="px-3 pt-2 pb-0" id="ixAjudaBox" style="display:none;">
+        <p class="small text-muted mb-2">
+            A linha <strong>SUPER</strong> é a indicação atual (fundo amarelo). Clique em qualquer número
+            do volante para incluir ou tirar da indicação.
+            Nas linhas dos concursos, o fundo <strong>verde</strong> marca o que foi sorteado.
+            Em <em>ACERTOS</em>, <strong>Indicado</strong> = sorteadas que estavam no SUPER;
+            <strong>Ñ indicado</strong> = sorteadas que não estavam.
+        </p>
+    </div>
+    <div class="ix-origem small text-muted" id="ixOrigemLbl">Carregando indicação…</div>
+    <div class="ix-rank" id="ixRanking"></div>
+    <div class="ix-wrap">
+        <table class="ix-table" id="ixTabela">
+            <thead>
+                <tr>
+                    <th class="ix-sticky-col"></th>
+                    <th class="ix-span-nums" id="ixThIndicados" colspan="1">INDICADO</th>
+                    <th class="ix-acertos-h" colspan="2">ACERTOS</th>
+                </tr>
+                <tr>
+                    <th class="ix-sticky-col"></th>
+                    <th class="ix-nums-head" id="ixThNums" colspan="1"></th>
+                    <th class="ix-acertos-h">Indicado</th>
+                    <th class="ix-acertos-h">Ñ indicado</th>
+                </tr>
+            </thead>
+            <tbody id="ixTbody">
+                <tr><td colspan="4" class="text-muted text-center py-3">Carregando…</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if cfg.layout != 'colunas' and (cfg.dezena_max - cfg.dezena_min + 1) >= 15 %}
+<div class="card shadow-sm mb-3" id="autoCard">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-list-ol me-2"></i>Combinações automáticas — desempenho histórico</span>
+    </div>
+    <div class="px-3 pt-2 small text-muted">
+        Pools de <strong>15 dezenas</strong>, gerados com regras já existentes (frequência, atraso, concentração).
+        Teste na base histórica completa. Ranking: <strong>7 acertos</strong> (prêmio principal), depois <strong>6</strong>.
+        A indicação SUPER manual não é alterada.
+        <span class="d-block mt-1">Resultado histórico — não é previsão do próximo concurso.</span>
+    </div>
+    <div class="px-3 py-2 d-flex flex-wrap align-items-center gap-2">
+        <button type="button" class="btn btn-sm btn-primary" id="autoBtnGerar">
+            <i class="fas fa-play me-1"></i> Gerar e testar
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="autoBtnExport" disabled>
+            <i class="fas fa-download me-1"></i> Exportar dezenas
+        </button>
+        <span class="small text-muted" id="autoStatus"></span>
+    </div>
+    <div class="auto-wrap px-2 pb-3" id="autoWrap">
+        <div class="text-muted small text-center py-3">Clique em <strong>Gerar e testar</strong> para montar o ranking.</div>
+    </div>
+</div>
+{% endif %}
+
 <script>
 (function () {
     const CFG = {{ cfg | tojson }};
     const API = '/analise/comparar-concursos';
     let modoAtual = (CFG.modos && CFG.modos[0]) || 'volante';
     let concursosLista = [];
+    let ordemBolas = 'classificado';
+    let linearSorteioA = [];
+    let linearSorteioB = [];
+    let linearRepV = new Set();
+    let linearRepP = new Set();
     const params = new URLSearchParams(window.location.search);
 
     function pad(n) {
@@ -274,6 +518,7 @@
 
     function renderLinear(dezenas, elId, repV, repP) {
         const el = document.getElementById(elId);
+        if (!el) return;
         el.innerHTML = (dezenas || []).map(n => {
             let cls = 'dez-ball';
             if (modoAtual === 'volante' && repV.has(n)) cls += ' rep-v';
@@ -284,6 +529,56 @@
             }
             return `<span class="${cls}">${pad(n)}</span>`;
         }).join('');
+    }
+    function dezenasNaOrdem(lista) {
+        const arr = (lista || []).map(Number);
+        if (ordemBolas === 'classificado') return [...arr].sort((x, y) => x - y);
+        return arr;
+    }
+    function atualizarBotoesOrdem() {
+        const txt = ordemBolas === 'classificado' ? 'ordem de sorteio' : 'classificar';
+        const tip = ordemBolas === 'classificado'
+            ? 'Mostrar na ordem em que as dezenas foram sorteadas'
+            : 'Classificar as dezenas em ordem crescente';
+        document.querySelectorAll('[data-ordem-bolas]').forEach(b => {
+            b.textContent = txt;
+            b.title = tip;
+        });
+    }
+    function pintarLinhasBolas() {
+        renderLinear(dezenasNaOrdem(linearSorteioA), 'listaLinearA', linearRepV, linearRepP);
+        renderLinear(dezenasNaOrdem(linearSorteioB), 'listaLinearB', linearRepV, linearRepP);
+        atualizarBotoesOrdem();
+    }
+
+    function pintarMesVolantes(data) {
+        const elA = document.getElementById('mesVolanteA');
+        const elB = document.getElementById('mesVolanteB');
+        if (!elA && !elB) return;
+        const lado = (qual) => {
+            const pack = data && data.mes && data.mes[qual];
+            if (pack && (pack.num || pack.nome)) return pack;
+            const c = data && (qual === 'a' ? data.concurso_a : data.concurso_b);
+            if (c && (c.mes_num || c.mes_nome)) return { num: c.mes_num, nome: c.mes_nome };
+            return null;
+        };
+        const ma = lado('a');
+        const mb = lado('b');
+        const repetiu = !!(data && data.mes && data.mes.repetiu)
+            || !!(ma && mb && ma.num && ma.num === mb.num);
+        function htmlMes(m, extra) {
+            if (!m || (!m.num && !m.nome)) return '—';
+            const nome = String(m.nome || '');
+            const num = m.num ? m.num + ' — ' : '';
+            const cls = nome.replace(/\s+/g, '');
+            const badge = nome
+                ? `<span class="volante-mes-badge mes-nome-${cls}">${nome}</span>`
+                : '—';
+            const suf = extra ? ' <span class="text-success fw-bold">(mesmo mês!)</span>' : '';
+            return `${num}${badge}${suf}`;
+        }
+        if (elA) elA.innerHTML = htmlMes(ma, false);
+        if (elB) elB.innerHTML = htmlMes(mb, repetiu);
     }
 
     function renderExtra(data) {
@@ -301,14 +596,8 @@
                 A: #${tm.a.num} ${tm.a.nome || ''}<br>
                 B: #${tm.b.num} ${tm.b.nome || ''}${rep}</div>`;
         }
-        if (data.mes) {
-            const ms = data.mes;
-            const rep = ms.repetiu ? ' <span class="text-success fw-bold">(mesmo mês!)</span>' : '';
-            html += `<div class="extra-panel"><strong>Mês da Sorte</strong><br>
-                A: ${ms.a.num ? ms.a.num + ' — ' : ''}${ms.a.nome || '—'}<br>
-                B: ${ms.b.num ? ms.b.num + ' — ' : ''}${ms.b.nome || '—'}${rep}</div>`;
-        }
         el.innerHTML = html;
+        pintarMesVolantes(data);
     }
 
     function renderComparacao(data) {
@@ -340,6 +629,7 @@
             htmlColunas(data.grade_colunas, 'colunasB', 'b');
             document.getElementById('listaLinearA').textContent = (a.colunas || []).join(' · ');
             document.getElementById('listaLinearB').textContent = (b.colunas || []).join(' · ');
+            document.querySelectorAll('[data-ordem-bolas]').forEach(b => { b.style.display = 'none'; });
         } else {
             wrapA.style.display = 'block';
             wrapB.style.display = 'block';
@@ -347,10 +637,12 @@
             colB.style.display = 'none';
             htmlVolante(data.grade, 'volanteA', 'a');
             htmlVolante(data.grade, 'volanteB', 'b');
-            const repV = new Set(data.resumo.volante.dezenas);
-            const repP = new Set((data.resumo.posicional.detalhe || []).map(x => x.dezena));
-            renderLinear(a.dezenas_exibicao || a.dezenas, 'listaLinearA', repV, repP);
-            renderLinear(b.dezenas_exibicao || b.dezenas, 'listaLinearB', repV, repP);
+            linearSorteioA = a.dezenas_exibicao && a.dezenas_exibicao.length ? a.dezenas_exibicao : (a.dezenas || []);
+            linearSorteioB = b.dezenas_exibicao && b.dezenas_exibicao.length ? b.dezenas_exibicao : (b.dezenas || []);
+            linearRepV = new Set(data.resumo.volante.dezenas);
+            linearRepP = new Set((data.resumo.posicional.detalhe || []).map(x => x.dezena));
+            document.querySelectorAll('[data-ordem-bolas]').forEach(b => { b.style.display = ''; });
+            pintarLinhasBolas();
         }
 
         const rv = data.resumo.volante;
@@ -412,7 +704,6 @@
         const cb = document.getElementById('selConcursoB').value;
         if (ca === cb) { alert('Selecione dois concursos diferentes.'); return; }
         document.getElementById('loaderComp').style.display = 'block';
-        document.getElementById('painelComp').style.display = 'none';
         let url = `${API}/api/comparar?modo=${modoAtual}&concurso_a=${ca}&concurso_b=${cb}`;
         if (CFG.dual_sorteio) {
             url += `&sorteio_a=${document.getElementById('selSorteioA').value}`;
@@ -437,6 +728,14 @@
             comparar();
         });
     });
+    document.querySelectorAll('[data-ordem-bolas]').forEach(btn => {
+        btn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            ordemBolas = ordemBolas === 'classificado' ? 'sorteio' : 'classificado';
+            pintarLinhasBolas();
+        });
+    });
     document.getElementById('btnComparar').addEventListener('click', comparar);
 
     (async function init() {
@@ -452,4 +751,530 @@
     })();
 })();
 </script>
+<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const API = '/analise/comparar-concursos';
+    const STORE = 'ix-indicados-' + (CFG.key || 'mod');
+    let dmin = Number(CFG.dezena_min);
+    let dmax = Number(CFG.dezena_max);
+    if (!Number.isFinite(dmin)) dmin = 1;
+    if (!Number.isFinite(dmax)) dmax = 31;
+    let nums = [];
+    let indicados = new Set();
+    let concursos = [];
+    let origem = { label: '', url: '/analise/' };
+    const MAX_PADRAO = { lotofacil: 18, lotomania: 30, quina: 15, megasena: 15, duplasena: 15, maismilionaria: 15, timemania: 20, supersete: 7, diadesorte: 15 };
+    let maxInd = Number(CFG.indicacao_max) || MAX_PADRAO[CFG.key] || 15;
+    let sortKey = 'concurso';
+    let sortDir = 'desc';
+    let avisoLimiteFeito = false;
+
+    function padN(n) {
+        return String(n).padStart((dmin === 0 || dmax >= 100) ? 2 : (n < 10 ? 1 : 2), '0');
+    }
+    function faixa() {
+        const a = [];
+        for (let i = dmin; i <= dmax; i++) a.push(i);
+        return a;
+    }
+    function salvar() {
+        try { localStorage.setItem(STORE, JSON.stringify([...indicados])); } catch (e) {}
+    }
+    function lidoSalvo() {
+        try {
+            const raw = localStorage.getItem(STORE);
+            if (!raw) return null;
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr) && arr.length) return arr.map(Number).filter(n => n >= dmin && n <= dmax);
+        } catch (e) {}
+        return null;
+    }
+    function toggleN(n) {
+        n = Number(n);
+        if (!Number.isFinite(n) || n < dmin || n > dmax) return;
+        if (indicados.has(n)) {
+            indicados.delete(n);
+            avisoLimiteFeito = false;
+            salvar();
+            renderGrade();
+            return;
+        }
+        if (indicados.size >= maxInd) return;
+        indicados.add(n);
+        salvar();
+        renderGrade();
+        if (indicados.size >= maxInd && !avisoLimiteFeito) {
+            avisoLimiteFeito = true;
+            mostrarAvisoLimite();
+        }
+    }
+    function mostrarAvisoLimite() {
+        document.getElementById('ixToast')?.remove();
+        const el = document.createElement('div');
+        el.id = 'ixToast';
+        el.className = 'ix-toast';
+        el.setAttribute('role', 'status');
+        el.innerHTML = `<strong>Indicação concluída!</strong><br>
+            Você já atingiu as <strong>${maxInd} indicações permitidas</strong> para esta modalidade.`;
+        document.body.appendChild(el);
+        setTimeout(() => { el.remove(); }, 4500);
+    }
+    function htmlNumCells(mode, drawnSet) {
+        return nums.map(n => {
+            let cls = 'ix-cell';
+            if (mode === 'super' && indicados.has(n)) cls += ' ix-indicado';
+            if (mode === 'draw' && drawnSet && drawnSet.has(n)) cls += ' ix-sorteado';
+            return `<td class="${cls}" data-n="${n}">${padN(n)}</td>`;
+        }).join('');
+    }
+    function acertosDe(drawnList) {
+        const lista = drawnList || [];
+        const ind = lista.filter(n => indicados.has(Number(n))).length;
+        return { ind, nind: Math.max(0, lista.length - ind) };
+    }
+    function concursosOrdenados() {
+        const rows = concursos.map(c => {
+            const drawn = c.dezenas_exibicao && c.dezenas_exibicao.length ? c.dezenas_exibicao : (c.dezenas || []);
+            const ac = acertosDe(drawn.map(Number));
+            return { c, drawn, ac, setD: new Set((c.dezenas || []).map(Number)) };
+        });
+        const mul = sortDir === 'asc' ? 1 : -1;
+        rows.sort((a, b) => {
+            let va, vb;
+            if (sortKey === 'ind') { va = a.ac.ind; vb = b.ac.ind; }
+            else if (sortKey === 'nind') { va = a.ac.nind; vb = b.ac.nind; }
+            else { va = Number(a.c.concurso) || 0; vb = Number(b.c.concurso) || 0; }
+            if (va !== vb) return (va - vb) * mul;
+            return (Number(a.c.concurso) - Number(b.c.concurso)) * mul;
+        });
+        return rows;
+    }
+    function indSort(key) {
+        return sortKey === key ? (sortDir === 'asc' ? '▲' : '▼') : '⇅';
+    }
+    function clsSort(key) {
+        return 'ix-sort' + (sortKey === key ? ' ix-sort-on' : '');
+    }
+    function desempenhoIndicacao() {
+        const distInd = {};
+        const distNind = {};
+        let soma = 0;
+        let maxHits = -1;
+        let melhores = [];
+        let maxFaixa = 0;
+        concursos.forEach(c => {
+            const drawn = c.dezenas_exibicao && c.dezenas_exibicao.length ? c.dezenas_exibicao : (c.dezenas || []);
+            const ac = acertosDe(drawn.map(Number));
+            maxFaixa = Math.max(maxFaixa, drawn.length, ac.ind, ac.nind);
+            distInd[ac.ind] = (distInd[ac.ind] || 0) + 1;
+            distNind[ac.nind] = (distNind[ac.nind] || 0) + 1;
+            soma += ac.ind;
+            if (ac.ind > maxHits) {
+                maxHits = ac.ind;
+                melhores = [c.concurso];
+            } else if (ac.ind === maxHits) {
+                melhores.push(c.concurso);
+            }
+        });
+        const total = concursos.length;
+        const zero = distInd[0] || 0;
+        return {
+            total,
+            soma,
+            media: total ? soma / total : 0,
+            comAcerto: total - zero,
+            distInd,
+            distNind,
+            maxFaixa,
+            maxHits: maxHits < 0 ? 0 : maxHits,
+            melhores,
+        };
+    }
+    function fmtN(n) {
+        return Number(n).toLocaleString('pt-BR');
+    }
+    function fmt1(n) {
+        return Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    }
+    function renderRanking() {
+        const box = document.getElementById('ixRanking');
+        if (!box) return;
+        if (!concursos.length) {
+            box.innerHTML = '';
+            return;
+        }
+        const d = desempenhoIndicacao();
+        const pct = d.total ? Math.round((d.comAcerto / d.total) * 1000) / 10 : 0;
+        const melhores = d.melhores.slice(0, 6).map(n => `#${n}`).join(', ')
+            + (d.melhores.length > 6 ? '…' : '');
+        const linhas = [];
+        for (let h = d.maxFaixa; h >= 0; h--) {
+            const lbl = h === 1 ? '1 acerto' : `${h} acertos`;
+            linhas.push(`<tr>
+                <td>${lbl}</td>
+                <td>${fmtN(d.distInd[h] || 0)}</td>
+                <td>${fmtN(d.distNind[h] || 0)}</td>
+            </tr>`);
+        }
+        box.innerHTML = `
+            <div class="ix-rank-resumo">
+                A indicação foi <strong>acertiva em ${fmtN(d.comAcerto)}</strong> de ${fmtN(d.total)} concursos
+                (${fmt1(pct).replace(',0', '')}%) — média de <strong>${fmt1(d.media)}</strong> acertos por concurso.
+                ${d.maxHits > 0 ? `Melhor: <strong>${d.maxHits} acerto${d.maxHits === 1 ? '' : 's'}</strong> (${melhores}).` : ''}
+            </div>
+            <table class="ix-cmp">
+                <thead>
+                    <tr>
+                        <th>Acertos</th>
+                        <th>Indicados</th>
+                        <th>Não Indicados</th>
+                    </tr>
+                </thead>
+                <tbody>${linhas.join('')}</tbody>
+            </table>`;
+    }
+    function renderGrade() {
+        const nCount = nums.length || 1;
+        const thead = document.querySelector('#ixTabela thead');
+        if (thead) {
+            thead.innerHTML = `
+                <tr>
+                    <th class="ix-sticky-col"></th>
+                    <th class="ix-span-nums" colspan="${nCount}">INDICADO</th>
+                    <th class="ix-acertos-h" colspan="2">ACERTOS</th>
+                </tr>
+                <tr>
+                    <th class="${clsSort('concurso')} ix-sticky-col" data-sort="concurso">Nº <span class="ix-sort-ind">${indSort('concurso')}</span></th>
+                    ${nums.map(n => `<th class="ix-cell">${padN(n)}</th>`).join('')}
+                    <th class="${clsSort('ind')} ix-acertos-h" data-sort="ind">Indicado <span class="ix-sort-ind">${indSort('ind')}</span></th>
+                    <th class="${clsSort('nind')} ix-acertos-h" data-sort="nind">Ñ indicado <span class="ix-sort-ind">${indSort('nind')}</span></th>
+                </tr>`;
+        }
+        const superLbl = origem.url
+            ? `<a class="ix-super-link" href="${origem.url}" title="${(origem.label || 'Origem da indicação').replace(/"/g, '&quot;')}">SUPER</a>`
+            : `<span class="ix-super-btn" title="${(origem.label || '').replace(/"/g, '&quot;')}">SUPER</span>`;
+        const linhas = [`<tr>
+            <th class="ix-sticky-col">${superLbl}</th>
+            ${htmlNumCells('super')}
+            <td class="ix-acertos"></td>
+            <td class="ix-acertos"></td>
+        </tr>`];
+        concursosOrdenados().forEach(({ c, ac, setD }) => {
+            linhas.push(`<tr>
+                <th class="ix-sticky-col" title="${c.data || ''}">${c.concurso}</th>
+                ${htmlNumCells('draw', setD)}
+                <td class="ix-acertos">${ac.ind}</td>
+                <td class="ix-acertos">${ac.nind}</td>
+            </tr>`);
+        });
+        const tb = document.getElementById('ixTbody');
+        if (tb) tb.innerHTML = linhas.join('');
+        const origEl = document.getElementById('ixOrigemLbl');
+        if (origEl) {
+            const qtd = indicados.size;
+            origEl.innerHTML = origem.url
+                ? `Indicação <strong>SUPER</strong> (<strong class="ix-qtd">${qtd}</strong> dezenas) — origem:
+                   <a href="${origem.url}">${origem.label || 'ver fonte'}</a>. Clique nos números para ajustar.`
+                : `Indicação SUPER (<strong class="ix-qtd">${qtd}</strong> dezenas). Clique nos números para ajustar.`;
+        }
+        renderRanking();
+    }
+    async function carregarIndicacao() {
+        const r = await fetch(`${API}/api/indicacao-padrao`);
+        const d = await r.json();
+        if (d.dezena_min != null) dmin = Number(d.dezena_min);
+        if (d.dezena_max != null) dmax = Number(d.dezena_max);
+        nums = faixa();
+        origem = d.origem || origem;
+        if (d.indicacao_max != null) maxInd = Number(d.indicacao_max) || maxInd;
+        const salvo = lidoSalvo();
+        let arr = (salvo && salvo.length ? salvo : (d.dezenas || [])).map(Number)
+            .filter(n => Number.isFinite(n) && n >= dmin && n <= dmax);
+        const excedeu = arr.length > maxInd;
+        if (excedeu) arr = arr.slice(0, maxInd);
+        indicados = new Set(arr);
+        if (indicados.size >= maxInd) avisoLimiteFeito = true;
+        if (excedeu) salvar();
+    }
+    async function carregarHistorico() {
+        concursos = [];
+        let off = 0;
+        for (let i = 0; i < 200; i++) {
+            const r = await fetch(`${API}/api/historico-indicados?limit=80&offset=${off}`);
+            const d = await r.json();
+            if (!d.sucesso) throw new Error(d.erro || 'Falha ao carregar histórico');
+            const batch = d.concursos || [];
+            concursos = concursos.concat(batch);
+            off = concursos.length;
+            if (!d.tem_mais || !batch.length) break;
+        }
+    }
+    document.getElementById('ixBtnAjuda')?.addEventListener('click', () => {
+        const box = document.getElementById('ixAjudaBox');
+        if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    });
+    document.getElementById('ixTabela')?.addEventListener('click', (ev) => {
+        const sortEl = ev.target.closest('th.ix-sort');
+        if (!sortEl || !sortEl.dataset.sort) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        const key = sortEl.dataset.sort;
+        if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        else { sortKey = key; sortDir = 'asc'; }
+        renderGrade();
+    });
+    document.addEventListener('click', (ev) => {
+        if (ev.target.closest('#ixTabela thead, th.ix-sort')) return;
+        const ix = ev.target.closest('#ixTbody .ix-cell[data-n]');
+        if (ix) { toggleN(ix.dataset.n); return; }
+        const v = ev.target.closest('.volante-sorteio-cell');
+        if (v) {
+            const n = parseInt(v.textContent, 10);
+            if (!Number.isNaN(n)) toggleN(n);
+            return;
+        }
+        const dg = ev.target.closest('.dig-cell');
+        if (dg) {
+            const n = parseInt(dg.textContent, 10);
+            if (!Number.isNaN(n)) toggleN(n);
+        }
+    });
+    (async function initIx() {
+        try {
+            await carregarIndicacao();
+            await carregarHistorico();
+            renderGrade();
+        } catch (e) {
+            const tb = document.getElementById('ixTbody');
+            if (tb) tb.innerHTML = `<tr><td colspan="4" class="text-danger text-center py-3">${e.message || e}</td></tr>`;
+        }
+    })();
+})();
+</script>
+{% if cfg.layout != 'colunas' and (cfg.dezena_max - cfg.dezena_min + 1) >= 15 %}
+<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const API = '/analise/comparar-concursos';
+    const STORE = 'ix-indicados-' + (CFG.key || 'mod');
+    let ranking = [];
+    let aberto = null;
+    let concAberto = null;
+    let ordemConc = 'classificado';
+
+    function pad2(n) {
+        return String(n).padStart(2, '0');
+    }
+    function fmtN(n) {
+        return Number(n).toLocaleString('pt-BR');
+    }
+    function lidoManual() {
+        try {
+            const raw = localStorage.getItem(STORE);
+            if (!raw) return [];
+            const arr = JSON.parse(raw);
+            if (!Array.isArray(arr)) return [];
+            return arr.map(Number).filter(n => Number.isFinite(n));
+        } catch (e) { return []; }
+    }
+    function faixaVal(r, k) {
+        const f = r.faixas || {};
+        return fmtN(f[k] != null ? f[k] : (f[String(k)] != null ? f[String(k)] : 0));
+    }
+    function renderAuto() {
+        const wrap = document.getElementById('autoWrap');
+        const btnEx = document.getElementById('autoBtnExport');
+        if (!wrap) return;
+        if (btnEx) btnEx.disabled = !ranking.length;
+        if (!ranking.length) {
+            wrap.innerHTML = '<div class="text-muted small text-center py-3">Nenhuma combinação gerada.</div>';
+            return;
+        }
+        const maxF = Math.max(7, ...ranking.map(r => Number(r.melhor_acerto) || 0));
+        const cols = [];
+        for (let h = maxF; h >= 0; h--) cols.push(h);
+        const headFaixas = cols.map(h => {
+            const cls = h === 7 ? 'auto-col7' : (h === 6 ? 'auto-col6' : '');
+            return `<th class="${cls}" title="${h === 7 ? 'Prêmio principal' : ''}">${h}</th>`;
+        }).join('');
+        const rows = ranking.map(r => {
+            const ref = r.referencia ? ' auto-ref' : '';
+            const fa = cols.map(h => {
+                const cls = h === 7 ? 'auto-col7' : (h === 6 ? 'auto-col6' : '');
+                return `<td class="${cls}">${faixaVal(r, h)}</td>`;
+            }).join('');
+            const dets = r.melhores_detalhe || [];
+            const concBtns = dets.map(d => {
+                const on = concAberto && concAberto.id === r.id && Number(concAberto.concurso) === Number(d.concurso) ? ' auto-conc-on' : '';
+                return `<button type="button" class="auto-conc${on}" data-auto-conc="${r.id}" data-conc="${d.concurso}">#${d.concurso}</button>`;
+            }).join(' ') || '—';
+            let concBox = '';
+            if (concAberto && concAberto.id === r.id) {
+                const d = dets.find(x => Number(x.concurso) === Number(concAberto.concurso));
+                if (d) {
+                    const hit = new Set((d.acertadas || []).map(Number));
+                    let lista = (d.dezenas || []).map(Number);
+                    if (ordemConc === 'classificado') lista = [...lista].sort((a, b) => a - b);
+                    const bolas = lista.map(n => {
+                        const ok = hit.has(Number(n));
+                        return `<span class="auto-dez ${ok ? 'auto-dez-hit' : 'auto-dez-miss'}" title="${ok ? 'acertou (estava no pool)' : 'não estava no pool'}">${pad2(n)}</span>`;
+                    }).join('');
+                    const rotuloOrdem = ordemConc === 'classificado' ? 'ordem de sorteio' : 'classificar';
+                    const tipOrdem = ordemConc === 'classificado'
+                        ? 'Mostrar na ordem em que as dezenas foram sorteadas'
+                        : 'Classificar as dezenas em ordem crescente';
+                    concBox = `<div class="auto-conc-box">
+                        <div class="mb-1"><strong>#${d.concurso}</strong>${d.data ? ' · ' + d.data : ''}
+                            · <strong>${d.acertos}</strong> acerto${d.acertos === 1 ? '' : 's'} neste concurso</div>
+                        <div class="mb-1">${bolas}</div>
+                        <button type="button" class="btn-ordem-bolas" data-auto-ordem title="${tipOrdem}">${rotuloOrdem}</button>
+                        <div class="small">Verde = saiu e estava no pool de 15 · Cinza = saiu e <em>não</em> estava no pool</div>
+                    </div>`;
+                }
+            }
+            const det = aberto === r.id ? `<tr><td class="auto-det" colspan="${4 + cols.length}">
+                <div class="mb-1"><strong>Dezenas (15):</strong>
+                    ${(r.dezenas || []).map(n => `<span class="auto-dez">${pad2(n)}</span>`).join('')}
+                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2 py-0" data-auto-copy="${r.id}">Copiar dezenas</button>
+                    <a class="btn btn-sm btn-outline-primary ms-1 py-0" data-auto-construtor
+                       href="${urlBaseConstrutor(r.dezenas)}" target="_blank" rel="noopener">Base Construtor</a>
+                </div>
+                <div>Concursos testados: <strong>${fmtN(r.concursos_testados)}</strong>
+                    · Melhor acerto (${r.melhor_acerto}) em ${fmtN(dets.length)} concurso(s) — clique para ver:
+                    <span class="d-inline-block mt-1">${concBtns}</span></div>
+                ${concBox}
+            </td></tr>` : '';
+            return `<tr class="auto-open${ref}" data-auto-id="${r.id}">
+                <td>${r.posicao}º</td>
+                <td class="auto-lbl">${r.label}${r.referencia ? ' <span class="text-muted">(referência)</span>' : ''}</td>
+                ${fa}
+                <td>${r.melhor_acerto}</td>
+                <td>${Number(r.media).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>${det}`;
+        }).join('');
+        wrap.innerHTML = `<table class="auto-tbl">
+            <thead><tr>
+                <th>Ranking</th>
+                <th class="auto-lbl">Combinação</th>
+                ${headFaixas}
+                <th>Melhor</th>
+                <th>Média</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+        </table>`;
+    }
+    function csvEscape(v) {
+        const s = String(v == null ? '' : v);
+        if (/[",;\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+        return s;
+    }
+    function exportar() {
+        if (!ranking.length) return;
+        const maxF = Math.max(7, ...ranking.map(r => Number(r.melhor_acerto) || 0));
+        const cols = [];
+        for (let h = maxF; h >= 0; h--) cols.push(h);
+        const header = ['ranking', 'combinacao', 'dezenas', ...cols.map(h => 'acertos_' + h), 'melhor', 'media', 'concursos_testados'].join(';');
+        const lines = ranking.map(r => {
+            const dez = (r.dezenas || []).map(pad2).join('-');
+            const fvals = cols.map(h => {
+                const f = r.faixas || {};
+                return f[h] != null ? f[h] : (f[String(h)] != null ? f[String(h)] : 0);
+            });
+            return [r.posicao, r.label, dez, ...fvals, r.melhor_acerto, r.media, r.concursos_testados].map(csvEscape).join(';');
+        });
+        const blob = new Blob(['\ufeff' + header + '\n' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'combinacoes-auto-' + (CFG.key || 'mod') + '.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+    function urlBaseConstrutor(dezenas) {
+        const qs = (dezenas || []).map(pad2).join('-');
+        return '/geradores-elite/construtor-construcoes/?dezenas=' + encodeURIComponent(qs);
+    }
+    function copiarDezenas(id) {
+        const r = ranking.find(x => x.id === id);
+        if (!r) return;
+        const txt = (r.dezenas || []).map(pad2).join(' ');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(txt);
+        } else {
+            window.prompt('Dezenas', txt);
+        }
+        const st = document.getElementById('autoStatus');
+        if (st) st.textContent = 'Dezenas copiadas: ' + txt;
+    }
+    async function gerar() {
+        const btn = document.getElementById('autoBtnGerar');
+        const st = document.getElementById('autoStatus');
+        const wrap = document.getElementById('autoWrap');
+        if (btn) btn.disabled = true;
+        if (st) st.textContent = 'Gerando e testando no histórico…';
+        if (wrap) wrap.innerHTML = '<div class="text-center py-3 text-muted"><i class="fas fa-spinner fa-spin"></i></div>';
+        try {
+            const r = await fetch(API + '/api/combinacoes-auto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dezenas_manual: lidoManual() }),
+            });
+            const d = await r.json();
+            if (!d.sucesso) throw new Error(d.erro || 'Falha ao gerar');
+            ranking = d.ranking || [];
+            aberto = ranking[0] ? ranking[0].id : null;
+            if (st) st.textContent = (d.aviso || '') + ' · ' + ranking.length + ' combinação(ões) · '
+                + (d.concursos_testados || 0).toLocaleString('pt-BR') + ' concursos.';
+            renderAuto();
+        } catch (e) {
+            ranking = [];
+            if (wrap) wrap.innerHTML = `<div class="text-danger small text-center py-3">${e.message || e}</div>`;
+            if (st) st.textContent = '';
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+    document.getElementById('autoBtnGerar')?.addEventListener('click', gerar);
+    document.getElementById('autoBtnExport')?.addEventListener('click', exportar);
+    document.getElementById('autoWrap')?.addEventListener('click', (ev) => {
+        const copy = ev.target.closest('[data-auto-copy]');
+        if (copy) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            copiarDezenas(copy.getAttribute('data-auto-copy'));
+            return;
+        }
+        const construtor = ev.target.closest('[data-auto-construtor]');
+        if (construtor) {
+            ev.stopPropagation();
+            return;
+        }
+        const ordemBtn = ev.target.closest('[data-auto-ordem]');
+        if (ordemBtn) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            ordemConc = ordemConc === 'classificado' ? 'sorteio' : 'classificado';
+            renderAuto();
+            return;
+        }
+        const concBtn = ev.target.closest('[data-auto-conc]');
+        if (concBtn) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            const id = concBtn.getAttribute('data-auto-conc');
+            const conc = Number(concBtn.getAttribute('data-conc'));
+            if (concAberto && concAberto.id === id && Number(concAberto.concurso) === conc) concAberto = null;
+            else concAberto = { id, concurso: conc };
+            renderAuto();
+            return;
+        }
+        const tr = ev.target.closest('tr.auto-open');
+        if (!tr) return;
+        const id = tr.getAttribute('data-auto-id');
+        aberto = aberto === id ? null : id;
+        renderAuto();
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}

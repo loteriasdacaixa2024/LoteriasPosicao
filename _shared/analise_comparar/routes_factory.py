@@ -60,6 +60,31 @@ def build_comparar_blueprint(modality_key: str) -> Blueprint:
         limite = request.args.get("limit", 150)
         return jsonify({"sucesso": True, "concursos": svc.listar_concursos(limite)})
 
+    @bp.route("/api/indicacao-padrao")
+    def api_indicacao_padrao():
+        return jsonify(svc.indicacao_padrao())
+
+    @bp.route("/api/historico-indicados")
+    def api_historico_indicados():
+        limite = request.args.get("limit", 15, type=int)
+        offset = request.args.get("offset", 0, type=int)
+        return jsonify(svc.historico_indicados(limit=limite, offset=offset))
+
+    @bp.route("/api/combinacoes-auto", methods=["POST"])
+    def api_combinacoes_auto():
+        from .auto_combinacoes import gerar_e_testar
+        body = request.get_json(silent=True) or {}
+        hist = svc.historico_indicados(limit=0)
+        if not hist.get("sucesso"):
+            return jsonify({"sucesso": False, "erro": "Falha ao ler o histórico."}), 400
+        return jsonify(gerar_e_testar(
+            concursos=hist.get("concursos") or [],
+            dmin=int(cfg["dezena_min"]),
+            dmax=int(cfg["dezena_max"]),
+            modality_key=modality_key,
+            dezenas_manual=body.get("dezenas_manual") or [],
+        ))
+
     return bp
 
 

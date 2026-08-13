@@ -1915,6 +1915,35 @@
         }, { once: true });
     }
 
+    function aplicarDezenasDaUrl() {
+        try {
+            const qs = new URLSearchParams(window.location.search);
+            const raw = qs.get('dezenas') || qs.get('base') || '';
+            if (!raw) return false;
+            const nums = raw.split(/[,;\-\s+]+/)
+                .map((s) => parseInt(String(s).trim(), 10))
+                .filter((n) => Number.isFinite(n) && n >= DEZENA_MIN && n <= DEZENA_MAX);
+            const unicos = [...new Set(nums)];
+            if (!unicos.length) return false;
+            try {
+                if ($('ccModoVolanteBtn') && modoEntrada !== 'volante') {
+                    setModoEntrada('volante', false);
+                }
+            } catch (_) { /* ignore */ }
+            const falta = Math.max(0, CONJUNTO_MAX - unicos.length);
+            let aviso = `Pool da análise Comparar (${unicos.length} dezenas).`;
+            if (falta === 1) {
+                aviso = `Pool de ${unicos.length} da análise Comparar. Falta 1 para o conjunto-base (máx. ${CONJUNTO_MAX}) — pode ser do último sorteio.`;
+            } else if (falta > 1) {
+                aviso = `Pool de ${unicos.length} da análise Comparar. Faltam ${falta} para o conjunto-base (máx. ${CONJUNTO_MAX}).`;
+            }
+            setSelecionadas(unicos, 'analise-comparar', aviso);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
     function init() {
         if (HAS_MES) carregarMesesIndicadosBanner();
         renderVolante();
@@ -1936,6 +1965,7 @@
                 }
             }
         } catch (_) { /* ignore */ }
+        aplicarDezenasDaUrl();
         processarImportPendente();
         carregarSessoes();
         carregarConcursos();
