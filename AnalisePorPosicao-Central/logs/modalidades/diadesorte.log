@@ -17661,3 +17661,27 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5153
 Press CTRL+C to quit
 [API Caixa] Dia de Sorte 1276/1276...127.0.0.1 - - [20/Aug/2026 03:11:58] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-08-20 03:26:02 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [20/Aug/2026 03:26:18] "GET / HTTP/1.1" 200 -
