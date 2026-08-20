@@ -7,7 +7,7 @@
         <div data-tb-panel="s10" class="{{ '' if show_s10_first else 'd-none' }}">
           <div class="tb-card">
             <h2 class="h5 fw-bold">📝 SEÇÃO 10 — MANUAL <span class="badge bg-secondary ms-1">ordem crescente</span></h2>
-            <p class="small text-muted">Crie jogos manualmente, cole texto ou arraste arquivos. Stats em tempo real. Exporta somente dezenas{% if extra_mes %} + mês (editável com ▲/▼){% endif %}.</p>
+            <p class="small text-muted">Três jeitos de incluir apostas: arraste TXT/CSV, cole o texto, ou clique em <strong>+</strong> para abrir linhas em branco e preencher as dezenas. Stats em tempo real. Exporta somente dezenas{% if extra_mes %} + mês (editável com ▲/▼){% endif %}.</p>
             <div class="tb-drop mb-2" id="tbDrop10" data-ai-compare="s10">Arraste TXT/CSV aqui · ou cole abaixo</div>
             <textarea id="tbPaste10" class="form-control form-control-sm mb-2" rows="3" placeholder="{% if extra_mes %}FORMATOS: 01 02 03 04 05 06 07 · 01 02 03 04 05 06 07 - Jul · 01 02 03 04 05 06 07 - Julho{% else %}FORMATO: dezenas separadas por espaço (ex.: 01 05 12 23 34 45){% endif %}"></textarea>
             <div class="d-flex flex-wrap gap-2 mb-2">
@@ -18,8 +18,15 @@
               <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport10">
                 <i class="fas fa-file-export me-1"></i>Exportar
               </button>
+              <button type="button" class="btn btn-sm btn-warning" id="tbJaSaiu10"
+                      title="Compara cada aposta com todos os resultados oficiais, do concurso 1 até o atual">
+                <i class="fas fa-history me-1"></i>Já saiu?
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbJaSaiu10Clear">Limpar verif.</button>
               <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear10">Limpar</button>
             </div>
+            <div class="small text-muted mb-2" id="tbJaSaiu10Info">Verifica se alguma aposta já foi o resultado oficial (concurso 1 até o atual)</div>
+            <div id="tbJaSaiu10Box" class="tb-jasaiu-box d-none mb-2" role="status"></div>
             <div class="tb-stats-panel mb-2" id="tbStats10"></div>
             <div class="small fw-bold text-muted mb-1" id="tbUltimo10Lbl">Último resultado (referência — histórico tubular)</div>
             <div class="table-responsive mb-3">
@@ -49,7 +56,20 @@
                 </tbody>
               </table>
             </div>
-            <div class="small fw-semibold mb-1">Suas apostas</div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+              <span class="small fw-semibold mb-0">Suas apostas</span>
+              <button type="button" class="btn btn-sm btn-primary" id="tbAddLinha10"
+                      title="Inclui linhas em branco para você preencher as dezenas">
+                <i class="fas fa-plus me-1"></i>Adicionar linha
+              </button>
+              <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbAddLinha10Qtd">
+                Qtd:
+                <input type="number" class="form-control form-control-sm" id="tbAddLinha10Qtd"
+                       value="1" min="1" max="500" step="1" style="width:4.5rem;"
+                       title="Quantas linhas em branco incluir de uma vez">
+              </label>
+              <span class="small text-muted">Clique em + quantas vezes quiser, ou informe a quantidade</span>
+            </div>
             <div id="tbFaltantesHint10" class="small text-muted mb-1 d-none"></div>
             <div id="tbDupMsg10" class="tb-dup-msg d-none mb-2" role="alert"></div>
             <div class="table-responsive">
@@ -69,11 +89,16 @@
                     <th class="tb-sort" data-sort="final" title="Clique para ordenar">Final <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="qtde" title="Clique para ordenar">Qtde <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="numeros" title="Clique para ordenar">Números <span class="tb-sort-ind">⇅</span></th>
-                    <th title="Remover"></th>
+                    <th title="Incluir ou remover linha"></th>
                   </tr>
                 </thead>
                 <tbody></tbody>
               </table>
+            </div>
+            <div class="mt-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" id="tbAddLinha10Footer">
+                <i class="fas fa-plus me-1"></i>Adicionar linha
+              </button>
             </div>
           </div>
         </div>
@@ -210,9 +235,16 @@
               <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport11">
                 <i class="fas fa-file-export me-1"></i>Exportar
               </button>
+              <button type="button" class="btn btn-sm btn-warning" id="tbJaSaiu11"
+                      title="Compara cada aposta gerada com todos os resultados oficiais, do concurso 1 até o atual">
+                <i class="fas fa-history me-1"></i>Já saiu?
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbJaSaiu11Clear">Limpar verif.</button>
               <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear11">Limpar</button>
               <span class="small text-muted" id="tbGerar11Info">—</span>
             </div>
+            <div class="small text-muted mb-2" id="tbJaSaiu11Info">Verifica se alguma aposta gerada já foi o resultado oficial (concurso 1 até o atual)</div>
+            <div id="tbJaSaiu11Box" class="tb-jasaiu-box d-none mb-2" role="status"></div>
             <div class="d-flex flex-wrap gap-2 mb-2 align-items-center" id="tbConferir11Bar">
               <label class="small mb-0 fw-semibold" for="tbConferir11Select">Conferir</label>
               <select class="form-select form-select-sm" id="tbConferir11Select">

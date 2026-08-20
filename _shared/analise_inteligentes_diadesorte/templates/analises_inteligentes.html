@@ -371,7 +371,7 @@
   }
   #ai-root #aiTabelaResumoPad td.td-apostar {
     font-weight: 800;
-    color: #1b5e20;
+    color: var(--accent-mes);
     font-variant-numeric: tabular-nums;
   }
   #ai-root #aiTabelaResumoPad td.td-ja-saiu {
@@ -379,8 +379,26 @@
     color: #842029;
     font-variant-numeric: tabular-nums;
   }
-  #ai-root #aiTabelaResumoPad tr.tr-resumo-top td {
-    background: rgba(25,135,84,.06);
+  #ai-root #aiTabelaResumoPad tr.tr-resumo-best td {
+    background: color-mix(in srgb, var(--accent) 24%, #fff);
+    box-shadow: inset 4px 0 0 var(--primary);
+  }
+  #ai-root #aiTabelaResumoPad th.ai-sort.ai-sort-asc,
+  #ai-root #aiTabelaResumoPad th.ai-sort.ai-sort-desc {
+    background: var(--primary-xdark) !important;
+    box-shadow: inset 0 -3px 0 var(--accent), 0 1px 0 rgba(0,0,0,.12);
+  }
+  #ai-root #aiTabelaResumoPad td.td-sort-col {
+    background: var(--accent-light) !important;
+    color: var(--primary-xdark);
+    font-weight: 800;
+  }
+  #ai-root #aiTabelaResumoPad td.td-apostar.td-sort-col {
+    background: color-mix(in srgb, var(--accent-mes) 18%, #fff) !important;
+    color: var(--accent-mes);
+  }
+  #ai-root #aiTabelaResumoPad td.td-ja-saiu.td-sort-col {
+    background: #fde8e8 !important;
   }
   #ai-root #aiPadIIResumoWrap {
     text-align: center;
@@ -732,23 +750,24 @@
         <div class="small text-muted mb-2" id="aiPadIIResumoStatus">
           Clique em <strong>Carregar resumo</strong> para ver, em cada padrão, quantos jogos estão
           dentro da média, quantos já saíram e quantos ainda valem para apostar.
+          Depois clique no título da coluna para ordenar — o maior valor fica no topo.
         </div>
         <div id="aiPadIIChecagem" class="ai-checagem d-none" role="status"></div>
         <div class="table-responsive ai-resumo-scroll" style="max-height:420px;overflow:auto;text-align:left;">
           <table class="table table-sm table-bordered ai-table mb-0" id="aiTabelaResumoPad">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Padrão</th>
-                <th>Distribuição</th>
-                <th title="Dentro da média e ainda não saíram">Para apostar</th>
-                <th title="Dentro da média e já saíram no histórico">Já saíram</th>
-                <th>Dentro</th>
-                <th>Próximas</th>
-                <th>Fora</th>
-                <th>Média</th>
-                <th>Jogos</th>
-                <th>%</th>
+                <th class="ai-sort" data-sort="idx" data-table="resumo"># <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="padrao" data-table="resumo">Padrão <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="descricao" data-table="resumo">Distribuição <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="para_apostar" data-table="resumo" title="Dentro da média e ainda não saíram">Para apostar <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="ja_sairam_dentro" data-table="resumo" title="Dentro da média e já saíram no histórico">Já saíram <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="dentro" data-table="resumo">Dentro <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="proxima" data-table="resumo">Próximas <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="fora" data-table="resumo">Fora <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="soma_media" data-table="resumo">Média <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="jogos_possiveis" data-table="resumo">Jogos <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="pct" data-table="resumo">% <span class="ai-sort-ind">⇅</span></th>
                 <th></th>
               </tr>
             </thead>
@@ -1039,7 +1058,7 @@
     </div>
   </div>
 </div>
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260811d">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260820b">
 <style>
   {% if extra_mes %}
   {% for nome, cor in (meses_cores or {}).items() %}
@@ -1050,7 +1069,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260811d"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260820b"></script>
 <script>
 (function () {
   const root = document.getElementById('ai-root');
@@ -1066,6 +1085,7 @@
   let CAT_PAD_II = [];
   let PAD_II_SEL = new Set();
   let RESUMO_PAD = [];
+  let RESUMO_PAD_META = null;
   let ULTIMO_RESULTADO = null;
   let MAPA_CONCURSOS = null;
   let FOCO_CONCURSO = null;
@@ -1080,6 +1100,7 @@
     pad: { key: 'concurso', dir: 'desc' },
     p2: { key: 'frequencia', dir: 'desc' },
     jogos: { key: 'distancia', dir: 'asc' },
+    resumo: { key: 'para_apostar', dir: 'desc' },
   };
   let PAGE = { res: 1, pad: 1 };
 
@@ -1647,7 +1668,14 @@
     atualizarSelPadII();
   }
 
+  function pctResumoPad(r, univ) {
+    if (r.prob_teorica_pct != null) return Number(r.prob_teorica_pct) || 0;
+    return univ ? (100 * Number(r.jogos_possiveis || 0) / univ) : 0;
+  }
+
   function renderResumoOperacionalPadroes(meta) {
+    if (meta) RESUMO_PAD_META = meta;
+    meta = meta || RESUMO_PAD_META || {};
     const tbody = document.querySelector('#aiTabelaResumoPad tbody');
     const status = document.getElementById('aiPadIIResumoStatus');
     const checagemEl = document.getElementById('aiPadIIChecagem');
@@ -1658,41 +1686,66 @@
       return;
     }
     const univ = meta && meta.checagem ? Number(meta.checagem.total_universo) || 0 : 0;
-    tbody.innerHTML = RESUMO_PAD.map((r, i) => {
+    const { key, dir } = SORT.resumo;
+    const STR = new Set(['padrao', 'descricao']);
+    const rows = RESUMO_PAD.map((r, orig) => ({ r, orig })).sort((a, b) => {
+      if (key === 'idx') return dir === 'asc' ? a.orig - b.orig : b.orig - a.orig;
+      if (STR.has(key)) {
+        const va = String(a.r[key] || '');
+        const vb = String(b.r[key] || '');
+        return dir === 'asc' ? va.localeCompare(vb, 'pt-BR') : vb.localeCompare(va, 'pt-BR');
+      }
+      const va = key === 'pct' ? pctResumoPad(a.r, univ) : (Number(a.r[key]) || 0);
+      const vb = key === 'pct' ? pctResumoPad(b.r, univ) : (Number(b.r[key]) || 0);
+      return dir === 'asc' ? va - vb : vb - va;
+    });
+    const colCls = (col) => col === key ? ' td-sort-col' : '';
+    tbody.innerHTML = rows.map(({ r }, i) => {
       const mediaTxt = r.soma_media != null
         ? `${esc(r.soma_media)}${r.tol_proxima != null ? ` (±${esc(r.tol_proxima)})` : ''}${r.fonte_media === 'historico' ? ' · hist.' : (r.fonte_media ? ' · teór.' : '')}`
         : '—';
-      const topCls = i < 3 ? 'tr-resumo-top' : '';
+      const topCls = i === 0 ? 'tr-resumo-best' : '';
       const ultimo = r.eh_padrao_ultimo_concurso ? ' tr-padrao-ultimo' : '';
       const pct = r.prob_teorica_pct != null
         ? Number(r.prob_teorica_pct).toFixed(2)
         : (univ ? ((100 * Number(r.jogos_possiveis || 0) / univ)).toFixed(2) : '—');
       const pctEmp = r.prob_empirica_pct != null ? Number(r.prob_empirica_pct).toFixed(2) : '';
       return `<tr class="${topCls}${ultimo}" data-padrao="${esc(r.padrao)}">
-        <td>${i + 1}</td>
-        <td class="td-padrao"><code>${esc(r.padrao)}</code></td>
-        <td>${esc(r.descricao || '')}</td>
-        <td class="td-apostar">${fmtVol(r.para_apostar)}</td>
-        <td class="td-ja-saiu">${fmtVol(r.ja_sairam_dentro)}</td>
-        <td>${fmtVol(r.dentro)}</td>
-        <td>${fmtVol(r.proxima)}</td>
-        <td>${fmtVol(r.fora)}</td>
-        <td class="small">${mediaTxt}</td>
-        <td>${fmtVol(r.jogos_possiveis)}</td>
-        <td class="small" title="Teórica % do universo${pctEmp !== '' ? ' · empírica ' + pctEmp + '%' : ''}">${pct}%</td>
+        <td class="${colCls('idx').trim()}">${i + 1}</td>
+        <td class="td-padrao${colCls('padrao')}"><code>${esc(r.padrao)}</code></td>
+        <td class="${colCls('descricao').trim()}">${esc(r.descricao || '')}</td>
+        <td class="td-apostar${colCls('para_apostar')}">${fmtVol(r.para_apostar)}</td>
+        <td class="td-ja-saiu${colCls('ja_sairam_dentro')}">${fmtVol(r.ja_sairam_dentro)}</td>
+        <td class="${colCls('dentro').trim()}">${fmtVol(r.dentro)}</td>
+        <td class="${colCls('proxima').trim()}">${fmtVol(r.proxima)}</td>
+        <td class="${colCls('fora').trim()}">${fmtVol(r.fora)}</td>
+        <td class="small${colCls('soma_media')}">${mediaTxt}</td>
+        <td class="${colCls('jogos_possiveis').trim()}">${fmtVol(r.jogos_possiveis)}</td>
+        <td class="small${colCls('pct')}" title="Teórica % do universo${pctEmp !== '' ? ' · empírica ' + pctEmp + '%' : ''}">${pct}%</td>
         <td><a href="#" class="btn btn-sm btn-outline-success py-0 px-2" data-act="ver-jogos-padrao" data-padrao="${esc(r.padrao)}" title="Abrir apostas (ainda não saíram)">Abrir</a></td>
       </tr>`;
     }).join('');
     if (status) {
       const totA = RESUMO_PAD.reduce((s, r) => s + (Number(r.para_apostar) || 0), 0);
       const totJ = RESUMO_PAD.reduce((s, r) => s + (Number(r.ja_sairam_dentro) || 0), 0);
-      status.innerHTML = `<strong>${RESUMO_PAD.length} padrões</strong> ·
-        total para apostar: <strong class="text-success">${fmtVol(totA)}</strong> ·
-        já saíram (dentro): <strong class="text-danger">${fmtVol(totJ)}</strong>`;
+      const rotulos = {
+        para_apostar: 'Para apostar', ja_sairam_dentro: 'Já saíram', dentro: 'Dentro',
+        proxima: 'Próximas', fora: 'Fora', soma_media: 'Média', jogos_possiveis: 'Jogos',
+        pct: '%', padrao: 'Padrão', descricao: 'Distribuição', idx: '#'
+      };
+      const melhor = rows[0] && rows[0].r;
+      const melhorTxt = melhor
+        ? ` · melhor em <strong>${esc(rotulos[key] || key)}</strong>: <strong>${esc(melhor.padrao)}</strong>`
+        : '';
+      const elapsed = meta.elapsed_ms != null ? ` · ${fmtVol(meta.elapsed_ms)} ms` : '';
+      status.innerHTML = `<strong>${fmtVol(meta.total_padroes != null ? meta.total_padroes : RESUMO_PAD.length)} padrões</strong> ·
+        total para apostar: <strong class="text-success">${fmtVol(meta.total_para_apostar != null ? meta.total_para_apostar : totA)}</strong> ·
+        já saíram (dentro): <strong class="text-danger">${fmtVol(meta.total_ja_sairam_dentro != null ? meta.total_ja_sairam_dentro : totJ)}</strong>${melhorTxt}${elapsed}`;
     }
     if (checagemEl && meta && meta.checagem) {
       renderChecagemResumo(meta.checagem);
     }
+    atualizarIndicadoresSort();
   }
 
   function renderChecagemResumo(ch) {
@@ -1750,12 +1803,6 @@
       if (!d.sucesso) throw new Error(d.erro || 'Falha');
       RESUMO_PAD = d.padroes || [];
       renderResumoOperacionalPadroes(d);
-      if (status) {
-        status.innerHTML = `<strong>${fmtVol(d.total_padroes)} padrões</strong> ·
-          total para apostar: <strong class="text-success">${fmtVol(d.total_para_apostar)}</strong> ·
-          já saíram (dentro): <strong class="text-danger">${fmtVol(d.total_ja_sairam_dentro)}</strong>
-          ${d.elapsed_ms != null ? ` · ${fmtVol(d.elapsed_ms)} ms` : ''}`;
-      }
     } catch (e) {
       if (tbody) tbody.innerHTML = `<tr><td colspan="12" class="text-danger text-center">${esc(e.message || e)}</td></tr>`;
       if (status) status.innerHTML = `<span class="text-danger">${esc(e.message || e)}</span>`;
@@ -2408,7 +2455,9 @@
       if (SORT[table].key === key) SORT[table].dir = SORT[table].dir === 'asc' ? 'desc' : 'asc';
       else {
         SORT[table].key = key;
-        SORT[table].dir = (key === 'concurso' || key === 'data' || key === 'frequencia' || key === 'jogos_possiveis' || key === 'soma') ? 'desc' : (key === 'distancia' ? 'asc' : 'asc');
+        const DESC_FIRST = new Set(['concurso', 'data', 'frequencia', 'jogos_possiveis', 'soma',
+          'para_apostar', 'ja_sairam_dentro', 'dentro', 'proxima', 'fora', 'soma_media', 'pct']);
+        SORT[table].dir = key === 'distancia' ? 'asc' : (DESC_FIRST.has(key) ? 'desc' : 'asc');
       }
       if (table === 'p2') {
         renderPadroesII();
@@ -2417,6 +2466,10 @@
       if (table === 'jogos') {
         JOGOS_PAD.offset = 0;
         aplicarPaginaJogos();
+        return;
+      }
+      if (table === 'resumo') {
+        renderResumoOperacionalPadroes();
         return;
       }
       PAGE[table] = 1;

@@ -280,6 +280,9 @@
     this.manual11SortDir = 'asc';
     this.stats11Open = false;
     this.conferencia11 = null; // { contest, nums: number[] }
+    this.jaSaiuAtivo = { 10: false, 11: false };
+    this._histMap = null;
+    this._histMapN = -1;
     this.faltantesCiclo = new Set(); // dezenas pendentes do ciclo atual
     this.manual10BlockMsg = '';
     this.auto11Janela = 10;
@@ -444,9 +447,20 @@
       r.querySelector(`#tbExport${fmt.toUpperCase()}`)?.addEventListener('click', () => this.exportMain(fmt));
     });
     r.querySelector('#tbAdd10')?.addEventListener('click', () => this.addManualRow(10));
+    r.querySelector('#tbAddLinha10')?.addEventListener('click', () => this.addManualRow(10));
+    r.querySelector('#tbAddLinha10Footer')?.addEventListener('click', () => this.addManualRow(10));
+    r.querySelector('#tbAddLinha10Qtd')?.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter') return;
+      ev.preventDefault();
+      this.addManualRow(10);
+    });
     r.querySelector('#tbProcess10')?.addEventListener('click', () => this.processPaste(10));
     r.querySelector('#tbExport10')?.addEventListener('click', () => this.exportManualApostas(10));
     r.querySelector('#tbExport11')?.addEventListener('click', () => this.exportManualApostas(11));
+    r.querySelector('#tbJaSaiu10')?.addEventListener('click', () => this.verificarJaSaiu(10));
+    r.querySelector('#tbJaSaiu11')?.addEventListener('click', () => this.verificarJaSaiu(11));
+    r.querySelector('#tbJaSaiu10Clear')?.addEventListener('click', () => this.limparJaSaiu(10));
+    r.querySelector('#tbJaSaiu11Clear')?.addEventListener('click', () => this.limparJaSaiu(11));
     r.querySelector('#tbGerar11')?.addEventListener('click', () => this.gerarAutomatico11(10));
     r.querySelector('#tbGerarMais11')?.addEventListener('click', () => this.gerarMaisAutomatico11());
     r.querySelector('#tbClear10')?.addEventListener('click', () => {
@@ -455,6 +469,8 @@
       this.manual10SortKey = null;
       this.manual10SortDir = 'asc';
       this._manualUid = 0;
+      this.jaSaiuAtivo[10] = false;
+      this._hideJaSaiuBox(10);
       this.renderManual(10);
     });
     r.querySelector('#tbAuto11Janela')?.addEventListener('click', (ev) => {
@@ -483,6 +499,8 @@
       this.manual11 = [];
       this.manual11SortKey = null;
       this.manual11SortDir = 'asc';
+      this.jaSaiuAtivo[11] = false;
+      this._hideJaSaiuBox(11);
       this.renderManual(11);
       const info = this.root.querySelector('#tbGerar11Info');
       if (info) info.textContent = '—';
@@ -729,6 +747,8 @@
           monthName: mesNome,
         };
       });
+      this._histMap = null;
+      this._histMapN = -1;
       this._goLastPage();
       this.renderKpis();
       this.renderCondStats();
@@ -1172,6 +1192,103 @@
     this.renderManual(11);
   };
 
+  /** Chave da combinação (ordem irrelevante) — só apostas completas. */
+  TubularApp.prototype._comboKey = function (nums) {
+    const L = limitsFrom(this.root);
+    const clean = [...new Set((nums || []).map(Number).filter(n => Number.isFinite(n)))]
+      .sort((a, b) => a - b);
+    if (clean.length !== L.sorteadas) return '';
+    return clean.join('-');
+  };
+
+  /** Mapa combinação → ocorrências oficiais (concurso 1 até o atual). */
+  TubularApp.prototype._histComboMap = function () {
+    if (this._histMap && this._histMapN === this.data.length) return this._histMap;
+    const map = new Map();
+    (this.data || []).forEach((c) => {
+      const nums = c.numbersAscending || c.numbersDrawOrder || [];
+      const key = this._comboKey(nums);
+      if (!key) return;
+      const arr = map.get(key) || [];
+      arr.push({
+        contest: c.contest,
+        date: c.date || '',
+        monthName: c.monthName || '',
+      });
+      map.set(key, arr);
+    });
+    this._histMap = map;
+    this._histMapN = this.data.length;
+    return map;
+  };
+
+  TubularApp.prototype._hideJaSaiuBox = function (section) {
+    const box = this.root.querySelector(section === 10 ? '#tbJaSaiu10Box' : '#tbJaSaiu11Box');
+    const info = this.root.querySelector(section === 10 ? '#tbJaSaiu10Info' : '#tbJaSaiu11Info');
+    if (box) {
+      box.classList.add('d-none');
+      box.classList.remove('tb-jasaiu-hit', 'tb-jasaiu-ok');
+      box.innerHTML = '';
+    }
+    if (info) {
+      info.textContent = 'Verifica se alguma aposta já foi o resultado oficial (concurso 1 até o atual)';
+    }
+  };
+
+  TubularApp.prototype.limparJaSaiu = function (section) {
+    this.jaSaiuAtivo[section] = false;
+    this._hideJaSaiuBox(section);
+    this.renderManual(section);
+  };
+
+  TubularApp.prototype.verificarJaSaiu = async function (section) {
+    const list = section === 10 ? this.manual10 : this.manual11;
+    const valid = (list || []).filter((g) => this._comboKey(g && g.numbers)).length;
+    if (!valid) {
+      alert(section === 11
+        ? 'Gere ou carregue apostas na Seção 11 antes de verificar.'
+        : 'Adicione apostas na Seção 10 antes de verificar.');
+      return;
+    }
+    if (!this.data.length) {
+      await this.load();
+    }
+    if (!this.data.length) {
+      alert('Não foi possível carregar o histórico de concursos.');
+      return;
+    }
+    this.jaSaiuAtivo[section] = true;
+    this.renderManual(section);
+  };
+
+  TubularApp.prototype._paintJaSaiuBox = function (section, hits, totalValid) {
+    const box = this.root.querySelector(section === 10 ? '#tbJaSaiu10Box' : '#tbJaSaiu11Box');
+    const info = this.root.querySelector(section === 10 ? '#tbJaSaiu10Info' : '#tbJaSaiu11Info');
+    if (!this.jaSaiuAtivo || !this.jaSaiuAtivo[section] || !box) return;
+    const chrono = this.data.slice().sort((a, b) => (+a.contest || 0) - (+b.contest || 0));
+    const de = chrono.length ? chrono[0].contest : '—';
+    const ate = chrono.length ? chrono[chrono.length - 1].contest : '—';
+    const faixa = `concursos ${de}–${ate} (${chrono.length})`;
+    box.classList.remove('d-none', 'tb-jasaiu-hit', 'tb-jasaiu-ok');
+    if (!hits.length) {
+      box.classList.add('tb-jasaiu-ok');
+      box.innerHTML = `<strong>Nenhuma aposta saiu como resultado oficial</strong> — conferido em ${esc(faixa)}.`;
+      if (info) info.textContent = `Nenhuma das ${totalValid} aposta(s) saiu · ${faixa}`;
+      return;
+    }
+    box.classList.add('tb-jasaiu-hit');
+    const items = hits.map((h) => {
+      const dez = (h.nums || []).map(fmt2).join(' ');
+      const oc = (h.ocorrencias || []).map((o) => {
+        const mes = o.monthName ? ` · ${o.monthName}` : '';
+        return `<strong>#${esc(String(o.contest))}</strong>${o.date ? ` (${esc(o.date)})` : ''}${esc(mes)}`;
+      }).join(', ');
+      return `<li>Aposta ${esc(String(h.apostaNum))} — <span class="font-monospace">${esc(dez)}</span> → ${oc}</li>`;
+    }).join('');
+    box.innerHTML = `<div class="fw-bold mb-1">${hits.length} de ${totalValid} aposta(s) já foram sorteadas (${esc(faixa)})</div><ul class="mb-0 ps-3">${items}</ul>`;
+    if (info) info.textContent = `${hits.length} de ${totalValid} aposta(s) já saíram · ${faixa}`;
+  };
+
   TubularApp.prototype._renderManual10DupMsg = function (alerts) {
     const el = this.root.querySelector('#tbDupMsg10');
     if (!el) return;
@@ -1349,18 +1466,54 @@
       <button type="button" class="btn btn-sm btn-outline-secondary" data-page="${pages}" ${this.page>=pages?'disabled':''}>»</button>`;
   };
 
-  TubularApp.prototype.addManualRow = function (section) {
+  TubularApp.prototype._blankManualRow = function () {
     const L = limitsFrom(this.root);
-    const row = {
+    return {
       numbers: Array.from({ length: L.sorteadas }, () => null),
       month: this.extraMes ? 1 : 0,
       monthName: this.extraMes ? 'Janeiro' : '',
       editable: true,
       _uid: ++this._manualUid,
     };
-    if (section === 10) this.manual10.push(row);
-    else this.manual11.push(row);
+  };
+
+  TubularApp.prototype._addLinhaQtd = function (section) {
+    const el = this.root.querySelector(section === 10 ? '#tbAddLinha10Qtd' : '#tbAddLinha11Qtd');
+    const v = el ? parseInt(el.value, 10) : 1;
+    if (!Number.isFinite(v) || v < 1) return 1;
+    return Math.min(500, v);
+  };
+
+  TubularApp.prototype._focusNewManualRow = function (section, rowIdx) {
+    const table = this.root.querySelector(section === 10 ? '#tbManual10' : '#tbManual11');
+    const inp = table && table.querySelector(`.tb-manual-input[data-row="${rowIdx}"][data-col="0"]`);
+    if (!inp) return;
+    try { inp.closest('tr')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (_) {}
+    inp.focus();
+    if (typeof inp.select === 'function') inp.select();
+  };
+
+  /**
+   * Inclui linhas em branco para preencher à mão.
+   * count: qtd (padrão = campo Qtd). afterIdx: insere abaixo dessa linha (array).
+   */
+  TubularApp.prototype.addManualRow = function (section, count, afterIdx) {
+    const n = (count != null && Number.isFinite(+count) && +count > 0)
+      ? Math.min(500, Math.max(1, parseInt(count, 10)))
+      : this._addLinhaQtd(section);
+    const rows = Array.from({ length: n }, () => this._blankManualRow());
+    const arr = section === 10 ? this.manual10 : this.manual11;
+    const at = Number.isFinite(afterIdx) ? Math.max(0, Math.min(arr.length, afterIdx + 1)) : arr.length;
+    arr.splice(at, 0, ...rows);
+    if (section === 10) {
+      this.manual10SortKey = null;
+      this.manual10SortDir = 'asc';
+    } else {
+      this.manual11SortKey = null;
+      this.manual11SortDir = 'asc';
+    }
     this.renderManual(section);
+    this._focusNewManualRow(section, at);
   };
 
   TubularApp.prototype.processPaste = function (section) {
@@ -1469,6 +1622,10 @@
     const alertMsgs = [];
     let sumAcertos = 0;
     let nComAcertos = 0;
+    const jaAtivo = !!(this.jaSaiuAtivo && this.jaSaiuAtivo[section]);
+    const histMap = jaAtivo ? this._histComboMap() : null;
+    const jaHits = [];
+    let nValidJa = 0;
     const emptyCols = section === 10
       ? (13 + (this.extraMes ? 1 : 0))
       : (13 + (this.extraMes ? 1 : 0));
@@ -1495,16 +1652,35 @@
         sumAcertos += acertos;
         nComAcertos += 1;
       }
+      let ocorrencias = [];
+      if (completeOk) {
+        nValidJa += 1;
+        const ck = histMap ? this._comboKey(valid) : '';
+        ocorrencias = (ck && histMap) ? (histMap.get(ck) || []) : [];
+        if (ocorrencias.length) {
+          jaHits.push({ apostaNum, nums: valid, ocorrencias });
+        }
+      }
+      const jaSaiu = ocorrencias.length > 0;
       const dezenasTd = section === 10
         ? this._manualPosControlsHtml(section, i, nums, sequences, repsList, L, dup.dupCols, null)
         : nums.map((n) => (n == null ? '—' : this._cellNum(n, sequences, repsList, hitSet))).join(' ');
       const mesTd = (section === 10 && this.extraMes)
         ? this._manualMesControlHtml(section, i, g)
         : '';
-      const rowCls = dup.hasDup ? ' class="tb-row-dup"' : '';
+      const rowClsParts = [];
+      if (dup.hasDup) rowClsParts.push('tb-row-dup');
+      if (jaSaiu) rowClsParts.push('tb-row-ja-saiu');
+      const rowCls = rowClsParts.length ? ` class="${rowClsParts.join(' ')}"` : '';
+      const jaTitle = jaSaiu
+        ? ocorrencias.map(o => `#${o.contest}${o.date ? ' · ' + o.date : ''}${o.monthName ? ' · ' + o.monthName : ''}`).join(' · ')
+        : '';
+      const jaBadge = jaSaiu
+        ? ` <span class="tb-badge-ja-saiu" title="${esc(jaTitle)}">já saiu #${esc(String(ocorrencias[0].contest))}${ocorrencias.length > 1 ? ` +${ocorrencias.length - 1}` : ''}</span>`
+        : '';
       if (section === 10) {
         return `<tr${rowCls}>
-          <td>${apostaNum}</td>
+          <td>${apostaNum}${jaBadge}</td>
           <td class="text-nowrap">${dezenasTd}</td>
           ${mesTd}
           <td>${an ? getEmojiByCount(an.sequencesInfo.qtde).text : '—'}</td>
@@ -1517,7 +1693,10 @@
           <td>${an ? esc(an.padroes.final) : '—'}</td>
           <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
           <td class="tb-align-mono">${an ? `<span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span>` : '—'}</td>
-          <td><button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}">×</button></td>
+          <td class="text-nowrap tb-row-actions">
+            <button type="button" class="btn btn-sm btn-outline-success py-0" data-add-row="${section}" data-idx="${i}" title="Adicionar linha abaixo">+</button>
+            <button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}" title="Remover">×</button>
+          </td>
         </tr>`;
       }
       const mesTd11 = this.extraMes
@@ -1528,7 +1707,7 @@
         this.conferencia11 ? `Acertos no concurso ${this.conferencia11.contest}` : 'Conferir um concurso'
       )}</td>`;
       return `<tr${rowCls}>
-        <td>${apostaNum}</td>
+        <td>${apostaNum}${jaBadge}</td>
         <td class="text-nowrap">${dezenasTd}</td>
         ${acertosTd}
         ${mesTd11}
@@ -1543,7 +1722,7 @@
         <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
         <td><button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}">×</button></td>
       </tr>`;
-    }).join('') || `<tr><td colspan="${emptyCols}" class="text-muted">${section === 11 ? 'Clique em «GERAR 10 APOSTAS»' : 'Clique em "+ Adicionar Linha" ou cole jogos acima'}</td></tr>`;
+    }).join('') || `<tr><td colspan="${emptyCols}" class="text-muted">${section === 11 ? 'Clique em «GERAR 10 APOSTAS»' : 'Clique em «+ Adicionar linha» para incluir apostas em branco, ou cole / arraste um arquivo'}</td></tr>`;
 
     if (section === 11 && hitSet) {
       const info = this.root.querySelector('#tbConferir11Info');
@@ -1554,6 +1733,7 @@
         info.textContent = `Conc. ${this.conferencia11.contest}: ${nums} · Σ acertos ${tot} · média ${med}`;
       }
     }
+    if (jaAtivo) this._paintJaSaiuBox(section, jaHits, nValidJa);
     if (section === 10) {
       this._renderManual10DupMsg(alertMsgs);
       this._renderFaltantesHint();
@@ -1618,6 +1798,13 @@
         const next = Math.min(L.dezenaMax, Math.max(L.dezenaMin, cur + delta));
         this._setManualPos(sec, row, col, next, L);
         this.renderManual(sec);
+      });
+    });
+    tbody.querySelectorAll('[data-add-row]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sec = +btn.dataset.addRow;
+        const idx = +btn.dataset.idx;
+        this.addManualRow(sec, 1, idx);
       });
     });
     tbody.querySelectorAll('[data-rm]').forEach(btn => {

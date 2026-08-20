@@ -630,6 +630,57 @@
   color: #fff;
   box-shadow: 0 0 0 1px #a16207;
 }
+#ai-tubular-root .tb-row-actions {
+  white-space: nowrap;
+  text-align: center;
+  width: 1%;
+}
+#ai-tubular-root .tb-row-actions .btn {
+  min-width: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+#ai-tubular-root .tb-row-actions .btn + .btn {
+  margin-left: .15rem;
+}
+#ai-tubular-root .tb-jasaiu-box {
+  border-radius: 8px;
+  padding: .55rem .75rem;
+  font-size: .8rem;
+  text-align: left;
+}
+#ai-tubular-root .tb-jasaiu-box.tb-jasaiu-ok {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+#ai-tubular-root .tb-jasaiu-box.tb-jasaiu-hit {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fdba74;
+}
+#ai-tubular-root .tb-jasaiu-box ul {
+  margin: .35rem 0 0;
+}
+#ai-tubular-root .tb-badge-ja-saiu {
+  display: inline-block;
+  margin-left: .35rem;
+  padding: .08rem .4rem;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #1a0a00;
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+#ai-tubular-root .tb-row-ja-saiu {
+  background: #fff7ed;
+}
+#ai-tubular-root .tb-row-ja-saiu td:first-child {
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
 #ai-tubular-root #tbConferir11Select {
   min-width: 14rem;
   width: auto;
