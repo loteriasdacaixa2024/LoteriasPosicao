@@ -19,7 +19,7 @@ def _page_ctx(modality_key: str, active_tab: str) -> dict:
         "enabled": enabled,
         "active_tab": active_tab,
         "api_base": "/analise/api/ciclo-cobertura",
-        "elite_href": "/geradores-elite/ciclo-apostas/",
+        "elite_href": "/geradores-elite/ciclo-apostas/?modo=estrategia",
     }
 
 

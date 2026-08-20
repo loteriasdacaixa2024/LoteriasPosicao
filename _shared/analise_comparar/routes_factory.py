@@ -70,6 +70,13 @@ def build_comparar_blueprint(modality_key: str) -> Blueprint:
         offset = request.args.get("offset", 0, type=int)
         return jsonify(svc.historico_indicados(limit=limite, offset=offset))
 
+    @bp.route("/api/historico-visual")
+    def api_historico_visual():
+        limite = request.args.get("limit", 10, type=int)
+        antes_de = request.args.get("antes_de", type=int)
+        concursos = request.args.get("concursos", "") or ""
+        return jsonify(svc.historico_visual(limit=limite, antes_de=antes_de, concursos=concursos))
+
     @bp.route("/api/combinacoes-auto", methods=["POST"])
     def api_combinacoes_auto():
         from .auto_combinacoes import gerar_e_testar

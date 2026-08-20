@@ -149,6 +149,10 @@ wire_analise_estudos(analise_bp, "diadesorte")
 from linhas_universo.app_integration import wire_camadas_linhas_dd_du
 wire_camadas_linhas_dd_du(analise_bp, "diadesorte")
 
+# RESUMO_GERAL_MODALIDADE
+from resumo_modalidade.app_integration import wire_resumo_modalidade
+wire_resumo_modalidade(analise_bp, "diadesorte")
+
 # ANALISE_SOMAS_DIGITOS_WIRED
 from analise_somas_digitos.app_integration import wire_analise_somas_digitos
 wire_analise_somas_digitos(analise_bp, "diadesorte")

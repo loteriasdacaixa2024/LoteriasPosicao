@@ -177,4 +177,23 @@ def get_compare_config(modality_key: str) -> dict:
         raise ValueError(f"Modalidade sem comparar configurado: {modality_key}")
     cfg = dict(COMPARE_MODALITIES[modality_key])
     cfg["key"] = modality_key
+    n_sort = len(cfg.get("ordered_fields") or []) or int(cfg.get("colunas") or 0)
+    try:
+        from geradores_elite.modality_config import MODALITIES
+        m = MODALITIES.get(modality_key) or {}
+        cfg["pick_min"] = int(m.get("pick_min") or 0)
+        cfg["pick_max"] = int(m.get("pick_max") or 0)
+        cfg["pick_default"] = int(m.get("pick_default") or cfg.get("pick_min") or 0)
+        cfg["sorteadas"] = int(m.get("sorteadas") or n_sort)
+        if modality_key == "maismilionaria":
+            cfg["trevo_pick_min"] = int(m.get("trevo_pick_min") or 2)
+            cfg["trevo_pick_max"] = int(m.get("trevo_pick_max") or 6)
+            cfg["trevo_total"] = int(m.get("trevo_total") or 6)
+    except Exception:
+        cfg.setdefault("pick_min", 0)
+        cfg.setdefault("pick_max", 0)
+        cfg.setdefault("pick_default", 0)
+        cfg.setdefault("sorteadas", n_sort)
+    # Verde semântico na seleção, exceto modalidades já verdes (anel = identidade).
+    cfg["fill_selected"] = "#0f172a" if modality_key in ("megasena", "supersete") else "#198754"
     return cfg

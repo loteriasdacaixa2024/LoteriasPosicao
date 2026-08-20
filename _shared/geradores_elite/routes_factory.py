@@ -85,6 +85,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             ), 404
         from geradores_elite.comportamento.specs import COMPORTAMENTO_TITLES, SPECS
         from geradores_elite.inteligente_page import repeticao_cfg_for_page
+        from resumo_modalidade.specs import tem_resumo_modalidade
 
         mod = MODALITIES[modality_key]
         rep_cfg = repeticao_cfg_for_page(modality_key)
@@ -107,6 +108,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             page_subtitle=spec.page_subtitle if spec else "",
             comportamento_ui=svc.ui_config() if svc else {},
             meses_cores=meses_cores,
+            tem_resumo_geral=tem_resumo_modalidade(modality_key),
         )
 
     @bp.route("/comportamento-apostas/")
@@ -334,6 +336,61 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             )
         code = 200 if out.get("ok") else 400
         return jsonify(out), code
+
+    @bp.route("/api/ciclo-apostas/estrategia/contexto")
+    def api_ciclo_estrategia_contexto():
+        from ciclo_cobertura.gerador_estrategia import contexto_estrategia_geracao
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        return jsonify(contexto_estrategia_geracao(modality_key))
+
+    @bp.route("/api/ciclo-apostas/estrategia/gerar", methods=["POST"])
+    def api_ciclo_estrategia_gerar():
+        from ciclo_cobertura.gerador_estrategia import gerar_apostas_estrategia
+        from ciclo_cobertura.pos_geracao import pos_processar_geracao
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        data = request.get_json(silent=True) or {}
+        desdob_raw = data.get("desdobramento", data.get("k", "auto"))
+        out = gerar_apostas_estrategia(
+            modality_key,
+            quantidade=int(data.get("quantidade") or 10),
+            pick=int(data["pick"]) if data.get("pick") is not None else None,
+            desdobramento=desdob_raw,
+            k_repeticao=int(data["k_repeticao"]) if data.get("k_repeticao") is not None else None,
+            bloquear_exato=bool(data.get("bloquear_exato", True)),
+            filtro_estrutura=bool(data.get("filtro_estrutura", True)),
+            usar_evolucao=bool(data.get("usar_evolucao", True)),
+            seed=int(data["seed"]) if data.get("seed") is not None else None,
+        )
+        if out.get("ok"):
+            out = pos_processar_geracao(
+                out,
+                modality_key,
+                mes_num=data.get("mes_num") or data.get("mes"),
+                descartar_historico=bool(data.get("descartar_historico")),
+                origem="ciclo_estrategia",
+            )
+        code = 200 if out.get("ok") else 400
+        return jsonify(out), code
+
+    @bp.route("/api/ciclo-apostas/recorrencia")
+    def api_ciclo_recorrencia():
+        from ciclo_cobertura.recorrencia_service import analisar_recorrencia
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+
+        if not tem_ciclo_cobertura(modality_key):
+            return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
+        n_raw = request.args.get("n", 4)
+        try:
+            n = int(n_raw)
+        except (TypeError, ValueError):
+            n = 4
+        return jsonify(analisar_recorrencia(modality_key, n=n))
 
     @bp.route("/api/ciclo-apostas/export-txt", methods=["POST"])
     def api_ciclo_export_txt():

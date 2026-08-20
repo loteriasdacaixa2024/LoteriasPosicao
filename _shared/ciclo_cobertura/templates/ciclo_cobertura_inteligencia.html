@@ -57,7 +57,22 @@
     const estr = op.estrategia_recomendada;
     const dist = d.historico_semelhante.distribuicao_entrada || {};
     const sug = estr.sugestao || {};
+    const fase = d.fase_ciclo || op.fase_ciclo || {};
+    const rep = d.repeticoes_historicas || op.repeticoes_historicas || {};
+    const repDist = rep.distribuicao_pct || {};
+    const scoresF = (d.scores_faltantes || []).slice(0, 12);
+    const faseClass = { inicio: 'success', andamento: 'secondary', finalizacao: 'danger' }[fase.fase] || 'secondary';
+    const eliteEstr = ELITE || '/geradores-elite/ciclo-apostas/?modo=estrategia';
     document.getElementById('conteudoOperacional').innerHTML = `
+    <div class="alert alert-${faseClass} d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 shadow-sm">
+      <div>
+        <strong class="fs-5">Ciclo #${est.numero_ciclo}</strong>
+        <span class="badge bg-dark ms-2">${fase.label || fase.fase || '—'}</span>
+        <span class="ms-2">${est.faltando} faltantes · ${est.fechamento_percentual}% · pressão ${est.pressao}</span>
+        <div class="small mt-1">${fase.hint || ''}</div>
+      </div>
+      <a href="${eliteEstr}" class="btn btn-dark btn-sm"><i class="fas fa-chess-knight me-1"></i>Ciclo — Estratégias</a>
+    </div>
     <div class="row mb-4">
       <div class="col-md-8">
         <div class="card border-primary shadow-sm">
@@ -86,14 +101,45 @@
     </div>
     <div class="row mb-4">
       <div class="col-md-6">
+        <div class="card h-100 border-dark">
+          <div class="card-header bg-dark text-white"><i class="fas fa-redo me-2"></i>Análise de repetições (0 / 1 / 2 / 3+)</div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              ${['0','1','2','3+'].map(k => `
+                <span class="badge ${rep.cenario_dominante === k ? 'bg-primary' : 'bg-secondary'} fs-6">${k}: ${repDist[k] ?? 0}%</span>
+              `).join('')}
+            </div>
+            <p class="small mb-1">${rep.leitura || ''}</p>
+            <p class="small mb-0">Recomendação: priorizar <strong>${rep.cenario_dominante || '2'}</strong> sem descartar os demais.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header"><i class="fas fa-sort-amount-up me-2"></i>Scores das faltantes</div>
+          <div class="card-body p-2">
+            ${scoresF.length ? scoresF.map(s => `
+              <div class="d-flex align-items-center mb-2">
+                <span class="badge bg-warning text-dark me-2" style="min-width:36px">${String(s.dezena).padStart(2,'0')}</span>
+                <div class="flex-grow-1 score-bar"><div class="score-fill" style="width:${s.score}%"></div></div>
+                <span class="ms-2 small">${s.atraso ?? '—'}atr · ${s.score}</span>
+              </div>`).join('') : '<p class="text-muted small mb-0">Sem faltantes.</p>'}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-4">
+      <div class="col-md-6">
         <div class="card h-100">
           <div class="card-header"><i class="fas fa-question-circle me-2"></i>Como jogar no cenário atual?</div>
           <div class="card-body"><p>${op.respostas.como_jogar}</p>
           <table class="table table-sm">
+            <tr><td>Fase do ciclo</td><td><strong>${fase.label || fase.fase || '—'}</strong></td></tr>
             <tr><td>Quantas faltantes?</td><td><strong>${op.respostas.quantas_faltantes}</strong></td></tr>
             <tr><td>Vale fechamento?</td><td><strong>${op.respostas.vale_fechamento}</strong></td></tr>
             <tr><td>Vale agressividade?</td><td><strong>${op.respostas.vale_agressividade ? 'Sim' : 'Moderada'}</strong></td></tr>
             <tr><td>Estrutura mais segura</td><td><strong>${op.respostas.estrutura_segura}</strong></td></tr>
+            <tr><td>Repetição dominante</td><td><strong>${op.respostas.repeticao_dominante || rep.cenario_dominante || '2'}</strong></td></tr>
           </table></div>
         </div>
       </div>
@@ -142,8 +188,8 @@
       </div>
     </div>
     <div class="text-center">
-      <a href="${ELITE}" class="btn btn-success btn-lg">
-        <i class="fas fa-magic me-2"></i>Ir para Gerador Elite (Ciclo)
+      <a href="${eliteEstr}" class="btn btn-success btn-lg">
+        <i class="fas fa-chess-knight me-2"></i>Ir para Ciclo — Estratégias (Elite)
       </a>
     </div>`;
   }

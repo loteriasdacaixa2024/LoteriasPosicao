@@ -54,23 +54,18 @@
     padding: .05rem .28rem;
     font-size: .78rem;
   }
-  /* Volume e Dígitos (I|F) cedem espaço */
+  /* Volume: mesma centralização da Soma */
   #ai-root .ai-table th.col-volume,
   #ai-root .ai-table td.td-volume {
+    text-align: center !important;
     white-space: nowrap;
-    max-width: 5.2rem;
-    font-size: .75rem;
-  }
-  #ai-root .ai-table th.col-digitos-if,
-  #ai-root .ai-table td.td-digitos-if {
-    white-space: nowrap;
-    max-width: 5.5rem;
-    font-size: .75rem;
+    font-variant-numeric: tabular-nums;
+    font-size: .78rem;
   }
   #ai-root .ai-table th.col-nao-sairam,
   #ai-root .ai-table td.td-nao-sairam {
-    max-width: 9.5rem;
-    width: 9.5rem;
+    max-width: 7.5rem;
+    width: 7.5rem;
   }
   #ai-root .ai-table th.col-gerar,
   #ai-root .ai-table td.td-gerar {
@@ -92,6 +87,35 @@
   }
   #ai-root #aiTabelaJogosPadrao tr.tr-jogo-vencedor.tr-aposta-sel > td {
     background-color: rgba(25,135,84,.22);
+  }
+  #ai-root #aiTabelaJogosPadrao tr.tr-ja-saiu > td {
+    background-color: rgba(220, 53, 69, .08);
+  }
+  #ai-root #aiTabelaJogosPadrao tr.tr-ja-saiu.tr-aposta-sel > td {
+    background-color: rgba(220, 53, 69, .14);
+  }
+  #ai-root #aiTabelaJogosPadrao tr.tr-ja-saiu.tr-jogo-vencedor > td {
+    background-color: rgba(25,135,84,.12);
+  }
+  #ai-root .badge-ja-saiu {
+    display: inline-block;
+    font-size: .65rem;
+    font-weight: 800;
+    color: #842029;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+    border-radius: 999px;
+    padding: .05rem .4rem;
+    margin-left: .25rem;
+    vertical-align: middle;
+  }
+  #ai-root .ai-chk-th {
+    width: 2.2rem;
+    text-align: center !important;
+  }
+  #ai-root .ai-chk-th .form-check-input {
+    margin: 0;
+    cursor: pointer;
   }
   #ai-root .ai-ultimo-bar {
     font-size: .78rem;
@@ -130,6 +154,35 @@
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
+  }
+  #ai-root a.ai-legenda-mini,
+  #ai-root button.ai-legenda-mini {
+    cursor: pointer;
+    text-decoration: underline !important;
+    text-underline-offset: 2px;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: #198754;
+  }
+  #ai-root a.ai-legenda-mini:hover,
+  #ai-root button.ai-legenda-mini:hover {
+    color: #0f5132;
+  }
+  #ai-root .ai-top-freq-card {
+    cursor: pointer;
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  #ai-root .ai-top-freq-card:hover {
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    transform: translateY(-1px);
+  }
+  #ai-root .ai-top-jogos {
+    font-size: .72rem;
+    color: #6c757d;
+    font-weight: 600;
+    margin-top: .15rem;
   }
   #ai-root .ai-legenda-dot {
     display: inline-block;
@@ -233,9 +286,16 @@
     display:inline; line-height:1.2; white-space:nowrap;
   }
   #ai-root .btn-dl-sutil:hover { opacity:1; color:var(--primary-xdark); }
+  #ai-root .ai-table th.col-digitos-if,
+  #ai-root .ai-table td.td-digitos-if {
+    white-space: nowrap;
+    max-width: 5.5rem;
+    font-size: .75rem;
+  }
   #ai-root .nao-sairam-cell {
     display:flex; flex-direction:column; align-items:center; gap:.12rem;
     padding:.15rem .2rem; white-space:nowrap;
+    cursor: help;
   }
   #ai-root .nao-sairam-linha {
     display:inline-flex; align-items:center; justify-content:center;
@@ -248,21 +308,202 @@
     font-size:.9rem; font-weight:800; color:#196f3d;
     background:rgba(25,111,61,.08); border-radius:5px; padding:.05rem .35rem;
   }
-  #ai-root .nao-sairam-nums {
-    font-size:.62rem; color:#666; text-align:center; max-width:9rem;
-    line-height:1.15; white-space:normal;
+  #ai-root .ai-aposta-meta {
+    text-align: center;
+    margin-bottom: .65rem;
+  }
+  #ai-root .ai-aposta-meta > p,
+  #ai-root .ai-aposta-meta .ai-hint {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 52rem;
+  }
+  #ai-root .ai-aposta-meta .ai-aposta-badges,
+  #ai-root .ai-aposta-meta .ai-media-kpis {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: .45rem .65rem;
+  }
+  #ai-root .ai-aposta-resumo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem .65rem;
+    padding: .55rem .8rem;
+    margin: 0 auto .65rem;
+    border-radius: 8px;
+    background: #e8f5e9;
+    border: 1px solid #c8e6c9;
+    font-size: .82rem;
+    text-align: center;
+    max-width: 52rem;
+  }
+  #ai-root .ai-aposta-resumo .ai-aposta-qtd {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1b5e20;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root .ai-aposta-resumo .ai-aposta-sub {
+    color: #4a6350;
+    font-size: .78rem;
+    width: 100%;
+  }
+  #ai-root .ai-aposta-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: .45rem .55rem;
+    margin-bottom: .65rem;
+  }
+  #ai-root #aiTabelaResumoPad thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--primary) !important;
+    color: #fff !important;
+    box-shadow: 0 1px 0 rgba(0,0,0,.12);
+  }
+  #ai-root #aiTabelaResumoPad td.td-apostar {
+    font-weight: 800;
+    color: #1b5e20;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaResumoPad td.td-ja-saiu {
+    font-weight: 700;
+    color: #842029;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaResumoPad tr.tr-resumo-top td {
+    background: rgba(25,135,84,.06);
+  }
+  #ai-root #aiPadIIResumoWrap {
+    text-align: center;
+  }
+  #ai-root #aiPadIIResumoWrap .ai-resumo-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem .85rem;
+    margin-bottom: .5rem;
+  }
+  #ai-root #aiPadIIResumoStatus {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 48rem;
+  }
+  #ai-root .ai-checagem {
+    font-size: .78rem;
+    border: 1px solid #c8e6c9;
+    border-radius: 10px;
+    padding: .75rem 1rem  .85rem;
+    margin: 0 auto .75rem;
+    background: #f1f8f2;
+    text-align: center;
+    max-width: 52rem;
+  }
+  #ai-root .ai-checagem.is-fail {
+    background: #fff5f5;
+    border-color: #f5c2c7;
+  }
+  #ai-root .ai-checagem .ai-checagem-title {
+    font-size: .95rem;
+    font-weight: 800;
+    margin-bottom: .25rem;
+  }
+  #ai-root .ai-checagem .ai-checagem-just {
+    color: #4a6350;
+    font-size: .74rem;
+    max-width: 40rem;
+    margin: 0 auto .65rem;
+    line-height: 1.35;
+  }
+  #ai-root .ai-checagem .ok { color: #1b5e20; font-weight: 700; }
+  #ai-root .ai-checagem .fail { color: #842029; font-weight: 800; }
+  #ai-root .ai-checagem .ai-checagem-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .3rem;
+    text-align: left;
+    max-width: 38rem;
+    margin: 0 auto;
+  }
+  #ai-root .ai-checagem .ai-check-row {
+    display: grid;
+    grid-template-columns: 1.1rem 1fr auto;
+    gap: .4rem .55rem;
+    align-items: baseline;
+    padding: .22rem .4rem;
+    border-radius: 6px;
+    background: rgba(255,255,255,.65);
+  }
+  #ai-root .ai-checagem .ai-check-row .nums {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    font-size: .72rem;
+    color: #555;
+  }
+  #ai-root .ai-checagem .ai-checagem-totais {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .35rem .65rem;
+    margin-top: .65rem;
+    padding-top: .55rem;
+    border-top: 1px dashed rgba(0,0,0,.12);
+    color: #555;
+    font-size: .74rem;
+  }
+  #ai-root .ai-checagem .ai-checagem-totais strong {
+    color: #1b5e20;
+  }
+  #ai-root .ai-aposta-pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .35rem .5rem;
+    margin-top: .45rem;
+  }
+  #ai-root .ai-aposta-pager .ai-page-input {
+    width: 4.2rem;
+    font-size: .78rem;
+    text-align: center;
+  }
+  #ai-root #aiJogosPadTotal.badge-dentro-aposta {
+    background: #1b5e20 !important;
+    color: #fff !important;
+    font-size: .85rem;
+    padding: .4rem .65rem;
   }
   #ai-root th.ai-sort { cursor:pointer; user-select:none; white-space:nowrap; }
   #ai-root th.ai-sort:hover { filter:brightness(.95); }
   #ai-root th.ai-sort .ai-sort-ind { font-size:.65rem; margin-left:.2rem; opacity:.55; }
   #ai-root th.ai-sort.ai-sort-asc .ai-sort-ind,
   #ai-root th.ai-sort.ai-sort-desc .ai-sort-ind { opacity:1; }
-  #ai-root .ai-pager {
-    display:flex; flex-wrap:wrap; align-items:center; gap:.5rem;
-    font-size:.8rem; color:#555; margin-top:.65rem;
+
+  /* Apostas por padrão — visão operacional
+     Fundo verde fica só no vencedor (tr-jogo-vencedor). Status da média = pills/texto. */
+  #ai-root #aiTabelaJogosPadrao td.td-soma-destaque {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
   }
-  #ai-root .ai-pager .ai-pager-info { font-weight:600; color:var(--primary-xdark); }
-  #ai-root .ai-pager .btn { min-width:2rem; }
+  #ai-root .ai-status-pill {
+    display: inline-flex; align-items: center; gap: .25rem;
+    padding: .1rem .45rem; border-radius: 999px;
+    font-size: .72rem; font-weight: 700; border: 1px solid transparent;
+  }
+  #ai-root .ai-status-pill.dentro { background: #e8f5e9; color: #1b5e20; border-color: #c8e6c9; }
+  #ai-root .ai-status-pill.proxima { background: #fff8e1; color: #8a6d00; border-color: #ffe082; }
+  #ai-root .ai-status-pill.fora { background: #f5f5f5; color: #666; border-color: #e0e0e0; }
+  #ai-root .ai-media-kpis { font-size: .8rem; }
+  #ai-root .ai-media-kpis .badge { font-weight: 700; }
 
 
 </style>
@@ -276,7 +517,9 @@
      data-gc-url="{{ gerador_gc_url }}"
      data-elite-url="{{ gerador_elite_url }}"
      data-extra-mes="{{ '1' if extra_mes else '0' }}"
-     data-sorteadas="{{ sorteadas }}">
+     data-sorteadas="{{ sorteadas }}"
+     data-modality-key="{{ modality_key }}"
+     data-modality-nome="{{ modality_nome }}">
 
   <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
@@ -303,7 +546,7 @@
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-combinacoes" type="button" data-aba="combinacoes">2 · Combinações</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-padroes" type="button" data-aba="padroes">3 · Padrões I</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-padroes-ii" type="button" data-aba="padroes-ii">4 · Padrões II</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-jogos-padrao" type="button" data-aba="jogos-padrao">5 · Padrões II (Apostas)</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-jogos-padrao" type="button" data-aba="jogos-padrao">5 · Apostas por Padrão</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tubular" type="button" data-aba="tubular">6 · Visualização Tubular</button></li>
   </ul>
 
@@ -429,6 +672,8 @@
           <span>Detalhes, filtros e resumo</span>
         </button>
         <span class="badge bg-light text-dark border" id="aiPadIISelCountTop">0 selecionados</span>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="aiPadIISelTodos" title="Seleciona todos os padrões visíveis na lista">Selecionar todos</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPadIILimparSel" title="Limpa seleção">Limpar</button>
       </div>
       <div id="aiPadIIPainelInfo" class="d-none mb-2">
         <p class="small text-muted mb-2">
@@ -460,7 +705,9 @@
         <table class="table table-sm table-bordered ai-table" id="aiTabelaPadroesII">
           <thead>
             <tr>
-              <th style="width:2.2rem">✓</th>
+              <th class="ai-chk-th" title="Selecionar / desmarcar todos visíveis">
+                <input type="checkbox" class="form-check-input" id="aiPadIIChkTodos">
+              </th>
               <th class="ai-sort text-center" data-sort="padrao" data-table="p2">Padrão <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dist" data-sort="descricao" data-table="p2">Distribuição <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-jogos" data-sort="jogos_possiveis" data-table="p2">Jogos <span class="ai-sort-ind">⇅</span></th>
@@ -473,9 +720,48 @@
         </table>
       </div>
       <div class="small text-muted" id="aiPadIIInfo">—</div>
+      <div class="mt-3" id="aiPadIIResumoWrap">
+        <div class="ai-resumo-head">
+          <div class="fw-bold" style="color:var(--primary-xdark)">
+            Resumo operacional — para apostar × já saíram
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="aiPadIIBtnResumo" title="Calcula para os 85 padrões">
+            <i class="fas fa-table me-1"></i>Carregar resumo
+          </button>
+        </div>
+        <div class="small text-muted mb-2" id="aiPadIIResumoStatus">
+          Clique em <strong>Carregar resumo</strong> para ver, em cada padrão, quantos jogos estão
+          dentro da média, quantos já saíram e quantos ainda valem para apostar.
+        </div>
+        <div id="aiPadIIChecagem" class="ai-checagem d-none" role="status"></div>
+        <div class="table-responsive ai-resumo-scroll" style="max-height:420px;overflow:auto;text-align:left;">
+          <table class="table table-sm table-bordered ai-table mb-0" id="aiTabelaResumoPad">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Padrão</th>
+                <th>Distribuição</th>
+                <th title="Dentro da média e ainda não saíram">Para apostar</th>
+                <th title="Dentro da média e já saíram no histórico">Já saíram</th>
+                <th>Dentro</th>
+                <th>Próximas</th>
+                <th>Fora</th>
+                <th>Média</th>
+                <th>Jogos</th>
+                <th>%</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="12" class="text-muted text-center">Aguardando carregamento do resumo…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- ABA 5 — Padrões II (Apostas) -->
+    <!-- ABA 5 — Padrões II (Apostas) — visão operacional -->
     <div class="tab-pane fade" id="tab-jogos-padrao">
       <div class="d-flex flex-wrap gap-2 mb-2">
         <button type="button" class="btn btn-sm btn-primary" id="aiJogosPadVoltarPadII">
@@ -489,25 +775,55 @@
         <strong>Aguardando seleção.</strong> As apostas só aparecem depois que você escolher um padrão
         na aba <strong>4 · Padrões II</strong> (clique no número da coluna <em>Jogos</em>).
       </div>
-      <p class="small text-muted mb-2">
-        <strong>Padrões II (Apostas)</strong> — marque uma ou várias apostas para copiar/exportar e usar na lotérica.
-        Origem: coluna <em>Jogos</em> da aba <strong>4 · Padrões II</strong>.
-      </p>
-      <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
-        <span class="badge bg-light text-dark border" id="aiJogosPadLbl">Nenhum padrão</span>
-        <span class="badge bg-secondary" id="aiJogosPadTotal">0 jogos</span>
-        <span class="badge bg-warning text-dark border" id="aiJogosPadSelCount">0 marcadas</span>
+      <div class="ai-aposta-meta">
+        <p class="small text-muted mb-2">
+          <strong>Apostas por Padrão</strong> — só o que vale apostar:
+          <em>dentro da média</em> e que <strong>ainda não saíram</strong> no histórico
+          (jogos já sorteados ficam indicados e fora da lista padrão).
+        </p>
+        <div class="ai-aposta-badges mb-2">
+          <span class="badge bg-light text-dark border" id="aiJogosPadLbl">Nenhum padrão</span>
+          <span class="badge badge-dentro-aposta" id="aiJogosPadTotal">0 para apostar</span>
+          <span class="badge bg-danger-subtle text-danger border" id="aiJogosPadJaSairam">0 já saíram</span>
+          <span class="badge bg-warning text-dark border" id="aiJogosPadSelCount">0 marcadas</span>
+          <span class="ai-media-kpis" id="aiJogosPadMediaKpis"></span>
+        </div>
+        <div id="aiJogosPadResumoAposta" class="ai-aposta-resumo d-none" role="status"></div>
+        <div class="ai-hint mb-2" id="aiJogosPadHint">
+          Só há conteúdo aqui após selecionar um padrão na aba <strong>4 · Padrões II</strong>
+          (coluna <em>Jogos</em>).
+        </div>
+      </div>
+      <div class="ai-aposta-toolbar">
+        <label class="small text-muted mb-0">Status soma</label>
+        <select id="aiJogosPadFiltroMedia" class="form-select form-select-sm" style="width:auto" title="Filtro operacional para apostar">
+          <option value="dentro_novos" selected>Dentro da média · ainda não saíram (apostar)</option>
+          <option value="dentro_ja">Dentro da média · já saíram (não apostar)</option>
+          <option value="dentro">Dentro da média · todas</option>
+          <option value="alinhadas">Dentro + próximas</option>
+          <option value="proxima">Só próximas</option>
+          <option value="fora">Fora da faixa</option>
+          <option value="all">Todos do padrão</option>
+        </select>
         <select id="aiJogosPadPageSize" class="form-select form-select-sm" style="width:auto">
           <option value="50">50 / pág.</option>
           <option value="100" selected>100 / pág.</option>
           <option value="250">250 / pág.</option>
           <option value="500">500 / pág.</option>
+          <option value="1000">1000 / pág.</option>
         </select>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadFirst" disabled title="Primeira página">«</button>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadPrev" disabled>‹</button>
+        <label class="small text-muted mb-0 d-inline-flex align-items-center gap-1">
+          Pág.
+          <input type="number" min="1" class="form-control form-control-sm ai-page-input" id="aiJogosPadPageNum" disabled>
+        </label>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadNext" disabled>›</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadLast" disabled title="Última página">»</button>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadSelPagina" disabled title="Marca todas da página">Marcar página</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="aiJogosPadSelTodas" disabled title="Marca todas do filtro atual (todas as páginas)">Marcar todas</button>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadLimparSel" disabled>Limpar marcas</button>
-        <button type="button" class="btn btn-sm btn-success" id="aiJogosPadCopiar" disabled title="Copia as marcadas (ou todas se nenhuma marcada)">
+        <button type="button" class="btn btn-sm btn-success" id="aiJogosPadCopiar" disabled title="Copia as marcadas (ou todas do filtro se nenhuma marcada)">
           <i class="fas fa-copy"></i> Copiar
         </button>
         <button type="button" class="btn btn-sm btn-outline-success" id="aiJogosPadExportTxt" disabled>
@@ -516,28 +832,29 @@
         <button type="button" class="btn btn-sm btn-outline-primary" id="aiJogosPadExportCsv" disabled>
           <i class="fas fa-file-csv"></i> CSV
         </button>
-        <select id="aiJogosPadEscopoExport" class="form-select form-select-sm" style="width:auto" title="Escopo da cópia/exportação">
-          <option value="auto">Marcadas (ou todas)</option>
+        <button type="button" class="btn btn-sm btn-outline-success" id="aiJogosPadExportXlsx" disabled title="Excel com o filtro atual (dentro da média)">
+          <i class="fas fa-file-excel"></i> Excel
+        </button>
+        <select id="aiJogosPadEscopoExport" class="form-select form-select-sm" style="width:auto" title="Escopo da cópia/exportação (respeita o filtro)">
+          <option value="auto" selected>Marcadas (ou filtro atual)</option>
+          <option value="all">Todas do filtro (ex.: todas dentro da média)</option>
           <option value="sel">Só marcadas</option>
-          <option value="all">Todas do padrão</option>
           <option value="page">Só página</option>
         </select>
-      </div>
-      <div class="ai-hint mb-2" id="aiJogosPadHint">
-        Só há conteúdo aqui após selecionar um padrão na aba <strong>4 · Padrões II</strong>
-        (coluna <em>Jogos</em>).
       </div>
       <div id="aiJogosPadUltimo" class="ai-ultimo-bar mb-2" hidden></div>
       <div class="table-responsive" style="max-height:560px;overflow:auto;">
         <table class="table table-sm table-bordered ai-table" id="aiTabelaJogosPadrao">
           <thead>
             <tr>
-              <th style="width:2.2rem" title="Marcar para apostar">✓</th>
-              <th class="ai-sort" data-sort="id" data-table="jogos" style="width:4rem"># <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-conc-jogo" data-sort="concurso" data-table="jogos">Concurso <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-dezenas-centro" data-sort="dezenas_fmt" data-table="jogos">Dezenas <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort" data-sort="soma" data-table="jogos">Soma <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-chk-th" title="Marcar / desmarcar página">
+                <input type="checkbox" class="form-check-input" id="aiJogosPadChkPagina" disabled>
+              </th>
               <th class="ai-sort" data-sort="padrao_inicial" data-table="jogos">Padrão <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dezenas-centro" data-sort="dezenas_fmt" data-table="jogos">Aposta <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="soma" data-table="jogos">Soma <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="status_media" data-table="jogos">Status <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-conc-jogo" data-sort="concurso" data-table="jogos">Concurso <span class="ai-sort-ind">⇅</span></th>
             </tr>
           </thead>
           <tbody>
@@ -742,22 +1059,27 @@
   const GC_URL = root.dataset.gcUrl || '/geradores-elite/gerador-gc/';
   const ELITE_URL = root.dataset.eliteUrl || '/geradores-elite/gerador-elite/';
   const EXTRA_MES = String(root.dataset.extraMes || '') === '1';
+  const MODALITY_KEY = root.dataset.modalityKey || '';
+  const MODALITY_NOME = root.dataset.modalityNome || MODALITY_KEY || 'Modalidade';
   let CACHE = [];
   let CAT = [];
   let CAT_PAD_II = [];
   let PAD_II_SEL = new Set();
+  let RESUMO_PAD = [];
   let ULTIMO_RESULTADO = null;
   let MAPA_CONCURSOS = null;
   let FOCO_CONCURSO = null;
   let JOGOS_PAD = {
     padrao: '', total: 0, offset: 0, pageSize: 100,
     all: [], cache: [], sel: new Set(), descricao: '',
+    soma_faixa: null, soma_media: null, resumo_status: null,
+    filtroMedia: 'dentro_novos',
   };
   let SORT = {
     res: { key: 'concurso', dir: 'desc' },
     pad: { key: 'concurso', dir: 'desc' },
     p2: { key: 'frequencia', dir: 'desc' },
-    jogos: { key: 'id', dir: 'asc' },
+    jogos: { key: 'distancia', dir: 'asc' },
   };
   let PAGE = { res: 1, pad: 1 };
 
@@ -812,14 +1134,17 @@
   function naoSairamHtml(l) {
     const qtd = l.qtd_nao_sairam ?? (l.nao_sairam || []).length;
     const conc = l.concurso;
-    return `<div class="nao-sairam-cell">
+    const nums = String(l.nao_sairam_fmt || '').trim();
+    const tip = nums
+      ? `Não saíram: ${nums}`
+      : 'Lista de dezenas que não saíram';
+    return `<div class="nao-sairam-cell" title="${esc(tip)}">
       <div class="nao-sairam-linha">
-        <span class="nao-sairam-top" title="Total que não saíram (31−7)">${esc(qtd)}</span>
-        <button type="button" class="btn-dl-sutil" data-act="dl-nao" data-concurso="${esc(conc)}" title="Baixar todos">↓ todos</button>
-        <span class="nao-sairam-centro" title="Conjunto-base Construtor">16</span>
+        <span class="nao-sairam-top" title="${esc(tip)}">${esc(qtd)}</span>
+        <button type="button" class="btn-dl-sutil" data-act="dl-nao" data-concurso="${esc(conc)}" title="Baixar todos${nums ? ': ' + esc(nums) : ''}">↓ todos</button>
+        <span class="nao-sairam-centro" title="Conjunto-base Construtor (16)">16</span>
         <button type="button" class="btn-dl-sutil" data-act="dl-nao16" data-concurso="${esc(conc)}" title="Baixar 16 para o Construtor">↓ 16</button>
       </div>
-      <div class="nao-sairam-nums">${esc(l.nao_sairam_fmt || '')}</div>
     </div>`;
   }
 
@@ -936,7 +1261,7 @@
         <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
         <td><strong>${esc(l.qtd_digitos)}</strong></td>
         <td><strong>${esc(l.soma)}</strong></td>
-        <td class="td-left text-start td-volume">${fmtVol(l.volume_combinacoes)}</td>
+        <td class="td-volume">${fmtVol(l.volume_combinacoes)}</td>
         <td class="text-nowrap td-gerar">${acoesHtml(l)}</td>
       </tr>`).join('') || `<tr><td colspan="${colRes}" class="text-muted">Sem dados</td></tr>`;
     document.querySelector('#aiTabelaPadroes tbody').innerHTML = metaPad.rows.map(l => {
@@ -1078,7 +1403,25 @@
 
   function goAba(nome) {
     const btn = document.querySelector(`#aiTabs [data-aba="${nome}"]`);
-    if (btn) btn.click();
+    if (!btn) return;
+    try {
+      if (window.bootstrap && bootstrap.Tab) {
+        bootstrap.Tab.getOrCreateInstance(btn).show();
+        return;
+      }
+    } catch (_) { /* fallback */ }
+    btn.click();
+  }
+
+  function setFiltroMedia(valor) {
+    const v = valor || 'dentro_novos';
+    const filtroEl = document.getElementById('aiJogosPadFiltroMedia');
+    if (filtroEl) filtroEl.value = v;
+    JOGOS_PAD.filtroMedia = v;
+  }
+
+  function normalizarPadrao(p) {
+    return String(p || '').replace(/,/g, ' ').trim().split(/\s+/).filter(Boolean).join(' ');
   }
 
   function statusBadge(st) {
@@ -1101,6 +1444,15 @@
         ? `?from=padroes-ii&padroes=${encodeURIComponent([...PAD_II_SEL].join('|'))}`
         : '?from=padroes-ii';
       btn.href = base + qs;
+    }
+    const rows = filtrarPadII();
+    const chk = document.getElementById('aiPadIIChkTodos');
+    if (chk) {
+      const n = rows.length;
+      const nSel = rows.filter(p => PAD_II_SEL.has(p.padrao)).length;
+      chk.disabled = n === 0;
+      chk.checked = n > 0 && nSel === n;
+      chk.indeterminate = nSel > 0 && nSel < n;
     }
   }
 
@@ -1143,6 +1495,18 @@
     const conc = getMapaConcursos().get(k);
     return conc || null;
   }
+  function jogoJaSaiu(j) {
+    return !!concursoDoJogo(j);
+  }
+  function jogosDentroMedia() {
+    return (JOGOS_PAD.all || []).filter(j => (j.status_media || 'fora') === 'dentro');
+  }
+  function contarDentroJaSairam() {
+    return jogosDentroMedia().filter(jogoJaSaiu).length;
+  }
+  function contarDentroNovos() {
+    return jogosDentroMedia().filter(j => !jogoJaSaiu(j)).length;
+  }
   function irParaConcurso(conc) {
     const n = +conc;
     if (!Number.isFinite(n) || n <= 0) return;
@@ -1171,21 +1535,30 @@
     return `<span class="ai-ultimo-lbl">Último resultado</span>
       <span class="ai-ultimo-nums"><strong>${esc(conc)}</strong> — <span class="font-monospace">${esc(dez)}</span></span>
       ${pad ? `<span class="ai-ultimo-pad text-muted">padrão <code>${esc(pad)}</code></span>` : ''}
-      <span class="ai-legenda-mini"><span class="ai-legenda-dot verde"></span>Último / Vencedor</span>
+      <button type="button" class="ai-legenda-mini" data-act="ir-vencedor"
+        title="Abrir o padrão vencedor na aba Apostas (só dentro da média)">
+        <span class="ai-legenda-dot verde"></span>Último / Vencedor
+      </button>
       ${extraHtml || ''}`;
   }
   function extraAba5Ultimo() {
     const u = ULTIMO_RESULTADO;
     if (!u) return '';
-    const padUlt = String(u.padrao || '').replace(/,/g, ' ').trim().split(/\s+/).filter(Boolean).join(' ');
-    const padAtual = String(JOGOS_PAD.padrao || '').replace(/,/g, ' ').trim().split(/\s+/).filter(Boolean).join(' ');
+    const padUlt = normalizarPadrao(u.padrao);
+    const padAtual = normalizarPadrao(JOGOS_PAD.padrao);
     if (!padAtual) return '';
     if (padUlt && padAtual && padUlt !== padAtual) {
-      return `<a href="#" class="small text-success" data-act="ver-jogos-padrao" data-padrao="${esc(padUlt)}">Ver padrão vencedor</a>`;
+      return `<button type="button" class="btn btn-sm btn-outline-success py-0 px-2" data-act="ver-jogos-padrao" data-padrao="${esc(padUlt)}">Ver padrão vencedor</button>`;
     }
+    const all = JOGOS_PAD.all || [];
+    const idxAll = all.findIndex(ehJogoVencedor);
+    if (idxAll < 0) return '<span class="small text-muted">vencedor fora desta lista</span>';
     const ordered = linhasOrdenadasJogos();
     const idx = ordered.findIndex(ehJogoVencedor);
-    if (idx < 0) return '';
+    if (idx < 0) {
+      return `<span class="small text-muted">vencedor fora do filtro atual</span>
+        <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" data-act="ir-vencedor-todos" title="Mostra todos e destaca o vencedor">Mostrar vencedor</button>`;
+    }
     const size = JOGOS_PAD.pageSize || 100;
     const page = Math.floor(idx / size) + 1;
     const onPage = idx >= (JOGOS_PAD.offset || 0) && idx < (JOGOS_PAD.offset || 0) + size;
@@ -1258,20 +1631,137 @@
         p.eh_padrao_ultimo_concurso ? 'tr-padrao-ultimo' : '',
         topSet.has(p.padrao) ? 'tr-top-freq' : '',
       ].filter(Boolean).join(' ');
-      const atraso = p.atraso == null ? '—' : `${p.atraso} conc.`;
-      const jogosLink = `<a href="#" class="fw-bold text-decoration-underline" data-act="ver-jogos-padrao" data-padrao="${esc(p.padrao)}" title="Ver as ${fmtVol(p.jogos_possiveis)} apostas possíveis">${fmtVol(p.jogos_possiveis)}</a>`;
+      const atraso = p.atraso == null ? '—' : String(p.atraso);
+      const jogosLink = `<a href="#" class="fw-bold text-decoration-underline" data-act="ver-jogos-padrao" data-padrao="${esc(p.padrao)}" title="Ver as ${fmtVol(p.jogos_possiveis)} apostas possíveis (só dentro da média)">${fmtVol(p.jogos_possiveis)}</a>`;
       return `<tr class="${cls}" data-padrao="${esc(p.padrao)}"${p.eh_padrao_ultimo_concurso ? ' title="Padrão do último resultado (vencedor)"' : ''}>
         <td><input type="checkbox" class="form-check-input ai-pad-ii-chk" data-padrao="${esc(p.padrao)}" ${checked}></td>
         <td class="td-padrao"><code>${esc(p.padrao)}</code></td>
         <td class="td-dist"><span class="ai-col-alinha">${esc(p.descricao)}</span></td>
         <td class="td-jogos"><span class="ai-col-alinha">${jogosLink}</span></td>
-        <td class="td-freq"><span class="ai-col-alinha">${esc(p.frequencia)} <span class="text-muted small">(${esc(p.percentual_concursos)}%)</span></span></td>
+        <td class="td-freq"><span class="ai-col-alinha">${esc(p.frequencia)}</span></td>
         <td class="td-atraso"><span class="ai-col-alinha">${esc(atraso)}</span></td>
         <td>${statusBadge(p.status)}</td>
       </tr>`;
     }).join('') || '<tr><td colspan="7" class="text-muted">Nenhum padrão com os filtros.</td></tr>';
     if (info) info.textContent = `Exibindo ${rows.length} de ${CAT_PAD_II.length} padrões`;
     atualizarSelPadII();
+  }
+
+  function renderResumoOperacionalPadroes(meta) {
+    const tbody = document.querySelector('#aiTabelaResumoPad tbody');
+    const status = document.getElementById('aiPadIIResumoStatus');
+    const checagemEl = document.getElementById('aiPadIIChecagem');
+    if (!tbody) return;
+    if (!RESUMO_PAD.length) {
+      tbody.innerHTML = '<tr><td colspan="12" class="text-muted text-center">Aguardando carregamento do resumo…</td></tr>';
+      if (checagemEl) { checagemEl.classList.add('d-none'); checagemEl.innerHTML = ''; }
+      return;
+    }
+    const univ = meta && meta.checagem ? Number(meta.checagem.total_universo) || 0 : 0;
+    tbody.innerHTML = RESUMO_PAD.map((r, i) => {
+      const mediaTxt = r.soma_media != null
+        ? `${esc(r.soma_media)}${r.tol_proxima != null ? ` (±${esc(r.tol_proxima)})` : ''}${r.fonte_media === 'historico' ? ' · hist.' : (r.fonte_media ? ' · teór.' : '')}`
+        : '—';
+      const topCls = i < 3 ? 'tr-resumo-top' : '';
+      const ultimo = r.eh_padrao_ultimo_concurso ? ' tr-padrao-ultimo' : '';
+      const pct = r.prob_teorica_pct != null
+        ? Number(r.prob_teorica_pct).toFixed(2)
+        : (univ ? ((100 * Number(r.jogos_possiveis || 0) / univ)).toFixed(2) : '—');
+      const pctEmp = r.prob_empirica_pct != null ? Number(r.prob_empirica_pct).toFixed(2) : '';
+      return `<tr class="${topCls}${ultimo}" data-padrao="${esc(r.padrao)}">
+        <td>${i + 1}</td>
+        <td class="td-padrao"><code>${esc(r.padrao)}</code></td>
+        <td>${esc(r.descricao || '')}</td>
+        <td class="td-apostar">${fmtVol(r.para_apostar)}</td>
+        <td class="td-ja-saiu">${fmtVol(r.ja_sairam_dentro)}</td>
+        <td>${fmtVol(r.dentro)}</td>
+        <td>${fmtVol(r.proxima)}</td>
+        <td>${fmtVol(r.fora)}</td>
+        <td class="small">${mediaTxt}</td>
+        <td>${fmtVol(r.jogos_possiveis)}</td>
+        <td class="small" title="Teórica % do universo${pctEmp !== '' ? ' · empírica ' + pctEmp + '%' : ''}">${pct}%</td>
+        <td><a href="#" class="btn btn-sm btn-outline-success py-0 px-2" data-act="ver-jogos-padrao" data-padrao="${esc(r.padrao)}" title="Abrir apostas (ainda não saíram)">Abrir</a></td>
+      </tr>`;
+    }).join('');
+    if (status) {
+      const totA = RESUMO_PAD.reduce((s, r) => s + (Number(r.para_apostar) || 0), 0);
+      const totJ = RESUMO_PAD.reduce((s, r) => s + (Number(r.ja_sairam_dentro) || 0), 0);
+      status.innerHTML = `<strong>${RESUMO_PAD.length} padrões</strong> ·
+        total para apostar: <strong class="text-success">${fmtVol(totA)}</strong> ·
+        já saíram (dentro): <strong class="text-danger">${fmtVol(totJ)}</strong>`;
+    }
+    if (checagemEl && meta && meta.checagem) {
+      renderChecagemResumo(meta.checagem);
+    }
+  }
+
+  function renderChecagemResumo(ch) {
+    const el = document.getElementById('aiPadIIChecagem');
+    if (!el || !ch) return;
+    el.classList.remove('d-none');
+    el.classList.toggle('is-fail', !ch.ok);
+    const title = ch.ok
+      ? '<div class="ai-checagem-title ok">✓ Checagem OK — números consistentes</div>'
+      : '<div class="ai-checagem-title fail">⚠ Checagem com divergências</div>';
+    const just = `<p class="ai-checagem-just">
+      Justificativa: os padrões particionam o universo da modalidade
+      <strong>C(${esc(ch.max_dezena - ch.min_dezena + 1)},${esc(ch.tamanho_jogo)})</strong>.
+      A soma dos jogos deve fechar 100% desse universo; a soma das frequências deve igualar os
+      <strong>${fmtVol(ch.total_concursos)}</strong> concursos apurados; e
+      <em>para apostar + já saíram = dentro da média</em> em cada padrão.
+    </p>`;
+    const items = (ch.checks || []).map(c => {
+      const cls = c.ok ? 'ok' : 'fail';
+      const mark = c.ok ? '✓' : '✗';
+      return `<div class="ai-check-row ${cls}">
+        <span>${mark}</span>
+        <span>${esc(c.label)}</span>
+        <span class="nums">${fmtVol(c.esperado)} = ${fmtVol(c.obtido)}</span>
+      </div>`;
+    }).join('');
+    const totais = `
+      <div class="ai-checagem-totais">
+        <span>Universo <strong>${fmtVol(ch.total_universo)}</strong> (${esc(ch.pct_universo_coberto)}%)</span>
+        <span>Concursos <strong>${fmtVol(ch.total_concursos)}</strong></span>
+        <span>Dentro <strong>${fmtVol(ch.total_dentro)}</strong></span>
+        <span>Próximas <strong>${fmtVol(ch.total_proxima)}</strong></span>
+        <span>Fora <strong>${fmtVol(ch.total_fora)}</strong></span>
+        <span>Apostar <strong>${fmtVol(ch.total_para_apostar)}</strong></span>
+        <span>Já saíram <strong>${fmtVol(ch.total_ja_sairam_dentro)}</strong></span>
+      </div>`;
+    const errs = (ch.inconsistencias_linha || []).length
+      ? `<div class="fail mt-2">Linhas: ${ch.inconsistencias_linha.map(esc).join(' · ')}</div>`
+      : '';
+    el.innerHTML = `${title}${just}<div class="ai-checagem-grid">${items}</div>${totais}${errs}`;
+  }
+
+  async function carregarResumoOperacionalPadroes() {
+    const status = document.getElementById('aiPadIIResumoStatus');
+    const btn = document.getElementById('aiPadIIBtnResumo');
+    const tbody = document.querySelector('#aiTabelaResumoPad tbody');
+    const checagemEl = document.getElementById('aiPadIIChecagem');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Calculando…'; }
+    if (status) status.textContent = 'Calculando resumo operacional dos padrões (pode levar alguns segundos)…';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="12" class="text-muted text-center">Calculando…</td></tr>';
+    if (checagemEl) { checagemEl.classList.add('d-none'); checagemEl.innerHTML = ''; }
+    try {
+      const r = await fetch(`${API}/resumo-operacional-padroes`);
+      const d = await r.json();
+      if (!d.sucesso) throw new Error(d.erro || 'Falha');
+      RESUMO_PAD = d.padroes || [];
+      renderResumoOperacionalPadroes(d);
+      if (status) {
+        status.innerHTML = `<strong>${fmtVol(d.total_padroes)} padrões</strong> ·
+          total para apostar: <strong class="text-success">${fmtVol(d.total_para_apostar)}</strong> ·
+          já saíram (dentro): <strong class="text-danger">${fmtVol(d.total_ja_sairam_dentro)}</strong>
+          ${d.elapsed_ms != null ? ` · ${fmtVol(d.elapsed_ms)} ms` : ''}`;
+      }
+    } catch (e) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="12" class="text-danger text-center">${esc(e.message || e)}</td></tr>`;
+      if (status) status.innerHTML = `<span class="text-danger">${esc(e.message || e)}</span>`;
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Atualizar resumo'; }
+    }
   }
 
   async function carregarPadroesII() {
@@ -1297,50 +1787,194 @@
       }
       if (topEl) {
         topEl.innerHTML = (d.top_frequencia || []).map((t, i) => `
-          <div class="col-md-4"><div class="ai-kpi">
-            <div class="lbl">Top ${i + 1} frequência</div>
-            <div class="val" style="font-size:.95rem"><code>${esc(t.padrao)}</code></div>
-            <div class="small text-muted">${esc(t.descricao)} · ${esc(t.frequencia)}x (${esc(t.percentual_concursos)}%)</div>
-          </div></div>`).join('');
+          <div class="col-md-4">
+            <div class="ai-kpi ai-top-freq-card" role="button" tabindex="0"
+                 data-act="ver-jogos-padrao" data-padrao="${esc(t.padrao)}"
+                 title="Abrir apostas deste padrão (só dentro da média)">
+              <div class="lbl">Top ${i + 1} frequência</div>
+              <div class="val" style="font-size:.95rem"><code>${esc(t.padrao)}</code></div>
+              <div class="small text-muted">${esc(t.descricao)} · ${esc(t.frequencia)}x (${esc(t.percentual_concursos)}%)</div>
+              <div class="ai-top-jogos">${fmtVol(t.jogos_possiveis)} jogos possíveis</div>
+            </div>
+          </div>`).join('');
       }
       renderBarrasUltimo();
       renderPadroesII();
+      // Resumo operacional (para apostar × já saíram) — carrega em seguida
+      carregarResumoOperacionalPadroes();
     } catch (e) {
       if (kpis) kpis.innerHTML = `<div class="col-12 text-danger small">${esc(e.message || e)}</div>`;
     }
   }
 
+  function contarStatus(st) {
+    const rs = JOGOS_PAD.resumo_status || {};
+    if (rs && rs[st] != null) return Number(rs[st]) || 0;
+    return (JOGOS_PAD.all || []).filter(j => (j.status_media || 'fora') === st).length;
+  }
   function atualizarNavJogosPad() {
-    const total = (JOGOS_PAD.all || []).length || JOGOS_PAD.total || 0;
+    const total = Number(JOGOS_PAD.total) || 0;
+    const bruto = (JOGOS_PAD.all || []).length;
+    const nDentro = contarStatus('dentro');
+    const nJa = contarDentroJaSairam();
+    const nNovos = contarDentroNovos();
     const size = JOGOS_PAD.pageSize || 100;
     const pages = Math.max(1, Math.ceil(total / size) || 1);
-    const page = Math.floor((JOGOS_PAD.offset || 0) / size) + 1;
+    const page = total ? Math.floor((JOGOS_PAD.offset || 0) / size) + 1 : 1;
     const prev = document.getElementById('aiJogosPadPrev');
     const next = document.getElementById('aiJogosPadNext');
-    if (prev) prev.disabled = page <= 1 || !JOGOS_PAD.padrao;
-    if (next) next.disabled = page >= pages || !JOGOS_PAD.padrao;
+    const first = document.getElementById('aiJogosPadFirst');
+    const last = document.getElementById('aiJogosPadLast');
+    const pageNum = document.getElementById('aiJogosPadPageNum');
+    const hasPad = !!JOGOS_PAD.padrao;
+    if (prev) prev.disabled = page <= 1 || !hasPad || total === 0;
+    if (next) next.disabled = page >= pages || !hasPad || total === 0;
+    if (first) first.disabled = page <= 1 || !hasPad || total === 0;
+    if (last) last.disabled = page >= pages || !hasPad || total === 0;
+    if (pageNum) {
+      pageNum.disabled = !hasPad || total === 0;
+      pageNum.max = pages;
+      pageNum.value = total ? page : '';
+    }
+    const filtro = JOGOS_PAD.filtroMedia || 'dentro_novos';
     const info = document.getElementById('aiJogosPadInfo');
-    if (info && JOGOS_PAD.padrao) {
-      const de = total ? (JOGOS_PAD.offset + 1) : 0;
-      const ate = Math.min(JOGOS_PAD.offset + (JOGOS_PAD.cache || []).length, total);
-      info.textContent = `Pág. ${page}/${pages} · ${de}–${ate} de ${fmtVol(total)} apostas · ${JOGOS_PAD.sel.size} marcadas`;
+    if (info && hasPad) {
+      if (!total) {
+        info.textContent = `Nenhuma aposta no filtro atual · dentro da média: ${fmtVol(nDentro)} (${fmtVol(nJa)} já saíram · ${fmtVol(nNovos)} ainda não)`;
+      } else {
+        const de = (JOGOS_PAD.offset || 0) + 1;
+        const ate = Math.min((JOGOS_PAD.offset || 0) + (JOGOS_PAD.cache || []).length, total);
+        const filtroLbl = filtro === 'dentro_novos' ? 'ainda não saíram (apostar)'
+          : (filtro === 'dentro_ja' ? 'já saíram (não apostar)'
+            : (filtro === 'dentro' ? 'dentro da média (todas)' : filtro));
+        info.textContent = `Pág. ${page}/${pages} · ${fmtVol(de)}–${fmtVol(ate)} de ${fmtVol(total)} · ${filtroLbl} · ${JOGOS_PAD.sel.size} marcadas`;
+      }
+    }
+    const tot = document.getElementById('aiJogosPadTotal');
+    if (tot && hasPad) {
+      tot.className = 'badge badge-dentro-aposta';
+      tot.textContent = `${fmtVol(nNovos)} para apostar`;
+      tot.title = `${fmtVol(nNovos)} jogos dentro da média que ainda não saíram — clique para filtrar`;
+      tot.style.cursor = 'pointer';
+      tot.onclick = () => {
+        setFiltroMedia('dentro_novos');
+        JOGOS_PAD.offset = 0;
+        aplicarPaginaJogos();
+      };
+    }
+    const jaEl = document.getElementById('aiJogosPadJaSairam');
+    if (jaEl && hasPad) {
+      jaEl.textContent = `${fmtVol(nJa)} já saíram`;
+      jaEl.title = `${fmtVol(nJa)} jogos deste padrão (dentro da média) já saíram no histórico — não apostar neles`;
+      jaEl.style.cursor = 'pointer';
+      jaEl.onclick = () => {
+        setFiltroMedia('dentro_ja');
+        JOGOS_PAD.offset = 0;
+        aplicarPaginaJogos();
+      };
+    }
+    const resumo = document.getElementById('aiJogosPadResumoAposta');
+    if (resumo) {
+      if (!hasPad) {
+        resumo.classList.add('d-none');
+        resumo.innerHTML = '';
+      } else {
+        resumo.classList.remove('d-none');
+        const avis = filtro === 'dentro_ja'
+          ? `<div class="ai-aposta-sub text-danger fw-bold">Lista de jogos que JÁ SAÍRAM — não use para apostar.</div>`
+          : (filtro === 'all' || filtro === 'dentro'
+            ? `<div class="ai-aposta-sub">Dica: use «ainda não saíram» para apostar sem repetir resultados históricos.</div>`
+            : '');
+        resumo.innerHTML = `
+          <div>Para apostar: <span class="ai-aposta-qtd">${fmtVol(nNovos)}</span> jogos <strong>dentro da média</strong> que <strong>ainda não saíram</strong></div>
+          <div class="ai-aposta-sub">dentro da média: ${fmtVol(nDentro)} · já saíram: ${fmtVol(nJa)} · padrão completo: ${fmtVol(bruto)} · próximas: ${fmtVol(contarStatus('proxima'))} · fora: ${fmtVol(contarStatus('fora'))}</div>
+          ${avis}`;
+      }
     }
     const selCount = document.getElementById('aiJogosPadSelCount');
     if (selCount) selCount.textContent = `${JOGOS_PAD.sel.size} marcadas`;
-    const hasData = total > 0;
-    ['aiJogosPadExportTxt', 'aiJogosPadExportCsv', 'aiJogosPadCopiar',
-      'aiJogosPadSelPagina', 'aiJogosPadLimparSel'].forEach(id => {
-      const b = document.getElementById(id);
-      if (b) b.disabled = !hasData;
+    const pageRows = JOGOS_PAD.cache || [];
+    const chkPag = document.getElementById('aiJogosPadChkPagina');
+    if (chkPag) {
+      const n = pageRows.length;
+      const nSel = pageRows.filter(j => JOGOS_PAD.sel.has(j.dezenas_fmt)).length;
+      chkPag.disabled = !hasPad || n === 0;
+      chkPag.checked = n > 0 && nSel === n;
+      chkPag.indeterminate = nSel > 0 && nSel < n;
+    }
+    ['aiJogosPadSelPagina', 'aiJogosPadSelTodas', 'aiJogosPadLimparSel', 'aiJogosPadCopiar',
+     'aiJogosPadExportTxt', 'aiJogosPadExportCsv', 'aiJogosPadExportXlsx'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = !hasPad;
     });
   }
 
+  function fmtDist(d) {
+    if (d == null || d === '') return '—';
+    const n = Number(d);
+    if (!Number.isFinite(n)) return '—';
+    return n > 0 ? `+${n}` : String(n);
+  }
+  function statusPill(st, label) {
+    const s = st || 'fora';
+    const lbl = label || (s === 'dentro' ? 'Dentro da média' : (s === 'proxima' ? 'Próxima da média' : 'Fora da faixa'));
+    const icon = s === 'dentro' || s === 'proxima' ? '●' : '○';
+    return `<span class="ai-status-pill ${esc(s)}" title="${esc(lbl)}">${icon} ${esc(lbl)}</span>`;
+  }
+  function jogosFiltradosPorMedia() {
+    const f = JOGOS_PAD.filtroMedia || 'dentro_novos';
+    const all = JOGOS_PAD.all || [];
+    if (f === 'all') return all;
+    if (f === 'alinhadas') return all.filter(j => j.status_media === 'dentro' || j.status_media === 'proxima');
+    if (f === 'proxima' || f === 'fora') {
+      return all.filter(j => (j.status_media || 'fora') === f);
+    }
+    // dentro / dentro_novos / dentro_ja
+    const dentro = all.filter(j => (j.status_media || 'fora') === 'dentro');
+    if (f === 'dentro_novos') return dentro.filter(j => !jogoJaSaiu(j));
+    if (f === 'dentro_ja') return dentro.filter(jogoJaSaiu);
+    return dentro;
+  }
+  function atualizarKpisMedia() {
+    const el = document.getElementById('aiJogosPadMediaKpis');
+    if (!el) return;
+    const faixa = JOGOS_PAD.soma_faixa;
+    const nDentro = contarStatus('dentro');
+    const nJa = contarDentroJaSairam();
+    const nNovos = contarDentroNovos();
+    const nProx = contarStatus('proxima');
+    const nFora = contarStatus('fora');
+    if (!faixa || faixa.media == null) {
+      el.innerHTML = '';
+      return;
+    }
+    const fonte = faixa.fonte === 'historico' ? 'histórica' : 'teórica';
+    el.innerHTML = `
+      <span class="badge bg-light text-dark border">Média ${esc(faixa.media)} (±${esc(faixa.tol_proxima)}) · ${fonte}</span>
+      <span class="badge ai-status-pill dentro" title="Ainda não saíram — para apostar">Apostar ${fmtVol(nNovos)}</span>
+      <span class="badge ai-status-pill fora" title="Já saíram no histórico">Já saíram ${fmtVol(nJa)}</span>
+      <span class="badge ai-status-pill dentro" title="Total dentro da média">Dentro ${fmtVol(nDentro)}</span>
+      <span class="badge ai-status-pill proxima">Próximas ${fmtVol(nProx)}</span>
+      <span class="badge ai-status-pill fora">Fora ${fmtVol(nFora)}</span>`;
+  }
   function linhasOrdenadasJogos() {
-    const sk = SORT.jogos || { key: 'id', dir: 'asc' };
+    const sk = SORT.jogos || { key: 'distancia', dir: 'asc' };
     const dir = sk.dir === 'asc' ? 1 : -1;
-    return [...(JOGOS_PAD.all || [])].sort((a, b) => {
+    return [...jogosFiltradosPorMedia()].sort((a, b) => {
       if (sk.key === 'concurso') {
         return dir * ((concursoDoJogo(a) || 0) - (concursoDoJogo(b) || 0));
+      }
+      if (sk.key === 'status_media') {
+        const ord = { dentro: 0, proxima: 1, fora: 2 };
+        return dir * ((ord[a.status_media] ?? 9) - (ord[b.status_media] ?? 9));
+      }
+      if (sk.key === 'distancia') {
+        const da = Math.abs(Number(a.distancia));
+        const db = Math.abs(Number(b.distancia));
+        const na = Number.isFinite(da) ? da : 99999;
+        const nb = Number.isFinite(db) ? db : 99999;
+        if (na !== nb) return dir * (na - nb);
+        return dir * ((Number(a.soma) || 0) - (Number(b.soma) || 0));
       }
       const ka = a[sk.key], kb = b[sk.key];
       if (sk.key === 'dezenas_fmt' || sk.key === 'padrao_inicial') {
@@ -1352,7 +1986,10 @@
 
   function aplicarPaginaJogos() {
     const sizeEl = document.getElementById('aiJogosPadPageSize');
+    const filtroEl = document.getElementById('aiJogosPadFiltroMedia');
     JOGOS_PAD.pageSize = sizeEl ? (+sizeEl.value || 100) : 100;
+    JOGOS_PAD.filtroMedia = filtroEl ? (filtroEl.value || 'dentro_novos') : (JOGOS_PAD.filtroMedia || 'dentro_novos');
+    MAPA_CONCURSOS = null; // reconstrói mapa com CACHE atual
     const ordered = linhasOrdenadasJogos();
     JOGOS_PAD.total = ordered.length;
     const size = JOGOS_PAD.pageSize;
@@ -1362,6 +1999,8 @@
       if (idx >= 0) {
         JOGOS_PAD.offset = Math.floor(idx / size) * size;
         JOGOS_PAD._scrollVencedor = true;
+      } else {
+        JOGOS_PAD.offset = 0;
       }
     }
     const maxOff = Math.max(0, ordered.length - 1);
@@ -1384,6 +2023,7 @@
         Nenhuma aposta ainda — selecione um padrão na aba <strong>4 · Padrões II</strong> (coluna Jogos).
       </td></tr>`;
       atualizarNavJogosPad();
+      atualizarKpisMedia();
       renderBarrasUltimo();
       return;
     }
@@ -1392,47 +2032,54 @@
       const checked = JOGOS_PAD.sel.has(key) ? 'checked' : '';
       const isWin = ehJogoVencedor(j);
       const conc = concursoDoJogo(j);
+      const jaSaiu = !!conc;
+      const st = j.status_media || 'fora';
       const trCls = [
         JOGOS_PAD.sel.has(key) ? 'tr-aposta-sel' : '',
         isWin ? 'tr-padrao-ultimo tr-jogo-vencedor' : '',
+        jaSaiu ? 'tr-ja-saiu' : '',
       ].filter(Boolean).join(' ');
       const concTit = conc
-        ? ` title="Saiu no concurso ${esc(conc)}${isWin ? ' (último / vencedor)' : ''}"`
-        : '';
+        ? ` title="JÁ SAIU no concurso ${esc(conc)} — não apostar novamente${isWin ? ' (último / vencedor)' : ''}"`
+        : ' title="Ainda não saiu no histórico"';
       const concHtml = conc
-        ? `<span class="ai-col-alinha"><a href="#" class="fw-bold text-decoration-underline" data-act="ir-concurso" data-concurso="${esc(conc)}" title="Abrir concurso ${esc(conc)} na aba Resultados">${esc(conc)}</a></span>`
-        : '';
-      return `<tr class="${trCls}"${isWin ? ' data-vencedor="1"' : ''}${concTit}>
+        ? `<span class="ai-col-alinha"><a href="#" class="fw-bold text-decoration-underline" data-act="ir-concurso" data-concurso="${esc(conc)}" title="Abrir concurso ${esc(conc)} na aba Resultados">${esc(conc)}</a><span class="badge-ja-saiu">já saiu</span></span>`
+        : '<span class="text-muted small">—</span>';
+      return `<tr class="${trCls}"${isWin ? ' data-vencedor="1"' : ''}${jaSaiu ? ' data-ja-saiu="1"' : ''}${concTit}>
         <td><input type="checkbox" class="form-check-input ai-aposta-chk" data-dez="${esc(key)}" ${checked}></td>
-        <td>${esc(j.id)}</td>
-        <td class="td-conc-jogo">${concHtml}</td>
-        <td class="td-dezenas-centro font-monospace">${esc(j.dezenas_fmt)}</td>
-        <td>${esc(j.soma)}</td>
         <td class="td-padrao"><code>${esc(j.padrao_inicial || JOGOS_PAD.padrao)}</code></td>
+        <td class="td-dezenas-centro font-monospace">${esc(j.dezenas_fmt)}</td>
+        <td class="td-soma-destaque">${esc(j.soma)}</td>
+        <td>${statusPill(st, j.status_media_label)}</td>
+        <td class="td-conc-jogo">${concHtml}</td>
       </tr>`;
     }).join('') || '<tr><td colspan="6" class="text-muted">Sem jogos nesta página.</td></tr>';
     atualizarNavJogosPad();
+    atualizarKpisMedia();
     renderBarrasUltimo();
     scrollLinhaVencedora(tbody);
   }
 
   function jogosParaExportar() {
     const escopo = (document.getElementById('aiJogosPadEscopoExport') || {}).value || 'auto';
-    const all = linhasOrdenadasJogos();
+    const filtrados = linhasOrdenadasJogos();
     if (escopo === 'page') return JOGOS_PAD.cache || [];
-    if (escopo === 'sel') return all.filter(j => JOGOS_PAD.sel.has(j.dezenas_fmt));
-    if (escopo === 'all') return all;
-    // auto: marcadas se houver, senão todas
-    if (JOGOS_PAD.sel.size) return all.filter(j => JOGOS_PAD.sel.has(j.dezenas_fmt));
-    return all;
+    if (escopo === 'sel') return filtrados.filter(j => JOGOS_PAD.sel.has(j.dezenas_fmt));
+    if (escopo === 'all') return filtrados;
+    if (JOGOS_PAD.sel.size) return filtrados.filter(j => JOGOS_PAD.sel.has(j.dezenas_fmt));
+    return filtrados;
   }
 
   async function carregarJogosPadrao(padrao, offset) {
     const p = String(padrao || '').trim();
     if (!p) return;
+    if (!CACHE || !CACHE.length) {
+      try { await carregarResultados(); } catch (_) { /* segue sem mapa */ }
+    }
     if (!ULTIMO_RESULTADO) {
       await carregarPadroesII();
     }
+    MAPA_CONCURSOS = null;
     const same = JOGOS_PAD.padrao === p && (JOGOS_PAD.all || []).length;
     if (same && offset != null) {
       const aviso = document.getElementById('aiJogosPadAvisoVazio');
@@ -1446,7 +2093,6 @@
     JOGOS_PAD.offset = Math.max(0, offset == null ? 0 : +offset);
     JOGOS_PAD.sel = new Set();
     const lbl = document.getElementById('aiJogosPadLbl');
-    const tot = document.getElementById('aiJogosPadTotal');
     const hint = document.getElementById('aiJogosPadHint');
     const aviso = document.getElementById('aiJogosPadAvisoVazio');
     const tbody = document.querySelector('#aiTabelaJogosPadrao tbody');
@@ -1461,12 +2107,23 @@
       JOGOS_PAD.all = d.jogos || [];
       JOGOS_PAD.total = d.total || JOGOS_PAD.all.length;
       JOGOS_PAD.descricao = d.descricao || '';
+      JOGOS_PAD.soma_faixa = d.soma_faixa || null;
+      JOGOS_PAD.soma_media = d.soma_media;
+      JOGOS_PAD.resumo_status = d.resumo_status || null;
       if (lbl) lbl.innerHTML = `Padrão <code>${esc(d.padrao)}</code> · ${esc(d.descricao || '')}`;
-      if (tot) tot.textContent = `${fmtVol(d.total)} jogos`;
+      const mediaTxt = d.soma_media != null ? ` · média ${d.soma_media}` : '';
       if (hint) {
-        hint.innerHTML = `Marque apostas para copiar/exportar e apostar. Padrão <code>${esc(d.padrao)}</code>
-          (${esc(d.descricao || '')}). Escopo: marcadas, página ou todas.`;
+        const nDentro = (d.resumo_status && d.resumo_status.dentro) || 0;
+        // Contagens de já saíram dependem do CACHE de resultados
+        MAPA_CONCURSOS = null;
+        const nJa = (d.jogos || []).filter(j => (j.status_media || 'fora') === 'dentro' && jogoJaSaiu(j)).length;
+        const nNovos = Math.max(0, nDentro - nJa);
+        hint.innerHTML = `Padrão <code>${esc(d.padrao)}</code> (${esc(d.descricao || '')})${mediaTxt}.
+          <strong>${fmtVol(nNovos)} para apostar</strong> (dentro da média e ainda não saíram) ·
+          <strong class="text-danger">${fmtVol(nJa)} já saíram</strong> ·
+          ${fmtVol(nDentro)} dentro da média no total.`;
       }
+      setFiltroMedia(JOGOS_PAD.filtroMedia || 'dentro_novos');
       if (offset == null || +offset === 0) JOGOS_PAD._irVencedor = true;
       aplicarPaginaJogos();
     } catch (e) {
@@ -1475,9 +2132,25 @@
     }
   }
 
-  function abrirJogosPadrao(padrao) {
+  function abrirJogosPadrao(padrao, opts) {
+    const o = opts || {};
+    // Fluxo de aposta: ainda não saíram + dentro da média (salvo pedido explícito)
+    setFiltroMedia(o.filtroMedia != null ? o.filtroMedia : 'dentro_novos');
+    JOGOS_PAD.offset = 0;
+    if (o.irVencedor) JOGOS_PAD._irVencedor = true;
     goAba('jogos-padrao');
     carregarJogosPadrao(padrao, 0);
+  }
+
+  function irParaPaginaJogos(page) {
+    const size = JOGOS_PAD.pageSize || 100;
+    const total = Number(JOGOS_PAD.total) || 0;
+    const pages = Math.max(1, Math.ceil(total / size) || 1);
+    let p = Math.floor(Number(page) || 1);
+    if (p < 1) p = 1;
+    if (p > pages) p = pages;
+    JOGOS_PAD.offset = (p - 1) * size;
+    aplicarPaginaJogos();
   }
 
   async function copiarApostasPadrao() {
@@ -1492,7 +2165,6 @@
       const hint = document.getElementById('aiJogosPadHint');
       if (hint) hint.innerHTML = `<strong>Copiado:</strong> ${rows.length} aposta(s) para a área de transferência.`;
     } catch (e) {
-      // fallback
       const ta = document.createElement('textarea');
       ta.value = txt;
       document.body.appendChild(ta);
@@ -1503,38 +2175,60 @@
     }
   }
 
-  function exportJogosPadrao(formato) {
+  async function exportJogosPadrao(formato) {
     const p = JOGOS_PAD.padrao;
     if (!p) return;
     const rows = jogosParaExportar();
     if (!rows.length) {
-      alert('Nenhuma aposta no escopo escolhido.');
-      return;
-    }
-    // Se exportar todas e escopo all/auto sem seleção → usa API TXT (rápido)
-    const escopo = (document.getElementById('aiJogosPadEscopoExport') || {}).value || 'auto';
-    if (formato === 'txt' && (escopo === 'all' || (escopo === 'auto' && !JOGOS_PAD.sel.size))) {
-      window.location.href = `${API}/jogos-padrao?padrao=${encodeURIComponent(p)}&formato=txt`;
+      alert('Nenhuma aposta no escopo/filtro escolhido.');
       return;
     }
     if (formato === 'txt') {
-      const header = `# Padrao: ${p} (${JOGOS_PAD.descricao || ''})\n# Total exportado: ${rows.length}\n`;
+      const header = `# Padrao: ${p} (${JOGOS_PAD.descricao || ''})\n# Soma media: ${JOGOS_PAD.soma_media ?? ''}\n# Filtro: ${JOGOS_PAD.filtroMedia || 'dentro'}\n# Total exportado: ${rows.length}\n`;
       const body = header + rows.map(j => j.dezenas_fmt).join('\n') + '\n';
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([body], { type: 'text/plain;charset=utf-8' }));
-      a.download = `apostas_padrao_${p.replace(/\s+/g, '')}.txt`;
+      a.download = `apostas_padrao_${p.replace(/\s+/g, '')}_dentro.txt`;
       a.click();
       return;
     }
-    const lines = ['id;concurso;dezenas;soma;padrao'];
-    rows.forEach(j => {
-      lines.push([j.id, concursoDoJogo(j) || '', j.dezenas_fmt, j.soma, j.padrao_inicial || p]
-        .map(x => `"${String(x ?? '').replace(/"/g, '""')}"`).join(';'));
-    });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
-    a.download = `apostas_padrao_${p.replace(/\s+/g, '')}.csv`;
-    a.click();
+    // CSV / XLSX via backend — mesma regra e mesmos campos da interface
+    try {
+      const r = await fetch(`${API}/jogos-padrao/export`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          padrao: p,
+          formato: formato === 'xlsx' ? 'xlsx' : 'csv',
+          jogos: rows.map(j => ({
+            id: j.id,
+            dezenas_fmt: j.dezenas_fmt,
+            soma: j.soma,
+            media: j.media,
+            distancia: j.distancia,
+            status_media: j.status_media,
+            status_media_label: j.status_media_label,
+            padrao_inicial: j.padrao_inicial || p,
+            concurso: concursoDoJogo(j) || '',
+          })),
+        }),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.erro || `Falha HTTP ${r.status}`);
+      }
+      const blob = await r.blob();
+      const cd = r.headers.get('Content-Disposition') || '';
+      const m = /filename=\"?([^\";]+)\"?/i.exec(cd);
+      const nome = (m && m[1]) || `apostas_padrao.${formato === 'xlsx' ? 'xlsx' : 'csv'}`;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = nome;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (e) {
+      alert(e.message || e);
+    }
   }
 
   // events
@@ -1611,20 +2305,72 @@
     JOGOS_PAD.offset = (JOGOS_PAD.offset || 0) + size;
     aplicarPaginaJogos();
   });
+  document.getElementById('aiJogosPadFirst')?.addEventListener('click', () => irParaPaginaJogos(1));
+  document.getElementById('aiJogosPadLast')?.addEventListener('click', () => {
+    const size = JOGOS_PAD.pageSize || 100;
+    const total = Number(JOGOS_PAD.total) || 0;
+    const pages = Math.max(1, Math.ceil(total / size) || 1);
+    irParaPaginaJogos(pages);
+  });
+  document.getElementById('aiJogosPadPageNum')?.addEventListener('change', (ev) => {
+    irParaPaginaJogos(ev.target.value);
+  });
+  document.getElementById('aiJogosPadPageNum')?.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      irParaPaginaJogos(ev.target.value);
+    }
+  });
   document.getElementById('aiJogosPadPageSize')?.addEventListener('change', () => {
     JOGOS_PAD.offset = 0;
     aplicarPaginaJogos();
   });
   document.getElementById('aiJogosPadExportTxt')?.addEventListener('click', () => exportJogosPadrao('txt'));
   document.getElementById('aiJogosPadExportCsv')?.addEventListener('click', () => exportJogosPadrao('csv'));
+  document.getElementById('aiJogosPadExportXlsx')?.addEventListener('click', () => exportJogosPadrao('xlsx'));
+  document.getElementById('aiJogosPadFiltroMedia')?.addEventListener('change', () => {
+    JOGOS_PAD.offset = 0;
+    aplicarPaginaJogos();
+  });
   document.getElementById('aiJogosPadCopiar')?.addEventListener('click', copiarApostasPadrao);
   document.getElementById('aiJogosPadSelPagina')?.addEventListener('click', () => {
     (JOGOS_PAD.cache || []).forEach(j => JOGOS_PAD.sel.add(j.dezenas_fmt));
     renderJogosPadrao();
   });
+  document.getElementById('aiJogosPadSelTodas')?.addEventListener('click', () => {
+    linhasOrdenadasJogos().forEach(j => JOGOS_PAD.sel.add(j.dezenas_fmt));
+    renderJogosPadrao();
+  });
+  document.getElementById('aiJogosPadChkPagina')?.addEventListener('change', (ev) => {
+    const on = !!ev.target.checked;
+    (JOGOS_PAD.cache || []).forEach(j => {
+      if (on) JOGOS_PAD.sel.add(j.dezenas_fmt);
+      else JOGOS_PAD.sel.delete(j.dezenas_fmt);
+    });
+    renderJogosPadrao();
+  });
   document.getElementById('aiJogosPadLimparSel')?.addEventListener('click', () => {
     JOGOS_PAD.sel.clear();
     renderJogosPadrao();
+  });
+  document.getElementById('aiPadIISelTodos')?.addEventListener('click', () => {
+    filtrarPadII().forEach(p => PAD_II_SEL.add(p.padrao));
+    renderPadroesII();
+  });
+  document.getElementById('aiPadIILimparSel')?.addEventListener('click', () => {
+    PAD_II_SEL.clear();
+    renderPadroesII();
+  });
+  document.getElementById('aiPadIIChkTodos')?.addEventListener('change', (ev) => {
+    const on = !!ev.target.checked;
+    filtrarPadII().forEach(p => {
+      if (on) PAD_II_SEL.add(p.padrao);
+      else PAD_II_SEL.delete(p.padrao);
+    });
+    renderPadroesII();
+  });
+  document.getElementById('aiPadIIBtnResumo')?.addEventListener('click', () => {
+    carregarResumoOperacionalPadroes();
   });
   document.getElementById('aiJogosPadVoltarPadII')?.addEventListener('click', () => {
     goAba('padroes-ii');
@@ -1662,7 +2408,7 @@
       if (SORT[table].key === key) SORT[table].dir = SORT[table].dir === 'asc' ? 'desc' : 'asc';
       else {
         SORT[table].key = key;
-        SORT[table].dir = (key === 'concurso' || key === 'data' || key === 'frequencia' || key === 'jogos_possiveis' || key === 'soma') ? 'desc' : 'asc';
+        SORT[table].dir = (key === 'concurso' || key === 'data' || key === 'frequencia' || key === 'jogos_possiveis' || key === 'soma') ? 'desc' : (key === 'distancia' ? 'asc' : 'asc');
       }
       if (table === 'p2') {
         renderPadroesII();
@@ -1707,13 +2453,31 @@
     if (act === 'ver-jogos-padrao') {
       ev.preventDefault();
       const pad = btn.dataset.padrao || '';
-      if (pad) abrirJogosPadrao(pad);
+      if (pad) abrirJogosPadrao(pad, { filtroMedia: 'dentro_novos' });
       return;
     }
     if (act === 'ir-vencedor') {
       ev.preventDefault();
-      JOGOS_PAD._irVencedor = true;
-      aplicarPaginaJogos();
+      const u = ULTIMO_RESULTADO;
+      if (!u) {
+        alert('Último resultado ainda não carregado. Aguarde a aba 4 carregar.');
+        return;
+      }
+      const padUlt = normalizarPadrao(u.padrao);
+      if (!padUlt) {
+        alert('Padrão do último resultado não disponível.');
+        return;
+      }
+      // Vencedor já saiu: abre lista com histórico e destaca
+      abrirJogosPadrao(padUlt, { filtroMedia: 'dentro', irVencedor: true });
+      return;
+    }
+    if (act === 'ir-vencedor-todos') {
+      ev.preventDefault();
+      const u = ULTIMO_RESULTADO;
+      const padUlt = normalizarPadrao(u && u.padrao);
+      if (!padUlt) return;
+      abrirJogosPadrao(padUlt, { filtroMedia: 'all', irVencedor: true });
       return;
     }
     if (act === 'ir-concurso') {

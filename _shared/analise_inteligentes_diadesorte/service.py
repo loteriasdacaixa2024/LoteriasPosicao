@@ -12,6 +12,13 @@ from itertools import combinations, product
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
 
 from analise_estudos.service_factory import make_estudos_base
+from analise_inteligentes_diadesorte.soma_media import (
+    calcular_faixa_soma,
+    classificar_soma,
+    enriquecer_jogos_com_media,
+    resumo_status,
+    somas_historicas_do_padrao,
+)
 from posicao_analise.core import extrair_digitos
 
 MAX_DEZENA = 31
@@ -222,6 +229,123 @@ def expandir_jogos_padrao(
         "min_dezena": min_dezena,
         "max_dezena": max_dezena,
         "tamanho_jogo": len(digs),
+    }
+
+
+def _chave_dezenas(dezenas: Sequence[int]) -> str:
+    return " ".join(f"{int(d):02d}" for d in sorted(int(x) for x in dezenas))
+
+
+def contar_operacional_padrao(
+    padrao: str,
+    *,
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+    faixa: Optional[Dict[str, Any]] = None,
+    hist_keys: Optional[Set[str]] = None,
+) -> Dict[str, Any]:
+    """
+    Conta jogos teóricos do padrão por status da média e quantos já saíram.
+    Não materializa a lista completa — só agregados (rápido o bastante p/ ~200k).
+    """
+    digs = [int(x) for x in str(padrao).replace(",", " ").split() if x.strip().isdigit()]
+    padrao_norm = " ".join(str(d) for d in digs)
+    if not digs:
+        return {
+            "padrao": padrao_norm,
+            "sucesso": False,
+            "erro": "Padrão inválido",
+            "jogos_possiveis": 0,
+            "dentro": 0,
+            "proxima": 0,
+            "fora": 0,
+            "ja_sairam_dentro": 0,
+            "para_apostar": 0,
+        }
+
+    need = Counter(digs)
+    pools = pool_por_digito_universo(min_dezena, max_dezena)
+    for dig, qtd in need.items():
+        if len(pools.get(dig) or []) < qtd:
+            return {
+                "padrao": padrao_norm,
+                "sucesso": False,
+                "erro": f"Universo insuficiente para dígito {dig}",
+                "jogos_possiveis": 0,
+                "dentro": 0,
+                "proxima": 0,
+                "fora": 0,
+                "ja_sairam_dentro": 0,
+                "para_apostar": 0,
+            }
+
+    digitos_ord = sorted(need.keys())
+    partes = [list(combinations(pools[d], need[d])) for d in digitos_ord]
+
+    # Se não há faixa histórica, 1ª passagem só para média teórica
+    faixa_local = faixa
+    if not faixa_local or faixa_local.get("media") is None:
+        somas: List[int] = []
+        for combo_parts in product(*partes):
+            soma = 0
+            for part in combo_parts:
+                for x in part:
+                    soma += int(x)
+            somas.append(soma)
+        faixa_local = calcular_faixa_soma(somas, fonte="teorico")
+        dentro = proxima = fora = 0
+        for soma in somas:
+            st = (classificar_soma(soma, faixa_local) or {}).get("status_media") or "fora"
+            if st == "dentro":
+                dentro += 1
+            elif st == "proxima":
+                proxima += 1
+            else:
+                fora += 1
+        total = len(somas)
+    else:
+        dentro = proxima = fora = 0
+        total = 0
+        for combo_parts in product(*partes):
+            soma = 0
+            for part in combo_parts:
+                for x in part:
+                    soma += int(x)
+            total += 1
+            st = (classificar_soma(soma, faixa_local) or {}).get("status_media") or "fora"
+            if st == "dentro":
+                dentro += 1
+            elif st == "proxima":
+                proxima += 1
+            else:
+                fora += 1
+
+    # Já saíram dentro: caller pode passar hist_keys só do próprio padrão
+    ja_dentro = 0
+    if hist_keys and faixa_local:
+        for key in hist_keys:
+            try:
+                dez = [int(x) for x in str(key).split() if x.strip().isdigit()]
+                if not dez:
+                    continue
+                st = (classificar_soma(sum(dez), faixa_local) or {}).get("status_media") or "fora"
+                if st == "dentro":
+                    ja_dentro += 1
+            except Exception:
+                continue
+
+    return {
+        "padrao": padrao_norm,
+        "sucesso": True,
+        "jogos_possiveis": total,
+        "dentro": dentro,
+        "proxima": proxima,
+        "fora": fora,
+        "ja_sairam_dentro": ja_dentro,
+        "para_apostar": max(0, dentro - ja_dentro),
+        "soma_faixa": faixa_local,
+        "soma_media": (faixa_local or {}).get("media"),
+        "fonte_media": (faixa_local or {}).get("fonte"),
     }
 
 
@@ -782,6 +906,20 @@ class AnaliseInteligentesService:
         teoricos = _gerar_padroes_teoricos(k, min_dezena=dmin, max_dezena=dmax)
         padroes_set = set(teoricos) | set(ocorrencias.keys())
 
+        # Somas históricas por padrão (para média operacional)
+        somas_por_padrao: Dict[str, List[int]] = defaultdict(list)
+        for l in linhas:
+            p = str(l.get("padrao_inicial") or "").strip()
+            if not p:
+                dez = l.get("dezenas") or []
+                p = padrao_inicial(sorted(int(x) for x in dez)) if dez else ""
+            if not p:
+                continue
+            try:
+                somas_por_padrao[p].append(int(l.get("soma") or 0))
+            except (TypeError, ValueError):
+                continue
+
         catalogo: List[Dict[str, Any]] = []
         for p in sorted(padroes_set):
             freq = len(ocorrencias.get(p) or [])
@@ -789,6 +927,7 @@ class AnaliseInteligentesService:
             st = status_padrao(freq, atraso, atraso_mediano)
             jogos = jogos_possiveis_padrao(p, min_dezena=dmin, max_dezena=dmax)
             eh_ultimo = bool(ultimo_resultado and ultimo_resultado.get("padrao") == p)
+            faixa = calcular_faixa_soma(somas_por_padrao.get(p) or [], fonte="historico")
             catalogo.append({
                 "padrao": p,
                 "descricao": descricao_bma_do_padrao(p),
@@ -799,6 +938,8 @@ class AnaliseInteligentesService:
                 "status": st,
                 "eh_padrao_ultimo_concurso": eh_ultimo,
                 "ultimo_concurso": max(ocorrencias[p]) if freq else None,
+                "soma_media": (faixa or {}).get("media"),
+                "soma_faixa": faixa,
             })
 
         # Ordenação padrão: frequência desc, depois jogos
@@ -812,6 +953,7 @@ class AnaliseInteligentesService:
                 "percentual_concursos": r["percentual_concursos"],
                 "atraso": r["atraso"],
                 "status": r["status"],
+                "jogos_possiveis": r["jogos_possiveis"],
             }
             for r in catalogo if r["frequencia"] > 0
         ][:3]
@@ -848,15 +990,264 @@ class AnaliseInteligentesService:
         *,
         limite: Optional[int] = None,
         offset: int = 0,
+        base: str = "geral",
     ) -> Dict[str, Any]:
         lim = cls._limites()
-        return expandir_jogos_padrao(
+        out = expandir_jogos_padrao(
             padrao,
             min_dezena=lim["min_dezena"],
             max_dezena=lim["max_dezena"],
             limite=limite,
             offset=offset,
         )
+        if not out.get("sucesso"):
+            return out
+
+        # Média do próprio padrão: histórico primeiro; fallback teórico
+        dados = cls.listar_resultados(janela=0, base=base)
+        hist = somas_historicas_do_padrao(dados.get("linhas") or [], out.get("padrao") or padrao)
+        faixa = calcular_faixa_soma(hist, fonte="historico")
+        if not faixa:
+            somas_teo = [int(j.get("soma") or 0) for j in (out.get("jogos") or [])]
+            # Se a página veio paginada, recalcula amostra teórica completa sem limite
+            if (limite not in (None, "", 0, "0")) or int(offset or 0):
+                full = expandir_jogos_padrao(
+                    out.get("padrao") or padrao,
+                    min_dezena=lim["min_dezena"],
+                    max_dezena=lim["max_dezena"],
+                    limite=None,
+                    offset=0,
+                )
+                somas_teo = [int(j.get("soma") or 0) for j in (full.get("jogos") or [])]
+            faixa = calcular_faixa_soma(somas_teo, fonte="teorico")
+
+        jogos = enriquecer_jogos_com_media(out.get("jogos") or [], faixa)
+        out["jogos"] = jogos
+        out["soma_faixa"] = faixa
+        out["soma_media"] = (faixa or {}).get("media")
+        out["resumo_status"] = resumo_status(jogos)
+        out["modality_key"] = cls.modality_key
+        try:
+            from geradores_elite.modality_config import MODALITIES
+            out["modality_nome"] = (MODALITIES.get(cls.modality_key) or {}).get("nome") or cls.modality_key
+        except Exception:
+            out["modality_nome"] = cls.modality_key
+        return out
+
+    @classmethod
+    def exportar_jogos_padrao_xlsx(
+        cls,
+        padrao: str,
+        *,
+        base: str = "geral",
+        ids: Optional[Sequence[int]] = None,
+        dezenas_fmt: Optional[Sequence[str]] = None,
+    ) -> Dict[str, Any]:
+        """Exporta apostas do padrão em XLSX (mesma regra da interface)."""
+        from analise_inteligentes_diadesorte.soma_media import (
+            build_xlsx_apostas,
+            safe_filename_padrao,
+        )
+
+        out = cls.listar_jogos_padrao(padrao, limite=None, offset=0, base=base)
+        if not out.get("sucesso"):
+            return out
+        jogos = list(out.get("jogos") or [])
+        if dezenas_fmt:
+            want = {str(x).strip() for x in dezenas_fmt if str(x).strip()}
+            jogos = [j for j in jogos if str(j.get("dezenas_fmt") or "") in want]
+        elif ids:
+            want_ids = {int(x) for x in ids}
+            jogos = [j for j in jogos if int(j.get("id") or 0) in want_ids]
+        blob = build_xlsx_apostas(
+            modality_key=out.get("modality_key") or cls.modality_key,
+            modality_nome=out.get("modality_nome") or cls.modality_key,
+            padrao=out.get("padrao") or padrao,
+            descricao=out.get("descricao") or "",
+            faixa=out.get("soma_faixa"),
+            jogos=jogos,
+        )
+        fname = (
+            f"apostas_padrao_{safe_filename_padrao(out.get('padrao') or padrao)}"
+            f"_{cls.modality_key}.xlsx"
+        )
+        return {
+            "sucesso": True,
+            "filename": fname,
+            "content": blob,
+            "total": len(jogos),
+            "soma_faixa": out.get("soma_faixa"),
+        }
+
+    @classmethod
+    def resumo_operacional_padroes(cls, base: str = "geral") -> Dict[str, Any]:
+        """
+        Tabela operacional (aba 4): por padrão — para apostar, já saíram, dentro/próximas/fora.
+        """
+        import time
+
+        t0 = time.perf_counter()
+        lim = cls._limites()
+        dmin = int(lim["min_dezena"])
+        dmax = int(lim["max_dezena"])
+
+        cat = cls.catalogo_padroes(base=base)
+        if not cat.get("sucesso"):
+            return cat
+
+        dados = cls.listar_resultados(janela=0, base=base)
+        linhas = list(dados.get("linhas") or [])
+        hist_keys_por_padrao: Dict[str, Set[str]] = defaultdict(set)
+        somas_por_padrao: Dict[str, List[int]] = defaultdict(list)
+        for l in linhas:
+            dez = l.get("dezenas") or []
+            p = str(l.get("padrao_inicial") or "").strip()
+            if not p and dez:
+                p = padrao_inicial(sorted(int(x) for x in dez))
+            if not p:
+                continue
+            try:
+                somas_por_padrao[p].append(int(l.get("soma") or 0))
+            except (TypeError, ValueError):
+                continue
+            if dez:
+                try:
+                    hist_keys_por_padrao[p].add(_chave_dezenas(dez))
+                except Exception:
+                    pass
+
+        rows: List[Dict[str, Any]] = []
+        for pinfo in (cat.get("padroes") or []):
+            p = str(pinfo.get("padrao") or "").strip()
+            if not p:
+                continue
+            faixa = calcular_faixa_soma(somas_por_padrao.get(p) or [], fonte="historico")
+            op = contar_operacional_padrao(
+                p,
+                min_dezena=dmin,
+                max_dezena=dmax,
+                faixa=faixa,
+                hist_keys=hist_keys_por_padrao.get(p) or set(),
+            )
+            rows.append({
+                "padrao": p,
+                "descricao": pinfo.get("descricao") or descricao_bma_do_padrao(p),
+                "frequencia": int(pinfo.get("frequencia") or 0),
+                "atraso": pinfo.get("atraso"),
+                "status": pinfo.get("status"),
+                "jogos_possiveis": int(op.get("jogos_possiveis") or pinfo.get("jogos_possiveis") or 0),
+                "para_apostar": int(op.get("para_apostar") or 0),
+                "ja_sairam_dentro": int(op.get("ja_sairam_dentro") or 0),
+                "dentro": int(op.get("dentro") or 0),
+                "proxima": int(op.get("proxima") or 0),
+                "fora": int(op.get("fora") or 0),
+                "soma_media": op.get("soma_media"),
+                "tol_proxima": (op.get("soma_faixa") or {}).get("tol_proxima"),
+                "fonte_media": op.get("fonte_media"),
+                "eh_padrao_ultimo_concurso": bool(pinfo.get("eh_padrao_ultimo_concurso")),
+            })
+
+        # Ordena: mais para apostar primeiro; empate por frequência
+        rows.sort(key=lambda r: (-int(r["para_apostar"]), -int(r["frequencia"]), r["padrao"]))
+
+        # --- Checagem de consistência / probabilidade ---
+        total_universo = combinacoes_n(dmax - dmin + 1, int(lim["tamanho_jogo"]))
+        total_jogos_soma = sum(int(r["jogos_possiveis"]) for r in rows)
+        total_freq = sum(int(r["frequencia"]) for r in rows)
+        total_concursos = int(cat.get("total_sorteios_analisados") or len(linhas) or 0)
+        total_dentro = sum(int(r["dentro"]) for r in rows)
+        total_proxima = sum(int(r["proxima"]) for r in rows)
+        total_fora = sum(int(r["fora"]) for r in rows)
+        total_para = sum(int(r["para_apostar"]) for r in rows)
+        total_ja = sum(int(r["ja_sairam_dentro"]) for r in rows)
+
+        inconsistencias_linha: List[str] = []
+        for r in rows:
+            jp = int(r["jogos_possiveis"])
+            dpf = int(r["dentro"]) + int(r["proxima"]) + int(r["fora"])
+            if jp != dpf:
+                inconsistencias_linha.append(
+                    f"{r['padrao']}: dentro+próx+fora={dpf} ≠ jogos={jp}"
+                )
+            if int(r["para_apostar"]) + int(r["ja_sairam_dentro"]) != int(r["dentro"]):
+                inconsistencias_linha.append(
+                    f"{r['padrao']}: apostar+já≠dentro"
+                )
+            # probabilidade teórica do padrão
+            r["prob_teorica_pct"] = round(100.0 * jp / max(1, total_universo), 4)
+            r["prob_empirica_pct"] = round(
+                100.0 * int(r["frequencia"]) / max(1, total_concursos), 4
+            )
+
+        checks = [
+            {
+                "id": "universo",
+                "label": f"Soma dos jogos dos padrões = C({dmax - dmin + 1},{lim['tamanho_jogo']})",
+                "esperado": total_universo,
+                "obtido": total_jogos_soma,
+                "ok": total_jogos_soma == total_universo,
+            },
+            {
+                "id": "concursos",
+                "label": "Soma das frequências = concursos apurados",
+                "esperado": total_concursos,
+                "obtido": total_freq,
+                "ok": total_freq == total_concursos,
+            },
+            {
+                "id": "particao_status",
+                "label": "Soma (dentro+próximas+fora) = total de jogos",
+                "esperado": total_jogos_soma,
+                "obtido": total_dentro + total_proxima + total_fora,
+                "ok": (total_dentro + total_proxima + total_fora) == total_jogos_soma,
+            },
+            {
+                "id": "apostar",
+                "label": "Soma (para apostar + já saíram) = soma (dentro)",
+                "esperado": total_dentro,
+                "obtido": total_para + total_ja,
+                "ok": (total_para + total_ja) == total_dentro,
+            },
+            {
+                "id": "padroes",
+                "label": "Qtd. padrões no resumo = catálogo",
+                "esperado": int(cat.get("total_padroes") or 0),
+                "obtido": len(rows),
+                "ok": len(rows) == int(cat.get("total_padroes") or 0),
+            },
+        ]
+        n_ok = sum(1 for c in checks if c["ok"])
+        checagem = {
+            "ok": n_ok == len(checks) and not inconsistencias_linha,
+            "checks": checks,
+            "inconsistencias_linha": inconsistencias_linha[:20],
+            "total_universo": total_universo,
+            "total_jogos_padroes": total_jogos_soma,
+            "total_concursos": total_concursos,
+            "total_frequencias": total_freq,
+            "total_dentro": total_dentro,
+            "total_proxima": total_proxima,
+            "total_fora": total_fora,
+            "total_para_apostar": total_para,
+            "total_ja_sairam_dentro": total_ja,
+            "pct_universo_coberto": round(100.0 * total_jogos_soma / max(1, total_universo), 4),
+            "min_dezena": dmin,
+            "max_dezena": dmax,
+            "tamanho_jogo": int(lim["tamanho_jogo"]),
+            "modality_key": cls.modality_key,
+        }
+
+        return {
+            "sucesso": True,
+            "base": base,
+            "total_padroes": len(rows),
+            "total_para_apostar": total_para,
+            "total_ja_sairam_dentro": total_ja,
+            "elapsed_ms": int((time.perf_counter() - t0) * 1000),
+            "padroes": rows,
+            "checagem": checagem,
+            "api": "/analise/api/inteligentes/resumo-operacional-padroes",
+        }
 
 
 def make_inteligentes_service(modality_key: str):

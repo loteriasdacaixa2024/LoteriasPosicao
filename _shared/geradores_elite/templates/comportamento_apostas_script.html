@@ -11,12 +11,6 @@
     const UNIVERSO_MAX = UI.universo || CFG.dezena_max || UI.total_dezenas || 60;
     const DEZENA_MIN = UI.dezena_min != null ? UI.dezena_min : (CFG.dezena_min != null ? CFG.dezena_min : 1);
     let janelaAtual = UI.janela_default ?? ((UI.janelas && UI.janelas.length) ? UI.janelas[0] : 10);
-    const ACERTOS_TIERS = UI.acertos_tiers || (() => {
-        const lo = UI.acertos_min_conferencia || 4;
-        const out = [];
-        for (let t = lo; t <= SORTEADAS; t++) out.push(t);
-        return out.length ? out : [4, 5, 6, 7];
-    })();
     const MESES_ABREV = {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
     const MESES_NOME_NUM = {
         1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',
@@ -524,117 +518,6 @@
         }
     }
 
-    function apostasPorBasePayload() {
-        return {
-            geral: apostasPorBase.geral,
-            vencedores: apostasPorBase.vencedores,
-            acumulados: apostasPorBase.acumulados,
-        };
-    }
-
-    function theadAcertosEstrategias() {
-        return ACERTOS_TIERS.map(t => `<th>${t} ac.</th>`).join('');
-    }
-
-    function tbodyAcertosEstrategias(d) {
-        return ACERTOS_TIERS.map(t => `<td>${d['dist_' + t] ?? 0}</td>`).join('');
-    }
-
-    function renderResultadoEstrategias(data) {
-        const el = document.getElementById('resultadoEstrategias');
-        if (!el || !data?.sucesso) {
-            if (el) el.innerHTML = `<span class="text-danger">${data?.erro || 'Erro'}</span>`;
-            return;
-        }
-        const por = data.por_base || {};
-        const rows = ['geral', 'vencedores', 'acumulados'].map(b => {
-            const d = por[b] || {};
-            const lbl = BASE_LABELS[b] || b;
-            return `<tr>
-                <td>${lbl}</td>
-                <td>${d.qtd_apostas || 0}</td>
-                <td><strong>${d.max_acertos ?? '—'}</strong></td>
-                <td>${d.media_acertos ?? '—'}</td>
-                ${tbodyAcertosEstrategias(d)}
-            </tr>`;
-        }).join('');
-        const lider = BASE_LABELS[data.lider] || data.lider || '—';
-        el.innerHTML = `<p class="mb-2">Concurso <strong>#${data.concurso}</strong> — líder: <strong>${lider}</strong></p>
-            <table class="table table-sm table-bordered mb-0">
-            <thead class="table-light"><tr>
-                <th>Estratégia</th><th>Apostas</th><th>Máx.</th><th>Média</th>
-                ${theadAcertosEstrategias()}
-            </tr></thead><tbody>${rows}</tbody></table>`;
-    }
-
-    async function conferirEstrategias() {
-        const sel = document.getElementById('selConcursoConf');
-        const concurso = sel ? parseInt(sel.value, 10) : 0;
-        if (!concurso) {
-            alert('Selecione um concurso para conferir.');
-            return;
-        }
-        const r = await fetch(apiPath('/conferir-estrategias'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ concurso, apostas_por_base: apostasPorBasePayload() }),
-        });
-        const data = await r.json();
-        renderResultadoEstrategias(data);
-    }
-
-    async function registrarConferenciaEstrategias() {
-        const sel = document.getElementById('selConcursoConf');
-        const concurso = sel ? parseInt(sel.value, 10) : 0;
-        if (!concurso) {
-            alert('Selecione um concurso.');
-            return;
-        }
-        const temAlguma = ['geral', 'vencedores', 'acumulados'].some(b => apostasPorBase[b]?.length);
-        if (!temAlguma) {
-            alert('Gere apostas em pelo menos uma aba antes de registrar.');
-            return;
-        }
-        const r = await fetch(apiPath('/registrar-conferencia-estrategias'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ concurso, apostas_por_base: apostasPorBasePayload() }),
-        });
-        const data = await r.json();
-        if (!data.sucesso) {
-            alert(data.erro || 'Erro ao registrar');
-            return;
-        }
-        renderResultadoEstrategias(data.pontual || data);
-        carregarPanorama();
-        alert(`Conferência registrada (#${data.registro_id}). Líder: ${data.lider_label || data.lider}`);
-    }
-
-    async function carregarPanorama() {
-        try {
-            const r = await fetch(apiPath('/panorama-estrategias'));
-            const data = await r.json();
-            if (!data.sucesso) return;
-            const tb = document.getElementById('tbodyPanoramaEstrategias');
-            const ins = document.getElementById('insightsEstrategias');
-            if (tb) {
-                const linhas = data.soma_por_estrategia || [];
-                tb.innerHTML = linhas.length ? linhas.map(l => `<tr>
-                    <td>${l.base_label}</td>
-                    <td>${l.conferencias}</td>
-                    <td><strong>${l.media_acertos}</strong></td>
-                    <td>${l.media_max_acertos}</td>
-                    ${ACERTOS_TIERS.map(t => `<td>${l['dist_' + t] ?? 0}</td>`).join('')}
-                </tr>`).join('') : `<tr><td colspan="${8 + ACERTOS_TIERS.length - 4}" class="text-muted">Nenhum registro ainda.</td></tr>`;
-            }
-            if (ins && data.insights?.conclusoes) {
-                ins.innerHTML = data.insights.conclusoes.map(c =>
-                    `<div class="estrategia-insight">${c.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>`
-                ).join('');
-            }
-        } catch (e) { /* ignore */ }
-    }
-
     function aplicarVisibilidadeModo() {
         const painelBase = document.getElementById('painelModoBase');
         const painelPan = document.getElementById('painelModoPanorama');
@@ -692,6 +575,7 @@
         modoGeracao = m;
         document.body.classList.toggle('sniper-modo-auto', m === 'automatico');
         document.body.classList.toggle('sniper-modo-manual', m === 'manual');
+        document.body.classList.toggle('sniper-modo-resumo', m === 'resumo_geral');
         document.querySelectorAll('.sniper-modo-btn').forEach(b => {
             b.classList.toggle('active', b.dataset.modo === m);
         });
@@ -936,6 +820,9 @@
         } else if (a.modo_motor_aposta === 'linhas_ranking') {
             const linhas = (a.linhas_origem || []).join(', ') || '—';
             html += `<div class="mb-1"><span class="badge bg-warning text-dark">Linhas ${linhas}</span></div>`;
+        } else if (a.modo_motor_aposta === 'resumo_geral') {
+            html += `<div class="mb-1"><strong>Resumo Geral</strong> — score ${a.score_dna != null ? a.score_dna : '—'}</div>`;
+            return html;
         } else if (a.modo_motor_aposta === 'moda') {
             html += `<div class="mb-1"><strong>Moda</strong> — resumo da janela</div>`;
         }
@@ -965,6 +852,7 @@
             el.innerHTML = aviso
                 ? `<div class="alert alert-warning py-2 small mb-0">${aviso}</div>`
                 : '<p class="text-muted small mb-0">Nenhuma aposta gerada.</p>';
+            renderPanoramaConjunto([]);
             return;
         }
         const avisoHtml = aviso ? `<div class="alert alert-warning py-2 small mb-2">${aviso}</div>` : '';
@@ -1001,6 +889,116 @@
             }
             if (panoramaDataGer?.sucesso) renderPanoramaGerador(panoramaDataGer);
         }
+        renderPanoramaConjunto(ultimasApostas);
+    }
+
+    function _pcPad(n) {
+        return String(n).padStart(2, '0');
+    }
+
+    function _pcSequencias(nums) {
+        const o = [...nums].map(Number).sort((a, b) => a - b);
+        const seqs = [];
+        let i = 0;
+        while (i < o.length) {
+            let j = i;
+            while (j + 1 < o.length && o[j + 1] - o[j] === 1) j += 1;
+            if (j > i) seqs.push(o.slice(i, j + 1));
+            i = j + 1;
+        }
+        return seqs;
+    }
+
+    function _pcBma(nums) {
+        let b = 0, m = 0, a = 0;
+        nums.forEach(n => {
+            const d = Number(n);
+            if (d >= 1 && d <= 10) b += 1;
+            else if (d >= 11 && d <= 20) m += 1;
+            else a += 1;
+        });
+        return { b, m, a, txt: `${b}B + ${m}M + ${a}A` };
+    }
+
+    function renderPanoramaConjunto(apostas) {
+        const box = document.getElementById('painelPanoramaConjunto');
+        if (!box) return;
+        const lista = apostas || [];
+        if (!lista.length) {
+            box.classList.add('d-none');
+            return;
+        }
+        const pad = _pcPad;
+        const ultimo = concursosLista && concursosLista[0];
+        const ultDez = new Set((ultimo?.dezenas || []).map(Number));
+        const nUlt = ultimo?.concurso || '—';
+        const ehDs = (CFG.key === 'diadesorte' || UNIVERSO_MAX === 31);
+        const thead = document.getElementById('theadPanoramaConjunto');
+        const tbody = document.getElementById('tbodyPanoramaConjunto');
+        const leg = document.getElementById('panoramaConjuntoLegenda');
+        const rodape = document.getElementById('panoramaConjuntoRodape');
+        if (thead) {
+            thead.innerHTML = `<tr>
+                <th>#</th><th>Aposta</th><th>Soma</th><th>P/I</th><th>Seq</th>
+                <th>Rep. ${nUlt}</th><th>Finais</th>${ehDs ? '<th>B/M/A</th>' : ''}
+            </tr>`;
+        }
+        const freq = {};
+        const rows = lista.map((a, i) => {
+            const dz = (a.dezenas || []).map(Number).sort((x, y) => x - y);
+            dz.forEach(d => { freq[d] = (freq[d] || 0) + 1; });
+            const soma = dz.reduce((s, n) => s + n, 0);
+            const pares = dz.filter(n => n % 2 === 0).length;
+            const seqs = _pcSequencias(dz);
+            const seqTxt = seqs.length
+                ? seqs.map(g => g.map(pad).join('–')).join(', ')
+                : 'nenhuma';
+            const reps = dz.filter(n => ultDez.has(n));
+            const fins = {};
+            dz.forEach(n => { const f = n % 10; fins[f] = (fins[f] || 0) + 1; });
+            const finGrupos = Object.keys(fins).filter(f => fins[f] >= 2).sort();
+            const finTxt = finGrupos.length
+                ? finGrupos.map(f => {
+                    const nums = dz.filter(n => n % 10 === Number(f)).map(pad).join(', ');
+                    return `${f}: ${nums}`;
+                }).join('; ')
+                : 'distintos';
+            const bma = ehDs ? _pcBma(dz) : null;
+            const somaOk = soma >= 93 && soma <= 130;
+            const seqOk = seqs.length >= 1 && seqs.length <= 2;
+            const seqAt = seqs.length === 0 || seqs.length >= 3;
+            const repOk = reps.length === 1 || reps.length === 2;
+            const finOk = finGrupos.length >= 1;
+            const bmaOk = bma && bma.b >= 2 && bma.b <= 3 && bma.m >= 2 && bma.m <= 3 && bma.a >= 2 && bma.a <= 3;
+            return `<tr>
+                <td>${a.numero || (i + 1)}</td>
+                <td class="fw-bold">${dz.map(pad).join(' ')}</td>
+                <td class="${ehDs ? (somaOk ? 'pan-conj-ok' : 'pan-conj-at') : ''}">${soma}</td>
+                <td>${pares}P / ${dz.length - pares}I</td>
+                <td class="${seqAt ? 'pan-conj-at' : (seqOk ? 'pan-conj-ok' : '')}">${seqTxt}</td>
+                <td class="${repOk ? 'pan-conj-ok' : 'pan-conj-at'}">${reps.length}${reps.length ? ' · ' + reps.map(pad).join(', ') : ''}</td>
+                <td class="${finOk ? 'pan-conj-ok' : 'pan-conj-at'}">${finTxt}</td>
+                ${ehDs ? `<td class="${bmaOk ? 'pan-conj-ok' : 'pan-conj-at'}">${bma.txt}</td>` : ''}
+            </tr>`;
+        }).join('');
+        if (tbody) tbody.innerHTML = rows;
+        if (leg) {
+            leg.textContent = ultimo
+                ? `Conjunto de ${lista.length} apostas · repetidas em relação ao concurso #${ultimo.concurso} (${(ultimo.dezenas || []).map(pad).join(' ')}). Verde = alinhado ao DNA usual; âmbar = atenção.`
+                : `Conjunto de ${lista.length} apostas.`;
+        }
+        const conc = Object.entries(freq)
+            .sort((a, b) => b[1] - a[1] || a[0] - b[0])
+            .filter(([, q]) => q >= 3)
+            .slice(0, 8)
+            .map(([d, q]) => `${pad(d)} em ${q}/${lista.length}`)
+            .join(' · ');
+        if (rodape) {
+            rodape.innerHTML = conc
+                ? `<strong>Concentração:</strong> ${conc}`
+                : 'Nenhuma dezena se repetiu em 3 ou mais apostas.';
+        }
+        box.classList.remove('d-none');
     }
 
     async function carregarConcursos() {
@@ -1112,9 +1110,9 @@
             quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
             dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || DEZ_DEFAULT,
             perfil: document.getElementById('inpPerfil').value,
-            janela: janelaAtual,
+            janela: modoGeracao === 'resumo_geral' ? 0 : janelaAtual,
             modo_geracao: modoGeracao,
-            modo_motor: modoMotor,
+            modo_motor: modoGeracao === 'resumo_geral' ? 'moda' : modoMotor,
             filtros: filtrosAtivos,
             base: baseAtual,
             base_estatistica: baseAtual,
@@ -1182,6 +1180,38 @@
         });
     }
 
+    function carregarCicloDna() {
+        const el = document.getElementById('ciclo-dna-box');
+        if (!el) return;
+        fetch('/geradores-elite/api/ciclo-apostas/estrategia/contexto')
+            .then((r) => r.ok ? r.json() : null)
+            .then((c) => {
+                if (!c || !(c.ok || c.sucesso)) return;
+                const p = c.estrategia_ciclo || {};
+                if (!p.leitura_curta) return;
+                const pad = (n) => String(n).padStart(2, '0');
+                const dez = (xs) => (xs || []).slice(0, 6).map(pad).join(' · ') || '—';
+                el.hidden = false;
+                el.innerHTML = `
+                    <div class="card border-0 shadow-sm" style="border-left:4px solid var(--primary)!important;">
+                      <div class="card-body py-3">
+                        <div class="d-flex flex-wrap justify-content-between gap-2">
+                          <div class="small text-uppercase text-muted fw-bold">DNA do ciclo (estratégia)</div>
+                          <a class="small" href="/geradores-elite/ciclo-apostas/?modo=estrategia">↗ Ver no Gerador</a>
+                        </div>
+                        <p class="mb-2 small mt-1" style="line-height:1.45">${p.leitura_curta}</p>
+                        <div class="small text-muted">
+                          Pendentes: <strong>${dez(p.pendentes)}</strong>
+                          · Núcleo: <strong>${dez(p.nucleo_ancoras)}</strong>
+                          · Alívio (excesso/quebra): <strong>${dez(p.repetidas_aliviar)}</strong>
+                        </div>
+                        <p class="mb-0 mt-2 small text-muted">${p.aviso_nao_previsao || 'Não é previsão do próximo sorteio.'}</p>
+                      </div>
+                    </div>`;
+            })
+            .catch(() => {});
+    }
+
     function initPage() {
         window.__panBasePanorama = () => basePanorama;
         window.__panRankPanorama = () => rankPanorama;
@@ -1204,6 +1234,7 @@
         carregarColecaoStorage();
         atualizarLblBase();
         initToggleEvidencias();
+        carregarCicloDna();
         document.querySelectorAll('#tabsBaseGerador .base-tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const b = btn.dataset.base;
@@ -1277,9 +1308,6 @@
             renderColecao();
         });
         document.getElementById('btnExportComposto')?.addEventListener('click', exportarComposto);
-        document.getElementById('btnConferirEstrategias')?.addEventListener('click', conferirEstrategias);
-        document.getElementById('btnRegistrarEstrategias')?.addEventListener('click', registrarConferenciaEstrategias);
-        document.getElementById('btnAtualizarPanorama')?.addEventListener('click', carregarPanorama);
         document.getElementById('grpModoGeracao')?.addEventListener('click', (e) => {
             const btn = e.target.closest('.sniper-modo-btn');
             if (!btn?.dataset.modo) return;
@@ -1331,7 +1359,6 @@
         atualizarExplicacaoMotor();
         carregarConcursos();
         carregarAnalise();
-        if (document.getElementById('tbodyPanoramaEstrategias')) carregarPanorama();
         initTooltipsInd();
         if (window.__bindConferirTxtHistorico) window.__bindConferirTxtHistorico();
 

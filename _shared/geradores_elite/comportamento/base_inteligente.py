@@ -147,9 +147,12 @@ class ComportamentoBaseInteligente:
                 "texto": f"Panorama — {base_lbl}" + (f" · {rank_lbl}" if rank_lbl else ""),
             })
         elif motor == "moda":
+            origem_dna = regras.get("_origem") == "resumo_geral"
             criterios.append({
                 "codigo": "moda",
-                "texto": "Perfil sintético: moda da janela selecionada",
+                "texto": "Resumo geral da modalidade"
+                if origem_dna else
+                "Perfil sintético: moda da janela selecionada",
             })
 
         ativos = list(sp.indicadores) if motor == "perfil_sorteio" else [
@@ -189,6 +192,31 @@ class ComportamentoBaseInteligente:
                 "codigo": "trevos",
                 "texto": f"Trevos: {aposta.get('trevos')}",
             })
+        extras = regras.get("_dna_extras") or {}
+        if extras:
+            dz = aposta.get("dezenas") or []
+            sm = sum(int(x) for x in dz)
+            lo, hi = extras.get("soma_min"), extras.get("soma_max")
+            if lo or hi:
+                criterios.append({
+                    "codigo": "dna_soma",
+                    "texto": f"Soma {sm} (faixa {lo}–{hi})",
+                })
+            if extras.get("exige_sequencia"):
+                criterios.append({
+                    "codigo": "dna_seq",
+                    "texto": "≥1 sequência consecutiva",
+                })
+            if extras.get("exige_final_repetido"):
+                criterios.append({
+                    "codigo": "dna_fin",
+                    "texto": "≥1 final repetido",
+                })
+            if extras.get("bma_2a3"):
+                criterios.append({
+                    "codigo": "dna_bma",
+                    "texto": "2–3 dezenas em cada faixa B / M / A",
+                })
         return criterios, {"comportamento": comp}
 
     @classmethod
@@ -205,6 +233,52 @@ class ComportamentoBaseInteligente:
         base_estatistica: str = "geral",
     ) -> Dict[str, Any]:
         sp = cls._spec()
+        if modo_geracao == "resumo_geral":
+            from resumo_modalidade.gerador import gerar_apostas_dna
+            raw = gerar_apostas_dna(
+                cls.modality_key,
+                quantidade=quantidade,
+                dezenas_por_jogo=dezenas_por_jogo or sp.dezenas_default,
+            )
+            if not raw.get("sucesso"):
+                return raw
+            apostas_out = list(raw.get("apostas") or [])
+            svc = cls._svc()
+            if svc._usa_meses_indicados():
+                ms = svc._meses_indicados_analise()
+                for i, a in enumerate(apostas_out):
+                    svc._aplicar_mes_indicado_aposta(a, i, ms)
+            out = {
+                "sucesso": True,
+                "apostas": apostas_out,
+                "total_geradas": len(apostas_out),
+                "solicitados": quantidade,
+                "aviso": raw.get("aviso"),
+                "modo_geracao": "resumo_geral",
+                "modo_motor": "resumo_geral",
+                "modo_motor_label": raw.get("modo_motor_label") or "Resumo Geral da Modalidade",
+                "evidencias": {},
+                "regras_aplicadas": raw.get("regras_aplicadas") or {},
+                "criterios_modo_auto": raw.get("criterios_modo_auto") or raw.get("criterios_dna") or [],
+                "alvos": {},
+                "descartadas_historico": raw.get("descartadas_historico", 0),
+                "validacao_ineditas": True,
+                "base_estatistica": base_estatistica,
+                "motor": cls.motor,
+                "modality": cls.modality_key,
+                "criterios_dna": raw.get("criterios_dna") or [],
+                "nota": raw.get("nota"),
+                "nucleo_txt": raw.get("nucleo_txt"),
+            }
+            try:
+                from geradores_elite.validacao.validador_global import ValidadorGeradoresElite
+                out = ValidadorGeradoresElite.aplicar(
+                    out, origem="comportamento_apostas", modality_key=cls.modality_key, campo="apostas",
+                )
+            except Exception:
+                pass
+            return out
+
         ctx = cls.montar_contexto(
             janela=janela, filtros=filtros, base_estatistica=base_estatistica,
         )

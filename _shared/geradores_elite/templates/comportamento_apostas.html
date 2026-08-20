@@ -13,7 +13,16 @@
     .manual-panel { display: none; }
     body.sniper-modo-manual .manual-panel { display: block; }
     .auto-preview { display: none; }
-    body.sniper-modo-auto .auto-preview { display: block; }
+    body.sniper-modo-auto .auto-preview,
+    body.sniper-modo-resumo .auto-preview { display: block; }
+    body.sniper-modo-resumo .comp-janela-toolbar,
+    body.sniper-modo-resumo #painelEvidencias,
+    body.sniper-modo-resumo #painelMotorGeracao,
+    body.sniper-modo-resumo #painelHistoricoComp { display: none; }
+    .pan-conj-table { font-size: .8rem; }
+    .pan-conj-table th { white-space: nowrap; }
+    .pan-conj-ok { color: #198754; font-weight: 700; }
+    .pan-conj-at { color: #b8860b; font-weight: 700; }
     .aposta-criterios { text-align: left; background: var(--accent-light); border-radius: 8px; padding: .5rem .65rem; color: var(--primary-dark); }
     .aposta-criterios .crit-line::before { content: '✓ '; color: var(--primary); font-weight: 800; }
     .janela-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
@@ -50,7 +59,6 @@
     .tm-cell-tip { cursor: help; text-decoration: underline dotted rgba(0,0,0,0.35); }
     .base-tab-btn.active { background: var(--accent); color: #1a2600; border-color: var(--accent); font-weight: 800; }
     .colecao-item { font-size: .82rem; border-left: 3px solid var(--accent); padding: .25rem .5rem; margin-bottom: .25rem; background: var(--accent-light); }
-    .estrategia-insight { border-left: 3px solid var(--primary); padding: .35rem .65rem; margin-bottom: .35rem; background: #fff8e1; font-size: .88rem; }
     .evid-toggle-btn { font-size: .78rem; font-weight: 800; color: var(--primary-xdark); border-color: rgba(192,139,0,.35); }
     .evid-toggle-btn:hover { background: var(--accent-light); color: var(--primary-xdark); border-color: var(--accent); }
     .evid-toggle-btn i { transition: transform .15s ease; }
@@ -238,9 +246,19 @@
         <a href="/analise/linhas-dd-du/" class="text-decoration-none">
             <i class="fas fa-th me-1"></i>Linhas &amp; DD × DU
         </a>
+        {% if modality_key == 'diadesorte' %}
+        <span class="text-muted mx-1">·</span>
+        <a href="/analise/resumo-geral/" class="text-decoration-none">← Voltar para Análise</a>
+        <span class="text-muted mx-1">·</span>
+        <a href="/geradores-elite/ciclo-apostas/?modo=estrategia" class="text-decoration-none">↗ Ciclo — Estratégias</a>
+        {% endif %}
         <span class="text-muted"> — estatísticas calculadas antes da geração</span>
     </p>
 </div>
+
+{% if modality_key == 'diadesorte' %}
+<div id="ciclo-dna-box" class="mb-3" hidden></div>
+{% endif %}
 
 {% include 'comportamento_bases_resumo.html' %}
 
@@ -461,6 +479,11 @@
     <button type="button" class="btn btn-outline-secondary sniper-modo-btn" data-modo="manual">
         <i class="fas fa-hand-pointer me-1"></i>Manual
     </button>
+    {% if tem_resumo_geral %}
+    <button type="button" class="btn btn-outline-secondary sniper-modo-btn" data-modo="resumo_geral">
+        <i class="fas fa-dna me-1"></i>Resumo Geral da Modalidade
+    </button>
+    {% endif %}
 </div>
 </div>
 
@@ -495,7 +518,7 @@
     </div>
 </div>
 
-<div class="card shadow-sm mb-3 border-0">
+<div class="card shadow-sm mb-3 border-0" id="painelHistoricoComp">
     <div class="card-header fw-bold py-2 d-flex flex-wrap align-items-center gap-2"
         style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
         <span><i class="fas fa-table me-1"></i>Histórico comportamental</span>
@@ -522,7 +545,7 @@
     </div>
 </div>
 
-<div class="card shadow-sm mb-3 border-0" style="border-top:3px solid var(--accent)!important;">
+<div class="card shadow-sm mb-3 border-0" id="painelMotorGeracao" style="border-top:3px solid var(--accent)!important;">
     <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
         <i class="fas fa-cogs me-1"></i>Como as apostas são geradas
     </div>
@@ -554,6 +577,22 @@
 
 {% include 'repeticao_gerador_card.html' %}
 
+<div class="card shadow-sm mb-3 border-0 d-none" id="painelPanoramaConjunto" style="border-top:4px solid var(--accent)!important;">
+    <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
+        <i class="fas fa-table me-1"></i>Panorama do conjunto gerado
+    </div>
+    <div class="card-body py-3">
+        <p class="small text-muted mb-2" id="panoramaConjuntoLegenda">—</p>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-2 pan-conj-table" id="tblPanoramaConjunto">
+                <thead class="table-light" id="theadPanoramaConjunto"></thead>
+                <tbody id="tbodyPanoramaConjunto"></tbody>
+            </table>
+        </div>
+        <p class="small mb-0" id="panoramaConjuntoRodape"></p>
+    </div>
+</div>
+
 <div class="card shadow-sm mb-3 border-0 comp-section-centered">
     <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
         <i class="fas fa-layer-group me-1"></i>Exportação composta
@@ -576,51 +615,6 @@
         <div id="colecaoCorpo" class="small text-muted comp-text-centered">Coleção vazia.</div>
     </div>
 </div>
-
-{% if modality_key == 'diadesorte' %}
-<div class="card shadow-sm mb-3 border-0">
-    <div class="card-header fw-bold py-2 small d-flex flex-wrap align-items-center gap-2"
-        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
-        <span><i class="fas fa-trophy me-1"></i>Comparar desempenho das 3 estratégias</span>
-        <button type="button" class="btn btn-sm btn-light ms-auto" id="btnAtualizarPanorama">
-            <i class="fas fa-sync-alt"></i>
-        </button>
-    </div>
-    <div class="card-body py-3">
-        <p class="small text-muted mb-2 comp-text-centered mx-auto" style="max-width:34rem;">
-            Use o concurso selecionado acima. Registre conferências para acumular panorama histórico.
-        </p>
-        <div class="d-flex flex-wrap gap-2 mb-3 justify-content-center">
-            <button type="button" class="btn btn-sm btn-outline-light border" id="btnConferirEstrategias"
-                style="color:var(--primary-xdark);border-color:var(--primary)!important;">
-                <i class="fas fa-search me-1"></i>Conferir 3 estratégias
-            </button>
-            <button type="button" class="btn btn-sm btn-primary" id="btnRegistrarEstrategias">
-                <i class="fas fa-save me-1"></i>Registrar no panorama
-            </button>
-        </div>
-        <div id="resultadoEstrategias" class="small mb-3"></div>
-        <div id="insightsEstrategias"></div>
-        <div class="table-responsive">
-            <table class="table table-sm table-bordered mb-0" id="tblPanoramaEstrategias">
-                <thead class="table-light">
-                    <tr>
-                        <th>Estratégia</th>
-                        <th>Conferências</th>
-                        <th>Média ac.</th>
-                        <th>Média máx.</th>
-                        <th>4 ac.</th>
-                        <th>5 ac.</th>
-                        <th>6 ac.</th>
-                        <th>7 ac.</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodyPanoramaEstrategias"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-{% endif %}
 
 <script>window.__REP_API_BASE__ = '{{ api_base }}';</script>
 <script>window.__REP_COMPORTAMENTO__ = true;</script>

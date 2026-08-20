@@ -57,6 +57,64 @@ def _repetidas_posicional(ordered_a: List[int], ordered_b: List[int]) -> List[Di
     return out
 
 
+def _fmt_data(row: Any) -> str:
+    data = getattr(row, "data", None)
+    if data is None:
+        return ""
+    if hasattr(data, "strftime"):
+        return data.strftime("%d/%m/%Y")
+    return str(data)
+
+
+def _parse_concursos(raw: Optional[str]) -> List[int]:
+    if not raw:
+        return []
+    out: List[int] = []
+    for part in str(raw).replace(";", ",").replace(" ", ",").split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            n = int(part)
+        except (TypeError, ValueError):
+            continue
+        if n > 0 and n not in out:
+            out.append(n)
+    return out
+
+
+def _pack_visual(row: Any, cfg: dict) -> Dict[str, Any]:
+    """Payload da aba Comparação visual: ordem de sorteio + extras."""
+    payload: Dict[str, Any] = {
+        "concurso": row.concurso,
+        "data": _fmt_data(row),
+    }
+    if cfg.get("layout") == "colunas":
+        cols = _dezenas_ordered(row, cfg)
+        payload["colunas"] = cols
+        payload["dezenas"] = list(cols)
+        payload["dezenas_exibicao"] = list(cols)
+    elif cfg.get("dual_sorteio"):
+        s1 = _dezenas_ordered(row, cfg, 1)
+        s2 = _dezenas_ordered(row, cfg, 2)
+        payload["sorteio1"] = s1
+        payload["sorteio2"] = s2
+        payload["dezenas"] = sorted(set(s1) | set(s2))
+        payload["dezenas_exibicao"] = list(s1)
+    else:
+        payload["dezenas"] = sorted(_dezenas_set(row, cfg))
+        payload["dezenas_exibicao"] = _dezenas_ordered(row, cfg)
+    if cfg.get("extra_trevos"):
+        payload["trevos"] = sorted(getattr(row, cfg["trevo_list_method"])())
+    if cfg.get("extra_time"):
+        payload["time_num"] = getattr(row, "time_num", None)
+        payload["time_nome"] = getattr(row, "time_nome", None) or ""
+    if cfg.get("extra_mes"):
+        payload["mes_num"] = getattr(row, cfg.get("mes_field", "mes_num"), None)
+        payload["mes_nome"] = getattr(row, cfg.get("mes_label_field", "mes_nome"), None) or ""
+    return payload
+
+
 def _pack_concurso(row: Any, cfg: dict, sorteio: int = 1) -> Dict[str, Any]:
     payload: Dict[str, Any] = {
         "concurso": row.concurso,
@@ -341,6 +399,46 @@ class CompararConcursosService:
             "limit": len(concursos),
             "tem_mais": off + len(concursos) < total,
             "concursos": concursos,
+        }
+
+    def historico_visual(
+        self,
+        limit: int = 10,
+        antes_de: Optional[int] = None,
+        concursos: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Janela de concursos para a aba Comparação visual (mais recente primeiro)."""
+        cfg = self.cfg
+        q = db.session.query(self.Model).order_by(desc(self.Model.concurso))
+        total = q.count()
+        ultimo_row = q.first()
+
+        nums = _parse_concursos(concursos)
+        if nums:
+            rows = (
+                db.session.query(self.Model)
+                .filter(self.Model.concurso.in_(nums))
+                .order_by(desc(self.Model.concurso))
+                .all()
+            )
+        else:
+            q2 = q
+            if antes_de is not None:
+                q2 = q2.filter(self.Model.concurso < int(antes_de))
+            pedido = int(limit if limit is not None else 10)
+            if pedido <= 0:
+                rows = q2.limit(8000).all()
+            else:
+                rows = q2.limit(max(1, min(pedido, 8000))).all()
+
+        return {
+            "sucesso": True,
+            "total": total,
+            "ultimo": _pack_visual(ultimo_row, cfg) if ultimo_row else None,
+            "concursos": [_pack_visual(s, cfg) for s in rows],
+            "pick_min": int(cfg.get("pick_min") or 0),
+            "pick_max": int(cfg.get("pick_max") or 0),
+            "sorteadas": int(cfg.get("sorteadas") or 0),
         }
 
     def _freq_dezenas(self) -> List[Dict[str, Any]]:

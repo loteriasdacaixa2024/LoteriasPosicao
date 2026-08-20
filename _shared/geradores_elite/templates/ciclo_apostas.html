@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Ciclo → Apostas — {{ modality_nome }}{% endblock %}
+{% block title %}Ciclo — Apostas — {{ modality_nome }}{% endblock %}
 {% block content %}
 <style>
   {% if meses_cores %}
@@ -32,6 +32,7 @@
   .cc-aposta.ritmo{--cc-accent:#fd7e14}
   .cc-aposta.operacional{--cc-accent:#6f42c1}
   .cc-aposta.fechamento{--cc-accent:#198754}
+  .cc-aposta.estrategia{--cc-accent:#0f172a}
   .cc-aposta.ja-hist{--cc-accent:#dc3545;background:#fff8f8}
   .cc-aposta.ja-hist:hover{background:#fff1f1}
 
@@ -129,6 +130,16 @@
   .cc-bt-pill{display:inline-flex;flex-direction:column;align-items:center;min-width:3rem;padding:.25rem .55rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:.72rem;margin:2px}
   .cc-bt-pill strong{font-size:.95rem;font-variant-numeric:tabular-nums}
 
+  .cc-ball.rec-mf{background:#dc3545;color:#fff}
+  .cc-ball.rec-f{background:#fd7e14;color:#fff}
+  .cc-ball.rec-2{background:#0d6efd;color:#fff}
+  .cc-ball.rec-1{background:#e2e8f0;color:#0f172a}
+  .cc-ball.rec-0{background:#fff;color:#64748b;box-shadow:0 0 0 1px #cbd5e1}
+  .rec-n-btn.active{background:#0f172a;border-color:#0f172a;color:#fff}
+  .rec-linha-cnc{font-variant-numeric:tabular-nums;min-width:3.2rem;font-weight:700;color:#334155}
+  .rec-bloco{border:1px solid #e5e7eb;border-radius:10px;padding:.75rem .9rem;background:#fff;height:100%}
+  .rec-bloco h3{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin:0 0 .45rem;color:#64748b}
+
   @media (max-width:576px){
     .cc-list{border-radius:8px}
     .cc-aposta{padding:.45rem .65rem .4rem .55rem}
@@ -147,27 +158,39 @@
   <div class="page-hdr mb-3" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;border-radius:12px;padding:1.25rem 1.5rem;">
     <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start">
       <div>
-        <h1 class="h4 mb-1"><i class="fas fa-dice me-2"></i>Ciclo → Apostas</h1>
+        <h1 class="h4 mb-1"><i class="fas fa-dice me-2"></i>Ciclo — Apostas</h1>
         <p class="mb-0 small opacity-90">{{ modality_nome }} · {{ pick_min }}–{{ pick_max }} dezenas · histórico + back test · TXT</p>
+        <div id="cc-ciclo-banner" class="mt-2 small opacity-95">Carregando ciclo…</div>
       </div>
-      <a class="btn btn-sm fw-bold" style="background:var(--accent);color:#1a0a00;border:none;" href="/analise/ciclo-cobertura/">
-        <i class="fas fa-chart-bar me-1"></i>Ver análise
-      </a>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-sm btn-outline-light" href="/analise/resumo-geral/">
+          ← Voltar para Análise
+        </a>
+        <a class="btn btn-sm fw-bold" style="background:var(--accent);color:#1a0a00;border:none;" href="/analise/ciclo-cobertura/">
+          <i class="fas fa-chart-bar me-1"></i>Análise do ciclo
+        </a>
+      </div>
     </div>
   </div>
 
   <ul class="nav nav-tabs mb-3 flex-wrap" role="tablist">
     <li class="nav-item" role="presentation">
-      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-21" type="button" role="tab">Ciclo → Apostas</button>
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-21" type="button" role="tab">Ciclo — Apostas</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ritmo" type="button" role="tab">Ciclo → Ritmo de Evolução</button>
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ritmo" type="button" role="tab">Ciclo — Ritmo de Evolução</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-operacional" type="button" role="tab">Ciclo → Modo Operacional</button>
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-operacional" type="button" role="tab">Ciclo — Modo Operacional</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fechamento" type="button" role="tab">Ciclo → Fechamento</button>
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fechamento" type="button" role="tab">Ciclo — Fechamento</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-btn-estrategia" data-bs-toggle="tab" data-bs-target="#tab-estrategia" type="button" role="tab">Ciclo — Estratégias</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-btn-recorrencia" data-bs-toggle="tab" data-bs-target="#tab-recorrencia" type="button" role="tab">Ciclo — Recorrência</button>
     </li>
   </ul>
 
@@ -435,6 +458,144 @@
       <div id="cf-bt" class="mb-3"></div>
       <div id="cf-out"></div>
     </div>
+
+    <!-- ABA 5 — Ciclo — Estratégias -->
+    <div class="tab-pane fade" id="tab-estrategia" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:#0f172a!important;">
+        <summary class="card-header fw-bold py-2" style="background:#0f172a;color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Observa <strong>novas + evolução + repetidas + progresso</strong> e transforma isso em plano:
+          núcleo compartilhado, k conforme o estágio (não só mistura 1–6) e distribuição das repetidas.
+          As 10 apostas são variações controladas — não previsão do próximo sorteio.
+        </div>
+      </details>
+      <div id="ce-estrategia-card" class="mb-3"></div>
+      <div id="ce-ctx" class="mb-3"><div class="alert alert-light border small">Carregando estratégia…</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:#0f172a!important;">
+        <div class="card-header fw-bold" style="background:#0f172a;color:#fff;">
+          <i class="fas fa-chess-knight me-2"></i>Gerar · Ciclo — Estratégias
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="ce-qtd" class="form-control form-control-sm" value="10" min="1" max="80">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}–{{ pick_max }})</label>
+              <select id="ce-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Desdobramento</label>
+              <select id="ce-desdob" class="form-select form-select-sm">
+                <option value="auto" selected>Auto (Evolução 1–6)</option>
+                <option value="1">1 faltante</option>
+                <option value="2">2 faltantes</option>
+                <option value="3">3 faltantes</option>
+                <option value="4">4 faltantes</option>
+                <option value="5">5 faltantes</option>
+                <option value="6">6 faltantes</option>
+                <option value="7" disabled>7 (bloqueado)</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Repetição alvo</label>
+              <select id="ce-krep" class="form-select form-select-sm">
+                <option value="">Auto (histórico)</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="3">3</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Ordenação</label>
+              <select id="ce-orden" class="form-select form-select-sm">
+                <option value="score" selected>Score</option>
+                <option value="soma">Soma</option>
+                <option value="atraso">Atraso (faltantes)</option>
+                <option value="frequencia">Frequência</option>
+                <option value="aleatorio">Aleatório</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Mês da Sorte</label>
+              <select id="ce-mes" class="form-select form-select-sm cc-mes-sorte">
+                <option value="">Carregando…</option>
+              </select>
+            </div>
+            <div class="col-12 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="ce-usar-evo" checked>
+                <label class="form-check-label small" for="ce-usar-evo" title="Usa Qtd. Evolução da tabela Evolução do Ciclo por Concurso">Seguir Evolução do Ciclo</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="ce-bloquear-exato" checked>
+                <label class="form-check-label small" for="ce-bloquear-exato">Bloquear combinação exata já sorteada</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="ce-filtro-estrut" checked>
+                <label class="form-check-label small" for="ce-filtro-estrut">Filtrar estrutura saturada</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="ce-descartar-hist" checked>
+                <label class="form-check-label small" for="ce-descartar-hist">Descartar já sorteadas (pós)</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="ce-btn-gerar" style="background:#0f172a;border-color:#0f172a;color:#fff;"><i class="fas fa-chess-knight"></i> Gerar Estratégia</button>
+            <button type="button" class="btn btn-outline-secondary" id="ce-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="ce-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="ce-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">F</span> Faltantes (novas do ciclo)</span>
+            <span><span class="cc-ball saida" style="width:18px;height:18px;font-size:.55rem">A</span> Já saídas mais atrasadas</span>
+          </div>
+        </div>
+      </div>
+      <div id="ce-relatorio" class="mb-3"></div>
+      <div id="ce-hist-alert"></div>
+      <div id="ce-bt" class="mb-3"></div>
+      <div id="ce-out"></div>
+    </div>
+
+    <!-- ABA 6 — Ciclo — Recorrência (só análise; sem gerar apostas) -->
+    <div class="tab-pane fade" id="tab-recorrencia" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:#334155!important;">
+        <summary class="card-header fw-bold py-2" style="background:#334155;color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Lê a coluna <strong>Repetidas no Ciclo</strong> dos últimos N concursos (padrão 4).
+          Conta cada dezena no universo 01–31: núcleo forte, repetidas, baixa presença e <strong>ausentes</strong>.
+          O pool para montar jogo depois é <strong>ausentes × baixa presença</strong> — geração automática fica para um próximo passo.
+        </div>
+      </details>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:#334155!important;">
+        <div class="card-header fw-bold d-flex flex-wrap justify-content-between align-items-center gap-2" style="background:#334155;color:#fff;">
+          <span><i class="fas fa-redo me-2"></i>Recorrência · Repetidas no Ciclo</span>
+          <span class="small fw-normal" id="rec-concursos-lbl"></span>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <span class="small text-muted fw-semibold">Últimos N concursos</span>
+            <div class="btn-group btn-group-sm" role="group" id="rec-n-group">
+              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="4">4</button>
+              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="5">5</button>
+              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="6">6</button>
+              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="8">8</button>
+              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="10">10</button>
+            </div>
+          </div>
+          <p class="small text-muted mb-0" id="rec-status">Carregando…</p>
+        </div>
+      </div>
+      <div id="rec-out"><div class="alert alert-light border small">Carregando recorrência…</div></div>
+    </div>
   </div>
 </div>
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
@@ -450,6 +611,7 @@
   let stateRitmo = { apostas: [], mes: null };
   let stateOp = { apostas: [], mes: null };
   let stateFech = { apostas: [], mes: null };
+  let stateEst = { apostas: [], mes: null, scoresMap: {}, relatorio: null };
 
   function mesPayloadFromSelect(selId){
     const el = document.getElementById(selId);
@@ -481,7 +643,7 @@
 
   if(window.MesSorteSelect){
     MesSorteSelect.load(API).then(data=>{
-      ['cc-mes','cr-mes','co-mes','cf-mes'].forEach(id=>{
+      ['cc-mes','cr-mes','co-mes','cf-mes','ce-mes'].forEach(id=>{
         MesSorteSelect.fill(document.getElementById(id), data, { defaultPrefer: 'atrasado' });
       });
     }).catch(()=>{});
@@ -525,6 +687,11 @@
     if(a.soma != null) badges.push(chip('Soma', a.soma));
     if(a.digitos_distintos != null) badges.push(chip('Dígitos', a.digitos_distintos));
     if(a.k_faltantes != null) badges.push(chip('k', a.k_faltantes));
+    if(a.k_desdobramento != null) badges.push(chip('Desdob.', a.k_desdobramento));
+    if(a.k_repeticao != null) badges.push(chip('Rep.', a.k_repeticao));
+    if(a.qtd_evolucao_alvo != null) badges.push(chip('Evol.', '+'+a.qtd_evolucao_alvo));
+    if(a.alinhado_evolucao) badges.push(`<span class="cc-chip" style="background:#ecfdf5;border-color:#a7f3d0;color:#047857"><em>Ritmo</em><strong>ok</strong></span>`);
+    if(a.score != null) badges.push(chip('Score', a.score));
     if(a.modo) badges.push(chip('Modo', a.modo));
     if(a.cobertura_pendentes != null) badges.push(chip('Cob.', a.cobertura_pendentes + '%'));
     badges.push(mesBadge(a));
@@ -866,6 +1033,7 @@
       'cr-bt': 'cr-out',
       'co-bt': 'co-out',
       'cf-bt': 'cf-out',
+      'ce-bt': 'ce-out',
     })[elId] || elId;
   }
 
@@ -909,6 +1077,281 @@
         box.appendChild(ref);
       }
     }
+  }
+
+  function atualizarBannerCiclo(c){
+    const el = document.getElementById('cc-ciclo-banner');
+    if(!el) return;
+    if(!c || !c.ok){
+      el.textContent = 'Ciclo indisponível';
+      return;
+    }
+    const fase = c.fase || {};
+    const est = c.estado_atual || {};
+    const n = c.numero_ciclo ?? est.numero_ciclo ?? '—';
+    const falt = (c.dezenas_pendentes||[]).length;
+    const saidas = (c.dezenas_saidas||[]).length;
+    el.innerHTML = `<strong>Ciclo #${n}</strong> · ${fase.label || fase.fase || '—'} · saídas ${saidas} · faltantes ${falt}` +
+      (fase.estrategia_recomendada ? ' · <span class="badge bg-light text-dark">estratégia recomendada</span>' : ' · <span class="badge bg-secondary">fase intermediária</span>');
+  }
+
+  function renderEstCtx(c){
+    atualizarBannerCiclo(c);
+    const box = document.getElementById('ce-ctx');
+    const card = document.getElementById('ce-estrategia-card');
+    if(!c || !c.ok){
+      box.innerHTML = `<div class="alert alert-warning small">${(c&&c.erro)||'Estratégia indisponível'}</div>`;
+      if(card) card.innerHTML = '';
+      return;
+    }
+    const plano = c.estrategia_ciclo || {};
+    const fmtDez = (xs, lim=8) => {
+      const arr = (xs||[]).slice(0, lim).map(pad);
+      return arr.join(' · ') || '—';
+    };
+    if(card){
+      const cotas = plano.cotas_k || {};
+      const cotasTxt = Object.keys(cotas).length
+        ? Object.entries(cotas).sort((a,b)=>Number(a[0])-Number(b[0])).map(([k,n])=>`${n}×k=${k}`).join(' · ')
+        : '—';
+      card.innerHTML = `
+        <div class="card shadow-sm border-0" style="border-left:4px solid #0f172a!important;">
+          <div class="card-body py-3">
+            <div class="small text-uppercase text-muted fw-bold mb-1">Ciclo — Estratégia atual</div>
+            <p class="mb-2 small" style="line-height:1.45">${plano.leitura_curta || c.leitura || '—'}</p>
+            <div class="d-flex flex-wrap gap-2 small">
+              <span class="cc-chip"><em>Estágio</em><strong>${plano.estagio || '—'}</strong></span>
+              <span class="cc-chip"><em>Tendência</em><strong>${plano.tendencia_evolucao || '—'}</strong></span>
+              <span class="cc-chip"><em>k esperado</em><strong>${plano.k_esperado ?? c.k_faltantes_sugerido ?? '—'}</strong></span>
+              <span class="cc-chip"><em>Pendentes</em><strong>${(plano.pendentes||c.dezenas_pendentes||[]).length}</strong></span>
+              <span class="cc-chip"><em>Núcleo</em><strong>${fmtDez(plano.nucleo_ancoras,4)}</strong></span>
+              <span class="cc-chip"><em>Cotas</em><strong>${cotasTxt}</strong></span>
+            </div>
+            <p class="mb-0 mt-2 small text-muted">${plano.aviso_nao_previsao || 'Não é previsão de quais dezenas sairão.'}</p>
+          </div>
+        </div>`;
+    }
+    const fase = c.fase || {};
+    const rep = c.repeticoes_historicas || {};
+    const dist = rep.distribuicao_pct || {};
+    const evo = c.evolucao_ciclo || {};
+    const obs = evo.observacoes || {};
+    const univ = evo.universo || 31;
+    const scores = (c.scores_faltantes || []).slice(0, 10);
+    stateEst.scoresMap = {};
+    (c.scores_faltantes || []).forEach(s => { stateEst.scoresMap[s.dezena] = s; });
+    const faseClass = { inicio:'success', andamento:'secondary', finalizacao:'danger' }[fase.fase] || 'secondary';
+    const linhas = evo.linhas || evo.ultimos || [];
+    const tabelaEvo = linhas.length ? `
+      <div class="table-responsive mb-2">
+        <table class="table table-sm table-striped mb-0 text-center align-middle" style="font-size:.78rem">
+          <thead class="table-light">
+            <tr>
+              <th>Cnc</th>
+              <th class="text-success">Novas Dezenas</th>
+              <th class="text-info">Qtd. Evolução</th>
+              <th class="text-secondary">Repetidas no Ciclo</th>
+              <th>Progresso</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${linhas.map(r => `
+              <tr>
+                <td><strong>${r.concurso||'—'}</strong></td>
+                <td>${(r.novas||[]).length ? (r.novas||[]).map(n=>`<span class="badge bg-success me-1">${pad(n)}</span>`).join('') : '<span class="text-muted">—</span>'}</td>
+                <td class="fw-bold text-info">${r.qtd_evolucao!=null ? ('+'+r.qtd_evolucao) : (r.qtd_novas!=null?('+'+r.qtd_novas):'—')}</td>
+                <td>${(r.repetidas||[]).length ? (r.repetidas||[]).map(n=>`<span class="badge bg-secondary me-1">${pad(n)}</span>`).join('') : '—'}</td>
+                <td><strong>${r.progresso_label || ((r.progresso!=null?r.progresso:(r.total_preenchido||'—'))+'/'+univ)}</strong>
+                  <div class="text-muted" style="font-size:.7rem">${r.progresso_pct!=null? (r.progresso_pct+'%') : ''}</div></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>` : '';
+    box.innerHTML = `
+      <div class="alert alert-${faseClass} small mb-2">
+        <strong>Ciclo #${c.numero_ciclo}</strong> · ${fase.label || '—'} ·
+        saídas ${fase.dezenas_saidas_ciclo ?? (c.dezenas_saidas||[]).length} ·
+        faltantes ${(c.dezenas_pendentes||[]).length}
+        <div class="mt-1 mb-0">${fase.hint || c.leitura || ''}</div>
+      </div>
+      <div class="card border-info shadow-sm mb-2">
+        <div class="card-header bg-info text-dark py-2 small fw-bold">
+          <i class="fas fa-chart-line me-1"></i>Observações da Evolução do Ciclo
+          <span class="fw-normal">— Novas · Qtd. Evolução · Repetidas · Progresso</span>
+        </div>
+        <div class="card-body small">
+          ${tabelaEvo}
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <div class="border rounded p-2 h-100">
+                <div class="fw-bold text-success mb-1">Novas Dezenas</div>
+                <div>${balls((obs.novas_dezenas||{}).recentes || evo.novas_recentes,'nova')}</div>
+                <div class="text-muted mt-1">${(obs.novas_dezenas||{}).leitura || ''}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-2 h-100">
+                <div class="fw-bold text-info mb-1">Qtd. Evolução</div>
+                <div>média recente <strong>${(obs.qtd_evolucao||{}).media_recente ?? evo.media_recente ?? '—'}</strong>
+                  · dominante <strong>${(obs.qtd_evolucao||{}).dominante_recente || evo.dominante || '—'}</strong></div>
+                <div class="text-muted mt-1">${(obs.qtd_evolucao||{}).leitura || ''}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-2 h-100">
+                <div class="fw-bold text-secondary mb-1">Repetidas no Ciclo</div>
+                <div>${balls((obs.repetidas_no_ciclo||{}).mais_frequentes || evo.top_repetidas_ciclo,'rep')}</div>
+                <div class="text-muted mt-1">${(obs.repetidas_no_ciclo||{}).leitura || ''}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-2 h-100">
+                <div class="fw-bold mb-1">Progresso</div>
+                <div class="fs-5 fw-bold">${(obs.progresso||{}).label || ((evo.progresso_atual||'—')+'/'+univ)}</div>
+                <div>${(obs.progresso||{}).percentual ?? evo.progresso_pct ?? '—'}% · Δ recente +${(obs.progresso||{}).delta_medio_recente ?? '—'}</div>
+                <div class="text-muted mt-1">${(obs.progresso||{}).leitura || ''}</div>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-light border py-2 mb-0">
+            Jogo sugerido pela evolução:
+            <strong>${evo.k_faltantes_sugerido??c.k_faltantes_sugerido??'—'} nova(s)/faltante(s)</strong>
+            + <strong>${evo.k_repeticao_sugerido??c.k_repeticao_sugerido??'—'} repetida(s)</strong>
+            · tendência <strong>${evo.tendencia||'—'}</strong>
+          </div>
+          ${(() => {
+            const tab = evo.tabela_sutil;
+            if(!tab || !tab.novas_qtd_evolucao) return '';
+            const h = (tab.novas_qtd_evolucao.historico || {});
+            const linhas = h.linhas || [];
+            const pct = (qs) => {
+              let p = 0;
+              linhas.forEach(r => { if(qs.includes(r.qtd)) p += Number(r.pct||0); });
+              return Math.round(p*10)/10;
+            };
+            const p0 = pct([0]), p12 = pct([1,2]), p34 = pct([3,4]), p57 = pct([5,6,7]);
+            const top = (h.top3||[]).map((t,i)=>{
+              const nome = t.qtd===0 ? 'só repete' : (t.qtd+' nova'+(t.qtd>1?'s':''));
+              return `${i+1}º ${nome} (${t.pct}%)`;
+            }).join(' · ');
+            return `<div class="border rounded p-2 mt-2 small bg-light">
+              <div class="fw-semibold mb-1">Em resumo (histórico)</div>
+              <div>Só repete: <strong>${p0}%</strong> · Poucas novas (1–2): <strong>${p12}%</strong> · Moderado (3–4): <strong>${p34}%</strong> · Muitas (5–7): <strong>${p57}%</strong></div>
+              <div class="text-muted mt-1">Top 3: ${top||'—'}</div>
+            </div>`;
+          })()}
+        </div>
+      </div>
+      <div class="row g-2">
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Último sorteio</div>
+          <div>${balls(c.ultimo_sorteio,'rep')}</div>
+          <div class="fw-bold mt-2 mb-1">Faltantes (${(c.dezenas_pendentes||[]).length})</div>
+          <div>${balls(c.dezenas_pendentes,'falt')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Repetições históricas (sorteios)</div>
+          <div>${['0','1','2','3+'].map(k=>`<span class="badge ${rep.cenario_dominante===k?'bg-primary':'bg-secondary'} me-1">${k}: ${dist[k]??0}%</span>`).join('')}</div>
+          <div class="text-muted mt-2">${rep.leitura||''}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Top faltantes (score)</div>
+          ${scores.map(s=>`<div class="d-flex justify-content-between"><span>${pad(s.dezena)} · atr ${s.atraso??'—'}</span><strong>${s.score}</strong></div>`).join('') || '—'}
+        </div></div></div>
+      </div>`;
+  }
+
+  function ordenarApostasEstrategia(apostas, modo){
+    const arr = (apostas || []).slice();
+    const sm = stateEst.scoresMap || {};
+    if(modo === 'aleatorio'){
+      for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+      return arr;
+    }
+    if(modo === 'soma'){
+      return arr.sort((a,b)=>(a.soma||0)-(b.soma||0));
+    }
+    if(modo === 'atraso'){
+      const atr = (ap) => (ap.faltantes||[]).reduce((s,d)=>s+(sm[d]?.atraso||0),0);
+      return arr.sort((a,b)=>atr(b)-atr(a));
+    }
+    if(modo === 'frequencia'){
+      const fr = (ap) => (ap.faltantes||[]).reduce((s,d)=>s+(sm[d]?.frequencia||0),0);
+      return arr.sort((a,b)=>fr(b)-fr(a));
+    }
+    return arr.sort((a,b)=>(b.score||0)-(a.score||0));
+  }
+
+  function renderEstRelatorio(rel){
+    const el = document.getElementById('ce-relatorio');
+    if(!rel){ el.innerHTML = ''; return; }
+    const mot = rel.motivos_eliminacao || {};
+    const evo = rel.evolucao || {};
+    el.innerHTML = `<div class="card border-dark shadow-sm"><div class="card-header bg-dark text-white py-2 small fw-bold">
+      Relatório pós-geração</div><div class="card-body small">
+      <div class="row g-2 text-center">
+        <div class="col-6 col-md-2"><div class="text-muted">Ciclo</div><strong>#${rel.ciclo??'—'}</strong></div>
+        <div class="col-6 col-md-2"><div class="text-muted">Fase</div><strong>${rel.fase_label||rel.fase||'—'}</strong></div>
+        <div class="col-6 col-md-2"><div class="text-muted">Faltantes</div><strong>${rel.faltantes??'—'}</strong></div>
+        <div class="col-6 col-md-2"><div class="text-muted">Desdob. / Rep.</div><strong>${rel.k_desdobramento} / ${rel.k_repeticao}</strong></div>
+        <div class="col-4 col-md-1"><div class="text-muted">Analisadas</div><strong>${rel.analisadas??0}</strong></div>
+        <div class="col-4 col-md-1"><div class="text-muted">Eliminadas</div><strong class="text-danger">${rel.eliminadas??0}</strong></div>
+        <div class="col-4 col-md-2"><div class="text-muted">Geradas</div><strong class="text-success">${rel.geradas??0}</strong></div>
+      </div>
+      <div class="mt-2 p-2 bg-light rounded">
+        ${(rel.estrategia_ciclo && rel.estrategia_ciclo.leitura_curta) ? `<div class="mb-1">${rel.estrategia_ciclo.leitura_curta}</div>` : ''}
+        ${rel.como_influenciou ? `<div class="mb-1"><strong>Como influenciou:</strong> ${rel.como_influenciou}</div>` : ''}
+        Evolução: tendência <strong>${evo.tendencia||'—'}</strong> ·
+        Qtd dominante <strong>${evo.dominante||'—'}</strong> ·
+        k sugerido <strong>${evo.k_sugerido??'—'}</strong> ·
+        mistura <strong>${evo.mistura_gerada ? Object.entries(evo.mistura_gerada).map(([k,v])=>k+'×'+v).join(' ') : (evo.media_k_gerado??'—')}</strong>
+        · completa com <strong>${rel.completacao||'plano'}</strong>
+        ${rel.usar_evolucao === false ? ' · <span class="text-warning">evolução desligada</span>' : ''}
+      </div>
+      ${Object.keys(mot).length?`<div class="text-muted mt-2">Motivos: ${Object.entries(mot).map(([k,v])=>`${k}=${v}`).join(' · ')}</div>`:''}
+    </div></div>`;
+  }
+
+  function renderEstApostas(j){
+    const out = document.getElementById('ce-out');
+    const st = document.getElementById('ce-status');
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      out.innerHTML = '';
+      stateEst.apostas = [];
+      renderEstRelatorio(j.relatorio || null);
+      document.getElementById('ce-btn-export').disabled = true;
+      document.getElementById('ce-btn-bt').disabled = true;
+      return;
+    }
+    const orden = document.getElementById('ce-orden').value || 'score';
+    stateEst.apostas = ordenarApostasEstrategia(j.apostas || [], orden);
+    stateEst.apostas.forEach((a,n)=>a.numero=n+1);
+    stateEst.mes = j.mes_num || mesNumResolved('ce-mes');
+    stateEst.relatorio = j.relatorio || null;
+    renderEstRelatorio(stateEst.relatorio);
+    st.textContent = (j.aviso || (`${j.geradas} jogo(s)`)) +
+      (stateEst.relatorio ? ` · analisadas ${stateEst.relatorio.analisadas} · eliminadas ${stateEst.relatorio.eliminadas}` : '');
+    renderHistAlert('ce-hist-alert', j.historico);
+    document.getElementById('ce-btn-export').disabled = !stateEst.apostas.length;
+    document.getElementById('ce-btn-bt').disabled = !stateEst.apostas.length;
+    out.innerHTML = wrapList(stateEst.apostas.map((a,i)=>renderApostaCard(a,i,{
+      variant: 'estrategia',
+      rmClass: 'ce-rm',
+      ballClass: (d, ap) => {
+        const falt = ap.faltantes || ap.novas_ciclo || [];
+        if(falt.includes(d)) return 'falt';
+        return 'saida';
+      }
+    })).join(''));
+    out.querySelectorAll('.ce-rm').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.dataset.i);
+        stateEst.apostas.splice(i,1);
+        stateEst.apostas.forEach((a,n)=>a.numero=n+1);
+        renderEstApostas({ok:true, geradas:stateEst.apostas.length, apostas:stateEst.apostas, relatorio:stateEst.relatorio, aviso:`${stateEst.apostas.length} jogo(s)`});
+      });
+    });
   }
 
   function aplicarBacktestUi(apostas, bt, btElId){
@@ -960,6 +1403,223 @@
     .catch(e=>{ document.getElementById('co-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`; });
   fetch(API+'/fechamento/contexto').then(async r=>parseJson(r)).then(renderFechCtx)
     .catch(e=>{ document.getElementById('cf-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`; });
+  fetch(API+'/estrategia/contexto').then(async r=>parseJson(r)).then(renderEstCtx)
+    .catch(e=>{
+      document.getElementById('ce-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`;
+      document.getElementById('cc-ciclo-banner').textContent = 'Ciclo: erro ao carregar';
+    });
+
+  let recN = 4;
+  let recLoaded = false;
+  (function initRecNFromQuery(){
+    const nQ = Number(new URLSearchParams(location.search).get('n'));
+    if(nQ && [4,5,6,8,10].includes(nQ)) recN = nQ;
+  })();
+
+  function recBallCls(vezes, maxF){
+    vezes = Number(vezes)||0;
+    if(vezes<=0) return 'rec-0';
+    if(vezes===1) return 'rec-1';
+    if(vezes===2) return 'rec-2';
+    if(vezes>=3 && vezes===maxF) return 'rec-mf';
+    return 'rec-f';
+  }
+  function recBalls(nums, vezes, maxF){
+    return (nums||[]).map(d=>`<span class="cc-ball ${recBallCls(vezes, maxF)}">${pad(d)}</span>`).join('') || '—';
+  }
+  function recGrupoBalls(nums, tabela, maxF){
+    const map = {};
+    (tabela||[]).forEach(t=>{ map[t.dezena]=t.vezes; });
+    return (nums||[]).map(d=>`<span class="cc-ball ${recBallCls(map[d]||0, maxF)}">${pad(d)}</span>`).join('') || '—';
+  }
+
+  function renderRecorrencia(j){
+    const out = document.getElementById('rec-out');
+    const st = document.getElementById('rec-status');
+    const lbl = document.getElementById('rec-concursos-lbl');
+    document.querySelectorAll('.rec-n-btn').forEach(b=>{
+      b.classList.toggle('active', Number(b.dataset.n)===Number(j.janela||recN));
+    });
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      lbl.textContent = '';
+      out.innerHTML = `<div class="alert alert-warning small">${j.erro||'Sem dados.'}</div>`;
+      return;
+    }
+    const g = j.grupos || {};
+    const fmt = j.fmt || {};
+    const cob = j.cobertura || {};
+    const des = j.destaques || {};
+    const ciclo = j.ciclo || {};
+    const pool = j.pool || {};
+    const maxF = (j.ranking && j.ranking[0]) ? j.ranking[0].vezes : 0;
+    const conc = (j.concursos||[]).join(', ');
+    st.textContent = j.leitura || '';
+    lbl.textContent = conc ? ('concursos '+conc) : '';
+    const linhasHtml = (j.linhas||[]).map(r=>`
+      <div class="d-flex flex-wrap align-items-center gap-2 py-1 border-bottom">
+        <span class="rec-linha-cnc">#${r.concurso||'—'}</span>
+        <span class="small text-muted">${r.data||''}</span>
+        <span>${(r.repetidas||[]).map(n=>`<span class="badge bg-secondary me-1">${pad(n)}</span>`).join('') || '<span class="text-muted">—</span>'}</span>
+      </div>`).join('');
+    const rankingRows = (j.ranking||[]).map(t=>`
+      <tr>
+        <td class="fw-bold">${pad(t.dezena)}</td>
+        <td>${t.vezes}×</td>
+        <td>${t.rotulo||''}</td>
+      </tr>`).join('') || '<tr><td colspan="3" class="text-muted">Nenhuma dezena repetida na janela.</td></tr>';
+    const mid = Math.ceil((j.tabela||[]).length/2);
+    const left = (j.tabela||[]).slice(0, mid);
+    const right = (j.tabela||[]).slice(mid);
+    const univRows = left.map((a,i)=>{
+      const b = right[i];
+      return `<tr>
+        <td>${pad(a.dezena)}</td><td>${a.vezes}</td><td class="text-muted">${a.rotulo}</td>
+        ${b?`<td>${pad(b.dezena)}</td><td>${b.vezes}</td><td class="text-muted">${b.rotulo}</td>`:'<td></td><td></td><td></td>'}
+      </tr>`;
+    }).join('');
+    const freqBlocos = (j.por_frequencia||[]).map(f=>`
+      <div class="mb-2">
+        <div class="small fw-bold mb-1">${f.vezes===0?'❌ 0 vezes':(f.vezes+' vez'+(f.vezes>1?'es':''))} · ${f.rotulo} (${f.qtd})</div>
+        <div>${recBalls(f.dezenas, f.vezes, maxF)}</div>
+      </div>`).join('');
+    const lider = des.lider;
+    const faixasHtml = (j.faixas||[]).map((f,i)=>`
+      <div class="col-md-3">
+        <div class="rec-bloco">
+          <h3>Linha ${i+1} · ${f.label||f.nome}</h3>
+          <div class="fw-bold">${f.tamanho} dezenas · ${f.qtd_presentes} presentes · ${f.qtd_ausentes} ausentes</div>
+          <div class="small text-muted mt-1 mb-1">Presentes</div>
+          <div>${recGrupoBalls(f.presentes, j.tabela, maxF)}</div>
+          <div class="small text-muted mt-2 mb-1">Ausentes</div>
+          <div>${recBalls(f.ausentes, 0, maxF)}</div>
+        </div>
+      </div>`).join('');
+    const top2txt = (des.top2||[]).map(t=>pad(t.dezena)).join(' + ');
+    out.innerHTML = `
+      <div class="card shadow-sm mb-3">
+        <div class="card-header py-2 small fw-bold">Fonte · Repetidas no Ciclo</div>
+        <div class="card-body py-2">${linhasHtml || '<span class="text-muted">—</span>'}</div>
+      </div>
+      <p class="small">${j.leitura||''} Distribuição abaixo.</p>
+      <div class="row g-3 mb-3">
+        <div class="col-lg-5">
+          <div class="rec-bloco">
+            <h3>1. Dezenas que mais se repetiram</h3>
+            <div class="table-responsive">
+              <table class="table table-sm mb-2" style="font-size:.78rem">
+                <thead class="table-light"><tr><th>Dezena</th><th>Ocorrências</th><th>Classificação</th></tr></thead>
+                <tbody>${rankingRows}</tbody>
+              </table>
+            </div>
+            <div class="small text-muted">${des.n_repetidas||0} dezena(s) apareceram mais de uma vez.</div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="rec-bloco mb-3">
+            <h3>2. Dezenas que apareceram apenas 1 vez</h3>
+            <div class="mb-1">${fmt.baixa_presenca||'—'}</div>
+            <div>${recBalls(g.baixa_presenca, 1, maxF)}</div>
+            <div class="small text-muted mt-1">${(g.baixa_presenca||[]).length} dezena(s) · baixa presença.</div>
+          </div>
+          <div class="rec-bloco">
+            <h3>3. Dezenas que NÃO apareceram</h3>
+            <div class="mb-1 fw-bold">${fmt.ausentes||'—'}</div>
+            <div>${recBalls(g.ausentes, 0, maxF)}</div>
+            <div class="small text-muted mt-1">${cob.ausentes||0} de ${j.universo} · ${cob.pct_ausentes||0}% do universo.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card shadow-sm mb-3">
+        <div class="card-header py-2 small fw-bold">4. Visão completa — ${pad(j.dezena_min)} a ${pad(j.dezena_max)}</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-striped mb-0 text-center" style="font-size:.78rem">
+              <thead class="table-light"><tr><th>Dezena</th><th>Vezes</th><th></th><th>Dezena</th><th>Vezes</th><th></th></tr></thead>
+              <tbody>${univRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="rec-bloco mb-3">
+        <h3>5. Agrupando por frequência</h3>
+        ${freqBlocos || '—'}
+      </div>
+      <div class="rec-bloco mb-3">
+        <h3>6. O que chama mais atenção</h3>
+        ${lider ? `<p class="small mb-1">A dezena <strong>${pad(lider.dezena)}</strong> sozinha representa <strong>${des.lider_pct}%</strong> das ocorrências (${lider.vezes} de ${j.ocorrencias}).</p>` : '<p class="small mb-1">Sem dezena repetida nesta janela.</p>'}
+        ${(des.top2||[]).length>=2 ? `<p class="small mb-1">${top2txt} = ${des.top2_ocor} ocorrências de ${j.ocorrencias} = <strong>${des.top2_pct}%</strong>.</p>` : ''}
+        <p class="small mb-0">Núcleo repetido (2×): <strong>${fmt.repetido||'—'}</strong></p>
+      </div>
+      <div class="rec-bloco mb-3">
+        <h3>7. Cobertura do universo</h3>
+        <p class="small mb-1">Usadas: <strong>${cob.usadas}</strong> de ${j.universo} (${cob.pct_usadas}%). Ausentes: <strong>${cob.ausentes}</strong> (${cob.pct_ausentes}%).</p>
+        <div class="progress" style="height:10px"><div class="progress-bar bg-secondary" style="width:${cob.pct_usadas||0}%"></div></div>
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-md-3"><div class="rec-bloco"><h3>Núcleo forte</h3><div class="mb-1">${fmt.nucleo_forte||'—'}</div>${recGrupoBalls(g.nucleo_forte, j.tabela, maxF)}</div></div>
+        <div class="col-md-3"><div class="rec-bloco"><h3>Núcleo repetido</h3><div class="mb-1">${fmt.repetido||'—'}</div>${recBalls(g.repetido, 2, maxF)}</div></div>
+        <div class="col-md-3"><div class="rec-bloco"><h3>Baixa presença</h3><div class="mb-1">${fmt.baixa_presenca||'—'}</div>${recBalls(g.baixa_presenca, 1, maxF)}</div></div>
+        <div class="col-md-3"><div class="rec-bloco"><h3>Ausentes</h3><div class="mb-1">${fmt.ausentes||'—'}</div>${recBalls(g.ausentes, 0, maxF)}</div></div>
+      </div>
+      <div class="row g-2 mb-3">${faixasHtml}</div>
+      <div class="card border-dark shadow-sm mb-3">
+        <div class="card-header bg-dark text-white py-2 small fw-bold">Pool para geração (depois) · ausentes × baixa presença</div>
+        <div class="card-body">
+          <div class="mb-2">${fmt.pool||'—'}</div>
+          <div class="mb-2">${recGrupoBalls(pool.ausentes_x_baixa, j.tabela, maxF)}</div>
+          <div class="small text-muted mb-2">${(pool.ausentes_x_baixa||[]).length} dezenas · ${pool.qtd_ausentes_no_pool||0} ausentes + ${pool.qtd_baixa_no_pool||0} baixa presença.</div>
+          <div class="small fw-bold mb-1">Faltantes do ciclo #${ciclo.numero||'—'} (${ciclo.percentual||0}%)</div>
+          <div>${balls(ciclo.pendentes,'falt')}</div>
+          <p class="small text-muted mt-2 mb-0">Útil no fim do ciclo. Esta aba ainda não gera apostas.</p>
+        </div>
+      </div>`;
+  }
+
+  async function loadRecorrencia(n){
+    recN = Number(n)||4;
+    const st = document.getElementById('rec-status');
+    st.textContent = 'Carregando…';
+    try{
+      const r = await fetch(API+'/recorrencia?n='+encodeURIComponent(recN));
+      const j = await parseJson(r);
+      recLoaded = true;
+      renderRecorrencia(j);
+    }catch(e){
+      recLoaded = false;
+      document.getElementById('rec-out').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`;
+      st.textContent = e.message;
+    }
+  }
+
+  document.querySelectorAll('.rec-n-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const n = Number(btn.dataset.n);
+      const u = new URL(location.href);
+      u.searchParams.set('modo','recorrencia');
+      u.searchParams.set('n', String(n));
+      history.replaceState({}, '', u);
+      loadRecorrencia(n);
+    });
+  });
+  const recTabBtn = document.getElementById('tab-btn-recorrencia');
+  if(recTabBtn){
+    recTabBtn.addEventListener('shown.bs.tab', ()=>{ if(!recLoaded) loadRecorrencia(recN); });
+  }
+  loadRecorrencia(recN);
+
+  // Deep-link ?modo=estrategia | ?modo=recorrencia
+  (function activateModoFromQuery(){
+    const m = new URLSearchParams(location.search).get('modo');
+    const id = m === 'recorrencia' ? 'tab-btn-recorrencia' : (m === 'estrategia' ? 'tab-btn-estrategia' : null);
+    if(!id) return;
+    const btn = document.getElementById(id);
+    if(btn && window.bootstrap && bootstrap.Tab){
+      bootstrap.Tab.getOrCreateInstance(btn).show();
+    } else if(btn){
+      btn.click();
+    }
+  })();
 
   document.getElementById('cc-btn-gerar').addEventListener('click', async ()=>{
     const st = document.getElementById('cc-status');
@@ -1051,14 +1711,49 @@
     }catch(e){ st.textContent = 'Erro: '+e.message; }
   });
 
+  document.getElementById('ce-btn-gerar').addEventListener('click', async ()=>{
+    const st = document.getElementById('ce-status');
+    st.textContent = 'Gerando estratégia e filtrando…';
+    const mes = mesPayloadFromSelect('ce-mes');
+    const krepRaw = document.getElementById('ce-krep').value;
+    const desdobRaw = document.getElementById('ce-desdob').value || 'auto';
+    const body = {
+      quantidade: Number(document.getElementById('ce-qtd').value||12),
+      pick: Number(document.getElementById('ce-pick').value||7),
+      desdobramento: desdobRaw === 'auto' ? 'auto' : Number(desdobRaw),
+      k_repeticao: krepRaw === '' ? null : Number(krepRaw),
+      usar_evolucao: document.getElementById('ce-usar-evo').checked,
+      bloquear_exato: document.getElementById('ce-bloquear-exato').checked,
+      filtro_estrutura: document.getElementById('ce-filtro-estrut').checked,
+      mes_num: mes,
+      descartar_historico: document.getElementById('ce-descartar-hist').checked,
+    };
+    try{
+      const r = await fetch(API+'/estrategia/gerar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await parseJson(r);
+      renderEstApostas(j);
+      if(j.ok && (j.apostas||[]).length){
+        if(j.backtest) aplicarBacktestUi(stateEst.apostas, j.backtest, 'ce-bt');
+        else await runBacktest(stateEst.apostas, 'ce-bt');
+      }
+    }catch(e){ st.textContent = 'Erro: '+e.message; }
+  });
+
+  document.getElementById('ce-orden').addEventListener('change', ()=>{
+    if(!stateEst.apostas.length) return;
+    renderEstApostas({ok:true, geradas:stateEst.apostas.length, apostas:stateEst.apostas, relatorio:stateEst.relatorio, aviso:`${stateEst.apostas.length} jogo(s)`});
+  });
+
   document.getElementById('cc-btn-export').addEventListener('click', ()=>exportTxt(state21.apostas, state21.mes || mesPayloadFromSelect('cc-mes')));
   document.getElementById('cr-btn-export').addEventListener('click', ()=>exportTxt(stateRitmo.apostas, stateRitmo.mes || mesPayloadFromSelect('cr-mes')));
   document.getElementById('co-btn-export').addEventListener('click', ()=>exportTxt(stateOp.apostas, stateOp.mes || mesPayloadFromSelect('co-mes')));
   document.getElementById('cf-btn-export').addEventListener('click', ()=>exportTxt(stateFech.apostas, stateFech.mes || mesPayloadFromSelect('cf-mes')));
+  document.getElementById('ce-btn-export').addEventListener('click', ()=>exportTxt(stateEst.apostas, stateEst.mes || mesPayloadFromSelect('ce-mes')));
   document.getElementById('cc-btn-bt').addEventListener('click', ()=>runBacktest(state21.apostas, 'cc-bt'));
   document.getElementById('cr-btn-bt').addEventListener('click', ()=>runBacktest(stateRitmo.apostas, 'cr-bt'));
   document.getElementById('co-btn-bt').addEventListener('click', ()=>runBacktest(stateOp.apostas, 'co-bt'));
   document.getElementById('cf-btn-bt').addEventListener('click', ()=>runBacktest(stateFech.apostas, 'cf-bt'));
+  document.getElementById('ce-btn-bt').addEventListener('click', ()=>runBacktest(stateEst.apostas, 'ce-bt'));
 })();
 </script>
 {% endblock %}

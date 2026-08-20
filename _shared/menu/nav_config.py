@@ -234,6 +234,14 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
         "backtesting": {"desc": "Prêmios de 4 a 7 dezenas + mês"},
         "analise_extras": [
             {
+                "title": "Resumo Geral da Modalidade",
+                "desc": "DNA estatístico — checklist para montar apostas",
+                "href": "/analise/resumo-geral/",
+                "icon": "fas fa-clipboard-list",
+                "icon_bg": "#fff3cd",
+                "icon_color": "#996e00",
+            },
+            {
                 "title": "Resultados & Padrões",
                 "desc": "Concursos · Padrões I/II · tubular · alimenta Construtor/Elite",
                 "href": "/analise/analises-inteligentes/",
@@ -342,8 +350,8 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 },
                 {
                     "href": "/geradores-elite/ciclo-apostas/",
-                    "title": "Ciclo → Apostas",
-                    "desc": "2+1 · Ritmo de Evolução (análise oficial)",
+                    "title": "Ciclo — Apostas",
+                    "desc": "Estratégias · ritmo · fechamento · 2+1",
                     "icon": "fas fa-sync-alt",
                 },
                 {

@@ -32,6 +32,7 @@ from analise_escolha_visual.app_integration import extend_analise_escolha_visual
 from analise_tubular_inteligente.app_integration import extend_analise_tubular_inteligente_app
 from configuracoes.app_integration import extend_config_app
 from ciclo_cobertura.app_integration import extend_ciclo_cobertura_app
+from resumo_modalidade.app_integration import extend_resumo_modalidade_app
 
 def create_app():
     app = Flask(__name__)
@@ -60,6 +61,7 @@ def create_app():
     extend_analise_escolha_visual_app(app)
     extend_analise_tubular_inteligente_app(app)
     extend_ciclo_cobertura_app(app, 'diadesorte')
+    extend_resumo_modalidade_app(app)
     from menu.app_integration import _merge_template_dirs
     _merge_template_dirs(app, [os.path.join(_CC_ROOT, 'geradores_elite', 'templates')])
     _merge_template_dirs(app, [os.path.join(_CC_ROOT, 'ciclo_cobertura', 'templates')])
@@ -111,6 +113,7 @@ if __name__ == '__main__':
     print(f"[OK] Servidor Dia de Sorte rodando na porta {porta}")
     print(f"[URL] Acesse:      http://localhost:{porta}")
     print(f"[URL] Análise:     http://localhost:{porta}/analise/")
+    print(f"[URL] Resumo Geral: http://localhost:{porta}/analise/resumo-geral/")
     print(f"[URL] Análise Comp: http://localhost:{porta}/analise/comportamento/")
     print(f"[URL] Análise Pos.: http://localhost:{porta}/analise/por-posicao/")
     print(f"[URL] Ciclo Cob.:  http://localhost:{porta}/analise/ciclo-cobertura/")

@@ -738,10 +738,22 @@ class ComportamentoBaseService:
         base_estatistica: str = "geral",
     ) -> Dict[str, Any]:
         sp = cls._spec()
+        dna_extras: Optional[Dict[str, Any]] = None
+        dna_pack: Optional[Dict[str, Any]] = None
+        if modo_geracao == "resumo_geral":
+            janela = 0
+            modo_motor = "moda"
+            from resumo_modalidade.service import ResumoModalidadeService
+            dna_pack = ResumoModalidadeService.regras_para_comportamento(sp.modality_key)
+            if not dna_pack.get("sucesso"):
+                return dna_pack
+            dna_extras = dna_pack.get("extras") or {}
         base = cls._normalizar_base_estatistica(
             (analise or {}).get("base_estatistica") or base_estatistica
         )
-        if analise is None:
+        if analise is None or (
+            modo_geracao == "resumo_geral" and int(analise.get("janela") or -1) != 0
+        ):
             analise = cls.analisar(janela, filtros, base_estatistica=base)
         if not analise.get("sucesso"):
             return analise
@@ -790,6 +802,8 @@ class ComportamentoBaseService:
 
         if modo_geracao == "automatico":
             regras = regras_manuais or cls._regras_automaticas_interno(analise)
+        elif modo_geracao == "resumo_geral":
+            regras = dict((dna_pack or {}).get("regras") or {})
         else:
             regras = dict(regras_manuais or {})
             for cod in sp.indicadores:
@@ -867,6 +881,8 @@ class ComportamentoBaseService:
 
             tentativas = 0
             max_tent = 1200 if motor_aposta == "perfil_sorteio" else 600
+            if dna_extras:
+                max_tent = max(max_tent, 2200)
             montada = None
 
             while tentativas < max_tent and montada is None:
@@ -884,6 +900,13 @@ class ComportamentoBaseService:
                     descartadas_historico += 1
                     montada = None
                     continue
+                if dna_extras:
+                    from resumo_modalidade.service import ResumoModalidadeService
+                    if not ResumoModalidadeService.aposta_alinha_dna(
+                        montada["dezenas"], dna_extras, sp.modality_key,
+                    ):
+                        montada = None
+                        continue
 
             if montada is None:
                 continue
@@ -930,6 +953,9 @@ class ComportamentoBaseService:
                     f"{descartadas_historico} combinação(ões) descartada(s) por já existirem no histórico oficial."
                 )
             partes.append(
+                "Filtros do DNA (soma, sequência, finais, faixas) ou do perfil são difíceis de fechar juntos — "
+                "tente menos apostas."
+                if dna_extras else
                 "Alguns perfis reais da tabela são difíceis de reproduzir — "
                 "tente outro período, modo híbrido ou menos apostas."
             )
@@ -957,6 +983,8 @@ class ComportamentoBaseService:
             "validacao_ineditas": True,
             "excluiu_ultimo_concurso": excluir_ultimo,
             "ultimo_concurso_ignorado": ultimo_ignorado,
+            "criterios_dna": (dna_pack or {}).get("labels") or [],
+            "modo_geracao": modo_geracao,
         }
 
     @classmethod

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from flask import Blueprint, jsonify, redirect, render_template, request, send_from_directory
+from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_from_directory
 
 from analise_inteligentes_diadesorte.service import make_inteligentes_service
 from geradores_elite.modality_config import MODALITIES
@@ -149,30 +149,41 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
+    @analise_bp.route("/api/inteligentes/resumo-operacional-padroes")
+    def api_inteligentes_resumo_operacional_padroes():
+        """Tabela operacional: para apostar / já saíram / dentro·próximas·fora por padrão."""
+        try:
+            base = request.args.get("base", "geral")
+            out = Svc.resumo_operacional_padroes(base=base)
+            return jsonify(out), (200 if out.get("sucesso") else 400)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
     @analise_bp.route("/api/inteligentes/jogos-padrao")
     def api_inteligentes_jogos_padrao():
-        """Lista as apostas possíveis de um padrão (coluna Jogos → aba 6)."""
+        """Lista as apostas possíveis de um padrão (coluna Jogos → aba Apostas)."""
         try:
             padrao = (request.args.get("padrao") or "").strip()
             if not padrao:
                 return jsonify({"sucesso": False, "erro": "Informe padrao="}), 400
             limite = request.args.get("limite", type=int)
             offset = request.args.get("offset", 0, type=int) or 0
+            base = request.args.get("base", "geral")
             formato = (request.args.get("formato") or "json").strip().lower()
-            out = Svc.listar_jogos_padrao(padrao, limite=limite, offset=offset)
+            out = Svc.listar_jogos_padrao(padrao, limite=limite, offset=offset, base=base)
             if not out.get("sucesso"):
                 return jsonify(out), 400
             if formato in ("txt", "text", "plain"):
-                out = Svc.listar_jogos_padrao(padrao, limite=None, offset=0)
+                out = Svc.listar_jogos_padrao(padrao, limite=None, offset=0, base=base)
                 if not out.get("sucesso"):
                     return jsonify(out), 400
                 lines = [j["dezenas_fmt"] for j in (out.get("jogos") or [])]
                 header = (
                     f"# Padrao: {out.get('padrao')} ({out.get('descricao')})\n"
                     f"# Total: {out.get('total')}\n"
+                    f"# Soma media: {out.get('soma_media')}\n"
                 )
                 body = header + "\n".join(lines) + ("\n" if lines else "")
-                from flask import Response
                 return Response(
                     body,
                     mimetype="text/plain; charset=utf-8",
@@ -183,7 +194,123 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
                         )
                     },
                 )
+            if formato in ("xlsx", "excel"):
+                exported = Svc.exportar_jogos_padrao_xlsx(padrao, base=base)
+                if not exported.get("sucesso"):
+                    return jsonify(exported), 400
+                return Response(
+                    exported["content"],
+                    mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    headers={
+                        "Content-Disposition": (
+                            f'attachment; filename="{exported.get("filename") or "apostas.xlsx"}"'
+                        )
+                    },
+                )
             return jsonify(out)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @analise_bp.route("/api/inteligentes/jogos-padrao/export", methods=["POST"])
+    def api_inteligentes_jogos_padrao_export():
+        """Exporta CSV/XLSX das apostas (escopo: todas, marcadas ou página)."""
+        try:
+            data = request.get_json(silent=True) or {}
+            padrao = (data.get("padrao") or request.args.get("padrao") or "").strip()
+            if not padrao:
+                return jsonify({"sucesso": False, "erro": "Informe padrao"}), 400
+            formato = (data.get("formato") or "csv").strip().lower()
+            base = data.get("base") or "geral"
+            dezenas_fmt = data.get("dezenas_fmt") or data.get("dezenas") or None
+            ids = data.get("ids")
+
+            out = Svc.listar_jogos_padrao(padrao, limite=None, offset=0, base=base)
+            if not out.get("sucesso"):
+                return jsonify(out), 400
+            jogos = list(out.get("jogos") or [])
+            payload_jogos = data.get("jogos")
+            if isinstance(payload_jogos, list) and payload_jogos:
+                # Interface envia o mesmo recorte exibido (inclui concurso)
+                by_dez = {str(j.get("dezenas_fmt") or ""): j for j in jogos}
+                merged = []
+                for item in payload_jogos:
+                    dez = str((item or {}).get("dezenas_fmt") or "").strip()
+                    base_j = dict(by_dez.get(dez) or {})
+                    if not base_j and item:
+                        base_j = dict(item)
+                    if item:
+                        if item.get("concurso") not in (None, ""):
+                            base_j["concurso"] = item.get("concurso")
+                        for k in ("soma", "media", "distancia", "status_media", "status_media_label", "id"):
+                            if item.get(k) is not None and base_j.get(k) is None:
+                                base_j[k] = item.get(k)
+                    if base_j.get("dezenas_fmt") or dez:
+                        base_j["dezenas_fmt"] = base_j.get("dezenas_fmt") or dez
+                        merged.append(base_j)
+                jogos = merged
+            elif dezenas_fmt:
+                want = {str(x).strip() for x in dezenas_fmt if str(x).strip()}
+                jogos = [j for j in jogos if str(j.get("dezenas_fmt") or "") in want]
+            elif ids:
+                want_ids = {int(x) for x in ids}
+                jogos = [j for j in jogos if int(j.get("id") or 0) in want_ids]
+
+            modality_nome = out.get("modality_nome") or modality_key
+            pad = out.get("padrao") or padrao
+            desc = out.get("descricao") or ""
+
+            if formato in ("xlsx", "excel"):
+                from analise_inteligentes_diadesorte.soma_media import (
+                    build_xlsx_apostas,
+                    safe_filename_padrao,
+                )
+                blob = build_xlsx_apostas(
+                    modality_key=out.get("modality_key") or modality_key,
+                    modality_nome=modality_nome,
+                    padrao=pad,
+                    descricao=desc,
+                    faixa=out.get("soma_faixa"),
+                    jogos=jogos,
+                )
+                fname = f"apostas_padrao_{safe_filename_padrao(pad)}_{modality_key}.xlsx"
+                return Response(
+                    blob,
+                    mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+                )
+
+            # CSV — cabeçalhos em MAIÚSCULO; mesma regra da interface
+            import csv
+            import io
+            buf = io.StringIO()
+            buf.write("\ufeff")
+            w = csv.writer(buf, delimiter=";", quoting=csv.QUOTE_ALL)
+            w.writerow([
+                "MODALIDADE", "PADRÃO", "DESCRIÇÃO", "APOSTA", "SOMA", "MÉDIA",
+                "DISTÂNCIA DA MÉDIA", "STATUS", "CONCURSO", "ID",
+            ])
+            for j in jogos:
+                dist = j.get("distancia")
+                dist_s = "" if dist is None else (f"+{dist}" if int(dist) > 0 else str(dist))
+                w.writerow([
+                    modality_nome,
+                    pad,
+                    desc,
+                    j.get("dezenas_fmt") or "",
+                    j.get("soma"),
+                    j.get("media") if j.get("media") is not None else "",
+                    dist_s,
+                    j.get("status_media_label") or "",
+                    j.get("concurso") or "",
+                    j.get("id") or "",
+                ])
+            from analise_inteligentes_diadesorte.soma_media import safe_filename_padrao
+            fname = f"apostas_padrao_{safe_filename_padrao(pad)}_{modality_key}.csv"
+            return Response(
+                buf.getvalue().encode("utf-8"),
+                mimetype="text/csv; charset=utf-8",
+                headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+            )
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 

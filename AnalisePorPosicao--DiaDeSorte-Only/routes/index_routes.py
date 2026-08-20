@@ -34,6 +34,9 @@ def api_sincronizar():
 @index_bp.route("/api/premiacao-caixa", methods=["GET"])
 def api_premiacao_caixa():
     try:
+        all_flag = str(request.args.get("all", "")).strip().lower() in ("1", "true", "sim", "yes")
+        if all_flag:
+            return jsonify(listar_premiacao_diadesorte(paginar=False))
         page = int(request.args.get("page", 1))
         size = int(request.args.get("size", 50))
         return jsonify(listar_premiacao_diadesorte(page=page, size=size, paginar=True))
