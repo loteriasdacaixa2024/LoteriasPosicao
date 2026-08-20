@@ -130,15 +130,30 @@
   .cc-bt-pill{display:inline-flex;flex-direction:column;align-items:center;min-width:3rem;padding:.25rem .55rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:.72rem;margin:2px}
   .cc-bt-pill strong{font-size:.95rem;font-variant-numeric:tabular-nums}
 
-  .cc-ball.rec-mf{background:#dc3545;color:#fff}
-  .cc-ball.rec-f{background:#fd7e14;color:#fff}
-  .cc-ball.rec-2{background:#0d6efd;color:#fff}
+  .cc-ball.rec-mf{background:var(--primary);color:#fff}
+  .cc-ball.rec-f{background:var(--accent);color:var(--on-accent,#1a0a00)}
+  .cc-ball.rec-2{background:var(--accent-mes);color:#fff}
   .cc-ball.rec-1{background:#e2e8f0;color:#0f172a}
   .cc-ball.rec-0{background:#fff;color:#64748b;box-shadow:0 0 0 1px #cbd5e1}
-  .rec-n-btn.active{background:#0f172a;border-color:#0f172a;color:#fff}
-  .rec-linha-cnc{font-variant-numeric:tabular-nums;min-width:3.2rem;font-weight:700;color:#334155}
+  .rec-n-btn{border-color:var(--primary)!important;color:var(--primary)!important}
+  .rec-n-btn:hover{background:var(--accent-light)!important;color:var(--primary-xdark)!important}
+  .rec-n-btn.active{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important}
+  .rec-linha-cnc{font-variant-numeric:tabular-nums;min-width:3.2rem;font-weight:700;color:var(--primary-xdark)}
   .rec-bloco{border:1px solid #e5e7eb;border-radius:10px;padding:.75rem .9rem;background:#fff;height:100%}
-  .rec-bloco h3{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin:0 0 .45rem;color:#64748b}
+  .rec-bloco h3{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin:0 0 .45rem;color:var(--primary-dark)}
+  .rec-pos{border:1px solid var(--accent);border-radius:12px;background:var(--accent-light);padding:1rem 1.1rem;margin-bottom:1rem}
+  .rec-pos h2{font-size:.95rem;font-weight:800;color:var(--primary-xdark);margin:0 0 .35rem}
+  .rec-pos .rec-pos-nota{font-size:.75rem;color:var(--primary-dark);opacity:.85;margin:0 0 .85rem}
+  .rec-pos-card{border:1px solid color-mix(in srgb, var(--primary) 28%, #e5e7eb);border-radius:10px;background:#fff;padding:.75rem .9rem;height:100%}
+  .rec-pos-card h3{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin:0 0 .45rem;color:var(--primary-dark)}
+  .rec-pos table{font-size:.78rem}
+  .rec-pos .rec-concl{border:1px solid var(--accent);border-radius:10px;background:#fff;padding:.85rem 1rem}
+  .rec-pos .rec-concl p{font-size:.82rem;margin:0 0 .45rem;color:#44403c}
+  .rec-pos .rec-concl p:last-child{margin-bottom:0}
+  .rec-win{background:var(--accent-light)!important;font-weight:700}
+  .rec-pool-old{opacity:.9}
+  .rec-bt-n-btn{border-color:var(--primary)!important;color:var(--primary)!important}
+  .rec-bt-n-btn.active{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important}
 
   @media (max-width:576px){
     .cc-list{border-radius:8px}
@@ -565,18 +580,19 @@
       <div id="ce-out"></div>
     </div>
 
-    <!-- ABA 6 — Ciclo — Recorrência (só análise; sem gerar apostas) -->
+    <!-- ABA 6 — Ciclo — Recorrência (análise + pós-análise) -->
     <div class="tab-pane fade" id="tab-recorrencia" role="tabpanel">
-      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:#334155!important;">
-        <summary class="card-header fw-bold py-2" style="background:#334155;color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
         <div class="card-body pt-2 small text-muted">
           Lê a coluna <strong>Repetidas no Ciclo</strong> dos últimos N concursos (padrão 4).
           Conta cada dezena no universo 01–31: núcleo forte, repetidas, baixa presença e <strong>ausentes</strong>.
-          O pool para montar jogo depois é <strong>ausentes × baixa presença</strong> — geração automática fica para um próximo passo.
+          A <strong>pós-análise</strong> compara essa classificação com o resultado oficial.
+          O pool principal recomendado é <strong>núcleo × baixa presença</strong>; ausentes ficam como recuperação.
         </div>
       </details>
-      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:#334155!important;">
-        <div class="card-header fw-bold d-flex flex-wrap justify-content-between align-items-center gap-2" style="background:#334155;color:#fff;">
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold d-flex flex-wrap justify-content-between align-items-center gap-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
           <span><i class="fas fa-redo me-2"></i>Recorrência · Repetidas no Ciclo</span>
           <span class="small fw-normal" id="rec-concursos-lbl"></span>
         </div>
@@ -584,11 +600,11 @@
           <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
             <span class="small text-muted fw-semibold">Últimos N concursos</span>
             <div class="btn-group btn-group-sm" role="group" id="rec-n-group">
-              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="4">4</button>
-              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="5">5</button>
-              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="6">6</button>
-              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="8">8</button>
-              <button type="button" class="btn btn-outline-dark rec-n-btn" data-n="10">10</button>
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="4">4</button>
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="5">5</button>
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="6">6</button>
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="8">8</button>
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="10">10</button>
             </div>
           </div>
           <p class="small text-muted mb-0" id="rec-status">Carregando…</p>
@@ -1554,7 +1570,7 @@
       <div class="rec-bloco mb-3">
         <h3>7. Cobertura do universo</h3>
         <p class="small mb-1">Usadas: <strong>${cob.usadas}</strong> de ${j.universo} (${cob.pct_usadas}%). Ausentes: <strong>${cob.ausentes}</strong> (${cob.pct_ausentes}%).</p>
-        <div class="progress" style="height:10px"><div class="progress-bar bg-secondary" style="width:${cob.pct_usadas||0}%"></div></div>
+        <div class="progress" style="height:10px"><div class="progress-bar" style="width:${cob.pct_usadas||0}%;background:var(--primary)"></div></div>
       </div>
       <div class="row g-2 mb-3">
         <div class="col-md-3"><div class="rec-bloco"><h3>Núcleo forte</h3><div class="mb-1">${fmt.nucleo_forte||'—'}</div>${recGrupoBalls(g.nucleo_forte, j.tabela, maxF)}</div></div>
@@ -1563,17 +1579,184 @@
         <div class="col-md-3"><div class="rec-bloco"><h3>Ausentes</h3><div class="mb-1">${fmt.ausentes||'—'}</div>${recBalls(g.ausentes, 0, maxF)}</div></div>
       </div>
       <div class="row g-2 mb-3">${faixasHtml}</div>
-      <div class="card border-dark shadow-sm mb-3">
-        <div class="card-header bg-dark text-white py-2 small fw-bold">Pool para geração (depois) · ausentes × baixa presença</div>
+      <div class="row g-2 mb-3">
+        <div class="col-lg-7">
+          <div class="card shadow-sm h-100" style="border:1px solid var(--accent-mes)">
+            <div class="card-header py-2 small fw-bold text-white" style="background:var(--accent-mes)">Pool principal (recomendado) · núcleo × baixa presença</div>
+            <div class="card-body">
+              <div class="mb-2">${fmt.pool_principal||'—'}</div>
+              <div class="mb-2">${recGrupoBalls(pool.nucleo_x_baixa, j.tabela, maxF)}</div>
+              <div class="small text-muted">${(pool.nucleo_x_baixa||[]).length} dezenas · ${pool.qtd_nucleo_no_pool||0} núcleo + ${pool.qtd_baixa_no_pool||0} baixa presença.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card shadow-sm h-100 rec-pool-old">
+            <div class="card-header py-2 small fw-bold text-white" style="background:var(--primary-xdark)">Pool de recuperação · ausentes</div>
+            <div class="card-body">
+              <div class="mb-2">${fmt.pool_recuperacao||fmt.ausentes||'—'}</div>
+              <div class="mb-2">${recBalls(pool.recuperacao_ausentes||g.ausentes, 0, maxF)}</div>
+              <div class="small text-muted">${(pool.recuperacao_ausentes||g.ausentes||[]).length} dezenas · no máximo 1 por jogo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card shadow-sm mb-3 rec-pool-old">
+        <div class="card-header py-2 small fw-bold" style="background:var(--accent-light);color:var(--primary-xdark)">Pool antigo (não recomendado) · ausentes × baixa presença</div>
         <div class="card-body">
           <div class="mb-2">${fmt.pool||'—'}</div>
           <div class="mb-2">${recGrupoBalls(pool.ausentes_x_baixa, j.tabela, maxF)}</div>
-          <div class="small text-muted mb-2">${(pool.ausentes_x_baixa||[]).length} dezenas · ${pool.qtd_ausentes_no_pool||0} ausentes + ${pool.qtd_baixa_no_pool||0} baixa presença.</div>
+          <div class="small text-muted mb-2">${(pool.ausentes_x_baixa||[]).length} dezenas · ${pool.qtd_ausentes_no_pool||0} ausentes + ${pool.qtd_baixa_no_pool||0} baixa presença. Descarta o núcleo classificado como forte/repetido.</div>
           <div class="small fw-bold mb-1">Faltantes do ciclo #${ciclo.numero||'—'} (${ciclo.percentual||0}%)</div>
           <div>${balls(ciclo.pendentes,'falt')}</div>
           <p class="small text-muted mt-2 mb-0">Útil no fim do ciclo. Esta aba ainda não gera apostas.</p>
         </div>
+      </div>
+      ${renderPosAnalise(j)}`;
+    bindRecPosBt();
+  }
+
+  function recGrupoCls(key){
+    if(key==='muito_forte') return 'rec-mf';
+    if(key==='forte') return 'rec-f';
+    if(key==='repetido') return 'rec-2';
+    if(key==='baixa_presenca') return 'rec-1';
+    return 'rec-0';
+  }
+
+  function recBtTable(slice, vencedor){
+    const estr = (slice && slice.estrategias) || [];
+    if(!estr.length) return '<p class="small text-muted mb-0">Sem histórico suficiente.</p>';
+    const pick = 7;
+    const rows = estr.map(e=>{
+      const win = e.id === vencedor ? ' rec-win' : '';
+      const d = e.dist || {};
+      return `<tr class="${win}">
+        <td>${e.nome}${e.id===vencedor?' <span class="badge" style="background:var(--accent-mes)">melhor densidade</span>':''}</td>
+        <td class="text-end">${e.pool_medio}</td>
+        <td class="text-end">${e.media}</td>
+        <td class="text-end fw-bold">${e.densidade!=null?e.densidade:'—'}</td>
+        <td class="text-end">${e.esperado_aleatorio!=null?e.esperado_aleatorio:'—'}</td>
+        <td class="text-end">${e.melhor}</td>
+        <td class="text-end">${d['5']||0}</td>
+        <td class="text-end">${d['6']||0}</td>
+        <td class="text-end">${d[String(pick)]||0}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="table-responsive"><table class="table table-sm mb-0">
+      <thead class="table-light"><tr>
+        <th>Estratégia</th><th class="text-end">Pool médio</th><th class="text-end">Teto médio</th>
+        <th class="text-end">Densidade</th><th class="text-end">Esp. aleat.</th>
+        <th class="text-end">Melhor</th><th class="text-end">5</th>
+        <th class="text-end">6</th><th class="text-end">7</th>
+      </tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function renderPosAnalise(j){
+    const pa = j.pos_analise;
+    if(!pa){
+      return '';
+    }
+    if(!pa.ok){
+      return `<div class="alert alert-light border small">Pós-análise: ${pa.erro||'indisponível.'}</div>`;
+    }
+    const labels = {
+      muito_forte:'Muito forte', forte:'Forte', repetido:'Repetidas',
+      baixa_presenca:'Baixa presença', ausentes:'Ausentes'
+    };
+    const detalheHtml = (pa.detalhe||[]).map(d=>{
+      const rows = Object.keys(labels).map(k=>{
+        const nums = (d.por_grupo && d.por_grupo[k]) || [];
+        const q = (d.qtd && d.qtd[k]) || 0;
+        return `<tr>
+          <td>${labels[k]}</td>
+          <td class="fw-bold">${q}</td>
+          <td>${(nums.length?nums.map(n=>`<span class="cc-ball ${recGrupoCls(k)}">${pad(n)}</span>`).join(''):'—')}</td>
+        </tr>`;
+      }).join('');
+      const jan = (d.janela_concursos||[]).join(', ');
+      const janLbl = d.classificacao==='atual'
+        ? ('grupos atuais da janela ('+jan+')')
+        : ('classificado com N anteriores: '+(jan||'—'));
+      const ballsRes = (d.resultado||[]).map(n=>{
+        let k = 'ausentes';
+        Object.keys(labels).forEach(gk=>{
+          if(((d.por_grupo||{})[gk]||[]).includes(n)) k = gk;
+        });
+        return `<span class="cc-ball ${recGrupoCls(k)}">${pad(n)}</span>`;
+      }).join('');
+      return `<div class="col-lg-6 mb-3">
+        <div class="rec-pos-card">
+          <h3>Concurso #${d.concurso||'—'}</h3>
+          <div class="small text-muted mb-2">${d.data||''} · ${janLbl}</div>
+          <div class="mb-2">${ballsRes || '—'}</div>
+          <div class="table-responsive">
+            <table class="table table-sm mb-2">
+              <thead class="table-light"><tr><th>Grupo do Ciclo</th><th>Qtd</th><th>Dezenas sorteadas</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+          <div class="small"><strong>${d.nucleo_n||0}</strong> núcleo + <strong>${d.baixa_n||0}</strong> baixa + <strong>${d.ausentes_n||0}</strong> ausente(s)
+            · ${d.padrao_label||''}</div>
+          ${d.tetos?`<div class="small text-muted mt-1">Teto no resultado: Ausentes+Baixa <strong>${d.tetos.ausentes_baixa}</strong> · Núcleo+Baixa <strong>${d.tetos.nucleo_baixa}</strong> · Núcleo+Baixa+1Aus <strong>${d.tetos.nucleo_baixa_1aus}</strong></div>`:''}
+        </div>
       </div>`;
+    }).join('');
+    const conc = pa.conclusao || {};
+    const pars = (conc.paragrafos||[]).map(p=>`<p>${p}</p>`).join('');
+    const bt = pa.backtest || {};
+    recPosBt = bt;
+    const defaultBt = [50,100,200].find(n => bt[String(n)] && bt[String(n)].ok) || 50;
+    const btBtns = [50,100,200].map(n=>{
+      const sl = bt[String(n)];
+      const dis = !sl || !sl.ok ? ' disabled' : '';
+      const act = n===defaultBt ? ' active' : '';
+      return `<button type="button" class="btn btn-outline-secondary rec-bt-n-btn${act}" data-bt="${n}"${dis}>${n}</button>`;
+    }).join('');
+    const sl0 = bt[String(defaultBt)] || {};
+    const mix = pa.composicao_media_detalhe || {};
+    return `<div class="rec-pos" id="rec-pos">
+      <h2><i class="fas fa-balance-scale me-1"></i>Pós-análise · resultado real × classificação</h2>
+      <p class="rec-pos-nota">${pa.nota||''}</p>
+      <div class="row g-0">${detalheHtml}</div>
+      <div class="rec-pos-card mb-3">
+        <h3>Padrão dos concursos acima</h3>
+        <p class="small mb-1">Média: <strong>${mix.nucleo||0}</strong> núcleo · <strong>${mix.baixa_presenca||0}</strong> baixa presença · <strong>${mix.ausentes||0}</strong> ausentes.</p>
+        <p class="small mb-0 text-muted">${(conc.recomendacao_label)?('Leitura recente + densidade apontam para «'+conc.recomendacao_label+'». O pool antigo (Ausentes + Baixa) descarta o núcleo.'):'Compare núcleo × ausentes nos cartões.'}</p>
+      </div>
+      <div class="rec-pos-card mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+          <h3 class="mb-0">Backtest automático de pools</h3>
+          <div class="btn-group btn-group-sm" role="group">${btBtns}</div>
+        </div>
+        <p class="small text-muted mb-2" id="rec-bt-lbl">${sl0.n?(`Últimos ${sl0.n} concursos (#${sl0.concurso_de}–#${sl0.concurso_ate}) · ${sl0.pct_zero_ausentes||0}% sem nenhuma ausente.`):''}</p>
+        <div id="rec-bt-table">${recBtTable(sl0, sl0.vencedor)}</div>
+        <p class="small mb-0 text-muted">Teto = cobertura máxima do resultado pelo pool. Densidade = teto / tamanho do pool (critério para montar 7 dezenas). Esp. aleat. = acertos esperados se o jogo fosse sorteado uniformemente no pool.</p>
+      </div>
+      <div class="rec-concl">
+        <div class="fw-bold mb-2" style="color:var(--primary-xdark)">${conc.titulo||'Conclusão'}</div>
+        ${conc.problema_atual?`<p><strong>Problema da estratégia atual.</strong> ${conc.problema_atual}</p>`:''}
+        ${pars}
+        <p class="mb-0"><strong>Pool recomendado:</strong> ${conc.recomendacao_label||'Núcleo + Baixa presença'}.</p>
+      </div>
+    </div>`;
+  }
+
+  let recPosBt = {};
+  function bindRecPosBt(){
+    const wrap = document.getElementById('rec-pos');
+    if(!wrap) return;
+    wrap.querySelectorAll('.rec-bt-n-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const n = String(btn.dataset.bt);
+        const sl = recPosBt[n]||{};
+        wrap.querySelectorAll('.rec-bt-n-btn').forEach(b=>b.classList.toggle('active', b===btn));
+        const lbl = document.getElementById('rec-bt-lbl');
+        const tab = document.getElementById('rec-bt-table');
+        if(lbl) lbl.textContent = sl.n ? ('Últimos '+sl.n+' concursos (#'+sl.concurso_de+'–#'+sl.concurso_ate+') · '+(sl.pct_zero_ausentes||0)+'% sem nenhuma ausente.') : '';
+        if(tab) tab.innerHTML = recBtTable(sl, sl.vencedor);
+      });
+    });
   }
 
   async function loadRecorrencia(n){
