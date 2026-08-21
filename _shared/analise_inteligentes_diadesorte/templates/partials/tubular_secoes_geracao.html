@@ -10,9 +10,8 @@
             <p class="small text-muted">Três jeitos de incluir apostas: arraste TXT/CSV, cole o texto, ou clique em <strong>+</strong> para abrir linhas em branco e preencher as dezenas. Stats em tempo real. Exporta somente dezenas{% if extra_mes %} + mês (editável com ▲/▼){% endif %}.</p>
             <div class="tb-drop mb-2" id="tbDrop10" data-ai-compare="s10">Arraste TXT/CSV aqui · ou cole abaixo</div>
             <textarea id="tbPaste10" class="form-control form-control-sm mb-2" rows="3" placeholder="{% if extra_mes %}FORMATOS: 01 02 03 04 05 06 07 · 01 02 03 04 05 06 07 - Jul · 01 02 03 04 05 06 07 - Julho{% else %}FORMATO: dezenas separadas por espaço (ex.: 01 05 12 23 34 45){% endif %}"></textarea>
-            <div class="d-flex flex-wrap gap-2 mb-2">
+            <div class="d-flex flex-wrap gap-2 mb-2 justify-content-center">
               <button type="button" class="btn btn-sm btn-success" id="tbProcess10">✓ Processar Jogos</button>
-              <button type="button" class="btn btn-sm btn-primary" id="tbAdd10">+ Adicionar Linha</button>
               <button type="button" class="btn btn-sm btn-success" id="tbBtnMark10">🔍 Marcar (seq + faltantes)</button>
               <button type="button" class="btn btn-sm btn-secondary" id="tbBtnReset10">Resetar Marcações</button>
               <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport10">
@@ -25,7 +24,7 @@
               <button type="button" class="btn btn-sm btn-outline-secondary" id="tbJaSaiu10Clear">Limpar verif.</button>
               <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear10">Limpar</button>
             </div>
-            <div class="small text-muted mb-2" id="tbJaSaiu10Info">Verifica se alguma aposta já foi o resultado oficial (concurso 1 até o atual)</div>
+            <div class="small text-muted mb-2 text-center" id="tbJaSaiu10Info">Verifica se alguma aposta já foi o resultado oficial (concurso 1 até o atual)</div>
             <div id="tbJaSaiu10Box" class="tb-jasaiu-box d-none mb-2" role="status"></div>
             <div class="tb-stats-panel mb-2" id="tbStats10"></div>
             <div class="small fw-bold text-muted mb-1" id="tbUltimo10Lbl">Último resultado (referência — histórico tubular)</div>
@@ -56,11 +55,11 @@
                 </tbody>
               </table>
             </div>
-            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center">
               <span class="small fw-semibold mb-0">Suas apostas</span>
-              <button type="button" class="btn btn-sm btn-primary" id="tbAddLinha10"
-                      title="Inclui linhas em branco para você preencher as dezenas">
-                <i class="fas fa-plus me-1"></i>Adicionar linha
+              <button type="button" class="btn btn-sm btn-outline-primary tb-act" id="tbAddLinha10"
+                      title="Adicionar linha em branco" aria-label="Adicionar linha">
+                <i class="fas fa-plus"></i>
               </button>
               <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbAddLinha10Qtd">
                 Qtd:
@@ -68,14 +67,32 @@
                        value="1" min="1" max="500" step="1" style="width:4.5rem;"
                        title="Quantas linhas em branco incluir de uma vez">
               </label>
-              <span class="small text-muted">Clique em + quantas vezes quiser, ou informe a quantidade</span>
+              <div class="tb-sel-bar d-none" id="tbSelBar10" role="toolbar" aria-label="Seleção de apostas">
+                <span class="tb-sel-count d-none" id="tbSelCount10"></span>
+                <button type="button" class="btn btn-sm btn-outline-secondary tb-act" id="tbSelAll10"
+                        title="Selecionar todos" aria-label="Selecionar todos">
+                  <i class="fas fa-check"></i> Todos
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary tb-act" id="tbSelNone10"
+                        title="Desmarcar todos" aria-label="Desmarcar todos" disabled>
+                  <i class="fas fa-undo"></i> Desmarcar
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger tb-act" id="tbSelDel10"
+                        title="Excluir selecionadas" aria-label="Excluir selecionadas" disabled>
+                  <i class="fas fa-trash-alt"></i> <span class="tb-act-label">Excluir</span>
+                </button>
+              </div>
             </div>
-            <div id="tbFaltantesHint10" class="small text-muted mb-1 d-none"></div>
+            <div id="tbFaltantesHint10" class="small text-muted mb-1 d-none text-center"></div>
             <div id="tbDupMsg10" class="tb-dup-msg d-none mb-2" role="alert"></div>
             <div class="table-responsive">
               <table class="table table-sm table-bordered tb-table" id="tbManual10">
                 <thead>
                   <tr>
+                    <th class="tb-sel-th" title="Selecionar todos">
+                      <input type="checkbox" class="tb-sel-cb" id="tbSelHead10"
+                             aria-label="Selecionar todas as apostas">
+                    </th>
                     <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
                     {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
@@ -94,11 +111,6 @@
                 </thead>
                 <tbody></tbody>
               </table>
-            </div>
-            <div class="mt-2">
-              <button type="button" class="btn btn-sm btn-outline-primary" id="tbAddLinha10Footer">
-                <i class="fas fa-plus me-1"></i>Adicionar linha
-              </button>
             </div>
           </div>
         </div>
@@ -265,10 +277,32 @@
                 <div class="tb-stats-panel tb-stats-panel-inline" id="tbStats11"></div>
               </div>
             </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+              <span class="small fw-semibold mb-0">Apostas geradas</span>
+              <div class="tb-sel-bar d-none" id="tbSelBar11" role="toolbar" aria-label="Seleção de apostas">
+                <span class="tb-sel-count d-none" id="tbSelCount11"></span>
+                <button type="button" class="btn btn-sm btn-outline-secondary tb-act" id="tbSelAll11"
+                        title="Selecionar todos" aria-label="Selecionar todos">
+                  <i class="fas fa-check"></i> Todos
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary tb-act" id="tbSelNone11"
+                        title="Desmarcar todos" aria-label="Desmarcar todos" disabled>
+                  <i class="fas fa-undo"></i> Desmarcar
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger tb-act" id="tbSelDel11"
+                        title="Excluir selecionadas" aria-label="Excluir selecionadas" disabled>
+                  <i class="fas fa-trash-alt"></i> <span class="tb-act-label">Excluir</span>
+                </button>
+              </div>
+            </div>
             <div class="table-responsive">
               <table class="table table-sm table-bordered tb-table" id="tbManual11">
                 <thead>
                   <tr>
+                    <th class="tb-sel-th" title="Selecionar todos">
+                      <input type="checkbox" class="tb-sel-cb" id="tbSelHead11"
+                             aria-label="Selecionar todas as apostas">
+                    </th>
                     <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="acertos" title="Clique para ordenar">Acertos <span class="tb-sort-ind">⇅</span></th>

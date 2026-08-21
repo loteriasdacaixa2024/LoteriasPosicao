@@ -7556,3 +7556,16 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5152
 Press CTRL+C to quit
 127.0.0.1 - - [20/Aug/2026 18:04:47] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:10:03] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:10:04] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [20/Aug/2026 21:10:05] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:10:06] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:10:06] "GET /api/ultimos-sorteios HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:17:00] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:17:02] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:17:03] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:17:20] "GET /api/ultimos-sorteios HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:17:41] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:17:51] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:17:52] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Aug/2026 21:17:53] "GET /api/ultimos-sorteios HTTP/1.1" 200 -

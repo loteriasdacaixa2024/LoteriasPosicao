@@ -273,6 +273,8 @@
     this.sortDir = 'asc';
     this.manual10 = [];
     this.manual11 = [];
+    this.selected10 = new Set();
+    this.selected11 = new Set();
     this._manualUid = 0;
     this.manual10SortKey = null;
     this.manual10SortDir = 'asc';
@@ -446,14 +448,20 @@
     ['txt', 'xlsx', 'html'].forEach(fmt => {
       r.querySelector(`#tbExport${fmt.toUpperCase()}`)?.addEventListener('click', () => this.exportMain(fmt));
     });
-    r.querySelector('#tbAdd10')?.addEventListener('click', () => this.addManualRow(10));
     r.querySelector('#tbAddLinha10')?.addEventListener('click', () => this.addManualRow(10));
-    r.querySelector('#tbAddLinha10Footer')?.addEventListener('click', () => this.addManualRow(10));
     r.querySelector('#tbAddLinha10Qtd')?.addEventListener('keydown', (ev) => {
       if (ev.key !== 'Enter') return;
       ev.preventDefault();
       this.addManualRow(10);
     });
+    r.querySelector('#tbSelAll10')?.addEventListener('click', () => this.setSelAll(10, true));
+    r.querySelector('#tbSelNone10')?.addEventListener('click', () => this.setSelAll(10, false));
+    r.querySelector('#tbSelDel10')?.addEventListener('click', () => this.excluirSelecionados(10));
+    r.querySelector('#tbSelHead10')?.addEventListener('change', (ev) => this.setSelAll(10, !!ev.target.checked));
+    r.querySelector('#tbSelAll11')?.addEventListener('click', () => this.setSelAll(11, true));
+    r.querySelector('#tbSelNone11')?.addEventListener('click', () => this.setSelAll(11, false));
+    r.querySelector('#tbSelDel11')?.addEventListener('click', () => this.excluirSelecionados(11));
+    r.querySelector('#tbSelHead11')?.addEventListener('change', (ev) => this.setSelAll(11, !!ev.target.checked));
     r.querySelector('#tbProcess10')?.addEventListener('click', () => this.processPaste(10));
     r.querySelector('#tbExport10')?.addEventListener('click', () => this.exportManualApostas(10));
     r.querySelector('#tbExport11')?.addEventListener('click', () => this.exportManualApostas(11));
@@ -469,6 +477,7 @@
       this.manual10SortKey = null;
       this.manual10SortDir = 'asc';
       this._manualUid = 0;
+      this.selected10 = new Set();
       this.jaSaiuAtivo[10] = false;
       this._hideJaSaiuBox(10);
       this.renderManual(10);
@@ -499,6 +508,7 @@
       this.manual11 = [];
       this.manual11SortKey = null;
       this.manual11SortDir = 'asc';
+      this.selected11 = new Set();
       this.jaSaiuAtivo[11] = false;
       this._hideJaSaiuBox(11);
       this.renderManual(11);
@@ -1505,15 +1515,104 @@
     const arr = section === 10 ? this.manual10 : this.manual11;
     const at = Number.isFinite(afterIdx) ? Math.max(0, Math.min(arr.length, afterIdx + 1)) : arr.length;
     arr.splice(at, 0, ...rows);
-    if (section === 10) {
-      this.manual10SortKey = null;
-      this.manual10SortDir = 'asc';
-    } else {
-      this.manual11SortKey = null;
-      this.manual11SortDir = 'asc';
-    }
     this.renderManual(section);
     this._focusNewManualRow(section, at);
+  };
+
+  TubularApp.prototype._selSet = function (section) {
+    if (section === 10) {
+      if (!this.selected10) this.selected10 = new Set();
+      return this.selected10;
+    }
+    if (!this.selected11) this.selected11 = new Set();
+    return this.selected11;
+  };
+
+  TubularApp.prototype._ensureRowUid = function (g) {
+    if (!g) return 0;
+    if (g._uid == null) g._uid = ++this._manualUid;
+    return g._uid;
+  };
+
+  TubularApp.prototype._pruneSel = function (section) {
+    const list = section === 10 ? this.manual10 : this.manual11;
+    const set = this._selSet(section);
+    const live = new Set((list || []).map((g) => g && g._uid).filter((u) => u != null));
+    [...set].forEach((u) => { if (!live.has(u)) set.delete(u); });
+  };
+
+  TubularApp.prototype._syncSelBar = function (section) {
+    this._pruneSel(section);
+    const list = section === 10 ? this.manual10 : this.manual11;
+    const set = this._selSet(section);
+    const n = set.size;
+    const total = (list || []).length;
+    const bar = this.root.querySelector(section === 10 ? '#tbSelBar10' : '#tbSelBar11');
+    const countEl = this.root.querySelector(section === 10 ? '#tbSelCount10' : '#tbSelCount11');
+    const btnAll = this.root.querySelector(section === 10 ? '#tbSelAll10' : '#tbSelAll11');
+    const btnNone = this.root.querySelector(section === 10 ? '#tbSelNone10' : '#tbSelNone11');
+    const btnDel = this.root.querySelector(section === 10 ? '#tbSelDel10' : '#tbSelDel11');
+    const headCb = this.root.querySelector(section === 10 ? '#tbSelHead10' : '#tbSelHead11');
+    if (bar) bar.classList.toggle('d-none', total === 0);
+    if (countEl) {
+      countEl.classList.toggle('d-none', n === 0);
+      countEl.textContent = n === 1 ? '1 selecionada' : `${n} selecionadas`;
+    }
+    if (btnAll) {
+      btnAll.disabled = total === 0;
+      btnAll.classList.toggle('active', total > 0 && n === total);
+    }
+    if (btnNone) btnNone.disabled = n === 0;
+    if (btnDel) {
+      btnDel.disabled = n === 0;
+      const lab = btnDel.querySelector('.tb-act-label');
+      if (lab) lab.textContent = n > 0 ? `Excluir (${n})` : 'Excluir';
+      const tip = n > 0 ? `Excluir selecionadas (${n})` : 'Excluir selecionadas';
+      btnDel.setAttribute('title', tip);
+      btnDel.setAttribute('aria-label', tip);
+    }
+    if (headCb) {
+      headCb.disabled = total === 0;
+      headCb.checked = total > 0 && n === total;
+      headCb.indeterminate = n > 0 && n < total;
+    }
+  };
+
+  TubularApp.prototype.setSelAll = function (section, on) {
+    const list = section === 10 ? this.manual10 : this.manual11;
+    const set = this._selSet(section);
+    if (on) (list || []).forEach((g) => { if (g) set.add(this._ensureRowUid(g)); });
+    else set.clear();
+    const table = this.root.querySelector(section === 10 ? '#tbManual10' : '#tbManual11');
+    if (table) {
+      table.querySelectorAll('tbody .tb-sel-cb').forEach((cb) => { cb.checked = !!on; });
+      table.querySelectorAll('tbody tr[data-uid]').forEach((tr) => tr.classList.toggle('tb-row-sel', !!on));
+    }
+    this._syncSelBar(section);
+  };
+
+  TubularApp.prototype.toggleSel = function (section, uid, on) {
+    const set = this._selSet(section);
+    if (on) set.add(uid);
+    else set.delete(uid);
+    const table = this.root.querySelector(section === 10 ? '#tbManual10' : '#tbManual11');
+    const tr = table && table.querySelector(`tr[data-uid="${uid}"]`);
+    if (tr) tr.classList.toggle('tb-row-sel', !!on);
+    this._syncSelBar(section);
+  };
+
+  TubularApp.prototype.excluirSelecionados = function (section) {
+    this._pruneSel(section);
+    const set = this._selSet(section);
+    const n = set.size;
+    if (!n) return;
+    if (n >= 2 && !window.confirm(`Excluir ${n} apostas selecionadas?`)) return;
+    const arr = section === 10 ? this.manual10 : this.manual11;
+    const kept = arr.filter((g) => !set.has(g && g._uid));
+    if (section === 10) this.manual10 = kept;
+    else this.manual11 = kept;
+    set.clear();
+    this.renderManual(section);
   };
 
   TubularApp.prototype.processPaste = function (section) {
@@ -1626,13 +1725,14 @@
     const histMap = jaAtivo ? this._histComboMap() : null;
     const jaHits = [];
     let nValidJa = 0;
-    const emptyCols = section === 10
-      ? (13 + (this.extraMes ? 1 : 0))
-      : (13 + (this.extraMes ? 1 : 0));
+    const emptyCols = 14 + (this.extraMes ? 1 : 0);
+    const selSet = this._selSet(section);
     tbody.innerHTML = order.map((origIdx) => {
       const g = list[origIdx];
       const i = origIdx;
-      const apostaNum = (g && g._uid != null) ? g._uid : (origIdx + 1);
+      const uid = this._ensureRowUid(g);
+      const apostaNum = uid;
+      const selected = selSet.has(uid);
       const nums = this._manualNumsDisplay(g, mode, L);
       const dup = this._manualDupInfo(nums);
       if (section === 10 && dup.hasDup) {
@@ -1671,6 +1771,7 @@
       const rowClsParts = [];
       if (dup.hasDup) rowClsParts.push('tb-row-dup');
       if (jaSaiu) rowClsParts.push('tb-row-ja-saiu');
+      if (selected) rowClsParts.push('tb-row-sel');
       const rowCls = rowClsParts.length ? ` class="${rowClsParts.join(' ')}"` : '';
       const jaTitle = jaSaiu
         ? ocorrencias.map(o => `#${o.contest}${o.date ? ' · ' + o.date : ''}${o.monthName ? ' · ' + o.monthName : ''}`).join(' · ')
@@ -1678,8 +1779,13 @@
       const jaBadge = jaSaiu
         ? ` <span class="tb-badge-ja-saiu" title="${esc(jaTitle)}">já saiu #${esc(String(ocorrencias[0].contest))}${ocorrencias.length > 1 ? ` +${ocorrencias.length - 1}` : ''}</span>`
         : '';
+      const selTd = `<td class="tb-sel-td">
+        <input type="checkbox" class="tb-sel-cb" data-sel-sec="${section}" data-uid="${uid}"
+               ${selected ? 'checked' : ''} aria-label="Selecionar aposta ${apostaNum}">
+      </td>`;
       if (section === 10) {
-        return `<tr${rowCls}>
+        return `<tr${rowCls} data-uid="${uid}">
+          ${selTd}
           <td>${apostaNum}${jaBadge}</td>
           <td class="text-nowrap">${dezenasTd}</td>
           ${mesTd}
@@ -1694,8 +1800,8 @@
           <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
           <td class="tb-align-mono">${an ? `<span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span>` : '—'}</td>
           <td class="text-nowrap tb-row-actions">
-            <button type="button" class="btn btn-sm btn-outline-success py-0" data-add-row="${section}" data-idx="${i}" title="Adicionar linha abaixo">+</button>
-            <button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}" title="Remover">×</button>
+            <button type="button" class="btn btn-sm btn-outline-success py-0 tb-act" data-add-row="${section}" data-idx="${i}" title="Adicionar linha abaixo" aria-label="Adicionar linha abaixo">+</button>
+            <button type="button" class="btn btn-sm btn-outline-danger py-0 tb-act" data-rm="${section}" data-idx="${i}" data-uid="${uid}" title="Remover linha" aria-label="Remover linha">×</button>
           </td>
         </tr>`;
       }
@@ -1706,7 +1812,8 @@
         acertos,
         this.conferencia11 ? `Acertos no concurso ${this.conferencia11.contest}` : 'Conferir um concurso'
       )}</td>`;
-      return `<tr${rowCls}>
+      return `<tr${rowCls} data-uid="${uid}">
+        ${selTd}
         <td>${apostaNum}${jaBadge}</td>
         <td class="text-nowrap">${dezenasTd}</td>
         ${acertosTd}
@@ -1720,9 +1827,11 @@
         <td>${an ? esc(an.padroes.inicial) : '—'}</td>
         <td>${an ? esc(an.padroes.final) : '—'}</td>
         <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
-        <td><button type="button" class="btn btn-sm btn-outline-danger py-0" data-rm="${section}" data-idx="${i}">×</button></td>
+        <td class="text-nowrap tb-row-actions">
+          <button type="button" class="btn btn-sm btn-outline-danger py-0 tb-act" data-rm="${section}" data-idx="${i}" data-uid="${uid}" title="Remover linha" aria-label="Remover linha">×</button>
+        </td>
       </tr>`;
-    }).join('') || `<tr><td colspan="${emptyCols}" class="text-muted">${section === 11 ? 'Clique em «GERAR 10 APOSTAS»' : 'Clique em «+ Adicionar linha» para incluir apostas em branco, ou cole / arraste um arquivo'}</td></tr>`;
+    }).join('') || `<tr><td colspan="${emptyCols}" class="text-muted">${section === 11 ? 'Clique em «GERAR 10 APOSTAS»' : 'Clique em «+» para incluir apostas em branco, ou cole / arraste um arquivo'}</td></tr>`;
 
     if (section === 11 && hitSet) {
       const info = this.root.querySelector('#tbConferir11Info');
@@ -1734,6 +1843,7 @@
       }
     }
     if (jaAtivo) this._paintJaSaiuBox(section, jaHits, nValidJa);
+    this._syncSelBar(section);
     if (section === 10) {
       this._renderManual10DupMsg(alertMsgs);
       this._renderFaltantesHint();
@@ -1807,12 +1917,24 @@
         this.addManualRow(sec, 1, idx);
       });
     });
+    tbody.querySelectorAll('.tb-sel-cb').forEach((cb) => {
+      cb.addEventListener('click', (ev) => ev.stopPropagation());
+      cb.addEventListener('change', (ev) => {
+        const sec = +cb.dataset.selSec;
+        const uid = +cb.dataset.uid;
+        this.toggleSel(sec, uid, !!ev.target.checked);
+      });
+    });
     tbody.querySelectorAll('[data-rm]').forEach(btn => {
       btn.addEventListener('click', () => {
         const sec = +btn.dataset.rm;
         const idx = +btn.dataset.idx;
-        if (sec === 10) this.manual10.splice(idx, 1);
-        else this.manual11.splice(idx, 1);
+        const uid = +btn.dataset.uid;
+        const arr = sec === 10 ? this.manual10 : this.manual11;
+        const row = arr[idx];
+        const id = Number.isFinite(uid) ? uid : (row && row._uid);
+        if (id != null) this._selSet(sec).delete(id);
+        arr.splice(idx, 1);
         this.renderManual(sec);
       });
     });
