@@ -9039,3 +9039,128 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.71.202.176:5157
 Press CTRL+C to quit
 127.0.0.1 - - [02/Sep/2026 07:13:13] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-02 16:20:38 ---
+===========================================================
+[OK] Servidor +Milionária rodando na porta 5157
+[URL] Acesse:      http://localhost:5157
+[URL] Análise:     http://localhost:5157/analise/
+[URL] Modelos:     http://localhost:5157/modelos/
+[URL] Conferência: http://localhost:5157/central-conferencias/
+[URL] Desdobramento: http://localhost:5157/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5157
+ * Running on http://10.0.0.10:5157
+Press CTRL+C to quit
+127.0.0.1 - - [02/Sep/2026 16:20:56] "GET / HTTP/1.1" 200 -
+[2026-09-02 17:12:26,480] ERROR in app: Exception on /geradores-elite/escolha-tubular-apostas/ [GET]
+Traceback (most recent call last):
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\app.py", line 1463, in wsgi_app
+    response = self.full_dispatch_request()
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\app.py", line 872, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "D:\Loterias\LoteriasPosicao\_shared\gerador_escolha_tubular\routes_factory.py", line 47, in escolha_tubular_apostas_page
+        except Exception:
+           ^^^^^^^^^^^^^^
+    ...<17 lines>...
+        tubular_api_base="/analise/api/inteligentes",
+    
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\jinja2\environment.py", line 1301, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\jinja2\environment.py", line 936, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "D:\Loterias\LoteriasPosicao\_shared\geradores_elite\templates\gerador_escolha_tubular.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "D:\Loterias\LoteriasPosicao\AnalisePorPosicao-MaisMilionaria-Only\templates\base.html", line 385, in top-level template code
+    <div class="page-content">{% block content %}{% endblock %}</div>
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LoteriasPosicao\_shared\geradores_elite\templates\gerador_escolha_tubular.html", line 333, in block 'content'
+    {% include 'partials/tubular_secoes_geracao.html' with context %}
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: partials/tubular_secoes_geracao.html
+127.0.0.1 - - [02/Sep/2026 17:12:26] "GET /geradores-elite/escolha-tubular-apostas/?aba=comparador HTTP/1.1" 500 -
+[2026-09-02 17:13:07,376] ERROR in app: Exception on /geradores-elite/escolha-tubular-apostas/ [GET]
+Traceback (most recent call last):
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\app.py", line 1463, in wsgi_app
+    response = self.full_dispatch_request()
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\app.py", line 872, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "D:\Loterias\LoteriasPosicao\_shared\gerador_escolha_tubular\routes_factory.py", line 47, in escolha_tubular_apostas_page
+        except Exception:
+           ^^^^^^^^^^^^^^
+    ...<17 lines>...
+        tubular_api_base="/analise/api/inteligentes",
+    
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\jinja2\environment.py", line 1301, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\jinja2\environment.py", line 936, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "D:\Loterias\LoteriasPosicao\_shared\geradores_elite\templates\gerador_escolha_tubular.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "D:\Loterias\LoteriasPosicao\AnalisePorPosicao-MaisMilionaria-Only\templates\base.html", line 385, in top-level template code
+    <div class="page-content">{% block content %}{% endblock %}</div>
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LoteriasPosicao\_shared\geradores_elite\templates\gerador_escolha_tubular.html", line 333, in block 'content'
+    {% include 'partials/tubular_secoes_geracao.html' with context %}
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\flask\templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: partials/tubular_secoes_geracao.html
+127.0.0.1 - - [02/Sep/2026 17:13:07] "GET /geradores-elite/escolha-tubular-apostas/?aba=comparador HTTP/1.1" 500 -
+
+--- iniciando 2026-09-02 17:15:19 ---
+===========================================================
+[OK] Servidor +Milionária rodando na porta 5157
+[URL] Acesse:      http://localhost:5157
+[URL] Análise:     http://localhost:5157/analise/
+[URL] Modelos:     http://localhost:5157/modelos/
+[URL] Conferência: http://localhost:5157/central-conferencias/
+[URL] Desdobramento: http://localhost:5157/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5157
+ * Running on http://10.0.0.10:5157
+Press CTRL+C to quit
+127.0.0.1 - - [02/Sep/2026 17:15:29] "GET / HTTP/1.1" 200 -
+D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'servicebus2.caixa.gov.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'servicebus2.caixa.gov.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+127.0.0.1 - - [02/Sep/2026 17:17:52] "GET /geradores-elite/escolha-tubular-apostas/?aba=comparador HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 17:18:24] "GET /geradores-elite/api/trevos-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 17:18:26] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -

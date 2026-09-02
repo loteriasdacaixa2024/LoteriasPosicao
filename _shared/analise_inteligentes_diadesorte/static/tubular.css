@@ -806,7 +806,7 @@
   outline: 2px solid var(--primary); outline-offset: 2px;
 }
 
-/* Seção 12 — Comparador compacto (volante real do Dia de Sorte) */
+/* Seção 12 — Comparador compacto (volante por modalidade) */
 #ai-tubular-root .tb-cmp-card {
   border-top: 3px solid var(--primary, #c08b00);
 }
@@ -814,6 +814,7 @@
   --tb-cmp-cell-w: 28px;
   --tb-cmp-cell-h: 22px;
   --tb-cmp-gap: 2px;
+  --tb-cmp-cols: 10;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: .85rem 1.25rem;
@@ -895,18 +896,15 @@
   display: flex;
   flex-direction: column;
   gap: var(--tb-cmp-gap);
-  width: calc(10 * var(--tb-cmp-cell-w) + 9 * var(--tb-cmp-gap));
+  width: calc(var(--tb-cmp-cols) * var(--tb-cmp-cell-w) + (var(--tb-cmp-cols) - 1) * var(--tb-cmp-gap));
   margin: 0 auto;
   flex: 0 0 auto;
 }
 #ai-tubular-root .tb-cmp-row {
   display: grid;
-  grid-template-columns: repeat(10, var(--tb-cmp-cell-w));
+  grid-template-columns: repeat(var(--tb-cmp-cols), var(--tb-cmp-cell-w));
   gap: var(--tb-cmp-gap);
   justify-content: start;
-}
-#ai-tubular-root .tb-cmp-row-last {
-  grid-template-columns: var(--tb-cmp-cell-w);
 }
 #ai-tubular-root .tb-cmp-cell {
   width: var(--tb-cmp-cell-w);
@@ -1008,6 +1006,17 @@
 #ai-tubular-root .tb-cmp-overlay.d-none {
   display: none !important;
 }
+#ai-tubular-root .tb-cmp-pair.tb-cmp-md {
+  --tb-cmp-cell-w: 26px;
+  --tb-cmp-cell-h: 20px;
+}
+#ai-tubular-root .tb-cmp-pair.tb-cmp-lg {
+  --tb-cmp-cell-w: 22px;
+  --tb-cmp-cell-h: 18px;
+}
+#ai-tubular-root .tb-cmp-pair.tb-cmp-lg .tb-cmp-cell {
+  font-size: .62rem;
+}
 #ai-tubular-root .tb-cmp-modal {
   background: #fff;
   border-radius: 10px;
@@ -1015,7 +1024,7 @@
   border-top: 3px solid var(--primary, #c08b00);
   box-shadow: 0 8px 32px rgba(0, 0, 0, .18);
   padding: 1rem 1.15rem;
-  width: min(22rem, 100%);
+  width: min(26rem, 100%);
 }
 @media (max-width: 640px) {
   #ai-tubular-root .tb-cmp-pair {

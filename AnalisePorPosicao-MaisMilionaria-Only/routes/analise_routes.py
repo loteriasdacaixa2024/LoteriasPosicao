@@ -47,6 +47,8 @@ from analise_escolha_visual.app_integration import wire_analise_escolha_visual
 wire_analise_escolha_visual(analise_bp, "maismilionaria")
 from analise_tubular_inteligente.app_integration import wire_analise_tubular_inteligente
 wire_analise_tubular_inteligente(analise_bp, "maismilionaria")
+from analise_inteligentes_diadesorte.app_integration import wire_analise_inteligentes
+wire_analise_inteligentes(analise_bp, "maismilionaria")
 
 from resumo_modalidade.app_integration import wire_resumo_modalidade
 wire_resumo_modalidade(analise_bp, "maismilionaria")

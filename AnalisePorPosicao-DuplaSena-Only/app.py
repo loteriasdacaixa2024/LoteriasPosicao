@@ -27,6 +27,7 @@ from analise_gaps_ciclo.app_integration import extend_analise_gaps_ciclo_app
 from linhas_universo.app_integration import extend_camadas_linhas_dd_du_app
 from analise_escolha_visual.app_integration import extend_analise_escolha_visual_app
 from analise_tubular_inteligente.app_integration import extend_analise_tubular_inteligente_app
+from analise_inteligentes_diadesorte.app_integration import extend_analise_inteligentes_app
 from menu.app_integration import extend_nav_app
 from posicao_analise.app_integration import extend_posicao_app
 from resumo_modalidade.app_integration import extend_resumo_modalidade_app
@@ -54,6 +55,7 @@ def create_app():
     extend_camadas_linhas_dd_du_app(app)
     extend_analise_escolha_visual_app(app)
     extend_analise_tubular_inteligente_app(app)
+    extend_analise_inteligentes_app(app)
     extend_posicao_app(app, 'duplasena')
     extend_resumo_modalidade_app(app)
     extend_ciclo_cobertura_app(app, 'duplasena')

@@ -21,12 +21,23 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
         if not ctx.get("sucesso"):
             from geradores_elite.modality_config import MODALITIES
             mod = MODALITIES.get(modality_key) or {}
+            vcols = 10
+            try:
+                from analise_estudos.specs import get_estudos_config
+                vcols = int(get_estudos_config(modality_key).get("volante_cols") or 10)
+            except Exception:
+                vcols = 5 if modality_key == "lotofacil" else 10
             ctx = {
                 "dezena_min": int(mod.get("dezena_min", 1)),
                 "dezena_max": int(mod.get("dezena_max", 31)),
                 "sorteadas": int(mod.get("sorteadas", mod.get("pick_default", 7))),
+                "pick_default": int(mod.get("pick_default", mod.get("sorteadas", 7))),
+                "pick_min": int(mod.get("pick_min", mod.get("pick_default", 7))),
+                "pick_max": int(mod.get("pick_max", mod.get("pick_default", 7))),
                 "extra_mes": mod.get("extra") == "mes" or modality_key == "diadesorte",
-                "volante_cols": 10,
+                "extra_time": mod.get("extra") == "time" or modality_key == "timemania",
+                "extra_trevo": mod.get("extra") == "trevo" or modality_key == "maismilionaria",
+                "volante_cols": vcols,
             }
         meses_cores = {}
         if ctx.get("extra_mes"):
@@ -61,6 +72,8 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
             dezena_max=int(ctx.get("dezena_max") or 31),
             sorteadas=int(ctx.get("sorteadas") or 7),
             extra_mes=bool(ctx.get("extra_mes")),
+            extra_time=bool(ctx.get("extra_time")),
+            extra_trevo=bool(ctx.get("extra_trevo")),
             aba_inicial=aba_inicial,
         )
 

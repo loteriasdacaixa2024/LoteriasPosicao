@@ -799,7 +799,7 @@ class AnaliseInteligentesService:
             crescentes = sorted(int(x) for x in ordem)
             mes_num = getattr(r, "mes_num", None)
             mes_nome = getattr(r, "mes_nome", "") or ""
-            sorteios.append({
+            item = {
                 "numero": int(r.concurso),
                 "concurso": int(r.concurso),
                 "data": getattr(r, "data", "") or "",
@@ -812,7 +812,33 @@ class AnaliseInteligentesService:
                 "mes_num": int(mes_num or 0) or None,
                 "mesSorteNome": mes_nome,
                 "nomeMesSorte": mes_nome,
-            })
+            }
+            tn = getattr(r, "time_num", None)
+            try:
+                tn_i = int(tn or 0)
+            except (TypeError, ValueError):
+                tn_i = 0
+            if tn_i:
+                item["time_num"] = tn_i
+                item["time_nome"] = getattr(r, "time_nome", "") or ""
+            trevos = []
+            if hasattr(r, "trevos_lista"):
+                try:
+                    trevos = [int(x) for x in (r.trevos_lista() or [])]
+                except Exception:
+                    trevos = []
+            if not trevos:
+                for attr in ("t1", "t2"):
+                    v = getattr(r, attr, None)
+                    try:
+                        vi = int(v or 0)
+                    except (TypeError, ValueError):
+                        vi = 0
+                    if vi:
+                        trevos.append(vi)
+            if trevos:
+                item["trevos"] = trevos
+            sorteios.append(item)
         return {
             "sucesso": True,
             "total": len(sorteios),

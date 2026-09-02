@@ -358,7 +358,7 @@
                   <div class="tb-cmp-col-title">Escolha manual</div>
                   <div class="tb-cmp-aposta-head">
                     <strong id="tbCmpManualTitulo">Volante 1</strong>
-                    <span class="small text-muted" id="tbCmpManualInfo">0 / 7</span>
+                    <span class="small text-muted" id="tbCmpManualInfo">0 / {{ sorteadas }}</span>
                     <button type="button" class="btn btn-sm btn-outline-danger tb-cmp-del" id="tbCmpDelAtivo"
                             title="Excluir este volante" aria-label="Excluir volante">
                       <i class="fas fa-trash-alt"></i>
@@ -367,7 +367,7 @@
                   <div class="tb-cmp-conc-lbl tb-cmp-head-spacer" aria-hidden="true">&nbsp;</div>
                 </div>
                 <div id="tbCmpManualVolante"></div>
-                <div class="tb-cmp-ticket-nums" id="tbCmpManualNums">Clique para marcar 7 dezenas</div>
+                <div class="tb-cmp-ticket-nums" id="tbCmpManualNums">Clique para marcar as dezenas</div>
               </div>
             </div>
             <div class="tb-cmp-tabs-wrap">
@@ -378,9 +378,9 @@
         </div>
         <div id="tbCmpMesOverlay" class="tb-cmp-overlay d-none" role="dialog" aria-modal="true" aria-labelledby="tbCmpMesTitulo">
           <div class="tb-cmp-modal">
-            <h3 class="h6 fw-bold mb-2" id="tbCmpMesTitulo">Mês da Sorte</h3>
-            <p class="small text-muted mb-2">Escolha o Mês da Sorte para a exportação das apostas dos volantes.</p>
-            <label class="form-label small mb-1" for="tbCmpMesSelect">Mês da Sorte</label>
+            <h3 class="h6 fw-bold mb-2" id="tbCmpMesTitulo">Extra da aposta</h3>
+            <p class="small text-muted mb-2" id="tbCmpMesHint">Escolha o extra para a exportação das apostas dos volantes.</p>
+            <label class="form-label small mb-1" for="tbCmpMesSelect" id="tbCmpMesLabel">Opção</label>
             <select class="form-select form-select-sm mb-3" id="tbCmpMesSelect"></select>
             <div class="d-flex flex-wrap gap-2 justify-content-end">
               <button type="button" class="btn btn-sm btn-outline-secondary" id="tbCmpMesCancel">Cancelar</button>

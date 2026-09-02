@@ -680,6 +680,28 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
+    @bp.route("/api/time-coracao-opcoes")
+    def api_time_coracao_opcoes():
+        """Select padronizado: + Atrasado, + Frequente, times, + Aleatório."""
+        if modality_key != "timemania":
+            return jsonify({"sucesso": False, "erro": "Disponível só para Timemania."}), 404
+        try:
+            from geradores_elite.extra_analise_select import opcoes_time_coracao
+            return jsonify(opcoes_time_coracao())
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @bp.route("/api/trevos-opcoes")
+    def api_trevos_opcoes():
+        """Select padronizado: + Atrasado, + Frequente, pares de trevos, + Aleatório."""
+        if modality_key != "maismilionaria":
+            return jsonify({"sucesso": False, "erro": "Disponível só para +Milionária."}), 404
+        try:
+            from geradores_elite.extra_analise_select import opcoes_trevos
+            return jsonify(opcoes_trevos())
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
     @bp.route("/api/comportamento/panorama-indicadores")
     def api_comportamento_panorama_indicadores():
         if not tem_gerador_comportamento(modality_key):

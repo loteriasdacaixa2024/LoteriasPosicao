@@ -14,11 +14,17 @@
     const dmin = parseInt(root && root.dataset.dezenaMin, 10);
     const dmax = parseInt(root && root.dataset.dezenaMax, 10);
     const sort = parseInt(root && root.dataset.sorteadas, 10);
+    const pickDef = parseInt(root && root.dataset.pickDefault, 10);
+    const cols = parseInt(root && root.dataset.volanteCols, 10);
     return {
       dezenaMin: Number.isFinite(dmin) ? dmin : 1,
       dezenaMax: Number.isFinite(dmax) ? dmax : 31,
       sorteadas: Number.isFinite(sort) ? sort : 7,
+      pickDefault: Number.isFinite(pickDef) ? pickDef : (Number.isFinite(sort) ? sort : 7),
+      volanteCols: Number.isFinite(cols) && cols > 0 ? cols : 10,
       extraMes: !!(root && String(root.dataset.extraMes || '') === '1'),
+      extraTime: !!(root && String(root.dataset.extraTime || '') === '1'),
+      extraTrevo: !!(root && String(root.dataset.extraTrevo || '') === '1'),
     };
   }
 
@@ -262,6 +268,9 @@
     this.root = root;
     this.api = root.dataset.api || '/analise/api/inteligentes';
     this.extraMes = hasMes(root);
+    this.extraTime = String(root.dataset.extraTime || '') === '1';
+    this.extraTrevo = String(root.dataset.extraTrevo || '') === '1';
+    this._extraOpcoes = null;
     this.mesesCores = {};
     try { this.mesesCores = JSON.parse(root.dataset.mesesCores || '{}'); } catch (_) {}
     this.data = [];
@@ -782,6 +791,7 @@
           mesNum = s.mesSorte || s.mes_num || 0;
           mesNome = s.mesSorteNome || s.nomeMesSorte || (mesNum ? (MESES[mesNum - 1] || '') : '') || '';
         }
+        const trevos = Array.isArray(s.trevos) ? s.trevos.map(Number).filter(Number.isFinite) : [];
         return {
           contest: s.concurso || s.numero,
           date: s.data || s.dataApuracao || '',
@@ -789,6 +799,9 @@
           numbersDrawOrder: draw,
           month: mesNum,
           monthName: mesNome,
+          timeNum: Number(s.time_num) || 0,
+          timeNome: s.time_nome || '',
+          trevos,
         };
       });
       this._histMap = null;
@@ -2847,7 +2860,38 @@
 
   TubularApp.prototype._cmpPickMax = function () {
     const L = limitsFrom(this.root);
-    return L.sorteadas || 7;
+    return L.pickDefault || L.sorteadas || 7;
+  };
+
+  TubularApp.prototype._cmpExtraKind = function () {
+    if (this.extraMes) return 'mes';
+    if (this.extraTime) return 'time';
+    if (this.extraTrevo) return 'trevo';
+    return '';
+  };
+
+  TubularApp.prototype._cmpExtraLabel = function (c) {
+    if (!c) return '';
+    if (this.extraMes && c.monthName) return c.monthName;
+    if (this.extraTime && (c.timeNome || c.time_nome)) return c.timeNome || c.time_nome;
+    const trevos = c.trevos || [];
+    if (this.extraTrevo && trevos.length) return 'T ' + trevos.map(fmt2).join(' ');
+    return '';
+  };
+
+  TubularApp.prototype._applyCmpLayout = function () {
+    const pair = this.root.querySelector('#tbCmpPair');
+    if (!pair) return;
+    const L = limitsFrom(this.root);
+    const cols = L.volanteCols || 10;
+    const span = (L.dezenaMax - L.dezenaMin) + 1;
+    pair.style.setProperty('--tb-cmp-cols', String(cols));
+    pair.classList.toggle('tb-cmp-lg', span >= 80);
+    pair.classList.toggle('tb-cmp-md', span >= 50 && span < 80);
+    const cellW = span >= 80 ? 22 : (span >= 50 ? 26 : 28);
+    const gap = 2;
+    const volW = cols * cellW + (cols - 1) * gap;
+    pair.style.width = `min(${Math.max(volW * 2 + 48, 320)}px, 100%)`;
   };
 
   TubularApp.prototype._blankCmpVolante = function () {
@@ -2886,7 +2930,15 @@
     if (!c) c = chrono[chrono.length - 1];
     if (!c) return null;
     const nums = (c.numbersAscending || c.numbersDrawOrder || []).map(Number).filter(Number.isFinite);
-    return { contest: c.contest, date: c.date || '', nums, monthName: c.monthName || '' };
+    return {
+      contest: c.contest,
+      date: c.date || '',
+      nums,
+      monthName: c.monthName || '',
+      timeNum: c.timeNum || 0,
+      timeNome: c.timeNome || '',
+      trevos: Array.isArray(c.trevos) ? c.trevos.slice() : [],
+    };
   };
 
   TubularApp.prototype._fillCmpConcSelect = function () {
@@ -2896,7 +2948,8 @@
     const last = chrono.length ? String(chrono[0].contest) : '';
     const prev = sel.value || (this.cmpOficialContest != null ? String(this.cmpOficialContest) : '');
     const opts = chrono.map((c) => {
-      const label = `#${c.contest}${c.date ? ' — ' + c.date : ''}${c.monthName ? ' · ' + c.monthName : ''}`;
+      const extra = this._cmpExtraLabel(c);
+      const label = `#${c.contest}${c.date ? ' — ' + c.date : ''}${extra ? ' · ' + extra : ''}`;
       return `<option value="${esc(String(c.contest))}">${esc(label)}</option>`;
     });
     sel.innerHTML = opts.length ? opts.join('') : '<option value="">— sem concursos —</option>';
@@ -2913,20 +2966,22 @@
     const oficial = opts.oficialSet || null;
     const interactive = !!opts.interactive;
     const vid = opts.vid;
+    const cols = L.volanteCols || 10;
     const rows = (L.dezenaMin === 1 && L.dezenaMax === 31)
       ? [[1, 10], [11, 20], [21, 30], [31, 31]]
       : (function () {
-          const cols = parseInt(this.root.dataset.volanteCols, 10) || 10;
           const out = [];
           for (let d = L.dezenaMin; d <= L.dezenaMax; d += cols) {
             out.push([d, Math.min(L.dezenaMax, d + cols - 1)]);
           }
           return out;
-        }).call(this);
+        })();
     let html = '<div class="tb-cmp-volante" role="' + (interactive ? 'group' : 'img') + '">';
     rows.forEach(([a, b]) => {
-      const last = a === b;
-      html += `<div class="tb-cmp-row${last ? ' tb-cmp-row-last' : ''}">`;
+      const count = b - a + 1;
+      const partial = count < cols;
+      const style = partial ? ` style="grid-template-columns: repeat(${count}, var(--tb-cmp-cell-w))"` : '';
+      html += `<div class="tb-cmp-row"${style}>`;
       for (let d = a; d <= b; d++) {
         const on = sel.has(d);
         const inOficial = !!(oficial && oficial.has(d));
@@ -2954,17 +3009,20 @@
     const root12 = this.root.querySelector('#tbSecao12');
     if (!root12) return;
     if (!this.cmpVolantes.length) this.initComparador();
+    this._applyCmpLayout();
     if (!skipSelect) this._fillCmpConcSelect();
     const ofc = this._cmpOficialEntry();
     const ofcSet = ofc ? new Set(ofc.nums) : null;
     const L = limitsFrom(this.root);
+    const pick = this._cmpPickMax();
+    const extraLbl = this._cmpExtraLabel(ofc);
     const lbl = this.root.querySelector('#tbCmpConcLbl');
     const numsEl = this.root.querySelector('#tbCmpOficialNums');
     const volEl = this.root.querySelector('#tbCmpOficialVolante');
     if (lbl) lbl.textContent = ofc ? `CONCURSO ${ofc.contest}` : 'CONCURSO —';
     if (numsEl) {
       numsEl.textContent = ofc
-        ? ofc.nums.map(fmt2).join(' ') + (ofc.monthName ? ' · ' + ofc.monthName : '')
+        ? ofc.nums.map(fmt2).join(' ') + (extraLbl ? ' · ' + extraLbl : '')
         : 'Sem resultado.';
     }
     if (volEl) volEl.innerHTML = this._cmpVolanteHtml(ofc ? ofc.nums : [], { oficialSet: ofcSet, interactive: false });
@@ -2979,12 +3037,12 @@
     const tit = this.root.querySelector('#tbCmpManualTitulo');
     if (tit) tit.textContent = `Volante ${idx + 1}`;
     const infoMan = this.root.querySelector('#tbCmpManualInfo');
-    if (infoMan) infoMan.textContent = `${n.length} / ${L.sorteadas}`;
+    if (infoMan) infoMan.textContent = `${n.length} / ${pick}`;
     const numsMan = this.root.querySelector('#tbCmpManualNums');
     if (numsMan) {
       numsMan.textContent = n.length
         ? n.map(fmt2).join(' ')
-        : `Clique para marcar ${L.sorteadas} dezenas`;
+        : `Clique para marcar ${pick} dezenas`;
     }
     const del = this.root.querySelector('#tbCmpDelAtivo');
     if (del && active) del.setAttribute('data-cmp-del', String(active.id));
@@ -3061,18 +3119,117 @@
     this.renderComparador(true);
   };
 
-  TubularApp.prototype._cmpExportLines = function (mesesLote) {
+  TubularApp.prototype._shuffleCopy = function (arr) {
+    const out = arr.slice();
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = out[i];
+      out[i] = out[j];
+      out[j] = t;
+    }
+    return out;
+  };
+
+  TubularApp.prototype._distribuirBloco = function (universo, n) {
+    const out = [];
+    if (!universo.length || n <= 0) return out;
+    while (out.length < n) out.push.apply(out, this._shuffleCopy(universo));
+    return out.slice(0, n);
+  };
+
+  TubularApp.prototype._paresTrevos = function () {
+    const out = [];
+    for (let a = 1; a <= 6; a++) {
+      for (let b = a + 1; b <= 6; b++) out.push([a, b]);
+    }
+    return out;
+  };
+
+  TubularApp.prototype._resolveTimeLote = function (value, n) {
+    const data = this._extraOpcoes || {};
+    const times = data.times || [];
+    const byNum = {};
+    times.forEach((t) => { byNum[Number(t.time_num)] = t; });
+    const universo = Object.keys(byNum).map(Number).sort((a, b) => a - b);
+    const pool = universo.length ? universo : Array.from({ length: 80 }, (_, i) => i + 1);
+    const item = (tn) => ({
+      time_num: Number(tn),
+      time_nome: (byNum[Number(tn)] && byNum[Number(tn)].time_nome) || ('Time ' + tn),
+    });
+    const v = String(value || '').trim().toLowerCase();
+    if (v === 'aleatorio' || v === 'aleatório' || v === 'random') {
+      return this._distribuirBloco(pool, n).map(item);
+    }
+    let tn = null;
+    if (v === 'atrasado') tn = Number((data.atrasado && data.atrasado.time_num) || pool[0]);
+    else if (v === 'frequente') tn = Number((data.frequente && data.frequente.time_num) || pool[0]);
+    else {
+      const num = parseInt(value, 10);
+      if (Number.isFinite(num)) tn = num;
+    }
+    if (tn == null) return [];
+    return Array.from({ length: n }, () => item(tn));
+  };
+
+  TubularApp.prototype._resolveTrevoLote = function (value, n) {
+    const data = this._extraOpcoes || {};
+    const pares = this._paresTrevos();
+    const v = String(value || '').trim().toLowerCase();
+    if (v === 'aleatorio' || v === 'aleatório' || v === 'random') {
+      return this._distribuirBloco(pares, n).map(p => p.slice().sort((a, b) => a - b));
+    }
+    let par = null;
+    if (v === 'atrasado') par = (data.atrasado && data.atrasado.trevos) || pares[0];
+    else if (v === 'frequente') par = (data.frequente && data.frequente.trevos) || pares[0];
+    else {
+      const parts = String(value || '').replace(/[,-]/g, ' ').split(/\s+/).filter(Boolean);
+      const nums = [];
+      parts.forEach((p) => {
+        const x = parseInt(p, 10);
+        if (x >= 1 && x <= 6 && !nums.includes(x)) nums.push(x);
+      });
+      if (nums.length >= 2) par = nums.slice(0, 2);
+    }
+    if (!par) return [];
+    const sorted = [Number(par[0]), Number(par[1])].sort((a, b) => a - b);
+    return Array.from({ length: n }, () => sorted.slice());
+  };
+
+  TubularApp.prototype._fillExtraSelect = function (sel, data) {
+    if (!sel || !data || !data.opcoes) return;
+    const prev = sel.value;
+    sel.innerHTML = '';
+    data.opcoes.forEach((o) => {
+      const opt = document.createElement('option');
+      opt.value = o.value;
+      opt.textContent = o.label;
+      sel.appendChild(opt);
+    });
+    const prefer = data.default || 'atrasado';
+    const candidates = [prefer, prev];
+    for (let i = 0; i < candidates.length; i++) {
+      const vs = String(candidates[i] || '');
+      if (vs && [...sel.options].some(o => o.value === vs)) {
+        sel.value = vs;
+        return;
+      }
+    }
+    if (sel.options.length) sel.selectedIndex = 0;
+  };
+
+  TubularApp.prototype._cmpExportLines = function (extraLote) {
     const lines = [];
     let mi = 0;
+    const kind = this._cmpExtraKind();
     this.cmpVolantes.forEach((v) => {
       const nums = [...new Set((v.nums || []).map(Number).filter(n => Number.isFinite(n)))]
         .sort((a, b) => a - b);
       if (!nums.length) return;
       let line = nums.map(fmt2).join(' ');
-      if (this.extraMes) {
+      if (kind === 'mes') {
         let pretty = '';
-        if (mesesLote && mesesLote[mi] != null) {
-          const mn = Number(mesesLote[mi]);
+        if (extraLote && extraLote[mi] != null) {
+          const mn = Number(extraLote[mi]);
           if (mn >= 1 && mn <= 12) {
             const ab = MESES_ABREV[mn - 1] || '';
             pretty = ab ? (ab.charAt(0) + ab.slice(1).toLowerCase()) : '';
@@ -3080,6 +3237,15 @@
         }
         if (!pretty) pretty = this._mesAbrevExport(v);
         if (pretty) line += ` ${pretty}`;
+        mi += 1;
+      } else if (kind === 'time' && extraLote && extraLote[mi]) {
+        const t = extraLote[mi];
+        const nome = (t && t.time_nome) || '';
+        if (nome) line += ` ${nome}`;
+        mi += 1;
+      } else if (kind === 'trevo' && extraLote && extraLote[mi]) {
+        const par = extraLote[mi] || [];
+        if (par.length) line += ` T${par.map(String).join('-')}`;
         mi += 1;
       }
       lines.push(line);
@@ -3092,12 +3258,56 @@
     if (ov) ov.classList.add('d-none');
   };
 
+  TubularApp.prototype._setCmpExtraCopy = function (kind) {
+    const tit = this.root.querySelector('#tbCmpMesTitulo');
+    const hint = this.root.querySelector('#tbCmpMesHint');
+    const lab = this.root.querySelector('#tbCmpMesLabel');
+    if (kind === 'time') {
+      if (tit) tit.textContent = 'Time do Coração';
+      if (hint) hint.textContent = 'Escolha o Time do Coração pela análise (atrasado, mais frequente ou aleatório) para a exportação das apostas.';
+      if (lab) lab.textContent = 'Time do Coração';
+    } else if (kind === 'trevo') {
+      if (tit) tit.textContent = 'Trevos';
+      if (hint) hint.textContent = 'Escolha o par de trevos pela análise (atrasado, mais frequente ou aleatório) para a exportação das apostas.';
+      if (lab) lab.textContent = 'Trevos';
+    } else {
+      if (tit) tit.textContent = 'Mês da Sorte';
+      if (hint) hint.textContent = 'Escolha o Mês da Sorte para a exportação das apostas dos volantes.';
+      if (lab) lab.textContent = 'Mês da Sorte';
+    }
+  };
+
   TubularApp.prototype._openCmpMesModal = async function () {
     const ov = this.root.querySelector('#tbCmpMesOverlay');
     const sel = this.root.querySelector('#tbCmpMesSelect');
     if (!ov || !sel) return false;
+    const kind = this._cmpExtraKind();
+    this._setCmpExtraCopy(kind);
     ov.classList.remove('d-none');
-    if (window.MesSorteSelect) {
+
+    if (kind === 'time') {
+      try {
+        const r = await fetch('/geradores-elite/api/time-coracao-opcoes');
+        const j = await r.json();
+        if (!j || !j.sucesso) throw new Error((j && j.erro) || 'Falha');
+        this._extraOpcoes = j;
+        this._fillExtraSelect(sel, j);
+      } catch (_) {
+        sel.innerHTML = '<option value="atrasado">+ Atrasado</option><option value="frequente">+ Frequente</option><option value="aleatorio">+ Aleatório</option>';
+        sel.value = 'atrasado';
+      }
+    } else if (kind === 'trevo') {
+      try {
+        const r = await fetch('/geradores-elite/api/trevos-opcoes');
+        const j = await r.json();
+        if (!j || !j.sucesso) throw new Error((j && j.erro) || 'Falha');
+        this._extraOpcoes = j;
+        this._fillExtraSelect(sel, j);
+      } catch (_) {
+        sel.innerHTML = '<option value="atrasado">+ Atrasado</option><option value="frequente">+ Frequente</option><option value="aleatorio">+ Aleatório</option>';
+        sel.value = 'atrasado';
+      }
+    } else if (window.MesSorteSelect) {
       try {
         await MesSorteSelect.fillFromApi(sel, '/geradores-elite/api/escolha-tubular', { defaultPrefer: 'atrasado' });
       } catch (_) {
@@ -3116,16 +3326,21 @@
     const sel = this.root.querySelector('#tbCmpMesSelect');
     const filled = (this.cmpVolantes || []).filter(v => (v.nums || []).length);
     const n = filled.length;
-    let mesesLote = null;
-    if (this.extraMes && sel) {
+    const kind = this._cmpExtraKind();
+    let extraLote = null;
+    if (kind === 'mes' && sel) {
       if (window.MesSorteSelect) {
-        mesesLote = MesSorteSelect.resolveLote(sel.value, n, MesSorteSelect.cached);
+        extraLote = MesSorteSelect.resolveLote(sel.value, n, MesSorteSelect.cached);
       } else {
         const mn = parseInt(sel.value, 10);
-        mesesLote = Number.isFinite(mn) ? Array(n).fill(mn) : null;
+        extraLote = Number.isFinite(mn) ? Array(n).fill(mn) : null;
       }
+    } else if (kind === 'time' && sel) {
+      extraLote = this._resolveTimeLote(sel.value, n);
+    } else if (kind === 'trevo' && sel) {
+      extraLote = this._resolveTrevoLote(sel.value, n);
     }
-    const lines = this._cmpExportLines(mesesLote);
+    const lines = this._cmpExportLines(extraLote);
     this._closeCmpMesModal();
     if (!lines.length) {
       alert('Nenhuma aposta nos volantes para exportar.');
@@ -3140,7 +3355,7 @@
       alert('Nenhuma aposta nos volantes para exportar.');
       return;
     }
-    if (this.extraMes && this.root.querySelector('#tbCmpMesOverlay')) {
+    if (this._cmpExtraKind() && this.root.querySelector('#tbCmpMesOverlay')) {
       await this._openCmpMesModal();
       return;
     }

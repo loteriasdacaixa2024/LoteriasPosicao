@@ -8521,3 +8521,43 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.71.202.176:5159
 Press CTRL+C to quit
 127.0.0.1 - - [02/Sep/2026 07:13:14] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-02 16:20:41 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [02/Sep/2026 16:20:56] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 17:12:29] "GET /geradores-elite/escolha-tubular-apostas/?aba=comparador HTTP/1.1" 200 -
+
+--- iniciando 2026-09-02 17:15:53 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [02/Sep/2026 17:16:05] "GET / HTTP/1.1" 200 -
+D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'servicebus2.caixa.gov.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+127.0.0.1 - - [02/Sep/2026 17:18:21] "GET /geradores-elite/escolha-tubular-apostas/?aba=comparador HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 17:18:24] "GET /geradores-elite/api/time-coracao-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 17:18:25] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
