@@ -2,11 +2,11 @@
 {% set sorteadas = sorteadas if sorteadas is defined else (ctx.get('sorteadas', 7) if ctx is defined else 7) %}
 {% set extra_mes = extra_mes if extra_mes is defined else (ctx.get('extra_mes', false) if ctx is defined else false) %}
 {% set show_s10_first = show_s10_first if show_s10_first is defined else true %}
-{% set show_s11_toggle = show_s11_toggle if show_s11_toggle is defined else false %}
+{% set show_s12_first = show_s12_first if show_s12_first is defined else false %}
 {% set show_comparador_volante = show_comparador_volante if show_comparador_volante is defined else false %}
 {% set sorteadas = sorteadas|int %}
         <!-- Seção 10 — MANUAL -->
-        <div data-tb-panel="s10" class="{{ '' if show_s10_first else 'd-none' }}">
+        <div data-tb-panel="s10" class="{{ '' if show_s10_first and not show_s12_first else 'd-none' }}">
           <div class="tb-card">
             <h2 class="h5 fw-bold">📝 SEÇÃO 10 — MANUAL <span class="badge bg-secondary ms-1">ordem crescente</span></h2>
             <p class="small text-muted mb-1">Três jeitos de incluir apostas: arraste TXT/CSV, cole o texto, ou clique em <strong>+</strong> para abrir linhas em branco e preencher as dezenas. Depois clique em <strong>Processar Jogos</strong>. <strong>Limpar</strong> zera o texto e a tabela. Stats em tempo real. Exporta somente dezenas{% if extra_mes %} + mês (editável com ▲/▼){% endif %}.</p>
@@ -21,13 +21,6 @@
               <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport10">
                 <i class="fas fa-file-export me-1"></i>Exportar
               </button>
-              {% if show_comparador_volante %}
-              <button type="button" class="btn btn-sm fw-bold" id="tbEnviarCmp10"
-                      title="Envia as apostas desta seção para os volantes da Seção 12, sem recalcular"
-                      style="background:var(--primary);border-color:var(--primary);color:#fff;">
-                <i class="fas fa-share-square me-1"></i>Enviar para Comparação
-              </button>
-              {% endif %}
               <button type="button" class="btn btn-sm btn-warning" id="tbJaSaiu10"
                       title="Compara cada aposta com todos os resultados oficiais, do concurso 1 até o atual">
                 <i class="fas fa-history me-1"></i>Já saiu?
@@ -105,17 +98,8 @@
           </div>
         </div>
 
-        {% if show_s11_toggle %}
-        <div class="tb-s11-toggle-wrap mb-3 text-center">
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="tbToggleS11"
-                  aria-expanded="false" aria-controls="tbPanelS11">
-            <i class="fas fa-eye me-1"></i>Mostrar Seção 11
-          </button>
-        </div>
-        {% endif %}
-
         <!-- Seção 11 — AUTOMÁTICO -->
-        <div data-tb-panel="s11" id="tbPanelS11" class="{{ 'd-none' if show_s10_first else '' }}">
+        <div data-tb-panel="s11" class="{{ 'd-none' if (show_s10_first or show_s12_first) else '' }}">
           <div class="tb-card">
             <h2 class="h5 fw-bold">⚡ SEÇÃO 11 — AUTOMÁTICO
               <span class="badge bg-primary ms-1" id="tbAuto11Badge">janela 10</span>
@@ -326,12 +310,13 @@
 
         {% if show_comparador_volante %}
         <!-- Seção 12 — Comparador de Apostas no Volante (independente das Seções 10 e 11) -->
-        <div data-tb-panel="s12" id="tbSecao12">
+        <div data-tb-panel="s12" id="tbSecao12" class="{{ '' if show_s12_first else 'd-none' }}">
           <div class="tb-card tb-cmp-card">
             <h2 class="h5 fw-bold">🎯 SEÇÃO 12 — COMPARADOR DE APOSTAS NO VOLANTE</h2>
             <p class="small text-muted mb-2">
-              Comparação visual: <strong>resultado oficial</strong> à esquerda e <strong>escolha manual</strong> à direita, no volante pequeno do Dia de Sorte.
-              Clique nas dezenas da direita para marcar ou desmarcar até 7 números. Use <strong>Enviar para Comparação</strong> na Seção 10 para preencher.
+              Monte as apostas do <strong>próximo concurso</strong> no volante da direita.
+              O lado esquerdo é só referência do último resultado — <strong>não há conferência de acertos</strong>.
+              Dezena em <strong>roxo</strong> = repetida desse resultado.
             </p>
             <div class="d-flex flex-wrap gap-2 mb-2 align-items-center justify-content-center">
               <button type="button" class="btn btn-sm btn-outline-success" id="tbCmpAdd1">
@@ -353,7 +338,7 @@
             <div class="tb-cmp-legenda small mb-2 d-flex flex-wrap gap-3 justify-content-center">
               <span><span class="tb-cmp-swatch tb-cmp-swatch-oficial"></span> Resultado oficial</span>
               <span><span class="tb-cmp-swatch tb-cmp-swatch-sel"></span> Escolha</span>
-              <span><span class="tb-cmp-swatch tb-cmp-swatch-hit"></span> Coincide</span>
+              <span><span class="tb-cmp-swatch tb-cmp-swatch-rept"></span> Repetida</span>
             </div>
             <div class="tb-cmp-pair" id="tbCmpPair">
               <div class="tb-cmp-ticket tb-cmp-ticket-oficial">

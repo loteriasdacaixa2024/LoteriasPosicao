@@ -807,9 +807,6 @@
 }
 
 /* Seção 12 — Comparador compacto (volante real do Dia de Sorte) */
-#ai-tubular-root .tb-s11-toggle-wrap .btn {
-  min-width: 12rem;
-}
 #ai-tubular-root .tb-cmp-card {
   border-top: 3px solid var(--primary, #c08b00);
 }
@@ -941,8 +938,8 @@
   color: #1a0a00;
   border-radius: 2px;
 }
-#ai-tubular-root .tb-cmp-cell.acerto {
-  background: #198754;
+#ai-tubular-root .tb-cmp-cell.rept {
+  background: #9b59b6;
   color: #fff;
   border-radius: 2px;
 }
@@ -960,9 +957,9 @@
   background: var(--accent, #ffd54f);
   border-color: var(--primary, #c08b00);
 }
-#ai-tubular-root .tb-cmp-swatch-hit {
-  background: #198754;
-  border-color: #146c43;
+#ai-tubular-root .tb-cmp-swatch-rept {
+  background: #9b59b6;
+  border-color: #7d3c98;
 }
 #ai-tubular-root .tb-cmp-tabs-wrap {
   text-align: center;

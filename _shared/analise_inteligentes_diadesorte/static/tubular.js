@@ -290,7 +290,6 @@
     this.auto11Janela = 10;
     this.auto11SomaModo = 'padrao';
     this.auto11ParesModo = 'fix_4';
-    this._s11Visible = false;
     this._cmpUid = 0;
     this.cmpVolantes = [];
     this.cmpOficialContest = null;
@@ -617,8 +616,6 @@
     });
     this._syncStats11Collapse();
     this._updateAuto11Hints();
-    r.querySelector('#tbToggleS11')?.addEventListener('click', () => this.setSecao11Visible(!this._s11Visible));
-    r.querySelector('#tbEnviarCmp10')?.addEventListener('click', () => this.enviarSecao10ParaComparador());
     r.querySelector('#tbCmpAdd1')?.addEventListener('click', () => this.addCmpVolantes(1));
     r.querySelector('#tbCmpAdd5')?.addEventListener('click', () => this.addCmpVolantes(5));
     r.querySelector('#tbCmpAdd10')?.addEventListener('click', () => this.addCmpVolantes(10));
@@ -695,33 +692,11 @@
   };
 
   TubularApp.prototype.showSub = function (key) {
-    const elite = String(this.root.dataset.mode || '') === 'elite-gen';
     this.root.querySelectorAll('[data-tb-sub]').forEach(b => b.classList.toggle('active', b.dataset.tbSub === key));
-    if (elite) {
-      const p10 = this.root.querySelector('[data-tb-panel="s10"]');
-      const p12 = this.root.querySelector('[data-tb-panel="s12"]');
-      if (p10) p10.classList.remove('d-none');
-      if (p12) p12.classList.remove('d-none');
-      if (key === 's11') this.setSecao11Visible(true);
-      if (!this.data.length) this.load();
-      else {
-        this.renderUltimo10();
-        this.renderManual(10);
-        this.renderComparador();
-      }
-      if (this._s11Visible) {
-        this._updateAuto11Hints();
-        this._fillConferir11Select();
-        this.renderManual(11);
-      }
-      if (key === 's11') this._scrollToPanel('#tbPanelS11');
-      if (key === 's12') this._scrollToPanel('#tbSecao12');
-      return;
-    }
     this.root.querySelectorAll('[data-tb-panel]').forEach(p => {
       p.classList.toggle('d-none', p.dataset.tbPanel !== key);
     });
-    if ((key === 's10' || key === 's11') && !this.data.length) this.load();
+    if ((key === 's10' || key === 's11' || key === 's12') && !this.data.length) this.load();
     else if (key === 's10' || key === 's11') this.renderUltimo10();
     if (key === 's10') this.renderManual(10);
     if (key === 's11') {
@@ -729,6 +704,7 @@
       this._fillConferir11Select();
       this.renderManual(11);
     }
+    if (key === 's12') this.renderComparador();
   };
 
   TubularApp.prototype.setView = function (view) {
@@ -2869,35 +2845,6 @@
     }
   };
 
-  TubularApp.prototype._scrollToPanel = function (sel) {
-    const el = this.root.querySelector(sel);
-    if (!el) return;
-    try { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (_) {}
-  };
-
-  TubularApp.prototype._syncToggleS11 = function () {
-    const btn = this.root.querySelector('#tbToggleS11');
-    const panel = this.root.querySelector('[data-tb-panel="s11"]');
-    const open = !!this._s11Visible;
-    if (panel) panel.classList.toggle('d-none', !open);
-    if (!btn) return;
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    btn.innerHTML = open
-      ? '<i class="fas fa-eye-slash me-1"></i>Ocultar Seção 11'
-      : '<i class="fas fa-eye me-1"></i>Mostrar Seção 11';
-  };
-
-  /** Visibilidade da Seção 11 — não altera a lógica interna, só mostra/oculta. */
-  TubularApp.prototype.setSecao11Visible = function (on) {
-    this._s11Visible = !!on;
-    this._syncToggleS11();
-    if (this._s11Visible) {
-      this._updateAuto11Hints();
-      this._fillConferir11Select();
-      this.renderManual(11);
-    }
-  };
-
   TubularApp.prototype._cmpPickMax = function () {
     const L = limitsFrom(this.root);
     return L.sorteadas || 7;
@@ -2985,7 +2932,7 @@
         const inOficial = !!(oficial && oficial.has(d));
         let cls = 'tb-cmp-cell';
         if (interactive) {
-          if (on && inOficial) cls += ' acerto';
+          if (on && inOficial) cls += ' rept';
           else if (on) cls += ' na-aposta';
         } else if (inOficial) {
           cls += ' oficial';
@@ -3025,7 +2972,6 @@
     const active = this._cmpActive();
     const idx = Math.max(0, this.cmpVolantes.findIndex(x => x.id === (active && active.id)));
     const n = ((active && active.nums) || []).slice().sort((a, b) => a - b);
-    const hits = ofcSet ? n.filter(x => ofcSet.has(x)).length : 0;
     const manEl = this.root.querySelector('#tbCmpManualVolante');
     if (manEl && active) {
       manEl.innerHTML = this._cmpVolanteHtml(n, { oficialSet: ofcSet, interactive: true, vid: active.id });
@@ -3037,7 +2983,7 @@
     const numsMan = this.root.querySelector('#tbCmpManualNums');
     if (numsMan) {
       numsMan.textContent = n.length
-        ? n.map(fmt2).join(' ') + (ofcSet ? ` · ${hits} acerto${hits === 1 ? '' : 's'}` : '')
+        ? n.map(fmt2).join(' ')
         : `Clique para marcar ${L.sorteadas} dezenas`;
     }
     const del = this.root.querySelector('#tbCmpDelAtivo');
@@ -3113,29 +3059,6 @@
       this.cmpActiveId = this.cmpVolantes[0].id;
     }
     this.renderComparador(true);
-  };
-
-  /** Copia as apostas da Seção 10 para os volantes — sem recalcular. */
-  TubularApp.prototype.enviarSecao10ParaComparador = function () {
-    const L = limitsFrom(this.root);
-    const list = (this.manual10 || []).map((g) => {
-      const nums = [...new Set((g.numbers || []).map(Number).filter(n => Number.isFinite(n) && n >= L.dezenaMin && n <= L.dezenaMax))]
-        .sort((a, b) => a - b);
-      return {
-        id: ++this._cmpUid,
-        nums,
-        month: g.month || 0,
-        monthName: g.monthName || '',
-      };
-    }).filter(v => v.nums.length);
-    if (!list.length) {
-      alert('Não há apostas na Seção 10 para enviar. Processe ou preencha as dezenas antes.');
-      return;
-    }
-    this.cmpVolantes = list;
-    this.cmpActiveId = list[0].id;
-    this.renderComparador();
-    this._scrollToPanel('#tbSecao12');
   };
 
   TubularApp.prototype._cmpExportLines = function (mesesLote) {
@@ -3239,11 +3162,6 @@
     if (mode === 'elite-gen') {
       const initialSub = root.dataset.initialSub || 's10';
       const start = async () => {
-        app.initComparador();
-        app.setSecao11Visible(initialSub === 's11');
-        if (!app.data.length) {
-          try { await app.load(); } catch (_) { /* load já alerta */ }
-        }
         app.showSub(initialSub);
         if (!app.consumeManualImport()) {
           // retry curto se o hub/aba ainda estiver montando

@@ -320,8 +320,8 @@
        data-pick-max="{{ ctx.pick_max or 15 }}"
        data-volante-cols="{{ ctx.volante_cols or 10 }}"
        data-initial-sub="{{ 's11' if aba_inicial == 'automatico' else ('s12' if aba_inicial == 'comparador' else 's10') }}">
-    {% set show_s10_first = true %}
-    {% set show_s11_toggle = true %}
+    {% set show_s10_first = aba_inicial not in ('automatico', 'comparador') %}
+    {% set show_s12_first = aba_inicial == 'comparador' %}
     {% set show_comparador_volante = true %}
     {% set sorteadas = sorteadas or ctx.sorteadas or 7 %}
     {% set extra_mes = extra_mes or (ctx.extra_mes if ctx is defined else false) %}
@@ -329,7 +329,7 @@
   </div>
 </div>{# /get-hub #}
 
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260902c">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260902f">
 <style>
   :root {
     --cor-sequencia-1: #86efac;
@@ -347,7 +347,7 @@
   {% endfor %}
   {% endif %}
 </style>
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260902b"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260902f"></script>
 <script>
 (function () {
   const hub = document.getElementById('get-hub');
