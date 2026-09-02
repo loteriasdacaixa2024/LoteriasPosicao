@@ -3445,12 +3445,18 @@
   };
 
   TubularApp.prototype._syncS10VolLayout = function (wrap) {
-    const pair = this.root.querySelector('#tbCmpPair');
     if (!wrap) return;
-    const cols = pair ? getComputedStyle(pair).getPropertyValue('--tb-cmp-cols').trim() : '';
-    wrap.style.setProperty('--tb-cmp-cols', cols || String(limitsFrom(this.root).volanteCols || 10));
-    wrap.classList.toggle('tb-cmp-lg', !!(pair && pair.classList.contains('tb-cmp-lg')));
-    wrap.classList.toggle('tb-cmp-md', !!(pair && pair.classList.contains('tb-cmp-md')));
+    const L = limitsFrom(this.root);
+    const cols = L.volanteCols || 10;
+    const span = (L.dezenaMax - L.dezenaMin) + 1;
+    const cellW = span >= 80 ? 22 : (span >= 50 ? 26 : 28);
+    const cellH = span >= 80 ? 18 : (span >= 50 ? 20 : 22);
+    wrap.style.setProperty('--tb-cmp-cols', String(cols));
+    wrap.style.setProperty('--tb-cmp-cell-w', cellW + 'px');
+    wrap.style.setProperty('--tb-cmp-cell-h', cellH + 'px');
+    wrap.style.setProperty('--tb-cmp-gap', '2px');
+    wrap.classList.toggle('tb-cmp-lg', span >= 80);
+    wrap.classList.toggle('tb-cmp-md', span >= 50 && span < 80);
   };
 
   TubularApp.prototype.renderS10VolPreview = function () {
@@ -3467,31 +3473,38 @@
     const L = limitsFrom(this.root);
     const ofc = this._cmpOficialEntry();
     const ofcSet = ofc ? new Set(ofc.nums) : null;
-    const active = this._s10VolActive();
-    const n = ((active && active.nums) || []).slice().sort((a, b) => a - b);
     const dirtyN = prev.items.filter(it => this._s10VolDirty(it)).length;
-    const extra = (active && this.extraMes && active.monthName) ? ` · ${active.monthName}` : '';
-    const tabs = prev.items.map((it, i) => {
-      const on = active && it.uid === active.uid;
+    const tickets = prev.items.map((it, i) => {
+      const n = (it.nums || []).slice().sort((a, b) => a - b);
+      const extra = (this.extraMes && it.monthName) ? ` · ${it.monthName}` : '';
       const dirty = this._s10VolDirty(it);
-      return `<button type="button" class="tb-cmp-tab${on ? ' active' : ''}${dirty ? ' tb-s10v-dirty' : ''}" data-s10v-tab="${it.uid}" aria-pressed="${on ? 'true' : 'false'}">${i + 1}${it.nums && it.nums.length ? ` · ${it.nums.length}` : ''}</button>`;
+      const volHtml = this._cmpVolanteHtml(n, {
+        oficialSet: ofcSet,
+        interactive: true,
+        vid: it.uid,
+        dezAttr: 'data-s10v-dez',
+        vidAttr: 'data-s10v-uid',
+      });
+      return `<div class="tb-cmp-ticket tb-cmp-ticket-manual tb-s10v-ticket${dirty ? ' tb-s10v-ticket-dirty' : ''}">
+          <div class="tb-cmp-head">
+            <div class="tb-cmp-col-title">Aposta ${i + 1}${dirty ? ' · alt' : ''}</div>
+            <div class="tb-cmp-aposta-head">
+              <strong>Seção 10 · ${it.uid}</strong>
+              <span class="small text-muted">${n.length} / ${L.sorteadas}</span>
+            </div>
+          </div>
+          ${volHtml}
+          <div class="tb-cmp-ticket-nums">${n.length ? n.map(fmt2).join(' ') + extra : `Clique para marcar ${L.sorteadas} dezenas`}</div>
+        </div>`;
     }).join('');
-    const volHtml = active
-      ? this._cmpVolanteHtml(n, {
-          oficialSet: ofcSet,
-          interactive: true,
-          vid: active.uid,
-          dezAttr: 'data-s10v-dez',
-          vidAttr: 'data-s10v-uid',
-        })
-      : '';
     const howtoOpen = !!wrap.querySelector('.tb-howto[open]');
+    const qtd = prev.items.length;
     wrap.innerHTML = `
       <div class="tb-s10v">
         <div class="tb-s10v-head">
           <div>
             <div class="tb-s10v-title">Apostas da Seção 10 — Visualização nos Volantes</div>
-            <p class="small text-muted mb-0">Visualização para comparação e ajustes.${dirtyN ? ` · ${dirtyN} alterada${dirtyN === 1 ? '' : 's'}.` : ''}</p>
+            <p class="small text-muted mb-0">${qtd} volante${qtd === 1 ? '' : 's'} — visualização para comparação e ajustes.${dirtyN ? ` · ${dirtyN} alterada${dirtyN === 1 ? '' : 's'}.` : ''}</p>
           </div>
           <div class="tb-s10v-actions">
             <button type="button" class="btn btn-sm btn-outline-secondary tb-act" data-s10v-discard>Descartar</button>
@@ -3502,28 +3515,14 @@
           <summary>Como usar</summary>
           <div class="tb-howto-body">
             <ol class="tb-howto-ol">
-              <li>As abas são as apostas enviadas da Seção 10 (cópia — a original não muda sozinha).</li>
-              <li>Clique nas dezenas do volante para ajustar. Roxo = repetida do resultado da esquerda.</li>
+              <li>Cada aposta da Seção 10 vira um volante igual aos demais — só as dezenas mudam.</li>
+              <li>Clique nas dezenas daquele volante para ajustar. Roxo = repetida do resultado oficial (acima).</li>
               <li><strong>Enviar alterações para Seção 10</strong> devolve só o que você confirmou.</li>
               <li><strong>Descartar</strong> fecha esta área e ignora ajustes não enviados.</li>
             </ol>
           </div>
         </details>
-        <div class="tb-cmp-tabs-wrap">
-          <div class="tb-cmp-tabs-lbl">Apostas</div>
-          <div class="tb-cmp-tabs">${tabs}</div>
-        </div>
-        <div class="tb-cmp-ticket tb-cmp-ticket-manual tb-s10v-ticket">
-          <div class="tb-cmp-head">
-            <div class="tb-cmp-col-title">Aposta ${active ? (prev.items.findIndex(x => x.uid === active.uid) + 1) : '—'}</div>
-            <div class="tb-cmp-aposta-head">
-              <strong>Seção 10 · ${active ? active.uid : ''}</strong>
-              <span class="small text-muted">${n.length} / ${L.sorteadas}</span>
-            </div>
-          </div>
-          ${volHtml}
-          <div class="tb-cmp-ticket-nums">${n.length ? n.map(fmt2).join(' ') + extra : `Clique para marcar ${L.sorteadas} dezenas`}</div>
-        </div>
+        <div class="tb-s10v-grid">${tickets}</div>
       </div>`;
     wrap.classList.remove('d-none');
     wrap.removeAttribute('hidden');
@@ -3538,15 +3537,6 @@
     const apply = ev.target.closest('[data-s10v-apply]');
     if (apply) {
       this.applyS10VolPreview();
-      return;
-    }
-    const tab = ev.target.closest('[data-s10v-tab]');
-    if (tab && this.s10VolPreview) {
-      const uid = parseInt(tab.getAttribute('data-s10v-tab'), 10);
-      if (Number.isFinite(uid)) {
-        this.s10VolPreview.activeUid = uid;
-        this.renderS10VolPreview();
-      }
       return;
     }
     const cell = ev.target.closest('[data-s10v-dez]');

@@ -993,6 +993,26 @@
   line-height: 1.45;
 }
 #ai-tubular-root .tb-howto-ol li + li { margin-top: .2rem; }
+#ai-tubular-root #tbS10VolPreview {
+  --tb-cmp-cell-w: 28px;
+  --tb-cmp-cell-h: 22px;
+  --tb-cmp-gap: 2px;
+  --tb-cmp-cols: 10;
+  margin-top: 1.15rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(192, 139, 0, .38);
+}
+#ai-tubular-root #tbS10VolPreview.tb-cmp-md {
+  --tb-cmp-cell-w: 26px;
+  --tb-cmp-cell-h: 20px;
+}
+#ai-tubular-root #tbS10VolPreview.tb-cmp-lg {
+  --tb-cmp-cell-w: 22px;
+  --tb-cmp-cell-h: 18px;
+}
+#ai-tubular-root #tbS10VolPreview.tb-cmp-lg .tb-cmp-cell {
+  font-size: .62rem;
+}
 #ai-tubular-root .tb-s10v-head {
   display: flex;
   flex-wrap: wrap;
@@ -1012,14 +1032,21 @@
   flex-wrap: wrap;
   gap: .35rem;
 }
-#ai-tubular-root .tb-s10v-ticket {
-  width: min(360px, 100%);
-  margin: .45rem auto 0;
+#ai-tubular-root .tb-s10v-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: .75rem 1rem;
 }
-#ai-tubular-root .tb-cmp-tab.tb-s10v-dirty::after {
-  content: ' · alt';
-  font-weight: 600;
-  opacity: .85;
+#ai-tubular-root .tb-s10v-ticket.tb-cmp-ticket {
+  width: auto;
+  max-width: 100%;
+  margin: 0;
+  flex: 0 0 auto;
+}
+#ai-tubular-root .tb-s10v-ticket-dirty {
+  box-shadow: 0 0 0 2px rgba(155, 89, 182, .35);
 }
 #ai-tubular-root .tb-cmp-tabs-wrap {
   text-align: center;
