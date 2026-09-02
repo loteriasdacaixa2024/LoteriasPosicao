@@ -303,6 +303,7 @@
     this.cmpVolantes = [];
     this.cmpOficialContest = null;
     this.cmpActiveId = null;
+    this.s10VolPreview = null;
     this._bind();
   }
 
@@ -650,6 +651,8 @@
     r.querySelector('#tbCmpMesOverlay')?.addEventListener('click', (ev) => {
       if (ev.target === ev.currentTarget) this._closeCmpMesModal();
     });
+    r.querySelector('#tbS10ToVolantes')?.addEventListener('click', () => this.sendS10ToVolantes());
+    r.querySelector('#tbS10VolPreview')?.addEventListener('click', (ev) => this._onS10VolPreviewClick(ev));
   };
 
   TubularApp.prototype.consumeManualImport = function () {
@@ -1964,6 +1967,7 @@
     if (section === 10) {
       this._renderManual10DupMsg(alertMsgs);
       this._renderFaltantesHint();
+      this._syncS10VolBtn();
     }
 
     tbody.querySelectorAll('.tb-manual-input').forEach(inp => {
@@ -2992,9 +2996,11 @@
         } else if (inOficial) {
           cls += ' oficial';
         }
+        const dezAttr = opts.dezAttr || 'data-cmp-dez';
+        const vidAttr = opts.vidAttr || 'data-cmp-vid';
         const label = `[${fmt2(d)}]`;
         if (interactive) {
-          html += `<button type="button" class="${cls}" data-cmp-dez="${d}" data-cmp-vid="${vid}" aria-pressed="${on ? 'true' : 'false'}">${label}</button>`;
+          html += `<button type="button" class="${cls}" ${dezAttr}="${d}" ${vidAttr}="${vid}" aria-pressed="${on ? 'true' : 'false'}">${label}</button>`;
         } else {
           html += `<span class="${cls}">${label}</span>`;
         }
@@ -3057,6 +3063,7 @@
         return `<button type="button" class="tb-cmp-tab${on ? ' active' : ''}" data-cmp-tab="${v.id}" aria-pressed="${on ? 'true' : 'false'}">${i + 1}${q ? ` · ${q}` : ''}</button>`;
       }).join('');
     }
+    this.renderS10VolPreview();
   };
 
   TubularApp.prototype._onCmpVolanteClick = function (ev) {
@@ -3365,6 +3372,249 @@
       return;
     }
     downloadBlob(lines.join('\n') + '\n', 'secao12_volantes.txt', 'text/plain');
+  };
+
+  TubularApp.prototype._s10CompleteRows = function () {
+    const L = limitsFrom(this.root);
+    const out = [];
+    (this.manual10 || []).forEach((g, i) => {
+      if (!g) return;
+      const nums = this._manualNumsDisplay(g, 'asc', L)
+        .filter(n => n != null && Number.isFinite(n) && n >= L.dezenaMin && n <= L.dezenaMax);
+      const uniq = [...new Set(nums.map(Number))];
+      if (uniq.length !== L.sorteadas || uniq.length !== nums.length) return;
+      uniq.sort((a, b) => a - b);
+      out.push({
+        g,
+        idx: i,
+        uid: this._ensureRowUid(g),
+        nums: uniq,
+        month: g.month || 0,
+        monthName: g.monthName || '',
+      });
+    });
+    return out;
+  };
+
+  TubularApp.prototype._syncS10VolBtn = function () {
+    const btn = this.root.querySelector('#tbS10ToVolantes');
+    if (!btn) return;
+    const show = !!this.root.querySelector('#tbSecao12') && this._s10CompleteRows().length > 0;
+    btn.classList.toggle('d-none', !show);
+  };
+
+  TubularApp.prototype._goHubAba = function (aba) {
+    const hubBtn = document.querySelector(`#get-hub [data-get-hub="${aba}"]`);
+    if (hubBtn) hubBtn.click();
+    else this.showSub(aba === 'comparador' ? 's12' : (aba === 'automatico' ? 's11' : 's10'));
+  };
+
+  TubularApp.prototype.sendS10ToVolantes = function () {
+    const rows = this._s10CompleteRows();
+    if (!rows.length) return;
+    this.s10VolPreview = {
+      items: rows.map((r) => ({
+        uid: r.uid,
+        nums: r.nums.slice(),
+        origNums: r.nums.slice(),
+        month: r.month,
+        monthName: r.monthName,
+      })),
+      activeUid: rows[0].uid,
+    };
+    this._goHubAba('comparador');
+    this.renderS10VolPreview();
+  };
+
+  TubularApp.prototype._s10VolDirty = function (item) {
+    if (!item) return false;
+    const a = (item.nums || []).slice().sort((x, y) => x - y).join(',');
+    const b = (item.origNums || []).slice().sort((x, y) => x - y).join(',');
+    return a !== b;
+  };
+
+  TubularApp.prototype._s10VolActive = function () {
+    const prev = this.s10VolPreview;
+    if (!prev || !prev.items || !prev.items.length) return null;
+    let it = prev.items.find(x => x.uid === prev.activeUid);
+    if (!it) {
+      it = prev.items[0];
+      prev.activeUid = it.uid;
+    }
+    return it;
+  };
+
+  TubularApp.prototype._syncS10VolLayout = function (wrap) {
+    const pair = this.root.querySelector('#tbCmpPair');
+    if (!wrap) return;
+    const cols = pair ? getComputedStyle(pair).getPropertyValue('--tb-cmp-cols').trim() : '';
+    wrap.style.setProperty('--tb-cmp-cols', cols || String(limitsFrom(this.root).volanteCols || 10));
+    wrap.classList.toggle('tb-cmp-lg', !!(pair && pair.classList.contains('tb-cmp-lg')));
+    wrap.classList.toggle('tb-cmp-md', !!(pair && pair.classList.contains('tb-cmp-md')));
+  };
+
+  TubularApp.prototype.renderS10VolPreview = function () {
+    const wrap = this.root.querySelector('#tbS10VolPreview');
+    if (!wrap) return;
+    const prev = this.s10VolPreview;
+    if (!prev || !prev.items || !prev.items.length) {
+      wrap.innerHTML = '';
+      wrap.classList.add('d-none');
+      wrap.setAttribute('hidden', '');
+      return;
+    }
+    this._syncS10VolLayout(wrap);
+    const L = limitsFrom(this.root);
+    const ofc = this._cmpOficialEntry();
+    const ofcSet = ofc ? new Set(ofc.nums) : null;
+    const active = this._s10VolActive();
+    const n = ((active && active.nums) || []).slice().sort((a, b) => a - b);
+    const dirtyN = prev.items.filter(it => this._s10VolDirty(it)).length;
+    const extra = (active && this.extraMes && active.monthName) ? ` · ${active.monthName}` : '';
+    const tabs = prev.items.map((it, i) => {
+      const on = active && it.uid === active.uid;
+      const dirty = this._s10VolDirty(it);
+      return `<button type="button" class="tb-cmp-tab${on ? ' active' : ''}${dirty ? ' tb-s10v-dirty' : ''}" data-s10v-tab="${it.uid}" aria-pressed="${on ? 'true' : 'false'}">${i + 1}${it.nums && it.nums.length ? ` · ${it.nums.length}` : ''}</button>`;
+    }).join('');
+    const volHtml = active
+      ? this._cmpVolanteHtml(n, {
+          oficialSet: ofcSet,
+          interactive: true,
+          vid: active.uid,
+          dezAttr: 'data-s10v-dez',
+          vidAttr: 'data-s10v-uid',
+        })
+      : '';
+    const howtoOpen = !!wrap.querySelector('.tb-howto[open]');
+    wrap.innerHTML = `
+      <div class="tb-s10v">
+        <div class="tb-s10v-head">
+          <div>
+            <div class="tb-s10v-title">Apostas da Seção 10 — Visualização nos Volantes</div>
+            <p class="small text-muted mb-0">Visualização para comparação e ajustes.${dirtyN ? ` · ${dirtyN} alterada${dirtyN === 1 ? '' : 's'}.` : ''}</p>
+          </div>
+          <div class="tb-s10v-actions">
+            <button type="button" class="btn btn-sm btn-outline-secondary tb-act" data-s10v-discard>Descartar</button>
+            <button type="button" class="btn btn-sm btn-outline-primary tb-act" data-s10v-apply>Enviar alterações para Seção 10</button>
+          </div>
+        </div>
+        <details class="tb-howto mb-2"${howtoOpen ? ' open' : ''}>
+          <summary>Como usar</summary>
+          <div class="tb-howto-body">
+            <ol class="tb-howto-ol">
+              <li>As abas são as apostas enviadas da Seção 10 (cópia — a original não muda sozinha).</li>
+              <li>Clique nas dezenas do volante para ajustar. Roxo = repetida do resultado da esquerda.</li>
+              <li><strong>Enviar alterações para Seção 10</strong> devolve só o que você confirmou.</li>
+              <li><strong>Descartar</strong> fecha esta área e ignora ajustes não enviados.</li>
+            </ol>
+          </div>
+        </details>
+        <div class="tb-cmp-tabs-wrap">
+          <div class="tb-cmp-tabs-lbl">Apostas</div>
+          <div class="tb-cmp-tabs">${tabs}</div>
+        </div>
+        <div class="tb-cmp-ticket tb-cmp-ticket-manual tb-s10v-ticket">
+          <div class="tb-cmp-head">
+            <div class="tb-cmp-col-title">Aposta ${active ? (prev.items.findIndex(x => x.uid === active.uid) + 1) : '—'}</div>
+            <div class="tb-cmp-aposta-head">
+              <strong>Seção 10 · ${active ? active.uid : ''}</strong>
+              <span class="small text-muted">${n.length} / ${L.sorteadas}</span>
+            </div>
+          </div>
+          ${volHtml}
+          <div class="tb-cmp-ticket-nums">${n.length ? n.map(fmt2).join(' ') + extra : `Clique para marcar ${L.sorteadas} dezenas`}</div>
+        </div>
+      </div>`;
+    wrap.classList.remove('d-none');
+    wrap.removeAttribute('hidden');
+  };
+
+  TubularApp.prototype._onS10VolPreviewClick = function (ev) {
+    const discard = ev.target.closest('[data-s10v-discard]');
+    if (discard) {
+      this.discardS10VolPreview();
+      return;
+    }
+    const apply = ev.target.closest('[data-s10v-apply]');
+    if (apply) {
+      this.applyS10VolPreview();
+      return;
+    }
+    const tab = ev.target.closest('[data-s10v-tab]');
+    if (tab && this.s10VolPreview) {
+      const uid = parseInt(tab.getAttribute('data-s10v-tab'), 10);
+      if (Number.isFinite(uid)) {
+        this.s10VolPreview.activeUid = uid;
+        this.renderS10VolPreview();
+      }
+      return;
+    }
+    const cell = ev.target.closest('[data-s10v-dez]');
+    if (!cell) return;
+    const dez = parseInt(cell.getAttribute('data-s10v-dez'), 10);
+    const uid = parseInt(cell.getAttribute('data-s10v-uid'), 10);
+    if (!Number.isFinite(dez) || !Number.isFinite(uid)) return;
+    this.toggleS10VolDezena(uid, dez);
+  };
+
+  TubularApp.prototype.toggleS10VolDezena = function (uid, dez) {
+    const prev = this.s10VolPreview;
+    if (!prev) return;
+    const item = prev.items.find(x => x.uid === uid);
+    if (!item) return;
+    const L = limitsFrom(this.root);
+    if (dez < L.dezenaMin || dez > L.dezenaMax) return;
+    const set = new Set(item.nums || []);
+    if (set.has(dez)) set.delete(dez);
+    else {
+      if (set.size >= L.sorteadas) return;
+      set.add(dez);
+    }
+    item.nums = [...set].sort((a, b) => a - b);
+    this.renderS10VolPreview();
+  };
+
+  TubularApp.prototype.discardS10VolPreview = function () {
+    const prev = this.s10VolPreview;
+    const dirty = prev && prev.items && prev.items.some(it => this._s10VolDirty(it));
+    if (dirty && !window.confirm('Descartar a visualização? As alterações não confirmadas não vão para a Seção 10.')) {
+      return;
+    }
+    this.s10VolPreview = null;
+    this.renderS10VolPreview();
+  };
+
+  TubularApp.prototype.applyS10VolPreview = function () {
+    const prev = this.s10VolPreview;
+    if (!prev || !prev.items) return;
+    const L = limitsFrom(this.root);
+    const dirty = prev.items.filter(it => this._s10VolDirty(it));
+    if (!dirty.length) {
+      this.s10VolPreview = null;
+      this.renderS10VolPreview();
+      this._goHubAba('manual');
+      return;
+    }
+    const incomplete = dirty.filter(it => (it.nums || []).length !== L.sorteadas);
+    if (incomplete.length) {
+      alert('Há apostas incompletas no volante. Mantenha ' + L.sorteadas + ' dezenas em cada aposta antes de enviar.');
+      return;
+    }
+    if (!window.confirm(`Enviar ${dirty.length} aposta(s) alterada(s) para a Seção 10?`)) return;
+    let applied = 0;
+    dirty.forEach((it) => {
+      const g = (this.manual10 || []).find(row => row && row._uid === it.uid);
+      if (!g) return;
+      g.numbers = it.nums.slice();
+      applied += 1;
+    });
+    this.s10VolPreview = null;
+    this.renderS10VolPreview();
+    this.renderManual(10);
+    this._goHubAba('manual');
+    if (!applied) {
+      alert('As apostas originais da Seção 10 não foram encontradas. Nada foi alterado.');
+    }
   };
 
   function boot() {

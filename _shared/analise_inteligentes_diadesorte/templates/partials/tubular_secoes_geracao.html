@@ -9,8 +9,18 @@
         <div data-tb-panel="s10" class="{{ '' if show_s10_first and not show_s12_first else 'd-none' }}">
           <div class="tb-card">
             <h2 class="h5 fw-bold">📝 SEÇÃO 10 — MANUAL <span class="badge bg-secondary ms-1">ordem crescente</span></h2>
-            <p class="small text-muted mb-1">Três jeitos de incluir apostas: arraste TXT/CSV, cole o texto, ou clique em <strong>+</strong> para abrir linhas em branco e preencher as dezenas. Depois clique em <strong>Processar Jogos</strong>. <strong>Limpar</strong> zera o texto e a tabela. Stats em tempo real. Exporta somente dezenas{% if extra_mes %} + mês (editável com ▲/▼){% endif %}.</p>
-            <p class="small text-muted mb-2">Uma aposta por linha{% if extra_mes %}, {{ sorteadas }} dezenas (01 a 31) e o mês no final (opcional){% else %}, {{ sorteadas }} dezenas separadas por espaço{% endif %}. Ex.: <code>{% if extra_mes %}02 09 18 21 23 26 28 Out{% else %}01 05 12 23 34 45{% endif %}</code>{% if extra_mes %} · <code>02 09 18 21 23 26 28 - Outubro</code>{% endif %}.</p>
+            <details class="tb-howto mb-2">
+              <summary>Como usar</summary>
+              <div class="tb-howto-body">
+                <ol class="tb-howto-ol">
+                  <li>Inclua as apostas: arraste TXT/CSV, cole o texto, ou clique em <strong>+</strong> para linhas em branco e preencha as dezenas.</li>
+                  <li>Clique em <strong>Processar Jogos</strong> (se colou ou arrastou). <strong>Limpar</strong> zera o texto e a tabela.</li>
+                  <li>Quando as apostas estiverem completas, aparece <strong>Visualizar nos Volantes</strong> — envia uma cópia para a Seção 12, só para conferir e ajustar.</li>
+                  <li>Na Seção 12 você compara no volante. Se mudar dezenas, use <strong>Enviar alterações para Seção 10</strong> para devolver; <strong>Descartar</strong> não altera a Seção 10.</li>
+                </ol>
+              </div>
+            </details>
+            <p class="small text-muted mb-1">Uma aposta por linha{% if extra_mes %}, {{ sorteadas }} dezenas (01 a 31) e o mês no final (opcional){% else %}, {{ sorteadas }} dezenas separadas por espaço{% endif %}. Ex.: <code>{% if extra_mes %}02 09 18 21 23 26 28 Out{% else %}01 05 12 23 34 45{% endif %}</code>{% if extra_mes %} · <code>02 09 18 21 23 26 28 - Outubro</code>{% endif %}.</p>
             <div class="tb-drop mb-2" id="tbDrop10" data-ai-compare="s10">Arraste TXT/CSV aqui · ou cole abaixo</div>
             <textarea id="tbPaste10" class="form-control form-control-sm mb-2" rows="3" placeholder="{% if extra_mes %}Uma aposta por linha. Ex.: 02 09 18 21 23 26 28 Out
 02 09 18 21 23 26 28 - Julho{% else %}Uma aposta por linha. Ex.: 01 05 12 23 34 45{% endif %}"></textarea>
@@ -20,6 +30,10 @@
               <button type="button" class="btn btn-sm btn-secondary" id="tbBtnReset10">Resetar Marcações</button>
               <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport10">
                 <i class="fas fa-file-export me-1"></i>Exportar
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary tb-act d-none" id="tbS10ToVolantes"
+                      title="Pré-visualizar estas apostas nos volantes da Seção 12">
+                Visualizar nos Volantes
               </button>
               <button type="button" class="btn btn-sm btn-warning" id="tbJaSaiu10"
                       title="Compara cada aposta com todos os resultados oficiais, do concurso 1 até o atual">
@@ -104,10 +118,16 @@
             <h2 class="h5 fw-bold">⚡ SEÇÃO 11 — AUTOMÁTICO
               <span class="badge bg-primary ms-1" id="tbAuto11Badge">janela 10</span>
             </h2>
-            <p class="small text-muted mb-2">
-              Gera apostas com base no histórico recente, com critérios de Soma opcionais.
-              <strong>SEQ, FINAIS e REPT</strong> devem ser diferentes dos padrões da janela selecionada.
-            </p>
+            <details class="tb-howto mb-2">
+              <summary>Como usar</summary>
+              <div class="tb-howto-body">
+                <ol class="tb-howto-ol">
+                  <li>Escolha a <strong>janela</strong> do histórico recente e, se quiser, os critérios de Soma e pares/ímpares.</li>
+                  <li>Clique em <strong>GERAR</strong> para montar as apostas. <strong>SEQ, FINAIS e REPT</strong> saem diferentes dos padrões dessa janela.</li>
+                  <li>Use <strong>Conferir</strong> para comparar com um concurso. Exportar baixa as dezenas da tabela.</li>
+                </ol>
+              </div>
+            </details>
 
             <div class="small fw-bold text-muted mb-1" id="tbUltimo11Lbl">Último resultado (referência — mesma prévia da Seção 10)</div>
             <div class="table-responsive mb-3">
@@ -313,11 +333,18 @@
         <div data-tb-panel="s12" id="tbSecao12" class="{{ '' if show_s12_first else 'd-none' }}">
           <div class="tb-card tb-cmp-card">
             <h2 class="h5 fw-bold">🎯 SEÇÃO 12 — COMPARADOR DE APOSTAS NO VOLANTE</h2>
-            <p class="small text-muted mb-2">
-              Monte as apostas do <strong>próximo concurso</strong> no volante da direita.
-              O lado esquerdo é só referência do último resultado — <strong>não há conferência de acertos</strong>.
-              Dezena em <strong>roxo</strong> = repetida desse resultado.
-            </p>
+            <details class="tb-howto mb-2">
+              <summary>Como usar</summary>
+              <div class="tb-howto-body">
+                <ol class="tb-howto-ol">
+                  <li>O volante da <strong>esquerda</strong> é o resultado oficial (só referência — sem conferência de acertos).</li>
+                  <li>No volante da <strong>direita</strong>, clique para marcar as dezenas da aposta do próximo concurso. Roxo = repetida do resultado.</li>
+                  <li>As abas <strong>1 2 3…</strong> são os volantes. Use <strong>+1 / +5 / +10</strong> para incluir mais.</li>
+                  <li><strong>Exportar</strong> baixa o TXT das apostas marcadas{% if extra_mes %} (com escolha do Mês da Sorte){% endif %}.</li>
+                  <li>Apostas da Seção 10, se enviadas, aparecem <strong>abaixo</strong> dessas abas — é só visualização; os volantes 1–10 não mudam.</li>
+                </ol>
+              </div>
+            </details>
             <div class="d-flex flex-wrap gap-2 mb-2 align-items-center justify-content-center">
               <button type="button" class="btn btn-sm btn-outline-success" id="tbCmpAdd1">
                 <i class="fas fa-plus me-1"></i>+1 volante
@@ -375,6 +402,7 @@
               <div class="tb-cmp-tabs" id="tbCmpVolantes"></div>
             </div>
           </div>
+          <div id="tbS10VolPreview" class="d-none" hidden></div>
         </div>
         <div id="tbCmpMesOverlay" class="tb-cmp-overlay d-none" role="dialog" aria-modal="true" aria-labelledby="tbCmpMesTitulo">
           <div class="tb-cmp-modal">

@@ -959,6 +959,68 @@
   background: #9b59b6;
   border-color: #7d3c98;
 }
+#ai-tubular-root .tb-howto > summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  font-size: .78rem;
+  color: #6b7280;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+}
+#ai-tubular-root .tb-howto > summary::-webkit-details-marker { display: none; }
+#ai-tubular-root .tb-howto > summary::before {
+  content: '▸';
+  font-size: .85rem;
+  line-height: 1;
+  color: var(--primary-xdark, #664a00);
+}
+#ai-tubular-root .tb-howto[open] > summary::before { content: '▾'; }
+#ai-tubular-root .tb-howto-body {
+  margin-top: .35rem;
+  padding: .45rem .65rem .35rem;
+  border: 1px dashed rgba(192, 139, 0, .28);
+  border-radius: 6px;
+  background: #fffdf6;
+}
+#ai-tubular-root .tb-howto-ol {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: .78rem;
+  color: #4b5563;
+  line-height: 1.45;
+}
+#ai-tubular-root .tb-howto-ol li + li { margin-top: .2rem; }
+#ai-tubular-root .tb-s10v-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .5rem .85rem;
+  margin-bottom: .55rem;
+}
+#ai-tubular-root .tb-s10v-title {
+  font-size: .78rem;
+  font-weight: 800;
+  color: var(--primary-xdark, #664a00);
+  letter-spacing: .02em;
+}
+#ai-tubular-root .tb-s10v-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+#ai-tubular-root .tb-s10v-ticket {
+  width: min(360px, 100%);
+  margin: .45rem auto 0;
+}
+#ai-tubular-root .tb-cmp-tab.tb-s10v-dirty::after {
+  content: ' · alt';
+  font-weight: 600;
+  opacity: .85;
+}
 #ai-tubular-root .tb-cmp-tabs-wrap {
   text-align: center;
   margin-top: .35rem;
