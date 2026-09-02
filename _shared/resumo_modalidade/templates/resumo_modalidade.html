@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    #rg-root { max-width: 1180px; }
+    #rg-root .rg-kpi {
+        background: var(--surface, #fff);
+        border: 1px solid rgba(192,139,0,.22);
+        border-radius: 10px;
+        padding: .7rem .9rem;
+        height: 100%;
+    }
+    #rg-root .rg-kpi .lbl {
+        font-size: .68rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: .03em;
+    }
+    #rg-root .rg-kpi .val {
+        font-size: 1.25rem; font-weight: 800; color: var(--primary-xdark);
+        line-height: 1.2;
+    }
+    #rg-root .rg-table { font-size: .84rem; }
+    #rg-root .rg-table thead th {
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    #rg-root .tipo-frequente { background: rgba(25,135,84,.1); }
+    #rg-root .tipo-atencao { background: rgba(192,139,0,.12); }
+    #rg-root .tipo-nao_confirmado { background: rgba(220,53,69,.08); }
+    #rg-root .tipo-info { background: rgba(13,110,253,.08); }
+    #rg-root .tipo-tendencia { background: rgba(192,139,0,.08); }
+    #rg-root .tipo-limite { background: #f8f9fa; }
+    #rg-root .rg-hint {
+        font-size: .82rem;
+        color: #5c5c5c;
+        border-left: 3px solid var(--accent);
+        padding: .45rem .75rem;
+        background: var(--accent-light);
+        border-radius: 0 8px 8px 0;
+    }
+    #rg-root .rg-section { margin-top: 1.6rem; }
+    #rg-root h2 { font-size: 1.05rem; font-weight: 800; color: var(--primary-xdark); }
+    #rg-root .bar {
+        height: 8px; background: #eee; border-radius: 99px; overflow: hidden;
+    }
+    #rg-root .bar > span {
+        display: block; height: 100%; background: var(--primary); border-radius: 99px;
+    }
+    #rg-root .rg-bolas span {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 32px; height: 32px; border-radius: 50%;
+        background: var(--primary); color: #fff; font-weight: 800; font-size: .8rem;
+        margin-right: .25rem;
+        border: 2px solid transparent;
+    }
+    #rg-root .rg-bolas span.rg-rep {
+        border-color: var(--primary-xdark);
+        background: var(--accent);
+    }
+    #rg-root .rg-neste { font-weight: 700; color: var(--primary-xdark); }
+</style>
+
+<div class="container-fluid py-3" id="rg-root">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1"><i class="fas fa-clipboard-list text-primary"></i> {{ page_title }}</h1>
+            <p class="text-muted small mb-0">{{ page_subtitle }} — {{ modality_nome }}</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/geradores-elite/ciclo-apostas/?modo=estrategia" class="btn btn-sm btn-outline-primary">↗ Ver no Gerador</a>
+            <a href="/geradores-elite/" class="btn btn-sm btn-outline-secondary">Gerador Elite</a>
+            <a href="/" class="btn btn-sm btn-outline-secondary">Voltar à home</a>
+        </div>
+    </div>
+
+    {% if not data.sucesso %}
+    <div class="alert alert-warning">{{ data.erro or "Não foi possível calcular o resumo." }}</div>
+    {% else %}
+    {% set m = data.meta %}
+    {% set k = data.kpis %}
+    {% set u = data.ultimo %}
+
+    <p class="small text-muted mb-3">
+        {{ m.universo }} · <strong>{{ m.total_concursos }}</strong> concursos
+        ({{ m.primeiro }} em {{ m.primeiro_data }} até {{ m.ultimo }} em {{ m.ultimo_data }}).
+        Frequência histórica — não é previsão.
+    </p>
+
+    <div class="row g-2 mb-3">
+        <div class="col-6 col-lg"><div class="rg-kpi"><div class="lbl">Soma média</div><div class="val">{{ k.soma_media }}</div></div></div>
+        <div class="col-6 col-lg"><div class="rg-kpi"><div class="lbl">Par / ímpar</div><div class="val">{{ k.par_impar_moda }}</div><div class="small text-muted">{{ k.par_impar_pct }}%</div></div></div>
+        <div class="col-6 col-lg"><div class="rg-kpi"><div class="lbl">Com sequência</div><div class="val">{{ k.pct_seq }}%</div></div></div>
+        <div class="col-6 col-lg"><div class="rg-kpi"><div class="lbl">Final repetido</div><div class="val">{{ k.pct_final }}%</div></div></div>
+        <div class="col-6 col-lg"><div class="rg-kpi"><div class="lbl">1 ou 2 repetidas</div><div class="val">{{ k.pct_rep_1ou2 }}%</div></div></div>
+    </div>
+
+    <h2 class="mb-2">Checklist operacional</h2>
+    <p class="small text-muted mb-2">Olhe isto antes de fechar o jogo — histórico vs concurso {{ u.concurso }}.</p>
+    <div class="rg-kpi mb-3">
+        <div class="small text-muted mb-1">Concurso {{ u.concurso }} · {{ u.data }} · repetidas do anterior com anel</div>
+        <div class="rg-bolas mb-0">
+            {% for d in u.dezenas %}
+            <span {% if d in (u.rep_dezenas or []) %}class="rg-rep" title="Repetida do concurso anterior"{% endif %}>{{ d }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm rg-table align-middle">
+            <thead>
+                <tr>
+                    <th>Critério</th>
+                    <th>Histórico</th>
+                    <th>Concurso {{ u.concurso }}</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for row in data.checklist %}
+            <tr class="tipo-{{ row.tipo }}">
+                <td class="fw-bold" title="{{ row.uso }}">{{ row.criterio }}</td>
+                <td>{{ row.ref }}</td>
+                <td class="rg-neste">{{ row.neste }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="rg-section">
+        <h2>14 regras para montar a aposta</h2>
+        <ol class="mb-0 ps-3">
+            {% for r in data.regras %}
+            <li class="mb-2">
+                <span class="badge
+                    {% if r.tipo == 'frequente' %}bg-success
+                    {% elif r.tipo == 'nao_confirmado' %}bg-danger
+                    {% elif r.tipo == 'atencao' or r.tipo == 'tendencia' %}bg-warning text-dark
+                    {% else %}bg-secondary{% endif %}">{{ r.tipo.replace('_', ' ') }}</span>
+                {{ r.texto }}
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+
+    <div class="rg-section">
+        <h2>Par / ímpar e soma</h2>
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="table-responsive">
+                    <table class="table table-sm rg-table">
+                        <thead><tr><th>Perfil</th><th>Concursos</th><th>%</th></tr></thead>
+                        <tbody>
+                        {% for row in data.par_impar.top %}
+                        <tr {% if loop.first %}class="tipo-frequente fw-bold"{% endif %}>
+                            <td>{{ row.dist }}</td>
+                            <td>{{ row.qtd }}</td>
+                            <td>
+                                {{ row.pct }}%
+                                <div class="bar mt-1"><span style="width:{{ row.pct }}%"></span></div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p class="rg-hint mb-0">
+                    Hipótese “sai mais par do que ímpar”
+                    {% if data.par_impar.predominio == 'impares' %}
+                    <strong>não confirmada</strong> — média {{ data.par_impar.media_impares }} ímpares vs {{ data.par_impar.media_pares }} pares.
+                    {% else %}
+                    alinhada à média ({{ data.par_impar.media_pares }} pares vs {{ data.par_impar.media_impares }} ímpares).
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <div class="table-responsive">
+                    <table class="table table-sm rg-table">
+                        <thead><tr><th>Faixa de soma</th><th>Concursos</th><th>%</th></tr></thead>
+                        <tbody>
+                        {% for row in data.soma.top_faixas %}
+                        <tr {% if loop.first %}class="tipo-frequente fw-bold"{% endif %}>
+                            <td>{{ row.valor }}</td>
+                            <td>{{ row.qtd }}</td>
+                            <td>{{ row.pct }}%</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p class="rg-hint mb-0">
+                    Operacional {{ data.soma.recomendavel }} · núcleo {{ data.soma.nucleo }} ·
+                    mín {{ data.soma.min }} · máx {{ data.soma.max }}.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="rg-section">
+        <h2>Faixas baixas · médias · altas</h2>
+        <div class="row g-2 mb-3">
+            {% for codigo, det in data.faixas.detalhe.items() %}
+            <div class="col-md-4">
+                <div class="rg-kpi">
+                    <div class="lbl">{{ det.label }}</div>
+                    <div class="val">moda {{ det.moda }} · média {{ det.media }}</div>
+                    <div class="small text-muted">min {{ det.min }} · máx {{ det.max }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm rg-table">
+                <thead><tr><th>Rank</th><th>Distribuição</th><th>Concursos</th><th>%</th></tr></thead>
+                <tbody>
+                {% for row in data.faixas.top8 %}
+                <tr {% if loop.index <= 3 %}class="tipo-frequente"{% endif %}>
+                    <td>{{ loop.index }}</td>
+                    <td class="fw-bold">{{ row.dist }}</td>
+                    <td>{{ row.qtd }}</td>
+                    <td>{{ row.pct }}%</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="rg-section">
+        <h2>Sequências, finais e repetição</h2>
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <h3 class="h6">Qtd. de sequências</h3>
+                <table class="table table-sm rg-table">
+                    <thead><tr><th>Qtd</th><th>%</th></tr></thead>
+                    <tbody>
+                    {% for row in data.sequencias.dist_qtd %}
+                    <tr><td>{{ row.valor }}</td><td>{{ row.pct }}%</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <p class="small text-muted">Tamanho mais comum: {{ data.sequencias.tamanho_mais_freq }} ({{ data.sequencias.tamanho_pct }}% das seqs).</p>
+            </div>
+            <div class="col-lg-4">
+                <h3 class="h6">Grupos de final repetido</h3>
+                <table class="table table-sm rg-table">
+                    <thead><tr><th>Grupos</th><th>%</th></tr></thead>
+                    <tbody>
+                    {% for row in data.finais.dist_grupos %}
+                    <tr><td>{{ row.valor }}</td><td>{{ row.pct }}%</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <p class="small text-muted">Ocupação líder:
+                    {% if data.finais.padrao_ocupacao_top %}{{ data.finais.padrao_ocupacao_top[0].valor }} ({{ data.finais.padrao_ocupacao_top[0].pct }}%){% endif %}
+                </p>
+            </div>
+            <div class="col-lg-4">
+                <h3 class="h6">Repetidas do concurso anterior</h3>
+                <table class="table table-sm rg-table">
+                    <thead><tr><th>Qtd</th><th>%</th></tr></thead>
+                    <tbody>
+                    {% for row in data.repeticao.dist %}
+                    <tr><td>{{ row.valor }}</td><td>{{ row.pct }}%</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <p class="small text-muted">Média {{ data.repeticao.media }} · zero em {{ data.repeticao.pct_zero }}%.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="rg-section">
+        <h2>Padrão inicial (primeiro dígito)</h2>
+        <p class="small text-muted">0 = 01–09 · 1 = 10–19 · 2 = 20–29 · 3 = 30–31. {{ data.padrao_inicial.distintos }} padrões distintos.</p>
+        <div class="table-responsive">
+            <table class="table table-sm rg-table">
+                <thead><tr><th>Rank</th><th>Padrão</th><th>Concursos</th><th>%</th></tr></thead>
+                <tbody>
+                {% for row in data.padrao_inicial.top5 %}
+                <tr {% if loop.first %}class="tipo-frequente fw-bold"{% endif %}>
+                    <td>{{ loop.index }}</td>
+                    <td><code>{{ row.valor }}</code></td>
+                    <td>{{ row.qtd }}</td>
+                    <td>{{ row.pct }}%</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if not data.padrao_inicial.hipotese.confirmado_lider %}
+        <p class="rg-hint">
+            Hipótese <code>{{ data.padrao_inicial.hipotese.padrao }}</code> como mais frequente
+            <strong>não confirmada</strong> ({{ data.padrao_inicial.hipotese.pct }}% — está no top, mas não é o 1º).
+        </p>
+        {% endif %}
+    </div>
+
+    <div class="rg-section">
+        <h2>Ciclos de cobertura (1–31)</h2>
+        <div class="row g-2 mb-3">
+            <div class="col-6 col-lg-3"><div class="rg-kpi"><div class="lbl">Duração média</div><div class="val">{{ data.ciclo.duracao_media }}</div></div></div>
+            <div class="col-6 col-lg-3"><div class="rg-kpi"><div class="lbl">Mais curto / longo</div><div class="val">{{ data.ciclo.min }} / {{ data.ciclo.max }}</div></div></div>
+            <div class="col-6 col-lg-3"><div class="rg-kpi"><div class="lbl">Moda</div><div class="val">{{ data.ciclo.moda }}</div></div></div>
+            <div class="col-6 col-lg-3"><div class="rg-kpi"><div class="lbl">Ciclos fechados</div><div class="val">{{ data.ciclo.completos }}</div></div></div>
+        </div>
+        {% if data.ciclo.atual %}
+        <p class="rg-hint">
+            Ciclo atual nº {{ data.ciclo.atual.numero }} · início {{ data.ciclo.atual.inicio }} ·
+            {{ data.ciclo.atual.concursos }} concursos · {{ data.ciclo.atual.pct }}% fechado ·
+            {{ data.ciclo.atual.pendentes_qtd }} pendentes
+            {% if data.ciclo.atual.pendentes %}
+            ({{ data.ciclo.atual.pendentes | join(', ') }}).
+            {% endif %}
+            Perto do fechamento a maioria dos sorteios <strong>não</strong> traz dezena nova.
+        </p>
+        {% endif %}
+        <p class="small text-muted mt-2 mb-0">
+            Dezenas novas: moda {{ data.ciclo.novas.moda }} ({{ data.ciclo.novas.moda_pct }}%).
+            Hipótese “1 ou 2 novas” = {{ data.ciclo.novas.pct_1_ou_2 }}% — não é maioria.
+            {% if data.ciclo.inicio %}
+            1º concurso do ciclo: média {{ data.ciclo.inicio[0].media }} novas.
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="rg-section">
+        <h2>Comportamento temporal</h2>
+        {% if data.temporal.confirmado %}
+        <p class="rg-hint">Há desvio pontual ≥ 8 pp em algum lag — veja a API para detalhe. Não trate como ciclo rígido.</p>
+        {% else %}
+        <p class="rg-hint">
+            Periodicidade a cada 2, 3 ou 4 concursos <strong>não confirmada</strong>
+            (sequência, finais, soma, baixas ≥3, repetição ≥2 — lags 1 a 6).
+        </p>
+        {% endif %}
+    </div>
+
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

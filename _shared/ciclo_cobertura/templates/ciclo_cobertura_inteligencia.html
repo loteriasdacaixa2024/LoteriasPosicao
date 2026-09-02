@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Inteligência Operacional — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+.badge-pressao-extrema { background: #dc3545; }
+.badge-pressao-alta { background: #fd7e14; }
+.badge-pressao-media { background: #ffc107; color: #212529; }
+.badge-pressao-baixa { background: #28a745; }
+.score-bar { height: 8px; border-radius: 4px; background: #e9ecef; }
+.score-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #0d6efd, #6610f2); }
+</style>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-0"><i class="fas fa-brain text-primary me-2"></i>Inteligência Operacional</h2>
+                    <p class="text-muted mb-0 mt-2">Transforma a análise do ciclo em decisões práticas — {{ modality_nome }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include '_nav_ciclo_analise.html' %}
+    <div id="conteudoOperacional">
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+            <p class="mt-2">Analisando ciclo e histórico...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  const API = {{ (api_base + '/inteligencia-operacional')|tojson }};
+  const ELITE = {{ elite_href|tojson }};
+
+  document.addEventListener('DOMContentLoaded', () => {
+    fetch(API + '?v=' + Date.now()).then(r => r.json()).then(data => {
+      if (data.sucesso) renderOperacional(data.dados);
+      else document.getElementById('conteudoOperacional').innerHTML =
+        `<div class="alert alert-danger">${data.mensagem || data.erro}</div>`;
+    }).catch(e => {
+      document.getElementById('conteudoOperacional').innerHTML =
+        `<div class="alert alert-danger">${e.message}</div>`;
+    });
+  });
+
+  function badgePressao(p) {
+    const m = { extrema: 'badge-pressao-extrema', alta: 'badge-pressao-alta', 'média': 'badge-pressao-media', media: 'badge-pressao-media', baixa: 'badge-pressao-baixa' };
+    return m[p] || 'bg-secondary';
+  }
+
+  function renderOperacional(d) {
+    const est = d.estado_atual;
+    const op = d.operacional;
+    const estr = op.estrategia_recomendada;
+    const dist = d.historico_semelhante.distribuicao_entrada || {};
+    const sug = estr.sugestao || {};
+    const fase = d.fase_ciclo || op.fase_ciclo || {};
+    const rep = d.repeticoes_historicas || op.repeticoes_historicas || {};
+    const repDist = rep.distribuicao_pct || {};
+    const scoresF = (d.scores_faltantes || []).slice(0, 12);
+    const faseClass = { inicio: 'success', andamento: 'secondary', finalizacao: 'danger' }[fase.fase] || 'secondary';
+    const eliteEstr = ELITE || '/geradores-elite/ciclo-apostas/?modo=estrategia';
+    document.getElementById('conteudoOperacional').innerHTML = `
+    <div class="alert alert-${faseClass} d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 shadow-sm">
+      <div>
+        <strong class="fs-5">Ciclo #${est.numero_ciclo}</strong>
+        <span class="badge bg-dark ms-2">${fase.label || fase.fase || '—'}</span>
+        <span class="ms-2">${est.faltando} faltantes · ${est.fechamento_percentual}% · pressão ${est.pressao}</span>
+        <div class="small mt-1">${fase.hint || ''}</div>
+      </div>
+      <a href="${eliteEstr}" class="btn btn-dark btn-sm"><i class="fas fa-chess-knight me-1"></i>Ciclo — Estratégias</a>
+    </div>
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <div class="card border-primary shadow-sm">
+          <div class="card-header bg-primary text-white"><strong>Estratégia sugerida</strong> (modo ${estr.modo_recomendado})</div>
+          <div class="card-body"><ul class="mb-0">
+            <li>Usar <strong>${sug.usar_faltantes || estr.faltantes_por_jogo + ' faltantes'}</strong></li>
+            <li>${estr.fechamento_parcial ? 'Evitar fechamento completo — fechamento parcial' : 'Cenário permite tentativa de fechamento'}</li>
+            <li>${sug.faixa || ''}</li>
+            <li>${sug.pares_impares || 'Equilibrar pares e ímpares'}</li>
+            <li>${sug.repetentes || ''}</li>
+          </ul></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+          <h6 class="text-muted">Estado</h6>
+          <p class="mb-1"><span class="badge bg-dark fs-6">${est.classificacao}</span>
+          <span class="badge ${badgePressao(est.pressao)} fs-6">${est.pressao}</span></p>
+          <p class="small mb-0">Ciclo #${est.numero_ciclo} · ${est.faltando} faltantes · ${est.fechamento_percentual}%</p>
+        </div></div>
+      </div>
+    </div>
+    <div class="alert alert-info shadow-sm mb-4">
+      <h6><i class="fas fa-comment-dots me-2"></i>Leitura operacional</h6>
+      <p class="mb-0">${op.resumo_final}</p>
+    </div>
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card h-100 border-dark">
+          <div class="card-header bg-dark text-white"><i class="fas fa-redo me-2"></i>Análise de repetições (0 / 1 / 2 / 3+)</div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              ${['0','1','2','3+'].map(k => `
+                <span class="badge ${rep.cenario_dominante === k ? 'bg-primary' : 'bg-secondary'} fs-6">${k}: ${repDist[k] ?? 0}%</span>
+              `).join('')}
+            </div>
+            <p class="small mb-1">${rep.leitura || ''}</p>
+            <p class="small mb-0">Recomendação: priorizar <strong>${rep.cenario_dominante || '2'}</strong> sem descartar os demais.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header"><i class="fas fa-sort-amount-up me-2"></i>Scores das faltantes</div>
+          <div class="card-body p-2">
+            ${scoresF.length ? scoresF.map(s => `
+              <div class="d-flex align-items-center mb-2">
+                <span class="badge bg-warning text-dark me-2" style="min-width:36px">${String(s.dezena).padStart(2,'0')}</span>
+                <div class="flex-grow-1 score-bar"><div class="score-fill" style="width:${s.score}%"></div></div>
+                <span class="ms-2 small">${s.atraso ?? '—'}atr · ${s.score}</span>
+              </div>`).join('') : '<p class="text-muted small mb-0">Sem faltantes.</p>'}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header"><i class="fas fa-question-circle me-2"></i>Como jogar no cenário atual?</div>
+          <div class="card-body"><p>${op.respostas.como_jogar}</p>
+          <table class="table table-sm">
+            <tr><td>Fase do ciclo</td><td><strong>${fase.label || fase.fase || '—'}</strong></td></tr>
+            <tr><td>Quantas faltantes?</td><td><strong>${op.respostas.quantas_faltantes}</strong></td></tr>
+            <tr><td>Vale fechamento?</td><td><strong>${op.respostas.vale_fechamento}</strong></td></tr>
+            <tr><td>Vale agressividade?</td><td><strong>${op.respostas.vale_agressividade ? 'Sim' : 'Moderada'}</strong></td></tr>
+            <tr><td>Estrutura mais segura</td><td><strong>${op.respostas.estrutura_segura}</strong></td></tr>
+            <tr><td>Repetição dominante</td><td><strong>${op.respostas.repeticao_dominante || rep.cenario_dominante || '2'}</strong></td></tr>
+          </table></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100 border-warning">
+          <div class="card-header bg-warning text-dark"><i class="fas fa-bell me-2"></i>Alertas operacionais</div>
+          <div class="card-body">
+            ${estr.alertas && estr.alertas.length
+              ? '<ul>' + estr.alertas.map(a => `<li>${a}</li>`).join('') + '</ul>'
+              : '<p class="text-muted mb-0">Nenhum alerta crítico no momento.</p>'}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Histórico semelhante (${d.historico_semelhante.amostras} amostras)</div>
+          <div class="card-body">
+            <table class="table table-sm">
+              <thead><tr><th>Faltantes que entraram</th><th>Frequência</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>${dist['0'] || 0}%</td></tr>
+                <tr><td>1</td><td>${dist['1'] || 0}%</td></tr>
+                <tr><td>2</td><td>${dist['2'] || 0}%</td></tr>
+                <tr><td>3</td><td>${dist['3'] || 0}%</td></tr>
+                <tr><td>4+</td><td>${dist['4+'] || 0}%</td></tr>
+              </tbody>
+            </table>
+            <p class="small text-muted mb-0">Média histórica de entrada: ${d.historico_semelhante.media_faltantes_entrada}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Score das dezenas (top)</div>
+          <div class="card-body p-2">
+            ${(d.scores_dezenas || []).slice(0, 10).map(s => `
+              <div class="d-flex align-items-center mb-2">
+                <span class="badge bg-primary me-2" style="min-width:36px">${String(s.dezena).padStart(2,'0')}</span>
+                <div class="flex-grow-1 score-bar"><div class="score-fill" style="width:${s.score}%"></div></div>
+                <span class="ms-2 small fw-bold">${s.score}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center">
+      <a href="${eliteEstr}" class="btn btn-success btn-lg">
+        <i class="fas fa-chess-knight me-2"></i>Ir para Ciclo — Estratégias (Elite)
+      </a>
+    </div>`;
+  }
+})();
+</script>
+{% endblock %}

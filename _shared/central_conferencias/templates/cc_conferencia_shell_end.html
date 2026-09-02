@@ -1,0 +1,110 @@
+    </div><!-- /panel-historico -->
+
+    <div class="conf-panel" id="panel-conversor" style="display:none;">
+        <div class="conf-conversor-wrap">
+            <h3 class="h5 fw-bold mb-2"><i class="fas fa-right-left me-2"></i>Conversor de Apostas — {{ cc_cfg.nome }}</h3>
+            <p class="text-muted small mb-3">{{ cc_cfg.menu_conv_desc }}</p>
+            <div class="conv-card" style="border: 2px solid var(--primary);">
+                <label for="convNumeroConcurso" class="form-label fw-bold mb-1">Número do concurso no JSON:</label>
+                <p class="text-muted small mb-2" id="convInstrucaoConcurso">Consultando banco local...</p>
+                <input type="number" id="convNumeroConcurso" class="conv-input-concurso" min="1" value="">
+            </div>
+            <div class="conv-card">
+                <h3 class="conv-section-title"><i class="fas fa-cloud-upload-alt me-2"></i>Upload de Arquivo</h3>
+                <div class="conv-upload-zone" id="convUploadZone">
+                    <i class="fas fa-file-upload d-block fa-2x text-success mb-2"></i>
+                    <p class="mb-0">Arraste .txt ou .json ou clique para selecionar</p>
+                    <input type="file" id="convFileInput" accept=".txt,.json" hidden>
+                </div>
+                <div id="convArquivoSel" class="mt-3" style="display:none;">
+                    <p class="mb-2"><strong>Arquivo:</strong> <span id="convNomeArquivo"></span></p>
+                    <button type="button" class="btn btn-success fw-bold" onclick="convProcessarArquivo()">Processar</button>
+                </div>
+            </div>
+            <div class="conv-card">
+                <h3 class="conv-section-title"><i class="fas fa-paste me-2"></i>Colar Texto</h3>
+                <p class="small text-muted">Exemplo: {{ cc_cfg.exemplo_txt }}</p>
+                <textarea class="form-control mt-2 font-monospace" id="convTextoApostas" rows="8" placeholder="Uma aposta por linha..."></textarea>
+                <div class="mt-3 d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-success fw-bold" onclick="convConverterTexto()">Converter para JSON</button>
+                    <button type="button" class="btn btn-secondary" onclick="convLimparTexto()">Limpar</button>
+                </div>
+            </div>
+            <div class="conv-card" id="convAreaResultado" style="display:none;">
+                <h3 class="conv-section-title">Resultado</h3>
+                <div id="convInfoValidacao"></div>
+                <div class="mt-2" id="convConteudoResultado"></div>
+                <div class="mt-3 d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-success btn-sm fw-bold" onclick="convDownloadJson()">Download JSON</button>
+                    <button type="button" class="btn btn-success btn-sm fw-bold" onclick="convDownloadTxt()">Download TXT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="conf-panel conf-panel-wide" id="panel-concursos" style="display:none;">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header fw-bold text-white" style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));">
+                <i class="fas fa-folder-open me-2"></i>Concursos Disponíveis — {{ cc_cfg.nome }}
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">
+                    Pastas em <code>conferencia_apostas\NUMERO\apostas.json</code> — conferência com o banco local.
+                </p>
+                <div id="cdLoading" class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-2x text-success"></i>
+                    <p class="text-muted mt-2 mb-0">Procurando concursos...</p>
+                </div>
+                <div id="cdLista" style="display:none;">
+                    <div class="row mb-3 align-items-center g-2">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="cdSelecionarTodos">
+                                <label class="form-check-label fw-bold" for="cdSelecionarTodos">Selecionar Todos</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8 text-md-end d-flex flex-wrap gap-2 justify-content-md-end">
+                            <span class="badge bg-info" id="cdTotalBadge">0 concursos</span>
+                            <button type="button" class="btn btn-success btn-sm fw-bold" id="cdBtnProcessarTopo" disabled>Processar</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="cdBtnRecarregarTopo">Recarregar</button>
+                        </div>
+                    </div>
+                    <div class="row g-3" id="cdContainer"></div>
+                    <div class="mt-3 d-flex gap-2">
+                        <button type="button" class="btn btn-success fw-bold" id="cdBtnProcessar" disabled>Processar Selecionados</button>
+                        <button type="button" class="btn btn-outline-secondary" id="cdBtnRecarregar">Recarregar</button>
+                    </div>
+                </div>
+                <div id="cdEmpty" class="text-center py-5" style="display:none;">
+                    <h5 class="text-muted">Nenhum concurso encontrado</h5>
+                    <p class="text-muted small">Crie <code>conferencia_apostas\NUMERO\apostas.json</code></p>
+                </div>
+                <div id="cdErrorState" class="alert alert-danger mt-3" style="display:none;">
+                    <span id="cdErrorMessage"></span>
+                </div>
+            </div>
+        </div>
+        <div id="cdCardProgresso" style="display:none;" class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-info text-white fw-bold py-2">Processamento</div>
+            <div class="card-body py-2" id="cdProgressoItems"></div>
+        </div>
+        <div id="cdAreaResultados" style="display:none;" class="card border-0 shadow-sm">
+            <div class="card-header text-white fw-bold" style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));">
+                Resultados
+            </div>
+            <div class="card-body">
+                <div id="cdSemResultados" class="text-center py-4 text-muted" style="display:none;">
+                    <p class="mb-0">Processe concursos para ver o relatório.</p>
+                </div>
+                <div id="cdConteudoResultados" style="display:none;">
+                    <ul class="nav nav-tabs mb-3" id="cdTabsConcursos" role="tablist"></ul>
+                    <div class="tab-content" id="cdTabsContent">
+                        <div class="tab-pane fade show active" id="cd-consolidado">
+                            <div id="cdRelatorioConsolidado"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- /conf-center-wide -->

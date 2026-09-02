@@ -1,0 +1,14 @@
+        <a class="mobile-link" href="{{ nav_cfg.sniper.href }}" onclick="closeMobileNav()">
+            <i class="{{ nav_cfg.sniper.icon }}"></i> {{ nav_cfg.sniper.title }}
+        </a>
+        {% for extra in nav_cfg.analise_extras %}
+        <a class="mobile-link" href="{{ extra.href }}" onclick="closeMobileNav()">
+            <i class="{{ extra.icon }}"></i> {{ extra.title }}
+        </a>
+        {% endfor %}
+        <a class="mobile-link" href="{{ nav_cfg.modelos.href }}" onclick="closeMobileNav()">
+            <i class="fas fa-layer-group"></i> Central de Modelos
+        </a>
+        <a class="mobile-link" href="{{ nav_cfg.backtesting.href }}" onclick="closeMobileNav()">
+            <i class="fas fa-chart-bar"></i> {{ nav_cfg.backtesting.title }}
+        </a>

@@ -1,0 +1,297 @@
+﻿<script>
+(function () {
+    let modoAtual = 'volante';
+    let ultimasApostas = [];
+    let dadosAnalise = null;
+    let statsDezenas = {};
+    let concursosLista = [];
+    let concursoConf = null;
+    /** numeros | volante | hibrido — como mostrar cada jogo gerado */
+    let exibicaoApostas = 'hibrido';
+
+    const DEZENAS_VOLANTE = Array.from({ length: 25 }, (_, i) => i + 1);
+    const LEGENDA_EXIBICAO = window.__repLegendaExibicao ? window.__repLegendaExibicao({ key: 'lotofacil' }) : {
+        numeros: 'Somente a lista linear em bolinhas.',
+        volante: 'Somente a grade do volante.',
+        hibrido: 'Lista em bolinhas e grade do volante juntas.',
+    };
+
+    function tendenciaBadge(t) {
+        if (t === 'permanencia') return '<span class="badge badge-perm">Permanência</span>';
+        if (t === 'saida') return '<span class="badge badge-sai">Saída</span>';
+        return '<span class="badge badge-neu">Neutra</span>';
+    }
+
+    function renderBolas(containerId, nums, repSet) {
+        const el = document.getElementById(containerId);
+        el.innerHTML = nums.map(n => {
+            const cls = repSet && repSet.has(n) ? 'dez-ball rep' : 'dez-ball';
+            return `<span class="${cls}">${String(n).padStart(2, '0')}</span>`;
+        }).join('');
+    }
+
+    function repSetVolante(data) {
+        return new Set(data.resumo_ultimo_par.volante.dezenas);
+    }
+
+    function tooltipDezena(d) {
+        const st = statsDezenas[d] || statsDezenas[String(d)] || {};
+        const pos = st.posicao_predominante ? `P${st.posicao_predominante}` : '—';
+        return [
+            `Dezena ${String(d).padStart(2, '0')}`,
+            `Frequência: ${st.frequencia ?? '—'} (${st.freq_pct ?? '—'}%)`,
+            `Atraso: ${st.atraso ?? '—'} concursos`,
+            `Posição predominante: ${pos}`,
+            `Ciclo: ${st.ciclo ?? '—'}`,
+        ].join('\n');
+    }
+
+    function calcConferencia(dezenasAposta) {
+        if (!concursoConf || !concursoConf.dezenas) return null;
+        const aposta = new Set(dezenasAposta);
+        const oficial = new Set(concursoConf.dezenas);
+        const acertos = [...aposta].filter(d => oficial.has(d)).length;
+        const fora = aposta.size - acertos;
+        const pct = Math.round((acertos / 15) * 1000) / 10;
+        return { acertos, fora, pct, totalOficial: 15 };
+    }
+
+    const CFG = { key: 'lotofacil', dezena_min: 1, dezena_max: 25, sorteadas: 15 };
+
+    function htmlVolante(dezenasAposta, jogoId) {
+        if (window.__repHtmlVolante) {
+            return window.__repHtmlVolante(dezenasAposta, jogoId, CFG, concursoConf);
+        }
+        const aposta = new Set(dezenasAposta);
+        const oficial = concursoConf && concursoConf.dezenas ? new Set(concursoConf.dezenas) : null;
+        const cells = DEZENAS_VOLANTE.map(d => {
+            let cls = 'volante-cell';
+            const naAposta = aposta.has(d);
+            const acertou = oficial && naAposta && oficial.has(d);
+            if (acertou) cls += ' acerto';
+            else if (naAposta) cls += ' na-aposta';
+            return `<div class="${cls}">${String(d).padStart(2, '0')}</div>`;
+        }).join('');
+        const conf = calcConferencia(dezenasAposta);
+        const confHtml = window.__htmlConfMini ? window.__htmlConfMini(conf) : '';
+        return `<div class="volante-oficial-wrap volante-lf-compacto" id="volante-jogo-${jogoId}">
+            <div class="volante-oficial-grid">${cells}</div>${confHtml}
+        </div>`;
+    }
+
+    function initTooltips(root) {
+        if (!window.bootstrap) return;
+        (root || document).querySelectorAll('[data-bs-toggle="tooltip"]:not(.volante-cell)').forEach(el => {
+            const old = bootstrap.Tooltip.getInstance(el);
+            if (old) old.dispose();
+            new bootstrap.Tooltip(el, { trigger: 'hover', html: false });
+        });
+    }
+
+    function atualizarLegendaExibicao() {
+        const el = document.getElementById('exibicaoLegendaTexto');
+        if (el) el.textContent = LEGENDA_EXIBICAO[exibicaoApostas] || '';
+    }
+
+    function renderAnalise(data) {
+        dadosAnalise = data;
+        statsDezenas = data.stats_dezenas || {};
+        document.getElementById('loaderAnalise').style.display = 'none';
+        document.getElementById('painelAnalise').style.display = 'block';
+
+        const rep = data.resumo_ultimo_par.volante;
+        const pos = data.resumo_ultimo_par.posicional;
+        document.getElementById('lblParConcursos').textContent =
+            `#${data.penultimo_concurso} → #${data.ultimo_concurso}`;
+
+        const linkComp = document.getElementById('linkCompararVisual');
+        if (linkComp) {
+            linkComp.href =
+                `/analise/comparar-concursos/?concurso_a=${data.penultimo_concurso}&concurso_b=${data.ultimo_concurso}&modo=${modoAtual}`;
+        }
+
+        const rs = repSetVolante(data);
+        renderBolas('bolasPenultimo', data.penultimo_sorteio, rs);
+        renderBolas('bolasUltimo', data.ultimo_sorteio, rs);
+
+        let htmlResumo = `<div class="fs-5 fw-bold text-success">${rep.quantidade} dezenas repetidas (volante)</div>`;
+        htmlResumo += `<div class="mt-1">${rep.dezenas.map(n => `<span class="dez-ball rep">${String(n).padStart(2,'0')}</span>`).join('')}</div>`;
+        htmlResumo += `<div class="small mt-2">Pares: <strong>${rep.pares}</strong> · Ímpares: <strong>${rep.impares}</strong></div>`;
+        if (modoAtual !== 'volante') {
+            htmlResumo += `<div class="small mt-1">Posicional: <strong>${pos.quantidade}</strong> posições com mesma dezena</div>`;
+        }
+        htmlResumo += `<div class="small text-muted mt-2">Média histórica: ${data.resumo_ultimo_par.media_historica_quantidade_volante} repetidas por par</div>`;
+        document.getElementById('resumoRep').innerHTML = htmlResumo;
+
+        document.getElementById('resumoPadroes').innerHTML =
+            `Quando há repetição no histórico, em média <strong>${data.padroes_grupo.media_pares_quando_repete}</strong> pares e ` +
+            `<strong>${data.padroes_grupo.media_impares_quando_repete}</strong> ímpares no grupo repetido. ` +
+            `Permanência média após repetição: <strong>${data.padroes_grupo.media_permanencia_apos_repeticao_pct}%</strong>.`;
+
+        const tb = document.getElementById('tbodyDezenas');
+        tb.innerHTML = data.dezenas.map(row => {
+            let repAgora = '—';
+            if (modoAtual === 'volante') repAgora = row.repetiu_ultimo_par_volante ? 'âœ“' : '';
+            else if (modoAtual === 'posicional') repAgora = row.repetiu_ultimo_par_posicional ? 'âœ“' : '';
+            else {
+                repAgora = (row.repetiu_ultimo_par_volante ? 'V' : '') + (row.repetiu_ultimo_par_posicional ? 'P' : '');
+            }
+            return `<tr>
+                <td><strong>${String(row.dezena).padStart(2,'0')}</strong></td>
+                <td class="text-center">${repAgora}</td>
+                <td>${row.freq_repeticao_vezes}</td>
+                <td>${row.freq_repeticao_pct}%</td>
+                <td>${row.permanencia_pct}% <span class="text-muted">(${row.permanencia_vezes}/${row.permanencia_eventos})</span></td>
+                <td>${tendenciaBadge(row.tendencia)}</td>
+                <td>${row.par ? 'Par' : 'Ímpar'}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function carregarAnalise() {
+        document.getElementById('loaderAnalise').style.display = 'block';
+        document.getElementById('painelAnalise').style.display = 'none';
+        const r = await fetch(`/analise/repeticao-concursos/api/analise?modo=${modoAtual}`);
+        const data = await r.json();
+        if (!data.sucesso) {
+            document.getElementById('loaderAnalise').innerHTML = `<span class="text-danger">${data.erro || 'Erro'}</span>`;
+            return;
+        }
+        renderAnalise(data);
+    }
+
+    function renderApostas(apostas, aviso) {
+        ultimasApostas = apostas || [];
+        document.getElementById('btnExport').disabled = !ultimasApostas.length;
+        const el = document.getElementById('listaApostas');
+        el.classList.toggle('lista-apostas-grid', ultimasApostas.length > 0);
+        el.classList.toggle('lista-apostas-hibrido', exibicaoApostas === 'hibrido');
+        if (!ultimasApostas.length) {
+            el.classList.remove('lista-apostas-grid', 'lista-apostas-hibrido');
+            el.innerHTML = aviso
+                ? `<div class="alert alert-warning py-2 small mb-0">${aviso}</div>`
+                : '<p class="text-muted small mb-0">Nenhuma aposta gerada.</p>';
+            return;
+        }
+        const avisoHtml = aviso
+            ? `<div class="alert alert-warning py-2 small mb-2">${aviso}</div>`
+            : '';
+        const showLinear = exibicaoApostas === 'numeros' || exibicaoApostas === 'hibrido';
+        const showVolante = exibicaoApostas === 'volante' || exibicaoApostas === 'hibrido';
+
+        el.innerHTML = avisoHtml + ultimasApostas.map(a => `
+            <div class="border rounded p-2 mb-2 aposta-item" data-aposta="${a.numero}">
+                ${window.__htmlApostaHead ? window.__htmlApostaHead(a.numero) : ''}
+                <div class="aposta-card-inner ${exibicaoApostas === 'hibrido' ? 'modo-hibrido' : ''}">
+                    ${showLinear ? `
+                    <div class="aposta-linear ${showVolante ? '' : 'w-100'}">
+                        <div class="my-1">${a.dezenas.map(n => `<span class="dez-ball">${String(n).padStart(2,'0')}</span>`).join('')}</div>
+                    </div>` : ''}
+                    ${showVolante ? htmlVolante(a.dezenas, a.numero) : ''}
+                </div>
+            </div>
+        `).join('');
+        initTooltips(el);
+        if (window.__bindApostaInfoToggle) window.__bindApostaInfoToggle(el);
+    }
+
+    async function carregarConcursos() {
+        const r = await fetch('/analise/repeticao-concursos/api/concursos?limit=150');
+        const data = await r.json();
+        if (!data.sucesso) return;
+        concursosLista = data.concursos || [];
+        const sel = document.getElementById('selConcursoConf');
+        const atual = sel.value;
+        sel.innerHTML = '<option value="">— Sem conferência (só amarelo) —</option>' +
+            concursosLista.map(c =>
+                `<option value="${c.concurso}">#${c.concurso} — ${c.data || ''}</option>`
+            ).join('');
+        if (atual) sel.value = atual;
+        else if (concursosLista.length) {
+            sel.value = String(concursosLista[0].concurso);
+            aplicarConcursoConf(parseInt(sel.value, 10));
+        }
+    }
+
+    function aplicarConcursoConf(concursoNum) {
+        if (!concursoNum) {
+            concursoConf = null;
+        } else {
+            concursoConf = concursosLista.find(c => c.concurso === concursoNum) || null;
+        }
+        if (ultimasApostas.length) renderApostas(ultimasApostas);
+    }
+
+    async function gerar() {
+        const body = {
+            modo: modoAtual,
+            quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+            dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || 15,
+            perfil: document.getElementById('inpPerfil').value,
+            usar_ultimo_par: document.getElementById('chkUltimoPar').checked,
+            so_permanencia: document.getElementById('chkPermanencia').checked,
+            respeitar_par_impar: document.getElementById('chkParImpar').checked,
+        };
+        const r = await fetch('/analise/repeticao-concursos/api/gerar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!data.sucesso) {
+            alert(data.erro || 'Erro ao gerar');
+            return;
+        }
+        renderApostas(data.apostas, data.aviso);
+    }
+
+    function exportarTxt() {
+        if (!ultimasApostas.length) return;
+        const blob = new Blob([ultimasApostas.map(a => a.texto).join('\n')], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `lotofacil_repeticao_${Date.now()}.txt`;
+        a.click();
+    }
+
+    function atualizarLegendaModo(modo) {
+        document.querySelectorAll('.modo-legenda-inline').forEach(el => {
+            el.classList.toggle('ativo', el.dataset.legenda === modo);
+        });
+    }
+
+    document.querySelectorAll('.modo-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.modo-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            modoAtual = btn.dataset.modo;
+            atualizarLegendaModo(modoAtual);
+            carregarAnalise();
+        });
+    });
+    atualizarLegendaModo(modoAtual);
+    const btnAtualizar = document.getElementById('btnAtualizar');
+    if (btnAtualizar) btnAtualizar.addEventListener('click', carregarAnalise);
+    const elGerar = document.getElementById('btnGerar');
+    if (elGerar) {
+        elGerar.addEventListener('click', gerar);
+        document.getElementById('btnExport').addEventListener('click', exportarTxt);
+        document.getElementById('selConcursoConf').addEventListener('change', (e) => {
+            const v = parseInt(e.target.value, 10);
+            aplicarConcursoConf(v || null);
+        });
+        document.querySelectorAll('.exibicao-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.exibicao-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                exibicaoApostas = btn.dataset.exib;
+                atualizarLegendaExibicao();
+                if (ultimasApostas.length) renderApostas(ultimasApostas);
+            });
+        });
+        atualizarLegendaExibicao();
+        carregarConcursos();
+    }
+    if (document.getElementById('painelAnalise') || elGerar) carregarAnalise();
+})();
+</script>

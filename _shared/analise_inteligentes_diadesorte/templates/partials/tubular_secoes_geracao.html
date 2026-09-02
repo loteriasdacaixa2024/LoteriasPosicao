@@ -1,0 +1,408 @@
+{# Seção 10 (Manual) + Seção 11 (Automático) — geração tubular #}
+{% set sorteadas = sorteadas if sorteadas is defined else (ctx.get('sorteadas', 7) if ctx is defined else 7) %}
+{% set extra_mes = extra_mes if extra_mes is defined else (ctx.get('extra_mes', false) if ctx is defined else false) %}
+{% set show_s10_first = show_s10_first if show_s10_first is defined else true %}
+{% set show_s11_toggle = show_s11_toggle if show_s11_toggle is defined else false %}
+{% set show_comparador_volante = show_comparador_volante if show_comparador_volante is defined else false %}
+{% set sorteadas = sorteadas|int %}
+        <!-- Seção 10 — MANUAL -->
+        <div data-tb-panel="s10" class="{{ '' if show_s10_first else 'd-none' }}">
+          <div class="tb-card">
+            <h2 class="h5 fw-bold">📝 SEÇÃO 10 — MANUAL <span class="badge bg-secondary ms-1">ordem crescente</span></h2>
+            <p class="small text-muted mb-1">Três jeitos de incluir apostas: arraste TXT/CSV, cole o texto, ou clique em <strong>+</strong> para abrir linhas em branco e preencher as dezenas. Depois clique em <strong>Processar Jogos</strong>. <strong>Limpar</strong> zera o texto e a tabela. Stats em tempo real. Exporta somente dezenas{% if extra_mes %} + mês (editável com ▲/▼){% endif %}.</p>
+            <p class="small text-muted mb-2">Uma aposta por linha{% if extra_mes %}, {{ sorteadas }} dezenas (01 a 31) e o mês no final (opcional){% else %}, {{ sorteadas }} dezenas separadas por espaço{% endif %}. Ex.: <code>{% if extra_mes %}02 09 18 21 23 26 28 Out{% else %}01 05 12 23 34 45{% endif %}</code>{% if extra_mes %} · <code>02 09 18 21 23 26 28 - Outubro</code>{% endif %}.</p>
+            <div class="tb-drop mb-2" id="tbDrop10" data-ai-compare="s10">Arraste TXT/CSV aqui · ou cole abaixo</div>
+            <textarea id="tbPaste10" class="form-control form-control-sm mb-2" rows="3" placeholder="{% if extra_mes %}Uma aposta por linha. Ex.: 02 09 18 21 23 26 28 Out
+02 09 18 21 23 26 28 - Julho{% else %}Uma aposta por linha. Ex.: 01 05 12 23 34 45{% endif %}"></textarea>
+            <div class="d-flex flex-wrap gap-2 mb-2 justify-content-center">
+              <button type="button" class="btn btn-sm btn-success" id="tbProcess10">✓ Processar Jogos</button>
+              <button type="button" class="btn btn-sm btn-success" id="tbBtnMark10">🔍 Marcar (seq + faltantes)</button>
+              <button type="button" class="btn btn-sm btn-secondary" id="tbBtnReset10">Resetar Marcações</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport10">
+                <i class="fas fa-file-export me-1"></i>Exportar
+              </button>
+              {% if show_comparador_volante %}
+              <button type="button" class="btn btn-sm fw-bold" id="tbEnviarCmp10"
+                      title="Envia as apostas desta seção para os volantes da Seção 12, sem recalcular"
+                      style="background:var(--primary);border-color:var(--primary);color:#fff;">
+                <i class="fas fa-share-square me-1"></i>Enviar para Comparação
+              </button>
+              {% endif %}
+              <button type="button" class="btn btn-sm btn-warning" id="tbJaSaiu10"
+                      title="Compara cada aposta com todos os resultados oficiais, do concurso 1 até o atual">
+                <i class="fas fa-history me-1"></i>Já saiu?
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbJaSaiu10Clear">Limpar verif.</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear10"
+                      title="Limpa o texto colado e as apostas processadas">Limpar</button>
+            </div>
+            <div class="small text-muted mb-2 text-center" id="tbJaSaiu10Info">Verifica se alguma aposta já foi o resultado oficial (concurso 1 até o atual)</div>
+            <div id="tbJaSaiu10Box" class="tb-jasaiu-box d-none mb-2" role="status"></div>
+            <div class="tb-stats-panel mb-2" id="tbStats10"></div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center">
+              <span class="small fw-semibold mb-0">Suas apostas</span>
+              <button type="button" class="btn btn-sm btn-outline-primary tb-act" id="tbAddLinha10"
+                      title="Adicionar linha em branco" aria-label="Adicionar linha">
+                <i class="fas fa-plus"></i>
+              </button>
+              <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbAddLinha10Qtd">
+                Qtd:
+                <input type="number" class="form-control form-control-sm" id="tbAddLinha10Qtd"
+                       value="1" min="1" max="500" step="1" style="width:4.5rem;"
+                       title="Quantas linhas em branco incluir de uma vez">
+              </label>
+              <div class="tb-sel-bar d-none" id="tbSelBar10" role="toolbar" aria-label="Seleção de apostas">
+                <span class="tb-sel-count d-none" id="tbSelCount10"></span>
+                <button type="button" class="btn btn-sm btn-outline-secondary tb-act" id="tbSelAll10"
+                        title="Selecionar todos" aria-label="Selecionar todos">
+                  <i class="fas fa-check"></i> Todos
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary tb-act" id="tbSelNone10"
+                        title="Desmarcar todos" aria-label="Desmarcar todos" disabled>
+                  <i class="fas fa-undo"></i> Desmarcar
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger tb-act" id="tbSelDel10"
+                        title="Excluir selecionadas" aria-label="Excluir selecionadas" disabled>
+                  <i class="fas fa-trash-alt"></i> <span class="tb-act-label">Excluir</span>
+                </button>
+              </div>
+            </div>
+            <div id="tbFaltantesHint10" class="small text-muted mb-1 d-none text-center"></div>
+            <div id="tbDupMsg10" class="tb-dup-msg d-none mb-2" role="alert"></div>
+            <div class="tb-s10-board">
+            <div class="small fw-bold text-muted mb-1" id="tbUltimo10Lbl">Último resultado (referência — histórico tubular)</div>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered tb-table" id="tbManual10">
+                <thead>
+                  <tr>
+                    <th class="tb-sel-th" title="Selecionar todos">
+                      <input type="checkbox" class="tb-sel-cb" id="tbSelHead10"
+                             aria-label="Selecionar todas as apostas">
+                    </th>
+                    <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
+                    {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
+                    <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="rept" title="Clique para ordenar">Rept <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="soma" title="Clique para ordenar">Soma <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="pares" title="Clique para ordenar">Pares <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="impares" title="Clique para ordenar">Ímpares <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="inicial" title="Clique para ordenar">Inicial <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="final" title="Clique para ordenar">Final <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="qtde" title="Clique para ordenar">Qtde <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="numeros" title="Clique para ordenar">Números <span class="tb-sort-ind">⇅</span></th>
+                    <th title="Incluir ou remover linha"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbUltimo10" class="tb-ultimo-preview">
+                  <tr><td colspan="{{ 14 + (1 if extra_mes else 0) }}" class="text-muted">Carregando histórico tubular…</td></tr>
+                </tbody>
+                <tbody id="tbManual10Body"></tbody>
+              </table>
+            </div>
+            </div>
+          </div>
+        </div>
+
+        {% if show_s11_toggle %}
+        <div class="tb-s11-toggle-wrap mb-3 text-center">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="tbToggleS11"
+                  aria-expanded="false" aria-controls="tbPanelS11">
+            <i class="fas fa-eye me-1"></i>Mostrar Seção 11
+          </button>
+        </div>
+        {% endif %}
+
+        <!-- Seção 11 — AUTOMÁTICO -->
+        <div data-tb-panel="s11" id="tbPanelS11" class="{{ 'd-none' if show_s10_first else '' }}">
+          <div class="tb-card">
+            <h2 class="h5 fw-bold">⚡ SEÇÃO 11 — AUTOMÁTICO
+              <span class="badge bg-primary ms-1" id="tbAuto11Badge">janela 10</span>
+            </h2>
+            <p class="small text-muted mb-2">
+              Gera apostas com base no histórico recente, com critérios de Soma opcionais.
+              <strong>SEQ, FINAIS e REPT</strong> devem ser diferentes dos padrões da janela selecionada.
+            </p>
+
+            <div class="small fw-bold text-muted mb-1" id="tbUltimo11Lbl">Último resultado (referência — mesma prévia da Seção 10)</div>
+            <div class="table-responsive mb-3">
+              <table class="table table-sm table-bordered tb-table" id="tbUltimo11">
+                <thead>
+                  <tr>
+                    <th>Concurso</th>
+                    <th>Data</th>
+                    {% for i in range(1, sorteadas + 1) %}
+                    <th class="tb-dez-h{% if i == 1 %} tb-dez-h-first{% endif %}{% if i == sorteadas %} tb-dez-h-last{% endif %}">{{ i }}º</th>
+                    {% endfor %}
+                    {% if extra_mes %}<th>Mês</th>{% endif %}
+                    <th>SEQ</th>
+                    <th>FINAIS</th>
+                    <th>Rept</th>
+                    <th>Soma</th>
+                    <th>Pares</th>
+                    <th>Ímpares</th>
+                    <th>Inicial</th>
+                    <th>Final</th>
+                    <th>Qtde</th>
+                    <th>Números</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="{{ 2 + sorteadas + (1 if extra_mes else 0) + 10 }}" class="text-muted">Carregando histórico tubular…</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="border rounded p-2 mb-3" style="background:var(--bg,#fffdf5);border-color:rgba(0,0,0,.08)!important;">
+              <div class="fw-bold small text-uppercase text-muted mb-2">Como gerar</div>
+              <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                <span class="comp-toolbar-lbl mb-0" style="font-size:.7rem;font-weight:700;color:#6c757d;">Janela:</span>
+                <div class="btn-group btn-group-sm" role="group" id="tbAuto11Janela">
+                  <button type="button" class="btn btn-outline-secondary active" data-janela="10">10</button>
+                  <button type="button" class="btn btn-outline-secondary" data-janela="20">20</button>
+                  <button type="button" class="btn btn-outline-secondary" data-janela="31">31</button>
+                  <button type="button" class="btn btn-outline-secondary" data-janela="0">Todos</button>
+                </div>
+              </div>
+              <div class="fw-semibold small mb-1">Critério de Soma</div>
+              <div class="d-flex flex-wrap gap-3" id="tbAuto11SomaModo">
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="padrao" checked>
+                  <span class="form-check-label small">Padrão</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="frequente">
+                  <span class="form-check-label small">Mais frequente</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="alta">
+                  <span class="form-check-label small">Mais alta</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="baixa">
+                  <span class="form-check-label small">Mais baixa</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Soma" value="media">
+                  <span class="form-check-label small">Média</span>
+                </label>
+              </div>
+              <div class="small text-muted mt-2" id="tbAuto11SomaHint">Modo padrão — coerente com o histórico, sem forçar soma específica.</div>
+              <div class="fw-semibold small mb-1 mt-3">Pares / Ímpares</div>
+              <div class="d-flex flex-wrap gap-2" id="tbAuto11ParesModo">
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_4" checked>
+                  <span class="form-check-label small"><strong>4P / 3I</strong> <span class="tb-pares-n" data-pares-n>—</span></span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_3">
+                  <span class="form-check-label small">3P / 4I <span class="tb-pares-n" data-pares-n>—</span></span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_5">
+                  <span class="form-check-label small">5P / 2I <span class="tb-pares-n" data-pares-n>—</span></span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_2">
+                  <span class="form-check-label small">2P / 5I <span class="tb-pares-n" data-pares-n>—</span></span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_6">
+                  <span class="form-check-label small">6P / 1I <span class="tb-pares-n" data-pares-n>—</span></span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_1">
+                  <span class="form-check-label small">1P / 6I <span class="tb-pares-n" data-pares-n>—</span></span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_7">
+                  <span class="form-check-label small">7P / 0I <span class="tb-pares-n" data-pares-n>—</span></span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="fix_0">
+                  <span class="form-check-label small">0P / 7I <span class="tb-pares-n" data-pares-n>—</span></span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbAuto11Pares" value="aleatorio">
+                  <span class="form-check-label small">Aleatório (todas) <span class="tb-pares-n" data-pares-n>—</span></span>
+                </label>
+              </div>
+              <div class="small text-muted mt-2" id="tbAuto11ParesHint">Fixo: 4 pares / 3 ímpares</div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
+              <button type="button" class="btn btn-sm btn-success" id="tbGerar11">
+                <i class="fas fa-magic me-1"></i>GERAR 10 APOSTAS
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-success" id="tbGerarMais11">
+                <i class="fas fa-plus me-1"></i>GERAR MAIS APOSTAS
+              </button>
+              <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbGerarMais11Qtd">
+                Qtd:
+                <input type="number" class="form-control form-control-sm" id="tbGerarMais11Qtd"
+                       value="50" min="1" max="5000" step="1" style="width:5.5rem;">
+              </label>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport11">
+                <i class="fas fa-file-export me-1"></i>Exportar
+              </button>
+              <button type="button" class="btn btn-sm btn-warning" id="tbJaSaiu11"
+                      title="Compara cada aposta gerada com todos os resultados oficiais, do concurso 1 até o atual">
+                <i class="fas fa-history me-1"></i>Já saiu?
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbJaSaiu11Clear">Limpar verif.</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear11">Limpar</button>
+              <span class="small text-muted" id="tbGerar11Info">—</span>
+            </div>
+            <div class="small text-muted mb-2" id="tbJaSaiu11Info">Verifica se alguma aposta gerada já foi o resultado oficial (concurso 1 até o atual)</div>
+            <div id="tbJaSaiu11Box" class="tb-jasaiu-box d-none mb-2" role="status"></div>
+            <div class="d-flex flex-wrap gap-2 mb-2 align-items-center" id="tbConferir11Bar">
+              <label class="small mb-0 fw-semibold" for="tbConferir11Select">Conferir</label>
+              <select class="form-select form-select-sm" id="tbConferir11Select">
+                <option value="">— concurso apurado —</option>
+              </select>
+              <button type="button" class="btn btn-sm btn-success" id="tbConferir11">
+                <i class="fas fa-check-double me-1"></i>Conferir
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbConferir11Clear">Limpar conf.</button>
+              <span class="small text-muted" id="tbConferir11Info">Selecione um concurso e clique em Conferir</span>
+            </div>
+            <div class="tb-cond-stats mb-2" id="tbStats11Wrap">
+              <button type="button" class="tb-cond-stats-toggle" id="tbStats11Toggle" aria-expanded="false">
+                <span class="tb-cond-stats-arrow" aria-hidden="true">▶</span>
+                <span>Resumo estatístico</span>
+              </button>
+              <div class="tb-cond-stats-body d-none" id="tbStats11Body">
+                <div class="tb-stats-panel tb-stats-panel-inline" id="tbStats11"></div>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+              <span class="small fw-semibold mb-0">Apostas geradas</span>
+              <div class="tb-sel-bar d-none" id="tbSelBar11" role="toolbar" aria-label="Seleção de apostas">
+                <span class="tb-sel-count d-none" id="tbSelCount11"></span>
+                <button type="button" class="btn btn-sm btn-outline-secondary tb-act" id="tbSelAll11"
+                        title="Selecionar todos" aria-label="Selecionar todos">
+                  <i class="fas fa-check"></i> Todos
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary tb-act" id="tbSelNone11"
+                        title="Desmarcar todos" aria-label="Desmarcar todos" disabled>
+                  <i class="fas fa-undo"></i> Desmarcar
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger tb-act" id="tbSelDel11"
+                        title="Excluir selecionadas" aria-label="Excluir selecionadas" disabled>
+                  <i class="fas fa-trash-alt"></i> <span class="tb-act-label">Excluir</span>
+                </button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered tb-table" id="tbManual11">
+                <thead>
+                  <tr>
+                    <th class="tb-sel-th" title="Selecionar todos">
+                      <input type="checkbox" class="tb-sel-cb" id="tbSelHead11"
+                             aria-label="Selecionar todas as apostas">
+                    </th>
+                    <th class="tb-sort" data-sort="idx" title="Clique para ordenar">Aposta <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="dezenas" title="Clique para ordenar">Dezenas <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="acertos" title="Clique para ordenar">Acertos <span class="tb-sort-ind">⇅</span></th>
+                    {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
+                    <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="rept" title="Clique para ordenar">Rept <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="soma" title="Clique para ordenar">Soma <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="pares" title="Clique para ordenar">Pares <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="impares" title="Clique para ordenar">Ímpares <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="inicial" title="Clique para ordenar">Inicial <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="final" title="Clique para ordenar">Final <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="qtde" title="Clique para ordenar">Qtde <span class="tb-sort-ind">⇅</span></th>
+                    <th title="Remover"></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {% if show_comparador_volante %}
+        <!-- Seção 12 — Comparador de Apostas no Volante (independente das Seções 10 e 11) -->
+        <div data-tb-panel="s12" id="tbSecao12">
+          <div class="tb-card tb-cmp-card">
+            <h2 class="h5 fw-bold">🎯 SEÇÃO 12 — COMPARADOR DE APOSTAS NO VOLANTE</h2>
+            <p class="small text-muted mb-2">
+              Comparação visual: <strong>resultado oficial</strong> à esquerda e <strong>escolha manual</strong> à direita, no volante pequeno do Dia de Sorte.
+              Clique nas dezenas da direita para marcar ou desmarcar até 7 números. Use <strong>Enviar para Comparação</strong> na Seção 10 para preencher.
+            </p>
+            <div class="d-flex flex-wrap gap-2 mb-2 align-items-center justify-content-center">
+              <button type="button" class="btn btn-sm btn-outline-success" id="tbCmpAdd1">
+                <i class="fas fa-plus me-1"></i>+1 volante
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-success" id="tbCmpAdd5">+5</button>
+              <button type="button" class="btn btn-sm btn-outline-success" id="tbCmpAdd10">+10</button>
+              <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbCmpAddQtd">
+                Qtd:
+                <input type="number" class="form-control form-control-sm" id="tbCmpAddQtd"
+                       value="1" min="1" max="200" step="1" style="width:4.5rem;">
+              </label>
+              <button type="button" class="btn btn-sm btn-outline-success" id="tbCmpAddN">Adicionar</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="tbCmpExport">
+                <i class="fas fa-file-export me-1"></i>Exportar
+              </button>
+              <span class="small text-muted" id="tbCmpInfo">10 volantes</span>
+            </div>
+            <div class="tb-cmp-legenda small mb-2 d-flex flex-wrap gap-3 justify-content-center">
+              <span><span class="tb-cmp-swatch tb-cmp-swatch-oficial"></span> Resultado oficial</span>
+              <span><span class="tb-cmp-swatch tb-cmp-swatch-sel"></span> Escolha</span>
+              <span><span class="tb-cmp-swatch tb-cmp-swatch-hit"></span> Coincide</span>
+            </div>
+            <div class="tb-cmp-pair" id="tbCmpPair">
+              <div class="tb-cmp-ticket tb-cmp-ticket-oficial">
+                <div class="tb-cmp-head">
+                  <div class="tb-cmp-col-title">Resultado</div>
+                  <label class="visually-hidden" for="tbCmpConcSelect">Concurso</label>
+                  <select class="form-select form-select-sm tb-cmp-conc-select" id="tbCmpConcSelect">
+                    <option value="">— carregando —</option>
+                  </select>
+                  <div class="tb-cmp-conc-lbl" id="tbCmpConcLbl">CONCURSO —</div>
+                </div>
+                <div id="tbCmpOficialVolante"></div>
+                <div class="tb-cmp-ticket-nums" id="tbCmpOficialNums"></div>
+              </div>
+              <div class="tb-cmp-ticket tb-cmp-ticket-manual">
+                <div class="tb-cmp-head">
+                  <div class="tb-cmp-col-title">Escolha manual</div>
+                  <div class="tb-cmp-aposta-head">
+                    <strong id="tbCmpManualTitulo">Volante 1</strong>
+                    <span class="small text-muted" id="tbCmpManualInfo">0 / 7</span>
+                    <button type="button" class="btn btn-sm btn-outline-danger tb-cmp-del" id="tbCmpDelAtivo"
+                            title="Excluir este volante" aria-label="Excluir volante">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                  <div class="tb-cmp-conc-lbl tb-cmp-head-spacer" aria-hidden="true">&nbsp;</div>
+                </div>
+                <div id="tbCmpManualVolante"></div>
+                <div class="tb-cmp-ticket-nums" id="tbCmpManualNums">Clique para marcar 7 dezenas</div>
+              </div>
+            </div>
+            <div class="tb-cmp-tabs-wrap">
+              <div class="tb-cmp-tabs-lbl">Volantes</div>
+              <div class="tb-cmp-tabs" id="tbCmpVolantes"></div>
+            </div>
+          </div>
+        </div>
+        <div id="tbCmpMesOverlay" class="tb-cmp-overlay d-none" role="dialog" aria-modal="true" aria-labelledby="tbCmpMesTitulo">
+          <div class="tb-cmp-modal">
+            <h3 class="h6 fw-bold mb-2" id="tbCmpMesTitulo">Mês da Sorte</h3>
+            <p class="small text-muted mb-2">Escolha o Mês da Sorte para a exportação das apostas dos volantes.</p>
+            <label class="form-label small mb-1" for="tbCmpMesSelect">Mês da Sorte</label>
+            <select class="form-select form-select-sm mb-3" id="tbCmpMesSelect"></select>
+            <div class="d-flex flex-wrap gap-2 justify-content-end">
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbCmpMesCancel">Cancelar</button>
+              <button type="button" class="btn btn-sm btn-success" id="tbCmpMesOk">
+                <i class="fas fa-file-export me-1"></i>Exportar
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endif %}

@@ -1,0 +1,1808 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* CSS Customizado - Dashboard Premium Mega-Sena */
+    :root {
+        --mega-green: #0a6b1a;
+        --mega-dark: #04250a;
+        --mega-light: #1ec83a;
+        --gold: #d97706;
+        --gold-light: #fef3c7;
+        --gold-dark: #92400e;
+        --surface-glass: rgba(255, 255, 255, 0.95);
+        --transition-soft: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--mega-dark), var(--mega-green));
+        border-radius: 16px;
+        padding: 1.8rem 2.5rem;
+        color: #fff;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(4, 37, 10, 0.15);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::after {
+        content: '🍀';
+        position: absolute;
+        right: -20px;
+        bottom: -20px;
+        font-size: 10rem;
+        opacity: 0.08;
+        transform: rotate(15deg);
+    }
+
+    /* Tab Custom Switcher */
+    .tab-container {
+        background: #fff;
+        border-radius: 12px;
+        padding: 0.4rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        display: flex;
+        gap: 6px;
+        margin-bottom: 2rem;
+        overflow-x: auto;
+        border: 1px solid rgba(10, 107, 26, 0.1);
+    }
+
+    .tab-btn-a {
+        padding: 0.65rem 1.2rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        background: transparent;
+        color: #555;
+        transition: var(--transition-soft);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .tab-btn-a:hover {
+        background: rgba(10, 107, 26, 0.05);
+        color: var(--mega-green);
+    }
+
+    .tab-btn-a.active {
+        background: linear-gradient(135deg, var(--mega-green), var(--mega-dark));
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(10, 107, 26, 0.2);
+    }
+
+    /* Dashboard Cards */
+    .metric-card {
+        background: var(--surface-glass);
+        border: 1px solid rgba(10, 107, 26, 0.08);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        transition: var(--transition-soft);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(10, 107, 26, 0.08);
+        border-color: rgba(10, 107, 26, 0.2);
+    }
+
+    .metric-icon {
+        position: absolute;
+        right: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2.2rem;
+        opacity: 0.12;
+        color: var(--mega-green);
+    }
+
+    .metric-val {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--mega-dark);
+        line-height: 1.2;
+    }
+
+    .metric-lbl {
+        font-size: 0.78rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    /* Interactive Volante Grid */
+    .volante-container {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid rgba(10, 107, 26, 0.08);
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    .heatmap-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 6px;
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    .hm-cell {
+        aspect-ratio: 1;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition-soft);
+        border: 2px solid transparent;
+        position: relative;
+    }
+
+    .hm-cell:hover {
+        transform: scale(1.15) translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        z-index: 5;
+    }
+
+    .hm-dez {
+        font-size: 0.95rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .hm-pct {
+        font-size: 0.55rem;
+        font-weight: 700;
+        opacity: 0.85;
+        line-height: 1;
+        margin-top: 3px;
+    }
+
+    .volante-toggle {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 1.25rem;
+    }
+
+    .toggle-btn {
+        padding: 0.45rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1.5px solid #dcdcdc;
+        background: #fdfdfd;
+        color: #666;
+        cursor: pointer;
+        transition: var(--transition-soft);
+    }
+
+    .toggle-btn.active {
+        background: var(--accent-light);
+        color: var(--mega-green);
+        border-color: var(--mega-green);
+    }
+
+    /* Lottery Balls Suggestion Styling */
+    .lotto-ball-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .lotto-ball {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+        transition: var(--transition-soft);
+        position: relative;
+    }
+
+    .lotto-ball::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 6px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    .lotto-ball:hover {
+        transform: scale(1.15) rotate(15deg);
+    }
+
+    .ball-quente {
+        background: radial-gradient(circle at 35% 35%, #f97316, #c2410c);
+    }
+
+    .ball-fria {
+        background: radial-gradient(circle at 35% 35%, #3b82f6, #1d4ed8);
+    }
+
+    .ball-inteligente {
+        background: radial-gradient(circle at 35% 35%, #059669, #047857);
+        border: 1.5px solid #fbbf24;
+    }
+
+    /* Mini volante estrutural */
+    .mini-volante-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 3px;
+        max-width: 420px;
+        margin: 0 auto;
+    }
+
+    .mv-cell {
+        aspect-ratio: 1;
+        font-size: 0.55rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        background: #f3f4f6;
+        color: #9ca3af;
+        border: 1px solid #e5e7eb;
+    }
+
+    .mv-cell.mv-on {
+        background: linear-gradient(135deg, var(--mega-green), var(--mega-dark));
+        color: #fff;
+        border-color: var(--mega-dark);
+        transform: scale(1.08);
+        z-index: 2;
+        box-shadow: 0 2px 6px rgba(10, 107, 26, 0.35);
+    }
+
+    .mv-cell.mv-col-dup.mv-on {
+        box-shadow: 0 0 0 2px #fbbf24;
+    }
+
+    .mv-cell.mv-lin-dup.mv-on {
+        outline: 2px dashed #3b82f6;
+        outline-offset: -2px;
+    }
+
+    .struct-table th {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .geo-heat .mv-cell {
+        font-size: 0.5rem;
+    }
+
+    .mv-pct {
+        font-size: 0.48rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .heatmap-grid {
+            gap: 4px;
+        }
+        .hm-dez {
+            font-size: 0.8rem;
+        }
+        .hm-pct {
+            font-size: 0.48rem;
+        }
+    }
+
+    /* Volante Grid for Results Tab */
+    .volante-grid-resultados {
+        display: grid;
+        grid-template-columns: 20px 2px repeat(10, 1fr);
+        grid-template-rows: 20px 2px repeat(6, 1fr);
+        gap: 8px;
+        max-width: 500px;
+        margin: 0 auto;
+        align-items: center;
+    }
+
+    .col-label-item {
+        color: #558b5f;
+        font-weight: 500;
+        font-size: 0.65rem;
+        text-align: center;
+        user-select: none;
+    }
+
+    .row-label-item {
+        color: #558b5f;
+        font-weight: 500;
+        font-size: 0.65rem;
+        text-align: center;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .volante-line-horizontal {
+        width: 100%;
+        height: 1.5px;
+        background-color: #ccead4;
+    }
+
+    .volante-line-vertical {
+        height: 100%;
+        width: 1.5px;
+        background-color: #ccead4;
+    }
+
+    .volante-celula-res {
+        aspect-ratio: 1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.95rem;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        color: #334155;
+        transition: var(--transition-soft);
+        user-select: none;
+        position: relative;
+    }
+
+    /* Premium style */
+    .volante-celula-res.highlight-premium {
+        background: linear-gradient(135deg, var(--mega-green), var(--mega-dark)) !important;
+        color: #fff !important;
+        border-color: var(--mega-dark) !important;
+        box-shadow: 0 4px 10px rgba(10, 107, 26, 0.25);
+        transform: scale(1.05);
+    }
+
+    /* Subtle style */
+    .volante-celula-res.highlight-sutil {
+        background-color: #e6f4ea !important;
+        color: #137333 !important;
+        border: 2px solid #137333 !important;
+        font-weight: 900 !important;
+        transform: scale(1.05);
+    }
+
+    .res-check {
+        position: absolute;
+        bottom: 1px;
+        font-size: 0.58rem;
+        font-weight: 900;
+    }
+
+    .highlight-premium .res-check {
+        color: rgba(255, 255, 255, 0.85);
+    }
+    .highlight-sutil .res-check {
+        color: #137333;
+    }
+</style>
+
+<div class="page-header">
+    <h2><i class="fas fa-chart-line me-2"></i>Mega-Sena Absoluta — Inteligência Estatística</h2>
+    <p class="mb-0 text-white-50 fs-6">Plataforma analítica e preditiva avançada fundamentada no histórico completo dos sorteios.</p>
+</div>
+
+<!-- Barra de Indicadores Rápida -->
+<div class="row g-3 mb-4" id="geralQuickStats">
+    <div class="col-md-3 col-6">
+        <div class="metric-card">
+            <div class="metric-lbl">Total Concursos</div>
+            <div class="metric-val" id="valTotalSorteios">---</div>
+            <div class="metric-icon"><i class="fas fa-database"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="metric-card">
+            <div class="metric-lbl">Último Sorteio</div>
+            <div class="metric-val" id="valUltimoConcurso">---</div>
+            <div class="metric-icon"><i class="fas fa-hashtag"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="metric-card">
+            <div class="metric-lbl">Média das Somas</div>
+            <div class="metric-val" id="valMediaSoma">---</div>
+            <div class="metric-icon"><i class="fas fa-calculator"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="metric-card">
+            <div class="metric-lbl">Amplitude Média</div>
+            <div class="metric-val" id="valMediaAmplitude">---</div>
+            <div class="metric-icon"><i class="fas fa-arrows-alt-h"></i></div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tab-container" id="dashboardTabs">
+    <button class="tab-btn-a active" onclick="setTab('geral')"><i class="fas fa-chart-pie"></i>Visão Geral</button>
+    <button class="tab-btn-a" onclick="setTab('lincol')"><i class="fas fa-grip"></i>Linhas e Colunas</button>
+    <button class="tab-btn-a" onclick="setTab('repconsec')"><i class="fas fa-arrows-rotate"></i>Repetição Consecutiva</button>
+    <button class="tab-btn-a" onclick="setTab('dist')"><i class="fas fa-chart-line"></i>Distribuições &amp; Somas</button>
+    <button class="tab-btn-a" onclick="setTab('posseq')"><i class="fas fa-list-ol"></i>Posições &amp; Sequências</button>
+    <button class="tab-btn-a" onclick="setTab('avan')"><i class="fas fa-gem"></i>Estratégias Avançadas</button>
+    <button class="tab-btn-a" onclick="setTab('geometria')"><i class="fas fa-compass-drafting"></i>Geometria do Volante</button>
+    <button class="tab-btn-a" onclick="setTab('resultados')"><i class="fas fa-th"></i>Resultados no Volante</button>
+</div>
+
+<!-- Content Panels -->
+<!-- PAINEL 1: VISÃO GERAL -->
+<div class="tab-panel-content" id="panel-geral">
+    <div class="row g-4">
+        <!-- Volante Heatmap -->
+        <div class="col-lg-7">
+            <div class="volante-container h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-fire me-2 text-success"></i>Volante Estatístico 6x10</h5>
+                    <div class="volante-toggle">
+                        <button class="toggle-btn active" id="toggleFreq" onclick="setHeatmapMode('freq')">Frequência (%)</button>
+                        <button class="toggle-btn" id="toggleAtr" onclick="setHeatmapMode('atr')">Atraso (Sort.)</button>
+                    </div>
+                </div>
+                <div class="heatmap-grid" id="heatmapGrid">
+                    <div class="text-center text-muted py-5 w-100" style="grid-column: 1/-1;">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Carregando banco de dados...
+                    </div>
+                </div>
+                <div class="heat-legend mt-4 d-flex align-items-center justify-content-center gap-3 font-monospace text-muted" style="font-size: 0.72rem;" id="heatLegend">
+                    <!-- Legend dynamic insert -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel Preditivo / Sugestões -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header border-0 py-3 text-white" style="background: linear-gradient(135deg, var(--mega-green), var(--mega-dark));">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-magic me-2"></i>Modelagem Estatística Preditiva</h5>
+                    <small style="opacity: 0.8;">Sugestões estratégicas baseadas em dados consolidados</small>
+                </div>
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <!-- Jogo Quente -->
+                        <div class="p-3 bg-light rounded-3 mb-3 border-start border-4 border-warning">
+                            <span class="badge bg-warning text-dark fw-bold uppercase-tag"><i class="fas fa-fire me-1"></i>Pool Quente</span>
+                            <p class="text-muted mb-1" style="font-size: 0.75rem; margin-top: 4px;">Gerado a partir das 15 dezenas com maior incidência histórica.</p>
+                            <div class="lotto-ball-group" id="sugestaoQuente"></div>
+                        </div>
+
+                        <!-- Jogo Frio -->
+                        <div class="p-3 bg-light rounded-3 mb-3 border-start border-4 border-primary">
+                            <span class="badge bg-primary text-white fw-bold uppercase-tag"><i class="fas fa-clock me-1"></i>Pool de Atraso</span>
+                            <p class="text-muted mb-1" style="font-size: 0.75rem; margin-top: 4px;">Composto pelas 15 dezenas mais atrasadas cronologicamente.</p>
+                            <div class="lotto-ball-group" id="sugestaoFria"></div>
+                        </div>
+
+                        <!-- Jogo Inteligente -->
+                        <div class="p-3 rounded-3 mb-3 border border-warning-subtle" style="background: var(--accent-light); border-start: 4px solid var(--mega-light) !important;">
+                            <span class="badge bg-success text-white fw-bold uppercase-tag"><i class="fas fa-brain me-1"></i>Mix Otimizado (Balanced)</span>
+                            <p class="text-dark mb-1 fw-medium" style="font-size: 0.75rem; margin-top: 4px;">Filtros: 3 Quentes + 1 Atrasada + 2 Neutras.</p>
+                            <div class="lotto-ball-group" id="sugestaoInteligente"></div>
+                            <div class="d-flex flex-wrap gap-1 mt-2" id="inteligenteBadges">
+                                <span class="badge bg-white text-success border border-success-subtle font-monospace" style="font-size: 0.65rem;">SOMA OK</span>
+                                <span class="badge bg-white text-success border border-success-subtle font-monospace" style="font-size: 0.65rem;">PAR/IMPAR BALANCED</span>
+                                <span class="badge bg-white text-success border border-success-subtle font-monospace" style="font-size: 0.65rem;">ALTO/BAIXO BALANCED</span>
+                                <span class="badge bg-white text-success border border-success-subtle font-monospace" style="font-size: 0.65rem;">CONSECUTIVAS ≤ 2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info py-2 px-3 mb-0 border-0 rounded-3 text-dark d-flex align-items-start gap-2" style="font-size: 0.75rem; background-color: #e0f2fe;">
+                        <i class="fas fa-info-circle text-info fs-6 mt-0.5"></i>
+                        <div>
+                            <strong>Nota Metodológica:</strong> Não há promessa ou garantia de ganhos. Trata-se de calibragem estatística para aumentar a harmonia matemática do volante.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAINEL 2: LINHAS E COLUNAS (estatísticas estruturais) -->
+<div class="tab-panel-content" id="panel-lincol" style="display: none;">
+    {% include 'coluna_final_vivo_widget.html' %}
+    <p class="text-muted small mb-3">
+        Análise objetiva da <strong>geometria espacial</strong> no volante 6×10 — quantidade absoluta e porcentagem em cada métrica.
+        <strong>Linha:</strong> concentração de dezenas na mesma faixa (01–10 … 51–60).
+        <strong>Multi-linha:</strong> quantas faixas têm ≥2 dezenas (ex.: concurso #3000 tem 3 linhas com pares, não 3 dezenas na mesma linha).
+        Clique no ícone <i class="fas fa-eye"></i> para ver o mini-volante do concurso exemplo.
+    </p>
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white fw-bold py-3">
+                    <i class="fas fa-table me-2"></i>Repetição de colunas e linhas (histórico completo)
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 struct-table align-middle" style="font-size:0.85rem;">
+                        <thead class="table-light">
+                            <tr><th>Estrutura</th><th class="text-end">Quantidade</th><th class="text-end">Porcentagem</th></tr>
+                        </thead>
+                        <tbody id="tblEstatColunaRep"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header bg-success text-white fw-bold py-3"><i class="fas fa-columns me-2"></i>Análise por coluna (final)</div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0 struct-table">
+                        <thead><tr><th>Coluna</th><th class="text-end">Frequência</th><th class="text-end">%</th></tr></thead>
+                        <tbody id="tblDistColunas"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header bg-warning text-dark fw-bold py-3"><i class="fas fa-grip-lines me-2"></i>Análise por linha (faixa)</div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0 struct-table">
+                        <thead><tr><th>Linha</th><th class="text-end">Frequência</th><th class="text-end">%</th></tr></thead>
+                        <tbody id="tblDistLinhas"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-primary text-white fw-bold py-3">
+                    <i class="fas fa-shapes me-2"></i>Estruturas completas do volante
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 struct-table" style="font-size:0.85rem;">
+                        <thead class="table-light">
+                            <tr><th>Estrutura</th><th class="text-end">Frequência</th><th class="text-end">Porcentagem</th></tr>
+                        </thead>
+                        <tbody id="tblEstruturasCompletas"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-star me-2 text-success"></i>Último concurso — geometria estrutural</h5>
+                <div id="ultimoConcursoGeo" class="text-muted small">Carregando...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAINEL: GEOMETRIA DO VOLANTE -->
+<div class="tab-panel-content" id="panel-geometria" style="display: none;">
+    <p class="text-muted small mb-3">
+        Visão avançada: heatmap geométrico, assinaturas estruturais (DNA do sorteio), regiões quentes/frias e sugestões baseadas em padrão — não em dezenas aleatórias.
+    </p>
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="fas fa-fire me-2 text-danger"></i>Heatmap geométrico (frequência por célula)</h5>
+                <div id="geoHeatmap"></div>
+                <p class="small text-muted mt-2 mb-0">Intensidade = % de concursos com aparição na célula (linha × coluna).</p>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="fas fa-fingerprint me-2"></i>Assinaturas geométricas (C-L-I)</h5>
+                <p class="small text-muted">Ex.: <code>C2-L2-I2</code> = 2 colunas duplicadas, 2 linhas duplicadas, 2 isoladas.</p>
+                <div class="table-responsive">
+                    <table class="table table-sm struct-table">
+                        <thead><tr><th>Assinatura</th><th class="text-end">Qtd</th><th class="text-end">%</th></tr></thead>
+                        <tbody id="tblGeoAssinaturas"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header fw-bold py-2">Estruturas dominantes</div>
+                <table class="table table-sm mb-0"><thead><tr><th>Nome</th><th class="text-end">Freq</th><th class="text-end">%</th></tr></thead>
+                <tbody id="tblGeoDominantes"></tbody></table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header fw-bold py-2">Estruturas raras (assinaturas)</div>
+                <table class="table table-sm mb-0"><thead><tr><th>Assinatura</th><th class="text-end">Freq</th><th class="text-end">%</th></tr></thead>
+                <tbody id="tblGeoRaras"></tbody></table>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header fw-bold py-2">Regiões mais frequentes (linha × coluna)</div>
+                <table class="table table-sm mb-0"><thead><tr><th>Região</th><th class="text-end">Freq</th><th class="text-end">%</th></tr></thead>
+                <tbody id="tblGeoRegioes"></tbody></table>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-4 border-start border-4 border-success">
+                <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Sugestões estruturais (próximo concurso)</h5>
+                <div id="geoSugestoes" class="small">Carregando...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAINEL: REPETIÇÃO CONSECUTIVA -->
+<div class="tab-panel-content" id="panel-repconsec" style="display: none;">
+    <p class="text-muted small mb-2" id="repConsecMeta">Carregando...</p>
+    <p class="text-muted small mb-3">
+        Quantas dezenas do concurso <strong>anterior</strong> reaparecem no concurso seguinte — análise temporal, não espacial no volante.
+    </p>
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white fw-bold py-3">
+                    <i class="fas fa-table me-2"></i>Repetição entre concursos consecutivos (histórico completo)
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 struct-table align-middle" style="font-size:0.85rem;">
+                        <thead class="table-light">
+                            <tr><th>Repetições</th><th class="text-end">Quantidade</th><th class="text-end">Porcentagem</th></tr>
+                        </thead>
+                        <tbody id="tblRepConsecDist"></tbody>
+                    </table>
+                </div>
+                <p class="small text-muted px-3 pb-2 mb-0">Passe o mouse na quantidade ou % para ver resumo; clique em <i class="fas fa-eye"></i> para exemplos reais.</p>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="fas fa-star me-2 text-success"></i>Último concurso</h5>
+                <div id="repConsecUltimo" class="small">Carregando...</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2"></i>Análise avançada</h5>
+                <ul class="small mb-3" id="repConsecSequencias"></ul>
+                <div id="repConsecTendencia" class="small text-muted mb-2"></div>
+                <div class="row g-2 small">
+                    <div class="col-6"><span class="fw-bold">Últimos 10:</span> <span id="repConsecUlt10">—</span></div>
+                    <div class="col-6"><span class="fw-bold">Últimos 30:</span> <span id="repConsecUlt30">—</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header fw-bold py-2">Média por década</div>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Década</th><th class="text-end">Média</th><th class="text-end">N</th></tr></thead>
+                    <tbody id="tblRepConsecDecada"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header fw-bold py-2">Média por ano (recentes)</div>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Ano</th><th class="text-end">Média</th><th class="text-end">N</th></tr></thead>
+                    <tbody id="tblRepConsecAno"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-4 border-start border-4 border-success">
+                <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Sugestões baseadas em repetição histórica</h5>
+                <div id="repConsecSugestoes" class="small">Carregando...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAINEL 3: DISTRIBUIÇÕES & SOMAS -->
+<div class="tab-panel-content" id="panel-dist" style="display: none;">
+    <div class="row g-4">
+        <!-- Pares vs Ímpares -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-percentage me-2 text-success"></i>Pares vs Ímpares (Equilíbrio)</h5>
+                    <select class="form-select form-select-sm w-auto font-monospace" style="font-size: 0.72rem;" id="selectParImparTrend" onchange="renderParImparChart()">
+                        <option value="historico">Histórico Completo</option>
+                        <option value="10">Últimos 10 Concursos</option>
+                        <option value="50">Últimos 50 Concursos</option>
+                        <option value="100">Últimos 100 Concursos</option>
+                    </select>
+                </div>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="chartParImpar"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Altas vs Baixas -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-arrows-up-down me-2 text-success"></i>Dezenas Altas (31-60) vs Baixas (01-30)</h5>
+                    <select class="form-select form-select-sm w-auto font-monospace" style="font-size: 0.72rem;" id="selectAltaBaixaTrend" onchange="renderAltaBaixaChart()">
+                        <option value="historico">Histórico Completo</option>
+                        <option value="10">Últimos 10 Concursos</option>
+                        <option value="50">Últimos 50 Concursos</option>
+                        <option value="100">Últimos 100 Concursos</option>
+                    </select>
+                </div>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="chartAltaBaixa"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linha do Tempo das Somas -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-chart-line me-2 text-success"></i>Evolução Cronológica da Soma Total (Últimos 20 Concursos)</h5>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="chartSomaLinha"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histograma de Soma -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-chart-bar me-2 text-success"></i>Faixas de Soma Mais Frequentes</h5>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="chartSomaBarras"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAINEL 4: POSIÇÕES & SEQUÊNCIAS -->
+<div class="tab-panel-content" id="panel-posseq" style="display: none;">
+    <div class="row g-4">
+        <!-- Ranking por Posição -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold text-dark mb-2"><i class="fas fa-sort-amount-down me-2 text-success"></i>Distribuição por Posição do Sorteio</h5>
+                <p class="text-muted" style="font-size: 0.78rem;">Verifica quais dezenas aparecem com mais frequência em cada uma das posições ordenadas (da 1ª dezena sorteada menor até a 6ª dezena maior).</p>
+                <div class="row g-3" id="posicoesList">
+                    <!-- Dynamic insert position ranks -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Repetição e Sequências -->
+        <div class="col-lg-5 d-flex flex-column gap-4">
+            <!-- Repetição do Concurso Anterior -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 flex-fill">
+                <h5 class="fw-bold text-dark mb-2"><i class="fas fa-redo me-2 text-success"></i>Dezenas Repetidas do Concurso Anterior</h5>
+                <div class="d-flex align-items-center gap-3 my-2">
+                    <h1 class="display-5 fw-bold mb-0 text-success" id="valRepeticaoMedia">---</h1>
+                    <div style="line-height: 1.2;">
+                        <span class="fw-bold d-block text-dark" style="font-size: 0.85rem;">Média de Repetição</span>
+                        <small class="text-muted" style="font-size: 0.7rem;">Número médio de dezenas que se repetem de um sorteio para o outro.</small>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span class="fw-bold text-dark d-block mb-1" style="font-size: 0.75rem;">Frequência de Repetições:</span>
+                    <div id="repeticoesDistGrid" class="d-flex flex-column gap-1.5 font-monospace text-muted" style="font-size: 0.72rem;"></div>
+                </div>
+            </div>
+
+            <!-- Sequências consecutivas -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 flex-fill">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-layer-group me-2 text-success"></i>Sequências Numéricas Consecutivas</h5>
+                <p class="text-muted" style="font-size: 0.72rem; margin-top: -8px;">Frequência de sorteios contendo grupos consecutivos de números (ex: 22-23).</p>
+                <div id="sequenciasDistList" class="d-flex flex-column gap-2 mb-3"></div>
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="p-2.5 bg-light rounded-3">
+                            <span class="fw-bold text-dark font-monospace" style="font-size: 0.72rem;"><i class="fas fa-tags text-warning me-1"></i>Duques Comuns</span>
+                            <div class="font-monospace text-muted mt-1" style="font-size: 0.68rem;" id="listDuquesComuns"></div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2.5 bg-light rounded-3">
+                            <span class="fw-bold text-dark font-monospace" style="font-size: 0.72rem;"><i class="fas fa-tags text-warning me-1"></i>Ternos Comuns</span>
+                            <div class="font-monospace text-muted mt-1" style="font-size: 0.68rem;" id="listTernosComuns"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAINEL 5: ESTRATÉGIAS AVANÇADAS -->
+<div class="tab-panel-content" id="panel-avan" style="display: none;">
+    <div class="row g-4">
+        <!-- Moldura vs Centro -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-border-outer me-2 text-success"></i>Moldura vs Centro</h5>
+                <p class="text-muted" style="font-size: 0.75rem; margin-top: -6px;">A moldura (borda externa do volante) possui 28 números. O centro possui 32. Veja o equilíbrio histórico:</p>
+                <div style="position: relative; height: 200px;">
+                    <canvas id="chartMoldura"></canvas>
+                </div>
+                <div class="text-center mt-3 font-monospace text-muted" style="font-size: 0.72rem;" id="textMolduraStat"></div>
+            </div>
+        </div>
+
+        <!-- Cruz e Diagonais -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-cross me-2 text-success"></i>Cruz &amp; Diagonais</h5>
+                    
+                    <div class="mb-4">
+                        <span class="fw-bold text-dark d-block mb-1" style="font-size: 0.8rem;"><i class="fas fa-plus text-success me-1"></i>Ocupação da Cruz</span>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.72rem;">Central vertical (colunas 5 e 6) + Central horizontal (linhas 3 e 4).</small>
+                        <div id="cruzStats" class="font-monospace text-muted" style="font-size: 0.75rem;"></div>
+                    </div>
+
+                    <div class="mb-2">
+                        <span class="fw-bold text-dark d-block mb-1" style="font-size: 0.8rem;"><i class="fas fa-divide text-success me-1"></i>Diagonais do Volante</span>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.72rem;">Presença de dezenas na diagonal principal e secundária.</small>
+                        <div id="diagStats" class="font-monospace text-muted" style="font-size: 0.75rem;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Regiões Quadrantes -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold text-dark mb-2"><i class="fas fa-cubes me-2 text-success"></i>Divisão por Quadrantes</h5>
+                <p class="text-muted" style="font-size: 0.75rem; margin-top: -6px;">Frequência de sorteios com base na ocupação espacial dos 4 quadrantes (Q1, Q2, Q3, Q4) do volante de 60 dezenas:</p>
+                <div id="quadrantesStats" class="d-flex flex-column gap-2 mt-2"></div>
+            </div>
+        </div>
+
+        <!-- Histograma de Amplitude -->
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-arrows-left-right me-2 text-success"></i>Histograma de Amplitude (Diferença entre Maior e Menor Dezena Sorteada)</h5>
+                <p class="text-muted" style="font-size: 0.78rem;">A amplitude ($d_6 - d_1$) mostra a dispersão do sorteio. Amplitudes muito baixas (ex: menos de 20) ou muito altas (mais de 55) são matematicamente mais raras.</p>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="chartAmplitude"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAINEL 6: RESULTADOS NO VOLANTE -->
+<div class="tab-panel-content" id="panel-resultados" style="display: none;">
+    <div class="row g-4">
+        <!-- Control Sidebar with Selector and Statistics -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header border-0 py-3 text-white" style="background: linear-gradient(135deg, var(--mega-green), var(--mega-dark));">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-search me-2"></i>Selecione o Concurso</h5>
+                    <small style="opacity: 0.8;">Navegue pelo histórico completo de sorteios</small>
+                </div>
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <!-- Select controls & navigation arrows -->
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <button class="btn btn-outline-success rounded-circle" id="btnPrevConcurso" onclick="navigateConcurso(1)" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <select id="selectConcursoResultados" class="form-select form-select-lg flex-fill font-monospace fw-bold border-success-subtle" onchange="onConcursoChange()" style="font-size: 1rem; color: var(--mega-dark);">
+                                <option value="">Carregando concursos...</option>
+                            </select>
+                            <button class="btn btn-outline-success rounded-circle" id="btnNextConcurso" onclick="navigateConcurso(-1)" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <!-- Highlights Styling Toggle -->
+                        <div class="p-3 bg-light rounded-3 mb-4 border-start border-4 border-success">
+                            <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.8rem;"><i class="fas fa-paint-brush me-1 text-success"></i>Estilo do Destaque</label>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-success flex-fill fw-bold" id="btnHighlightPremium" onclick="setHighlightMode('premium')">Premium (Preenchido)</button>
+                                <button class="btn btn-sm btn-outline-success flex-fill fw-bold" id="btnHighlightSutil" onclick="setHighlightMode('sutil')">Sutil (Borda/Suave)</button>
+                            </div>
+                        </div>
+
+                        <!-- Drawing Details Card -->
+                        <div class="p-4 bg-light rounded-4 border border-light-subtle shadow-sm mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-dark text-white fw-bold uppercase-tag font-monospace" style="font-size: 0.72rem;" id="badgeConcursoNum">CONCURSO ----</span>
+                                <span class="text-muted font-monospace" style="font-size: 0.72rem;" id="txtConcursoData">Data: --/--/----</span>
+                            </div>
+                            
+                            <!-- Beautiful lottery balls -->
+                            <div class="lotto-ball-group justify-content-center my-3" id="sorteioBolas">
+                                <!-- Drawn balls dynamically inserted -->
+                            </div>
+
+                            <hr class="my-3 opacity-10">
+
+                            <!-- Statistics Summary for this Draw -->
+                            <div class="d-flex flex-column gap-2 text-dark" style="font-size: 0.8rem;">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted"><i class="fas fa-calculator me-1 text-success"></i>Soma Total:</span>
+                                    <strong class="font-monospace text-dark fs-6" id="txtSorteioSoma">---</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted"><i class="fas fa-percentage me-1 text-success"></i>Pares/Ímpares:</span>
+                                    <strong class="font-monospace text-dark" id="txtSorteioParImpar">---</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted"><i class="fas fa-arrows-up-down me-1 text-success"></i>Altas/Baixas:</span>
+                                    <strong class="font-monospace text-dark" id="txtSorteioAltaBaixa">---</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info py-2 px-3 mb-0 border-0 rounded-3 text-dark d-flex align-items-start gap-2" style="font-size: 0.75rem; background-color: #e8f5e9; border: 1px solid #c8e6c9 !important;">
+                        <i class="fas fa-info-circle text-success fs-6 mt-0.5"></i>
+                        <div>
+                            Visualização espacial das dezenas no volante de apostas. Útil para verificar padrões geométricos e dispersão no cartão oficial.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Beautiful Volante Grid Card -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 volante-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-th me-2 text-success"></i>Resultado Mapeado no Volante</h5>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill font-monospace" style="font-size: 0.7rem;">60 DEZENAS</span>
+                </div>
+                
+                <!-- Volante Grid -->
+                <div class="volante-grid-resultados mb-3" id="volante-grid-resultados">
+                    <!-- Volante dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Biblioteca Chart.js carregada de forma isolada e segura -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/analise-estrutura.js"></script>
+<script src="/static/js/analise-repeticao-consecutiva.js"></script>
+<script>
+    // Gerenciador de Estado do Dashboard
+    let _dataAvancada = null;
+    let _activeTab = 'geral';
+    let _heatmapMode = 'freq'; // 'freq' ou 'atr'
+    let _ultimosSorteios = null;
+    let _currentSorteioIndex = 0;
+    let _highlightMode = 'premium'; // 'premium' ou 'sutil'
+
+    // Coleção de Instâncias do Chart.js para destruição limpa ao atualizar dados
+    const _charts = {
+        colunas: null,
+        linhas: null,
+        parImpar: null,
+        altaBaixa: null,
+        somaLinha: null,
+        somaBarras: null,
+        moldura: null,
+        amplitude: null
+    };
+
+    // Alternar entre abas de forma reativa e sem latência
+    function setTab(tabId) {
+        _activeTab = tabId;
+        // Atualizar botões
+        document.querySelectorAll('#dashboardTabs .tab-btn-a').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeBtn = Array.from(document.querySelectorAll('#dashboardTabs .tab-btn-a'))
+            .find(btn => btn.innerText.toLowerCase().includes(
+                tabId === 'lincol' ? 'linhas' :
+                tabId === 'geometria' ? 'geometria' :
+                tabId === 'repconsec' ? 'repetição' :
+                tabId === 'dist' ? 'distribuições' : 
+                tabId === 'posseq' ? 'posições' : 
+                tabId === 'avan' ? 'avançadas' : 
+                tabId === 'resultados' ? 'resultados' : 'geral'
+            ));
+        if (activeBtn) activeBtn.classList.add('active');
+
+        // Alternar visualização dos painéis
+        document.querySelectorAll('.tab-panel-content').forEach(panel => {
+            panel.style.display = 'none';
+        });
+        const currentPanel = document.getElementById('panel-' + tabId);
+        if (currentPanel) currentPanel.style.display = 'block';
+
+        // Disparar renderizações específicas por aba para evitar lag de inicialização
+        if (_dataAvancada) {
+            setTimeout(() => {
+                if (tabId === 'lincol') {
+                    if (window.AnaliseEstrutura) AnaliseEstrutura.renderLinCol();
+                } else if (tabId === 'geometria') {
+                    if (window.AnaliseEstrutura) AnaliseEstrutura.renderGeometria();
+                } else if (tabId === 'repconsec') {
+                    if (window.AnaliseRepeticaoConsecutiva) AnaliseRepeticaoConsecutiva.render();
+                } else if (tabId === 'dist') {
+                    renderDistCharts();
+                } else if (tabId === 'posseq') {
+                    renderPosSeqDetails();
+                } else if (tabId === 'avan') {
+                    renderAvanCharts();
+                } else if (tabId === 'resultados') {
+                    renderResultadosVolante();
+                }
+            }, 50);
+        }
+    }
+
+    // Cores de calor do volante (Verde Premium da Mega-Sena)
+    function heatColor(n, isDelay = false) {
+        // Atraso: Amarelo/Dourado suave para curto atraso, Vermelho/Laranja para longo atraso
+        if (isDelay) {
+            const cold = [254, 243, 199], hot = [185, 28, 28]; // HSL Tailored Hues
+            return `rgb(${Math.round(cold[0] + (hot[0] - cold[0]) * n)},${Math.round(cold[1] + (hot[1] - cold[1]) * n)},${Math.round(cold[2] + (hot[2] - cold[2]) * n)})`;
+        } else {
+            // Frequência: Verde claro -> Verde Mega Sena profundo e vívido
+            const cold = [232, 250, 234], hot = [10, 107, 26];
+            return `rgb(${Math.round(cold[0] + (hot[0] - cold[0]) * n)},${Math.round(cold[1] + (hot[1] - cold[1]) * n)},${Math.round(cold[2] + (hot[2] - cold[2]) * n)})`;
+        }
+    }
+
+    function textContrastColor(n, isDelay = false) {
+        if (isDelay) return n > 0.55 ? '#fff' : '#78350f';
+        return n > 0.55 ? '#fff' : '#04250a';
+    }
+
+    // Alternar modo de visualização do Volante Heatmap
+    function setHeatmapMode(mode) {
+        _heatmapMode = mode;
+        document.getElementById('toggleFreq').classList.toggle('active', mode === 'freq');
+        document.getElementById('toggleAtr').classList.toggle('active', mode === 'atr');
+        renderHeatmap();
+    }
+
+    // Renderizar volante heatmap com coloração dinâmica
+    function renderHeatmap() {
+        const grid = document.getElementById('heatmapGrid');
+        const legend = document.getElementById('heatLegend');
+        if (!_dataAvancada || !_dataAvancada.dados_dezenas) return;
+
+        const dezenas = _dataAvancada.dados_dezenas;
+        const isAtr = (_heatmapMode === 'atr');
+        const values = dezenas.map(d => isAtr ? d.atraso : d.freq);
+        const minVal = Math.min(...values);
+        const maxVal = Math.max(...values);
+        const norm = v => maxVal === minVal ? 0.5 : (v - minVal) / (maxVal - minVal);
+
+        let html = '';
+        dezenas.forEach(d => {
+            const v = isAtr ? d.atraso : d.freq;
+            const n = norm(v);
+            const bg = heatColor(n, isAtr);
+            const tc = textContrastColor(n, isAtr);
+            const tooltipText = isAtr ? `Atraso: ${d.atraso} concursos` : `Sorteado: ${d.freq} vezes (${d.pct}%)`;
+
+            html += `
+                <div class="hm-cell" style="background:${bg}; border-color: rgba(10,107,26,0.15);" title="Dezena ${d.dezena_fmt} | ${tooltipText}">
+                    <span class="hm-dez" style="color:${tc};">${d.dezena_fmt}</span>
+                    <span class="hm-pct" style="color:${tc};">${isAtr ? d.atraso + 'c' : d.pct + '%'}</span>
+                </div>
+            `;
+        });
+        grid.innerHTML = html;
+
+        // Atualizar legenda
+        if (isAtr) {
+            legend.innerHTML = `
+                <div class="d-flex align-items-center gap-1"><div style="width:14px;height:10px;border-radius:2px;background:rgb(254,243,199);"></div><span>Menos Atrasado</span></div>
+                <div style="width:100px;height:6px;border-radius:3px;background:linear-gradient(to right, rgb(254,243,199), rgb(185,28,28));"></div>
+                <div class="d-flex align-items-center gap-1"><div style="width:14px;height:10px;border-radius:2px;background:rgb(185,28,28);"></div><span>Mais Atrasado</span></div>
+            `;
+        } else {
+            legend.innerHTML = `
+                <div class="d-flex align-items-center gap-1"><div style="width:14px;height:10px;border-radius:2px;background:rgb(232,250,234);"></div><span>Frequência Baixa</span></div>
+                <div style="width:100px;height:6px;border-radius:3px;background:linear-gradient(to right, rgb(232,250,234), rgb(10,107,26));"></div>
+                <div class="d-flex align-items-center gap-1"><div style="width:14px;height:10px;border-radius:2px;background:rgb(10,107,26);"></div><span>Frequência Alta</span></div>
+            `;
+        }
+    }
+
+    // Renderizar Bolas de Loteria das sugestões
+    function renderSugestoes() {
+        if (!_dataAvancada || !_dataAvancada.preditivo) return;
+
+        const pred = _dataAvancada.preditivo;
+        const renderBolas = (elId, dezenas, ballClass) => {
+            const container = document.getElementById(elId);
+            container.innerHTML = dezenas.map(d => `
+                <div class="lotto-ball ${ballClass}">${String(d).padStart(2, '0')}</div>
+            `).join('');
+        };
+
+        renderBolas('sugestaoQuente', pred.quente, 'ball-quente');
+        renderBolas('sugestaoFria', pred.fria, 'ball-fria');
+        renderBolas('sugestaoInteligente', pred.inteligente, 'ball-inteligente');
+    }
+
+    // TAB 2: GRÁFICOS E TABELAS DE COLUNAS/LINHAS
+    function renderLinColCharts() {
+        if (!_dataAvancada) return;
+
+        // 1. Gráfico de Colunas
+        const colData = _dataAvancada.colunas;
+        const colLabels = colData.map(c => `Col ${c.coluna}`);
+        const colValues = colData.map(c => c.freq);
+
+        if (_charts.colunas) _charts.colunas.destroy();
+        const ctxCol = document.getElementById('chartColunas').getContext('2d');
+        _charts.colunas = new Chart(ctxCol, {
+            type: 'bar',
+            data: {
+                labels: colLabels,
+                datasets: [{
+                    label: 'Sorteios por Coluna',
+                    data: colValues,
+                    backgroundColor: 'rgba(10, 107, 26, 0.75)',
+                    borderColor: 'rgb(4, 37, 10)',
+                    borderWidth: 1.5,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 2. Gráfico de Linhas
+        const linData = _dataAvancada.linhas;
+        const linLabels = linData.map(l => `Linha ${l.linha}`);
+        const linValues = linData.map(l => l.freq);
+
+        if (_charts.linhas) _charts.linhas.destroy();
+        const ctxLin = document.getElementById('chartLinhas').getContext('2d');
+        _charts.linhas = new Chart(ctxLin, {
+            type: 'bar',
+            data: {
+                labels: linLabels,
+                datasets: [{
+                    label: 'Sorteios por Linha',
+                    data: linValues,
+                    backgroundColor: 'rgba(217, 119, 6, 0.75)',
+                    borderColor: 'rgb(146, 64, 14)',
+                    borderWidth: 1.5,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 3. Tabelas de Atrasos/Freq
+        const colTable = document.getElementById('colunasTableBody');
+        colTable.innerHTML = colData.map(c => {
+            const statusBadge = c.atraso > 3 ? '<span class="badge bg-danger">Muito Atrasada</span>' : c.atraso > 1 ? '<span class="badge bg-warning text-dark">Atrasada</span>' : '<span class="badge bg-success">Quente</span>';
+            return `
+                <tr>
+                    <td class="fw-bold text-dark">Coluna ${c.coluna}</td>
+                    <td>${c.freq} dezenas</td>
+                    <td class="font-monospace">${c.pct}%</td>
+                    <td class="fw-bold font-monospace text-danger">${c.atraso} sorteios</td>
+                    <td>${statusBadge}</td>
+                </tr>
+            `;
+        }).join('');
+
+        const linTable = document.getElementById('linhasTableBody');
+        linTable.innerHTML = linData.map(l => {
+            const statusBadge = l.atraso > 3 ? '<span class="badge bg-danger">Muito Atrasada</span>' : l.atraso > 1 ? '<span class="badge bg-warning text-dark">Atrasada</span>' : '<span class="badge bg-success">Quente</span>';
+            return `
+                <tr>
+                    <td class="fw-bold text-dark">Linha ${l.linha}</td>
+                    <td>${l.freq} dezenas</td>
+                    <td class="font-monospace">${l.pct}%</td>
+                    <td class="fw-bold font-monospace text-danger">${l.atraso} sorteios</td>
+                    <td>${statusBadge}</td>
+                </tr>
+            `;
+        }).join('');
+
+        // 4. Combinações de Linhas Ocupadas
+        const patternsWrap = document.getElementById('linhaPadraoList');
+        patternsWrap.innerHTML = _dataAvancada.top_comb_linhas.map((p, idx) => `
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-3 border-start border-3 border-success text-center">
+                    <span class="badge bg-dark mb-1 font-monospace" style="font-size: 0.7rem;">${idx+1}º Lugar</span>
+                    <h5 class="fw-extrabold mb-1 font-monospace text-success">${p.padrao}</h5>
+                    <small class="text-muted d-block" style="font-size: 0.72rem;">Frequência: <strong>${p.freq}</strong> vezes</small>
+                    <small class="text-muted font-monospace" style="font-size: 0.65rem;">Sorteado em ${p.pct}% dos concursos</small>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // TAB 3: DISTRIBUIÇÕES & TENDÊNCIAS
+    function renderParImparChart() {
+        if (!_dataAvancada) return;
+        const trend = document.getElementById('selectParImparTrend').value;
+        let dataSrc = [];
+
+        if (trend === 'historico') {
+            dataSrc = _dataAvancada.par_impar.dist;
+        } else {
+            dataSrc = _dataAvancada.par_impar.tendencias[trend] || [];
+        }
+
+        const labels = dataSrc.map(p => `${p.par} Pares / ${p.impar} Ímpares`);
+        const values = dataSrc.map(p => p.pct);
+
+        if (_charts.parImpar) _charts.parImpar.destroy();
+        const ctxPI = document.getElementById('chartParImpar').getContext('2d');
+        _charts.parImpar = new Chart(ctxPI, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        '#059669', '#3b82f6', '#fbbf24', '#f87171', '#a78bfa', '#f472b6', '#374151'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { boxWidth: 12, font: { size: 10, family: 'monospace' } }
+                    },
+                    tooltip: { callbacks: { label: (item) => ` ${item.label}: ${item.raw}%` } }
+                }
+            }
+        });
+    }
+
+    function renderAltaBaixaChart() {
+        if (!_dataAvancada) return;
+        const trend = document.getElementById('selectAltaBaixaTrend').value;
+        let dataSrc = [];
+
+        if (trend === 'historico') {
+            dataSrc = _dataAvancada.alta_baixa.dist;
+        } else {
+            dataSrc = _dataAvancada.alta_baixa.tendencias[trend] || [];
+        }
+
+        const labels = dataSrc.map(p => `${p.baixa} Baixas / ${p.alta} Altas`);
+        const values = dataSrc.map(p => p.pct);
+
+        if (_charts.altaBaixa) _charts.altaBaixa.destroy();
+        const ctxAB = document.getElementById('chartAltaBaixa').getContext('2d');
+        _charts.altaBaixa = new Chart(ctxAB, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6', '#ec4899', '#6b7280'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { boxWidth: 12, font: { size: 10, family: 'monospace' } }
+                    },
+                    tooltip: { callbacks: { label: (item) => ` ${item.label}: ${item.raw}%` } }
+                }
+            }
+        });
+    }
+
+    function renderDistCharts() {
+        renderParImparChart();
+        renderAltaBaixaChart();
+
+        // 3. Linha do Tempo das Somas
+        const somaData = _dataAvancada.soma;
+        const labelsSoma = somaData.concursos_recentes.map(c => `#${c}`);
+        const valuesSoma = somaData.somas_recentes;
+
+        if (_charts.somaLinha) _charts.somaLinha.destroy();
+        const ctxSL = document.getElementById('chartSomaLinha').getContext('2d');
+        _charts.somaLinha = new Chart(ctxSL, {
+            type: 'line',
+            data: {
+                labels: labelsSoma,
+                datasets: [{
+                    label: 'Soma do Concurso',
+                    data: valuesSoma,
+                    borderColor: '#059669',
+                    backgroundColor: 'rgba(5, 150, 105, 0.05)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#047857',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { min: 40, max: 320, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 4. Faixas de Soma Históricas
+        const faixasData = _dataAvancada.soma.dist_faixas;
+        const labelsFaixas = faixasData.map(f => f.faixa);
+        const valuesFaixas = faixasData.map(f => f.freq);
+
+        if (_charts.somaBarras) _charts.somaBarras.destroy();
+        const ctxSB = document.getElementById('chartSomaBarras').getContext('2d');
+        _charts.somaBarras = new Chart(ctxSB, {
+            type: 'bar',
+            data: {
+                labels: labelsFaixas,
+                datasets: [{
+                    data: valuesFaixas,
+                    backgroundColor: '#d97706',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // TAB 4: DETALHES DE POSIÇÕES E SEQUÊNCIAS
+    function renderPosSeqDetails() {
+        if (!_dataAvancada) return;
+
+        // 1. Matriz de Rankings de Posição
+        const posContainer = document.getElementById('posicoesList');
+        posContainer.innerHTML = '';
+        for (let p = 1; p <= 6; p++) {
+            const posInfo = _dataAvancada.posicoes[String(p)];
+            if (!posInfo) continue;
+
+            const rankingHtml = posInfo.ranking.map((r, i) => `
+                <div class="d-flex justify-content-between align-items-center mb-1 font-monospace" style="font-size: 0.72rem;">
+                    <span>${i+1}º <strong class="text-success">${String(r.dezena).padStart(2, '0')}</strong></span>
+                    <span class="text-muted">${r.freq}x (${r.pct}%)</span>
+                </div>
+            `).join('');
+
+            posContainer.innerHTML += `
+                <div class="col-md-4 col-6">
+                    <div class="p-3 bg-light rounded-3 border-top border-3 border-success h-100">
+                        <span class="badge bg-success mb-2">${p}ª Dezena</span>
+                        <div class="mt-1">${rankingHtml}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. Repetição e Sequências
+        document.getElementById('valRepeticaoMedia').innerText = _dataAvancada.repeticoes.media;
+        
+        const repDistGrid = document.getElementById('repeticoesDistGrid');
+        repDistGrid.innerHTML = _dataAvancada.repeticoes.dist_qtd.map(r => `
+            <div class="d-flex align-items-center justify-content-between">
+                <span>Repetir <strong class="text-dark">${r.qtd}</strong> dezenas:</span>
+                <div class="d-flex align-items-center gap-2 flex-fill mx-3">
+                    <div class="progress rounded-pill flex-fill" style="height: 6px;">
+                        <div class="progress-bar bg-success" style="width: ${r.pct}%;"></div>
+                    </div>
+                </div>
+                <span>${r.freq}x (${r.pct}%)</span>
+            </div>
+        `).join('');
+
+        // 3. Sequências Consecutivas
+        const seqDist = document.getElementById('sequenciasDistList');
+        seqDist.innerHTML = _dataAvancada.sequencias.dist_consec.map(s => {
+            const nameMap = {
+                'nenhuma': 'Sem Sequência',
+                'duque': 'Duque (2)',
+                'terno': 'Terno (3)',
+                'quadra': 'Quadra (4)',
+                'quina': 'Quina (5)',
+                'sena': 'Sena (6)'
+            };
+            const label = nameMap[s.tipo] || s.tipo;
+            return `
+                <div class="d-flex align-items-center justify-content-between font-monospace" style="font-size: 0.75rem;">
+                    <span>${label}:</span>
+                    <div class="d-flex align-items-center gap-2 flex-fill mx-3">
+                        <div class="progress rounded-pill flex-fill" style="height: 6px;">
+                            <div class="progress-bar bg-amber" style="width: ${s.pct}%; background-color:#d97706;"></div>
+                        </div>
+                    </div>
+                    <span class="text-muted">${s.freq}x (${s.pct}%)</span>
+                </div>
+            `;
+        }).join('');
+
+        // Duques comuns
+        document.getElementById('listDuquesComuns').innerHTML = _dataAvancada.sequencias.top_duques.map((d, i) => `
+            <div>${i+1}º: <strong class="text-success">${String(d.dezena_a).padStart(2,'0')}-${String(d.dezena_b).padStart(2,'0')}</strong> (${d.freq}x)</div>
+        `).join('');
+
+        // Ternos comuns
+        document.getElementById('listTernosComuns').innerHTML = _dataAvancada.sequencias.top_ternos.map((t, i) => `
+            <div>${i+1}º: <strong class="text-success">${String(t.dezena_a).padStart(2,'0')}-${String(t.dezena_b).padStart(2,'0')}-${String(t.dezena_c).padStart(2,'0')}</strong> (${t.freq}x)</div>
+        `).join('');
+    }
+
+    // TAB 5: GRÁFICOS AVANÇADOS (MOLDURA, REGIOES, AMPLITUDE)
+    function renderAvanCharts() {
+        if (!_dataAvancada) return;
+
+        // 1. Moldura vs Centro
+        const molduraData = _dataAvancada.avancado.dist_moldura;
+        const labelsM = molduraData.map(m => `${m.moldura} Bordas / ${m.centro} Centro`);
+        const valuesM = molduraData.map(m => m.pct);
+
+        if (_charts.moldura) _charts.moldura.destroy();
+        const ctxMoldura = document.getElementById('chartMoldura').getContext('2d');
+        _charts.moldura = new Chart(ctxMoldura, {
+            type: 'doughnut',
+            data: {
+                labels: labelsM,
+                datasets: [{
+                    data: valuesM,
+                    backgroundColor: ['#059669', '#3b82f6', '#fbbf24', '#f87171', '#6b7280'],
+                    borderWidth: 1.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (item) => ` ${item.label}: ${item.raw}%` } }
+                }
+            }
+        });
+
+        // Atualizar legenda texto da moldura
+        const topMold = molduraData[0];
+        document.getElementById('textMolduraStat').innerHTML = `
+            Mais Frequente: <strong class="text-success">${topMold.moldura}M / ${topMold.centro}C</strong> (${topMold.pct}% dos sorteios).
+        `;
+
+        // 2. Cruz e Diagonais
+        const cruzInfo = _dataAvancada.avancado.dist_cruz;
+        const cruzContainer = document.getElementById('cruzStats');
+        cruzContainer.innerHTML = cruzInfo.map(c => `
+            <div class="d-flex justify-content-between mb-1">
+                <span>${c.qtd_na_cruz} Números na Cruz:</span>
+                <span>${c.freq}x (${c.pct}%)</span>
+            </div>
+        `).join('');
+
+        const diagInfo = _dataAvancada.avancado.dist_diagonais;
+        const diagContainer = document.getElementById('diagStats');
+        diagContainer.innerHTML = diagInfo.map(d => {
+            const labelMap = {
+                'principal': 'Apenas Diag. Principal (1,12,23,34,45,56)',
+                'secundaria': 'Apenas Diag. Secundária (10,19,28,37,46,55)',
+                'ambas': 'Dezenas em Ambas Diagonais',
+                'nenhuma': 'Nenhuma Dezena nas Diagonais'
+            };
+            const label = labelMap[d.tipo] || d.tipo;
+            return `
+                <div class="d-flex justify-content-between mb-1" style="font-size: 0.7rem;">
+                    <span>${label}:</span>
+                    <span>${d.freq}x (${d.pct}%)</span>
+                </div>
+            `;
+        }).join('');
+
+        // 3. Regiões / Quadrantes
+        const quadInfo = _dataAvancada.avancado.dist_quadrantes;
+        const quadContainer = document.getElementById('quadrantesStats');
+        quadContainer.innerHTML = quadInfo.map((q, i) => `
+            <div class="p-2 bg-light rounded-3 font-monospace text-muted d-flex align-items-center justify-content-between" style="font-size: 0.72rem;">
+                <span>${i+1}º: [Q1:${q.q1} | Q2:${q.q2} | Q3:${q.q3} | Q4:${q.q4}]</span>
+                <span class="fw-bold text-success">${q.freq}x (${q.pct}%)</span>
+            </div>
+        `).join('');
+
+        // 4. Histograma de Amplitude
+        const ampData = _dataAvancada.avancado.dist_amplitudes;
+        const labelsAmp = ampData.map(a => `Amp ${a.amplitude}`);
+        const valuesAmp = ampData.map(a => a.freq);
+
+        if (_charts.amplitude) _charts.amplitude.destroy();
+        const ctxAmp = document.getElementById('chartAmplitude').getContext('2d');
+        _charts.amplitude = new Chart(ctxAmp, {
+            type: 'bar',
+            data: {
+                labels: labelsAmp,
+                datasets: [{
+                    data: valuesAmp,
+                    backgroundColor: 'rgba(5, 150, 105, 0.7)',
+                    borderColor: '#047857',
+                    borderWidth: 1.2,
+                    borderRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // TAB 6: RESULTADOS NO VOLANTE
+    async function renderResultadosVolante() {
+        if (!_ultimosSorteios) {
+            try {
+                const resp = await fetch('/analise/api/ultimos');
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    _ultimosSorteios = data.sorteios;
+                    populateSelectConcurso();
+                } else {
+                    console.error("Falha ao carregar últimos sorteios.");
+                    return;
+                }
+            } catch (e) {
+                console.error("Erro na requisição: " + e.message);
+                return;
+            }
+        }
+
+        if (!_ultimosSorteios || _ultimosSorteios.length === 0) return;
+
+        const sorteio = _ultimosSorteios[_currentSorteioIndex];
+        const dezenas = sorteio.dezenas;
+
+        // Atualizar painel de detalhes
+        document.getElementById('badgeConcursoNum').innerText = `CONCURSO #${sorteio.concurso}`;
+        document.getElementById('txtConcursoData').innerText = `Data: ${sorteio.data}`;
+        document.getElementById('selectConcursoResultados').value = _currentSorteioIndex;
+
+        // Bolas de loteria do sorteio
+        const ballsGroup = document.getElementById('sorteioBolas');
+        ballsGroup.innerHTML = dezenas.map(d => `
+            <div class="lotto-ball ball-inteligente">${String(d).padStart(2, '0')}</div>
+        `).join('');
+
+        // Estatísticas rápidas
+        const soma = dezenas.reduce((a, b) => a + b, 0);
+        const evens = dezenas.filter(d => d % 2 === 0).length;
+        const odds = 6 - evens;
+        const lows = dezenas.filter(d => d <= 30).length;
+        const highs = 6 - lows;
+
+        document.getElementById('txtSorteioSoma').innerText = `${soma} (Média Mega: ~183)`;
+        document.getElementById('txtSorteioParImpar').innerText = `${evens} Pares / ${odds} Ímpares`;
+        document.getElementById('txtSorteioAltaBaixa').innerText = `${lows} Baixas / ${highs} Altas`;
+
+        // Renderizar Volante 6x10
+        const volante = document.getElementById('volante-grid-resultados');
+        volante.innerHTML = '';
+
+        // 1. Column labels (1 to 10)
+        for (let col = 1; col <= 10; col++) {
+            const lbl = document.createElement('div');
+            lbl.className = 'col-label-item';
+            lbl.style.gridRow = '1';
+            lbl.style.gridColumn = (col + 2).toString();
+            lbl.textContent = col;
+            volante.appendChild(lbl);
+        }
+
+        // 2. Horizontal divider
+        const hLine = document.createElement('div');
+        hLine.className = 'volante-line-horizontal';
+        hLine.style.gridRow = '2';
+        hLine.style.gridColumn = '3 / span 10';
+        volante.appendChild(hLine);
+
+        // 3. Row labels (1 to 6)
+        for (let row = 1; row <= 6; row++) {
+            const lbl = document.createElement('div');
+            lbl.className = 'row-label-item';
+            lbl.style.gridRow = (row + 2).toString();
+            lbl.style.gridColumn = '1';
+            lbl.textContent = row;
+            volante.appendChild(lbl);
+        }
+
+        // 4. Vertical divider
+        const vLine = document.createElement('div');
+        vLine.className = 'volante-line-vertical';
+        vLine.style.gridRow = '3 / span 6';
+        vLine.style.gridColumn = '2';
+        volante.appendChild(vLine);
+
+        // 5. Volante cells
+        for (let row = 0; row < 6; row++) {
+            for (let col = 1; col <= 10; col++) {
+                const number = row * 10 + col;
+                const cell = document.createElement('div');
+                cell.className = 'volante-celula-res';
+                cell.style.gridRow = (row + 3).toString();
+                cell.style.gridColumn = (col + 2).toString();
+                cell.textContent = String(number).padStart(2, '0');
+
+                // Destaque se for uma dezena sorteada
+                if (dezenas.includes(number)) {
+                    if (_highlightMode === 'premium') {
+                        cell.classList.add('highlight-premium');
+                    } else {
+                        cell.classList.add('highlight-sutil');
+                    }
+
+                    const check = document.createElement('span');
+                    check.className = 'res-check';
+                    check.innerText = '✓';
+                    cell.appendChild(check);
+                }
+
+                volante.appendChild(cell);
+            }
+        }
+
+        // Habilitar/desabilitar setas de navegação
+        document.getElementById('btnPrevConcurso').disabled = (_currentSorteioIndex >= _ultimosSorteios.length - 1);
+        document.getElementById('btnNextConcurso').disabled = (_currentSorteioIndex <= 0);
+    }
+
+    function populateSelectConcurso() {
+        const select = document.getElementById('selectConcursoResultados');
+        select.innerHTML = _ultimosSorteios.map((s, idx) => `
+            <option value="${idx}">Concurso #${s.concurso} (${s.data})</option>
+        `).join('');
+    }
+
+    function onConcursoChange() {
+        const select = document.getElementById('selectConcursoResultados');
+        _currentSorteioIndex = parseInt(select.value);
+        renderResultadosVolante();
+    }
+
+    function navigateConcurso(direction) {
+        const nextIndex = _currentSorteioIndex + direction;
+        if (nextIndex >= 0 && nextIndex < _ultimosSorteios.length) {
+            _currentSorteioIndex = nextIndex;
+            renderResultadosVolante();
+        }
+    }
+
+    function setHighlightMode(mode) {
+        _highlightMode = mode;
+        document.getElementById('btnHighlightPremium').className = mode === 'premium' ? 'btn btn-sm btn-success flex-fill fw-bold' : 'btn btn-sm btn-outline-success flex-fill fw-bold';
+        document.getElementById('btnHighlightSutil').className = mode === 'sutil' ? 'btn btn-sm btn-success flex-fill fw-bold' : 'btn btn-sm btn-outline-success flex-fill fw-bold';
+        renderResultadosVolante();
+    }
+
+    // Ingestão dinâmica de dados via API avançada
+    async function carregarDadosAvancados() {
+        try {
+            const resp = await fetch('/analise/api/avancada');
+            const data = await resp.json();
+
+            if (data.status !== 'success') {
+                document.getElementById('heatmapGrid').innerHTML = `
+                    <div class="text-danger text-center py-5 w-100" style="grid-column: 1/-1;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar dados: ${data.message}
+                    </div>
+                `;
+                return;
+            }
+
+            _dataAvancada = data;
+
+            try {
+                await AnaliseEstrutura.load();
+            } catch (geoErr) {
+                console.warn('Geometria estrutural:', geoErr);
+            }
+            try {
+                await AnaliseRepeticaoConsecutiva.load();
+            } catch (repErr) {
+                console.warn('Repetição consecutiva:', repErr);
+            }
+
+            // Injetar indicadores gerais
+            document.getElementById('valTotalSorteios').innerText = data.total_sorteios.toLocaleString();
+            document.getElementById('valUltimoConcurso').innerHTML = `#<strong>${data.ultimo_concurso}</strong> <span class="d-block text-muted" style="font-size:0.65rem;">sorteado em ${data.ultimo_sorteio_data}</span>`;
+            document.getElementById('valMediaSoma').innerText = Math.round(data.soma.media);
+            document.getElementById('valMediaAmplitude').innerText = Math.round(data.avancado.media_amplitude) + ' dezenas';
+
+            // Renderizar Volante Heatmap
+            renderHeatmap();
+
+            // Renderizar Sugestões preditivas
+            renderSugestoes();
+
+            // Iniciar com a aba atual (Geral)
+            setTab(_activeTab);
+
+            const nh = (location.hash || '').replace(/^#/, '');
+            if (nh === 'repconsec') setTab('repconsec');
+            else if (nh === 'posseq') setTab('posseq');
+
+        } catch (e) {
+            document.getElementById('heatmapGrid').innerHTML = `
+                <div class="text-danger text-center py-5 w-100" style="grid-column: 1/-1;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Falha de comunicação: ${e.message}
+                </div>
+            `;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', carregarDadosAvancados);
+</script>
+{% endblock %}

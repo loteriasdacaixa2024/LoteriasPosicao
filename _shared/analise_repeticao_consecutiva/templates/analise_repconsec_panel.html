@@ -1,0 +1,68 @@
+<div id="panelRepconsec" style="display: none;">
+    <p class="text-muted small mb-2" id="repConsecMeta">Carregando...</p>
+    <p class="text-muted small mb-3">
+        Quantas dezenas do concurso <strong>anterior</strong> reaparecem no concurso seguinte — análise temporal, não espacial no volante.
+    </p>
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white fw-bold py-3">
+                    <i class="fas fa-table me-2"></i>Repetição entre concursos consecutivos (histórico completo)
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle" style="font-size:0.85rem;">
+                        <thead class="table-light">
+                            <tr><th>Repetições</th><th class="text-end">Quantidade</th><th class="text-end">Porcentagem</th></tr>
+                        </thead>
+                        <tbody id="tblRepConsecDist"></tbody>
+                    </table>
+                </div>
+                <p class="small text-muted px-3 pb-2 mb-0">Passe o mouse na quantidade ou % para ver resumo; clique em <i class="fas fa-eye"></i> para exemplos reais.</p>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="fas fa-star me-2 text-success"></i>Último concurso</h5>
+                <div id="repConsecUltimo" class="small">Carregando...</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2"></i>Análise avançada</h5>
+                <ul class="small mb-3" id="repConsecSequencias"></ul>
+                <div id="repConsecTendencia" class="small text-muted mb-2"></div>
+                <div class="row g-2 small">
+                    <div class="col-6"><span class="fw-bold">Últimos 10:</span> <span id="repConsecUlt10">—</span></div>
+                    <div class="col-6"><span class="fw-bold">Últimos 30:</span> <span id="repConsecUlt30">—</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header fw-bold py-2">Média por década</div>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Década</th><th class="text-end">Média</th><th class="text-end">N</th></tr></thead>
+                    <tbody id="tblRepConsecDecada"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header fw-bold py-2">Média por ano (recentes)</div>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Ano</th><th class="text-end">Média</th><th class="text-end">N</th></tr></thead>
+                    <tbody id="tblRepConsecAno"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-4 border-start border-4 border-success">
+                <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Sugestões baseadas em repetição histórica</h5>
+                <div id="repConsecSugestoes" class="small">Carregando...</div>
+            </div>
+        </div>
+        <div class="col-12">
+            {% include 'cta_sniper_apostas.html' %}
+        </div>
+    </div>
+</div>

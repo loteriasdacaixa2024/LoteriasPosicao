@@ -1,0 +1,127 @@
+﻿<div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+    <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+        <i class="fas fa-dice me-2"></i>Gerar apostas a partir da análise
+    </div>
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+                <label class="form-label small mb-0">Apostas</label>
+                <input type="number" class="form-control form-control-sm" id="inpQtd" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small mb-0">{% if cfg.layout == 'colunas' %}Colunas{% else %}Dezenas ({{ cfg.dezenas_min }}–{{ cfg.dezenas_max }}){% endif %}</label>
+                <input type="number" class="form-control form-control-sm" id="inpDezenas"
+                    value="{{ cfg.dezenas_default }}" min="{{ cfg.dezenas_min }}" max="{{ cfg.dezenas_max }}"
+                    {% if cfg.layout == 'colunas' %}readonly title="Super Sete: sempre 7 colunas"{% endif %}>
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label small mb-0">Perfil</label>
+                <select class="form-select form-select-sm" id="inpPerfil">
+                    <option value="equilibrado">Equilibrado</option>
+                    <option value="conservador">Conservador</option>
+                    <option value="agressivo">Agressivo</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-5 d-flex flex-wrap gap-3 align-items-center">
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="chkUltimoPar" checked>
+                    <label class="form-check-label small" for="chkUltimoPar" title="Dá mais peso às repetidas">Priorizar repetidas do último par</label>
+                </div>
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="chkPermanencia">
+                    <label class="form-check-label small" for="chkPermanencia">Só tendência permanência</label>
+                </div>
+                {% if cfg.layout != 'colunas' %}
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="chkParImpar" checked>
+                    <label class="form-check-label small" for="chkParImpar">Respeitar par/ímpar do grupo</label>
+                </div>
+                {% endif %}
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="chkDescartarHist" checked>
+                    <label class="form-check-label small" for="chkDescartarHist">Descartar já sorteadas</label>
+                </div>
+            </div>
+        </div>
+        <div class="row g-2 mt-2 align-items-end border-top pt-3">
+            <div class="col-12 col-lg-5">
+                <label class="form-label small mb-0">Conferir apostas com concurso</label>
+                <select class="form-select form-select-sm" id="selConcursoConf">
+                    <option value="">— Sem conferência (só amarelo) —</option>
+                </select>
+            </div>
+            {% if cfg.show_volante_apostas != False %}
+            <div class="col-12 col-lg-7">
+                <span class="fw-bold small text-uppercase text-muted d-block mb-2">Exibição das apostas geradas</span>
+                <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
+                    <div class="btn-group flex-shrink-0" role="group" id="grpExibicao">
+                        <button type="button" class="btn btn-outline-secondary btn-sm exibicao-btn" data-exib="numeros">Números</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm exibicao-btn" data-exib="volante">Volante</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm exibicao-btn active" data-exib="hibrido">Híbrido</button>
+                    </div>
+                    <p class="exibicao-legenda-inline mb-0" id="exibicaoLegendaTexto">
+                        Lista em bolinhas e grade do volante juntas.
+                    </p>
+                </div>
+                <div class="volante-legenda-mini mt-2">
+                    <span class="legenda-cor" style="background:var(--accent);border:1px solid var(--primary)"></span> Aposta
+                    <span class="legenda-cor" style="background:#198754;border:1px solid #146c43"></span> Acerto
+                    <span class="legenda-cor" style="background:#fff;border:1px solid #ccc"></span> Fora
+                    {% if cfg.layout == 'colunas' %}
+                    <span class="legenda-nota text-muted">· 1 dígito por coluna (C1–C7)</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn fw-bold" id="btnGerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar</button>
+            <button class="btn btn-outline-secondary" id="btnExport" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-secondary" id="btnRepBacktest" disabled
+                style="border-color:var(--primary);color:var(--primary);">
+                <i class="fas fa-chart-line me-1"></i>Back Test
+            </button>
+            {% if cfg.key == 'lotofacil' %}
+            <button class="btn btn-outline-secondary btn-sm" type="button" id="btnToggleConfTxt" aria-expanded="false"
+                style="border-color:var(--primary);color:var(--primary);">
+                <i class="fas fa-file-import"></i> Conferir TXT no histórico
+            </button>
+            {% endif %}
+        </div>
+        {% if cfg.key == 'lotofacil' %}
+        <div class="border rounded p-2 mt-2 d-none" id="painelConfTxt" style="background:#f8f5fc;">
+            <div class="small fw-bold text-muted mb-2">
+                <i class="fas fa-history me-1"></i>Importe o TXT exportado e compare cada aposta com <strong>todos</strong> os concursos do banco.
+            </div>
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-5">
+                    <label class="form-label small mb-0">Arquivo .txt</label>
+                    <input type="file" class="form-control form-control-sm" id="inpConfTxt" accept=".txt,text/plain">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-0">Mín. acertos</label>
+                    <select class="form-select form-select-sm" id="selConfTxtMin">
+                        <option value="11">11+</option>
+                        <option value="12">12+</option>
+                        <option value="13">13+</option>
+                        <option value="14">14+</option>
+                        <option value="15">15</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <button type="button" class="btn btn-primary btn-sm w-100" id="btnConfTxtExecutar">
+                        <i class="fas fa-search"></i> Conferir
+                    </button>
+                </div>
+                <div class="col-12 col-md-2">
+                    <a class="btn btn-link btn-sm w-100" href="/central-conferencias/">Central completa</a>
+                </div>
+            </div>
+            <div id="confTxtResultado" class="mt-2 small"></div>
+        </div>
+        {% endif %}
+        <div id="rep-hist-alert" class="mt-3"></div>
+        <div id="rep-bt" class="mt-2"></div>
+        <div id="listaApostas" class="mt-3 lista-apostas-grid"></div>
+    </div>
+</div>

@@ -1,0 +1,159 @@
+Entendi o que você quer montar. Antes de gerar o prompt definitivo, eu vou organizar a interpretação técnica para garantir que o prompt fique claro para a IA de desenvolvimento.
+
+O objetivo não é criar mais uma análise isolada, mas sim unificar informações que hoje estão espalhadas em dois sistemas diferentes, criando um módulo único com abas.
+
+A ideia principal do prompt será:
+
+Analisar os arquivos:
+index1.html até index10.html
+cg1.html até cg10.html
+prints das telas
+estruturas dos dois endereços Netlify
+Comparar:
+colunas existentes;
+títulos das colunas;
+informações repetidas;
+informações exclusivas de cada sistema.
+
+A arquitetura sugerida no prompt será algo semelhante:
+
+MENU PRINCIPAL
+└── Análises Inteligentes Dia de Sorte
+       │
+       ├── Aba 1 - Resultados & Dígitos
+       │      Concurso
+       │      Data
+       │      Dezenas (ordem Caixa)
+       │      Dígitos
+       │      Dígitos Ordenados
+       │      Quantidade de Dígitos
+       │
+       ├── Aba 2 - Combinações de Dígitos
+       │      Quantidade de dígitos
+       │      Quantidade de combinações possíveis
+       │      Acesso automático:
+       │          6 dígitos → index6.html
+       │          7 dígitos → index7.html
+       │          8 dígitos → index8.html
+       │          ...
+       │
+       ├── Aba 3 - Gerador Pro / cg
+       │      cg3
+       │      cg4
+       │      cg5
+       │      cg6
+       │      cg7
+       │      cg8
+       │      cg9
+       │      cg10
+       │
+       ├── Aba 4 - Padrões do Concurso
+       │      Concurso
+       │      Data
+       │      Dezenas
+       │      Mês
+       │      Padrão Inicial
+       │      Padrão Final
+       │      Dígitos Únicos
+       │      Quantidade de Dígitos
+       │      Pares e Ímpares
+       │      Não Saíram
+       │
+       └── Aba 5 - Gerador Elite de Palpites
+              Geração por quantidade de dígitos:
+              3d
+              4d
+              5d
+              6d
+              7d
+              8d
+              9d
+
+Também entendi um ponto importante:
+
+Você não quer simplesmente "copiar tabelas".
+
+Você quer que a IA faça uma análise de relacionamento:
+
+Exemplo:
+
+Sistema A:
+
+Concurso
+Data
+Dezenas
+Dígitos
+Quantidade de Dígitos
+Combinações
+Gerador Pro
+
+Sistema B:
+
+Concurso
+Data
+Dezenas
+Mês
+Padrão Inicial
+Padrão Final
+Dígitos Únicos
+Quantidade de Dígitos
+Pares/Ímpares
+Não Saíram
+
+Resultado esperado:
+
+Uma tabela inteligente:
+
+Concurso
+Data
+Dezenas
+Mês
+Dígitos
+Dígitos Ordenados
+Quantidade Dígitos
+Combinações
+Não Saíram
+Pares/Ímpares
+Padrões
+Ações
+
+Com botões:
+
+[Ver Combinações]
+        ↓
+index8.html
+
+[Gerar cg8]
+        ↓
+cg8.html
+
+[Gerador Elite]
+        ↓
+aba específica
+
+Agora, para eu montar o prompt profissional final, eu recomendo você me enviar:
+
+Os prints dos dois sites com a barra de endereço aparecendo.
+A pasta com:
+index1.html até index10.html
+cg1.html até cg10.html
+O caminho exato da pasta (você mencionou algo como):
+D:\Loterias\LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only\adaptar
+
+(confirme o nome exato porque no prompt precisa ficar correto).
+
+Os dois endereços Netlify completos.
+
+Depois disso eu monto um prompt no formato profissional, algo como:
+
+Objetivo
+Contexto atual
+Arquivos para análise
+Regras de integração
+Estrutura de menu/abas
+Regras de navegação index/cg
+Requisitos do Gerador Elite
+Critérios para não duplicar informações
+Resultado esperado
+
+Assim a IA que vai implementar entende exatamente o que deve analisar antes de alterar o sistema.

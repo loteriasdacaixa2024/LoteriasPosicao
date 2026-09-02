@@ -1,0 +1,13 @@
+        <a class="mobile-link" href="/" onclick="closeMobileNav()">
+            <i class="fas fa-satellite-dish"></i> {{ nav_cfg.sync.title }}
+        </a>
+        {% include 'ac_nav_comparar_mobile.html' %}
+        {% include 'ac_nav_repeticao_mobile.html' %}
+        <a class="mobile-link" href="{{ nav_cfg.stats.href }}" onclick="closeMobileNav()">
+            <i class="{{ nav_cfg.stats.icon }}"></i> {{ nav_cfg.stats.title }}
+        </a>
+        {% for extra in nav_cfg.dados_extras %}
+        <a class="mobile-link" href="{{ extra.href }}" onclick="closeMobileNav()">
+            <i class="{{ extra.icon }}"></i> {{ extra.title }}
+        </a>
+        {% endfor %}

@@ -1,0 +1,576 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    {% if meses_cores %}
+    {% for nome, cor in meses_cores.items() %}
+    #ge-analise-posicao .pos-mes-badge.mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+    {% endfor %}
+    {% endif %}
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+    }
+
+    .pos-layout {
+        display: grid;
+        grid-template-columns: minmax(220px, 260px) 1fr;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    @media (max-width: 991px) {
+        .pos-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pos-concursos-card {
+        background: #fff;
+        border: 1px solid #fce7a2;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+        overflow: hidden;
+        max-height: calc(100vh - 220px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pos-concursos-head {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        color: #fff;
+        padding: .65rem .85rem;
+        font-weight: 700;
+        font-size: .82rem;
+    }
+
+    .pos-concursos-list {
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .pos-concurso-item {
+        display: block;
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid #f0f0f0;
+        background: #fff;
+        text-align: left;
+        padding: .45rem .65rem;
+        cursor: pointer;
+        transition: background .12s;
+        font-size: .72rem;
+        line-height: 1.35;
+        color: #333;
+    }
+
+    .pos-concurso-item:hover {
+        background: var(--accent-light);
+    }
+
+    .pos-concurso-item.active {
+        background: #fff9e6;
+        border-left: 3px solid var(--accent);
+    }
+
+    .pos-concurso-item .pos-ci-linha {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .pos-concurso-item .pos-ci-linha .pos-ci-num {
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .pos-concurso-item .pos-ci-ordem {
+        margin-top: 3px;
+        padding: 2px 4px;
+        background: #eef2ff;
+        border-radius: 3px;
+        font-weight: 600;
+        letter-spacing: .02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .pos-meta-resumo {
+        display: inline-block;
+        background: #555;
+        color: #fff;
+        font-weight: 800;
+        font-size: .72rem;
+        padding: 2px 8px;
+        border-radius: 8px;
+    }
+
+    .pos-main-card {
+        background: #fff;
+        border: 1px solid #fce7a2;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+        padding: 1rem;
+    }
+
+    .pos-ordem-strip {
+        display: grid;
+        grid-template-columns: repeat({{ pos_cfg.num_posicoes }}, minmax({{ pos_cfg.min_panel_width }}px, 1fr));
+        gap: 0;
+        margin-bottom: 0;
+        border: 1px solid #d9d9d9;
+        border-bottom: 0;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+    }
+
+    .pos-ordem-cell {
+        background: linear-gradient(180deg, #2e7d32, #1b5e20);
+        color: #fff;
+        text-align: center;
+        padding: .4rem .15rem;
+        border-right: 1px solid rgba(255, 255, 255, .15);
+        transition: transform .15s, box-shadow .15s;
+    }
+
+    .pos-ordem-cell:last-child {
+        border-right: 0;
+    }
+
+    .pos-ordem-cell.flash {
+        animation: posFlash .35s ease;
+    }
+
+    @keyframes posFlash {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.04);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, .55);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .pos-ordem-cell .pos-oc-label {
+        display: block;
+        font-size: .58rem;
+        opacity: .85;
+        font-weight: 600;
+    }
+
+    .pos-ordem-cell .pos-oc-val {
+        display: block;
+        font-size: 1rem;
+        font-weight: 900;
+        line-height: 1.1;
+    }
+
+    .pos-panels {
+        display: grid;
+        grid-template-columns: repeat({{ pos_cfg.num_posicoes }}, minmax({{ pos_cfg.min_panel_width }}px, 1fr));
+        gap: 0;
+        border: 1px solid #d9d9d9;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .pos-excel-block {
+        margin-bottom: .5rem;
+    }
+
+    .pos-excel-block .pos-panels-wrap {
+        overflow-x: auto;
+    }
+
+    .pos-excel-block .pos-ordem-strip,
+    .pos-excel-block .pos-panels {
+        min-width: 420px;
+    }
+
+    .pos-excel-block .pos-panels {
+        border-top: 0;
+        border-radius: 0 0 8px 8px;
+    }
+
+    @media (max-width: 992px) {
+        .pos-ordem-strip {
+            grid-template-columns: repeat({{ pos_cfg.num_posicoes }}, minmax({{ pos_cfg.min_panel_width }}px, 1fr));
+        }
+    }
+
+    .pos-panel {
+        border-right: 1px solid #e0e0e0;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .pos-panel:last-child {
+        border-right: 0;
+    }
+
+    .pos-panel.flash {
+        animation: panelFlash .35s ease;
+    }
+
+    @keyframes panelFlash {
+        0% {
+            box-shadow: none;
+        }
+
+        50% {
+            box-shadow: 0 0 0 2px rgba(230, 168, 0, .45);
+        }
+
+        100% {
+            box-shadow: none;
+        }
+    }
+
+    .pos-panel-head {
+        display: none;
+    }
+
+    .pos-matrix {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
+        background: #fff;
+        flex: 1;
+    }
+
+    .pos-matrix-cell {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: .78rem;
+        font-weight: 600;
+        color: #333;
+        line-height: 1.45;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+    }
+
+    .pos-matrix-cell.hit {
+        background: var(--accent);
+        color: var(--on-accent);
+        font-weight: 900;
+    }
+
+    .pos-panel-info {
+        padding: .45rem .35rem .5rem;
+        font-size: .58rem;
+        color: #555;
+        border-top: 1px solid #e8e8e8;
+        background: #fafafa;
+        text-align: center;
+    }
+
+    .pos-panel-info .pos-info-row {
+        margin-bottom: .25rem;
+    }
+
+    .pos-panel-info strong {
+        color: var(--primary);
+    }
+
+    .pos-dig-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 3px;
+        margin: 0 1px;
+        border-radius: 3px;
+        background: #444;
+        color: #fff;
+        font-weight: 800;
+        font-size: .55rem;
+    }
+
+    .pos-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .65rem 1rem;
+        align-items: center;
+        margin-bottom: .85rem;
+        font-size: .78rem;
+        color: #666;
+    }
+
+    .pos-meta-bar strong {
+        color: var(--primary);
+    }
+
+    .pos-mes-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: .72rem;
+        color: #fff;
+        line-height: 1.35;
+        vertical-align: middle;
+    }
+
+    .pos-ci-linha .pos-meta-resumo,
+    .pos-ci-linha .pos-mes-badge {
+        margin-left: 2px;
+    }
+</style>
+
+<div id="ge-analise-posicao">
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div style="font-size:2rem;">📊</div>
+        <div>
+            <h2 class="mb-0">Análise por Posição</h2>
+            <p class="mb-0 mt-1" style="opacity:.88;font-size:.88rem;">
+                {{ pos_cfg.subtitle_analise }}
+            </p>
+            {% if pos_cfg.duplasena %}
+            <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+                <span style="font-size:.82rem;opacity:.9;">Sorteio:</span>
+                <select id="selSorteioPos" class="form-select form-select-sm" style="width:auto;max-width:160px;">
+                    <option value="1">1º Sorteio</option>
+                    <option value="2">2º Sorteio</option>
+                </select>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="pos-layout">
+    <div class="pos-concursos-card">
+        <div class="pos-concursos-head"><i class="fas fa-list me-1"></i> Concursos</div>
+        <div class="pos-concursos-list" id="listaConcursos">
+            <div class="text-center text-muted py-4 small"><i class="fas fa-spinner fa-spin me-1"></i>Carregando…</div>
+        </div>
+    </div>
+
+    <div class="pos-main-card">
+        <div id="posPlaceholder" class="text-center text-muted py-5">
+            <i class="fas fa-hand-pointer fa-2x mb-2 opacity-50"></i>
+            <p class="mb-0 small">Selecione um concurso na lista.</p>
+        </div>
+
+        <div id="posConteudo" style="display:none;">
+            <div class="pos-meta-bar">
+                <span>Concurso <strong id="metaConcurso">—</strong></span>
+                <span>Data <strong id="metaData">—</strong></span>
+                <span id="metaMesWrap"></span>
+                <span id="metaTimeWrap"></span>
+                <span id="metaTrevoWrap"></span>
+                {% if pos_cfg.show_dig_soma %}
+                <span id="metaDigitosWrap">Dígitos: <strong id="metaDigitos">—</strong></span>
+                <span class="pos-meta-resumo" id="metaResumo">—</span>
+                {% endif %}
+            </div>
+
+            <div class="pos-excel-block">
+                <div class="pos-ordem-strip" id="ordemStrip"></div>
+                <div class="pos-panels-wrap">
+                    <div class="pos-panels" id="posPanels"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const POS_CFG = {{ pos_cfg | tojson }};
+    const MATRIZ_NUMS = Array.from(
+        { length: POS_CFG.valor_max - POS_CFG.valor_min + 1 },
+        (_, i) => POS_CFG.valor_min + i
+    );
+    const MESES_CORES = {{ meses_cores | tojson }};
+    let sorteioAtual = 1;
+    const MESES_NUM_NOME = {
+        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+        5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro',
+    };
+    let concursoAtual = null;
+
+    function fmtDez(n) {
+        const p = POS_CFG.pad_width || 2;
+        return p <= 1 ? String(n) : String(n).padStart(p, '0');
+    }
+
+    function htmlMesBadge(abrev, nome, mesNum) {
+        const mn = parseInt(mesNum, 10);
+        const nm = nome || ((mn >= 1 && mn <= 12) ? MESES_NUM_NOME[mn] : '');
+        const ab = abrev || '';
+        if (!ab) return '';
+        const cls = nm ? `mes-nome-${nm}` : '';
+        const cor = nm && MESES_CORES[nm] ? MESES_CORES[nm] : '';
+        const style = cor ? ` style="background-color:${cor}!important;color:#fff!important;"` : '';
+        return `<span class="pos-mes-badge ${cls}"${style} title="${nm || ab}">${ab}</span>`;
+    }
+
+    function renderMatrizCell(n, hitDezena) {
+        const cls = n === hitDezena ? 'pos-matrix-cell hit' : 'pos-matrix-cell';
+        return `<div class="${cls}">${fmtDez(n)}</div>`;
+    }
+
+    function renderMatriz(dezenaDestaque) {
+        return MATRIZ_NUMS.map(n => renderMatrizCell(n, dezenaDestaque)).join('');
+    }
+
+    function renderPainel(pos) {
+        return `
+        <div class="pos-panel" id="panel-pos-${pos.posicao}">
+            <div class="pos-matrix">${renderMatriz(pos.dezena)}</div>
+        </div>`;
+    }
+
+    function renderOrdemStrip(posicoes) {
+        return posicoes.map(p => `
+            <div class="pos-ordem-cell" id="ordem-cell-${p.posicao}" title="Posição ${p.posicao}">
+                <span class="pos-oc-val">${p.dezena_fmt}</span>
+            </div>
+        `).join('');
+    }
+
+    function flashAtualizacao() {
+        document.querySelectorAll('.pos-ordem-cell, .pos-panel').forEach(el => {
+            el.classList.remove('flash');
+            void el.offsetWidth;
+            el.classList.add('flash');
+        });
+    }
+
+    async function selecionarConcurso(concurso) {
+        concursoAtual = concurso;
+        document.querySelectorAll('.pos-concurso-item').forEach(btn => {
+            btn.classList.toggle('active', parseInt(btn.dataset.concurso, 10) === concurso);
+        });
+
+        try {
+            let url = `/analise/api/por-posicao/${concurso}`;
+            if (POS_CFG.duplasena) url += `?sorteio=${sorteioAtual}`;
+            const r = await fetch(url);
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Erro');
+
+            document.getElementById('posPlaceholder').style.display = 'none';
+            document.getElementById('posConteudo').style.display = 'block';
+
+            document.getElementById('metaConcurso').textContent = `#${d.concurso}`;
+            document.getElementById('metaData').textContent = d.data || '—';
+            if (POS_CFG.show_dig_soma) {
+                const digEl = document.getElementById('metaDigitos');
+                const resEl = document.getElementById('metaResumo');
+                if (digEl) digEl.textContent = d.digitos_distintos_fmt || '—';
+                if (resEl) resEl.textContent = d.resumo_dig_soma || '—';
+            }
+
+            const mesWrap = document.getElementById('metaMesWrap');
+            if (mesWrap) {
+                if (POS_CFG.extra_mes && (d.mes_abrev || d.mes_nome)) {
+                    mesWrap.innerHTML = htmlMesBadge(d.mes_abrev, d.mes_nome, d.mes_num);
+                } else {
+                    mesWrap.innerHTML = '';
+                }
+            }
+            const timeWrap = document.getElementById('metaTimeWrap');
+            if (timeWrap) {
+                if (POS_CFG.extra_time && d.time_nome) {
+                    timeWrap.innerHTML = `<span class="badge bg-dark">⚽ ${d.time_nome}</span>`;
+                } else {
+                    timeWrap.innerHTML = '';
+                }
+            }
+            const trevoWrap = document.getElementById('metaTrevoWrap');
+            if (trevoWrap) {
+                if (POS_CFG.extra_trevo && d.trevos_fmt) {
+                    trevoWrap.innerHTML = `<span class="badge bg-success">🍀 ${d.trevos_fmt.join(' ')}</span>`;
+                } else {
+                    trevoWrap.innerHTML = '';
+                }
+            }
+
+            document.getElementById('ordemStrip').innerHTML = renderOrdemStrip(d.posicoes);
+            document.getElementById('posPanels').innerHTML = d.posicoes.map(renderPainel).join('');
+            flashAtualizacao();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function renderListaConcursos(concursos) {
+        const el = document.getElementById('listaConcursos');
+        if (!concursos.length) {
+            el.innerHTML = '<div class="text-muted small p-3 text-center">Nenhum concurso no banco.</div>';
+            return;
+        }
+        el.innerHTML = concursos.map(c => {
+            const mesBadge = c.mes_abrev
+                ? htmlMesBadge(c.mes_abrev, c.mes_nome, c.mes_num)
+                : '';
+            const resumoBadge = c.resumo_dig_soma
+                ? `<span class="pos-meta-resumo">${c.resumo_dig_soma}</span>`
+                : '';
+            const ordem = (c.dezenas_ordem_fmt || c.dezenas_ordem || []).map(n => fmtDez(n)).join(' ');
+            return `<button type="button" class="pos-concurso-item" data-concurso="${c.concurso}">
+                <div class="pos-ci-linha"><span class="pos-ci-num">#${c.concurso}</span> ${c.data || '—'} ${mesBadge} ${resumoBadge}</div>
+                <div class="pos-ci-ordem">${ordem}</div>
+            </button>`;
+        }).join('');
+
+        el.querySelectorAll('.pos-concurso-item').forEach(btn => {
+            btn.addEventListener('click', () => selecionarConcurso(parseInt(btn.dataset.concurso, 10)));
+        });
+    }
+
+    async function init() {
+        try {
+            let urlConc = '/analise/api/por-posicao/concursos';
+            if (POS_CFG.duplasena) urlConc += `?sorteio=${sorteioAtual}`;
+            const r = await fetch(urlConc);
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message);
+            renderListaConcursos(d.concursos || []);
+            if (d.concursos && d.concursos.length) {
+                await selecionarConcurso(d.concursos[0].concurso);
+            }
+        } catch (e) {
+            document.getElementById('listaConcursos').innerHTML =
+                `<div class="text-danger small p-3">${e.message}</div>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const sel = document.getElementById('selSorteioPos');
+        if (sel) {
+            sel.addEventListener('change', async () => {
+                sorteioAtual = parseInt(sel.value, 10) || 1;
+                await init();
+                if (concursoAtual) await selecionarConcurso(concursoAtual);
+            });
+        }
+        init();
+    });
+</script>
+{% endblock %}

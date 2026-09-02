@@ -1,0 +1,112 @@
+Na rota http://localhost:5022/pacientes/cadastrar
+
+---Seção 'Telefone Residencial'
+ajuste o placeholder para 19 3872-2141 mascara 00 0000-0000
+
+E tbm na mesma rota adicionar o select as segintes informações...
+
+
+-------------
+## PONTOS DE EMBARQUE
+
+Implementar uma solução completa para gerenciamento e seleção de pontos de embarque, contemplando os seguintes recursos:
+
+### 1. Pontos de embarque pré-definidos
+
+* [ ] Disponibilizar no campo **Ponto de Embarque** um `select` com pontos previamente cadastrados.
+* [ ] Organizar os pontos de forma clara e fácil de localizar.
+* [ ] Permitir que novos pontos sejam adicionados posteriormente sem necessidade de alteração no código.
+
+### 2. Digitação manual
+
+* [ ] Disponibilizar a opção **"Outro / Digitar manualmente"** no `select`.
+* [ ] Quando selecionada, exibir um campo para o usuário informar o ponto de embarque.
+* [ ] Permitir endereço, nome do local ou referência, conforme a necessidade da aplicação.
+* [ ] A digitação manual não deve impedir o prosseguimento do cadastro.
+
+### 3. Inclusão automática de novos pontos
+
+Quando o usuário informar manualmente um ponto que ainda não existe:
+
+* [ ] Verificar se o ponto já está cadastrado antes de inserir.
+* [ ] Evitar duplicidades considerando diferenças de maiúsculas/minúsculas e espaços desnecessários.
+* [ ] Caso não exista, oferecer a opção de **salvar esse novo ponto como ponto pré-definido**.
+* [ ] Após o cadastro, disponibilizar imediatamente o novo ponto no `select`.
+* [ ] O novo ponto deverá ficar disponível para utilizações futuras.
+
+### 4. Pesquisa no campo de seleção
+
+* [ ] Permitir pesquisar/digitar dentro do `select`, principalmente quando houver muitos pontos cadastrados.
+* [ ] Filtrar os resultados conforme o usuário digita.
+* [ ] Exibir mensagem amigável quando nenhum ponto for encontrado.
+* [ ] Nesse caso, oferecer diretamente a possibilidade de cadastrar/informar um novo ponto.
+
+### 5. Favoritos e pontos mais utilizados
+
+Avaliar a implementação de:
+
+* [ ] **Pontos mais utilizados**, posicionados no início da lista.
+* [ ] **Pontos favoritos**, permitindo ao usuário marcar locais recorrentes.
+* [ ] Ordenação por frequência de utilização ou ordem alfabética.
+* [ ] Manter os pontos mais utilizados facilmente acessíveis.
+
+### 6. Endereço e localização
+
+Avaliar a possibilidade de permitir que o ponto seja composto por:
+
+* [ ] Nome do local.
+* [ ] Endereço.
+* [ ] Número.
+* [ ] Bairro.
+* [ ] Cidade.
+* [ ] Referência.
+* [ ] Coordenadas geográficas, quando disponíveis.
+
+Quando tecnicamente viável, avaliar integração com mapa/geolocalização para facilitar a identificação precisa do ponto de embarque.
+
+### 7. Validação e qualidade dos dados
+
+* [ ] Impedir cadastros evidentemente duplicados.
+* [ ] Normalizar espaços e diferenças de capitalização.
+* [ ] Validar campos obrigatórios.
+* [ ] Exibir mensagens claras de erro ou confirmação.
+* [ ] Evitar que um ponto digitado incorretamente seja automaticamente transformado em um ponto permanente sem confirmação do usuário.
+
+### 8. Experiência de uso
+
+Priorizar uma experiência simples:
+
+**Selecionar ponto existente → continuar**
+
+ou
+
+**Não encontrou → Digitar novo ponto → Confirmar → utilizar o ponto**
+
+O fluxo deve exigir o mínimo possível de cliques e não deve dificultar o cadastro quando o local ainda não estiver previamente cadastrado.
+
+### 9. Avaliação de outras facilidades
+
+Além dos requisitos acima, analisar funcionalidades normalmente encontradas atualmente em sistemas de transporte, logística e gestão de embarques, identificando quais poderiam agregar valor à aplicação, especialmente:
+
+* pesquisa inteligente de locais;
+* favoritos;
+* pontos mais utilizados;
+* histórico de pontos utilizados;
+* autocomplete;
+* geolocalização;
+* integração com mapas;
+* identificação de endereço por localização;
+* pontos de embarque por região/bairro;
+* possibilidade de editar ou desativar pontos cadastrados;
+* controle de pontos ativos/inativos;
+* prevenção de duplicidades;
+* sugestões automáticas de pontos;
+* responsividade e facilidade de uso em dispositivos móveis.
+
+### 10. Regra importante
+
+A implementação deve preservar o funcionamento atual da aplicação.
+
+Antes de alterar banco de dados, rotas, modelos ou componentes existentes, analisar a estrutura atual do projeto e reutilizar os mecanismos já existentes sempre que possível.
+
+Não criar funcionalidades paralelas ou duplicadas caso já exista estrutura equivalente no sistema.

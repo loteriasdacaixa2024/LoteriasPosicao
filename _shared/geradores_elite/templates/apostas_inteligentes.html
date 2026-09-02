@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+{% include 'repeticao_gerador_estilos.html' %}
+{% include 'repeticao_aposta_info_util.html' %}
+
+<style>
+    .sniper-modo-btn.active { background: var(--accent); color: #1a2600; border-color: var(--accent); font-weight: 800; }
+    .evid-box { background: var(--surface); border: 1px solid rgba(112,142,37,.2); border-radius: 10px; padding: .75rem; height: 100%; }
+    .evid-box h6 { font-size: .78rem; font-weight: 800; color: var(--primary-xdark); text-transform: uppercase; margin-bottom: .5rem; }
+    .evid-linha { display: flex; justify-content: space-between; font-size: .8rem; padding: .2rem 0; border-bottom: 1px solid rgba(0,0,0,.04); }
+    .evid-pct { font-weight: 800; color: var(--primary); }
+    .manual-panel { display: none; }
+    body.sniper-modo-manual .manual-panel { display: block; }
+    .auto-preview { display: none; }
+    body.sniper-modo-auto .auto-preview { display: block; }
+    .dez-ball.dig-quente { background: linear-gradient(135deg, #e8a317, #f0c040) !important; color: #1a2600 !important; box-shadow: 0 0 0 2px #c98500; }
+    .dez-ball.dig-frio { background: #b8d4f0 !important; color: #1a3a8b !important; }
+    .dez-ball.dig-seq-rep { box-shadow: 0 0 0 2px var(--primary); }
+    .coluna-ball-item.col-forte .col-mini-lbl { color: var(--primary-xdark); text-decoration: underline; }
+    .aposta-criterios { text-align: left; background: var(--accent-light); border-radius: 8px; padding: .5rem .65rem; color: var(--primary-dark); }
+    .aposta-criterios .crit-line::before { content: '✓ '; color: var(--primary); font-weight: 800; }
+    .rule-colunas-only, .rule-intrasorte-only, .rule-pool-only,
+    .rule-extra-mes, .rule-extra-time, .rule-extra-trevo { display: none; }
+    body.layout-colunas .rule-colunas-only,
+    body.layout-colunas .rule-intrasorte-only { display: block; }
+    body.layout-pool .rule-pool-only { display: block; }
+    body.has-extra-mes .rule-extra-mes { display: block; }
+    body.has-extra-time .rule-extra-time { display: block; }
+    body.has-extra-trevo .rule-extra-trevo { display: block; }
+</style>
+
+<div class="page-hdr">
+    <h2 class="h4 mb-1"><i class="fas fa-wand-magic-sparkles me-2"></i>{{ page_title }}</h2>
+    <p class="mb-0 small opacity-90">{{ page_subtitle }}</p>
+</div>
+
+<div class="btn-group mb-3" role="group" id="grpModoGeracao">
+    <button type="button" class="btn btn-outline-secondary sniper-modo-btn active" data-modo="automatico">
+        <i class="fas fa-robot me-1"></i>Automático
+    </button>
+    <button type="button" class="btn btn-outline-secondary sniper-modo-btn" data-modo="manual">
+        <i class="fas fa-hand-pointer me-1"></i>Manual
+    </button>
+</div>
+
+<div class="card shadow-sm mb-3 border-0" id="painelEvidencias" style="border-top:4px solid var(--accent)!important;">
+    <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
+        <i class="fas fa-chart-pie me-1"></i>Painel de evidências
+        <span class="spinner-border spinner-border-sm ms-2 d-none" id="evidLoader"></span>
+    </div>
+    <div class="card-body py-3" id="evidCorpo">
+        <p class="text-muted small mb-0">Carregando análises…</p>
+    </div>
+</div>
+
+<div class="alert auto-preview border-0 py-2" style="background:var(--accent-light);color:var(--primary-xdark);" id="autoCriteriosPreview">
+    <strong>Modo automático:</strong> <span id="autoCriteriosTxt">—</span>
+</div>
+
+<div class="card shadow-sm mb-3 border-0 manual-panel">
+    <div class="card-header fw-bold py-2 small" style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <i class="fas fa-sliders me-1"></i>Regras manuais
+    </div>
+    <div class="card-body py-3">
+        <div class="row g-2">
+            <div class="col-md-6">
+                <div class="form-check"><input class="form-check-input reg-manual" type="checkbox" id="regRepeticao" checked data-k="usar_repeticao"><label class="form-check-label small" for="regRepeticao">Utilizar repetição</label></div>
+                <div class="form-check rule-intrasorte-only"><input class="form-check-input reg-manual" type="checkbox" id="regDupla" data-k="usar_dupla"><label class="form-check-label small" for="regDupla">Utilizar dupla</label></div>
+                <div class="form-check rule-intrasorte-only"><input class="form-check-input reg-manual" type="checkbox" id="regTrinca" data-k="usar_trinca"><label class="form-check-label small" for="regTrinca">Utilizar trinca</label></div>
+                <div class="form-check"><input class="form-check-input reg-manual" type="checkbox" id="regQuentes" checked data-k="usar_numeros_quentes"><label class="form-check-label small" for="regQuentes">Utilizar números quentes</label></div>
+                <div class="form-check"><input class="form-check-input reg-manual" type="checkbox" id="regFrios" data-k="usar_numeros_frios"><label class="form-check-label small" for="regFrios">Utilizar números frios</label></div>
+                <div class="form-check rule-pool-only"><input class="form-check-input reg-manual" type="checkbox" id="regPermanencia" data-k="usar_permanencia"><label class="form-check-label small" for="regPermanencia">Tendência de permanência</label></div>
+                <div class="form-check rule-pool-only"><input class="form-check-input reg-manual" type="checkbox" id="regPosicional" data-k="usar_posicional"><label class="form-check-label small" for="regPosicional">Repetição posicional</label></div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check rule-colunas-only"><input class="form-check-input reg-manual" type="checkbox" id="regColForte" checked data-k="usar_colunas_fortes"><label class="form-check-label small" for="regColForte">Colunas / posições mais fortes</label></div>
+                <div class="form-check rule-colunas-only"><input class="form-check-input reg-manual" type="checkbox" id="regColFraca" data-k="usar_colunas_fracas"><label class="form-check-label small" for="regColFraca">Colunas mais fracas</label></div>
+                <div class="form-check"><input class="form-check-input reg-manual" type="checkbox" id="regAtraso" checked data-k="usar_atraso"><label class="form-check-label small" for="regAtraso">Utilizar atraso</label></div>
+                <div class="form-check rule-colunas-only"><input class="form-check-input reg-manual" type="checkbox" id="regSequencial" checked data-k="usar_sequencial"><label class="form-check-label small" for="regSequencial">Repetição sequencial</label></div>
+                <div class="form-check"><input class="form-check-input reg-manual" type="checkbox" id="regUltimoPar" checked data-k="usar_ultimo_par"><label class="form-check-label small" for="regUltimoPar">Último par de concursos</label></div>
+                <div class="form-check rule-pool-only"><input class="form-check-input reg-manual" type="checkbox" id="regParImpar" checked data-k="usar_par_impar"><label class="form-check-label small" for="regParImpar">Respeitar par/ímpar</label></div>
+                <div class="form-check rule-colunas-only"><input class="form-check-input reg-manual" type="checkbox" id="regPares" data-k="usar_pares_colunas"><label class="form-check-label small" for="regPares">Par de colunas (sinergia)</label></div>
+                <div class="form-check rule-extra-mes"><input class="form-check-input reg-manual" type="checkbox" id="regMes" data-k="usar_mes"><label class="form-check-label small" for="regMes">Mês da sorte</label></div>
+                <div class="form-check rule-extra-time"><input class="form-check-input reg-manual" type="checkbox" id="regTime" data-k="usar_time"><label class="form-check-label small" for="regTime">Time do coração</label></div>
+                <div class="form-check rule-extra-trevo"><input class="form-check-input reg-manual" type="checkbox" id="regTrevos" data-k="usar_trevos"><label class="form-check-label small" for="regTrevos">Trevos</label></div>
+            </div>
+        </div>
+        <div class="row g-2 mt-2 rule-intrasorte-only">
+            <div class="col-md-4">
+                <label class="form-label small mb-0">Tipo alvo (opcional)</label>
+                <select class="form-select form-select-sm" id="selTipoManual">
+                    <option value="">Qualquer</option>
+                    <option value="1_dupla">1 dupla</option>
+                    <option value="2_duplas">2 duplas</option>
+                    <option value="1_trinca">1 trinca</option>
+                    <option value="0_repeticao">Todos únicos</option>
+                </select>
+            </div>
+            <div class="col-md-4 rule-colunas-only">
+                <label class="form-label small mb-0">Par de colunas</label>
+                <select class="form-select form-select-sm" id="selParManual" disabled><option value="">—</option></select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small mb-0" id="lblFoco">Dezena foco</label>
+                <select class="form-select form-select-sm" id="selDigitoManual">
+                    <option value="">Automático</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'repeticao_analise_dom_stub.html' %}
+{% include 'repeticao_gerador_card.html' %}
+<script>window.__REP_API_BASE__ = '{{ api_base }}';</script>
+<script>window.__REP_SNIPER_INTELIGENTE__ = true;</script>
+<script>window.__INTELIGENTE_UI__ = {{ inteligente_ui | tojson }};</script>
+<script>window.__REP_EXTRA_UI__ = { meses_cores: {{ meses_cores | tojson }} };</script>
+{% include 'repeticao_gerador_page_script.html' %}
+{% include 'apostas_inteligentes_script.html' %}
+{% endblock %}

@@ -1,0 +1,1382 @@
+<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const UI = window.__COMPORTAMENTO_UI__ || {};
+    const API_BASE = window.__REP_API_BASE__ || '/geradores-elite/api/comportamento';
+    const INDICADORES = UI.indicadores || ['PA','IM','PR','RT','MO','SQ','M3','FB'];
+    const IND_LABELS = UI.indicador_labels || {};
+    const SORTEADAS = UI.sorteadas || CFG.sorteadas || UI.dezenas_default || CFG.dezenas_default || 7;
+    const DEZ_DEFAULT = UI.dezenas_default || CFG.dezenas_default || SORTEADAS;
+    const POOL_PANORAMA = UI.pool_panorama || CFG.pool_panorama || 16;
+    const UNIVERSO_MAX = UI.universo || CFG.dezena_max || UI.total_dezenas || 60;
+    const DEZENA_MIN = UI.dezena_min != null ? UI.dezena_min : (CFG.dezena_min != null ? CFG.dezena_min : 1);
+    let janelaAtual = UI.janela_default ?? ((UI.janelas && UI.janelas.length) ? UI.janelas[0] : 10);
+    const MESES_ABREV = {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+    const MESES_NOME_NUM = {
+        1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',
+        7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'
+    };
+    const MESES_CORES = window.__MESES_CORES__ || {};
+    const BASE_LABELS = {
+        geral: 'Geral',
+        vencedores: 'Concursos com Vencedores',
+        acumulados: 'Concursos Acumulados',
+    };
+    const COLECAO_KEY = 'comportamento_colecao_ds';
+
+    function nomeMesRow(row) {
+        const num = row.mes_num != null ? row.mes_num : row.MS;
+        return row.mes_nome || MESES_NOME_NUM[num] || '';
+    }
+
+    function badgeMesAbrev(row) {
+        const nome = nomeMesRow(row);
+        const num = row.mes_num != null ? row.mes_num : row.MS;
+        const abrev = row.mes_abrev || MESES_ABREV[num] || '';
+        if (!abrev) return '';
+        const clsMes = nome ? `mes-nome-${nome}` : '';
+        return `<span class="mes-abrev-badge ${clsMes}">${abrev}</span>`;
+    }
+
+    function htmlConcursoCol(row) {
+        return window.ComportamentoColConcurso?.html(row, {
+            showMes: !!CFG.extra_mes,
+            badgeMes: badgeMesAbrev,
+        }) || `#${row.concurso}`;
+    }
+
+    function fmtConcursoMes(row) {
+        return htmlConcursoCol(row);
+    }
+
+    function mesAbrevAposta(a) {
+        const num = a.mes_num != null ? a.mes_num : a.mes;
+        if (!num || !CFG.extra_mes) return '';
+        return a.mes_abrev || MESES_ABREV[num] || '';
+    }
+
+    function fmtLinhaDezenasMes(a) {
+        const pad = (n) => (window.__repPadDezena ? window.__repPadDezena(n, CFG) : String(n).padStart(2, '0'));
+        const dez = (a.dezenas || []).map(pad).join(' ');
+        const ab = mesAbrevAposta(a);
+        return ab ? `${dez} ${ab}` : dez;
+    }
+
+    function mesHtmlAposta(a) {
+        if (!(CFG.extra_mes && (a.mes || a.mes_num))) return '';
+        const num = a.mes_num != null ? a.mes_num : a.mes;
+        const nome = a.mes_nome || MESES_NOME_NUM[num] || '';
+        const abrev = mesAbrevAposta(a);
+        if (!abrev) return '';
+        const clsMes = nome ? `mes-nome-${nome}` : '';
+        return `<span class="mes-abrev-badge ${clsMes}">${abrev}</span>`;
+    }
+
+    function escAttr(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    }
+
+    function fmtModaInline(moda, pct) {
+        if (moda == null || moda === undefined) return '—';
+        if (pct != null && pct !== '') return `${moda}<span class="moda-inline-pct">${pct}%</span>`;
+        return String(moda);
+    }
+
+    function fmtIndicadorCell(row, c) {
+        const val = row[c] != null ? row[c] : '—';
+        const cls = `comp-ind${filtrosAtivos[c] === row[c] ? ' fw-bold text-primary' : ''}`;
+        if (CFG.extra_time && c === 'TM' && row.time_nome) {
+            return `<td class="${cls} tm-cell-tip" title="${escAttr(row.time_nome)}" data-bs-toggle="tooltip" data-bs-placement="top">${val}</td>`;
+        }
+        return `<td class="${cls}">${val}</td>`;
+    }
+
+    function initTmTooltips() {
+        if (!window.bootstrap) return;
+        document.querySelectorAll('#tbodyComportamento [data-bs-toggle="tooltip"]').forEach(el => {
+            const old = bootstrap.Tooltip.getInstance(el);
+            if (old) old.dispose();
+            new bootstrap.Tooltip(el, { trigger: 'hover', delay: { show: 300, hide: 80 } });
+        });
+    }
+
+    let baseAtual = 'geral';
+    let metaBases = UI.meta_bases || null;
+    let basePanorama = 'geral';
+    let rankPanorama = 1;
+    let rankPanoramaGerado = null;
+    let rankPanoramaGeradoLabel = '';
+    let panoramaDataGer = null;
+    const alvoMax = UI.dezenas_max || CFG.dezenas_max || UI.pick_max || CFG.pick_max || 15;
+    let modoGeracao = 'automatico';
+    let compData = null;
+    let filtrosAtivos = {};
+    let ultimasApostas = [];
+    const apostasPorBase = {
+        geral: [], vencedores: [], acumulados: [],
+        panorama_geral: [], panorama_vencedores: [], panorama_acumulados: [],
+        linhas: [],
+    };
+    let colecaoExport = [];
+    let concursosLista = [];
+    let concursoConf = null;
+    let exibicaoApostas = 'hibrido';
+    let modoMotor = UI.motor_default || 'perfil_sorteio';
+    let baseLinhas = 'geral';
+    let janelaLinhas = 0;
+    let topNLinhas = 3;
+    let modoPesoLinhas = 'frequencia';
+    let linhasDataGer = null;
+
+    const MOTOR_EXPLICACOES = {
+        perfil_sorteio: {
+            resumo: `Cada aposta tenta reproduzir o comportamento <strong>real</strong> de um concurso da tabela (${SORTEADAS} dezenas sorteadas por concurso). O <strong>último concurso é ignorado</strong> na geração.`,
+            detalhes: [
+                'A <strong>1ª aposta</strong> usa o perfil do <strong>penúltimo</strong> concurso; a 2ª do antepenúltimo; e assim por diante (até a janela escolhida).',
+                'As <strong>dezenas são novas</strong>, mas PA, IM, PR, RT, MO, SQ, M3 e FB buscam igualar o perfil histórico copiado.',
+                '<strong>RT</strong> no perfil real usa o concurso anterior ao perfil copiado (como no histórico daquele sorteio).',
+            ],
+        },
+        hibrido: {
+            resumo: 'Alterna entre <strong>perfil real</strong> (ímpares: penúltimo em diante) e <strong>moda</strong> (pares), sem usar o último concurso nos perfis.',
+            detalhes: [
+                'Aposta 1, 3, 5… → perfil de um concurso real (a partir do penúltimo).',
+                'Aposta 2, 4, 6… → resumo estatístico (moda) dos concursos usados na geração.',
+                'Combine histórico concreto com tendência geral.',
+            ],
+        },
+        moda: {
+            resumo: 'Usa o <strong>resumo</strong> da janela (valor mais frequente de cada indicador), não um concurso específico.',
+            detalhes: [
+                'Indicadores alvo = moda observada nos sorteios do período.',
+                'Útil quando quer tendência geral, não um perfil de concurso único.',
+            ],
+        },
+    };
+
+    const LEGENDA_EXIBICAO = window.__repLegendaExibicao ? window.__repLegendaExibicao(CFG) : {
+        numeros: 'Somente a lista linear em bolinhas.',
+        volante: 'Somente a grade do volante.',
+        hibrido: 'Lista em bolinhas e grade do volante juntas.',
+    };
+
+    function apiPath(suffix) {
+        return `${API_BASE}${suffix}`;
+    }
+
+    function buildAnaliseQuery() {
+        const p = new URLSearchParams({ janela: String(janelaAtual), base: baseAtual });
+        Object.entries(filtrosAtivos).forEach(([k, v]) => p.set(k, String(v)));
+        return p.toString();
+    }
+
+    function isModoPanorama() {
+        return baseAtual === 'panorama';
+    }
+
+    function isModoLinhas() {
+        return baseAtual === 'linhas';
+    }
+
+    function chaveApostasAtual() {
+        if (isModoPanorama()) return `panorama_${basePanorama}`;
+        if (isModoLinhas()) return 'linhas';
+        return baseAtual;
+    }
+
+    function labelApostasAtual() {
+        if (isModoPanorama()) {
+            return `Panorama Top-3 — ${BASE_LABELS[basePanorama] || basePanorama}`;
+        }
+        if (isModoLinhas()) {
+            return `Linhas L1–L10 — ${BASE_LABELS[baseLinhas] || baseLinhas}`;
+        }
+        return BASE_LABELS[baseAtual] || baseAtual;
+    }
+
+    function rankClass(pos) {
+        if (pos === 1) return 'top1';
+        if (pos === 2) return 'top2';
+        if (pos === 3) return 'top3';
+        return '';
+    }
+
+    function renderCelulaMatriz(row) {
+        if (!row) return '<td class="panorama-cel-vazia">—</td>';
+        const rc = rankClass(row.ranking);
+        return `<td class="panorama-cel">
+            <div class="panorama-cel-val ${rc}">${row.valor_label}</div>
+            <div class="panorama-cel-meta">${row.ocorrencias} · ${row.percentual}%</div>
+        </td>`;
+    }
+
+    const RANK_LABELS = { 1: '1º ranking', 2: '2º ranking', 3: '3º ranking' };
+
+    function labelRankPanorama(r) {
+        return RANK_LABELS[r] || `${r}º ranking`;
+    }
+
+    function renderMatrizPanorama(inds, rankDestaque, rankUsadoGeracao) {
+        const rd = rankDestaque || rankPanorama;
+        const rg = rankUsadoGeracao != null ? rankUsadoGeracao : rankPanoramaGerado;
+        const maxRank = 3;
+        const mapRank = {};
+        inds.forEach(ind => {
+            mapRank[ind.codigo] = {};
+            (ind.ranking || []).forEach(row => { mapRank[ind.codigo][row.ranking] = row; });
+        });
+        const headCols = inds.map(ind =>
+            `<th class="text-center panorama-col-hdr" title="${ind.label}">
+                <span class="sigla">${ind.codigo}</span>
+                <span class="legenda d-block">${ind.label}</span>
+            </th>`
+        ).join('');
+        const bodyRows = [];
+        for (let r = 1; r <= maxRank; r++) {
+            const selCls = r === rd ? ' rank-selecionado' : '';
+            const gerCls = rg && r === rg ? ' rank-gerado' : '';
+            bodyRows.push(`<tr class="${r <= 3 ? 'linha-top' : ''}${selCls}${gerCls}" data-rank-linha="${r}">
+                <td class="panorama-rank-col ${rankClass(r)}">${r}º</td>
+                ${inds.map(ind => renderCelulaMatriz(mapRank[ind.codigo]?.[r])).join('')}
+            </tr>`);
+        }
+        return `<div class="table-responsive">
+            <table class="table table-sm table-bordered panorama-matriz mb-0">
+                <thead><tr><th class="panorama-rank-col">Rank</th>${headCols}</tr></thead>
+                <tbody>${bodyRows.join('')}</tbody>
+            </table>
+        </div>`;
+    }
+
+    function renderPanoramaGerador(data) {
+        const corpo = document.getElementById('panoramaIndCorpoGer');
+        const concl = document.getElementById('panoramaConclusoesGer');
+        const lblBase = document.getElementById('lblPanoramaBaseGer');
+        const lblTotal = document.getElementById('lblPanoramaTotalGer');
+        const critTxt = document.getElementById('panoramaCriteriosTxt');
+        if (!corpo) return;
+
+        if (!data?.sucesso) {
+            corpo.innerHTML = `<p class="text-danger small mb-0">${data?.erro || 'Erro ao carregar panorama.'}</p>`;
+            return;
+        }
+
+        panoramaDataGer = data;
+        const pan = data.panorama || {};
+        const lbl = data.base_label || BASE_LABELS[basePanorama] || basePanorama;
+        if (lblBase) lblBase.textContent = lbl;
+        if (lblTotal) lblTotal.textContent = `${pan.total_concursos || 0} concursos`;
+
+        const inds = pan.indicadores || [];
+        if (!inds.length) {
+            corpo.innerHTML = '<p class="text-muted small mb-0">Sem dados para panorama.</p>';
+            return;
+        }
+
+        if (concl) {
+            if (pan.aviso_mes) {
+                concl.innerHTML = `<div class="alert alert-warning py-2 small mb-0">${pan.aviso_mes}</div>`;
+            } else {
+                concl.innerHTML = '';
+            }
+        }
+        corpo.innerHTML = renderMatrizPanorama(inds, rankPanorama, rankPanoramaGerado);
+
+        if (critTxt) {
+            critTxt.textContent = rankPanoramaGerado
+                ? (rankPanoramaGeradoLabel || labelRankPanorama(rankPanoramaGerado))
+                : labelRankPanorama(rankPanorama);
+        }
+        const hint = document.getElementById('lblRankPanoramaHint');
+        if (hint) hint.textContent = '';
+    }
+
+    function atualizarRankPanoramaUI() {
+        const sel = document.getElementById('selRankPanorama');
+        if (sel) sel.value = String(rankPanorama);
+        if (panoramaDataGer?.sucesso) renderPanoramaGerador(panoramaDataGer);
+    }
+
+    async function carregarPanoramaGerador() {
+        const corpo = document.getElementById('panoramaIndCorpoGer');
+        if (corpo) corpo.innerHTML = '<p class="text-muted small mb-0">Carregando panorama…</p>';
+        try {
+            const r = await fetch(`${apiPath('/panorama-indicadores')}?base=${encodeURIComponent(basePanorama)}`);
+            const data = await r.json();
+            renderPanoramaGerador(data);
+            if (window.PanoramaModos) {
+                PanoramaModos.onPanoramaRefresh(basePanorama, rankPanorama);
+            }
+            const avisoEl = document.getElementById('avisoPanoramaGerador');
+            if (avisoEl) {
+                const msg = data.aviso_base || data.panorama?.aviso_mes || null;
+                if (msg) { avisoEl.textContent = msg; avisoEl.classList.remove('d-none'); }
+                else avisoEl.classList.add('d-none');
+            }
+        } catch (e) {
+            if (corpo) corpo.innerHTML = `<p class="text-danger small">${e.message}</p>`;
+        }
+    }
+
+    function syncJanelaLinhasUI() {
+        document.querySelectorAll('#grpJanelaLinhas .linhas-janela-btn').forEach(b => {
+            b.classList.toggle('active', parseInt(b.dataset.janela, 10) === janelaLinhas);
+        });
+    }
+
+    function atualizarCriteriosLinhasTxt() {
+        const el = document.getElementById('linhasCriteriosTxt');
+        if (!el) return;
+        const pesoLbl = {
+            frequencia: 'peso por frequência',
+            uniforme: 'peso uniforme no Top-N',
+            so_top1: 'somente 1º lugar',
+        }[modoPesoLinhas] || modoPesoLinhas;
+        const topLbl = modoPesoLinhas === 'so_top1' ? '1º lugar' : `Top ${topNLinhas}`;
+        el.textContent = `${topLbl} · ${pesoLbl} · ${BASE_LABELS[baseLinhas] || baseLinhas}`;
+    }
+
+    function renderRankingLinhas(data) {
+        const topo = document.getElementById('linhasRankingTopo');
+        const corpo = document.getElementById('linhasRankingCorpo');
+        const lblBase = document.getElementById('lblLinhasBase');
+        const lblTotal = document.getElementById('lblLinhasTotal');
+        if (!corpo) return;
+
+        if (!data?.sucesso) {
+            linhasDataGer = null;
+            corpo.innerHTML = `<p class="text-danger small mb-0">${data?.erro || 'Erro ao carregar ranking.'}</p>`;
+            if (topo) topo.innerHTML = '';
+            return;
+        }
+        linhasDataGer = data;
+        const freq = [...(data.frequencia_linhas || [])].sort(
+            (a, b) => (b.ocorrencias || 0) - (a.ocorrencias || 0)
+            || String(a.linha || '').localeCompare(String(b.linha || ''))
+        );
+        freq.forEach((r, i) => { r.posicao = i + 1; });
+
+        if (lblBase) lblBase.textContent = data.base_label || BASE_LABELS[baseLinhas] || baseLinhas;
+        if (lblTotal) {
+            const tot = data.total_concursos != null ? data.total_concursos : freq.reduce((s, r) => s + (r.ocorrencias || 0), 0);
+            lblTotal.textContent = `${tot} concursos`;
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+        const labels = ['1º lugar', '2º lugar', '3º lugar'];
+        if (topo) {
+            topo.innerHTML = `<div class="row g-2 justify-content-center">${freq.slice(0, 3).map((r, i) => `
+                <div class="col-12 col-sm-4">
+                    <div class="border rounded p-2 h-100 text-center" style="background:#fff;">
+                        <div class="small fw-bold text-muted">${medals[i]} ${labels[i]}</div>
+                        <div class="fs-4 fw-bold" style="color:var(--primary-xdark)">${r.linha}</div>
+                        <div class="small text-muted">${r.label || ''}</div>
+                        <div class="small"><strong>${r.ocorrencias || 0}</strong> · ${r.pct != null ? r.pct + '%' : '—'}</div>
+                    </div>
+                </div>`).join('')}</div>`;
+        }
+
+        if (!freq.length) {
+            corpo.innerHTML = '<p class="text-muted small mb-0">Sem dados de ranking.</p>';
+            return;
+        }
+        const lim = modoPesoLinhas === 'so_top1' ? 1 : topNLinhas;
+        corpo.innerHTML = `<div class="table-responsive"><table class="table table-sm table-bordered panorama-matriz mb-0">
+            <thead><tr>
+                <th class="panorama-rank-col">Pos.</th>
+                <th>Linha</th>
+                <th>Faixa</th>
+                <th class="text-center">Ocorr.</th>
+                <th class="text-center">%</th>
+                <th class="text-center">Na geração</th>
+            </tr></thead>
+            <tbody>${freq.map((r, i) => {
+                const pos = r.posicao || (i + 1);
+                const medal = pos <= 3 ? `${medals[pos - 1]} ` : '';
+                const usada = pos <= lim;
+                return `<tr class="${usada ? 'linha-top' : ''}">
+                    <td class="panorama-rank-col ${rankClass(pos)}">${medal}${pos}º</td>
+                    <td class="fw-bold">${r.linha}</td>
+                    <td class="small text-muted">${r.label || '—'}</td>
+                    <td class="text-center">${r.ocorrencias || 0}</td>
+                    <td class="text-center">${r.pct != null ? r.pct + '%' : '—'}</td>
+                    <td class="text-center">${usada ? '✓' : '—'}</td>
+                </tr>`;
+            }).join('')}</tbody>
+        </table></div>`;
+        atualizarCriteriosLinhasTxt();
+    }
+
+    async function carregarRankingLinhas() {
+        const corpo = document.getElementById('linhasRankingCorpo');
+        if (corpo) corpo.innerHTML = '<p class="text-muted small mb-0">Carregando ranking…</p>';
+        try {
+            const url = `/analise/api/linhas-universo/analise?janela=${janelaLinhas}&base=${encodeURIComponent(baseLinhas)}`;
+            const r = await fetch(url);
+            const data = await r.json();
+            renderRankingLinhas(data);
+        } catch (e) {
+            if (corpo) corpo.innerHTML = `<p class="text-danger small">${e.message}</p>`;
+        }
+    }
+
+    function mostrarAvisoBase(msg) {
+        const el = document.getElementById('avisoBaseGerador');
+        if (!el) return;
+        if (msg) {
+            el.textContent = msg;
+            el.classList.remove('d-none');
+        } else {
+            el.classList.add('d-none');
+        }
+    }
+
+    function atualizarLblBase() {
+        const lbl = document.getElementById('lblBaseAtiva');
+        if (lbl) lbl.textContent = BASE_LABELS[baseAtual] || baseAtual;
+    }
+
+    function salvarColecaoStorage() {
+        try {
+            sessionStorage.setItem(COLECAO_KEY, JSON.stringify(colecaoExport));
+        } catch (e) { /* ignore */ }
+    }
+
+    function carregarColecaoStorage() {
+        try {
+            const raw = sessionStorage.getItem(COLECAO_KEY);
+            colecaoExport = raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            colecaoExport = [];
+        }
+        renderColecao();
+    }
+
+    function renderColecao() {
+        const el = document.getElementById('colecaoCorpo');
+        const btnExp = document.getElementById('btnExportComposto');
+        if (!el) return;
+        if (!colecaoExport.length) {
+            el.innerHTML = '<span class="text-muted">Coleção vazia.</span>';
+            if (btnExp) btnExp.disabled = true;
+            return;
+        }
+        if (btnExp) btnExp.disabled = false;
+        el.innerHTML = colecaoExport.map((it, i) => {
+            const linha = fmtLinhaDezenasMes({
+                dezenas: it.dezenas,
+                mes: it.mes,
+                mes_num: it.mes_num,
+                mes_abrev: it.mes_abrev,
+            });
+            return `<div class="colecao-item"><strong>${i + 1}.</strong> ${it.base_label} — ${linha}</div>`;
+        }).join('');
+    }
+
+    function adicionarAColecao() {
+        if (!ultimasApostas.length) {
+            alert('Gere apostas na aba atual antes de adicionar à coleção.');
+            return;
+        }
+        const label = labelApostasAtual();
+        ultimasApostas.forEach(a => {
+            colecaoExport.push({
+                base: chaveApostasAtual(),
+                base_label: label,
+                dezenas: a.dezenas,
+                mes: a.mes,
+                mes_num: a.mes,
+                mes_nome: a.mes_nome,
+                mes_abrev: mesAbrevAposta(a),
+                texto: fmtLinhaDezenasMes(a),
+            });
+        });
+        salvarColecaoStorage();
+        renderColecao();
+    }
+
+    async function exportarComposto() {
+        if (!colecaoExport.length) return;
+        try {
+            const r = await fetch(apiPath('/export-composto'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itens: colecaoExport }),
+            });
+            const data = await r.json();
+            if (!data.sucesso) {
+                alert(data.erro || 'Erro ao exportar');
+                return;
+            }
+            const blob = new Blob([data.texto], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${CFG.key || 'modalidade'}_comportamento_composto_${Date.now()}.txt`;
+            a.click();
+        } catch (e) {
+            alert(e.message || e);
+        }
+    }
+
+    function aplicarVisibilidadeModo() {
+        const painelBase = document.getElementById('painelModoBase');
+        const painelPan = document.getElementById('painelModoPanorama');
+        const painelLinhas = document.getElementById('painelModoLinhas');
+        if (painelBase) painelBase.classList.toggle('d-none', isModoPanorama() || isModoLinhas());
+        if (painelPan) painelPan.classList.toggle('d-none', !isModoPanorama());
+        if (painelLinhas) painelLinhas.classList.toggle('d-none', !isModoLinhas());
+    }
+
+    function trocarBase(novaBase) {
+        apostasPorBase[chaveApostasAtual()] = ultimasApostas.slice();
+        baseAtual = novaBase;
+        ultimasApostas = (apostasPorBase[chaveApostasAtual()] || []).slice();
+        aplicarVisibilidadeModo();
+        if (isModoLinhas()) {
+            window.ComportamentoBasesResumo?.render(metaBases, baseLinhas);
+            syncJanelaLinhasUI();
+            carregarRankingLinhas();
+            atualizarCriteriosLinhasTxt();
+        } else if (!isModoPanorama()) {
+            atualizarLblBase();
+            filtrosAtivos = {};
+            window.ComportamentoBasesResumo?.render(metaBases, novaBase);
+            carregarAnalise();
+        } else {
+            window.ComportamentoBasesResumo?.render(metaBases, basePanorama);
+            carregarPanoramaGerador();
+        }
+        document.getElementById('btnAddColecao').disabled = !ultimasApostas.length;
+        renderApostas(ultimasApostas);
+    }
+
+    function trocarBasePanorama(novaBase) {
+        apostasPorBase[chaveApostasAtual()] = ultimasApostas.slice();
+        basePanorama = novaBase;
+        ultimasApostas = (apostasPorBase[chaveApostasAtual()] || []).slice();
+        document.querySelectorAll('#tabsPanoramaBase .panorama-tab-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.pbase === novaBase);
+        });
+        window.ComportamentoBasesResumo?.render(metaBases, novaBase);
+        carregarPanoramaGerador();
+        document.getElementById('btnAddColecao').disabled = !ultimasApostas.length;
+        renderApostas(ultimasApostas);
+    }
+
+    function atualizarExplicacaoMotor() {
+        const info = MOTOR_EXPLICACOES[modoMotor] || MOTOR_EXPLICACOES.perfil_sorteio;
+        const el = document.getElementById('motorExplicacao');
+        const ul = document.getElementById('motorDetalhes');
+        if (el) el.innerHTML = info.resumo;
+        if (ul) ul.innerHTML = info.detalhes.map(t => `<li>${t}</li>`).join('');
+    }
+
+    function setModoBody(m) {
+        modoGeracao = m;
+        document.body.classList.toggle('sniper-modo-auto', m === 'automatico');
+        document.body.classList.toggle('sniper-modo-manual', m === 'manual');
+        document.body.classList.toggle('sniper-modo-resumo', m === 'resumo_geral');
+        document.querySelectorAll('.sniper-modo-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.modo === m);
+        });
+    }
+
+    function renderRegrasManuais(alvos) {
+        const el = document.getElementById('painelRegrasManuais');
+        if (!el) return;
+        el.innerHTML = INDICADORES.map(cod => {
+            const lbl = IND_LABELS[cod] || cod;
+            const alvo = alvos?.[cod] ?? '';
+            return `<div class="col-6 col-md-4 col-lg-3">
+                <div class="form-check mb-1">
+                    <input class="form-check-input reg-manual" type="checkbox" id="reg${cod}" data-k="usar_${cod}" checked>
+                    <label class="form-check-label small" for="reg${cod}">${lbl} (${cod})</label>
+                </div>
+                <input type="number" class="form-control form-control-sm reg-alvo" id="alvo${cod}" data-cod="${cod}"
+                    value="${alvo}" min="0" max="${cod === 'MS' ? 12 : alvoMax}" title="Valor alvo">
+            </div>`;
+        }).join('');
+    }
+
+    function renderEvidencias(ev) {
+        const el = document.getElementById('evidCorpo');
+        if (!el || !ev) return;
+        const inds = ev.indicadores || [];
+        const chunks = [];
+        for (let i = 0; i < inds.length; i += 4) {
+            const slice = inds.slice(i, i + 4);
+            const html = slice.map(it => {
+                const dist = Object.entries(it.distribuicao || {})
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 4)
+                    .map(([v, n]) => `${v}(${n})`)
+                    .join(' · ');
+                return `<div class="col-md-6 col-lg-3">
+                    <div class="evid-box">
+                        <h6>${it.label} (${it.codigo})</h6>
+                        <div class="evid-linha"><span>Moda</span><span class="evid-pct">${fmtModaInline(it.moda, it.moda_pct)}</span></div>
+                        <div class="evid-linha"><span>Média</span><span class="evid-pct">${it.media}</span></div>
+                        <div class="evid-linha"><span>Último</span><span class="evid-pct">${it.ultimo}</span></div>
+                        <div class="evid-linha"><span>Alvo gerador</span><span class="evid-pct">${it.alvo}</span></div>
+                        <div class="small text-muted mt-1">${dist || '—'}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            chunks.push(`<div class="row g-2 mb-2">${html}</div>`);
+        }
+        el.innerHTML = chunks.join('') +
+            `<p class="small text-muted mb-0 mt-2">${ev.base_label || BASE_LABELS[baseAtual] || ''} · ${ev.janela_label || ''} · ` +
+            `${ev.total_janela || 0} sorteios · ${ev.total_concursos_base ?? ev.total_concursos ?? 0} na base` +
+            (Object.keys(filtrosAtivos).length ? ` · ${ev.linhas_filtradas_count || 0} após filtros` : '') +
+            `</p>`;
+    }
+
+    function atualizarFiltrosBar() {
+        const bar = document.getElementById('filtrosAtivosBar');
+        const keys = Object.keys(filtrosAtivos);
+        document.querySelectorAll('.comp-tabela th[data-ind]').forEach(th => {
+            const ind = th.dataset.ind;
+            th.classList.toggle('filtro-ativo', filtrosAtivos[ind] != null);
+            const old = th.querySelector('.filtro-badge');
+            if (old) old.remove();
+            if (filtrosAtivos[ind] != null) {
+                const b = document.createElement('span');
+                b.className = 'filtro-badge';
+                b.textContent = filtrosAtivos[ind];
+                th.appendChild(b);
+            }
+        });
+        if (!keys.length) {
+            bar.innerHTML = '<span class="text-muted small">Clique no cabeçalho de uma coluna para filtrar. ' +
+                '<button type="button" class="btn btn-link btn-sm p-0" id="btnLimparFiltros" disabled>Limpar</button></span>';
+            return;
+        }
+        bar.innerHTML = '<span class="small fw-bold me-2">Filtros:</span>' +
+            keys.map(k => `<span class="badge bg-primary me-1">${k}=${filtrosAtivos[k]}</span>`).join('') +
+            ' <button type="button" class="btn btn-link btn-sm" id="btnLimparFiltros">Limpar filtros</button>';
+        document.getElementById('btnLimparFiltros')?.addEventListener('click', () => {
+            filtrosAtivos = {};
+            carregarAnalise();
+        });
+    }
+
+    function initTooltipsInd() {
+        if (!window.bootstrap) return;
+        document.querySelectorAll('.comp-tabela th.comp-ind[title]').forEach(el => {
+            const old = bootstrap.Tooltip.getInstance(el);
+            if (old) old.dispose();
+            new bootstrap.Tooltip(el, { trigger: 'hover', delay: { show: 400, hide: 100 } });
+        });
+    }
+
+    function renderTabela(linhas) {
+        const tb = document.getElementById('tbodyComportamento');
+        const cnt = document.getElementById('histContador');
+        if (!tb) return;
+        const vis = linhas || [];
+        if (cnt) cnt.textContent = `${vis.length} sorteios`;
+        tb.innerHTML = vis.map(row => {
+            const cells = INDICADORES.map(c => fmtIndicadorCell(row, c)).join('');
+            return `<tr data-concurso="${row.concurso}">
+                <td class="comp-col-concurso">${htmlConcursoCol(row)}</td>
+                <td class="text-muted small">${row.data || ''}</td>${cells}</tr>`;
+        }).join('');
+        atualizarFiltrosBar();
+        initTmTooltips();
+    }
+
+    function filtrarLinhasLocal(linhas) {
+        if (!Object.keys(filtrosAtivos).length) return linhas;
+        return (linhas || []).filter(row =>
+            Object.entries(filtrosAtivos).every(([k, v]) => row[k] === v)
+        );
+    }
+
+    function abrirChipPanel(th, ind, dist) {
+        document.querySelectorAll('.comp-chip-panel').forEach(p => p.remove());
+        const panel = document.createElement('div');
+        panel.className = 'comp-chip-panel aberto';
+        const rect = th.getBoundingClientRect();
+        panel.style.top = `${rect.bottom + window.scrollY + 4}px`;
+        panel.style.left = `${rect.left + window.scrollX}px`;
+        const tit = document.createElement('div');
+        tit.className = 'small fw-bold mb-1';
+        tit.textContent = `${IND_LABELS[ind] || ind} — filtrar`;
+        panel.appendChild(tit);
+        Object.entries(dist).sort((a, b) => b[1] - a[1]).forEach(([val, qtd]) => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'comp-chip' + (filtrosAtivos[ind] === parseInt(val, 10) ? ' ativo' : '');
+            chip.textContent = `${val} (${qtd})`;
+            chip.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const v = parseInt(val, 10);
+                if (filtrosAtivos[ind] === v) delete filtrosAtivos[ind];
+                else filtrosAtivos[ind] = v;
+                panel.remove();
+                carregarAnalise();
+            });
+            panel.appendChild(chip);
+        });
+        document.body.appendChild(panel);
+        const close = (e) => {
+            if (!panel.contains(e.target) && e.target !== th) {
+                panel.remove();
+                document.removeEventListener('click', close);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', close), 50);
+    }
+
+    function bindTabelaHeaders() {
+        document.querySelectorAll('.comp-tabela th[data-ind]').forEach(th => {
+            th.addEventListener('click', () => {
+                const ind = th.dataset.ind;
+                const resumo = compData?.analise?.resumo?.[ind];
+                const dist = resumo?.distribuicao || {};
+                if (!Object.keys(dist).length) return;
+                abrirChipPanel(th, ind, dist);
+            });
+        });
+    }
+
+    function coletarRegrasManuais() {
+        const regras = { janela: janelaAtual };
+        document.querySelectorAll('.reg-manual').forEach(inp => {
+            const k = inp.dataset.k;
+            if (k) regras[k] = inp.checked;
+        });
+        document.querySelectorAll('.reg-alvo').forEach(inp => {
+            const cod = inp.dataset.cod;
+            if (cod && inp.value !== '') regras[`alvo_${cod}`] = parseInt(inp.value, 10);
+        });
+        return regras;
+    }
+
+    async function carregarAnalise() {
+        const loader = document.getElementById('evidLoader');
+        loader?.classList.remove('d-none');
+        try {
+            const r = await fetch(`${apiPath('/analise')}?${buildAnaliseQuery()}`);
+            const data = await r.json();
+            if (!data.sucesso) {
+                document.getElementById('evidCorpo').innerHTML =
+                    `<span class="text-danger">${data.erro || 'Erro'}</span>`;
+                return;
+            }
+            compData = data;
+            if (data.meta_bases) {
+                metaBases = data.meta_bases;
+                window.ComportamentoBasesResumo?.render(metaBases, baseAtual);
+            }
+            renderEvidencias(data.evidencias);
+            mostrarAvisoBase(data.aviso_base || data.evidencias?.aviso_base || null);
+            const alvos = data.analise?.criterios_sugeridos?.alvos || {};
+            renderRegrasManuais(alvos);
+            if (modoGeracao === 'automatico' && data.regras_automaticas) {
+                Object.entries(data.regras_automaticas).forEach(([k, v]) => {
+                    const inp = document.querySelector(`.reg-manual[data-k="${k}"]`);
+                    if (inp) inp.checked = !!v;
+                });
+            }
+            const linhas = data.analise?.linhas || [];
+            renderTabela(filtrarLinhasLocal(linhas));
+            bindTabelaHeaders();
+            initTooltipsInd();
+            const perfis = data.analise?.linhas_filtradas_count || data.analise?.total_janela || 0;
+            const prev = (UI.motores || []).find(m => m.id === modoMotor);
+            const txt = (data.criterios_auto_preview || []).join(' · ')
+                || `${prev?.label || modoMotor} · ${perfis} perfis na janela`;
+            const el = document.getElementById('autoCriteriosTxt');
+            if (el) el.textContent = txt;
+            const lbl = document.getElementById('lblJanelaInfo');
+            if (lbl) lbl.textContent = data.analise?.janela_label || '';
+        } catch (err) {
+            document.getElementById('evidCorpo').innerHTML =
+                `<span class="text-danger small">Falha: ${err.message || err}</span>`;
+        } finally {
+            loader?.classList.add('d-none');
+        }
+    }
+
+    function htmlVolante(dezenasAposta, jogoId) {
+        if (window.__repHtmlVolante) {
+            return window.__repHtmlVolante(dezenasAposta, jogoId, CFG, concursoConf);
+        }
+        return '';
+    }
+
+    function htmlInfoExtras(a) {
+        const comp = a.comportamento || {};
+        let html = '';
+        if (a.perfil_referencia?.texto_curto) {
+            html += `<div class="mb-1"><strong>Perfil:</strong> ${a.perfil_referencia.texto_curto}</div>`;
+        } else if (a.modo_motor_aposta === 'panorama_top') {
+            const rk = a.rank_escolhido_label || labelRankPanorama(a.rank_escolhido);
+            html += `<div class="mb-1"><span class="badge bg-warning text-dark">${rk}</span></div>`;
+        } else if (a.modo_motor_aposta === 'panorama_guiado') {
+            const rk = a.rank_escolhido_label || labelRankPanorama(a.rank_escolhido);
+            html += `<div class="mb-1"><span class="badge bg-info text-dark">Guiado — ${rk}</span></div>`;
+        } else if (a.modo_motor_aposta === 'linhas_ranking') {
+            const linhas = (a.linhas_origem || []).join(', ') || '—';
+            html += `<div class="mb-1"><span class="badge bg-warning text-dark">Linhas ${linhas}</span></div>`;
+        } else if (a.modo_motor_aposta === 'resumo_geral') {
+            html += `<div class="mb-1"><strong>Resumo Geral</strong> — score ${a.score_dna != null ? a.score_dna : '—'}</div>`;
+            return html;
+        } else if (a.modo_motor_aposta === 'moda') {
+            html += `<div class="mb-1"><strong>Moda</strong> — resumo da janela</div>`;
+        }
+        if (a.sobreposicao != null) {
+            html += `<div class="mb-1">Sobreposição último concurso: <strong>${a.sobreposicao}</strong></div>`;
+        }
+        const indTxt = INDICADORES.map(c => `${c} ${comp[c] ?? '—'}`).join(' · ');
+        html += `<div class="text-muted">${indTxt}</div>`;
+        return html;
+    }
+
+    function renderApostas(apostas, aviso) {
+        ultimasApostas = apostas || [];
+        apostasPorBase[chaveApostasAtual()] = ultimasApostas.slice();
+        document.getElementById('btnExport').disabled = !ultimasApostas.length;
+        const btnAdd = document.getElementById('btnAddColecao');
+        if (btnAdd) btnAdd.disabled = !ultimasApostas.length;
+        const el = document.getElementById('listaApostas');
+        const showVolante = CFG.show_volante_apostas !== false &&
+            (exibicaoApostas === 'volante' || exibicaoApostas === 'hibrido');
+        const showLinear = exibicaoApostas === 'numeros' || exibicaoApostas === 'hibrido';
+        el.classList.toggle('lista-apostas-grid', ultimasApostas.length > 0);
+        el.classList.toggle('lista-apostas-hibrido', exibicaoApostas === 'hibrido' && showVolante);
+        el.classList.toggle('layout-colunas', (CFG.layout === 'colunas' || CFG.key === 'supersete') && ultimasApostas.length > 0);
+        if (!ultimasApostas.length) {
+            el.classList.remove('lista-apostas-grid', 'lista-apostas-hibrido');
+            el.innerHTML = aviso
+                ? `<div class="alert alert-warning py-2 small mb-0">${aviso}</div>`
+                : '<p class="text-muted small mb-0">Nenhuma aposta gerada.</p>';
+            renderPanoramaConjunto([]);
+            return;
+        }
+        const avisoHtml = aviso ? `<div class="alert alert-warning py-2 small mb-2">${aviso}</div>` : '';
+        const pad = (n) => (window.__repPadDezena ? window.__repPadDezena(n, CFG) : String(n).padStart(2, '0'));
+        const timeHtml = (a) => (CFG.extra_time && a.time_num) ? `<span class="badge bg-success ms-1">T${a.time_num}</span>` : '';
+        const trevoHtml = (a) => (CFG.extra_trevos && a.trevos) ? `<span class="badge bg-purple ms-1">${a.trevos.join('-')}</span>` : '';
+        const labelLista = (isModoPanorama() || isModoLinhas()) ? labelApostasAtual() : '';
+        el.innerHTML = avisoHtml + ultimasApostas.map(a => {
+            const linhaTxt = fmtLinhaDezenasMes(a);
+            const headLista = labelLista
+                ? `<div class="aposta-lista-linha small text-muted mb-1">${a.numero}. ${labelLista} — ${linhaTxt}</div>`
+                : (window.__htmlApostaHead ? window.__htmlApostaHead(a.numero) : `<div class="aposta-num-label fw-bold text-muted mb-1">Aposta ${String(a.numero).padStart(2, '0')}</div>`);
+            return `
+            <div class="border rounded p-2 mb-2 aposta-item" data-aposta="${a.numero}">
+                ${headLista}
+                <div class="aposta-card-inner ${exibicaoApostas === 'hibrido' ? 'modo-hibrido' : ''}">
+                    ${showLinear ? `<div class="aposta-linear ${showVolante ? '' : 'w-100'}">
+                        <div class="my-1 aposta-dezenas-linha">${a.dezenas.map(n => `<span class="dez-ball">${pad(n)}</span>`).join('')}${mesHtmlAposta(a)}${timeHtml(a)}${trevoHtml(a)}</div>
+                    </div>` : ''}
+                    ${showVolante ? htmlVolante(a.dezenas, a.numero) : ''}
+                </div>
+                ${window.__htmlCriteriosColapsavel ? window.__htmlCriteriosColapsavel(a, htmlInfoExtras(a)) : ''}
+            </div>`;
+        }).join('');
+        if (window.__bindApostaInfoToggle) window.__bindApostaInfoToggle(el);
+        if (isModoPanorama()) {
+            if (ultimasApostas.length && ultimasApostas[0].rank_escolhido) {
+                rankPanoramaGerado = ultimasApostas[0].rank_escolhido;
+                rankPanoramaGeradoLabel = ultimasApostas[0].rank_escolhido_label
+                    || labelRankPanorama(rankPanoramaGerado);
+            } else if (!ultimasApostas.length) {
+                rankPanoramaGerado = null;
+                rankPanoramaGeradoLabel = '';
+            }
+            if (panoramaDataGer?.sucesso) renderPanoramaGerador(panoramaDataGer);
+        }
+        renderPanoramaConjunto(ultimasApostas);
+    }
+
+    function _pcPad(n) {
+        return String(n).padStart(2, '0');
+    }
+
+    function _pcSequencias(nums) {
+        const o = [...nums].map(Number).sort((a, b) => a - b);
+        const seqs = [];
+        let i = 0;
+        while (i < o.length) {
+            let j = i;
+            while (j + 1 < o.length && o[j + 1] - o[j] === 1) j += 1;
+            if (j > i) seqs.push(o.slice(i, j + 1));
+            i = j + 1;
+        }
+        return seqs;
+    }
+
+    function _pcBma(nums) {
+        let b = 0, m = 0, a = 0;
+        nums.forEach(n => {
+            const d = Number(n);
+            if (d >= 1 && d <= 10) b += 1;
+            else if (d >= 11 && d <= 20) m += 1;
+            else a += 1;
+        });
+        return { b, m, a, txt: `${b}B + ${m}M + ${a}A` };
+    }
+
+    function renderPanoramaConjunto(apostas) {
+        const box = document.getElementById('painelPanoramaConjunto');
+        if (!box) return;
+        const lista = apostas || [];
+        if (!lista.length) {
+            box.classList.add('d-none');
+            return;
+        }
+        const pad = _pcPad;
+        const ultimo = concursosLista && concursosLista[0];
+        const ultDez = new Set((ultimo?.dezenas || []).map(Number));
+        const nUlt = ultimo?.concurso || '—';
+        const ehDs = (CFG.key === 'diadesorte' || UNIVERSO_MAX === 31);
+        const thead = document.getElementById('theadPanoramaConjunto');
+        const tbody = document.getElementById('tbodyPanoramaConjunto');
+        const leg = document.getElementById('panoramaConjuntoLegenda');
+        const rodape = document.getElementById('panoramaConjuntoRodape');
+        if (thead) {
+            thead.innerHTML = `<tr>
+                <th>#</th><th>Aposta</th><th>Soma</th><th>P/I</th><th>Seq</th>
+                <th>Rep. ${nUlt}</th><th>Finais</th>${ehDs ? '<th>B/M/A</th>' : ''}
+            </tr>`;
+        }
+        const freq = {};
+        const rows = lista.map((a, i) => {
+            const dz = (a.dezenas || []).map(Number).sort((x, y) => x - y);
+            dz.forEach(d => { freq[d] = (freq[d] || 0) + 1; });
+            const soma = dz.reduce((s, n) => s + n, 0);
+            const pares = dz.filter(n => n % 2 === 0).length;
+            const seqs = _pcSequencias(dz);
+            const seqTxt = seqs.length
+                ? seqs.map(g => g.map(pad).join('–')).join(', ')
+                : 'nenhuma';
+            const reps = dz.filter(n => ultDez.has(n));
+            const fins = {};
+            dz.forEach(n => { const f = n % 10; fins[f] = (fins[f] || 0) + 1; });
+            const finGrupos = Object.keys(fins).filter(f => fins[f] >= 2).sort();
+            const finTxt = finGrupos.length
+                ? finGrupos.map(f => {
+                    const nums = dz.filter(n => n % 10 === Number(f)).map(pad).join(', ');
+                    return `${f}: ${nums}`;
+                }).join('; ')
+                : 'distintos';
+            const bma = ehDs ? _pcBma(dz) : null;
+            const somaOk = soma >= 93 && soma <= 130;
+            const seqOk = seqs.length >= 1 && seqs.length <= 2;
+            const seqAt = seqs.length === 0 || seqs.length >= 3;
+            const repOk = reps.length === 1 || reps.length === 2;
+            const finOk = finGrupos.length >= 1;
+            const bmaOk = bma && bma.b >= 2 && bma.b <= 3 && bma.m >= 2 && bma.m <= 3 && bma.a >= 2 && bma.a <= 3;
+            return `<tr>
+                <td>${a.numero || (i + 1)}</td>
+                <td class="fw-bold">${dz.map(pad).join(' ')}</td>
+                <td class="${ehDs ? (somaOk ? 'pan-conj-ok' : 'pan-conj-at') : ''}">${soma}</td>
+                <td>${pares}P / ${dz.length - pares}I</td>
+                <td class="${seqAt ? 'pan-conj-at' : (seqOk ? 'pan-conj-ok' : '')}">${seqTxt}</td>
+                <td class="${repOk ? 'pan-conj-ok' : 'pan-conj-at'}">${reps.length}${reps.length ? ' · ' + reps.map(pad).join(', ') : ''}</td>
+                <td class="${finOk ? 'pan-conj-ok' : 'pan-conj-at'}">${finTxt}</td>
+                ${ehDs ? `<td class="${bmaOk ? 'pan-conj-ok' : 'pan-conj-at'}">${bma.txt}</td>` : ''}
+            </tr>`;
+        }).join('');
+        if (tbody) tbody.innerHTML = rows;
+        if (leg) {
+            leg.textContent = ultimo
+                ? `Conjunto de ${lista.length} apostas · repetidas em relação ao concurso #${ultimo.concurso} (${(ultimo.dezenas || []).map(pad).join(' ')}). Verde = alinhado ao DNA usual; âmbar = atenção.`
+                : `Conjunto de ${lista.length} apostas.`;
+        }
+        const conc = Object.entries(freq)
+            .sort((a, b) => b[1] - a[1] || a[0] - b[0])
+            .filter(([, q]) => q >= 3)
+            .slice(0, 8)
+            .map(([d, q]) => `${pad(d)} em ${q}/${lista.length}`)
+            .join(' · ');
+        if (rodape) {
+            rodape.innerHTML = conc
+                ? `<strong>Concentração:</strong> ${conc}`
+                : 'Nenhuma dezena se repetiu em 3 ou mais apostas.';
+        }
+        box.classList.remove('d-none');
+    }
+
+    async function carregarConcursos() {
+        const r = await fetch(`${apiPath('/concursos')}?limit=150`);
+        const data = await r.json();
+        if (!data.sucesso) return;
+        concursosLista = data.concursos || [];
+        const sel = document.getElementById('selConcursoConf');
+        if (!sel) return;
+        const atual = sel.value;
+        sel.innerHTML = '<option value="">— Sem conferência (só amarelo) —</option>' +
+            concursosLista.map(c =>
+                `<option value="${c.concurso}">#${c.concurso} — ${c.data || ''}</option>`
+            ).join('');
+        if (atual) sel.value = atual;
+        else if (concursosLista.length) {
+            sel.value = String(concursosLista[0].concurso);
+            concursoConf = concursosLista.find(c => c.concurso === parseInt(sel.value, 10)) || concursosLista[0];
+            if (ultimasApostas.length) renderApostas(ultimasApostas);
+        }
+    }
+
+    async function gerarLinhas() {
+        const body = {
+            quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+            dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || DEZ_DEFAULT,
+            janela: janelaLinhas,
+            base: baseLinhas,
+            base_estatistica: baseLinhas,
+            top_n: topNLinhas,
+            modo_peso: modoPesoLinhas,
+        };
+        const r = await fetch(apiPath('/gerar-linhas'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!data.sucesso) {
+            alert(data.erro || data.validacao?.motivo || 'Erro ao gerar');
+            return;
+        }
+        if (data.criterios_modo_auto?.length) {
+            const el = document.getElementById('linhasCriteriosTxt');
+            if (el) el.textContent = data.criterios_modo_auto.join(' · ');
+        } else {
+            atualizarCriteriosLinhasTxt();
+        }
+        let aviso = data.aviso;
+        if (data.descartadas_historico > 0) {
+            aviso = (aviso ? aviso + ' ' : '') +
+                `(${data.descartadas_historico} descartada(s) por já existirem no histórico.)`;
+        }
+        if (data.linhas_usadas?.length && linhasDataGer?.sucesso) {
+            renderRankingLinhas(linhasDataGer);
+        }
+        renderApostas(data.apostas, aviso);
+    }
+
+    async function gerarPanorama() {
+        const extras = window.PanoramaModos?.getGerarExtras?.() || {};
+        if (extras.erro) {
+            alert(extras.erro);
+            return;
+        }
+        const dezJogo = parseInt(document.getElementById('inpDezenas').value, 10) || DEZ_DEFAULT;
+        const body = {
+            quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+            dezenas_por_jogo: dezJogo,
+            perfil: document.getElementById('inpPerfil').value,
+            base: basePanorama,
+            base_estatistica: basePanorama,
+            rank_escolhido: rankPanorama,
+            ...extras,
+        };
+        const r = await fetch(apiPath('/gerar-panorama-top'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!data.sucesso) {
+            alert(data.erro || data.validacao?.motivo || 'Erro ao gerar');
+            return;
+        }
+        rankPanoramaGerado = data.rank_escolhido || rankPanorama;
+        rankPanoramaGeradoLabel = data.rank_escolhido_label || labelRankPanorama(rankPanoramaGerado);
+        if (panoramaDataGer?.sucesso) renderPanoramaGerador(panoramaDataGer);
+
+        const el = document.getElementById('panoramaCriteriosTxt');
+        if (el) el.textContent = rankPanoramaGeradoLabel || labelRankPanorama(rankPanoramaGerado);
+
+        let aviso = data.aviso;
+        if (data.descartadas_historico > 0) {
+            aviso = (aviso ? aviso + ' ' : '') +
+                `(${data.descartadas_historico} descartada(s) por já existirem no histórico.)`;
+        }
+        renderApostas(data.apostas, aviso);
+    }
+
+    async function gerar() {
+        if (isModoPanorama()) {
+            return gerarPanorama();
+        }
+        if (isModoLinhas()) {
+            return gerarLinhas();
+        }
+        const body = {
+            quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+            dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || DEZ_DEFAULT,
+            perfil: document.getElementById('inpPerfil').value,
+            janela: modoGeracao === 'resumo_geral' ? 0 : janelaAtual,
+            modo_geracao: modoGeracao,
+            modo_motor: modoGeracao === 'resumo_geral' ? 'moda' : modoMotor,
+            filtros: filtrosAtivos,
+            base: baseAtual,
+            base_estatistica: baseAtual,
+        };
+        if (modoGeracao === 'manual') {
+            body.regras_manuais = coletarRegrasManuais();
+            const alguma = INDICADORES.some(c => body.regras_manuais[`usar_${c}`]);
+            if (!alguma) {
+                alert('Ative pelo menos um indicador nas regras manuais.');
+                return;
+            }
+        }
+        const r = await fetch(apiPath('/gerar'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!data.sucesso) {
+            alert(data.erro || 'Erro ao gerar');
+            return;
+        }
+        if (data.criterios_modo_auto?.length) {
+            const el = document.getElementById('autoCriteriosTxt');
+            if (el) el.textContent = data.criterios_modo_auto.join(' · ');
+        }
+        let aviso = data.aviso;
+        if (data.excluiu_ultimo_concurso && data.ultimo_concurso_ignorado) {
+            const ign = `Último concurso #${data.ultimo_concurso_ignorado} ignorado na geração.`;
+            aviso = aviso ? `${ign} ${aviso}` : ign;
+        }
+        if (data.descartadas_historico > 0) {
+            aviso = (aviso ? aviso + ' ' : '') +
+                `(${data.descartadas_historico} descartada(s) por já existirem no histórico — só inéditas foram mantidas.)`;
+        }
+        renderApostas(data.apostas, aviso);
+    }
+
+    function exportarTxt() {
+        if (!ultimasApostas.length) return;
+        const linhas = ultimasApostas.map(a => fmtLinhaDezenasMes(a));
+        const blob = new Blob([linhas.join('\n') + '\n'], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        const rankSlug = isModoPanorama() && rankPanoramaGerado ? `_rank${rankPanoramaGerado}` : '';
+        a.download = `${CFG.key || 'modalidade'}_comportamento_${chaveApostasAtual()}${rankSlug}_${Date.now()}.txt`;
+        a.click();
+    }
+
+    function setEvidenciasVisivel(visivel) {
+        const corpo = document.getElementById('evidCorpo');
+        const btn = document.getElementById('btnToggleEvidencias');
+        const lbl = document.getElementById('lblToggleEvidencias');
+        if (!corpo || !btn) return;
+        corpo.classList.toggle('d-none', !visivel);
+        btn.setAttribute('aria-expanded', visivel ? 'true' : 'false');
+        if (lbl) lbl.textContent = visivel ? 'Ocultar' : 'Mostrar';
+    }
+
+    function initToggleEvidencias() {
+        setEvidenciasVisivel(false);
+        document.getElementById('btnToggleEvidencias')?.addEventListener('click', () => {
+            const corpo = document.getElementById('evidCorpo');
+            setEvidenciasVisivel(corpo?.classList.contains('d-none'));
+        });
+    }
+
+    function carregarCicloDna() {
+        const el = document.getElementById('ciclo-dna-box');
+        if (!el) return;
+        fetch('/geradores-elite/api/ciclo-apostas/estrategia/contexto')
+            .then((r) => r.ok ? r.json() : null)
+            .then((c) => {
+                if (!c || !(c.ok || c.sucesso)) return;
+                const p = c.estrategia_ciclo || {};
+                if (!p.leitura_curta) return;
+                const pad = (n) => String(n).padStart(2, '0');
+                const dez = (xs) => (xs || []).slice(0, 6).map(pad).join(' · ') || '—';
+                el.hidden = false;
+                el.innerHTML = `
+                    <div class="card border-0 shadow-sm" style="border-left:4px solid var(--primary)!important;">
+                      <div class="card-body py-3">
+                        <div class="d-flex flex-wrap justify-content-between gap-2">
+                          <div class="small text-uppercase text-muted fw-bold">DNA do ciclo (estratégia)</div>
+                          <a class="small" href="/geradores-elite/ciclo-apostas/?modo=estrategia">↗ Ver no Gerador</a>
+                        </div>
+                        <p class="mb-2 small mt-1" style="line-height:1.45">${p.leitura_curta}</p>
+                        <div class="small text-muted">
+                          Pendentes: <strong>${dez(p.pendentes)}</strong>
+                          · Núcleo: <strong>${dez(p.nucleo_ancoras)}</strong>
+                          · Alívio (excesso/quebra): <strong>${dez(p.repetidas_aliviar)}</strong>
+                        </div>
+                        <p class="mb-0 mt-2 small text-muted">${p.aviso_nao_previsao || 'Não é previsão do próximo sorteio.'}</p>
+                      </div>
+                    </div>`;
+            })
+            .catch(() => {});
+    }
+
+    function initPage() {
+        window.__panBasePanorama = () => basePanorama;
+        window.__panRankPanorama = () => rankPanorama;
+        if (window.PanoramaModos) {
+            PanoramaModos.init({
+                apiPath,
+                dezenasPorJogo: DEZ_DEFAULT,
+                dezenasMin: UI.dezenas_min || CFG.dezenas_min || DEZ_DEFAULT,
+                poolPanorama: POOL_PANORAMA,
+                universoMax: UNIVERSO_MAX,
+                dezenaMin: DEZENA_MIN,
+                volanteCols: UI.volante_cols || CFG.grid_cols || 10,
+            });
+        }
+        document.getElementById('inpDezenas')?.addEventListener('change', (e) => {
+            const k = parseInt(e.target.value, 10);
+            if (window.PanoramaModos) PanoramaModos.syncDezenasPorJogo(k);
+        });
+        setModoBody('automatico');
+        carregarColecaoStorage();
+        atualizarLblBase();
+        initToggleEvidencias();
+        carregarCicloDna();
+        document.querySelectorAll('#tabsBaseGerador .base-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const b = btn.dataset.base;
+                if (!b || b === baseAtual) return;
+                document.querySelectorAll('#tabsBaseGerador .base-tab-btn').forEach(x => x.classList.remove('active'));
+                btn.classList.add('active');
+                trocarBase(b);
+            });
+        });
+        document.querySelectorAll('#tabsPanoramaBase .panorama-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const b = btn.dataset.pbase;
+                if (!b || b === basePanorama) return;
+                trocarBasePanorama(b);
+            });
+        });
+        document.getElementById('btnAtualizarPanoramaGer')?.addEventListener('click', carregarPanoramaGerador);
+        document.getElementById('selRankPanorama')?.addEventListener('change', (e) => {
+            rankPanorama = parseInt(e.target.value, 10) || 1;
+            rankPanoramaGerado = null;
+            rankPanoramaGeradoLabel = '';
+            atualizarRankPanoramaUI();
+            if (window.PanoramaModos) PanoramaModos.onPanoramaRefresh(basePanorama, rankPanorama);
+        });
+        document.querySelectorAll('#tabsLinhasBase .linhas-base-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const b = btn.dataset.lbase;
+                if (!b || b === baseLinhas) return;
+                baseLinhas = b;
+                document.querySelectorAll('#tabsLinhasBase .linhas-base-btn').forEach(x => {
+                    x.classList.toggle('active', x.dataset.lbase === b);
+                });
+                window.ComportamentoBasesResumo?.render(metaBases, b);
+                carregarRankingLinhas();
+            });
+        });
+        document.getElementById('grpJanelaLinhas')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('.linhas-janela-btn');
+            if (!btn) return;
+            e.preventDefault();
+            janelaLinhas = parseInt(btn.dataset.janela, 10);
+            syncJanelaLinhasUI();
+            carregarRankingLinhas();
+        });
+        document.getElementById('selTopNLinhas')?.addEventListener('change', (e) => {
+            topNLinhas = parseInt(e.target.value, 10) || 3;
+            if (linhasDataGer?.sucesso) renderRankingLinhas(linhasDataGer);
+            else atualizarCriteriosLinhasTxt();
+        });
+        document.getElementById('grpModoPesoLinhas')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('.linhas-peso-btn');
+            if (!btn?.dataset.peso) return;
+            e.preventDefault();
+            modoPesoLinhas = btn.dataset.peso;
+            document.querySelectorAll('#grpModoPesoLinhas .linhas-peso-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.peso === modoPesoLinhas);
+            });
+            if (modoPesoLinhas === 'so_top1') {
+                const sel = document.getElementById('selTopNLinhas');
+                if (sel) sel.value = '1';
+                topNLinhas = 1;
+            }
+            if (linhasDataGer?.sucesso) renderRankingLinhas(linhasDataGer);
+            else atualizarCriteriosLinhasTxt();
+        });
+        document.getElementById('btnAtualizarLinhas')?.addEventListener('click', carregarRankingLinhas);
+        document.getElementById('btnAddColecao')?.addEventListener('click', adicionarAColecao);
+        document.getElementById('btnLimparColecao')?.addEventListener('click', () => {
+            colecaoExport = [];
+            salvarColecaoStorage();
+            renderColecao();
+        });
+        document.getElementById('btnExportComposto')?.addEventListener('click', exportarComposto);
+        document.getElementById('grpModoGeracao')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('.sniper-modo-btn');
+            if (!btn?.dataset.modo) return;
+            e.preventDefault();
+            setModoBody(btn.dataset.modo);
+        });
+        document.getElementById('grpJanela')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('.janela-btn');
+            if (!btn) return;
+            e.preventDefault();
+            janelaAtual = parseInt(btn.dataset.janela, 10);
+            document.querySelectorAll('.janela-btn').forEach(b =>
+                b.classList.toggle('active', b === btn)
+            );
+            filtrosAtivos = {};
+            carregarAnalise();
+        });
+        const chkUlt = document.getElementById('chkUltimoPar')?.closest('.form-check-inline');
+        const chkPerm = document.getElementById('chkPermanencia')?.closest('.form-check-inline');
+        const chkPI = document.getElementById('chkParImpar')?.closest('.form-check-inline');
+        if (chkUlt) chkUlt.style.display = 'none';
+        if (chkPerm) chkPerm.style.display = 'none';
+        if (chkPI) chkPI.style.display = 'none';
+
+        document.getElementById('btnGerar')?.addEventListener('click', gerar);
+        document.getElementById('btnExport')?.addEventListener('click', exportarTxt);
+        document.getElementById('selConcursoConf')?.addEventListener('change', (e) => {
+            const v = parseInt(e.target.value, 10);
+            concursoConf = v ? concursosLista.find(c => c.concurso === v) : null;
+            if (ultimasApostas.length) renderApostas(ultimasApostas);
+        });
+        document.querySelectorAll('.exibicao-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.exibicao-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                exibicaoApostas = btn.dataset.exib;
+                const leg = document.getElementById('exibicaoLegendaTexto');
+                if (leg) leg.textContent = LEGENDA_EXIBICAO[exibicaoApostas] || '';
+                if (ultimasApostas.length) renderApostas(ultimasApostas);
+            });
+        });
+        const leg = document.getElementById('exibicaoLegendaTexto');
+        if (leg) leg.textContent = LEGENDA_EXIBICAO.hibrido;
+
+        document.getElementById('selModoMotor')?.addEventListener('change', (e) => {
+            modoMotor = e.target.value || 'perfil_sorteio';
+            atualizarExplicacaoMotor();
+        });
+        atualizarExplicacaoMotor();
+        carregarConcursos();
+        carregarAnalise();
+        initTooltipsInd();
+        if (window.__bindConferirTxtHistorico) window.__bindConferirTxtHistorico();
+
+        const tabParam = new URLSearchParams(window.location.search).get('tab');
+        if (tabParam === 'linhas') {
+            const btnLinhas = document.querySelector('#tabsBaseGerador .base-tab-btn[data-base="linhas"]');
+            if (btnLinhas) {
+                document.querySelectorAll('#tabsBaseGerador .base-tab-btn').forEach(x => x.classList.remove('active'));
+                btnLinhas.classList.add('active');
+                trocarBase('linhas');
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+        initPage();
+    }
+})();
+</script>

@@ -1,0 +1,1159 @@
+{% extends "base.html" %}
+{% block title %}Análise por Posição → Apostas — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    {% if meses_cores %}
+    {% for nome, cor in meses_cores.items() %}
+    #ge-posicao-apostas .pos-mes-badge.mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+    {% endfor %}
+    {% endif %}
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+    }
+
+    .pos-meta-resumo {
+        display: inline-block;
+        background: #555;
+        color: #fff;
+        font-weight: 800;
+        font-size: .72rem;
+        padding: 2px 8px;
+        border-radius: 8px;
+        line-height: 1.35;
+        vertical-align: middle;
+    }
+
+    .pos-mes-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: .72rem;
+        color: #fff;
+        line-height: 1.35;
+        vertical-align: middle;
+    }
+
+    .aposta-meta-linha {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .35rem .5rem;
+        font-size: .72rem;
+        color: #666;
+        margin-bottom: 4px;
+    }
+
+    .aposta-meta-linha .aposta-num {
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .pos-ci-ordem {
+        padding: 2px 4px;
+        background: #eef2ff;
+        border-radius: 3px;
+        font-weight: 600;
+        letter-spacing: .02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: .72rem;
+        color: #333;
+    }
+
+    .pos-ci-ordem .dez-hit {
+        color: #146c43;
+        font-weight: 900;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .pos-ci-ordem .dez-hit-vol {
+        color: #0d6efd;
+        font-weight: 800;
+    }
+
+    .card-refino {
+        border-left: 4px solid var(--accent);
+    }
+
+    .toggle-refino {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: .65rem .85rem;
+        background: #fffdf8;
+        height: 100%;
+    }
+
+    .toggle-refino.active {
+        border-color: var(--accent);
+        background: #fff9e6;
+    }
+
+    .toggle-refino .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .preset-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+
+    .dez-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--on-accent);
+        font-weight: 800;
+        font-size: .82rem;
+        border: 2px solid var(--primary);
+        margin: 2px;
+    }
+
+    .dez-ball.pos-label-wrap {
+        flex-direction: column;
+        width: auto;
+        min-width: 38px;
+        height: auto;
+        border-radius: 8px;
+        padding: 2px 4px;
+        background: #eef2ff;
+        border-color: #c5cae9;
+    }
+
+    .dez-ball.pos-label-wrap .pos-mini {
+        font-size: .5rem;
+        font-weight: 700;
+        color: #555;
+        line-height: 1;
+    }
+
+    .dez-ball.pos-label-wrap .dez-inner {
+        background: var(--accent);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--primary);
+        font-weight: 800;
+        color: var(--on-accent);
+    }
+
+    .dez-ball.hit-conf {
+        background: linear-gradient(145deg, #198754, #146c43);
+        color: #fff;
+        border-color: #0f5132;
+    }
+
+    .mes-badge-ap {
+        display: none;
+    }
+
+    .aposta-linha {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: .65rem .85rem;
+        margin-bottom: .5rem;
+        background: #fff;
+    }
+
+    .aposta-linha:hover { background: var(--accent-light); }
+
+    .resumo-plugins {
+        font-size: .75rem;
+        color: #666;
+    }
+
+    .resumo-plugins strong { color: var(--primary); }
+
+    /* —— Matriz Ordem Oficial (igual /analise/por-posicao/) —— */
+    .pos-apostas-layout {
+        display: grid;
+        grid-template-columns: minmax(200px, 240px) 1fr;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    @media (max-width: 991px) {
+        .pos-apostas-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pos-apostas-sidebar {
+        background: #fff;
+        border: 1px solid #fce7a2;
+        border-radius: 12px;
+        overflow: hidden;
+        max-height: calc(100vh - 280px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pos-apostas-sidebar-head {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        color: #fff;
+        padding: .55rem .75rem;
+        font-weight: 700;
+        font-size: .78rem;
+    }
+
+    .pos-apostas-sidebar-list {
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .aposta-item-btn {
+        display: block;
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid #f0f0f0;
+        background: #fff;
+        text-align: left;
+        padding: .45rem .65rem;
+        cursor: pointer;
+        transition: background .12s;
+        font-size: .72rem;
+        line-height: 1.35;
+        color: #333;
+    }
+
+    .aposta-item-btn:hover { background: var(--accent-light); }
+
+    .aposta-item-btn.active {
+        background: #fff9e6;
+        border-left: 3px solid var(--accent);
+    }
+
+    .pos-main-card {
+        background: #fff;
+        border: 1px solid #fce7a2;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+        padding: 1rem;
+    }
+
+    .pos-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .65rem 1rem;
+        align-items: center;
+        margin-bottom: .85rem;
+        font-size: .78rem;
+        color: #666;
+    }
+
+    .pos-meta-bar strong { color: var(--primary); }
+
+    .pos-excel-block { margin-bottom: .5rem; }
+
+    .pos-excel-block .pos-panels-wrap { overflow-x: auto; }
+
+    .pos-excel-block .pos-ordem-strip,
+    .pos-excel-block .pos-panels { min-width: 420px; }
+
+    .pos-excel-block .pos-ordem-strip {
+        display: grid;
+        grid-template-columns: repeat({{ pos_cfg.num_posicoes }}, minmax({{ pos_cfg.min_panel_width }}px, 1fr));
+        gap: 0;
+        margin-bottom: 0;
+        border: 1px solid #d9d9d9;
+        border-bottom: 0;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+    }
+
+    .pos-excel-block .pos-panels {
+        display: grid;
+        grid-template-columns: repeat({{ pos_cfg.num_posicoes }}, minmax({{ pos_cfg.min_panel_width }}px, 1fr));
+        gap: 0;
+        border: 1px solid #d9d9d9;
+        border-top: 0;
+        border-radius: 0 0 8px 8px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .pos-ordem-cell {
+        background: linear-gradient(180deg, #2e7d32, #1b5e20);
+        color: #fff;
+        text-align: center;
+        padding: .4rem .15rem;
+        border-right: 1px solid rgba(255, 255, 255, .15);
+    }
+
+    .pos-ordem-cell:last-child { border-right: 0; }
+
+    .pos-ordem-cell .pos-oc-val {
+        display: block;
+        font-size: 1rem;
+        font-weight: 900;
+        line-height: 1.1;
+    }
+
+    .pos-panel {
+        border-right: 1px solid #e0e0e0;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .pos-panel:last-child { border-right: 0; }
+
+    .pos-matrix {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
+        background: #fff;
+        flex: 1;
+    }
+
+    .pos-matrix-cell {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: .78rem;
+        font-weight: 600;
+        color: #333;
+        line-height: 1.45;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+    }
+
+    .pos-matrix-cell.hit {
+        background: var(--accent);
+        color: var(--on-accent);
+        font-weight: 900;
+    }
+
+    .viz-mode-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+
+    .painel-conferencia-ativa {
+        background: #f0f7ff;
+        border: 1px solid #b8d4f0;
+        border-radius: 10px;
+        padding: .65rem .85rem;
+        margin-bottom: .75rem;
+        font-size: .75rem;
+        color: #444;
+    }
+
+    .painel-conferencia-ativa .conf-oficial-ordem {
+        margin-top: 4px;
+        padding: 2px 4px;
+        background: #eef2ff;
+        border-radius: 3px;
+        font-weight: 600;
+        letter-spacing: .02em;
+    }
+
+    .pos-ordem-cell.conf-pos-hit {
+        box-shadow: inset 0 0 0 2px var(--accent);
+    }
+
+    .pos-ordem-cell.conf-pos-miss {
+        box-shadow: inset 0 0 0 2px #dc3545;
+    }
+
+    .pos-ordem-strip-oficial {
+        display: grid;
+        grid-template-columns: repeat({{ pos_cfg.num_posicoes }}, minmax({{ pos_cfg.min_panel_width }}px, 1fr));
+        gap: 0;
+        border: 1px solid #d9d9d9;
+        border-top: 0;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+
+    .pos-ordem-cell-oficial {
+        background: #6c757d;
+        color: #fff;
+        text-align: center;
+        padding: .25rem .1rem;
+        font-size: .78rem;
+        font-weight: 800;
+        border-right: 1px solid rgba(255,255,255,.2);
+    }
+
+    .pos-ordem-cell-oficial:last-child { border-right: 0; }
+
+    .pos-ordem-cell-oficial.conf-pos-hit {
+        background: #198754;
+    }
+
+    .badge-conf-mes.ok { background: #198754; }
+    .badge-conf-mes.fail { background: #6c757d; }
+
+    .aposta-linha.conf-destaque {
+        border-color: #b8d4f0;
+        background: #fafcff;
+    }
+</style>
+
+<div id="ge-posicao-apostas">
+<div class="page-header">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <div style="font-size:2rem;">🎯</div>
+            <div>
+                <h2 class="mb-0">Análise por Posição → Apostas</h2>
+                <p class="mb-0 mt-1" style="opacity:.88;font-size:.88rem;">
+                    {{ pos_cfg.subtitle_gerador }} · refinamentos opcionais
+                </p>
+                {% if pos_cfg.duplasena %}
+                <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+                    <span style="font-size:.82rem;opacity:.9;">Sorteio:</span>
+                    <select id="selSorteioGer" class="form-select form-select-sm" style="width:auto;max-width:160px;">
+                        <option value="1">1º Sorteio</option>
+                        <option value="2">2º Sorteio</option>
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <a href="/analise/por-posicao/" class="btn btn-sm btn-light">
+            <i class="fas fa-table-cells"></i> Ver matriz analítica
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body py-3">
+        <div class="d-flex flex-wrap gap-3 align-items-center resumo-plugins" id="barResumo">
+            <span><i class="fas fa-spinner fa-spin"></i> Carregando análise…</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card shadow-sm card-refino mb-3">
+            <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+                <i class="fas fa-cog me-1"></i> Motor posicional <small class="opacity-75">(sempre ativo)</small>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label small mb-0">Apostas</label>
+                        <input type="number" class="form-control form-control-sm" id="inpQtd" value="10" min="1" max="100">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small mb-0">Janela</label>
+                        <select class="form-select form-select-sm" id="inpJanela">
+                            <option value="30">30 concursos</option>
+                            <option value="50" selected>50 concursos</option>
+                            <option value="100">100 concursos</option>
+                            <option value="200">200 concursos</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small mb-0">Perfil por posição</label>
+                        <select class="form-select form-select-sm" id="inpPerfil">
+                            <option value="equilibrado">Equilibrado (freq + atraso)</option>
+                            <option value="frequencia">Frequência na posição</option>
+                            <option value="atraso">Atraso na posição</option>
+                        </select>
+                    </div>
+                    {% if pos_cfg.show_dig_soma %}
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="chkDigSoma">
+                            <label class="form-check-label small" for="chkDigSoma">
+                                Aproximar dígitos/soma do último concurso
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-header fw-bold bg-light">
+                <i class="fas fa-sliders-h me-1"></i> Preset de combinação
+            </div>
+            <div class="card-body pt-2 pb-3">
+                <div class="btn-group w-100" role="group" id="grpPreset">
+                    <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-preset="manual">Manual</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-preset="leve">Leve</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm preset-btn active" data-preset="integrado">Integrado</button>
+                </div>
+                <p class="small text-muted mt-2 mb-0" id="presetLegenda">
+                    Integrado: posição + repetição + sniper + comportamento (pesos moderados).
+                </p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-header fw-bold bg-light">
+                <i class="fas fa-plug me-1"></i> Refinamentos opcionais
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-12">
+                        <div class="toggle-refino" id="wrapRep">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input refino-toggle" type="checkbox" id="chkRep" checked data-key="rep">
+                                <label class="form-check-label fw-bold small" for="chkRep">
+                                    <i class="fas fa-dice text-warning"></i> Repetição entre concursos
+                                </label>
+                            </div>
+                            <p class="small text-muted mb-0 mt-1">Prioriza repetição posicional do último par e permanência.</p>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="toggle-refino" id="wrapSniper">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input refino-toggle" type="checkbox" id="chkSniper" checked data-key="sniper">
+                                <label class="form-check-label fw-bold small" for="chkSniper">
+                                    <i class="fas fa-crosshairs text-primary"></i> Sniper → Apostas
+                                </label>
+                            </div>
+                            <p class="small text-muted mb-0 mt-1">Evidências e números fortes como peso secundário por coluna.</p>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="toggle-refino" id="wrapComp">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input refino-toggle" type="checkbox" id="chkComp" checked data-key="comp">
+                                <label class="form-check-label fw-bold small" for="chkComp">
+                                    <i class="fas fa-chart-line text-info"></i> Comportamento → Apostas
+                                </label>
+                            </div>
+                            <p class="small text-muted mb-0 mt-1">Valida PA/PR/RT/MO/MS após montar a aposta.</p>
+                            <select class="form-select form-select-sm mt-2" id="selModoComp">
+                                <option value="relaxar" selected>Modo relaxar (±1 nos indicadores)</option>
+                                <option value="estrito">Modo estrito</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn fw-bold" id="btnGerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar apostas</button>
+            <button class="btn btn-outline-secondary" id="btnExport" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header fw-bold bg-light">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <span><i class="fas fa-list-ol me-1"></i> Apostas geradas</span>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="small text-muted"><i class="fas fa-eye me-1"></i>Visualização:</span>
+                        <div class="btn-group btn-group-sm" role="group" id="grpViz">
+                            <button type="button" class="btn btn-outline-secondary viz-mode-btn active" data-viz="simplificado">Simplificada</button>
+                            <button type="button" class="btn btn-outline-secondary viz-mode-btn" data-viz="ordem">Ordem Oficial</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pb-2">
+                <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-2">
+                    <label class="small mb-0 text-muted">Conferir com:</label>
+                    <select class="form-select form-select-sm" id="selConferencia" style="width:auto;min-width:180px;">
+                        <option value="">— Selecione concurso —</option>
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnConferir" disabled>
+                        <i class="fas fa-check-double"></i> Conferir
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="btnLimparConf">
+                        Limpar
+                    </button>
+                </div>
+                <div id="painelConferencia" class="painel-conferencia-ativa d-none"></div>
+                <div id="listaApostas">
+                    <p class="text-muted small mb-0">Configure os parâmetros e clique em <strong>Gerar apostas</strong>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const POS_CFG = {{ pos_cfg | tojson }};
+    const MESES_CORES = {{ meses_cores | tojson }};
+    const API = '/geradores-elite/api/posicao';
+    const MATRIZ_NUMS = Array.from(
+        { length: POS_CFG.valor_max - POS_CFG.valor_min + 1 },
+        (_, i) => POS_CFG.valor_min + i
+    );
+    let sorteioAtual = 1;
+    let dadosAnalise = null;
+    let ultimasApostas = [];
+    let concursosLista = [];
+    let concursoConf = null;
+    let conferenciaAtiva = false;
+    let presetAtual = 'integrado';
+    let modoVisualizacao = 'simplificado';
+    let apostaAtivaIdx = 0;
+
+    const LEGENDA_PRESET = {
+        manual: 'Manual: você escolhe cada refinamento abaixo.',
+        leve: 'Leve: posição + repetição posicional apenas.',
+        integrado: 'Integrado: posição + repetição + sniper + comportamento (pesos moderados).',
+    };
+
+    function fmt(n) {
+        const p = POS_CFG.pad_width || 2;
+        return p <= 1 ? String(n) : String(n).padStart(p, '0');
+    }
+
+    function joinOrdem(arr) {
+        const sep = POS_CFG.export_join || ' ';
+        return (arr || []).map(n => fmt(n)).join(sep);
+    }
+
+    function sorteioParam() {
+        return POS_CFG.duplasena ? `&sorteio=${sorteioAtual}` : '';
+    }
+
+    const MESES_NUM_NOME = {
+        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+        5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro',
+    };
+    const MESES_NUM_ABREV = {
+        1: 'Jan', 2: 'Fev', 3: 'Mar', 4: 'Abr', 5: 'Mai', 6: 'Jun',
+        7: 'Jul', 8: 'Ago', 9: 'Set', 10: 'Out', 11: 'Nov', 12: 'Dez',
+    };
+
+    function resolveMesNome(nome, mesNum) {
+        if (nome) return nome;
+        const mn = parseInt(mesNum, 10);
+        return (mn >= 1 && mn <= 12) ? MESES_NUM_NOME[mn] : '';
+    }
+
+    function htmlMesBadge(abrev, nome, mesNum) {
+        const mn = parseInt(mesNum, 10);
+        const nm = resolveMesNome(nome, mn);
+        const ab = abrev || ((mn >= 1 && mn <= 12) ? MESES_NUM_ABREV[mn] : '');
+        if (!ab) return '';
+        const cls = nm ? `mes-nome-${nm}` : '';
+        const cor = nm && MESES_CORES[nm] ? MESES_CORES[nm] : '';
+        const style = cor ? ` style="background-color:${cor}!important;color:#fff!important;"` : '';
+        return `<span class="pos-mes-badge ${cls}"${style} title="${nm || ab}">${ab}</span>`;
+    }
+
+    function htmlResumoBadge(resumo) {
+        if (!resumo) return '';
+        return `<span class="pos-meta-resumo" title="Dígitos distintos / soma">${resumo}</span>`;
+    }
+
+    function aplicarPreset(preset, manual) {
+        presetAtual = preset;
+        document.querySelectorAll('.preset-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.preset === preset);
+        });
+        document.getElementById('presetLegenda').textContent = LEGENDA_PRESET[preset] || '';
+
+        const rep = document.getElementById('chkRep');
+        const sni = document.getElementById('chkSniper');
+        const comp = document.getElementById('chkComp');
+        if (preset === 'leve') {
+            rep.checked = true; sni.checked = false; comp.checked = false;
+        } else if (preset === 'integrado') {
+            rep.checked = true; sni.checked = true; comp.checked = true;
+        }
+        atualizarWraps();
+        if (!manual) return;
+    }
+
+    function atualizarWraps() {
+        document.getElementById('wrapRep').classList.toggle('active', document.getElementById('chkRep').checked);
+        document.getElementById('wrapSniper').classList.toggle('active', document.getElementById('chkSniper').checked);
+        document.getElementById('wrapComp').classList.toggle('active', document.getElementById('chkComp').checked);
+    }
+
+    function renderResumo(data) {
+        const el = document.getElementById('barResumo');
+        if (!data || !data.sucesso) {
+            el.innerHTML = '<span class="text-danger">Erro ao carregar análise.</span>';
+            return;
+        }
+        const plug = data.plugins_resumo || {};
+        const alvos = plug.comportamento_alvos || {};
+        const alvosTxt = ['PA','PR','RT','MO'].filter(k => alvos[k] != null).map(k => `${k}=${alvos[k]}`).join(' · ');
+        el.innerHTML = `
+            <span>Último <strong>#${data.ultimo_concurso || '—'}</strong></span>
+            <span>${data.ultimo_data || ''}</span>
+            ${POS_CFG.extra_mes ? htmlMesBadge(data.ultimo_mes_abrev, data.ultimo_mes_nome, data.ultimo_mes_num) : ''}
+            ${POS_CFG.show_dig_soma ? htmlResumoBadge(data.ultimo_resumo_dig_soma) : ''}
+            ${POS_CFG.show_dig_soma ? `<span>Média soma <strong>${data.media_soma ?? '—'}</strong></span>` : ''}
+            <span>Janela <strong>${data.total_sorteios || data.janela}</strong> sorteios</span>
+            <span>Rep. posicional último par: <strong>${plug.repeticao_ultimo_par_posicional ?? '—'}</strong></span>
+            ${alvosTxt ? `<span>Comp. alvos: <strong>${alvosTxt}</strong></span>` : ''}
+        `;
+    }
+
+    async function carregarAnalise() {
+        const janela = document.getElementById('inpJanela').value;
+        const r = await fetch(`${API}/analise?janela=${janela}${sorteioParam()}`);
+        dadosAnalise = await r.json();
+        renderResumo(dadosAnalise);
+    }
+
+    async function carregarConcursos() {
+        const r = await fetch(`${API}/concursos?limit=150${sorteioParam()}`);
+        const data = await r.json();
+        concursosLista = data.concursos || [];
+        const sel = document.getElementById('selConferencia');
+        sel.innerHTML = '<option value="">— Sem conferência —</option>';
+        concursosLista.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.concurso;
+            const mes = c.mes_abrev ? ` ${c.mes_abrev}` : '';
+            const rs = c.resumo_dig_soma ? ` ${c.resumo_dig_soma}` : '';
+            opt.textContent = `#${c.concurso} ${c.data || ''}${mes}${rs}`;
+            sel.appendChild(opt);
+        });
+        atualizarBtnConferir();
+    }
+
+    function atualizarBtnConferir() {
+        const sel = document.getElementById('selConferencia');
+        document.getElementById('btnConferir').disabled = !sel.value || !ultimasApostas.length;
+    }
+
+    function calcConferencia(ap) {
+        if (!conferenciaAtiva || !concursoConf) return null;
+        const dezenas = ap.dezenas_ordem || [];
+        const oficial = concursoConf.dezenas_ordem || [];
+        if (!oficial.length) return null;
+
+        let acertosPos = 0;
+        const hitsPos = [];
+        for (let i = 0; i < 7; i++) {
+            if (dezenas[i] === oficial[i]) {
+                acertosPos++;
+                hitsPos.push(i);
+            }
+        }
+
+        const setAp = new Set(dezenas);
+        const setOf = new Set(oficial);
+        const acertosVol = [...setAp].filter(d => setOf.has(d)).length;
+
+        const mesAp = parseInt(ap.mes || ap.mes_num, 10);
+        const mesOf = parseInt(concursoConf.mes_num, 10);
+        const mesAcertou = mesAp >= 1 && mesOf >= 1 && mesAp === mesOf;
+
+        return {
+            acertosPos,
+            acertosVol,
+            mesAcertou,
+            hitsPos,
+            oficial,
+        };
+    }
+
+    function htmlBadgesConferencia(conf) {
+        if (!conf) return '';
+        const mesBadge = conf.mesAcertou != null
+            ? `<span class="badge badge-conf-mes ${conf.mesAcertou ? 'ok' : 'fail'} ms-1">${conf.mesAcertou ? 'Mês ✓' : 'Mês ✗'}</span>`
+            : '';
+        return `
+            <span class="badge ${conf.acertosVol >= 5 ? 'bg-success' : conf.acertosVol >= 4 ? 'bg-warning text-dark' : 'bg-light text-dark'}">${conf.acertosVol}/7 vol.</span>
+            <span class="badge ${conf.acertosPos >= 3 ? 'bg-success' : conf.acertosPos >= 2 ? 'bg-warning text-dark' : 'bg-light text-dark'} ms-1">${conf.acertosPos}/7 pos.</span>
+            ${mesBadge}`;
+    }
+
+    function renderPainelConferencia() {
+        const el = document.getElementById('painelConferencia');
+        const btnLimpar = document.getElementById('btnLimparConf');
+        if (!conferenciaAtiva || !concursoConf) {
+            el.classList.add('d-none');
+            el.innerHTML = '';
+            btnLimpar.classList.add('d-none');
+            return;
+        }
+        const ordem = (concursoConf.dezenas_ordem_fmt || concursoConf.dezenas_ordem || []).map(n => fmt(n)).join(' ');
+        el.classList.remove('d-none');
+        btnLimpar.classList.remove('d-none');
+        el.innerHTML = `
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <strong><i class="fas fa-check-double text-primary"></i> Conferindo #${concursoConf.concurso}</strong>
+                <span>${concursoConf.data || ''}</span>
+                ${htmlMesBadge(concursoConf.mes_abrev, concursoConf.mes_nome, concursoConf.mes_num)}
+                ${htmlResumoBadge(concursoConf.resumo_dig_soma)}
+            </div>
+            <div class="conf-oficial-ordem">Ordem oficial: ${ordem}</div>
+        `;
+    }
+
+    async function executarConferencia() {
+        const sel = document.getElementById('selConferencia');
+        const concurso = parseInt(sel.value, 10);
+        if (!concurso || !ultimasApostas.length) return;
+
+        const btn = document.getElementById('btnConferir');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        try {
+            let url = `/analise/api/por-posicao/${concurso}`;
+            if (POS_CFG.duplasena) url += `?sorteio=${sorteioAtual}`;
+            const r = await fetch(url);
+            const d = await r.json();
+            if (d.status !== 'success') {
+                alert(d.message || 'Concurso não encontrado.');
+                return;
+            }
+            concursoConf = {
+                concurso: d.concurso,
+                data: d.data,
+                dezenas_ordem: d.dezenas_ordem,
+                dezenas_ordem_fmt: d.dezenas_ordem_fmt,
+                mes_num: d.mes_num,
+                mes_nome: d.mes_nome,
+                mes_abrev: d.mes_abrev,
+                resumo_dig_soma: d.resumo_dig_soma,
+            };
+            conferenciaAtiva = true;
+            renderPainelConferencia();
+            renderApostas();
+        } catch (e) {
+            alert('Erro ao conferir: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-double"></i> Conferir';
+            atualizarBtnConferir();
+        }
+    }
+
+    function limparConferencia() {
+        conferenciaAtiva = false;
+        concursoConf = null;
+        document.getElementById('selConferencia').value = '';
+        renderPainelConferencia();
+        renderApostas();
+        atualizarBtnConferir();
+    }
+
+    function apostaPosicoes(ap) {
+        return (ap.dezenas_ordem || []).map((d, i) => ({
+            posicao: i + 1,
+            dezena: d,
+            dezena_fmt: fmt(d),
+        }));
+    }
+
+    function renderMatrizCell(n, hitDezena) {
+        const cls = n === hitDezena ? 'pos-matrix-cell hit' : 'pos-matrix-cell';
+        return `<div class="${cls}">${fmt(n)}</div>`;
+    }
+
+    function renderMatrizColuna(dezenaDestaque) {
+        return MATRIZ_NUMS.map(n => renderMatrizCell(n, dezenaDestaque)).join('');
+    }
+
+    function renderPainelPos(pos) {
+        return `
+        <div class="pos-panel" id="panel-aposta-pos-${pos.posicao}">
+            <div class="pos-matrix">${renderMatrizColuna(pos.dezena)}</div>
+        </div>`;
+    }
+
+    function renderOrdemStripPos(posicoes, conf) {
+        const oficial = conf ? conf.oficial : null;
+        return posicoes.map((p, i) => {
+            let cls = '';
+            if (conf && oficial && oficial.length > i) {
+                cls = p.dezena === oficial[i] ? ' conf-pos-hit' : ' conf-pos-miss';
+            }
+            return `
+            <div class="pos-ordem-cell${cls}" title="Posição ${p.posicao}">
+                <span class="pos-oc-val">${p.dezena_fmt}</span>
+            </div>`;
+        }).join('');
+    }
+
+    function renderOrdemStripOficial(conf) {
+        if (!conf || !conf.oficial) return '';
+        return conf.oficial.map((d, i) => {
+            const hit = conf.hitsPos.includes(i);
+            return `<div class="pos-ordem-cell-oficial${hit ? ' conf-pos-hit' : ''}" title="Oficial P${i + 1}">${fmt(d)}</div>`;
+        }).join('');
+    }
+
+    function htmlMetaBarAposta(ap, idx) {
+        const mes = ap.mes_abrev || (ap.mes_nome || '').substring(0, 3);
+        const mesNome = ap.mes_nome || '';
+        const digitos = ap.digitos_distintos_fmt || (ap.digitos_distintos || []).join(', ');
+        const soma = ap.soma_dezenas != null ? ap.soma_dezenas : '—';
+        return `
+            <span>Aposta <strong>${String(idx + 1).padStart(2, '0')}</strong></span>
+            <span>Mês ${htmlMesBadge(mes, mesNome, ap.mes || ap.mes_num)}</span>
+            <span>Dígitos: <strong>${digitos || '—'}</strong></span>
+            <span>Soma: <strong>${soma}</strong></span>
+            ${htmlResumoBadge(ap.resumo_dig_soma)}
+        `;
+    }
+
+    function htmlMatrizOficial(ap, idx) {
+        const posicoes = apostaPosicoes(ap);
+        const conf = calcConferencia(ap);
+        const confHtml = htmlBadgesConferencia(conf);
+        const compScore = ap.comportamento_score != null
+            ? `<span class="badge bg-secondary ms-1">Comp ${ap.comportamento_score}</span>` : '';
+
+        const stripOficial = conf
+            ? `<div class="pos-ordem-strip-oficial">${renderOrdemStripOficial(conf)}</div>`
+            : '';
+
+        return `
+        <div class="pos-main-card">
+            <div class="pos-meta-bar">
+                ${htmlMetaBarAposta(ap, idx)}
+                ${compScore}${confHtml}
+            </div>
+            <div class="pos-excel-block">
+                <div class="pos-ordem-strip">${renderOrdemStripPos(posicoes, conf)}</div>
+                ${stripOficial}
+                <div class="pos-panels-wrap">
+                    <div class="pos-panels">${posicoes.map(renderPainelPos).join('')}</div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function htmlApostaSidebar(ap, idx) {
+        const mes = ap.mes_abrev || (ap.mes_nome || '').substring(0, 3);
+        const mesNome = ap.mes_nome || '';
+        const ordem = (ap.dezenas_ordem_fmt || ap.dezenas_ordem || []).map(n => fmt(n)).join(' ');
+        const active = idx === apostaAtivaIdx ? ' active' : '';
+        const conf = calcConferencia(ap);
+        const confHtml = conf ? `<span class="ms-1">${htmlBadgesConferencia(conf)}</span>` : '';
+        return `
+        <button type="button" class="aposta-item-btn${active}" data-aposta-idx="${idx}">
+            <div class="aposta-meta-linha mb-1">
+                <span class="aposta-num">${String(idx + 1).padStart(2, '0')}</span>
+                ${htmlMesBadge(mes, mesNome, ap.mes || ap.mes_num)}
+                ${htmlResumoBadge(ap.resumo_dig_soma)}
+                ${confHtml}
+            </div>
+            <div class="pos-ci-ordem">${htmlOrdemStrip(ap.dezenas_ordem, conf)}</div>
+        </button>`;
+    }
+
+    function htmlOrdemStrip(dezenas, conf) {
+        const oficial = conf ? conf.oficial : null;
+        return (dezenas || []).map((d, i) => {
+            const hitPos = conf && oficial && oficial[i] === d;
+            const hitVol = conf && oficial && oficial.includes(d);
+            let cls = '';
+            if (hitPos) cls = 'dez-hit';
+            else if (hitVol) cls = 'dez-hit-vol';
+            return `<span class="${cls}">${fmt(d)}</span>`;
+        }).join(' ');
+    }
+
+    function htmlAposta(ap, idx) {
+        const conf = calcConferencia(ap);
+        const mes = ap.mes_abrev || (ap.mes_nome || '').substring(0, 3);
+        const mesNome = ap.mes_nome || '';
+
+        const compScore = ap.comportamento_score != null
+            ? `<span class="badge bg-secondary" title="Score comportamental">Comp ${ap.comportamento_score}</span>` : '';
+
+        const confHtml = htmlBadgesConferencia(conf);
+        const destaque = conf && conf.acertosVol >= 4 ? ' conf-destaque' : '';
+
+        return `
+        <div class="aposta-linha${destaque}">
+            <div class="aposta-meta-linha">
+                <span class="aposta-num">${String(idx + 1).padStart(2, '0')}</span>
+                ${htmlMesBadge(mes, mesNome, ap.mes || ap.mes_num)}
+                ${htmlResumoBadge(ap.resumo_dig_soma)}
+                ${compScore}${confHtml}
+            </div>
+            <div class="pos-ci-ordem">${htmlOrdemStrip(ap.dezenas_ordem, conf)}</div>
+        </div>`;
+    }
+
+    function renderApostas() {
+        const el = document.getElementById('listaApostas');
+        if (!ultimasApostas.length) {
+            el.innerHTML = '<p class="text-muted small mb-0">Nenhuma aposta gerada.</p>';
+            return;
+        }
+
+        if (apostaAtivaIdx >= ultimasApostas.length) {
+            apostaAtivaIdx = 0;
+        }
+
+        if (modoVisualizacao === 'ordem') {
+            const apAtiva = ultimasApostas[apostaAtivaIdx];
+            el.innerHTML = `
+            <div class="pos-apostas-layout">
+                <div class="pos-apostas-sidebar">
+                    <div class="pos-apostas-sidebar-head"><i class="fas fa-list me-1"></i> Apostas</div>
+                    <div class="pos-apostas-sidebar-list">
+                        ${ultimasApostas.map((a, i) => htmlApostaSidebar(a, i)).join('')}
+                    </div>
+                </div>
+                ${htmlMatrizOficial(apAtiva, apostaAtivaIdx)}
+            </div>`;
+            el.querySelectorAll('.aposta-item-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    apostaAtivaIdx = parseInt(btn.dataset.apostaIdx, 10);
+                    renderApostas();
+                });
+            });
+            return;
+        }
+
+        el.innerHTML = ultimasApostas.map((a, i) => htmlAposta(a, i)).join('');
+    }
+
+    function setModoVisualizacao(modo) {
+        modoVisualizacao = modo;
+        document.querySelectorAll('.viz-mode-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.viz === modo);
+        });
+        renderApostas();
+    }
+
+    async function gerar() {
+        const btn = document.getElementById('btnGerar');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando…';
+        try {
+            const body = {
+                quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+                janela: parseInt(document.getElementById('inpJanela').value, 10) || 50,
+                perfil: document.getElementById('inpPerfil').value,
+                filtrar_dig_soma: POS_CFG.show_dig_soma && document.getElementById('chkDigSoma')?.checked,
+                preset: presetAtual,
+                usar_repeticao: document.getElementById('chkRep').checked,
+                usar_sniper: document.getElementById('chkSniper').checked,
+                usar_comportamento: document.getElementById('chkComp').checked,
+                modo_comportamento: document.getElementById('selModoComp').value,
+                sorteio: sorteioAtual,
+            };
+            const r = await fetch(`${API}/gerar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            const data = await r.json();
+            if (!data.sucesso) {
+                alert(data.erro || 'Erro ao gerar.');
+                return;
+            }
+            ultimasApostas = data.apostas || [];
+            apostaAtivaIdx = 0;
+            document.getElementById('btnExport').disabled = !ultimasApostas.length;
+            atualizarBtnConferir();
+            renderApostas();
+        } catch (e) {
+            alert('Falha na requisição: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-bolt"></i> Gerar apostas';
+        }
+    }
+
+    function exportarTxt() {
+        if (!ultimasApostas.length) return;
+        const linhas = ultimasApostas.map(a => {
+            const dz = joinOrdem(a.dezenas_ordem_fmt ? a.dezenas_ordem_fmt.map(x => parseInt(x, 10)) : (a.dezenas_ordem || []));
+            const parts = [dz];
+            if (POS_CFG.extra_mes) {
+                const mn = parseInt(a.mes || a.mes_num, 10);
+                const mes = a.mes_abrev
+                    || ((mn >= 1 && mn <= 12) ? MESES_NUM_ABREV[mn] : '')
+                    || (a.mes_nome || '').substring(0, 3);
+                if (mes) parts.push(mes);
+            }
+            if (POS_CFG.extra_time && a.time_nome) {
+                parts.push(a.time_nome);
+            }
+            if (POS_CFG.extra_trevo && a.trevos_fmt) {
+                parts.push(a.trevos_fmt.join(' '));
+            }
+            return parts.join(' ');
+        });
+        const blob = new Blob([linhas.join('\n') + '\n'], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'posicao_apostas.txt';
+        a.click();
+    }
+
+    document.getElementById('grpViz').addEventListener('click', e => {
+        const btn = e.target.closest('.viz-mode-btn');
+        if (!btn) return;
+        setModoVisualizacao(btn.dataset.viz);
+    });
+
+    document.getElementById('grpPreset').addEventListener('click', e => {
+        const btn = e.target.closest('.preset-btn');
+        if (!btn) return;
+        aplicarPreset(btn.dataset.preset, false);
+    });
+
+    document.querySelectorAll('.refino-toggle').forEach(chk => {
+        chk.addEventListener('change', () => {
+            presetAtual = 'manual';
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.preset-btn[data-preset="manual"]').classList.add('active');
+            document.getElementById('presetLegenda').textContent = LEGENDA_PRESET.manual;
+            atualizarWraps();
+        });
+    });
+
+    document.getElementById('inpJanela').addEventListener('change', carregarAnalise);
+    document.getElementById('btnGerar').addEventListener('click', gerar);
+    document.getElementById('btnExport').addEventListener('click', exportarTxt);
+    document.getElementById('btnConferir').addEventListener('click', executarConferencia);
+    document.getElementById('btnLimparConf').addEventListener('click', limparConferencia);
+    document.getElementById('selConferencia').addEventListener('change', () => {
+        atualizarBtnConferir();
+    });
+
+    aplicarPreset('integrado', false);
+    const selSorteio = document.getElementById('selSorteioGer');
+    if (selSorteio) {
+        selSorteio.addEventListener('change', async () => {
+            sorteioAtual = parseInt(selSorteio.value, 10) || 1;
+            await carregarAnalise();
+            await carregarConcursos();
+            limparConferencia();
+        });
+    }
+    carregarAnalise();
+    carregarConcursos();
+})();
+</script>
+{% endblock %}

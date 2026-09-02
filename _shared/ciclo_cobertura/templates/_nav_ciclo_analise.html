@@ -1,0 +1,48 @@
+{# Nav das abas da Análise de Ciclos — sem link ao Elite (já está no menu). #}
+<ul class="nav nav-pills mb-3 flex-wrap" id="ciclosAnaliseTabs">
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if active_tab == 'ciclo-atual' else '' }}"
+           href="/analise/ciclo-cobertura/">
+            <i class="fas fa-sync-alt me-2"></i>Ciclo Atual
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if active_tab == 'metricas' else '' }}"
+           href="/analise/ciclo-cobertura/metricas/">
+            <i class="fas fa-chart-bar me-2"></i>Métricas Históricas
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if active_tab == 'inteligencia' else '' }}"
+           href="/analise/ciclo-cobertura/inteligencia-operacional/">
+            <i class="fas fa-brain me-2"></i>Inteligência Operacional
+        </a>
+    </li>
+</ul>
+{% set passo_atual = {
+    'ciclo-atual': 1,
+    'metricas': 2,
+    'inteligencia': 3,
+}.get(active_tab, 1) %}
+<div class="fluxo-ciclos mb-4" style="background:linear-gradient(135deg,#f8f9fa 0%,#eef2f7 100%);border:1px solid #dee2e6;border-radius:10px;padding:14px 16px;">
+    <div class="small text-muted text-uppercase fw-bold mb-2">
+        <i class="fas fa-route me-1"></i> Como usar — fluxo recomendado
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="/analise/ciclo-cobertura/" class="fluxo-passo {{ 'ativo' if passo_atual == 1 else '' }}"
+           style="flex:1 1 140px;min-width:120px;display:flex;gap:8px;padding:8px 10px;border-radius:8px;text-decoration:none;color:inherit;border:2px solid {{ '#0d6efd' if passo_atual == 1 else 'transparent' }};background:{{ '#e7f1ff' if passo_atual == 1 else '#fff' }};">
+            <span style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;background:{{ '#0d6efd' if passo_atual == 1 else '#dee2e6' }};color:{{ '#fff' if passo_atual == 1 else '#495057' }};">1</span>
+            <span><strong>Ciclo Atual</strong><br><small class="text-muted">Volante · Evolução</small></span>
+        </a>
+        <a href="/analise/ciclo-cobertura/metricas/" class="fluxo-passo {{ 'ativo' if passo_atual == 2 else '' }}"
+           style="flex:1 1 140px;min-width:120px;display:flex;gap:8px;padding:8px 10px;border-radius:8px;text-decoration:none;color:inherit;border:2px solid {{ '#0d6efd' if passo_atual == 2 else 'transparent' }};background:{{ '#e7f1ff' if passo_atual == 2 else '#fff' }};">
+            <span style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;background:{{ '#0d6efd' if passo_atual == 2 else '#dee2e6' }};color:{{ '#fff' if passo_atual == 2 else '#495057' }};">2</span>
+            <span><strong>Métricas</strong><br><small class="text-muted">Histórico de ciclos</small></span>
+        </a>
+        <a href="/analise/ciclo-cobertura/inteligencia-operacional/" class="fluxo-passo {{ 'ativo' if passo_atual == 3 else '' }}"
+           style="flex:1 1 140px;min-width:120px;display:flex;gap:8px;padding:8px 10px;border-radius:8px;text-decoration:none;color:inherit;border:2px solid {{ '#0d6efd' if passo_atual == 3 else 'transparent' }};background:{{ '#e7f1ff' if passo_atual == 3 else '#fff' }};">
+            <span style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;background:{{ '#0d6efd' if passo_atual == 3 else '#dee2e6' }};color:{{ '#fff' if passo_atual == 3 else '#495057' }};">3</span>
+            <span><strong>Inteligência</strong><br><small class="text-muted">Decisões operacionais</small></span>
+        </a>
+    </div>
+</div>

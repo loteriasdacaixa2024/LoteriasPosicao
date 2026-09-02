@@ -1,0 +1,6 @@
+        <div class="mobile-group-title">{{ nav_cfg.geradores_elite.title }}</div>
+        {% for item in nav_cfg.geradores_elite['items'] %}
+        <a class="mobile-link" href="{{ item.href }}" onclick="closeMobileNav()">
+            <i class="{{ item.icon }}"></i> {{ item.title }}
+        </a>
+        {% endfor %}

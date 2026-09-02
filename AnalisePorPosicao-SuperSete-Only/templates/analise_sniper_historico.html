@@ -1,0 +1,160 @@
+{# Histórico compartilhado — filtros + tabela; contexto muda com a aba ativa #}
+<div class="card border-0 shadow-sm" id="historicoSniperCard">
+    <div class="card-header fw-bold d-flex flex-wrap align-items-center gap-2"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-history me-2"></i>Últimos concursos (detalhado)</span>
+        <span class="badge bg-light text-dark ms-auto" id="histContador">{{ historico|length }} sorteios</span>
+    </div>
+    <div class="card-body border-bottom bg-light py-3">
+        <p class="small text-muted mb-2" id="histContextoTxt">
+            Filtros conforme a aba <strong>Volante por coluna</strong>: destaque por coluna e repetição no sorteio.
+        </p>
+
+        {% if repeticoes %}
+        <div class="mb-3">
+            <span class="fw-bold small text-uppercase text-muted d-block mb-2">Resumo visual — quantos dígitos distintos repetiram no sorteio</span>
+            <div class="d-flex flex-wrap gap-2" id="histResumoChips">
+                <button type="button" class="btn btn-sm btn-outline-secondary hist-chip-qtd" data-qtd="0">
+                    0 dígitos <span class="badge bg-secondary">{{ repeticoes.resumo_qtd_digitos_repetidos.get(0, 0) }}</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary hist-chip-qtd" data-qtd="1">
+                    1 dígito <span class="badge bg-secondary">{{ repeticoes.resumo_qtd_digitos_repetidos.get(1, 0) }}</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary hist-chip-qtd" data-qtd="2">
+                    2 dígitos <span class="badge bg-secondary">{{ repeticoes.resumo_qtd_digitos_repetidos.get(2, 0) }}</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary hist-chip-qtd" data-qtd="3">
+                    3+ dígitos <span class="badge bg-secondary">{{ repeticoes.resumo_qtd_digitos_repetidos.get(3, 0) }}</span>
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-lg-4 hist-filter-grp hist-filter-intrasorte">
+                <label class="form-label small mb-0 fw-bold">Tipo no sorteio</label>
+                <select class="form-select form-select-sm" id="histFiltroTipo">
+                    <option value="">Todos os tipos</option>
+                    <option value="0_repeticao">Todos únicos</option>
+                    <option value="1_dupla">1 dupla</option>
+                    <option value="2_duplas">2 duplas</option>
+                    <option value="1_trinca">1 trinca</option>
+                    <option value="outros">Múltiplas (quadras+)</option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2 hist-filter-grp hist-filter-intrasorte">
+                <label class="form-label small mb-0 fw-bold">Dígitos repetidos</label>
+                <select class="form-select form-select-sm" id="histFiltroQtdDig">
+                    <option value="">Qualquer qtd</option>
+                    <option value="0">0 (únicos)</option>
+                    <option value="1">1 dígito</option>
+                    <option value="2">2 dígitos</option>
+                    <option value="3">3 ou mais</option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2 hist-filter-grp hist-filter-sequencial">
+                <label class="form-label small mb-0 fw-bold">Rep. vs concurso ant.</label>
+                <select class="form-select form-select-sm" id="histFiltroSeq">
+                    <option value="">Qualquer</option>
+                    <option value="0">0 colunas</option>
+                    <option value="1">1 coluna</option>
+                    <option value="2">2 colunas</option>
+                    <option value="3">3+ colunas</option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2 hist-filter-grp hist-filter-volante">
+                <label class="form-label small mb-0 fw-bold">Coluna</label>
+                <select class="form-select form-select-sm" id="histFiltroCol">
+                    <option value="">Todas</option>
+                    {% for c in range(1, 8) %}
+                    <option value="{{ c }}">C{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-lg-2 hist-filter-grp hist-filter-volante">
+                <label class="form-label small mb-0 fw-bold">Dígito na coluna</label>
+                <select class="form-select form-select-sm" id="histFiltroDigCol" disabled>
+                    <option value="">—</option>
+                    {% for d in range(10) %}
+                    <option value="{{ d }}">{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-lg-auto ms-lg-auto">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="histLimparFiltros">
+                    <i class="fas fa-eraser me-1"></i>Limpar
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover historico-table mb-0 align-middle text-center" id="histTabela">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Data</th>
+                        <th>C1</th><th>C2</th><th>C3</th><th>C4</th><th>C5</th><th>C6</th><th>C7</th>
+                        <th class="hist-col-intrasorte">Dígitos repetidos</th>
+                        <th class="hist-col-sequencial">Rep. vs anterior</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in historico %}
+                    <tr class="hist-row"
+                        data-tipo="{{ s.tipo_intrasorte }}"
+                        data-qtd-dig="{{ s.qtd_digitos_repetidos if s.qtd_digitos_repetidos < 3 else 3 }}"
+                        data-qtd-seq="{{ s.qtd_colunas_rep_sequencial if s.qtd_colunas_rep_sequencial < 3 else 3 }}"
+                        data-c1="{{ s.digitos[0] }}" data-c2="{{ s.digitos[1] }}" data-c3="{{ s.digitos[2] }}"
+                        data-c4="{{ s.digitos[3] }}" data-c5="{{ s.digitos[4] }}" data-c6="{{ s.digitos[5] }}"
+                        data-c7="{{ s.digitos[6] }}">
+                        <td class="fw-bold">{{ s.concurso }}</td>
+                        <td class="text-muted text-nowrap small">{{ s.data }}</td>
+                        {% for d in s.digitos %}
+                        {% set ns = namespace(bg='', text='', bor='') %}
+                        {% for rep in s.repetidos %}
+                        {% if rep.digito == d %}
+                        {% if loop.index0 == 0 %}
+                        {% set ns.bg = '#708e25' %}{% set ns.text = '#ffffff' %}{% set ns.bor = '#50651a' %}
+                        {% elif loop.index0 == 1 %}
+                        {% set ns.bg = '#405115' %}{% set ns.text = '#ffffff' %}{% set ns.bor = '#303d10' %}
+                        {% elif loop.index0 == 2 %}
+                        {% set ns.bg = '#20290a' %}{% set ns.text = '#ffffff' %}{% set ns.bor = '#101405' %}
+                        {% else %}
+                        {% set ns.bg = '#101405' %}{% set ns.text = '#ffffff' %}{% set ns.bor = '#000000' %}
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                        <td>
+                            <span class="digito-box {% if ns.bg %}shadow-sm{% endif %}" {% if ns.bg %}
+                                style="background:{{ ns.bg }};color:{{ ns.text }};border:1px solid {{ ns.bor }};font-weight:900;"
+                                {% endif %}>{{ d }}</span>
+                        </td>
+                        {% endfor %}
+                        <td class="hist-col-intrasorte text-start">
+                            {% if s.repetidos|length > 0 %}
+                            <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                {% for rep in s.repetidos %}
+                                <span class="badge" style="background:#708e25;color:#fff;">{{ rep.digito }} ({{ rep.qtd }}×)</span>
+                                {% endfor %}
+                            </div>
+                            <span class="badge bg-light text-muted border mt-1">{{ s.tipo_intrasorte_label }}</span>
+                            {% else %}
+                            <span class="badge bg-light text-muted border">Únicos</span>
+                            {% endif %}
+                        </td>
+                        <td class="hist-col-sequencial text-start small">
+                            {% if s.rep_sequencial|length > 0 %}
+                            <span class="text-success fw-bold">{{ s.texto_rep_sequencial }}</span>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="small text-muted mb-0 p-2" id="histRodapeVisiveis">Exibindo todos os concursos.</p>
+    </div>
+</div>

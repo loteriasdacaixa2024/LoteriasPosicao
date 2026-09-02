@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    .estudos-aba-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+    .base-tab-btn.active { background: var(--accent); color: #1a2600; border-color: var(--accent); font-weight: 800; }
+    .janela-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+    .kpi-card { background: var(--surface, #fff); border: 1px solid rgba(192,139,0,.2); border-radius: 10px; padding: .65rem .85rem; height: 100%; }
+    .kpi-card .kpi-label { font-size: .72rem; font-weight: 700; color: #6c757d; text-transform: uppercase; }
+    .kpi-card .kpi-val { font-size: 1.1rem; font-weight: 800; color: var(--primary-xdark); }
+    .estudos-tabela { font-size: .8rem; }
+    .estudos-tabela th, .estudos-tabela td { text-align: center; vertical-align: middle; }
+    .estudos-tabela th.sigla-hdr { white-space: nowrap; font-size: .75rem; }
+    .estudos-tabela .comp-col-concurso { text-align: left; min-width: 11rem; }
+    .insight-item { border-left: 3px solid var(--accent); padding: .35rem .65rem; margin-bottom: .35rem; background: var(--accent-light); font-size: .85rem; }
+    .classif-chip { font-size: .7rem; padding: .15rem .4rem; border-radius: 5px; border: 1px solid #ddd; margin: 2px; display: inline-block; }
+    .panorama-matriz { font-size: .75rem; }
+    .panorama-cel-val.top1 { color: #b8860b; font-weight: 800; }
+    .chart-box { min-height: 220px; background: var(--surface,#fff); border: 1px solid rgba(0,0,0,.08); border-radius: 10px; padding: .75rem; }
+    .estudos-links a { text-decoration: none; font-weight: 600; }
+    .estudos-links a:hover { text-decoration: underline; }
+    .heatmap-cooc .heat-cell { font-size: .72rem; min-width: 1.6rem; }
+    .cmp-table th.cmp-v { background: rgba(46,125,50,.12); }
+    .cmp-table th.cmp-a { background: rgba(21,101,192,.12); }
+    .cmp-table td.delta-pos { color: #2e7d32; font-weight: 700; }
+    .cmp-table td.delta-neg { color: #c62828; font-weight: 700; }
+    .btn-comparativo.active { background: #5c6bc0; color: #fff; border-color: #5c6bc0; }
+    {% include 'comportamento_col_concurso_estilos.html' %}
+    .mes-abrev-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 2.4rem; font-size: .7rem; font-weight: 700; padding: .1rem .35rem; border-radius: 5px; color: #fff !important; margin-left: .15rem; }
+    .mes-abrev-badge:not([class*="mes-nome-"]) { background: #6c757d; }
+    .estudos-collapse { border: 1px solid rgba(0,0,0,.1); border-radius: 8px; background: var(--surface, #fff); margin-bottom: .65rem; }
+    .estudos-collapse-summary { cursor: pointer; padding: .5rem .75rem; font-size: .84rem; font-weight: 600; list-style: none; user-select: none; }
+    .estudos-collapse-summary::-webkit-details-marker { display: none; }
+    .estudos-collapse-summary::before { content: '▸'; display: inline-block; margin-right: .4rem; transition: transform .15s; color: var(--primary, #2e7d32); }
+    .estudos-collapse[open] > .estudos-collapse-summary::before { transform: rotate(90deg); }
+    .estudos-collapse-body { padding: 0 .75rem .65rem; font-size: .84rem; }
+    .estudos-tabela-dif-hist .col-dezenas-left { text-align: left !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .estudos-tabela-dif-hist .col-dezenas-left th { text-align: left !important; }
+    .dif-bloco-concursos { font-size: .72rem; font-weight: 500; color: #6c757d; margin-left: .35rem; }
+    .dif-dezenas-txt { font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+    .dif-acoes-bar { gap: .5rem; align-items: center; position: relative; flex-wrap: wrap; }
+    .dif-linha-dica { display: inline-block; margin: 0; position: relative; }
+    .dif-linha-dica > summary { list-style: none; cursor: pointer; }
+    .dif-linha-dica > summary::-webkit-details-marker { display: none; }
+    .dif-linha-chip { font-size: .68rem; font-weight: 600; padding: .22rem .5rem; border-radius: 999px; color: #6c757d; border: 1px solid rgba(0,0,0,.12); background: #fff; user-select: none; }
+    .dif-linha-dica[open] > summary .dif-linha-chip { border-color: var(--primary, #2e7d32); color: var(--primary, #2e7d32); }
+    .dif-linha-dica-body { position: absolute; z-index: 20; right: 0; top: 100%; margin-top: .35rem; min-width: min(100vw - 2rem, 420px); max-width: 480px; padding: .65rem .75rem; font-size: .78rem; color: #5c6570; background: #fff; border: 1px solid rgba(0,0,0,.1); border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+    .dif-exemplo-bloco { font-family: ui-monospace, monospace; font-size: .74rem; background: rgba(0,0,0,.04); border-radius: 6px; padding: .45rem .55rem; margin: .35rem 0; white-space: pre-wrap; line-height: 1.45; }
+    .dif-ajuda-lista { margin: .25rem 0 0; padding-left: 1.1rem; }
+    .dif-ajuda-lista li { margin-bottom: .2rem; }
+</style>
+
+<div class="container-fluid py-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1"><i class="fas fa-microscope text-primary"></i> {{ page_title }}</h1>
+            <p class="text-muted small mb-0">{{ page_subtitle }} — {{ modality_nome }}</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="badge bg-secondary" id="lblBaseAtiva">Geral</span>
+            <span class="badge bg-light text-dark border" id="lblJanelaAtiva">Janela 10</span>
+            <span class="badge bg-light text-dark border" id="lblUltimoConcurso">—</span>
+            <div class="btn-group btn-group-sm ms-1">
+                <button type="button" class="btn btn-outline-secondary" id="btnExportTxt" title="Exportar TXT">
+                    <i class="fas fa-download"></i> TXT
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnExportCsv" title="Exportar CSV">
+                    <i class="fas fa-file-csv"></i> CSV
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        <span class="small fw-bold text-muted me-1">Base:</span>
+        <div class="btn-group btn-group-sm" id="tabsBase">
+            <button type="button" class="btn btn-outline-secondary base-tab-btn active" data-base="geral">Geral</button>
+            <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="vencedores">Vencedores</button>
+            <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="acumulados">Acumulados</button>
+        </div>
+        <span class="small fw-bold text-muted ms-2 me-1">Janela:</span>
+        <div class="btn-group btn-group-sm" id="grpJanela">
+            {% for j in estudos_ui.janelas %}
+            <button type="button" class="btn btn-outline-secondary janela-btn{% if j == estudos_ui.janela_default %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm btn-comparativo ms-2" id="btnComparativo" title="Comparar vencedores × acumulados">
+            <i class="fas fa-columns"></i> V × A
+        </button>
+    </div>
+
+    <div id="painelComparativo" class="mb-3 d-none"></div>
+
+    <ul class="nav nav-tabs mb-3" id="estudosAbas" role="tablist">
+        {% for aba in abas %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link estudos-aba-btn{% if loop.first %} active{% endif %}" id="tab-{{ aba.id }}" data-bs-toggle="tab" data-bs-target="#pane-{{ aba.id }}" data-aba="{{ aba.id }}" type="button" role="tab">
+                <i class="{{ aba.icone }} me-1"></i>{{ aba.titulo }}
+            </button>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <div class="tab-content" id="estudosTabContent">
+        {% for aba in abas %}
+        <div class="tab-pane fade{% if loop.first %} show active{% endif %}" id="pane-{{ aba.id }}" role="tabpanel" data-aba="{{ aba.id }}">
+            <div id="kpis-{{ aba.id }}" class="row g-2 mb-3"></div>
+            <div id="corpo-{{ aba.id }}">
+                <p class="text-muted small">Carregando…</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    window.__ESTUDOS_UI__ = {{ estudos_ui | tojson }};
+    window.__ESTUDOS_ABAS__ = {{ abas | tojson }};
+    window.__ESTUDOS_API__ = {{ api_base | tojson }};
+    window.__MESES_CORES__ = {{ meses_cores | tojson }};
+    window.__ESTUDOS_EXTRA_MES__ = {{ estudos_cfg.extra_mes | tojson }};
+    window.__ESTUDOS_CONSTRUTOR__ = {{ construtor_habilitado | tojson }};
+    window.__ESTUDOS_CONSTRUTOR_URL__ = {{ construtor_url | tojson }};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('geradores_elite.static', filename='comportamento_col_concurso.js') }}"></script>
+<script src="/analise/analises-gerais/static/analise_estudos.js"></script>
+{% endblock %}

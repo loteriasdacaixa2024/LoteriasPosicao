@@ -1,0 +1,26 @@
+{% if nav_cfg.desdobramento.mode == 'dropdown' %}
+            <div class="nav-item-wrap">
+                <button class="nav-btn">
+                    <i class="fas fa-sparkles nav-icon"></i> {{ nav_cfg.desdobramento.title }}
+                    <i class="fas fa-chevron-down caret"></i>
+                </button>
+                <div class="nav-dropdown">
+                    <div class="dd-header">{{ nav_cfg.desdobramento.title }}</div>
+                    {% for item in nav_cfg.desdobramento['items'] %}
+                    <a class="dd-link" href="{{ item.href }}">
+                        <span class="dd-icon" style="background:var(--accent-light);color:var(--primary);">
+                            <i class="{{ item.icon }}"></i>
+                        </span>
+                        <span class="dd-text-block">
+                            <span class="dd-title">{{ item.title }}</span>
+                            <span class="dd-desc">{{ item.desc }}</span>
+                        </span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+{% else %}
+            <a class="nav-btn" href="{{ nav_cfg.desdobramento.href }}">
+                <i class="fas fa-sparkles nav-icon"></i> {{ nav_cfg.desdobramento.title }}
+            </a>
+{% endif %}

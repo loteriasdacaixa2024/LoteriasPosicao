@@ -1,0 +1,1705 @@
+{% extends "base.html" %}
+{% block title %}Construtor de Construções — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    {% if meses_cores %}
+    {% for nome, cor in meses_cores.items() %}
+    #ge-construtor .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+    {% endfor %}
+    {% endif %}
+    #ge-construtor .cc-panel {
+        border-radius: var(--radius, 12px);
+        border: 1px solid rgba(0, 0, 0, .08);
+        background: var(--surface, #fff);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+        margin-bottom: 1rem;
+    }
+    #ge-construtor .cc-step-card {
+        border-left-width: 4px;
+        border-left-style: solid;
+    }
+    #ge-construtor .cc-step-1 {
+        background: var(--accent-light);
+        border-left-color: var(--primary);
+        border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+        box-shadow: 0 3px 16px color-mix(in srgb, var(--primary) 18%, transparent);
+    }
+    #ge-construtor .cc-step-1 .cc-step-badge {
+        background: var(--primary);
+        color: #fff;
+    }
+    #ge-construtor .cc-step-1-header {
+        text-align: left;
+    }
+    #ge-construtor .cc-step-1 .cc-step-hint {
+        text-align: left;
+        padding-left: 2rem;
+    }
+    #ge-construtor .cc-step-1-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-top: .25rem;
+    }
+    #ge-construtor .cc-step-1-body .cc-volante {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #ge-construtor .cc-step-1-body .cc-faixa-legend {
+        justify-content: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem .75rem;
+    }
+    #ge-construtor .cc-step-1-body .cc-import-btns {
+        justify-content: center;
+    }
+    #ge-construtor .cc-step-1-body .cc-colinha-pop {
+        width: 100%;
+        max-width: 420px;
+        text-align: left;
+    }
+    #ge-construtor .cc-modo-toggle {
+        display: inline-flex;
+        gap: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+        margin: 0 auto .65rem;
+    }
+    #ge-construtor .cc-modo-toggle .btn {
+        border-radius: 0;
+        border: none;
+        font-size: .78rem;
+        font-weight: 600;
+        padding: .35rem .7rem;
+    }
+    #ge-construtor .cc-modo-toggle .btn.active {
+        background: var(--primary);
+        color: #fff;
+    }
+    #ge-construtor .cc-modo-toggle .btn:not(.active) {
+        background: var(--surface, #fff);
+        color: var(--primary-dark);
+    }
+    #ge-construtor .cc-apostas-ta {
+        width: 100%;
+        max-width: 420px;
+        min-height: 11.5rem;
+        font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+        font-size: .82rem;
+        line-height: 1.45;
+        resize: vertical;
+    }
+    #ge-construtor .cc-apostas-drop {
+        width: 100%;
+        max-width: 420px;
+        border: 2px dashed color-mix(in srgb, var(--primary) 40%, transparent);
+        border-radius: 10px;
+        padding: .65rem;
+        background: rgba(255, 255, 255, .55);
+        transition: border-color .15s, background .15s;
+    }
+    #ge-construtor .cc-apostas-drop.cc-dragover {
+        border-color: var(--primary);
+        background: var(--accent-light);
+    }
+    #ge-construtor .cc-step-2 {
+        background: var(--accent-light);
+        border-left-color: var(--primary);
+        border-color: color-mix(in srgb, var(--primary) 20%, transparent);
+    }
+    #ge-construtor .cc-step-2 .cc-step-badge {
+        background: var(--primary);
+        color: #fff;
+    }
+    #ge-construtor .cc-step-3 {
+        background: color-mix(in srgb, var(--accent-light) 70%, #fff);
+        border-left-color: var(--primary-dark);
+        border-color: color-mix(in srgb, var(--primary-dark) 18%, transparent);
+    }
+    #ge-construtor .cc-step-3 .cc-step-badge {
+        background: var(--primary-dark);
+        color: #fff;
+    }
+    #ge-construtor #ccPadroesIIWrap {
+        background: color-mix(in srgb, var(--accent-light) 78%, #fff);
+        border: 1px solid color-mix(in srgb, var(--primary) 32%, #dee2e6);
+        border-left: 4px solid var(--primary);
+        border-radius: 8px;
+        box-shadow: 0 1px 8px color-mix(in srgb, var(--primary) 12%, transparent);
+    }
+    #ge-construtor #ccPadroesIIWrap .cc-padroes-ii-title {
+        color: var(--primary-xdark);
+    }
+    #ge-construtor #ccPadroesIIWrap .cc-padroes-ii-title i {
+        color: var(--primary);
+    }
+    #ge-construtor #ccPadroesIIWrap .btn-outline-primary {
+        color: var(--primary);
+        border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+    }
+    #ge-construtor #ccPadroesIIWrap .btn-outline-primary:hover {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+    #ge-construtor #ccPadroesIIWrap #ccPadIILista {
+        background: color-mix(in srgb, #fff 72%, var(--accent-light));
+        border-radius: 6px;
+        padding: .28rem .45rem;
+    }
+    #ge-construtor #ccPadroesIIWrap #ccPadIICount {
+        background: var(--primary) !important;
+    }
+    #ge-construtor .cc-refinar-box {
+        background: color-mix(in srgb, var(--accent-light) 78%, #fff);
+        border: 1px solid color-mix(in srgb, var(--primary) 28%, #dee2e6);
+        border-left: 4px solid var(--primary);
+        border-radius: 8px;
+        padding: .75rem .9rem;
+        margin-bottom: .75rem;
+    }
+    #ge-construtor .cc-refinar-box h3 {
+        font-size: .88rem;
+        font-weight: 800;
+        color: var(--primary-xdark);
+        margin: 0 0 .45rem;
+    }
+    #ge-construtor .cc-refinada-row {
+        font-size: .82rem;
+        padding: .28rem 0;
+        border-top: 1px dashed rgba(0,0,0,.08);
+    }
+    #ge-construtor .cc-refinada-meta {
+        color: #64748b;
+        font-size: .72rem;
+    }
+    #ge-construtor .cc-gerar-progress {
+        display: none;
+        margin-top: .65rem;
+        max-width: 420px;
+    }
+    #ge-construtor .cc-gerar-progress.is-active {
+        display: block;
+    }
+    #ge-construtor .cc-gerar-progress-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: .3rem;
+        font-size: .8rem;
+        color: #495057;
+    }
+    #ge-construtor .cc-gerar-progress-meta .cc-gerar-pct {
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        color: var(--primary-dark, #0d6efd);
+        min-width: 3.2rem;
+        text-align: right;
+    }
+    #ge-construtor .cc-gerar-progress .progress {
+        height: 0.65rem;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, .08);
+        overflow: hidden;
+    }
+    #ge-construtor .cc-gerar-progress .progress-bar {
+        border-radius: 999px;
+        transition: width .25s ease;
+        background: linear-gradient(90deg, var(--primary, #0d6efd), var(--primary-dark, #0a58ca));
+    }
+    #ge-construtor .cc-gerar-progress.is-done .progress-bar {
+        background: #198754;
+    }
+    #ge-construtor .cc-gerar-progress.is-error .progress-bar {
+        background: #dc3545;
+    }
+    #ge-construtor .cc-sessao-board {
+        margin-top: .75rem;
+        padding: .7rem .85rem;
+        border: 1px solid rgba(0, 0, 0, .08);
+        border-radius: 10px;
+        background: #f8f9fb;
+        max-width: 720px;
+    }
+    #ge-construtor .cc-sessao-head {
+        font-size: .86rem;
+        margin-bottom: .35rem;
+    }
+    #ge-construtor .cc-sessao-dl {
+        display: grid;
+        grid-template-columns: minmax(160px, 220px) 1fr;
+        gap: .2rem .75rem;
+        margin: .35rem 0 0;
+        font-size: .8rem;
+    }
+    #ge-construtor .cc-sessao-row {
+        display: contents;
+    }
+    #ge-construtor .cc-sessao-dl dt {
+        color: #5c6570;
+        font-weight: 600;
+        margin: 0;
+    }
+    #ge-construtor .cc-sessao-dl dd {
+        margin: 0;
+        color: #212529;
+    }
+    #ge-construtor .cc-gerar-erro {
+        line-height: 1.4;
+    }
+    #ge-construtor .cc-valor-rs {
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        color: #196f3d;
+    }
+    #ge-construtor .cc-step-4 {
+        background: linear-gradient(145deg, #fafdf8 0%, #eef6f0 100%);
+        border-left-color: var(--accent-mes, #196f3d);
+        border-color: rgba(25, 111, 61, .18);
+    }
+    #ge-construtor .cc-step-4 .cc-step-badge {
+        background: var(--accent-mes, #196f3d);
+        color: #fff;
+    }
+    #ge-construtor .cc-step-5 {
+        background: linear-gradient(145deg, #f2faf5 0%, #e3f2e9 100%);
+        border-left-color: #2e8b57;
+        border-color: rgba(46, 139, 87, .22);
+    }
+    #ge-construtor .cc-step-5 .cc-step-badge {
+        background: #2e8b57;
+        color: #fff;
+    }
+    #ge-construtor .cc-volante {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 6px;
+        max-width: 420px;
+    }
+    #ge-construtor .cc-volante-colunas {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 100%;
+    }
+    #ge-construtor .cc-coluna-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    #ge-construtor .cc-coluna-label {
+        min-width: 2.2rem;
+        font-weight: 700;
+        font-size: .78rem;
+        color: var(--primary-dark);
+    }
+    #ge-construtor .cc-coluna-balls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    #ge-construtor .cc-coluna-balls .cc-ball {
+        width: 32px;
+        height: 32px;
+        font-size: .78rem;
+    }
+    #ge-construtor .cc-aposta-colunas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: center;
+    }
+    #ge-construtor .cc-aposta-colunas .cc-col-mini {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: .65rem;
+        line-height: 1;
+    }
+    #ge-construtor .cc-aposta-colunas .cc-col-mini span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #198754;
+        color: #fff;
+        font-weight: 700;
+        font-size: .75rem;
+    }
+    @media (max-width: 520px) {
+        #ge-construtor .cc-volante { grid-template-columns: repeat(7, 1fr); max-width: 100%; }
+    }
+    #ge-construtor .cc-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #dee2e6;
+        background: #f8f9fa;
+        font-weight: 700;
+        font-size: .82rem;
+        cursor: pointer;
+        user-select: none;
+        transition: all .15s;
+    }
+    #ge-construtor .cc-ball.selected {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+        transform: scale(1.05);
+    }
+    #ge-construtor .cc-ball.faixa-baixa.selected { background: #0d6efd; border-color: #0d6efd; }
+    #ge-construtor .cc-ball.faixa-media.selected { background: #fd7e14; border-color: #fd7e14; }
+    #ge-construtor .cc-ball.faixa-alta.selected { background: #dc3545; border-color: #dc3545; }
+    #ge-construtor .cc-ball.faixa-isolada.selected { background: #6f42c1; border-color: #6f42c1; }
+    #ge-construtor .cc-faixa-legend span {
+        display: inline-block;
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+    #ge-construtor .cc-construcao-card {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: .75rem;
+        margin-bottom: .75rem;
+        background: #fafafa;
+    }
+    #ge-construtor .cc-construcao-card.cc-melhor {
+        border-color: #198754;
+        background: #f0fff4;
+    }
+    #ge-construtor .cc-aposta-row {
+        display: grid;
+        grid-template-columns: 2.25rem 1fr auto;
+        gap: 6px;
+        align-items: center;
+        padding: .35rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    #ge-construtor .cc-aposta-row:last-child { border-bottom: none; }
+    #ge-construtor .cc-aposta-num {
+        font-size: .75rem;
+        color: #6c757d;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        line-height: 1;
+        padding-right: 2px;
+    }
+    #ge-construtor .cc-aposta-balls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: center;
+    }
+    #ge-construtor .cc-aposta-acertos {
+        font-size: .72rem;
+        white-space: nowrap;
+        text-align: right;
+    }
+    #ge-construtor .cc-sim-badge {
+        font-size: .75rem;
+        padding: .2rem .5rem;
+        border-radius: 999px;
+        background: #e8f4fd;
+        color: #1565c0;
+    }
+    {{ ball_css|safe }}
+    #ge-construtor .dez-ball-mini {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+        font-size: .72rem;
+        flex-shrink: 0;
+    }
+    #ge-construtor .dez-ball-mini.cc-erro {
+        background: #ced4da;
+        color: #6c757d;
+    }
+    #ge-construtor .dez-ball-mini.cc-acerto {
+        background: #198754;
+        color: #fff;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 3px #20c997;
+    }
+    #ge-construtor .cc-estrategia-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .72rem;
+        font-weight: 600;
+        padding: .2rem .55rem;
+        margin-bottom: .45rem;
+        border-radius: 6px;
+        background: #f4f6f8;
+        color: #495057;
+        border-left: 3px solid #6c757d;
+    }
+    #ge-construtor .cc-estrategia-badge i {
+        font-size: .65rem;
+        opacity: .75;
+    }
+    #ge-construtor .cc-estrategia-detalhe {
+        font-weight: 400;
+        opacity: .85;
+    }
+    #ge-construtor .cc-estrategia-automatica { border-left-color: #6c757d; }
+    #ge-construtor .cc-estrategia-balanceada { border-left-color: #198754; }
+    #ge-construtor .cc-estrategia-somente_baixas,
+    #ge-construtor .cc-estrategia-somente_medias,
+    #ge-construtor .cc-estrategia-somente_altas { border-left-color: #0d6efd; }
+    #ge-construtor .cc-estrategia-baixas_medias,
+    #ge-construtor .cc-estrategia-medias_altas,
+    #ge-construtor .cc-estrategia-baixas_altas { border-left-color: #fd7e14; }
+    #ge-construtor .cc-estrategia-personalizada { border-left-color: #6f42c1; }
+    #ge-construtor .cc-estrategia-conforme_comportamento { border-left-color: #1565c0; }
+    #ge-construtor .cc-sorteadas-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: center;
+        margin-top: .35rem;
+    }
+    #ge-construtor .cc-colinha-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.35rem;
+        height: 1.35rem;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        color: #9aa0a6;
+        font-size: .85rem;
+        cursor: pointer;
+        vertical-align: middle;
+        opacity: .8;
+        transition: color .15s, opacity .15s;
+    }
+    #ge-construtor .cc-colinha-btn:hover,
+    #ge-construtor .cc-colinha-btn[aria-expanded="true"] {
+        color: var(--accent);
+        opacity: 1;
+    }
+    #ge-construtor .cc-colinha-pop {
+        display: none;
+        position: relative;
+        margin-top: .5rem;
+        padding: .55rem .65rem;
+        font-size: .78rem;
+        line-height: 1.45;
+        background: #f0fff4;
+        border: 1px solid #b8dfc4;
+        border-radius: 10px;
+        color: #2d5016;
+        box-shadow: 0 4px 14px rgba(25, 135, 84, .12);
+    }
+    #ge-construtor .cc-colinha-pop.aberto { display: block; }
+    #ge-construtor .cc-colinha-pop strong { color: #146c43; }
+    #ge-construtor .cc-colinha-pop .btn-fechar {
+        float: right;
+        border: none;
+        background: none;
+        color: #6c757d;
+        font-size: .9rem;
+        line-height: 1;
+        padding: 0 0 0 .5rem;
+        cursor: pointer;
+    }
+    #ge-construtor .cc-contador {
+        font-weight: 700;
+        color: var(--accent);
+    }
+    #ge-construtor .cc-contador.cc-limite {
+        color: #dc3545;
+    }
+    #ge-construtor .cc-ball.cc-bloqueado {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+    #ge-construtor .cc-ball.cc-ultimo-ref:not(.selected) {
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 55%, transparent);
+        border-color: var(--primary);
+    }
+    #ge-construtor .cc-ball.cc-ciclo-falt:not(.selected) {
+        box-shadow: 0 0 0 2px #f59e0b;
+        background: #fff7ed;
+        border-color: #f59e0b;
+        color: #9a3412;
+        font-weight: 800;
+    }
+    #ge-construtor .cc-ball.selected.cc-ciclo-falt {
+        box-shadow: 0 0 0 2px #f59e0b, 0 0 0 4px rgba(245, 158, 11, .35);
+    }
+    #ge-construtor .cc-ciclo-visao {
+        text-align: right;
+        padding: .45rem .65rem;
+        border-radius: 10px;
+        background: #fff7ed;
+        border: 1px solid rgba(245, 158, 11, .45);
+        min-width: 0;
+        flex: 0 1 auto;
+    }
+    #ge-construtor .cc-ciclo-visao-label {
+        font-size: .68rem;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #9a3412;
+        font-weight: 700;
+        margin-bottom: .2rem;
+    }
+    #ge-construtor .cc-ciclo-visao-meta {
+        font-size: .78rem;
+        color: #7c2d12;
+        font-weight: 700;
+        margin-bottom: .3rem;
+    }
+    #ge-construtor .cc-ciclo-visao-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: flex-end;
+        align-items: center;
+    }
+    #ge-construtor .cc-ciclo-visao .dez-ball-mini {
+        width: 26px;
+        height: 26px;
+        font-size: .68rem;
+        background: #f59e0b;
+        color: #1a0a00;
+    }
+    #ge-construtor .cc-ciclo-visao-ok {
+        font-size: .78rem;
+        color: #146c43;
+        font-weight: 700;
+    }
+    #ge-construtor .cc-ciclo-legenda {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid #f59e0b;
+        background: #fff7ed;
+        vertical-align: -1px;
+        margin-right: .2rem;
+    }
+    @media (max-width: 768px) {
+        #ge-construtor .cc-ciclo-visao {
+            text-align: left;
+            width: 100%;
+        }
+        #ge-construtor .cc-ciclo-visao-row { justify-content: flex-start; }
+    }
+    #ge-construtor .cc-acoes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+        margin-bottom: .5rem;
+    }
+    #ge-construtor .cc-acoes .btn {
+        font-size: .72rem;
+        padding: .2rem .45rem;
+    }
+    #ge-construtor .cc-conf-badge {
+        display: inline-block;
+        font-size: .68rem;
+        font-weight: 600;
+        padding: .12rem .4rem;
+        border-radius: 5px;
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #a5d6a7;
+    }
+    #ge-construtor .cc-analise-card {
+        border-radius: 10px;
+        border: 1px solid rgba(25, 111, 61, .25);
+        background: #f8fffa;
+        padding: .75rem .85rem;
+        height: 100%;
+        text-align: center;
+    }
+    #ge-construtor .cc-analise-card .cc-analise-valor {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #196f3d;
+        line-height: 1.2;
+    }
+    #ge-construtor .cc-analise-card .cc-analise-pergunta {
+        font-size: .72rem;
+        color: #6c757d;
+        margin-bottom: .35rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+    }
+    #ge-construtor .cc-analise-card .cc-analise-detalhe {
+        font-size: .78rem;
+        color: #495057;
+        margin-top: .25rem;
+        line-height: 1.4;
+    }
+    #ge-construtor .cc-analise-resumo {
+        text-align: center;
+        margin-bottom: 1rem;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #ge-construtor .cc-analise-resumo-titulo {
+        font-size: .82rem;
+        font-weight: 700;
+        color: #196f3d;
+        margin-bottom: .65rem;
+        width: 100%;
+        text-align: center;
+    }
+    #ge-construtor .cc-analise-painel {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(200px, 260px));
+        justify-content: center;
+        gap: .75rem;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto .75rem;
+    }
+    @media (max-width: 768px) {
+        #ge-construtor .cc-analise-painel {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 280px));
+        }
+    }
+    #ge-construtor .cc-analise-painel .cc-analise-card {
+        width: 100%;
+    }
+    #ge-construtor .cc-analise-estrategia-linha {
+        width: 100%;
+        max-width: 520px;
+        margin: 0 auto;
+    }
+    #ge-construtor .cc-analise-estrategia-linha .cc-analise-card {
+        width: 100%;
+    }
+    #ge-construtor .cc-analise-card.cc-analise-card-estrategia {
+        border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+        background: linear-gradient(145deg, #fffef8 0%, #f8fffa 100%);
+    }
+    #ge-construtor .cc-analise-soma-label {
+        display: inline-block;
+        font-size: .68rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: .15rem;
+    }
+    #ge-construtor .cc-analise-hint {
+        max-width: 720px;
+        margin: 0 auto .75rem;
+        text-align: center;
+    }
+    #ge-construtor #ccTabHistoricoPane {
+        text-align: center;
+    }
+    #ge-construtor #ccTabHistoricoPane > p.small {
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #ge-construtor #ccAnaliseHistorica {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #ge-construtor #ccTabPanoramaPane,
+    #ge-construtor #ccPanoramaGeral {
+        text-align: center;
+    }
+    #ge-construtor #ccPanoramaGeral .table-responsive {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    #ge-construtor #ccAnaliseHistorica .cc-analise-alerta {
+        max-width: 720px;
+        text-align: center;
+    }
+    #ge-construtor .cc-ranking-hist {
+        font-size: .78rem;
+    }
+    #ge-construtor .cc-ranking-hist tr.cc-top td {
+        background: rgba(25, 135, 84, .08);
+        font-weight: 600;
+    }
+    #ge-construtor .cc-hist-loading {
+        opacity: .6;
+        pointer-events: none;
+    }
+    #ge-construtor .cc-edit-aposta input {
+        font-size: .78rem;
+        font-family: monospace;
+    }
+    #ge-construtor .cc-mes-badge {
+        display: inline-block;
+        font-size: .72rem;
+        font-weight: 700;
+        padding: .15rem .45rem;
+        border-radius: 6px;
+        background: #ffd700;
+        color: #333;
+    }
+    #ge-construtor .cc-como-usar {
+        background: linear-gradient(135deg, var(--accent-light) 0%, #f0faf4 55%, #fff8e6 100%);
+        border-color: color-mix(in srgb, var(--primary) 22%, transparent);
+        border-left: 4px solid var(--primary);
+    }
+    #ge-construtor .cc-passos {
+        margin: 0;
+        padding-left: 1.15rem;
+        line-height: 1.55;
+    }
+    #ge-construtor .cc-passos li { margin-bottom: .35rem; }
+    #ge-construtor .cc-passos li:last-child { margin-bottom: 0; }
+    #ge-construtor .cc-step-title {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        font-weight: 700;
+        margin-bottom: .25rem;
+    }
+    #ge-construtor .cc-step-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.55rem;
+        height: 1.55rem;
+        padding: 0 .35rem;
+        border-radius: 999px;
+        font-size: .72rem;
+        font-weight: 800;
+        flex-shrink: 0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+    }
+    #ge-construtor .cc-step-hint {
+        font-size: .78rem;
+        line-height: 1.45;
+        margin-bottom: .65rem;
+        padding-left: 2rem;
+    }
+    #ge-construtor .cc-ultimo-sorteio {
+        text-align: right;
+        padding: .45rem .65rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, .72);
+        border: 1px solid rgba(192, 139, 0, .28);
+        min-width: 0;
+        flex: 0 1 auto;
+    }
+    #ge-construtor .cc-ultimo-sorteio-label {
+        font-size: .68rem;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #6c757d;
+        font-weight: 700;
+        margin-bottom: .25rem;
+    }
+    #ge-construtor .cc-ultimo-sorteio-meta {
+        font-size: .72rem;
+        color: #868e96;
+        margin-bottom: .35rem;
+    }
+    #ge-construtor .cc-ultimo-sorteio-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: flex-end;
+        align-items: center;
+    }
+    #ge-construtor .cc-ultimo-sorteio .dez-ball-mini {
+        width: 26px;
+        height: 26px;
+        font-size: .68rem;
+        background: var(--primary);
+    }
+    #ge-construtor .cc-ultimo-mes {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .68rem;
+        font-weight: 700;
+        padding: .2rem .5rem;
+        border-radius: 6px;
+        color: #fff;
+        margin-left: 2px;
+    }
+    @media (max-width: 768px) {
+        #ge-construtor .cc-ultimo-sorteio {
+            text-align: left;
+            width: 100%;
+        }
+        #ge-construtor .cc-ultimo-sorteio-row {
+            justify-content: flex-start;
+        }
+    }
+</style>
+
+<div id="ge-construtor" class="ge-construtor"
+    data-api="{{ api_base }}"
+    data-pick-min="{{ ui_config.pick_min }}"
+    data-pick-max="{{ ui_config.pick_max }}"
+    data-qtd-apostas="{{ ui_config.qtd_apostas_fixa }}"
+    data-conjunto-max="{{ ui_config.max_conjunto_base }}">
+
+    <div class="cc-panel p-3">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-2">
+            <div class="flex-grow-1">
+                <h1 class="h5 mb-1"><i class="fas fa-layer-group text-success"></i> Construtor de Construções</h1>
+                <span class="text-muted small">{{ modality_nome }} — mesmo conjunto-base, múltiplas engenharias</span>
+            </div>
+            {% if ultimo_sorteio %}
+            <div class="cc-ultimo-sorteio" id="ccUltimoSorteio" title="Referência para montar o conjunto-base">
+                <div class="cc-ultimo-sorteio-label">Último sorteio</div>
+                <div class="cc-ultimo-sorteio-meta">
+                    Concurso <strong>{{ ultimo_sorteio.concurso }}</strong>
+                    {% if ultimo_sorteio.data %} · {{ ultimo_sorteio.data }}{% endif %}
+                </div>
+                <div class="cc-ultimo-sorteio-row">
+                    {% for d in ultimo_sorteio.dezenas %}
+                    <span class="dez-ball-mini">{{ '%02d'|format(d) }}</span>
+                    {% endfor %}
+                    {% if ultimo_sorteio.mes_nome %}
+                    <span class="cc-ultimo-mes mes-nome-{{ ultimo_sorteio.mes_nome }}">
+                        {{ ultimo_sorteio.mes_abrev or ultimo_sorteio.mes_nome[:3] }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="cc-ultimo-sorteio" id="ccUltimoSorteio" style="display:none;"></div>
+            {% endif %}
+            {% if not ui_config.positional %}
+            <div class="cc-ciclo-visao" id="ccCicloVisao" hidden
+                title="Mesma leitura da análise do ciclo: o que já saiu e o que ainda falta fechar.">
+                <div class="cc-ciclo-visao-label">Ciclo atual</div>
+                <div class="cc-ciclo-visao-meta" id="ccCicloVisaoMeta">Carregando…</div>
+                <div class="cc-ciclo-visao-row" id="ccCicloVisaoBalls"></div>
+            </div>
+            {% endif %}
+            <a href="{{ url_for('geradores_elite.index') }}" class="btn btn-sm btn-outline-secondary align-self-start">Geradores de Elite</a>
+        </div>
+        <p class="small text-muted mb-0">
+            Fixo: <strong>{{ ui_config.qtd_apostas_fixa }} apostas</strong> por construção
+            · conjunto-base: <strong>máx. {{ ui_config.max_conjunto_base }} dezenas</strong>.
+            Mesma matéria-prima, múltiplas formas de organizar.
+        </p>
+    </div>
+
+    {% if digitos_habilitado %}
+    <ul class="nav nav-tabs mb-3" id="ccMainTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="ccTabDezenas" data-bs-toggle="tab" data-bs-target="#ccPaneDezenas" type="button" role="tab">
+                <i class="fas fa-th me-1"></i> Pool de Dezenas (01–31)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ccTabDigitos" data-bs-toggle="tab" data-bs-target="#ccPaneDigitos" type="button" role="tab">
+                <i class="fas fa-hashtag me-1"></i> Pool de Dígitos (0–9)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ccTabDezenasEsp" data-bs-toggle="tab" data-bs-target="#ccPaneDezenasEsp" type="button" role="tab">
+                <i class="fas fa-star me-1"></i> Pool de Dezenas (01–31) Especial
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="ccMainTabContent">
+        <div class="tab-pane fade show active" id="ccPaneDezenas" role="tabpanel">
+    {% endif %}
+
+    {% if ui_config.has_mes %}
+    <div class="alert alert-success py-2 px-3 mb-3 small" id="ccMesesIndicadosBanner" style="display:none;">
+        <i class="fas fa-calendar-check me-1"></i>
+        <strong>Meses indicados (últimos 10):</strong>
+        <span id="ccMesesIndicadosTxt">—</span>
+        <span class="text-muted ms-1">· usados automaticamente no export TXT (ciclo por construção)</span>
+    </div>
+    {% endif %}
+
+    <div class="cc-panel cc-como-usar p-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+            <h2 class="h6 mb-0"><i class="fas fa-book-open text-success"></i> Como usar</h2>
+            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0" id="ccToggleComoUsar"
+                aria-expanded="true" aria-controls="ccComoUsarCorpo">
+                Ocultar
+            </button>
+        </div>
+        <div id="ccComoUsarCorpo">
+            <ol class="cc-passos small text-muted">
+                <li><strong>Conjunto-base</strong> — Escolha de {{ ui_config.pick_min }} a {{ ui_config.max_conjunto_base }} dezenas no volante (manual ou importação). É a matéria-prima fixa de todas as construções.</li>
+                <li><strong>Configuração da sessão</strong> — Dê um nome, defina quantas dezenas por aposta e clique em <strong>Salvar conjunto-base</strong>. Isso libera os passos seguintes.</li>
+                <li><strong>Nova construção</strong> — Escolha a estratégia (balanceada, personalizada, conforme comportamento etc.) e clique em <strong>Gerar construção</strong>. Repita para criar outras engenharias com as mesmas dezenas.</li>
+                <li><strong>Construções salvas</strong> — Revise as {{ ui_config.qtd_apostas_fixa }} apostas de cada construção. Edite, exclua, exporte em .TXT ou use <strong>Enviar → Manual S10</strong> para levar as apostas à Seção 10 Manual{% if ui_config.has_mes %} (com Mês da Sorte no export TXT){% elif ui_config.has_time %} (com Time do Coração){% elif ui_config.has_trevos %} (com Trevos){% endif %}.</li>
+                <li><strong>Refinar apostas</strong> — Depois de gerar, o painel cria variações pontuadas <em>sem apagar as originais</em>. As refinadas aparecem embaixo, só com dezenas do conjunto-base. <strong>Baixar apostas refinadas</strong> gera o TXT no mesmo formato do export{% if ui_config.has_mes %} (incluindo o Mês da Sorte){% endif %}.</li>
+                <li><strong>Conferir com sorteio</strong> — Compare todas as construções com um concurso real e veja qual pontuou mais (acertos em verde).</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="cc-panel cc-step-card cc-step-1 p-3">
+                <div class="cc-step-1-header d-flex align-items-center gap-1 mb-0">
+                    <h2 class="h6 cc-step-title mb-0 flex-grow-1">
+                        <span class="cc-step-badge">1</span> Conjunto-base
+                    </h2>
+                    <button type="button" class="cc-colinha-btn" id="ccColinhaBtn"
+                        title="{{ ui_config.colinha.titulo }}" aria-label="Colinha — ajuda"
+                        aria-expanded="false">
+                        <i class="fas fa-circle-question"></i>
+                    </button>
+                    <span class="small">
+                        <span class="cc-contador" id="ccContador">0/{{ ui_config.max_conjunto_base }}</span>
+                    </span>
+                </div>
+                <p class="cc-step-hint mb-2" id="ccStep1Hint">
+                    {% if ui_config.positional %}
+                    Marque até {{ ui_config.max_digitos_por_coluna }} dígitos (0–9) em cada coluna C1–C7, ou importe da análise.
+                    {% else %}
+                    Marque as dezenas da matéria-prima ou importe do ciclo/análise. Máximo {{ ui_config.max_conjunto_base }} números.
+                    {% endif %}
+                </p>
+                <div class="cc-step-1-body">
+                    {% if not ui_config.positional %}
+                    <div class="cc-modo-toggle" role="group" aria-label="Modo de entrada do conjunto-base">
+                        <button type="button" class="btn active" id="ccModoVolanteBtn" data-modo="volante">
+                            Conjunto-base (máx. {{ ui_config.max_conjunto_base }})
+                        </button>
+                        <button type="button" class="btn" id="ccModoApostasBtn" data-modo="apostas10x7">
+                            10 apostas × {{ ui_config.pick_default }}
+                        </button>
+                    </div>
+                    {% endif %}
+                    <div class="cc-colinha-pop" id="ccColinhaPop" role="status">
+                        <button type="button" class="btn-fechar" id="ccColinhaFechar" aria-label="Fechar">&times;</button>
+                        <strong>{{ ui_config.colinha.titulo }}</strong>
+                        <p class="mb-0 mt-1">{{ ui_config.colinha.texto }}</p>
+                    </div>
+                    <div id="ccModoVolanteWrap">
+                        <div class="cc-faixa-legend small mb-2">
+                            <span style="background:#0d6efd"></span> Baixas ({{ ui_config.faixas.baixas }})
+                            <span style="background:#fd7e14"></span> Médias ({{ ui_config.faixas.medias }})
+                            <span style="background:#dc3545"></span> Altas ({{ ui_config.faixas.altas }})
+                            {% if ui_config.faixas.isolada %}
+                            <span style="background:#6f42c1"></span> Isolada ({{ ui_config.faixas.isolada }})
+                            {% endif %}
+                            <span class="ms-1"><i class="cc-ciclo-legenda"></i> Faltante do ciclo</span>
+                        </div>
+                        <div class="cc-volante mb-2" id="ccVolante" {% if ui_config.positional %}style="display:none"{% endif %}></div>
+                        <div class="cc-volante-colunas mb-2" id="ccVolanteColunas" {% if not ui_config.positional %}style="display:none"{% endif %}></div>
+                        <div class="d-flex flex-wrap gap-2 mb-2 cc-import-btns">
+                            {% if not ui_config.positional %}
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="ccBtnCicloSorteadas">
+                                <i class="fas fa-download"></i> Ciclo — sorteadas
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="ccBtnCicloFaltantes">
+                                <i class="fas fa-download"></i> Ciclo — faltantes
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="ccBtnUltimoSorteio">
+                                <i class="fas fa-download"></i> Último sorteio
+                            </button>
+                            {% endif %}
+                            <button type="button" class="btn btn-sm btn-outline-info" id="ccBtnAnaliseAtraso">
+                                <i class="fas fa-chart-bar"></i> Análise — atraso
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-info" id="ccBtnAnaliseFreq">
+                                <i class="fas fa-chart-bar"></i> Análise — freq.
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="ccBtnLimpar">Limpar</button>
+                        </div>
+                    </div>
+                    {% if not ui_config.positional %}
+                    <div id="ccModoApostasWrap" style="display:none;">
+                        <div class="cc-apostas-drop mb-2" id="ccApostasDrop">
+                            <label class="form-label small mb-1 text-start d-block">
+                                Cole ou arraste <strong>exatamente 10 linhas</strong> com <strong>{{ ui_config.pick_default }} dezenas</strong> cada
+                                (01–{{ ui_config.total_dezenas }}). O conjunto-base será a união das dezenas.
+                            </label>
+                            <textarea class="form-control form-control-sm cc-apostas-ta" id="ccApostasTexto"
+                                placeholder="{% for i in range(ui_config.pick_default) %}{{ '%02d'|format(i+1) }}{% if not loop.last %} {% endif %}{% endfor %}&#10;… (10 linhas)"
+                                spellcheck="false" autocomplete="off"></textarea>
+                            <div class="d-flex flex-wrap gap-2 mt-2 justify-content-center">
+                                <button type="button" class="btn btn-sm btn-primary" id="ccBtnAplicarApostas">
+                                    <i class="fas fa-check"></i> Usar estas 10 apostas
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="ccBtnLimparApostas">
+                                    Limpar texto
+                                </button>
+                            </div>
+                        </div>
+                        <div class="small text-muted mb-1" id="ccApostasParseInfo"></div>
+                    </div>
+                    {% endif %}
+                    <div class="small text-muted" id="ccPoolInfo">0 dezenas selecionadas</div>
+                </div>
+            </div>
+
+            <div class="cc-panel cc-step-card cc-step-2 p-3">
+                <h2 class="h6 cc-step-title">
+                    <span class="cc-step-badge">2</span> Configuração da sessão
+                </h2>
+                <p class="cc-step-hint">Nomeie a sessão, escolha o tamanho de cada aposta e salve. O botão <strong>Gerar construção</strong> só libera após salvar.</p>
+                <div class="mb-2">
+                    <label class="form-label small mb-1">Nome</label>
+                    <input type="text" class="form-control form-control-sm" id="ccNomeSessao"
+                        placeholder="Ex.: Teste 16 dezenas — jul/2026">
+                </div>
+                <div class="row g-2 mb-2">
+                    {% if not ui_config.positional %}
+                    <div class="col-6">
+                        <label class="form-label small mb-1">Dezenas por aposta</label>
+                        <select class="form-select form-select-sm" id="ccDezenasAposta"></select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small mb-1">Qtd. importação análise</label>
+                        <input type="number" class="form-control form-control-sm" id="ccQtdImport"
+                            min="{{ ui_config.pick_min }}" max="{{ ui_config.max_conjunto_base }}" value="{{ ui_config.max_conjunto_base }}">
+                    </div>
+                    {% else %}
+                    <div class="col-12">
+                        <label class="form-label small mb-1">Dígitos por coluna na importação</label>
+                        <input type="number" class="form-control form-control-sm" id="ccQtdImport"
+                            min="1" max="{{ ui_config.max_digitos_por_coluna }}" value="{{ ui_config.max_digitos_por_coluna }}">
+                        <input type="hidden" id="ccDezenasAposta" value="7">
+                    </div>
+                    {% endif %}
+                </div>
+                {% if not ui_config.positional %}
+                <div class="cc-sd-panel border rounded p-2 mb-2" id="ccSomasDigitosPanel"
+                     style="background:linear-gradient(145deg,#fffef8 0%,#f8fffa 100%);border-color:rgba(192,139,0,.28)!important;">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-1">
+                        <strong class="small"><i class="fas fa-calculator text-warning"></i> Soma &amp; Dígitos</strong>
+                        <a class="small" href="/analise/somas-digitos/" target="_blank" rel="noopener">Abrir análise completa</a>
+                    </div>
+                    <div class="small mb-2" id="ccSdResumoAtual">
+                        Selecione dezenas para ver soma atual e dígitos distintos.
+                    </div>
+                    <div class="small text-muted mb-2" id="ccSdGuiaHistorico">Carregando guia histórico…</div>
+                    <div class="row g-2 mb-1">
+                        <div class="col-6">
+                            <label class="form-label small mb-0">Soma mín.</label>
+                            <input type="number" class="form-control form-control-sm" id="ccSomaMin" placeholder="opcional">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small mb-0">Soma máx.</label>
+                            <input type="number" class="form-control form-control-sm" id="ccSomaMax" placeholder="opcional">
+                        </div>
+                    </div>
+                    <div class="form-check form-check-inline small mb-0">
+                        <input class="form-check-input" type="checkbox" id="ccExigirDigitos">
+                        <label class="form-check-label" for="ccExigirDigitos">Exigir qtd. de dígitos distintos</label>
+                    </div>
+                    <select class="form-select form-select-sm mt-1" id="ccDigitosExigidos" disabled>
+                        {% for q in range(4, 10) %}
+                        <option value="{{ q }}"{% if q == 7 %} selected{% endif %}>{{ q }} dígitos</option>
+                        {% endfor %}
+                    </select>
+                    <div class="small mt-1" id="ccSdValidacao"></div>
+                </div>
+                {% endif %}
+                <button type="button" class="btn btn-success btn-sm w-100" id="ccBtnSalvarSessao">
+                    <i class="fas fa-save"></i> Salvar conjunto-base (sessão)
+                </button>
+                <div class="mt-2 small text-success" id="ccSessaoStatus"></div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="cc-panel cc-step-card cc-step-3 p-3">
+                <h2 class="h6 cc-step-title">
+                    <span class="cc-step-badge">3</span> Nova construção
+                </h2>
+                <p class="cc-step-hint">Defina a estratégia de organização das mesmas dezenas. Cada clique gera mais 10 apostas com perfil diferente.</p>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label small mb-1">Estratégia de construção</label>
+                        <select class="form-select form-select-sm" id="ccEstrategia"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Similaridade mín. (%)</label>
+                        <input type="number" class="form-control form-control-sm" id="ccSimMin"
+                            min="50" max="99" value="{{ ui_config.similaridade_min_default }}"
+                            title="Quanto maior, mais diferente da construção anterior">
+                    </div>
+                    <div class="col-md-3" id="ccJanelaWrap" style="display:none;">
+                        <label class="form-label small mb-1">Janela de comportamento</label>
+                        <select class="form-select form-select-sm" id="ccJanela" title="Quantos concursos recentes entram na análise de padrões">
+                            <option value="10">Últimos 10 concursos</option>
+                            <option value="20">Últimos 20 concursos</option>
+                            <option value="31">Últimos 31 concursos</option>
+                            <option value="0">Todos os concursos</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="small text-muted mb-2 d-none" id="ccJanelaHint">
+                    <i class="fas fa-circle-info"></i>
+                    Quantidade de concursos recentes usados para calcular o padrão histórico
+                    (distribuição Baixas/Médias/Altas, par/ímpar etc.) que a construção tentará reproduzir
+                    usando apenas o seu conjunto-base.
+                </p>
+                <div class="row g-2 mb-2" id="ccPersonalizadaWrap" style="display:none;">
+                    <div class="col-4">
+                        <label class="form-label small mb-1">Baixas</label>
+                        <input type="number" class="form-control form-control-sm" id="ccPersB" min="0" value="0">
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label small mb-1">Médias</label>
+                        <input type="number" class="form-control form-control-sm" id="ccPersM" min="0" value="0">
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label small mb-1">Altas</label>
+                        <input type="number" class="form-control form-control-sm" id="ccPersA" min="0" value="0">
+                    </div>
+                </div>
+                <div class="cc-padroes-ii p-2 mb-2" id="ccPadroesIIWrap">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                        <div class="small fw-bold mb-0 cc-padroes-ii-title">
+                            <i class="fas fa-cubes"></i> Padrões II
+                            <span class="fw-normal text-muted">— escolha 1 ou mais para orientar a geração</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="ccBtnPadIILoad" title="Carregar catálogo de /analise/api/inteligentes/catalogo-padroes">
+                                <i class="fas fa-sync"></i> Carregar
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="ccBtnPadIILimpar">Limpar</button>
+                            <a class="btn btn-outline-primary btn-sm" href="/analise/analises-inteligentes/?aba=padroes-ii" target="_blank" rel="noopener">
+                                Abrir análise
+                            </a>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mb-1 align-items-center">
+                        <input type="search" class="form-control form-control-sm" id="ccPadIIBusca" style="max-width:200px" placeholder="Filtrar padrão…">
+                        <select class="form-select form-select-sm" id="ccPadIIStatus" style="width:auto">
+                            <option value="">Todos</option>
+                            <option value="frequente">Frequente</option>
+                            <option value="atrasado">Atrasado</option>
+                            <option value="faltante">Faltante</option>
+                        </select>
+                        <span class="badge bg-secondary" id="ccPadIICount">0 selecionados</span>
+                    </div>
+                    <div id="ccPadIILista" class="small" style="max-height:160px;overflow:auto;">
+                        <span class="text-muted">Clique em Carregar para listar os padrões da análise Padrões II.</span>
+                    </div>
+                </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <button type="button" class="btn btn-primary" id="ccBtnGerar" disabled
+                        title="Salve o conjunto-base antes de gerar">
+                        <i class="fas fa-magic"></i> Gerar construção
+                    </button>
+                    {% if ui_config.has_mes %}
+                    <select class="form-select form-select-sm" id="ccManualMes" style="max-width:220px;"
+                        title="Mês ao enviar para o Manual S10 (padrão: + Atrasado / + Frequente / Aleatório)">
+                        <option value="">Mês: da construção</option>
+                    </select>
+                    {% endif %}
+                    <button type="button" class="btn btn-success" id="ccBtnManualUltima" disabled
+                        title="Envia as apostas da última construção para a Seção 10 Manual">
+                        <i class="fas fa-share-from-square"></i> Enviar → Manual S10
+                    </button>
+                </div>
+                <div class="cc-sessao-board mt-2" id="ccSessaoBoard">
+                    <div class="cc-sessao-head text-muted" id="ccGerarHint">
+                        Salve o conjunto-base (sessão) para liberar a geração.
+                    </div>
+                    <dl class="cc-sessao-dl" id="ccSessaoDl" hidden></dl>
+                    <div class="cc-gerar-progress" id="ccGerarProgress" aria-hidden="true">
+                        <div class="cc-gerar-progress-meta">
+                            <span id="ccGerarProgressLabel">Gerando construção…</span>
+                            <span class="cc-gerar-pct" id="ccGerarProgressPct">0%</span>
+                        </div>
+                        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ccGerarProgressBarWrap">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" id="ccGerarProgressBar" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div class="mt-2 small" id="ccGerarStatus"></div>
+                </div>
+            </div>
+
+            <div class="cc-panel cc-step-card cc-step-4 p-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-1">
+                    <div>
+                        <h2 class="h6 cc-step-title mb-0">
+                            <span class="cc-step-badge">4</span> Construções salvas
+                        </h2>
+                        <p class="cc-step-hint mb-0">Apostas geradas nesta sessão. Compare estratégias, edite ou exporte.</p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="ccBtnExportTodas" disabled
+                            title="Exportar todas as construções da sessão em um .TXT">
+                            <i class="fas fa-file-export"></i> Exportar todas .TXT
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" id="ccBtnManualTodas" disabled
+                            title="Enviar todas as apostas das construções para a Seção 10 Manual">
+                            <i class="fas fa-share-from-square"></i> Enviar todas → Manual S10
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm" id="ccBtnConferirTodas" disabled
+                            title="Conferir todas as construções contra o histórico completo">
+                            <i class="fas fa-history"></i> Analisar todas no histórico
+                        </button>
+                        <select class="form-select form-select-sm" style="max-width:220px;" id="ccSelectSessao">
+                            <option value="">— Carregar sessão —</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="ccMatrizSim" class="mb-2"></div>
+                <div class="cc-refinar-box" id="ccRefinarBox" hidden>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h3 class="mb-0 flex-grow-1"><i class="fas fa-recycle me-1"></i> Refinar apostas</h3>
+                        <button type="button" class="btn btn-sm btn-link p-0 text-muted" id="ccRefinarInfoBtn"
+                            title="Em caso de dúvida" aria-label="Como funciona o refinamento"
+                            aria-expanded="false" aria-controls="ccRefinarInfoBox">
+                            <i class="fas fa-circle-info"></i>
+                        </button>
+                    </div>
+                    <div class="alert alert-light border small py-2 px-3 mb-2" id="ccRefinarInfoBox" hidden role="note">
+                        Depois de gerar, este painel cria variações da construção escolhida
+                        <strong>sem apagar as originais</strong>. Só entram dezenas do conjunto-base.
+                        As refinadas aparecem embaixo da construção. <strong>Baixar apostas refinadas</strong>
+                        gera o TXT no mesmo formato do export{% if ui_config.has_mes %} (incluindo o Mês da Sorte){% endif %}.
+                    </div>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small mb-0" for="ccRefinarConstrucao">Construção
+                                <i class="fas fa-info-circle text-muted" style="font-size:.72rem;cursor:help" title="Qual construção da sessão será refinada."></i>
+                            </label>
+                            <select class="form-select form-select-sm" id="ccRefinarConstrucao"></select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small mb-0" for="ccRefinarModo">Modo
+                                <i class="fas fa-info-circle text-muted" style="font-size:.72rem;cursor:help" title="Inteligente mistura direções. Para mais / para menos enviesa o deslocamento no volante. Misto alterna entre os modos."></i>
+                            </label>
+                            <select class="form-select form-select-sm" id="ccRefinarModo">
+                                <option value="inteligente" selected>Inteligente</option>
+                                <option value="mais">Para mais</option>
+                                <option value="menos">Para menos</option>
+                                <option value="misto">Misto</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small mb-0" for="ccRefinarIntensidade">Intensidade
+                                <i class="fas fa-info-circle text-muted" style="font-size:.72rem;cursor:help" title="Quantas dezenas troca em cada aposta: leve 1–2, média 3–4, forte 4–6."></i>
+                            </label>
+                            <select class="form-select form-select-sm" id="ccRefinarIntensidade">
+                                <option value="leve" selected>Leve</option>
+                                <option value="media">Média</option>
+                                <option value="forte">Forte</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small mb-0" for="ccRefinarQtd">Quantas apostas
+                                <i class="fas fa-info-circle text-muted" style="font-size:.72rem;cursor:help" title="Quantas linhas da construção original entram no refino."></i>
+                            </label>
+                            <select class="form-select form-select-sm" id="ccRefinarQtd">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                                <option value="7">7</option>
+                                <option value="todas" selected>Todas</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small mb-0" for="ccRefinarVar">Variações / aposta
+                                <i class="fas fa-info-circle text-muted" style="font-size:.72rem;cursor:help" title="Quantas refinadas gerar para cada aposta original escolhida."></i>
+                            </label>
+                            <select class="form-select form-select-sm" id="ccRefinarVar">
+                                <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="form-label small mb-0" for="ccRefinarDist">Distância
+                                <i class="fas fa-info-circle text-muted" style="font-size:.72rem;cursor:help" title="Evita jogos gêmeos. Baixa = mais parecidas; alta = mais diferentes entre si."></i>
+                            </label>
+                            <select class="form-select form-select-sm" id="ccRefinarDist">
+                                <option value="baixa">Baixa</option>
+                                <option value="media" selected>Média</option>
+                                <option value="alta">Alta</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <button type="button" class="btn btn-sm btn-primary" id="ccBtnRefinar"
+                            title="Gera as variações pontuadas. As originais permanecem intactas.">
+                            <i class="fas fa-recycle"></i> Refinar apostas
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="ccBtnExportRefinadas" disabled
+                            title="TXT no mesmo formato do export atual{% if ui_config.has_mes %}, incluindo o Mês da Sorte{% endif %} — só as apostas refinadas.">
+                            <i class="fas fa-download"></i> Baixar apostas refinadas
+                        </button>
+                        <span class="small text-muted align-self-center" id="ccRefinarStatus"></span>
+                    </div>
+                </div>
+                <div id="ccConstrucoes"></div>
+            </div>
+
+            <div class="cc-panel cc-step-card cc-step-5 p-3">
+                <h2 class="h6 cc-step-title">
+                    <span class="cc-step-badge">5</span> Conferir com sorteio
+                </h2>
+                <p class="cc-step-hint">Conferência pontual (1 concurso) ou análise automática contra todo o histórico salvo no banco.</p>
+
+                <ul class="nav nav-tabs nav-tabs-sm mb-3" id="ccConfTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active small" id="ccTabPontual" data-bs-toggle="tab"
+                            data-bs-target="#ccTabPontualPane" type="button" role="tab">
+                            Concurso único
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link small" id="ccTabHistorico" data-bs-toggle="tab"
+                            data-bs-target="#ccTabHistoricoPane" type="button" role="tab">
+                            Análise da sessão
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link small" id="ccTabPanorama" data-bs-toggle="tab"
+                            data-bs-target="#ccTabPanoramaPane" type="button" role="tab">
+                            Panorama geral
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="ccTabPontualPane" role="tabpanel">
+                        <p class="small text-muted mb-2">Escolha um concurso e descubra qual construção teve melhor desempenho. Dezenas acertadas aparecem em verde.</p>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label small mb-1">Concurso</label>
+                                <select class="form-select form-select-sm" id="ccConcurso"></select>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-outline-success btn-sm" id="ccBtnConferir" disabled>
+                                    <i class="fas fa-check-double"></i> Conferir
+                                </button>
+                            </div>
+                        </div>
+                        <div id="ccConferencia" class="mt-3"></div>
+                    </div>
+                    <div class="tab-pane fade" id="ccTabHistoricoPane" role="tabpanel">
+                        <p class="small text-muted mb-2">
+                            Compara construções da sessão com o mesmo conjunto-base. Resultados ficam salvos — use
+                            <strong>Analisar todas no histórico</strong> (passo 4) ou o botão em cada construção.
+                            Nesta modalidade o sorteio traz <strong>{{ ui_config.pick_default }} dezenas</strong>
+                            — o máximo de acertos por aposta é <strong>{{ ui_config.acertos_max_possivel }}</strong>.
+                        </p>
+                        <div class="text-center mb-2">
+                            <div class="form-check form-check-inline small mb-0">
+                                <input class="form-check-input" type="checkbox" id="ccHistIncremental">
+                                <label class="form-check-label" for="ccHistIncremental">
+                                    Atualizar só concursos novos (incremental)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="text-center mb-2">
+                            <button type="button" class="btn btn-success btn-sm" id="ccBtnIrPanorama">
+                                <i class="fas fa-table"></i> Panorama geral — todas as sessões do banco
+                            </button>
+                        </div>
+                        <div id="ccAnaliseHistorica" class="mt-2"></div>
+                    </div>
+                    <div class="tab-pane fade" id="ccTabPanoramaPane" role="tabpanel">
+                        <p class="small text-muted mb-2 text-center">
+                            Todas as conferências históricas <strong>salvas no banco</strong>, de todas as sessões.
+                            Ordenação: 7 → 6 → 5 → 4 ac.
+                        </p>
+                        <div class="text-center mb-2">
+                            <button type="button" class="btn btn-outline-success btn-sm" id="ccBtnAtualizarPanorama">
+                                <i class="fas fa-sync-alt"></i> Atualizar panorama
+                            </button>
+                        </div>
+                        <div id="ccPanoramaGeral" class="mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if digitos_habilitado %}
+        </div><!-- /ccPaneDezenas -->
+
+        <div class="tab-pane fade" id="ccPaneDigitos" role="tabpanel">
+            <div class="row g-3">
+                <div class="col-lg-5">
+                    <div class="cc-panel cc-step-card cc-step-1 p-3">
+                        <h2 class="h6 cc-step-title">
+                            <span class="cc-step-badge">1</span> Pool de Dígitos (0–9)
+                            <span class="ms-auto small"><span class="cc-contador" id="cdContador">0/10</span></span>
+                        </h2>
+                        <p class="cc-step-hint mb-2">
+                            Os <strong>10 dígitos únicos (0–9)</strong> formam as dezenas
+                            (ex.: <strong>09</strong>, <strong>22</strong>, <strong>34</strong>).
+                            Padrão: todos marcados.
+                        </p>
+                        <div class="cc-volante mb-2" id="cdVolante" style="grid-template-columns:repeat(5,1fr);max-width:280px;margin:0 auto;"></div>
+                        <div class="d-flex flex-wrap gap-2 mb-2 justify-content-center">
+                            <button type="button" class="btn btn-sm btn-success" id="cdBtnTodos" title="Marca os 10 dígitos únicos 0–9">Todos (0–9)</button>
+                            <button type="button" class="btn btn-sm btn-outline-info" id="cdBtnFreq">Top frequência</button>
+                            <button type="button" class="btn btn-sm btn-outline-info" id="cdBtnAtraso">Mais atrasados</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cdBtnPares">Pares</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cdBtnImpares">Ímpares</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cdBtnLimpar">Limpar</button>
+                        </div>
+                        <div class="small text-muted mb-2" id="cdPoolInfo">Nenhum dígito selecionado</div>
+                        <div class="small mb-0" id="cdAvisoRec"></div>
+                    </div>
+                    <div class="cc-panel cc-step-card cc-step-2 p-3">
+                        <h2 class="h6 cc-step-title"><span class="cc-step-badge">2</span> Sessão (opcional)</h2>
+                        <p class="cc-step-hint">Salve o pool para histórico/conferência. O Gerador Inteligente pode importar este pool.</p>
+                        <input type="text" class="form-control form-control-sm mb-2" id="cdNomeSessao" placeholder="Ex.: Pool pares">
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">Dezenas por aposta (referência)</label>
+                            <select class="form-select form-select-sm" id="cdDezenasAposta"></select>
+                        </div>
+                        <button type="button" class="btn btn-success btn-sm w-100" id="cdBtnSalvar">
+                            <i class="fas fa-save"></i> Salvar pool de dígitos
+                        </button>
+                        <div class="mt-2 small" id="cdSessaoStatus"></div>
+                        <select class="form-select form-select-sm mt-2" id="cdSelectSessao">
+                            <option value="">— sessões salvas —</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="cc-panel p-3 mb-3">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                            <h2 class="h6 mb-0"><i class="fas fa-chart-bar text-warning"></i> Guia — todos os sorteios</h2>
+                            <a class="small" href="/analise/somas-digitos/" target="_blank" rel="noopener">Abrir análise completa</a>
+                        </div>
+                        <div id="cdGuiaHistorico" class="small text-muted">Carregando…</div>
+                        <div class="table-responsive mt-2">
+                            <table class="table table-sm table-bordered mb-0" style="font-size:.82rem;">
+                                <thead style="background:var(--primary);color:#fff;">
+                                    <tr><th>Qtd. dígitos</th><th>Nº sorteios</th><th>%</th></tr>
+                                </thead>
+                                <tbody id="cdTabelaQtd"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="cc-panel p-3">
+                        <h2 class="h6 mb-2"><i class="fas fa-list-ol text-success"></i> Dezenas elegíveis (regra estrita)</h2>
+                        <div class="small mb-2" id="cdResumoCombos">Selecione o pool para ver elegíveis e combinações.</div>
+                        <div id="cdElegiveis" class="d-flex flex-wrap gap-1 mb-2"></div>
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="cdBtnListarCombos">
+                                <i class="fas fa-th-list"></i> Listar todas as apostas
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-success" id="cdBtnExportTodas">
+                                <i class="fas fa-file-export"></i> Exportar todas .TXT
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cdBtnExportElegiveis">
+                                <i class="fas fa-download"></i> Exportar elegíveis
+                            </button>
+                        </div>
+                        <div class="small text-muted mb-1" id="cdCombosMeta"></div>
+                        <div id="cdCombosLista" class="small" style="max-height:280px;overflow:auto;"></div>
+                        <div class="mt-3 pt-2 border-top">
+                            <a class="btn btn-sm btn-outline-primary" href="/geradores-elite/gerador-digitos-inteligente/" id="cdBtnIrGerador">
+                                <i class="fas fa-brain"></i> Abrir Gerador Inteligente por Dígitos
+                            </a>
+                            <span class="small text-muted ms-1">leva o pool desta aba</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /ccPaneDigitos -->
+
+        <div class="tab-pane fade" id="ccPaneDezenasEsp" role="tabpanel">
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="cc-panel cc-step-card cc-step-1 p-3">
+                        <div class="d-flex align-items-start gap-2 mb-2">
+                            <h2 class="h6 cc-step-title mb-0 flex-grow-1">
+                                <span class="cc-step-badge">1</span> Distribuição especial (16 dezenas)
+                            </h2>
+                            <button type="button" class="btn btn-sm btn-link p-0 text-muted" id="ccEspInfoBtn"
+                                title="Como funciona" aria-label="Como funciona" aria-expanded="false"
+                                aria-controls="ccEspInfoBox">
+                                <i class="fas fa-circle-info fa-lg"></i>
+                            </button>
+                        </div>
+                        <div class="alert alert-light border small py-2 px-3 mb-3" id="ccEspInfoBox" style="display:none;" role="note">
+                            <strong>Como funciona:</strong> você escolhe uma distribuição fixa de
+                            <strong>exatamente 16 dezenas</strong>. Ao carregar, o sistema envia esse pool
+                            para a aba <em>Pool de Dezenas (01–31)</em> — o mesmo construtor, filtros e export.
+                            O confronto com ciclo/atraso abaixo é só informativo (não altera as 16 dezenas).
+                            Depois: <strong>Salvar conjunto-base</strong> → <strong>Gerar construção</strong>.
+                        </div>
+                        <label class="form-label small mb-1" for="ccEspSelect">Escolha a Distribuição</label>
+                        <select class="form-select form-select-sm mb-3" id="ccEspSelect">
+                            <option value="">— selecione —</option>
+                            <option value="1">Distribuição 1 — 6B / 5M / 5A</option>
+                            <option value="2">Distribuição 2 — 5B / 5M / 6A</option>
+                            <option value="3">Distribuição 3 — 6B / 5M / 5A</option>
+                            <option value="4">Distribuição 4 — mescla D1+D3 (6B / 5M / 5A)</option>
+                        </select>
+                        <div id="ccEspPreview" class="small text-muted mb-3">Selecione uma distribuição para ver o pool.</div>
+                        <div id="ccEspConfronto" class="small mb-3" style="display:none;"></div>
+                        <button type="button" class="btn btn-sm btn-success" id="ccEspBtnCarregar" disabled>
+                            <i class="fas fa-download"></i> Carregar no construtor (16 dezenas)
+                        </button>
+                        <p class="small text-muted mt-2 mb-0" id="ccEspStatus"></p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="cc-panel p-3">
+                        <h3 class="h6"><i class="fas fa-layer-group text-primary"></i> Faixas da distribuição</h3>
+                        <div class="cc-faixa-legend small mb-2">
+                            <span style="background:#0d6efd"></span> Baixas (01–10)
+                            <span style="background:#fd7e14"></span> Médias (11–20)
+                            <span style="background:#dc3545"></span> Altas (21–31)
+                        </div>
+                        <div id="ccEspBalls" class="d-flex flex-wrap gap-1 mb-2" style="min-height:2.5rem;"></div>
+                        <p class="small text-muted mb-0">
+                            Total obrigatório: <strong>16</strong> · universo Dia de Sorte (01–31).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /ccPaneDezenasEsp -->
+    </div><!-- /ccMainTabContent -->
+    {% endif %}
+</div>
+
+<!-- Modal editar construção -->
+<div class="modal fade" id="ccModalEditar" tabindex="-1" aria-labelledby="ccModalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title h6" id="ccModalEditarLabel">
+                    <i class="fas fa-pen"></i> Editar construção <span id="ccEditNumero"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2 mb-3 align-items-end">
+                    {% if ui_config.has_mes %}
+                    <div class="col-md-6">
+                        <label class="form-label small mb-1">Mês da Sorte (todas as apostas no TXT)</label>
+                        <select class="form-select form-select-sm" id="ccEditMes"></select>
+                    </div>
+                    <div class="col-md-6">
+                    {% else %}
+                    <div class="col-12">
+                    {% endif %}
+                        <p class="small text-muted mb-0">
+                            {% if ui_config.positional %}
+                            Um dígito (0–9) por coluna C1–C7, separados por espaço. Cada dígito deve estar no pool da coluna.
+                            {% else %}
+                            Dezenas separadas por espaço. Todas devem estar no conjunto-base
+                            (<span id="ccEditPoolHint"></span>).
+                            {% endif %}
+                        </p>
+                        {% if ui_config.positional %}
+                        <p class="small text-muted mb-0 mt-1" id="ccEditPoolHint"></p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div id="ccEditApostas"></div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-success" id="ccBtnSalvarEdicao">
+                    <i class="fas fa-save"></i> Salvar alterações
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal exportar TXT -->
+<div class="modal fade" id="ccModalExport" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title h6"><i class="fas fa-file-export"></i> Exportar .TXT</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-2">Construção <strong id="ccExportNumero"></strong> — {{ ui_config.qtd_apostas_fixa }} apostas{% if ui_config.has_mes %} + Mês da Sorte{% elif ui_config.has_time %} + Time{% elif ui_config.has_trevos %} + Trevos{% endif %}.</p>
+                {% if ui_config.has_mes %}
+                <label class="form-label small mb-1">Mês da Sorte</label>
+                <select class="form-select form-select-sm" id="ccExportMes"></select>
+                {% endif %}
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-primary" id="ccBtnConfirmarExport">
+                    <i class="fas fa-download"></i> Baixar .TXT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal conferência histórica -->
+<div class="modal fade" id="ccModalConfHist" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title h6">
+                    <i class="fas fa-history"></i> Conferência histórica — construção <span id="ccConfHistNum"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body" id="ccConfHistCorpo">
+                <p class="text-muted small mb-0">Carregando…</p>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.__CC_UI__ = {{ ui_config | tojson }};
+window.__CC_API__ = {{ api_base | tojson }};
+window.__CC_ULTIMO__ = {{ ultimo_sorteio | tojson if ultimo_sorteio else 'null' }};
+window.__CC_DIGITOS__ = {{ (digitos_habilitado | default(false)) | tojson }};
+window.__CC_DIGITOS_PAGE__ = 'construtor';
+</script>
+{% endblock %}
+
+{% block scripts %}
+{% if ui_config.positional %}
+<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes_ss.js') }}"></script>
+{% else %}
+{% if ui_config.has_mes %}
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
+{% endif %}
+<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}?v=14"></script>
+{% if digitos_habilitado %}
+<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=9"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_dezenas_especial.js') }}?v=1"></script>
+{% endif %}
+{% endif %}
+{% endblock %}

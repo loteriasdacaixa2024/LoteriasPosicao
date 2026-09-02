@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+  {% if meses_cores %}
+  {% for nome, cor in meses_cores.items() %}
+  .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+  {% endfor %}
+  {% endif %}
+  #gc-root .gc-kpi {
+    background: var(--surface, #fff);
+    border: 1px solid rgba(192,139,0,.22);
+    border-radius: 10px;
+    padding: .65rem .85rem;
+    height: 100%;
+  }
+  #gc-root .gc-kpi .lbl {
+    font-size: .7rem; font-weight: 700; color: #6c757d; text-transform: uppercase;
+  }
+  #gc-root .gc-kpi .val {
+    font-size: 1.05rem; font-weight: 800; color: var(--primary-xdark);
+    font-variant-numeric: tabular-nums;
+  }
+  #gc-root .gc-card {
+    border: 1px solid #e5e7eb; border-radius: 12px; background: #fff;
+    box-shadow: 0 1px 2px rgba(16,24,40,.04);
+  }
+  #gc-root .gc-card h2 {
+    font-size: 1rem; font-weight: 800; margin: 0;
+    color: var(--primary-xdark, #1a0a00);
+  }
+  #gc-root .janela-btn.active, #gc-root .base-tab-btn.active {
+    background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700;
+  }
+  #gc-root .gc-ball {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent, #ffd54f); color: var(--on-accent, #1a0a00);
+    font-weight: 800; font-size: .75rem; margin: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  #gc-root .gc-gap {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 2.15rem; padding: .1rem .3rem; border-radius: 6px;
+    background: #f1f5f9; border: 1px solid #e2e8f0; color: #334155;
+    font-size: .72rem; font-weight: 700; margin: 1px; font-variant-numeric: tabular-nums;
+  }
+  #gc-root .gc-table { font-size: .85rem; }
+  #gc-root .gc-table thead th {
+    background: var(--primary); color: #fff; font-weight: 700;
+    text-align: center; white-space: nowrap; vertical-align: middle;
+  }
+  #gc-root .gc-table thead th.gc-th-sort {
+    cursor: pointer; user-select: none;
+  }
+  #gc-root .gc-table thead th.gc-th-sort:hover {
+    filter: brightness(1.08);
+  }
+  #gc-root .gc-table thead th.gc-th-sort .gc-sort-ind {
+    font-size: .65rem; margin-left: .2rem; opacity: .85;
+  }
+  #gc-root .gc-table td {
+    text-align: center; vertical-align: middle;
+    font-variant-numeric: tabular-nums;
+  }
+  #gc-root .gc-toks {
+    display: inline-flex; flex-wrap: nowrap; justify-content: center; gap: 2px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  #gc-root .gc-tok {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 1.85rem; height: 1.45rem;
+    font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  #gc-root .gc-table tbody tr.gc-top { background: rgba(25,135,84,.12); font-weight: 700; }
+  #gc-root .gc-padrao {
+    cursor: pointer; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  #gc-root .gc-padrao.sel { background: var(--accent-light, #fff8e1); }
+  #gc-root .gc-hint {
+    font-size: .8rem; color: #6c757d;
+    border-left: 3px solid var(--accent, #ffd54f);
+    padding: .35rem .65rem; background: var(--accent-light, #fff8e1);
+  }
+  #gc-root .gc-gap.sorteio {
+    background: #eef2ff; border-color: #c7d2fe; color: #3730a3;
+  }
+  #gc-root .gc-eq { background: #dcfce7; color: #166534; font-weight: 700; }
+  #gc-root .gc-diff { background: #ffedd5; color: #9a3412; font-weight: 700; }
+  #gc-root .gc-rec { background: rgba(25,135,84,.12); }
+  #gc-root .gc-fonte-ambos { color: #166534; font-weight: 800; }
+  #gc-root .gc-fonte-class { color: #92400e; }
+  #gc-root .gc-fonte-sort { color: #3730a3; }
+  #gc-root .leitura-btn.active {
+    background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700;
+  }
+  #gc-root .gc-col-title {
+    font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em;
+    color: #64748b; margin-bottom: .35rem;
+  }
+</style>
+
+<div class="container-fluid py-3" id="gc-root"
+     data-api="{{ api_base }}"
+     data-gerador="{{ gerador_url }}">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1"><i class="fas fa-ruler-horizontal text-primary"></i> {{ page_title }}</h1>
+      <p class="text-muted small mb-0">{{ page_subtitle }} — {{ modality_nome }}</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <span class="badge bg-secondary" id="gcLblBase">Geral</span>
+      <span class="badge bg-light text-dark border" id="gcLblJanela">Janela</span>
+      <span class="badge bg-light text-dark border" id="gcLblUltimo">—</span>
+      <a class="btn btn-sm btn-outline-primary" href="{{ gerador_url }}">
+        <i class="fas fa-dice"></i> Gerador de Apostas
+      </a>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+    <span class="small fw-bold text-muted me-1">Base:</span>
+    <div class="btn-group btn-group-sm" id="gcTabsBase">
+      <button type="button" class="btn btn-outline-secondary base-tab-btn active" data-base="geral">Geral</button>
+      <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="vencedores">Vencedores</button>
+      <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="acumulados">Acumulados</button>
+    </div>
+    <span class="small fw-bold text-muted ms-2 me-1">Janela:</span>
+    <div class="btn-group btn-group-sm" id="gcGrpJanela">
+      {% for j in gc_spec.janelas_ui %}
+      <button type="button" class="btn btn-outline-secondary janela-btn{% if j == gc_spec.janela_default %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <p class="gc-hint mb-3">
+    Sessão 1 mede o GAP nas duas leituras oficiais: <strong>ordem de sorteio</strong> (posições em que saíram)
+    e <strong>classificado</strong> (como a Caixa divulga). O ranking comparativo junta as duas para escolher as sequências.
+  </p>
+
+  <div class="gc-card mb-3 p-3" id="gcSessao1">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+      <h2><span class="badge bg-primary me-1">1</span> Sessão 1 — Gaps</h2>
+      <span class="small text-muted">Ordem de sorteio × classificado</span>
+    </div>
+    <div class="row g-2 mb-3" id="gcKpisS1"></div>
+    <div id="gcCorpoS1"><p class="text-muted small mb-0">Carregando…</p></div>
+  </div>
+
+  <div class="gc-card p-3" id="gcSessao2">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+      <h2><span class="badge bg-success me-1">2</span> Sessão 2 — Inicial + Ciclo</h2>
+      <span class="small text-muted">POS1 = inicial · POSn = anterior + ciclo</span>
+    </div>
+    <div class="row g-2 align-items-end mb-3">
+      <div class="col-6 col-md-3">
+        <label class="form-label small mb-0" for="gcInicial">Número inicial</label>
+        <select id="gcInicial" class="form-select form-select-sm"></select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label small mb-0" for="gcPerfil">Perfil de ciclo</label>
+        <select id="gcPerfil" class="form-select form-select-sm">
+          <option value="ultimo">Último concurso</option>
+          <option value="frequente">Padrão mais frequente</option>
+          <option value="moda_posicao">Moda por posição</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <p class="small text-muted mb-0" id="gcInicialHint"></p>
+      </div>
+    </div>
+    <div id="gcCorpoS2"><p class="text-muted small mb-0">Carregando…</p></div>
+  </div>
+</div>
+
+<script>
+  window.__GC_SPEC__ = {{ gc_spec | tojson }};
+  window.__GC_API__ = {{ api_base | tojson }};
+</script>
+<script src="/analise/gaps-ciclo/static/analise_gaps_ciclo.js?v=dupla2"></script>
+{% endblock %}

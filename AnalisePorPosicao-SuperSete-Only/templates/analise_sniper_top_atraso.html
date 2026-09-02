@@ -1,0 +1,29 @@
+{# Top 3 dígitos mais atrasados por coluna — requer `analise` #}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header fw-bold py-2" style="background:#fff3cd;color:#856404;">
+        <i class="fas fa-hourglass-half me-1"></i>Top 3 atrasados por coluna
+        <span class="fw-normal small ms-1">(dígitos há mais tempo sem sair em cada C)</span>
+    </div>
+    <div class="card-body py-3">
+        <div class="row g-3">
+            {% for col_num, dados in analise.items() %}
+            <div class="col-6 col-md-4 col-xl">
+                <div class="h-100 p-2" style="background:#f8f9fa;border-radius:10px;border-top:3px solid var(--accent);">
+                    <div class="fw-bold text-center mb-2" style="color:var(--primary);">C{{ col_num }}</div>
+                    {% for dig in dados.rank_atraso[:3] %}
+                    {% set atraso = dados.atraso[dig] %}
+                    <div class="d-flex align-items-center justify-content-between gap-1 mb-1 {% if loop.first %}fw-bold{% endif %}">
+                        <span class="digito-ball {% if dig == dados.digito_atual %}atual{% endif %}"
+                            style="width:24px;height:24px;font-size:.75rem;">{{ dig }}</span>
+                        <span class="small flex-grow-1 text-muted">{{ loop.index }}º</span>
+                        <span class="atraso-tag {% if atraso == 0 %}atraso-hot{% elif atraso <= 3 %}atraso-warm{% else %}atraso-cold{% endif %}">
+                            {% if atraso == 0 %}SAIU{% else %}{{ atraso }}{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+    }
+    .config-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        border: 1px solid #eaeaea;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .config-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .mes-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        font-size: .85rem;
+        color: #555;
+        margin-bottom: .75rem;
+    }
+    .color-line {
+        height: 6px;
+        border-radius: 4px;
+        margin-bottom: .75rem;
+        transition: background-color 0.2s;
+    }
+    .color-btn {
+        width: 100%;
+        padding: .5rem;
+        border-radius: 6px;
+        border: none;
+        color: #fff;
+        font-weight: 700;
+        font-size: .85rem;
+        cursor: pointer;
+        transition: filter 0.2s;
+    }
+    .color-btn:hover {
+        filter: brightness(1.1);
+    }
+</style>
+
+<div class="alert alert-info py-2 small mb-3">
+    Preços e bolão: edite no <a href="{{ central_url }}" target="_blank" class="fw-bold">Painel Central de Configurações</a>.
+    <a href="{{ cfg.link_caixa }}" target="_blank" rel="noopener" class="ms-2">Site oficial Caixa</a>
+</div>
+<div class="row g-2 mb-4">
+    <div class="col-md-3"><div class="config-card p-2"><small class="text-muted">Aposta simples</small><div class="fw-bold text-success">{{ cfg.preco_simples_fmt }}</div></div></div>
+    <div class="col-md-3"><div class="config-card p-2"><small class="text-muted">Bolão mínimo</small><div class="fw-bold">{{ cfg.bolao_valor_minimo_fmt }}</div></div></div>
+    <div class="col-md-3"><div class="config-card p-2"><small class="text-muted">Concurso site / app</small><div class="fw-bold">#{{ cfg.concurso_site }} / #{{ cfg.concurso_app }}</div></div></div>
+    <div class="col-md-3"><div class="config-card p-2"><small class="text-muted">Cotas bolão</small><div class="fw-bold">{{ cfg.bolao.cotas_min }}–{{ cfg.bolao.cotas_max }}</div></div></div>
+</div>
+
+<div class="config-card mb-4 p-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h5 class="fw-bold mb-0"><i class="fas fa-book me-2"></i>Informações completas — Dia de Sorte</h5>
+        <button type="button" class="btn btn-sm btn-outline-primary fw-bold" id="btnRefreshCaixaCfg">
+            <i class="fas fa-sync me-1"></i> Atualizar API Caixa
+        </button>
+    </div>
+    {% with perfil=perfil, theme='light', compact=false %}
+    {% include '_config_detalhe_sections.html' %}
+    {% endwith %}
+</div>
+
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+        <h2><i class="fas fa-palette me-2"></i>Cores dos Meses</h2>
+        <p class="mb-0" style="opacity:.85;font-size:.9rem;">Personalize as cores usadas para identificar cada mês em todo o sistema. Estas cores são aplicadas automaticamente em todas as visualizações.</p>
+    </div>
+    <div>
+        <button class="btn" style="background:var(--accent);color:#111;font-weight:700;" id="btnSalvar" onclick="salvarConfiguracoes()">
+            <i class="fas fa-save me-2"></i>Salvar Cores
+        </button>
+    </div>
+</div>
+
+<div class="row g-3">
+    {% for mes, cor in cores.items() %}
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="config-card">
+            <div class="mes-header">
+                <i class="far fa-calendar-alt"></i> {{ mes }}
+            </div>
+            <label class="d-block w-100" style="cursor: pointer;">
+                <!-- Linha Colorida -->
+                <div class="color-line" id="line-{{ mes }}" style="background-color: {{ cor }};"></div>
+                <!-- Botão Falso Colorido -->
+                <div class="color-btn text-center" id="btn-{{ mes }}" style="background-color: {{ cor }};">
+                    {{ mes }}
+                </div>
+                <!-- Input Oculto -->
+                <input type="color" class="color-input d-none" data-mes="{{ mes }}" value="{{ cor }}" oninput="atualizarPreview(this)">
+            </label>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    // Atualiza as cores visualmente quando o usuário move o seletor
+    function atualizarPreview(input) {
+        const mes = input.dataset.mes;
+        const cor = input.value;
+        document.getElementById('line-' + mes).style.backgroundColor = cor;
+        document.getElementById('btn-' + mes).style.backgroundColor = cor;
+        
+        // Decide se a cor do texto do botão precisa ser escura ou clara para dar contraste
+        const rgb = hexToRgb(cor);
+        const brilho = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+        document.getElementById('btn-' + mes).style.color = brilho > 128 ? '#111' : '#fff';
+    }
+
+    function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : { r: 0, g: 0, b: 0 };
+    }
+
+    async function salvarConfiguracoes() {
+        const btn = document.getElementById('btnSalvar');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+
+        const novasCores = {};
+        document.querySelectorAll('.color-input').forEach(input => {
+            novasCores[input.dataset.mes] = input.value;
+        });
+
+        try {
+            const r = await fetch('/configuracoes/api/cores', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(novasCores)
+            });
+            const d = await r.json();
+
+            if (d.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Salvo!',
+                    text: 'As cores foram atualizadas com sucesso.',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    // Recarrega para que o CSS seja atualizado em todo lugar
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire('Erro', d.message, 'error');
+            }
+        } catch (e) {
+            Swal.fire('Erro', e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Cores';
+        }
+    }
+
+    document.getElementById('btnRefreshCaixaCfg')?.addEventListener('click', async () => {
+        const r = await fetch('/configuracoes/api/atualizar-caixa', { method: 'POST' });
+        const d = await r.json();
+        if (d.status === 'success') location.reload();
+    });
+</script>
+{% endblock %}

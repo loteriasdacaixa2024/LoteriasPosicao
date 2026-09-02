@@ -1,0 +1,2516 @@
+{% extends "base.html" %}
+{% block title %}Ciclo — Apostas — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+  {% if meses_cores %}
+  {% for nome, cor in meses_cores.items() %}
+  .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+  {% endfor %}
+  {% endif %}
+
+  /* —— Design system: listagem de apostas (denso / analítico) —— */
+  .cc-list{
+    display:flex;flex-direction:column;gap:0;
+    border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;
+    background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.04);
+  }
+  .cc-aposta{
+    --cc-accent:#0d6efd;
+    position:relative;background:#fff;border:0;border-radius:0;
+    padding:.5rem .85rem .45rem .75rem;
+    border-bottom:1px solid #eef0f3;
+    border-left:3px solid var(--cc-accent);
+    box-shadow:none;
+    transition:background .16s ease, box-shadow .16s ease;
+  }
+  .cc-aposta:last-child{border-bottom:0}
+  .cc-aposta:hover{
+    background:#fafbfc;
+    box-shadow:inset 0 0 0 1px rgba(16,24,40,.04);
+    z-index:1;
+  }
+  .cc-aposta.ritmo{--cc-accent:#fd7e14}
+  .cc-aposta.operacional{--cc-accent:#6f42c1}
+  .cc-aposta.fechamento{--cc-accent:#198754}
+  .cc-aposta.estrategia{--cc-accent:#0f172a}
+  .cc-aposta.ja-hist{--cc-accent:#dc3545;background:#fff8f8}
+  .cc-aposta.ja-hist:hover{background:#fff1f1}
+
+  .cc-aposta-head{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:.5rem .75rem;flex-wrap:wrap;margin-bottom:.35rem;
+  }
+  .cc-aposta-left{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;min-width:0}
+  .cc-aposta-num{
+    font-size:1.125rem;font-weight:800;letter-spacing:-.03em;
+    color:#0f172a;line-height:1;font-variant-numeric:tabular-nums;
+    min-width:2.35rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  .cc-aposta-badges{display:flex;align-items:center;gap:.28rem;flex-wrap:wrap}
+  .cc-chip{
+    display:inline-flex;align-items:center;gap:.2rem;
+    padding:.15rem .45rem;border-radius:6px;
+    border:1px solid #e5e7eb;background:#f8fafc;color:#334155;
+    font-size:.6875rem;font-weight:600;line-height:1.25;white-space:nowrap;
+  }
+  .cc-chip em{font-style:normal;font-weight:500;color:#64748b;margin-right:.12rem}
+  .cc-chip strong{font-weight:700;font-variant-numeric:tabular-nums;color:#0f172a}
+  .cc-chip.warn{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
+  .cc-chip.warn strong,.cc-chip.warn em{color:#b91c1c}
+
+  .cc-aposta-actions{display:flex;align-items:center;gap:.35rem;margin-left:auto}
+  .cc-aposta-actions .btn{
+    font-size:.68rem;font-weight:600;padding:.15rem .5rem;border-radius:6px;line-height:1.3;
+  }
+
+  .cc-aposta-dezenas{
+    display:flex;flex-wrap:wrap;align-items:center;gap:.3rem;
+    padding:.2rem 0 .4rem;
+  }
+  .cc-ball{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:50%;
+    font-size:.75rem;font-weight:700;font-variant-numeric:tabular-nums;
+    margin:0;line-height:1;
+    box-shadow:0 0 0 1px rgba(15,23,42,.06);
+    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .cc-ball:hover{transform:translateY(-1px) scale(1.06);box-shadow:0 2px 8px rgba(15,23,42,.16);filter:brightness(1.03)}
+  .cc-ball.nova{background:#0d6efd;color:#fff}
+  .cc-ball.rep{background:#fd7e14;color:#fff}
+  .cc-ball.falt{background:#ff9800;color:#fff}
+  .cc-ball.saida{background:#198754;color:#fff}
+  .cc-ball.livre{background:#64748b;color:#fff}
+  .cc-ball.dez{background:#e2e8f0;color:#0f172a}
+  .cc-ball.acerto{background:#198754!important;color:#fff!important;box-shadow:0 0 0 2px #146c43}
+
+  .cc-aposta-foot{
+    display:flex;flex-wrap:wrap;align-items:center;gap:.35rem 1.1rem;
+    padding-top:.35rem;border-top:1px solid #f1f5f9;
+    font-size:.6875rem;color:#64748b;
+  }
+  .cc-stat{
+    display:inline-flex;align-items:baseline;gap:.3rem;
+    min-width:6.25rem;max-width:9rem;flex:0 1 auto;
+    font-variant-numeric:tabular-nums;
+  }
+  .cc-stat-label{color:#94a3b8;font-weight:500;flex-shrink:0}
+  .cc-stat-leader{
+    flex:1 1 auto;min-width:.75rem;height:0;
+    border-bottom:1px dotted #cbd5e1;
+    transform:translateY(-.35em);
+  }
+  .cc-stat-val{font-weight:700;color:#334155;flex-shrink:0}
+  .cc-aposta-bt-slot{margin-left:auto;font-size:.6875rem}
+  .bt-acertos-info{
+    display:inline-flex;align-items:center;gap:.25rem;
+    color:#15803d!important;font-weight:700;
+    background:#f0fdf4;border:1px solid #bbf7d0;
+    border-radius:6px;padding:.1rem .4rem;
+  }
+  .cc-aposta-fora{
+    margin-top:.3rem;font-size:.68rem;color:#94a3b8;
+    letter-spacing:.01em;
+  }
+
+  /* Mês: cores via .mes-nome-* (identidade); só moderniza o envelope */
+  .mes-badge{
+    display:inline-flex;align-items:center;
+    padding:.15rem .5rem;border-radius:6px;
+    font-size:.6875rem;font-weight:700;letter-spacing:.015em;
+    background:#6c757d;color:#fff;line-height:1.25;white-space:nowrap;
+    box-shadow:0 0 0 1px rgba(15,23,42,.04);
+  }
+
+  .cc-legenda{display:flex;flex-wrap:wrap;gap:.75rem;font-size:.75rem;color:#6c757d;margin-top:.5rem}
+  .cc-legenda span{display:inline-flex;align-items:center;gap:.3rem}
+  .cc-i{cursor:help;color:#6c757d;font-size:.78rem;margin-left:.2rem}
+  .cc-toggle{display:flex;align-items:center;gap:.4rem;padding:.45rem .65rem;border:1px solid #dee2e6;border-radius:8px;background:#fff}
+  .cc-bt-box{border:1px solid #e5e7eb;border-radius:10px;padding:.75rem .85rem;background:#fafbfc;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  .cc-bt-pill{display:inline-flex;flex-direction:column;align-items:center;min-width:3rem;padding:.25rem .55rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:.72rem;margin:2px}
+  .cc-bt-pill strong{font-size:.95rem;font-variant-numeric:tabular-nums}
+
+  .cc-ball.rec-mf{background:var(--primary);color:#fff}
+  .cc-ball.rec-f{background:var(--accent);color:var(--on-accent,#1a0a00)}
+  .cc-ball.rec-2{background:var(--accent-mes);color:#fff}
+  .cc-ball.rec-1{background:#e2e8f0;color:#0f172a}
+  .cc-ball.rec-0{background:#fff;color:#64748b;box-shadow:0 0 0 1px #cbd5e1}
+  .rec-n-btn{border-color:var(--primary)!important;color:var(--primary)!important}
+  .rec-n-btn:hover{background:var(--accent-light)!important;color:var(--primary-xdark)!important}
+  .rec-n-btn.active{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important}
+  .rec-linha-cnc{font-variant-numeric:tabular-nums;min-width:3.2rem;font-weight:700;color:var(--primary-xdark)}
+  .rec-bloco{border:1px solid #e5e7eb;border-radius:10px;padding:.75rem .9rem;background:#fff;height:100%}
+  .rec-bloco h3{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin:0 0 .45rem;color:var(--primary-dark)}
+  .rec-fold{border:1px solid var(--accent);border-radius:12px;background:var(--accent-light);margin-bottom:.85rem}
+  .rec-fold > summary{list-style:none;cursor:pointer;padding:.85rem 1.1rem;user-select:none;display:flex;align-items:flex-start;gap:.5rem}
+  .rec-fold > summary::-webkit-details-marker{display:none}
+  .rec-fold > summary::before{content:'▸';display:inline-block;margin-top:.12rem;transition:transform .15s ease;color:var(--primary-xdark);font-weight:800;flex-shrink:0;line-height:1.2}
+  .rec-fold[open] > summary::before{transform:rotate(90deg)}
+  .rec-fold-head{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+  .rec-fold-title{font-size:.95rem;font-weight:800;color:var(--primary-xdark);line-height:1.3}
+  .rec-fold-resumo{font-size:.78rem;color:var(--primary-dark);opacity:.92;font-weight:500;line-height:1.4}
+  .rec-fold-body{padding:0 1.1rem 1rem}
+  .rec-fold-explica{font-size:.84rem;color:#44403c;line-height:1.55;margin:0 0 .85rem}
+  .rec-pos-card{border:1px solid color-mix(in srgb, var(--primary) 28%, #e5e7eb);border-radius:10px;background:#fff;padding:.75rem .9rem;height:100%}
+  .rec-pos-card h3{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin:0 0 .45rem;color:var(--primary-dark)}
+  .rec-fold table{font-size:.78rem}
+  .rec-fold .rec-concl{border:1px solid var(--accent);border-radius:10px;background:#fff;padding:.85rem 1rem}
+  .rec-fold .rec-concl p{font-size:.82rem;margin:0 0 .45rem;color:#44403c}
+  .rec-fold .rec-concl p:last-child{margin-bottom:0}
+  .rec-win{background:var(--accent-light)!important;font-weight:700}
+  .rec-pool-old{opacity:.9}
+  .rec-bt-n-btn{border-color:var(--primary)!important;color:var(--primary)!important}
+  .rec-bt-n-btn.active{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important}
+  .rec-conjunto{border:2px solid var(--accent-mes);border-radius:12px;background:#fff;padding:1rem 1.15rem;margin-bottom:1rem;box-shadow:0 2px 10px rgba(16,24,40,.06)}
+  .rec-conjunto h2{font-size:1.05rem;font-weight:800;color:var(--primary-xdark);margin:0 0 .25rem}
+  .rec-conjunto .rec-conjunto-fmt{font-size:1.05rem;font-weight:800;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(--primary-xdark);margin:.35rem 0 .65rem}
+  .rec-conjunto .cc-ball{width:40px;height:40px;font-size:.85rem}
+  .rec-conjunto .rec-ajuda{font-size:.78rem;color:#64748b;margin:.15rem 0 .5rem}
+  .rec-conjunto .rec-ajuda > summary{
+    cursor:pointer;list-style:none;font-weight:600;color:#64748b;display:inline-flex;align-items:center;gap:.35rem
+  }
+  .rec-conjunto .rec-ajuda > summary::-webkit-details-marker{display:none}
+  .rec-conjunto .rec-ajuda > summary:hover{color:var(--primary-xdark)}
+  .rec-conjunto .rec-ajuda p{margin:.4rem 0 0;line-height:1.5}
+  .rec-pad-box{border-color:var(--primary)}
+  .rec-pad-ultimo{background:rgba(25,135,84,.12);border-color:#198754!important}
+  .rec-pad-ultimo .rec-pad-star{color:#198754;font-weight:800;font-size:.68rem}
+  .rec-pad-row{cursor:pointer}
+  .rec-pad-row:hover{background:#f8fafc}
+  .rec-pad-slot{min-height:2.1rem;border:1px dashed #cbd5e1;border-radius:8px;padding:.25rem .5rem;font-size:.78rem;background:#fff}
+  .rec-pad-slot.is-on{border-style:solid;border-color:var(--accent-mes);background:var(--accent-light)}
+  .rec-pad-ini{display:inline-flex;align-items:center;gap:.35rem;margin:.15rem .6rem .15rem 0;font-size:.78rem}
+  .rec-pad-val li{font-size:.78rem}
+  .rec-pad-lista{max-height:260px;overflow:auto;border:1px solid #e5e7eb;border-radius:8px;background:#fff}
+
+  @media (max-width:576px){
+    .cc-list{border-radius:8px}
+    .cc-aposta{padding:.45rem .65rem .4rem .55rem}
+    .cc-ball{width:28px;height:28px;font-size:.7rem}
+    .cc-aposta-num{font-size:1rem;min-width:2.1rem}
+    .cc-stat{min-width:5.5rem;max-width:100%}
+    .cc-aposta-bt-slot{margin-left:0;width:100%}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .cc-aposta,.cc-ball,.rec-fold > summary::before{transition:none}
+    .cc-aposta:hover,.cc-ball:hover{transform:none}
+  }
+
+</style>
+<div class="container-fluid py-3">
+  <div class="page-hdr mb-3" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;border-radius:12px;padding:1.25rem 1.5rem;">
+    <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start">
+      <div>
+        <h1 class="h4 mb-1"><i class="fas fa-dice me-2"></i>Ciclo — Apostas</h1>
+        <p class="mb-0 small opacity-90">{{ modality_nome }} · {{ pick_min }}–{{ pick_max }} dezenas · histórico + back test · TXT</p>
+        <div id="cc-ciclo-banner" class="mt-2 small opacity-95">Carregando ciclo…</div>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-sm btn-outline-light" href="/analise/resumo-geral/">
+          ← Voltar para Análise
+        </a>
+        <a class="btn btn-sm fw-bold" style="background:var(--accent);color:#1a0a00;border:none;" href="/analise/ciclo-cobertura/">
+          <i class="fas fa-chart-bar me-1"></i>Análise do ciclo
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <ul class="nav nav-tabs mb-3 flex-wrap" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-21" type="button" role="tab">Ciclo — Apostas</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ritmo" type="button" role="tab">Ciclo — Ritmo de Evolução</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-operacional" type="button" role="tab">Ciclo — Modo Operacional</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fechamento" type="button" role="tab">Ciclo — Fechamento</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-btn-estrategia" data-bs-toggle="tab" data-bs-target="#tab-estrategia" type="button" role="tab">Ciclo — Estratégias</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-btn-recorrencia" data-bs-toggle="tab" data-bs-target="#tab-recorrencia" type="button" role="tab">Ciclo — Recorrência</button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- ABA 1 -->
+    <div class="tab-pane fade show active" id="tab-21" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Pool = <strong>união</strong> das Novas e Repetidas dos 2 últimos concursos.
+          Cada jogo fixa <strong>2 novas</strong> + <strong>1 repetida</strong>; o restante completa até 7–{{ pick_max }} dezenas.
+          Após gerar, o sistema confere o histórico oficial e roda o back test automaticamente.
+        </div>
+      </details>
+      <div id="cc-ctx" class="mb-3"><div class="alert alert-light border small">Carregando contexto…</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+          <i class="fas fa-dice me-2"></i>Gerar apostas a partir da análise
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="cc-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}–{{ pick_max }}) <i class="fas fa-info-circle cc-i" title="Quantidade de dezenas por aposta (limites Caixa)."></i></label>
+              <select id="cc-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% if has_mes %}
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Mês da Sorte <i class="fas fa-info-circle cc-i" title="Mês exportado junto com cada aposta no TXT (padrão Dia de Sorte)."></i></label>
+              <select id="cc-mes" class="form-select form-select-sm cc-mes-sorte">
+                <option value="">Carregando…</option>
+              </select>
+            </div>
+            {% endif %}
+            <div class="col-12 col-md-6 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cc-f-faixa">
+                <label class="form-check-label small" for="cc-f-faixa">Faixas</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cc-f-soma">
+                <label class="form-check-label small" for="cc-f-soma">Soma</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cc-f-dig">
+                <label class="form-check-label small" for="cc-f-dig">Dígitos</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cc-descartar-hist" checked>
+                <label class="form-check-label small" for="cc-descartar-hist" title="Remove apostas idênticas ao histórico oficial">Descartar já sorteadas</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="cc-btn-gerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar</button>
+            <button type="button" class="btn btn-outline-secondary" id="cc-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="cc-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="cc-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball nova" style="width:18px;height:18px;font-size:.55rem">N</span> Novas <i class="fas fa-info-circle cc-i" title="Dezenas que ainda não tinham saído no ciclo aberto naquele concurso (união dos 2 últimos no pool)."></i></span>
+            <span><span class="cc-ball rep" style="width:18px;height:18px;font-size:.55rem">R</span> Repetidas <i class="fas fa-info-circle cc-i" title="Dezenas que já haviam aparecido no mesmo ciclo antes daquele concurso."></i></span>
+            <span><span class="cc-ball livre" style="width:18px;height:18px;font-size:.55rem">L</span> Complemento <i class="fas fa-info-circle cc-i" title="Dezenas que completam o jogo além das 2 novas + 1 repetida fixas."></i></span>
+            <span><span class="cc-ball acerto" style="width:18px;height:18px;font-size:.55rem">✓</span> Acerto no Back Test</span>
+          </div>
+        </div>
+      </div>
+      <div id="cc-hist-alert"></div>
+      <div id="cc-bt" class="mb-3"></div>
+      <div id="cc-out"></div>
+    </div>
+
+    <!-- ABA 2 -->
+    <div class="tab-pane fade" id="tab-ritmo" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Consome a análise oficial. O nº de <strong>faltantes (k)</strong> é amostrado pelos cenários semelhantes + teto de pressão.
+          Restante = dezenas já saídas no ciclo. Histórico e back test rodam após a geração.
+        </div>
+      </details>
+      <div id="cr-ctx" class="mb-3"><div class="alert alert-light border small">Carregando indicadores…</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+          <i class="fas fa-dice me-2"></i>Gerar apostas a partir da análise · Ritmo
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="cr-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}–{{ pick_max }})</label>
+              <select id="cr-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% if has_mes %}
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Mês da Sorte</label>
+              <select id="cr-mes" class="form-select form-select-sm cc-mes-sorte">
+                <option value="">Carregando…</option>
+              </select>
+            </div>
+            {% endif %}
+            <div class="col-12 col-md-3 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cr-descartar-hist" checked>
+                <label class="form-check-label small" for="cr-descartar-hist">Descartar já sorteadas</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="cr-btn-gerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar Ritmo</button>
+            <button type="button" class="btn btn-outline-secondary" id="cr-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="cr-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="cr-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">P</span> Pendentes / faltantes <i class="fas fa-info-circle cc-i" title="Dezenas que ainda não saíram no ciclo atual (laranja no volante da análise)."></i></span>
+            <span><span class="cc-ball saida" style="width:18px;height:18px;font-size:.55rem">S</span> Já saídas <i class="fas fa-info-circle cc-i" title="Dezenas que já apareceram ao menos uma vez no ciclo aberto."></i></span>
+          </div>
+        </div>
+      </div>
+      <div id="cr-hist-alert"></div>
+      <div id="cr-bt" class="mb-3"></div>
+      <div id="cr-out"></div>
+    </div>
+
+    <!-- ABA 3 — Modo Operacional -->
+    <div class="tab-pane fade" id="tab-operacional" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Segue a <strong>receita da Inteligência Operacional</strong>: quantidade fixa de faltantes
+          (<em>faltantes_por_jogo</em>), 1 repetente do último concurso e complemento com já saídas.
+          O modo (conservador / equilibrado / agressivo) ajusta o k. Histórico e back test rodam após gerar.
+        </div>
+      </details>
+      <div id="co-ctx" class="mb-3"><div class="alert alert-light border small">Carregando estratégia…</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+          <i class="fas fa-dice me-2"></i>Gerar apostas a partir da análise · Operacional
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="co-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}–{{ pick_max }})</label>
+              <select id="co-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% if has_mes %}
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Mês da Sorte</label>
+              <select id="co-mes" class="form-select form-select-sm cc-mes-sorte">
+                <option value="">Carregando…</option>
+              </select>
+            </div>
+            {% endif %}
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Modo</label>
+              <select id="co-modo" class="form-select form-select-sm">
+                <option value="auto" selected>Auto (recomendado)</option>
+                <option value="conservador">Conservador</option>
+                <option value="equilibrado">Equilibrado</option>
+                <option value="agressivo">Agressivo</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="co-descartar-hist" checked>
+                <label class="form-check-label small" for="co-descartar-hist">Descartar já sorteadas</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="co-btn-gerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar Operacional</button>
+            <button type="button" class="btn btn-outline-secondary" id="co-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="co-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="co-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">P</span> Pendentes / faltantes</span>
+            <span><span class="cc-ball rep" style="width:18px;height:18px;font-size:.55rem">R</span> Repetente (último)</span>
+            <span><span class="cc-ball saida" style="width:18px;height:18px;font-size:.55rem">S</span> Já saídas</span>
+          </div>
+        </div>
+      </div>
+      <div id="co-hist-alert"></div>
+      <div id="co-bt" class="mb-3"></div>
+      <div id="co-out"></div>
+    </div>
+
+    <!-- ABA 4 — Fechamento -->
+    <div class="tab-pane fade" id="tab-fechamento" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Especializado no <strong>fim de ciclo</strong>: cobre subconjuntos das pendentes (fechamento parcial)
+          e completa com já saídas. Só libera quando a análise indica pressão/estado crítico — ou use
+          <em>Forçar mesmo assim</em>. Histórico e back test rodam após gerar.
+        </div>
+      </details>
+      <div id="cf-ctx" class="mb-3"><div class="alert alert-light border small">Carregando elegibilidade…</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+          <i class="fas fa-dice me-2"></i>Gerar apostas a partir da análise · Fechamento
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="cf-qtd" class="form-control form-control-sm" value="10" min="1" max="100">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}–{{ pick_max }})</label>
+              <select id="cf-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% if has_mes %}
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Mês da Sorte</label>
+              <select id="cf-mes" class="form-select form-select-sm cc-mes-sorte">
+                <option value="">Carregando…</option>
+              </select>
+            </div>
+            {% endif %}
+            <div class="col-12 col-md-5 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cf-descartar-hist" checked>
+                <label class="form-check-label small" for="cf-descartar-hist">Descartar já sorteadas</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="cf-forcar">
+                <label class="form-check-label small" for="cf-forcar" title="Ignora o bloqueio quando a análise não recomenda fechamento">Forçar mesmo assim</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="cf-btn-gerar" style="background:var(--primary);border-color:var(--primary);color:#fff;"><i class="fas fa-bolt"></i> Gerar Fechamento</button>
+            <button type="button" class="btn btn-outline-secondary" id="cf-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="cf-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="cf-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">P</span> Pendentes cobertas</span>
+            <span><span class="cc-ball saida" style="width:18px;height:18px;font-size:.55rem">S</span> Já saídas</span>
+            <span><span class="cc-ball livre" style="width:18px;height:18px;font-size:.55rem">·</span> Pendentes deixadas de fora</span>
+          </div>
+        </div>
+      </div>
+      <div id="cf-hist-alert"></div>
+      <div id="cf-bt" class="mb-3"></div>
+      <div id="cf-out"></div>
+    </div>
+
+    <!-- ABA 5 — Ciclo — Estratégias -->
+    <div class="tab-pane fade" id="tab-estrategia" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:#0f172a!important;">
+        <summary class="card-header fw-bold py-2" style="background:#0f172a;color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Observa <strong>novas + evolução + repetidas + progresso</strong> e transforma isso em plano:
+          núcleo compartilhado, k conforme o estágio (não só mistura 1–6) e distribuição das repetidas.
+          As 10 apostas são variações controladas — não previsão do próximo sorteio.
+        </div>
+      </details>
+      <div id="ce-estrategia-card" class="mb-3"></div>
+      <div id="ce-ctx" class="mb-3"><div class="alert alert-light border small">Carregando estratégia…</div></div>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:#0f172a!important;">
+        <div class="card-header fw-bold" style="background:#0f172a;color:#fff;">
+          <i class="fas fa-chess-knight me-2"></i>Gerar · Ciclo — Estratégias
+        </div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Apostas</label>
+              <input type="number" id="ce-qtd" class="form-control form-control-sm" value="10" min="1" max="80">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Dezenas ({{ pick_min }}–{{ pick_max }})</label>
+              <select id="ce-pick" class="form-select form-select-sm">
+                {% for n in range(pick_min, pick_max + 1) %}
+                <option value="{{ n }}" {% if n == pick_default %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Desdobramento</label>
+              <select id="ce-desdob" class="form-select form-select-sm">
+                <option value="auto" selected>Auto (Evolução 1–6)</option>
+                <option value="1">1 faltante</option>
+                <option value="2">2 faltantes</option>
+                <option value="3">3 faltantes</option>
+                <option value="4">4 faltantes</option>
+                <option value="5">5 faltantes</option>
+                <option value="6">6 faltantes</option>
+                <option value="7" disabled>7 (bloqueado)</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Repetição alvo</label>
+              <select id="ce-krep" class="form-select form-select-sm">
+                <option value="">Auto (histórico)</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="3">3</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Ordenação</label>
+              <select id="ce-orden" class="form-select form-select-sm">
+                <option value="score" selected>Score</option>
+                <option value="soma">Soma</option>
+                <option value="atraso">Atraso (faltantes)</option>
+                <option value="frequencia">Frequência</option>
+                <option value="aleatorio">Aleatório</option>
+              </select>
+            </div>
+            {% if has_mes %}
+            <div class="col-6 col-md-2">
+              <label class="form-label small mb-0">Mês da Sorte</label>
+              <select id="ce-mes" class="form-select form-select-sm cc-mes-sorte">
+                <option value="">Carregando…</option>
+              </select>
+            </div>
+            {% endif %}
+            <div class="col-12 d-flex flex-wrap gap-3 align-items-center">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="ce-usar-evo" checked>
+                <label class="form-check-label small" for="ce-usar-evo" title="Usa Qtd. Evolução da tabela Evolução do Ciclo por Concurso">Seguir Evolução do Ciclo</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="ce-bloquear-exato" checked>
+                <label class="form-check-label small" for="ce-bloquear-exato">Bloquear combinação exata já sorteada</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="ce-filtro-estrut" checked>
+                <label class="form-check-label small" for="ce-filtro-estrut">Filtrar estrutura saturada</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" id="ce-descartar-hist" checked>
+                <label class="form-check-label small" for="ce-descartar-hist">Descartar já sorteadas (pós)</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn fw-bold" id="ce-btn-gerar" style="background:#0f172a;border-color:#0f172a;color:#fff;"><i class="fas fa-chess-knight"></i> Gerar Estratégia</button>
+            <button type="button" class="btn btn-outline-secondary" id="ce-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
+            <button type="button" class="btn btn-outline-primary" id="ce-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
+          </div>
+          <p class="small text-muted mt-2 mb-0" id="ce-status"></p>
+          <div class="cc-legenda">
+            <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">F</span> Faltantes (novas do ciclo)</span>
+            <span><span class="cc-ball saida" style="width:18px;height:18px;font-size:.55rem">A</span> Já saídas mais atrasadas</span>
+          </div>
+        </div>
+      </div>
+      <div id="ce-relatorio" class="mb-3"></div>
+      <div id="ce-hist-alert"></div>
+      <div id="ce-bt" class="mb-3"></div>
+      <div id="ce-out"></div>
+    </div>
+
+    <!-- ABA 6 — Ciclo — Recorrência (análise + pós-análise) -->
+    <div class="tab-pane fade" id="tab-recorrencia" role="tabpanel">
+      <details class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <summary class="card-header fw-bold py-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;cursor:pointer;font-size:.9rem;list-style:none;">Como utilizar</summary>
+        <div class="card-body pt-2 small text-muted">
+          Esta aba olha as <strong>dezenas que voltaram a sair</strong> nos últimos N concursos do ciclo
+          (você escolhe 4, 5, 6, 8 ou 10) e separa o universo em quatro grupos:
+          núcleo forte, repetidas, baixa presença e ausentes.
+          Embaixo, três caixas vêm fechadas — clique na seta quando quiser o detalhe:
+          o confronto com o resultado real, o teste no histórico e a recomendação de pool.
+          O conjunto principal sugerido é <strong>núcleo + baixa presença</strong>; as ausentes entram no máximo 1 por jogo.
+          As <strong>16 dezenas</strong> do cartão destacado vão para o Construtor nesta ordem:
+          primeiro as <strong>pendentes do ciclo</strong> (as que ainda não saíram), depois o núcleo e a baixa presença.
+          Se houver mais de 16 faltantes, ficam as de maior score.
+        </div>
+      </details>
+      <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+        <div class="card-header fw-bold d-flex flex-wrap justify-content-between align-items-center gap-2" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark) 100%);color:#fff;">
+          <span><i class="fas fa-redo me-2"></i>Recorrência · Repetidas no Ciclo</span>
+          <span class="small fw-normal" id="rec-concursos-lbl"></span>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <span class="small text-muted fw-semibold">Últimos N concursos</span>
+            <div class="btn-group btn-group-sm" role="group" id="rec-n-group">
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="4">4</button>
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="5">5</button>
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="6">6</button>
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="8">8</button>
+                <button type="button" class="btn btn-outline-secondary rec-n-btn" data-n="10">10</button>
+            </div>
+          </div>
+          <p class="small text-muted mb-0" id="rec-status">Carregando…</p>
+        </div>
+      </div>
+      <div id="rec-out"><div class="alert alert-light border small">Carregando recorrência…</div></div>
+    </div>
+  </div>
+</div>
+{% if has_mes %}
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
+{% endif %}
+<script>
+(function(){
+  const API = {{ api_base|tojson }};
+  const HAS_MES = {{ 'true' if has_mes else 'false' }};
+  const MESES_ABREV = {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+  const MESES_NOME = {1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
+  const pad = n => String(n).padStart(2,'0');
+  const balls = (arr, cls) => (arr||[]).map(d=>`<span class="cc-ball ${cls}">${pad(d)}</span>`).join('') || '—';
+
+  let state21 = { apostas: [], mes: null };
+  let stateRitmo = { apostas: [], mes: null };
+  let stateOp = { apostas: [], mes: null };
+  let stateFech = { apostas: [], mes: null };
+  let stateEst = { apostas: [], mes: null, scoresMap: {}, relatorio: null };
+
+  function mesPayloadFromSelect(selId){
+    const el = document.getElementById(selId);
+    if(!el || !el.value) return null;
+    return el.value; // atrasado|frequente|aleatorio|N — backend resolve
+  }
+
+  function mesNumResolved(selId){
+    const el = document.getElementById(selId);
+    if(!el || !el.value) return null;
+    if(window.MesSorteSelect) return MesSorteSelect.resolveFromSelect(el, MesSorteSelect.cached);
+    const n = parseInt(el.value, 10);
+    return isNaN(n) ? null : n;
+  }
+
+  async function parseJson(r){
+    const ct = (r.headers.get('content-type')||'');
+    const txt = await r.text();
+    if(!ct.includes('application/json')){
+      throw new Error(`API ${r.status}: resposta não-JSON (servidor desatualizado? reinicie o app).`);
+    }
+    let j;
+    try { j = JSON.parse(txt); }
+    catch(e){ throw new Error('JSON inválido: '+e.message); }
+    if(!r.ok && j && (j.erro || j.error || j.message)) throw new Error(j.erro || j.error || j.message);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return j;
+  }
+
+  if(HAS_MES && window.MesSorteSelect){
+    MesSorteSelect.load(API).then(data=>{
+      ['cc-mes','cr-mes','co-mes','cf-mes','ce-mes'].forEach(id=>{
+        MesSorteSelect.fill(document.getElementById(id), data, { defaultPrefer: 'atrasado' });
+      });
+    }).catch(()=>{});
+  }
+
+
+  function chip(label, value){
+    if(value == null || value === '') return '';
+    return `<span class="cc-chip"><em>${label}</em><strong>${value}</strong></span>`;
+  }
+
+  function statsParImpar(dezenas){
+    const dz = dezenas || [];
+    let pares = 0;
+    dz.forEach(d => { if(Number(d) % 2 === 0) pares++; });
+    return { pares, impares: dz.length - pares };
+  }
+
+  function footStat(label, value){
+    if(value == null || value === '') return '';
+    return `<span class="cc-stat"><span class="cc-stat-label">${label}</span><span class="cc-stat-leader" aria-hidden="true"></span><span class="cc-stat-val">${value}</span></span>`;
+  }
+
+  function mesBadge(ap){
+    const n = Number(ap.mes_num || ap.mes) || 0;
+    if(!n) return '';
+    const label = ap.mes_nome || MESES_NOME[n] || ap.mes_abrev || MESES_ABREV[n] || '';
+    if(!label) return '';
+    // Classe idêntica às chaves de meses_cores (ex.: mes-nome-Março) — não alterar cores
+    return `<span class="mes-badge mes-nome-${label}" title="Mês da Sorte">${label}</span>`;
+  }
+
+  function renderApostaCard(a, i, opts){
+    opts = opts || {};
+    const num = a.numero || (i + 1);
+    const numTxt = '#' + String(num).padStart(2, '0');
+    const variant = opts.variant || '';
+    const rmClass = opts.rmClass || '';
+    const pi = statsParImpar(a.dezenas);
+    const badges = [];
+    if(a.soma != null) badges.push(chip('Soma', a.soma));
+    if(a.digitos_distintos != null) badges.push(chip('Dígitos', a.digitos_distintos));
+    if(a.k_faltantes != null) badges.push(chip('k', a.k_faltantes));
+    if(a.k_desdobramento != null) badges.push(chip('Desdob.', a.k_desdobramento));
+    if(a.k_repeticao != null) badges.push(chip('Rep.', a.k_repeticao));
+    if(a.qtd_evolucao_alvo != null) badges.push(chip('Evol.', '+'+a.qtd_evolucao_alvo));
+    if(a.alinhado_evolucao) badges.push(`<span class="cc-chip" style="background:#ecfdf5;border-color:#a7f3d0;color:#047857"><em>Ritmo</em><strong>ok</strong></span>`);
+    if(a.score != null) badges.push(chip('Score', a.score));
+    if(a.modo) badges.push(chip('Modo', a.modo));
+    if(a.cobertura_pendentes != null) badges.push(chip('Cob.', a.cobertura_pendentes + '%'));
+    badges.push(mesBadge(a));
+    if(a.ja_sorteada){
+      badges.push(`<span class="cc-chip warn"><em>Hist.</em><strong>#${a.concurso_historico||'?'}</strong></span>`);
+    }
+    const ballsHtml = (a.dezenas||[]).map(d => {
+      const cls = (opts.ballClass ? opts.ballClass(d, a) : 'dez');
+      return `<span class="cc-ball ${cls}">${pad(d)}</span>`;
+    }).join('');
+    const foot = [
+      footStat('Pares', pi.pares),
+      footStat('Ímpares', pi.impares),
+    ].filter(Boolean).join('');
+    const fora = (a.pendentes_fora||[]).length
+      ? `<div class="cc-aposta-fora">Fora: ${(a.pendentes_fora||[]).map(pad).join(' ')}</div>`
+      : '';
+    const rm = a.ja_sorteada && rmClass
+      ? `<button type="button" class="btn btn-outline-danger btn-sm ${rmClass}" data-i="${i}">Remover</button>`
+      : '';
+    return `<article class="cc-aposta ${variant} ${a.ja_sorteada?'ja-hist':''}" data-idx="${i}">
+      <div class="cc-aposta-head">
+        <div class="cc-aposta-left">
+          <span class="cc-aposta-num">${numTxt}</span>
+          <div class="cc-aposta-badges">${badges.join('')}</div>
+        </div>
+        <div class="cc-aposta-actions">${rm}</div>
+      </div>
+      <div class="cc-aposta-dezenas" role="group" aria-label="Dezenas">${ballsHtml}</div>
+      <div class="cc-aposta-foot">${foot}<span class="cc-aposta-bt-slot"></span></div>
+      ${fora}
+    </article>`;
+  }
+
+  function wrapList(html){
+    if(!html) return '<div class="text-muted small">Nenhum jogo.</div>';
+    return `<div class="cc-list">${html}</div>`;
+  }
+
+  function renderHistAlert(elId, hist){
+    const el = document.getElementById(elId);
+    if(!hist || !hist.ja_sorteadas_count){ el.innerHTML = ''; return; }
+    const itens = (hist.itens||[]).map(it =>
+      `#${it.concurso}${it.data?(' ('+it.data+')'):''}: ${(it.dezenas||[]).map(pad).join(' ')}`
+    ).join('<br>');
+    el.innerHTML = `<div class="alert alert-warning small">
+      <strong><i class="fas fa-exclamation-triangle me-1"></i>${hist.ja_sorteadas_count} aposta(s) já sorteada(s) no histórico oficial</strong>
+      ${hist.descartadas ? `<div class="mt-1">${hist.descartadas} removida(s) automaticamente.</div>` : `<div class="mt-1">Mantidas e destacadas em vermelho — use Remover se desejar descartar.</div>`}
+      <div class="mt-2">${itens}</div>
+    </div>`;
+  }
+
+  function renderBacktest(elId, bt){
+    const el = document.getElementById(elId);
+    if(!bt){ el.innerHTML = ''; return; }
+    if(!bt.sucesso){
+      el.innerHTML = `<div class="alert alert-danger small">${bt.erro||'Falha no back test'}</div>`;
+      return;
+    }
+    el.innerHTML = `<div class="cc-bt-box small">
+      <div class="fw-bold mb-2"><i class="fas fa-chart-line me-1"></i>Back Test · últimos ${bt.concursos_analisados} concursos (#${bt.concurso_de}–#${bt.concurso_ate})</div>
+      <div class="d-flex flex-wrap gap-1 mb-2">
+        <span class="cc-bt-pill"><strong>${bt.media_max_acertos}</strong><span>média máx.</span></span>
+        <span class="cc-bt-pill"><strong>${bt.dist_4||0}</strong><span>4 acertos</span></span>
+        <span class="cc-bt-pill"><strong>${bt.dist_5||0}</strong><span>5 acertos</span></span>
+        <span class="cc-bt-pill"><strong>${bt.dist_6||0}</strong><span>6 acertos</span></span>
+        <span class="cc-bt-pill"><strong>${bt.dist_7||0}</strong><span>7 acertos</span></span>
+      </div>
+      ${(bt.destaques||[]).length ? `<div class="text-muted">Destaques: ${(bt.destaques||[]).slice(0,5).map(d=>`#${d.concurso} (${d.max_acertos} ac.)`).join(' · ')}</div>` : ''}
+    </div>`;
+  }
+
+  function renderCtx(c){
+    const box = document.getElementById('cc-ctx');
+    if(!c || !c.ok){
+      box.innerHTML = `<div class="alert alert-warning small">${(c&&c.erro)||'Contexto indisponível'}</div>`;
+      return;
+    }
+    const ant = (c.concursos||[]).find(x=>x.papel==='anterior') || {};
+    const ult = (c.concursos||[]).find(x=>x.papel==='ultimo') || {};
+    box.innerHTML = `
+      <div class="row g-2">
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Anterior ${ant.concurso||''}</div>
+          <div>Novas ${balls(ant.novas,'nova')}</div>
+          <div class="mt-1">Rep. ${balls(ant.repetidas,'rep')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Último ${ult.concurso||''} <span class="badge bg-primary">auto</span></div>
+          <div>Novas ${balls(ult.novas,'nova')}</div>
+          <div class="mt-1">Rep. ${balls(ult.repetidas,'rep')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Pool união</div>
+          <div>Novas ${balls(c.pool.novas,'nova')}</div>
+          <div class="mt-1">Rep. ${balls(c.pool.repetidas,'rep')}</div>
+          <div class="text-muted mt-2">Apto 2+1: <strong>${c.pool_ok?'sim':'não'}</strong></div>
+        </div></div></div>
+      </div>`;
+  }
+
+  function renderApostas21(j){
+    const out = document.getElementById('cc-out');
+    const st = document.getElementById('cc-status');
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      out.innerHTML = '';
+      state21.apostas = [];
+      document.getElementById('cc-btn-export').disabled = true;
+      document.getElementById('cc-btn-bt').disabled = true;
+      return;
+    }
+    state21.apostas = j.apostas || [];
+    state21.mes = j.mes_num || mesNumResolved('cc-mes');
+    st.textContent = (j.aviso || (`${j.geradas} jogo(s) gerados`)) +
+      (j.contexto ? ` · concursos ${j.contexto.anterior_concurso}–${j.contexto.ultimo_concurso}` : '');
+    renderHistAlert('cc-hist-alert', j.historico);
+    document.getElementById('cc-btn-export').disabled = !state21.apostas.length;
+    document.getElementById('cc-btn-bt').disabled = !state21.apostas.length;
+    out.innerHTML = wrapList(state21.apostas.map((a,i)=>renderApostaCard(a,i,{
+      rmClass: 'cc-rm',
+      ballClass: (d, ap) => {
+        if((ap.novas||[]).includes(d)) return 'nova';
+        if((ap.repetidas||[]).includes(d)) return 'rep';
+        return 'livre';
+      }
+    })).join(''));
+    out.querySelectorAll('.cc-rm').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.dataset.i);
+        state21.apostas.splice(i,1);
+        state21.apostas.forEach((a,n)=>a.numero=n+1);
+        renderApostas21({ok:true, geradas:state21.apostas.length, apostas:state21.apostas, historico:null, aviso:`${state21.apostas.length} jogo(s)`});
+      });
+    });
+  }
+
+  function renderRitmoCtx(c){
+    const box = document.getElementById('cr-ctx');
+    if(!c || !c.ok){
+      box.innerHTML = `<div class="alert alert-warning small">${(c&&c.erro)||'Indicadores indisponíveis'}</div>`;
+      return;
+    }
+    const dist = c.distribuicao_entrada || {};
+    box.innerHTML = `
+      <div class="row g-2">
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Ciclo #${c.ciclo} · ${c.classificacao||'—'} · pressão <span class="badge bg-secondary">${c.pressao||'—'}</span></div>
+          <div>Fechamento <strong>${c.percentual}%</strong> · ${c.quantidade_concursos} concursos</div>
+          <div class="mt-2 text-muted">${c.leitura||''}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Pendentes (${(c.pendentes||[]).length}) <i class="fas fa-info-circle cc-i" title="Ainda não saíram no ciclo atual."></i></div>
+          <div>${balls(c.pendentes,'falt')}</div>
+          <div class="fw-bold mt-2 mb-1">Top 3</div>
+          <div>${balls(c.top_3,'nova')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Próximo concurso (n=${c.amostras||0})</div>
+          <div>0: ${dist['0']||0}% · 1: ${dist['1']||0}% · 2: ${dist['2']||0}%</div>
+          <div>3: ${dist['3']||0}% · 4+: ${dist['4+']||0}%</div>
+          <div class="text-muted mt-2">Já saídas: <strong>${(c.saidas||[]).length}</strong></div>
+        </div></div></div>
+      </div>`;
+  }
+
+  function renderRitmoApostas(j){
+    const out = document.getElementById('cr-out');
+    const st = document.getElementById('cr-status');
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      out.innerHTML = '';
+      stateRitmo.apostas = [];
+      document.getElementById('cr-btn-export').disabled = true;
+      document.getElementById('cr-btn-bt').disabled = true;
+      return;
+    }
+    stateRitmo.apostas = j.apostas || [];
+    stateRitmo.mes = j.mes_num || mesNumResolved('cr-mes');
+    const ind = j.indicadores || {};
+    st.textContent = (j.aviso || (`${j.geradas} jogo(s)`)) +
+      (ind.ciclo != null ? ` · k médio ${ind.media_k_gerado} · ciclo #${ind.ciclo}` : '');
+    renderHistAlert('cr-hist-alert', j.historico);
+    document.getElementById('cr-btn-export').disabled = !stateRitmo.apostas.length;
+    document.getElementById('cr-btn-bt').disabled = !stateRitmo.apostas.length;
+    out.innerHTML = wrapList(stateRitmo.apostas.map((a,i)=>renderApostaCard(a,i,{
+      variant: 'ritmo',
+      rmClass: 'cr-rm',
+      ballClass: (d, ap) => (ap.faltantes||[]).includes(d) ? 'falt' : 'saida'
+    })).join(''));
+    out.querySelectorAll('.cr-rm').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.dataset.i);
+        stateRitmo.apostas.splice(i,1);
+        stateRitmo.apostas.forEach((a,n)=>a.numero=n+1);
+        renderRitmoApostas({ok:true, geradas:stateRitmo.apostas.length, apostas:stateRitmo.apostas, aviso:`${stateRitmo.apostas.length} jogo(s)`});
+      });
+    });
+  }
+
+  function renderOpCtx(c){
+    const box = document.getElementById('co-ctx');
+    if(!c || !c.ok){
+      box.innerHTML = `<div class="alert alert-warning small">${(c&&c.erro)||'Estratégia indisponível'}</div>`;
+      return;
+    }
+    const alertas = (c.alertas||[]).map(a=>`<li>${a}</li>`).join('');
+    box.innerHTML = `
+      <div class="row g-2">
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Ciclo #${c.ciclo} · ${c.classificacao||'—'} · <span class="badge bg-secondary">${c.pressao||'—'}</span></div>
+          <div>Modo recomendado: <strong>${c.modo_recomendado||'—'}</strong></div>
+          <div>Faltantes/jogo: <strong>${c.faltantes_por_jogo??'—'}</strong> · faixa: <strong>${c.priorizar_faixa||'—'}</strong></div>
+          <div class="mt-2 text-muted">${c.leitura||''}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Pendentes (${(c.pendentes||[]).length})</div>
+          <div>${balls(c.pendentes,'falt')}</div>
+          <div class="fw-bold mt-2 mb-1">Top 3</div>
+          <div>${balls(c.top_3,'nova')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Operacional</div>
+          <div>Fechamento parcial: <strong>${c.fechamento_parcial?'sim':'não'}</strong></div>
+          <div>Vale fechamento: <strong>${c.vale_fechamento??'—'}</strong></div>
+          <div class="text-muted mt-2">Já saídas: <strong>${(c.saidas||[]).length}</strong></div>
+          ${alertas?`<ul class="mb-0 mt-2 ps-3 text-warning">${alertas}</ul>`:''}
+        </div></div></div>
+      </div>`;
+  }
+
+  function renderOpApostas(j){
+    const out = document.getElementById('co-out');
+    const st = document.getElementById('co-status');
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      out.innerHTML = '';
+      stateOp.apostas = [];
+      document.getElementById('co-btn-export').disabled = true;
+      document.getElementById('co-btn-bt').disabled = true;
+      return;
+    }
+    stateOp.apostas = j.apostas || [];
+    stateOp.mes = j.mes_num || mesNumResolved('co-mes');
+    const ind = j.indicadores || {};
+    st.textContent = (j.aviso || (`${j.geradas} jogo(s)`)) +
+      (ind.modo_usado ? ` · modo ${ind.modo_usado} · k≈${ind.media_k_gerado}` : '');
+    renderHistAlert('co-hist-alert', j.historico);
+    document.getElementById('co-btn-export').disabled = !stateOp.apostas.length;
+    document.getElementById('co-btn-bt').disabled = !stateOp.apostas.length;
+    out.innerHTML = wrapList(stateOp.apostas.map((a,i)=>renderApostaCard(a,i,{
+      variant: 'operacional',
+      rmClass: 'co-rm',
+      ballClass: (d, ap) => {
+        if((ap.faltantes||[]).includes(d)) return 'falt';
+        if((ap.repetentes||[]).includes(d)) return 'rep';
+        return 'saida';
+      }
+    })).join(''));
+    out.querySelectorAll('.co-rm').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.dataset.i);
+        stateOp.apostas.splice(i,1);
+        stateOp.apostas.forEach((a,n)=>a.numero=n+1);
+        renderOpApostas({ok:true, geradas:stateOp.apostas.length, apostas:stateOp.apostas, aviso:`${stateOp.apostas.length} jogo(s)`});
+      });
+    });
+  }
+
+  function renderFechCtx(c){
+    const box = document.getElementById('cf-ctx');
+    if(!c || !c.ok){
+      box.innerHTML = `<div class="alert alert-warning small">${(c&&c.erro)||'Contexto indisponível'}</div>`;
+      return;
+    }
+    const badge = c.elegivel
+      ? `<span class="badge bg-success">elegível</span>`
+      : `<span class="badge bg-warning text-dark">não recomendado</span>`;
+    box.innerHTML = `
+      <div class="row g-2">
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Ciclo #${c.ciclo} · ${c.classificacao||'—'} · ${badge}</div>
+          <div>Pressão <strong>${c.pressao||'—'}</strong> · faltando <strong>${(c.pendentes||[]).length}</strong></div>
+          <div>Tipo fechamento: <strong>${c.fechamento_tipo||'—'}</strong></div>
+          <div class="mt-2 text-muted">${c.motivo||''}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Pendentes (${(c.pendentes||[]).length})</div>
+          <div>${balls(c.pendentes,'falt')}</div>
+          <div class="fw-bold mt-2 mb-1">Top 3</div>
+          <div>${balls(c.top_3,'nova')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Leitura</div>
+          <div class="text-muted">${c.leitura||c.fechamento_texto||''}</div>
+          <div class="mt-2">Vale fechamento: <strong>${c.vale_fechamento??'—'}</strong></div>
+          <div>Parcial: <strong>${c.parcial?'sim':'não'}</strong></div>
+        </div></div></div>
+      </div>`;
+  }
+
+  function renderFechApostas(j){
+    const out = document.getElementById('cf-out');
+    const st = document.getElementById('cf-status');
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      out.innerHTML = '';
+      stateFech.apostas = [];
+      document.getElementById('cf-btn-export').disabled = true;
+      document.getElementById('cf-btn-bt').disabled = true;
+      return;
+    }
+    stateFech.apostas = j.apostas || [];
+    stateFech.mes = j.mes_num || mesNumResolved('cf-mes');
+    const ind = j.indicadores || {};
+    st.textContent = (j.aviso || (`${j.geradas} jogo(s)`)) +
+      (ind.faltando != null ? ` · cobrindo subconjunto de ${ind.faltando} pendentes` : '');
+    renderHistAlert('cf-hist-alert', j.historico);
+    document.getElementById('cf-btn-export').disabled = !stateFech.apostas.length;
+    document.getElementById('cf-btn-bt').disabled = !stateFech.apostas.length;
+    out.innerHTML = wrapList(stateFech.apostas.map((a,i)=>renderApostaCard(a,i,{
+      variant: 'fechamento',
+      rmClass: 'cf-rm',
+      ballClass: (d, ap) => (ap.faltantes||[]).includes(d) ? 'falt' : 'saida'
+    })).join(''));
+    out.querySelectorAll('.cf-rm').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.dataset.i);
+        stateFech.apostas.splice(i,1);
+        stateFech.apostas.forEach((a,n)=>a.numero=n+1);
+        renderFechApostas({ok:true, geradas:stateFech.apostas.length, apostas:stateFech.apostas, aviso:`${stateFech.apostas.length} jogo(s)`});
+      });
+    });
+  }
+
+  function outIdFromBt(elId){
+    return ({
+      'cc-bt': 'cc-out',
+      'cr-bt': 'cr-out',
+      'co-bt': 'co-out',
+      'cf-bt': 'cf-out',
+      'ce-bt': 'ce-out',
+    })[elId] || elId;
+  }
+
+  function aplicarAcertosVerde(apostas, bt, btElId){
+    if(!bt || !bt.sucesso || !bt.melhor) return;
+    const mapa = {};
+    (bt.melhor.apostas || []).forEach((a, i) => {
+      const num = a.numero != null ? a.numero : (i + 1);
+      mapa[num] = new Set(a.acertadas || []);
+    });
+    const out = document.getElementById(outIdFromBt(btElId));
+    if(!out) return;
+    out.querySelectorAll('.cc-ball.acerto').forEach(b => b.classList.remove('acerto'));
+    out.querySelectorAll('.bt-acertos-info').forEach(n => n.remove());
+    out.querySelectorAll('.cc-aposta').forEach((el, i) => {
+      const ap = apostas[i] || {};
+      const num = ap.numero || (i + 1);
+      const hits = mapa[num] || new Set();
+      if(!hits.size) return;
+      el.querySelectorAll('.cc-ball').forEach(ball => {
+        const v = parseInt(ball.textContent, 10);
+        if(hits.has(v)) ball.classList.add('acerto');
+      });
+      const slot = el.querySelector('.cc-aposta-bt-slot') || el.querySelector('.cc-aposta-foot');
+      if(slot && !slot.querySelector('.bt-acertos-info')){
+        const span = document.createElement('span');
+        span.className = 'bt-acertos-info';
+        span.textContent = `BT #${bt.melhor.concurso}: ${hits.size} acerto(s)`;
+        slot.appendChild(span);
+      }
+    });
+    const btBox = document.getElementById(btElId);
+    if(btBox){
+      const old = btBox.querySelector('.bt-melhor-ref');
+      if(old) old.remove();
+      if(bt.melhor.concurso){
+        const ref = document.createElement('div');
+        ref.className = 'bt-melhor-ref small text-success mt-1';
+        ref.innerHTML = `<i class="fas fa-check-circle me-1"></i>Dezenas em verde = acertos no melhor concurso #${bt.melhor.concurso}${bt.melhor.data ? ' ('+bt.melhor.data+')' : ''}.`;
+        const box = btBox.querySelector('.cc-bt-box') || btBox;
+        box.appendChild(ref);
+      }
+    }
+  }
+
+  function atualizarBannerCiclo(c){
+    const el = document.getElementById('cc-ciclo-banner');
+    if(!el) return;
+    if(!c || !c.ok){
+      el.textContent = 'Ciclo indisponível';
+      return;
+    }
+    const fase = c.fase || {};
+    const est = c.estado_atual || {};
+    const n = c.numero_ciclo ?? est.numero_ciclo ?? '—';
+    const falt = (c.dezenas_pendentes||[]).length;
+    const saidas = (c.dezenas_saidas||[]).length;
+    el.innerHTML = `<strong>Ciclo #${n}</strong> · ${fase.label || fase.fase || '—'} · saídas ${saidas} · faltantes ${falt}` +
+      (fase.estrategia_recomendada ? ' · <span class="badge bg-light text-dark">estratégia recomendada</span>' : ' · <span class="badge bg-secondary">fase intermediária</span>');
+  }
+
+  function renderEstCtx(c){
+    atualizarBannerCiclo(c);
+    const box = document.getElementById('ce-ctx');
+    const card = document.getElementById('ce-estrategia-card');
+    if(!c || !c.ok){
+      box.innerHTML = `<div class="alert alert-warning small">${(c&&c.erro)||'Estratégia indisponível'}</div>`;
+      if(card) card.innerHTML = '';
+      return;
+    }
+    const plano = c.estrategia_ciclo || {};
+    const fmtDez = (xs, lim=8) => {
+      const arr = (xs||[]).slice(0, lim).map(pad);
+      return arr.join(' · ') || '—';
+    };
+    if(card){
+      const cotas = plano.cotas_k || {};
+      const cotasTxt = Object.keys(cotas).length
+        ? Object.entries(cotas).sort((a,b)=>Number(a[0])-Number(b[0])).map(([k,n])=>`${n}×k=${k}`).join(' · ')
+        : '—';
+      card.innerHTML = `
+        <div class="card shadow-sm border-0" style="border-left:4px solid #0f172a!important;">
+          <div class="card-body py-3">
+            <div class="small text-uppercase text-muted fw-bold mb-1">Ciclo — Estratégia atual</div>
+            <p class="mb-2 small" style="line-height:1.45">${plano.leitura_curta || c.leitura || '—'}</p>
+            <div class="d-flex flex-wrap gap-2 small">
+              <span class="cc-chip"><em>Estágio</em><strong>${plano.estagio || '—'}</strong></span>
+              <span class="cc-chip"><em>Tendência</em><strong>${plano.tendencia_evolucao || '—'}</strong></span>
+              <span class="cc-chip"><em>k esperado</em><strong>${plano.k_esperado ?? c.k_faltantes_sugerido ?? '—'}</strong></span>
+              <span class="cc-chip"><em>Pendentes</em><strong>${(plano.pendentes||c.dezenas_pendentes||[]).length}</strong></span>
+              <span class="cc-chip"><em>Núcleo</em><strong>${fmtDez(plano.nucleo_ancoras,4)}</strong></span>
+              <span class="cc-chip"><em>Cotas</em><strong>${cotasTxt}</strong></span>
+            </div>
+            <p class="mb-0 mt-2 small text-muted">${plano.aviso_nao_previsao || 'Não é previsão de quais dezenas sairão.'}</p>
+          </div>
+        </div>`;
+    }
+    const fase = c.fase || {};
+    const rep = c.repeticoes_historicas || {};
+    const dist = rep.distribuicao_pct || {};
+    const evo = c.evolucao_ciclo || {};
+    const obs = evo.observacoes || {};
+    const univ = evo.universo || 31;
+    const scores = (c.scores_faltantes || []).slice(0, 10);
+    stateEst.scoresMap = {};
+    (c.scores_faltantes || []).forEach(s => { stateEst.scoresMap[s.dezena] = s; });
+    const faseClass = { inicio:'success', andamento:'secondary', finalizacao:'danger' }[fase.fase] || 'secondary';
+    const linhas = evo.linhas || evo.ultimos || [];
+    const tabelaEvo = linhas.length ? `
+      <div class="table-responsive mb-2">
+        <table class="table table-sm table-striped mb-0 text-center align-middle" style="font-size:.78rem">
+          <thead class="table-light">
+            <tr>
+              <th>Cnc</th>
+              <th class="text-success">Novas Dezenas</th>
+              <th class="text-info">Qtd. Evolução</th>
+              <th class="text-secondary">Repetidas no Ciclo</th>
+              <th>Progresso</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${linhas.map(r => `
+              <tr>
+                <td><strong>${r.concurso||'—'}</strong></td>
+                <td>${(r.novas||[]).length ? (r.novas||[]).map(n=>`<span class="badge bg-success me-1">${pad(n)}</span>`).join('') : '<span class="text-muted">—</span>'}</td>
+                <td class="fw-bold text-info">${r.qtd_evolucao!=null ? ('+'+r.qtd_evolucao) : (r.qtd_novas!=null?('+'+r.qtd_novas):'—')}</td>
+                <td>${(r.repetidas||[]).length ? (r.repetidas||[]).map(n=>`<span class="badge bg-secondary me-1">${pad(n)}</span>`).join('') : '—'}</td>
+                <td><strong>${r.progresso_label || ((r.progresso!=null?r.progresso:(r.total_preenchido||'—'))+'/'+univ)}</strong>
+                  <div class="text-muted" style="font-size:.7rem">${r.progresso_pct!=null? (r.progresso_pct+'%') : ''}</div></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>` : '';
+    box.innerHTML = `
+      <div class="alert alert-${faseClass} small mb-2">
+        <strong>Ciclo #${c.numero_ciclo}</strong> · ${fase.label || '—'} ·
+        saídas ${fase.dezenas_saidas_ciclo ?? (c.dezenas_saidas||[]).length} ·
+        faltantes ${(c.dezenas_pendentes||[]).length}
+        <div class="mt-1 mb-0">${fase.hint || c.leitura || ''}</div>
+      </div>
+      <div class="card border-info shadow-sm mb-2">
+        <div class="card-header bg-info text-dark py-2 small fw-bold">
+          <i class="fas fa-chart-line me-1"></i>Observações da Evolução do Ciclo
+          <span class="fw-normal">— Novas · Qtd. Evolução · Repetidas · Progresso</span>
+        </div>
+        <div class="card-body small">
+          ${tabelaEvo}
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <div class="border rounded p-2 h-100">
+                <div class="fw-bold text-success mb-1">Novas Dezenas</div>
+                <div>${balls((obs.novas_dezenas||{}).recentes || evo.novas_recentes,'nova')}</div>
+                <div class="text-muted mt-1">${(obs.novas_dezenas||{}).leitura || ''}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-2 h-100">
+                <div class="fw-bold text-info mb-1">Qtd. Evolução</div>
+                <div>média recente <strong>${(obs.qtd_evolucao||{}).media_recente ?? evo.media_recente ?? '—'}</strong>
+                  · dominante <strong>${(obs.qtd_evolucao||{}).dominante_recente || evo.dominante || '—'}</strong></div>
+                <div class="text-muted mt-1">${(obs.qtd_evolucao||{}).leitura || ''}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-2 h-100">
+                <div class="fw-bold text-secondary mb-1">Repetidas no Ciclo</div>
+                <div>${balls((obs.repetidas_no_ciclo||{}).mais_frequentes || evo.top_repetidas_ciclo,'rep')}</div>
+                <div class="text-muted mt-1">${(obs.repetidas_no_ciclo||{}).leitura || ''}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-2 h-100">
+                <div class="fw-bold mb-1">Progresso</div>
+                <div class="fs-5 fw-bold">${(obs.progresso||{}).label || ((evo.progresso_atual||'—')+'/'+univ)}</div>
+                <div>${(obs.progresso||{}).percentual ?? evo.progresso_pct ?? '—'}% · Δ recente +${(obs.progresso||{}).delta_medio_recente ?? '—'}</div>
+                <div class="text-muted mt-1">${(obs.progresso||{}).leitura || ''}</div>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-light border py-2 mb-0">
+            Jogo sugerido pela evolução:
+            <strong>${evo.k_faltantes_sugerido??c.k_faltantes_sugerido??'—'} nova(s)/faltante(s)</strong>
+            + <strong>${evo.k_repeticao_sugerido??c.k_repeticao_sugerido??'—'} repetida(s)</strong>
+            · tendência <strong>${evo.tendencia||'—'}</strong>
+          </div>
+          ${(() => {
+            const tab = evo.tabela_sutil;
+            if(!tab || !tab.novas_qtd_evolucao) return '';
+            const h = (tab.novas_qtd_evolucao.historico || {});
+            const linhas = h.linhas || [];
+            const pct = (qs) => {
+              let p = 0;
+              linhas.forEach(r => { if(qs.includes(r.qtd)) p += Number(r.pct||0); });
+              return Math.round(p*10)/10;
+            };
+            const p0 = pct([0]), p12 = pct([1,2]), p34 = pct([3,4]), p57 = pct([5,6,7]);
+            const top = (h.top3||[]).map((t,i)=>{
+              const nome = t.qtd===0 ? 'só repete' : (t.qtd+' nova'+(t.qtd>1?'s':''));
+              return `${i+1}º ${nome} (${t.pct}%)`;
+            }).join(' · ');
+            return `<div class="border rounded p-2 mt-2 small bg-light">
+              <div class="fw-semibold mb-1">Em resumo (histórico)</div>
+              <div>Só repete: <strong>${p0}%</strong> · Poucas novas (1–2): <strong>${p12}%</strong> · Moderado (3–4): <strong>${p34}%</strong> · Muitas (5–7): <strong>${p57}%</strong></div>
+              <div class="text-muted mt-1">Top 3: ${top||'—'}</div>
+            </div>`;
+          })()}
+        </div>
+      </div>
+      <div class="row g-2">
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Último sorteio</div>
+          <div>${balls(c.ultimo_sorteio,'rep')}</div>
+          <div class="fw-bold mt-2 mb-1">Faltantes (${(c.dezenas_pendentes||[]).length})</div>
+          <div>${balls(c.dezenas_pendentes,'falt')}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Repetições históricas (sorteios)</div>
+          <div>${['0','1','2','3+'].map(k=>`<span class="badge ${rep.cenario_dominante===k?'bg-primary':'bg-secondary'} me-1">${k}: ${dist[k]??0}%</span>`).join('')}</div>
+          <div class="text-muted mt-2">${rep.leitura||''}</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
+          <div class="fw-bold mb-1">Top faltantes (score)</div>
+          ${scores.map(s=>`<div class="d-flex justify-content-between"><span>${pad(s.dezena)} · atr ${s.atraso??'—'}</span><strong>${s.score}</strong></div>`).join('') || '—'}
+        </div></div></div>
+      </div>`;
+  }
+
+  function ordenarApostasEstrategia(apostas, modo){
+    const arr = (apostas || []).slice();
+    const sm = stateEst.scoresMap || {};
+    if(modo === 'aleatorio'){
+      for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+      return arr;
+    }
+    if(modo === 'soma'){
+      return arr.sort((a,b)=>(a.soma||0)-(b.soma||0));
+    }
+    if(modo === 'atraso'){
+      const atr = (ap) => (ap.faltantes||[]).reduce((s,d)=>s+(sm[d]?.atraso||0),0);
+      return arr.sort((a,b)=>atr(b)-atr(a));
+    }
+    if(modo === 'frequencia'){
+      const fr = (ap) => (ap.faltantes||[]).reduce((s,d)=>s+(sm[d]?.frequencia||0),0);
+      return arr.sort((a,b)=>fr(b)-fr(a));
+    }
+    return arr.sort((a,b)=>(b.score||0)-(a.score||0));
+  }
+
+  function renderEstRelatorio(rel){
+    const el = document.getElementById('ce-relatorio');
+    if(!rel){ el.innerHTML = ''; return; }
+    const mot = rel.motivos_eliminacao || {};
+    const evo = rel.evolucao || {};
+    el.innerHTML = `<div class="card border-dark shadow-sm"><div class="card-header bg-dark text-white py-2 small fw-bold">
+      Relatório pós-geração</div><div class="card-body small">
+      <div class="row g-2 text-center">
+        <div class="col-6 col-md-2"><div class="text-muted">Ciclo</div><strong>#${rel.ciclo??'—'}</strong></div>
+        <div class="col-6 col-md-2"><div class="text-muted">Fase</div><strong>${rel.fase_label||rel.fase||'—'}</strong></div>
+        <div class="col-6 col-md-2"><div class="text-muted">Faltantes</div><strong>${rel.faltantes??'—'}</strong></div>
+        <div class="col-6 col-md-2"><div class="text-muted">Desdob. / Rep.</div><strong>${rel.k_desdobramento} / ${rel.k_repeticao}</strong></div>
+        <div class="col-4 col-md-1"><div class="text-muted">Analisadas</div><strong>${rel.analisadas??0}</strong></div>
+        <div class="col-4 col-md-1"><div class="text-muted">Eliminadas</div><strong class="text-danger">${rel.eliminadas??0}</strong></div>
+        <div class="col-4 col-md-2"><div class="text-muted">Geradas</div><strong class="text-success">${rel.geradas??0}</strong></div>
+      </div>
+      <div class="mt-2 p-2 bg-light rounded">
+        ${(rel.estrategia_ciclo && rel.estrategia_ciclo.leitura_curta) ? `<div class="mb-1">${rel.estrategia_ciclo.leitura_curta}</div>` : ''}
+        ${rel.como_influenciou ? `<div class="mb-1"><strong>Como influenciou:</strong> ${rel.como_influenciou}</div>` : ''}
+        Evolução: tendência <strong>${evo.tendencia||'—'}</strong> ·
+        Qtd dominante <strong>${evo.dominante||'—'}</strong> ·
+        k sugerido <strong>${evo.k_sugerido??'—'}</strong> ·
+        mistura <strong>${evo.mistura_gerada ? Object.entries(evo.mistura_gerada).map(([k,v])=>k+'×'+v).join(' ') : (evo.media_k_gerado??'—')}</strong>
+        · completa com <strong>${rel.completacao||'plano'}</strong>
+        ${rel.usar_evolucao === false ? ' · <span class="text-warning">evolução desligada</span>' : ''}
+      </div>
+      ${Object.keys(mot).length?`<div class="text-muted mt-2">Motivos: ${Object.entries(mot).map(([k,v])=>`${k}=${v}`).join(' · ')}</div>`:''}
+    </div></div>`;
+  }
+
+  function renderEstApostas(j){
+    const out = document.getElementById('ce-out');
+    const st = document.getElementById('ce-status');
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      out.innerHTML = '';
+      stateEst.apostas = [];
+      renderEstRelatorio(j.relatorio || null);
+      document.getElementById('ce-btn-export').disabled = true;
+      document.getElementById('ce-btn-bt').disabled = true;
+      return;
+    }
+    const orden = document.getElementById('ce-orden').value || 'score';
+    stateEst.apostas = ordenarApostasEstrategia(j.apostas || [], orden);
+    stateEst.apostas.forEach((a,n)=>a.numero=n+1);
+    stateEst.mes = j.mes_num || mesNumResolved('ce-mes');
+    stateEst.relatorio = j.relatorio || null;
+    renderEstRelatorio(stateEst.relatorio);
+    st.textContent = (j.aviso || (`${j.geradas} jogo(s)`)) +
+      (stateEst.relatorio ? ` · analisadas ${stateEst.relatorio.analisadas} · eliminadas ${stateEst.relatorio.eliminadas}` : '');
+    renderHistAlert('ce-hist-alert', j.historico);
+    document.getElementById('ce-btn-export').disabled = !stateEst.apostas.length;
+    document.getElementById('ce-btn-bt').disabled = !stateEst.apostas.length;
+    out.innerHTML = wrapList(stateEst.apostas.map((a,i)=>renderApostaCard(a,i,{
+      variant: 'estrategia',
+      rmClass: 'ce-rm',
+      ballClass: (d, ap) => {
+        const falt = ap.faltantes || ap.novas_ciclo || [];
+        if(falt.includes(d)) return 'falt';
+        return 'saida';
+      }
+    })).join(''));
+    out.querySelectorAll('.ce-rm').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.dataset.i);
+        stateEst.apostas.splice(i,1);
+        stateEst.apostas.forEach((a,n)=>a.numero=n+1);
+        renderEstApostas({ok:true, geradas:stateEst.apostas.length, apostas:stateEst.apostas, relatorio:stateEst.relatorio, aviso:`${stateEst.apostas.length} jogo(s)`});
+      });
+    });
+  }
+
+  function aplicarBacktestUi(apostas, bt, btElId){
+    renderBacktest(btElId, bt);
+    aplicarAcertosVerde(apostas, bt, btElId);
+  }
+
+  async function runBacktest(apostas, elId){
+    if(!apostas.length) return;
+    renderBacktest(elId, {sucesso:true, concursos_analisados:'…', concurso_de:'', concurso_ate:'', media_max_acertos:'…', dist_4:0,dist_5:0,dist_6:0,dist_7:0, destaques:[]});
+    try{
+      const r = await fetch(API+'/backtest', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ apostas, limite: 30 })
+      });
+      const bt = await parseJson(r);
+      aplicarBacktestUi(apostas, bt, elId);
+    }catch(e){
+      renderBacktest(elId, {sucesso:false, erro:e.message});
+    }
+  }
+
+  async function exportTxt(apostas, mes){
+    if(!apostas.length) return;
+    const mesVal = mes != null ? mes : null;
+    if(HAS_MES && (mesVal == null || mesVal === '')){
+      alert('Selecione o Mês da Sorte para exportar o TXT.');
+      return;
+    }
+    const r = await fetch(API+'/export-txt', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ apostas, mes_num: mesVal })
+    });
+    const j = await parseJson(r);
+    if(!j.sucesso){ alert(j.erro||'Falha no export'); return; }
+    const blob = new Blob([j.texto], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = j.nome_arquivo || 'ciclo_apostas.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  fetch(API+'/contexto').then(async r=>parseJson(r)).then(j=>renderCtx(j.contexto||j))
+    .catch(e=>{ document.getElementById('cc-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`; });
+  fetch(API+'/ritmo/contexto').then(async r=>parseJson(r)).then(renderRitmoCtx)
+    .catch(e=>{ document.getElementById('cr-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`; });
+  fetch(API+'/operacional/contexto').then(async r=>parseJson(r)).then(renderOpCtx)
+    .catch(e=>{ document.getElementById('co-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`; });
+  fetch(API+'/fechamento/contexto').then(async r=>parseJson(r)).then(renderFechCtx)
+    .catch(e=>{ document.getElementById('cf-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`; });
+  fetch(API+'/estrategia/contexto').then(async r=>parseJson(r)).then(renderEstCtx)
+    .catch(e=>{
+      document.getElementById('ce-ctx').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`;
+      document.getElementById('cc-ciclo-banner').textContent = 'Ciclo: erro ao carregar';
+    });
+
+  let recN = 4;
+  let recLoaded = false;
+  (function initRecNFromQuery(){
+    const nQ = Number(new URLSearchParams(location.search).get('n'));
+    if(nQ && [4,5,6,8,10].includes(nQ)) recN = nQ;
+  })();
+
+  function recBallCls(vezes, maxF){
+    vezes = Number(vezes)||0;
+    if(vezes<=0) return 'rec-0';
+    if(vezes===1) return 'rec-1';
+    if(vezes===2) return 'rec-2';
+    if(vezes>=3 && vezes===maxF) return 'rec-mf';
+    return 'rec-f';
+  }
+  function recBalls(nums, vezes, maxF){
+    return (nums||[]).map(d=>`<span class="cc-ball ${recBallCls(vezes, maxF)}">${pad(d)}</span>`).join('') || '—';
+  }
+  function recGrupoBalls(nums, tabela, maxF){
+    const map = {};
+    (tabela||[]).forEach(t=>{ map[t.dezena]=t.vezes; });
+    return (nums||[]).map(d=>`<span class="cc-ball ${recBallCls(map[d]||0, maxF)}">${pad(d)}</span>`).join('') || '—';
+  }
+
+  function recConjunto16(j){
+    const pend = [...new Set(((j.ciclo||{}).pendentes||[]).map(Number).filter(n=>n>0))];
+    const scoreMap = {};
+    ((j.ciclo||{}).scores_faltantes||[]).forEach(s=>{
+      const d = Number(s && s.dezena);
+      if (d>0) scoreMap[d] = Number(s.score)||0;
+    });
+    pend.sort((a,b)=>(scoreMap[b]||0)-(scoreMap[a]||0) || a-b);
+    const tab = j.tabela||[];
+    const freq = {};
+    tab.forEach(t=>{ freq[t.dezena]=t.vezes||0; });
+    const g = j.grupos||{};
+    const nucleo = [...new Set([...(g.nucleo_forte||[]), ...(g.repetido||[])])]
+      .sort((a,b)=>(freq[b]||0)-(freq[a]||0) || a-b);
+    const baixa = [...(g.baixa_presenca||[])];
+    const hits = {};
+    const recencia = {};
+    ((j.pos_analise||{}).detalhe||[]).forEach((d,i)=>{
+      ((d.por_grupo||{}).baixa_presenca||[]).forEach(n=>{
+        hits[n]=(hits[n]||0)+1;
+        if(recencia[n]==null) recencia[n]=i;
+      });
+    });
+    const baixaOrd = baixa.slice().sort((a,b)=>
+      (hits[b]||0)-(hits[a]||0)
+      || ((recencia[a]==null?99:recencia[a])-(recencia[b]==null?99:recencia[b]))
+      || a-b
+    );
+    const alvo = 16;
+    const nucleoIn = [];
+    const baixaIn = [];
+    const faltIn = [];
+    const escolhidas = [];
+    const seen = new Set();
+    const add = (d, bucket)=>{
+      if(seen.has(d) || escolhidas.length>=alvo) return;
+      seen.add(d);
+      escolhidas.push(d);
+      bucket.push(d);
+    };
+    pend.forEach(d=>add(d, faltIn));
+    nucleo.forEach(d=>add(d, nucleoIn));
+    baixaOrd.forEach(d=>add(d, baixaIn));
+    const ordenadas = escolhidas.slice().sort((a,b)=>a-b);
+    const partes = [];
+    if(faltIn.length) partes.push(faltIn.length+' faltante(s) do ciclo fixada(s) ('+faltIn.slice().sort((a,b)=>a-b).map(pad).join(' · ')+')');
+    partes.push(nucleoIn.length+' do núcleo');
+    if(baixaIn.length) partes.push(baixaIn.length+' de baixa presença');
+    return {
+      n: ordenadas.length,
+      dezenas: ordenadas,
+      fmt: ordenadas.map(pad).join(' · '),
+      nucleo: nucleoIn.slice().sort((a,b)=>a-b),
+      baixa: baixaIn.slice().sort((a,b)=>a-b),
+      faltantes_ciclo: faltIn.slice().sort((a,b)=>a-b),
+      como_escolheu: 'As 16 priorizam o que o ciclo ainda precisa fechar, depois o núcleo e a baixa presença. '+partes.join('; ')+'.',
+      href: '/geradores-elite/construtor-construcoes/?origem=recorrencia&dezenas='+ordenadas.join(',')
+        +(faltIn.length ? '&faltantes='+faltIn.slice().sort((a,b)=>a-b).join(',') : '')
+    };
+  }
+
+  let recPad = {
+    rec: null, dezenasOrig: [], dezenas: [], catalogo: [], ultimo: '',
+    slots: Array(10).fill(''), sel: new Set(), apostas: [], mes: null, seed: null,
+  };
+  function recPadIniDe(d){ return Math.floor(Number(d)/10); }
+  function recPadCounts(nums){
+    const c = {0:0,1:0,2:0,3:0};
+    (nums||[]).forEach(d=>{ const i=recPadIniDe(d); if(c[i]!=null) c[i]++; });
+    return c;
+  }
+  function recPadNeed(padrao){
+    const c = {0:0,1:0,2:0,3:0};
+    String(padrao||'').split(/\s+/).filter(Boolean).forEach(x=>{ const i=Number(x); if(c[i]!=null) c[i]++; });
+    return c;
+  }
+  function recPadViavel(padrao){
+    const n = recPadNeed(padrao);
+    const c = recPadCounts(recPad.dezenas);
+    return [0,1,2,3].every(i => n[i] <= c[i]);
+  }
+  function recPadCatalogoViavel(){
+    return (recPad.catalogo||[]).filter(p => recPadViavel(p.padrao));
+  }
+  function recPadEhUltimo(p){
+    return !!(p && (p.eh_padrao_ultimo_concurso || p.padrao === recPad.ultimo));
+  }
+  function recPadMontarLote10(){
+    const viaveis = recPadCatalogoViavel();
+    const seen = new Set();
+    const out = [];
+    const push = (raw)=>{
+      const s = String(raw||'').trim();
+      if(!s || seen.has(s) || !recPadViavel(s)) return;
+      seen.add(s); out.push(s);
+    };
+    push(recPad.ultimo);
+    [...recPad.sel].forEach(push);
+    viaveis.forEach(p=>push(p.padrao));
+    if(!out.length) return [];
+    return Array.from({length:10}, (_,i)=> out[i] || out[i % out.length]);
+  }
+  function recPadLimparSlotsInvalidos(){
+    recPad.slots = recPad.slots.map(p => (p && recPadViavel(p)) ? p : '');
+  }
+  function recPadSlotsCheios(){ return recPad.slots.filter(Boolean).length === 10; }
+  function recPadHtmlIniciais(nums){
+    const c = recPadCounts(nums);
+    const g = {0:[],1:[],2:[],3:[]};
+    (nums||[]).slice().sort((a,b)=>a-b).forEach(d=>{ if(g[recPadIniDe(d)]) g[recPadIniDe(d)].push(d); });
+    return [0,1,2,3].map(i =>
+      `<span class="rec-pad-ini"><strong>Inicial ${i}</strong> → ${c[i]} (${(g[i]||[]).map(pad).join(' · ')||'—'})</span>`
+    ).join('') + `<span class="rec-pad-ini"><strong>TOTAL</strong> → ${(nums||[]).length}</span>`;
+  }
+  function recPadRenderLista(){
+    const box = document.getElementById('rec-pad-lista');
+    if(!box) return;
+    const busca = ((document.getElementById('rec-pad-busca')||{}).value||'').trim().toLowerCase();
+    const st = ((document.getElementById('rec-pad-status')||{}).value)||'';
+    const viaveis = recPadCatalogoViavel();
+    const rows = viaveis.filter(p=>{
+      if(st && p.status !== st) return false;
+      if(!busca) return true;
+      return `${p.padrao} ${p.descricao} ${p.status}`.toLowerCase().includes(busca);
+    }).sort((a,b)=>{
+      const ua = recPadEhUltimo(a) ? 1 : 0;
+      const ub = recPadEhUltimo(b) ? 1 : 0;
+      return ub - ua;
+    }).slice(0, 80);
+    box.innerHTML = rows.map(p=>{
+      const ultimo = recPadEhUltimo(p);
+      const chk = recPad.sel.has(p.padrao) ? 'checked' : '';
+      const atraso = p.atraso==null ? '—' : (p.atraso+'c');
+      return `<label class="d-flex align-items-center gap-2 border-bottom py-1 px-2 mb-0 rec-pad-row ${ultimo?'rec-pad-ultimo':''}" data-padrao="${String(p.padrao).replace(/"/g,'&quot;')}">
+        <input type="checkbox" class="form-check-input rec-pad-chk" data-padrao="${String(p.padrao).replace(/"/g,'&quot;')}" ${chk}>
+        <code class="small">${p.padrao}</code>
+        <span class="text-muted small">${p.descricao||''}</span>
+        ${ultimo?'<span class="rec-pad-star">★ ÚLTIMO PADRÃO SORTEADO</span>':''}
+        <span class="ms-auto small">${p.frequencia||0}x · ${atraso} · ${p.status||''}</span>
+      </label>`;
+    }).join('') || '<div class="text-muted small p-2">Nenhum padrão destas 16 dezenas. Clique em Carregar.</div>';
+    const cnt = document.getElementById('rec-pad-sel-count');
+    if(cnt) cnt.textContent = recPad.sel.size + ' selecionados';
+    const info = document.getElementById('rec-pad-lista-info');
+    if(info){
+      const tot = (recPad.catalogo||[]).length;
+      info.textContent = tot
+        ? `${viaveis.length} padrões cabem nas 16 · ${tot - viaveis.length} ocultos (não dá para montar)`
+        : 'Clique em Carregar para listar os padrões da análise Padrões II.';
+    }
+  }
+  function recPadRenderSlots(){
+    const box = document.getElementById('rec-pad-slots');
+    if(!box) return;
+    box.innerHTML = recPad.slots.map((p,i)=>{
+      const on = p ? ' is-on' : '';
+      return `<div class="d-flex align-items-center gap-2 mb-1">
+        <span class="small fw-bold" style="min-width:4.6rem">Aposta ${String(i+1).padStart(2,'0')}</span>
+        <div class="rec-pad-slot flex-grow-1${on}" data-slot="${i}">${p ? `<code>${p}</code>` : '<span class="text-muted">— selecione um padrão acima —</span>'}</div>
+        <button type="button" class="btn btn-sm btn-outline-secondary rec-pad-slot-x" data-slot="${i}" ${p?'':'disabled'}>×</button>
+      </div>`;
+    }).join('');
+  }
+  function recPadValidacaoLocal(){
+    const nums = recPad.dezenas||[];
+    const slots = recPad.slots.filter(Boolean);
+    const c = recPadCounts(nums);
+    const maxN = {0:0,1:0,2:0,3:0};
+    slots.forEach(p=>{ const n = recPadNeed(p); [0,1,2,3].forEach(i=>{ if(n[i]>maxN[i]) maxN[i]=n[i]; }); });
+    const faltas = [0,1,2,3].filter(i=>c[i]<maxN[i]).map(i=>({ inicial:i, necessario:maxN[i], disponivel:c[i], falta:maxN[i]-c[i] }));
+    const univOk = nums.length===16;
+    const padOk = slots.length===10;
+    return { univOk, padOk, iniOk: !faltas.length, faltas, c, maxN, ok: univOk && padOk && !faltas.length };
+  }
+  function recPadRenderValidacao(){
+    const el = document.getElementById('rec-pad-validacao');
+    const alerta = document.getElementById('rec-pad-alerta');
+    const btnG = document.getElementById('rec-pad-btn-gerar');
+    const btnC = document.getElementById('rec-pad-btn-completar');
+    if(!el) return;
+    const v = recPadValidacaoLocal();
+    const li = (ok, txt) => `<li>${ok?'✓':'✗'} ${txt}</li>`;
+    el.innerHTML = `<div class="small fw-bold mb-1">VALIDAÇÃO</div>
+      <ul class="rec-pad-val ps-3 mb-1">
+        ${li(v.univOk, 'Universo → '+((recPad.dezenas||[]).length)+' dezenas'+(v.univOk?' ✓':''))}
+        ${[0,1,2,3].map(i=>{ const f = v.faltas.find(x=>x.inicial===i); return li(!f, 'Inicial '+i+' → '+(f?('falta '+f.falta+' (disp. '+f.disponivel+' / nec. '+f.necessario+')'):'OK')); }).join('')}
+        ${li(v.padOk, 'Padrões selecionados → '+(recPad.slots.filter(Boolean).length)+'/10'+(v.padOk?' OK':''))}
+        ${li(true, 'Faltantes do ciclo → prioridade na inicial correspondente')}
+        <li>Duplicação dentro da mesma aposta → BLOQUEADA</li>
+        ${HAS_MES?li(true,'Mês da Sorte → OK'):''}
+      </ul>`;
+    if(alerta){
+      if(v.faltas.length){
+        alerta.innerHTML = `<div class="alert alert-warning small mb-2">${v.faltas.map(f=>`<div>⚠️ <strong>INICIAL ${f.inicial}</strong> — Necessário → ${f.necessario} · Disponível → ${f.disponivel} · Falta → ${f.falta} dezena(s)</div>`).join('')}<div class="mt-1">Escolha outros padrões ou complete as 16 dezenas.</div></div>`;
+      } else if(!v.padOk){
+        alerta.innerHTML = '<div class="alert alert-light border small mb-2">Selecione um padrão na lista para ele ir para a próxima aposta. O botão Preencher 10 diferenciados completa o restante.</div>';
+      } else alerta.innerHTML = '';
+    }
+    if(btnG) btnG.disabled = !v.ok;
+    if(btnC) btnC.disabled = !(v.faltas.length || (recPad.dezenas||[]).length!==16);
+  }
+  function recPadSyncChecks(){
+    recPad.sel = new Set(recPad.slots.filter(Boolean));
+    document.querySelectorAll('.rec-pad-chk').forEach((chk)=>{
+      chk.checked = recPad.sel.has(chk.dataset.padrao);
+    });
+    const cnt = document.getElementById('rec-pad-sel-count');
+    if(cnt) cnt.textContent = recPad.sel.size + ' selecionados';
+  }
+  function recPadCompactarSlots(){
+    const filled = recPad.slots.filter(Boolean);
+    recPad.slots = filled.concat(Array(10 - filled.length).fill(''));
+  }
+  function recPadAddPadrao(p){
+    if(!p || !recPadViavel(p)) return false;
+    recPadCompactarSlots();
+    const i = recPad.slots.findIndex(s=>!s);
+    if(i < 0) return false;
+    recPad.slots[i] = p;
+    recPad.sel.add(p);
+    recPadRenderSlots(); recPadRenderValidacao(); recPadSyncChecks();
+    return true;
+  }
+  function recPadRemoverPadrao(p){
+    recPad.slots = recPad.slots.map((s)=> s===p ? '' : s);
+    recPadCompactarSlots();
+    recPad.sel.delete(p);
+    recPadRenderSlots(); recPadRenderValidacao(); recPadSyncChecks();
+  }
+  function recPadFill10(){
+    recPadCompactarSlots();
+    const ja = recPad.slots.filter(Boolean);
+    const lote = recPadMontarLote10();
+    if(!lote.length && !ja.length) return;
+    const seen = new Set(ja);
+    const out = ja.slice();
+    lote.forEach((p)=>{
+      if(out.length >= 10 || seen.has(p)) return;
+      seen.add(p);
+      out.push(p);
+    });
+    recPad.slots = out.concat(Array(Math.max(0, 10 - out.length)).fill('')).slice(0, 10);
+    recPadRenderSlots(); recPadRenderValidacao(); recPadSyncChecks();
+  }
+  function recPadMesBadge(ap){
+    const n = Number(ap.mes_num || ap.mes) || 0;
+    const nome = ap.mes_nome || MESES_NOME[n] || '';
+    const abrev = ap.mes_abrev || MESES_ABREV[n] || (nome ? nome.slice(0, 3) : '');
+    if(!abrev) return '—';
+    const cls = nome ? ` mes-nome-${nome}` : '';
+    return `<span class="mes-badge${cls}" title="${nome || 'Mês da Sorte'}">${abrev}</span>`;
+  }
+  function recPadRenderApostas(apostas){
+    const el = document.getElementById('rec-pad-out');
+    if(!el) return;
+    if(!apostas || !apostas.length){ el.innerHTML = ''; return; }
+    const rows = apostas.map((a,i)=>{
+      const n = String(a.numero || (i+1)).padStart(2,'0');
+      const dez = (a.dezenas||[]).map(pad).join(' ');
+      return `<tr><td class="fw-bold">${n}</td><td class="font-monospace">${dez}</td><td><code>${a.padrao||''}</code></td><td>${recPadMesBadge(a)}</td></tr>`;
+    }).join('');
+    el.innerHTML = `<div class="table-responsive"><table class="table table-sm table-striped mb-0" style="font-size:.8rem"><thead class="table-light"><tr><th>Aposta</th><th>Dezenas</th><th>Padrão</th><th>Mês da Sorte</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  async function recPadCarregarCatalogo(){
+    const box = document.getElementById('rec-pad-lista');
+    if(box) box.innerHTML = '<div class="text-muted small p-2">Carregando Padrões II…</div>';
+    try{
+      const r = await fetch('/geradores-elite/api/inteligentes/catalogo-padroes');
+      const d = await parseJson(r);
+      recPad.catalogo = d.padroes || [];
+      recPad.ultimo = ((d.ultimo_resultado||{}).padrao) || (recPad.catalogo.find(p=>p.eh_padrao_ultimo_concurso)||{}).padrao || '';
+      recPad.sel = new Set([...recPad.sel].filter(p=>recPadViavel(p)));
+      recPadLimparSlotsInvalidos();
+      recPadRenderLista(); recPadRenderSlots(); recPadRenderValidacao(); recPadSyncChecks();
+    }catch(e){ if(box) box.innerHTML = `<div class="text-danger small p-2">${e.message||e}</div>`; }
+  }
+  async function recPadCompletar(){
+    const st = document.getElementById('rec-pad-status-txt');
+    try{
+      const r = await fetch(API+'/recorrencia/completar', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ n: recN, dezenas: recPad.dezenas, padroes: recPad.slots })
+      });
+      const j = JSON.parse(await r.text());
+      if(j.dezenas && j.dezenas.length){
+        recPad.dezenas = j.dezenas.slice();
+        const uni = document.getElementById('rec-pad-universo');
+        if(uni) uni.innerHTML = recPadHtmlIniciais(recPad.dezenas);
+        const fmt = document.getElementById('rec-pad-fmt');
+        if(fmt) fmt.textContent = recPad.dezenas.map(pad).join(' · ');
+      }
+      const sug = (j.sugestoes||[]).filter(s=>s.sugestao);
+      const alerta = document.getElementById('rec-pad-alerta');
+      if(alerta && sug.length){
+        alerta.innerHTML = `<div class="alert alert-info small mb-2">⚠️ COMPLEMENTAÇÃO — ${sug.map(s=>{
+          const t = s.sai!=null ? `sai ${pad(s.sai)} → entra ${pad(s.sugestao)}` : `entra ${pad(s.sugestao)}`;
+          return `Inicial ${s.inicial}: ${t}`;
+        }).join(' · ')}</div>`;
+      }
+      recPadLimparSlotsInvalidos();
+      recPadRenderLista(); recPadRenderSlots(); recPadRenderValidacao();
+      if(st) st.textContent = (j.validacao && j.validacao.gerar_liberado) ? 'Universo completado.' : 'Complementação aplicada — confira a validação.';
+    }catch(e){ if(st) st.textContent = e.message; }
+  }
+  async function recPadGerar(regenerar){
+    const st = document.getElementById('rec-pad-status-txt');
+    const btnG = document.getElementById('rec-pad-btn-gerar');
+    const btnR = document.getElementById('rec-pad-btn-regen');
+    const btnE = document.getElementById('rec-pad-btn-export');
+    if(st) st.textContent = regenerar ? 'Regenerando…' : 'Gerando…';
+    if(btnG) btnG.disabled = true;
+    const seed = regenerar ? Date.now() : recPad.seed;
+    try{
+      const body = { n: recN, dezenas: recPad.dezenas, padroes: recPad.slots, mes_num: HAS_MES ? mesPayloadFromSelect('rec-pad-mes') : null, seed: seed || undefined };
+      const r = await fetch(API+'/recorrencia/gerar', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      const j = JSON.parse(await r.text());
+      if(!j.ok){
+        recPad.apostas = []; recPadRenderApostas([]);
+        const alerta = document.getElementById('rec-pad-alerta');
+        const fal = ((j.validacao||{}).faltas) || recPadValidacaoLocal().faltas;
+        if(alerta) alerta.innerHTML = `<div class="alert alert-warning small mb-2"><strong>⚠️ NÃO É POSSÍVEL GERAR AS 10 APOSTAS</strong><div>${j.erro||''}</div>${fal.length?`<div class="mt-1">${fal.map(f=>`Inicial ${f.inicial} → falta ${f.falta}`).join(' · ')}</div>`:''}<div class="mt-1">Escolha outros padrões ou complete as 16 dezenas.</div></div>`;
+        if(st) st.textContent = 'Geração bloqueada.';
+        if(btnE) btnE.disabled = true; if(btnR) btnR.disabled = true;
+        recPadRenderValidacao(); return;
+      }
+      recPad.apostas = j.apostas || []; recPad.mes = body.mes_num; recPad.seed = seed;
+      recPadRenderApostas(recPad.apostas);
+      if(st) st.textContent = (j.geradas||0)+' apostas geradas · universo fixo de '+(j.universo||[]).length+' dezenas.';
+      if(btnE) btnE.disabled = !recPad.apostas.length; if(btnR) btnR.disabled = !recPad.apostas.length;
+    }catch(e){ if(st) st.textContent = e.message; }
+    finally { recPadRenderValidacao(); if(btnG && recPadValidacaoLocal().ok) btnG.disabled = false; }
+  }
+  function montarRecPadGerador(j, cj){
+    const wrap = document.getElementById('rec-pad-gerador');
+    if(!wrap) return;
+    recPad.rec = j; recPad.dezenasOrig = (cj.dezenas||[]).slice(); recPad.dezenas = recPad.dezenasOrig.slice();
+    recPad.slots = Array(10).fill(''); recPad.sel = new Set(); recPad.apostas = []; recPad.seed = null;
+    const mesHtml = HAS_MES ? `<div class="col-6 col-md-3"><label class="form-label small mb-0">Mês da Sorte</label><select id="rec-pad-mes" class="form-select form-select-sm cc-mes-sorte"><option value="">Carregando…</option></select></div>` : '';
+    wrap.innerHTML = `<div class="rec-conjunto rec-pad-box">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-1">
+        <h2 class="mb-0"><i class="fas fa-th me-1"></i>10 apostas · padrões de iniciais
+          <i class="fas fa-info-circle cc-i" title="Faltantes do ciclo entram em toda aposta da mesma inicial. A mesma dezena pode repetir entre apostas, nunca dentro da mesma aposta."></i>
+        </h2>
+        <a class="btn btn-sm btn-outline-primary" href="/analise/analises-inteligentes/?aba=padroes-ii" target="_blank" rel="noopener">Abrir Padrões II</a>
+      </div>
+      <details class="rec-ajuda"><summary><i class="fas fa-circle-question"></i> Como funciona</summary>
+        <p>As 16 dezenas acima formam o universo fixo. Só aparecem padrões que essas 16 conseguem montar. Ao selecionar um padrão, ele vai para a próxima aposta. As dezenas restantes do ciclo entram em toda aposta cuja inicial corresponda (ex.: 27 em todas que tiverem inicial 2). O botão Preencher 10 diferenciados completa as vagas. As mesmas dezenas podem repetir entre apostas, nunca dentro da mesma aposta.</p>
+      </details>
+      <div class="small fw-bold mb-1" id="rec-pad-fmt">${(recPad.dezenas||[]).map(pad).join(' · ')||'—'}</div>
+      <div class="mb-2" id="rec-pad-universo">${recPadHtmlIniciais(recPad.dezenas)}</div>
+      <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
+        <input type="search" id="rec-pad-busca" class="form-control form-control-sm" style="max-width:220px" placeholder="Filtrar padrão...">
+        <select id="rec-pad-status" class="form-select form-select-sm" style="width:auto">
+          <option value="">Todos</option><option value="frequente">Frequente</option><option value="atrasado">Atrasado</option><option value="faltante">Faltante</option>
+        </select>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="rec-pad-btn-load">Carregar</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="rec-pad-btn-limpar">Limpar</button>
+        <button type="button" class="btn btn-sm btn-outline-success" id="rec-pad-btn-fill10" title="Último padrão sorteado + selecionados + demais diferenciados que cabem nas 16">Preencher 10 diferenciados</button>
+        <span class="badge bg-light text-dark border" id="rec-pad-sel-count">0 selecionados</span>
+      </div>
+      <p class="small text-muted mb-1" id="rec-pad-lista-info">Clique em Carregar para listar os padrões da análise Padrões II.</p>
+      <div class="rec-pad-lista mb-3" id="rec-pad-lista"><div class="text-muted small p-2">Clique em Carregar para listar os padrões da análise Padrões II.</div></div>
+      <div class="small fw-bold mb-1">Padrão de cada aposta</div>
+      <div id="rec-pad-slots" class="mb-3"></div>
+      <div id="rec-pad-alerta"></div>
+      <div id="rec-pad-validacao" class="rec-bloco mb-3"></div>
+      <div class="row g-2 align-items-end mb-2">
+        ${mesHtml}
+        <div class="col d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-sm fw-bold" id="rec-pad-btn-completar" style="background:var(--accent-mes);color:#fff;border:none;" disabled>Completar 16 dezenas</button>
+          <button type="button" class="btn btn-sm fw-bold" id="rec-pad-btn-gerar" style="background:var(--primary);color:#fff;border:none;" disabled>Gerar 10 apostas</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="rec-pad-btn-regen" disabled>Regenerar</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="rec-pad-btn-export" disabled>Exportar</button>
+        </div>
+      </div>
+      <p class="small text-muted mb-2" id="rec-pad-status-txt"></p>
+      <div id="rec-pad-out"></div>
+    </div>`;
+    recPadRenderSlots(); recPadRenderValidacao();
+    if(HAS_MES && window.MesSorteSelect){
+      const sel = document.getElementById('rec-pad-mes');
+      const apply = (data)=> MesSorteSelect.fill(sel, data, { defaultPrefer: 'atrasado' });
+      if(MesSorteSelect.cached) apply(MesSorteSelect.cached);
+      else MesSorteSelect.load(API).then(apply).catch(()=>{});
+    }
+    if(!wrap.dataset.bound){
+      wrap.dataset.bound = '1';
+      wrap.addEventListener('change', (ev)=>{
+        const chk = ev.target.closest('.rec-pad-chk');
+        if(!chk) return;
+        const p = chk.dataset.padrao; if(!p) return;
+        if(chk.checked){
+          if(!recPadAddPadrao(p)) chk.checked = false;
+        } else {
+          recPadRemoverPadrao(p);
+        }
+      });
+      wrap.addEventListener('click', (ev)=>{
+        const x = ev.target.closest('.rec-pad-slot-x');
+        if(x){
+          recPad.slots[Number(x.dataset.slot)] = '';
+          recPadCompactarSlots();
+          recPadRenderSlots(); recPadRenderValidacao(); recPadSyncChecks();
+        }
+      });
+    }
+    document.getElementById('rec-pad-btn-load')?.addEventListener('click', recPadCarregarCatalogo);
+    document.getElementById('rec-pad-btn-limpar')?.addEventListener('click', ()=>{
+      recPad.sel.clear(); recPad.slots = Array(10).fill(''); recPad.apostas=[];
+      recPad.dezenas = recPad.dezenasOrig.slice();
+      const uni = document.getElementById('rec-pad-universo'); if(uni) uni.innerHTML = recPadHtmlIniciais(recPad.dezenas);
+      const fmt = document.getElementById('rec-pad-fmt'); if(fmt) fmt.textContent = recPad.dezenas.map(pad).join(' · ');
+      recPadRenderLista(); recPadRenderSlots(); recPadRenderApostas([]); recPadRenderValidacao();
+      const btnE = document.getElementById('rec-pad-btn-export'); const btnR = document.getElementById('rec-pad-btn-regen');
+      if(btnE) btnE.disabled = true; if(btnR) btnR.disabled = true;
+    });
+    document.getElementById('rec-pad-btn-fill10')?.addEventListener('click', recPadFill10);
+    document.getElementById('rec-pad-busca')?.addEventListener('input', recPadRenderLista);
+    document.getElementById('rec-pad-status')?.addEventListener('change', recPadRenderLista);
+    document.getElementById('rec-pad-btn-completar')?.addEventListener('click', recPadCompletar);
+    document.getElementById('rec-pad-btn-gerar')?.addEventListener('click', ()=>recPadGerar(false));
+    document.getElementById('rec-pad-btn-regen')?.addEventListener('click', ()=>recPadGerar(true));
+    document.getElementById('rec-pad-btn-export')?.addEventListener('click', ()=>{
+      exportTxt(recPad.apostas, recPad.mes || mesPayloadFromSelect('rec-pad-mes'));
+    });
+    recPadCarregarCatalogo();
+  }
+
+  function renderRecorrencia(j){
+    const out = document.getElementById('rec-out');
+    const st = document.getElementById('rec-status');
+    const lbl = document.getElementById('rec-concursos-lbl');
+    document.querySelectorAll('.rec-n-btn').forEach(b=>{
+      b.classList.toggle('active', Number(b.dataset.n)===Number(j.janela||recN));
+    });
+    if(!j.ok){
+      st.textContent = j.erro || 'Falha';
+      lbl.textContent = '';
+      out.innerHTML = `<div class="alert alert-warning small">${j.erro||'Sem dados.'}</div>`;
+      return;
+    }
+    const g = j.grupos || {};
+    const fmt = j.fmt || {};
+    const cob = j.cobertura || {};
+    const des = j.destaques || {};
+    const ciclo = j.ciclo || {};
+    const pool = j.pool || {};
+    const maxF = (j.ranking && j.ranking[0]) ? j.ranking[0].vezes : 0;
+    const conc = (j.concursos||[]).join(', ');
+    st.textContent = j.leitura || '';
+    lbl.textContent = conc ? ('concursos '+conc) : '';
+    const linhasHtml = (j.linhas||[]).map(r=>`
+      <div class="d-flex flex-wrap align-items-center gap-2 py-1 border-bottom">
+        <span class="rec-linha-cnc">#${r.concurso||'—'}</span>
+        <span class="small text-muted">${r.data||''}</span>
+        <span>${(r.repetidas||[]).map(n=>`<span class="badge bg-secondary me-1">${pad(n)}</span>`).join('') || '<span class="text-muted">—</span>'}</span>
+      </div>`).join('');
+    const rankingRows = (j.ranking||[]).map(t=>`
+      <tr>
+        <td class="fw-bold">${pad(t.dezena)}</td>
+        <td>${t.vezes}×</td>
+        <td>${t.rotulo||''}</td>
+      </tr>`).join('') || '<tr><td colspan="3" class="text-muted">Nenhuma dezena repetida na janela.</td></tr>';
+    const mid = Math.ceil((j.tabela||[]).length/2);
+    const left = (j.tabela||[]).slice(0, mid);
+    const right = (j.tabela||[]).slice(mid);
+    const univRows = left.map((a,i)=>{
+      const b = right[i];
+      return `<tr>
+        <td>${pad(a.dezena)}</td><td>${a.vezes}</td><td class="text-muted">${a.rotulo}</td>
+        ${b?`<td>${pad(b.dezena)}</td><td>${b.vezes}</td><td class="text-muted">${b.rotulo}</td>`:'<td></td><td></td><td></td>'}
+      </tr>`;
+    }).join('');
+    const freqBlocos = (j.por_frequencia||[]).map(f=>`
+      <div class="mb-2">
+        <div class="small fw-bold mb-1">${f.vezes===0?'❌ 0 vezes':(f.vezes+' vez'+(f.vezes>1?'es':''))} · ${f.rotulo} (${f.qtd})</div>
+        <div>${recBalls(f.dezenas, f.vezes, maxF)}</div>
+      </div>`).join('');
+    const lider = des.lider;
+    const faixasHtml = (j.faixas||[]).map((f,i)=>`
+      <div class="col-md-3">
+        <div class="rec-bloco">
+          <h3>Linha ${i+1} · ${f.label||f.nome}</h3>
+          <div class="fw-bold">${f.tamanho} dezenas · ${f.qtd_presentes} presentes · ${f.qtd_ausentes} ausentes</div>
+          <div class="small text-muted mt-1 mb-1">Presentes</div>
+          <div>${recGrupoBalls(f.presentes, j.tabela, maxF)}</div>
+          <div class="small text-muted mt-2 mb-1">Ausentes</div>
+          <div>${recBalls(f.ausentes, 0, maxF)}</div>
+        </div>
+      </div>`).join('');
+    const top2txt = (des.top2||[]).map(t=>pad(t.dezena)).join(' + ');
+    const cj = recConjunto16(j);
+    out.innerHTML = `
+      <div class="card shadow-sm mb-3">
+        <div class="card-header py-2 small fw-bold">Fonte · Repetidas no Ciclo</div>
+        <div class="card-body py-2">${linhasHtml || '<span class="text-muted">—</span>'}</div>
+      </div>
+      <p class="small">${j.leitura||''} Distribuição abaixo.</p>
+      <div class="row g-3 mb-3">
+        <div class="col-lg-5">
+          <div class="rec-bloco">
+            <h3>1. Dezenas que mais se repetiram</h3>
+            <div class="table-responsive">
+              <table class="table table-sm mb-2" style="font-size:.78rem">
+                <thead class="table-light"><tr><th>Dezena</th><th>Ocorrências</th><th>Classificação</th></tr></thead>
+                <tbody>${rankingRows}</tbody>
+              </table>
+            </div>
+            <div class="small text-muted">${des.n_repetidas||0} dezena(s) apareceram mais de uma vez.</div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="rec-bloco mb-3">
+            <h3>2. Dezenas que apareceram apenas 1 vez</h3>
+            <div class="mb-1">${fmt.baixa_presenca||'—'}</div>
+            <div>${recBalls(g.baixa_presenca, 1, maxF)}</div>
+            <div class="small text-muted mt-1">${(g.baixa_presenca||[]).length} dezena(s) · baixa presença.</div>
+          </div>
+          <div class="rec-bloco">
+            <h3>3. Dezenas que NÃO apareceram</h3>
+            <div class="mb-1 fw-bold">${fmt.ausentes||'—'}</div>
+            <div>${recBalls(g.ausentes, 0, maxF)}</div>
+            <div class="small text-muted mt-1">${cob.ausentes||0} de ${j.universo} · ${cob.pct_ausentes||0}% do universo.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card shadow-sm mb-3">
+        <div class="card-header py-2 small fw-bold">4. Visão completa — ${pad(j.dezena_min)} a ${pad(j.dezena_max)}</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-striped mb-0 text-center" style="font-size:.78rem">
+              <thead class="table-light"><tr><th>Dezena</th><th>Vezes</th><th></th><th>Dezena</th><th>Vezes</th><th></th></tr></thead>
+              <tbody>${univRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="rec-bloco mb-3">
+        <h3>5. Agrupando por frequência</h3>
+        ${freqBlocos || '—'}
+      </div>
+      <div class="rec-bloco mb-3">
+        <h3>6. O que chama mais atenção</h3>
+        ${lider ? `<p class="small mb-1">A dezena <strong>${pad(lider.dezena)}</strong> sozinha representa <strong>${des.lider_pct}%</strong> das ocorrências (${lider.vezes} de ${j.ocorrencias}).</p>` : '<p class="small mb-1">Sem dezena repetida nesta janela.</p>'}
+        ${(des.top2||[]).length>=2 ? `<p class="small mb-1">${top2txt} = ${des.top2_ocor} ocorrências de ${j.ocorrencias} = <strong>${des.top2_pct}%</strong>.</p>` : ''}
+        <p class="small mb-0">Núcleo repetido (2×): <strong>${fmt.repetido||'—'}</strong></p>
+      </div>
+      <div class="rec-bloco mb-3">
+        <h3>7. Cobertura do universo</h3>
+        <p class="small mb-1">Usadas: <strong>${cob.usadas}</strong> de ${j.universo} (${cob.pct_usadas}%). Ausentes: <strong>${cob.ausentes}</strong> (${cob.pct_ausentes}%).</p>
+        <div class="progress" style="height:10px"><div class="progress-bar" style="width:${cob.pct_usadas||0}%;background:var(--primary)"></div></div>
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-md-3"><div class="rec-bloco"><h3>Núcleo forte</h3><div class="mb-1">${fmt.nucleo_forte||'—'}</div>${recGrupoBalls(g.nucleo_forte, j.tabela, maxF)}</div></div>
+        <div class="col-md-3"><div class="rec-bloco"><h3>Núcleo repetido</h3><div class="mb-1">${fmt.repetido||'—'}</div>${recBalls(g.repetido, 2, maxF)}</div></div>
+        <div class="col-md-3"><div class="rec-bloco"><h3>Baixa presença</h3><div class="mb-1">${fmt.baixa_presenca||'—'}</div>${recBalls(g.baixa_presenca, 1, maxF)}</div></div>
+        <div class="col-md-3"><div class="rec-bloco"><h3>Ausentes</h3><div class="mb-1">${fmt.ausentes||'—'}</div>${recBalls(g.ausentes, 0, maxF)}</div></div>
+      </div>
+      <div class="rec-conjunto">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-1">
+          <h2 class="mb-0"><i class="fas fa-bullseye me-1"></i>${cj.n||16} dezenas indicadas · núcleo × baixa presença
+            <i class="fas fa-info-circle cc-i" title="Pendentes do ciclo entram primeiro no conjunto-base; depois núcleo e baixa presença. Se houver mais de 16 faltantes, ficam as de maior score."></i>
+          </h2>
+          <a class="btn btn-sm fw-bold" style="background:var(--accent-mes);color:#fff;border:none;" href="${cj.href||'#'}"
+            title="Leva este recorte (já com as faltantes do ciclo) para o conjunto-base do Construtor.">
+            Enviar ao Construtor (conjunto-base)
+          </a>
+        </div>
+        <details class="rec-ajuda">
+          <summary><i class="fas fa-circle-question"></i> Em caso de dúvida</summary>
+          <p>${cj.como_escolheu||'As 16 priorizam o que o ciclo ainda precisa fechar, depois o núcleo e a baixa presença.'} O Construtor usa no máximo ${cj.n||16} dezenas; o pool completo tem ${(pool.nucleo_x_baixa||[]).length}.</p>
+        </details>
+        <div class="rec-conjunto-fmt">${cj.fmt||'—'}</div>
+        <div class="mb-2">${recGrupoBalls(cj.dezenas, j.tabela, maxF)}</div>
+        ${(cj.faltantes_ciclo||[]).length
+          ? `<div class="small mb-1"><span class="fw-bold">Faltantes do ciclo</span> <i class="fas fa-info-circle cc-i" title="Fixas neste recorte: o ciclo ainda precisa fechá-las, por isso entram antes do núcleo e da baixa presença."></i>: ${balls(cj.faltantes_ciclo,'falt')}</div>`
+          : ''}
+        <div class="small text-muted">${(cj.nucleo||[]).length} do núcleo (${(cj.nucleo||[]).map(pad).join(' · ')||'—'}) · ${(cj.baixa||[]).length} de baixa presença (${(cj.baixa||[]).map(pad).join(' · ')||'—'}).</div>
+      </div>
+      <div id="rec-pad-gerador"></div>
+      <div class="row g-2 mb-3">${faixasHtml}</div>
+      <div class="row g-2 mb-3">
+        <div class="col-lg-7">
+          <div class="card shadow-sm h-100" style="border:1px solid var(--accent-mes)">
+            <div class="card-header py-2 small fw-bold text-white" style="background:var(--accent-mes)">Pool principal (recomendado) · núcleo × baixa presença</div>
+            <div class="card-body">
+              <div class="mb-2">${fmt.pool_principal||'—'}</div>
+              <div class="mb-2">${recGrupoBalls(pool.nucleo_x_baixa, j.tabela, maxF)}</div>
+              <div class="small text-muted">${(pool.nucleo_x_baixa||[]).length} dezenas · ${pool.qtd_nucleo_no_pool||0} núcleo + ${pool.qtd_baixa_no_pool||0} baixa presença. As ${cj.n||16} indicadas para o Construtor estão no cartão destacado acima.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card shadow-sm h-100 rec-pool-old">
+            <div class="card-header py-2 small fw-bold text-white" style="background:var(--primary-xdark)">Pool de recuperação · ausentes</div>
+            <div class="card-body">
+              <div class="mb-2">${fmt.pool_recuperacao||fmt.ausentes||'—'}</div>
+              <div class="mb-2">${recBalls(pool.recuperacao_ausentes||g.ausentes, 0, maxF)}</div>
+              <div class="small text-muted">${(pool.recuperacao_ausentes||g.ausentes||[]).length} dezenas · no máximo 1 por jogo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card shadow-sm mb-3 rec-pool-old">
+        <div class="card-header py-2 small fw-bold" style="background:var(--accent-light);color:var(--primary-xdark)">Pool antigo (não recomendado) · ausentes × baixa presença</div>
+        <div class="card-body">
+          <div class="mb-2">${fmt.pool||'—'}</div>
+          <div class="mb-2">${recGrupoBalls(pool.ausentes_x_baixa, j.tabela, maxF)}</div>
+          <div class="small text-muted mb-2">${(pool.ausentes_x_baixa||[]).length} dezenas · ${pool.qtd_ausentes_no_pool||0} ausentes + ${pool.qtd_baixa_no_pool||0} baixa presença. Descarta o núcleo classificado como forte/repetido.</div>
+          <div class="small fw-bold mb-1">Faltantes do ciclo #${ciclo.numero||'—'} (${ciclo.percentual||0}%)</div>
+          <div>${balls(ciclo.pendentes,'falt')}</div>
+          <p class="small text-muted mt-2 mb-0">Útil no fim do ciclo. Esta aba ainda não gera apostas.</p>
+        </div>
+      </div>
+      ${renderPosAnalise(j)}`;
+    bindRecPosBt();
+    montarRecPadGerador(j, cj);
+  }
+
+  function recGrupoCls(key){
+    if(key==='muito_forte') return 'rec-mf';
+    if(key==='forte') return 'rec-f';
+    if(key==='repetido') return 'rec-2';
+    if(key==='baixa_presenca') return 'rec-1';
+    return 'rec-0';
+  }
+
+  function recBtTable(slice, vencedor){
+    const estr = (slice && slice.estrategias) || [];
+    if(!estr.length) return '<p class="small text-muted mb-0">Ainda não há histórico suficiente para este recorte.</p>';
+    const pick = 7;
+    const rows = estr.map(e=>{
+      const win = e.id === vencedor ? ' rec-win' : '';
+      const d = e.dist || {};
+      return `<tr class="${win}">
+        <td>${e.nome}${e.id===vencedor?' <span class="badge" style="background:var(--accent-mes)">melhor por dezena usada</span>':''}</td>
+        <td class="text-end">${e.pool_medio}</td>
+        <td class="text-end">${e.media}</td>
+        <td class="text-end fw-bold">${e.densidade!=null?e.densidade:'—'}</td>
+        <td class="text-end">${e.esperado_aleatorio!=null?e.esperado_aleatorio:'—'}</td>
+        <td class="text-end">${e.melhor}</td>
+        <td class="text-end">${d['5']||0}</td>
+        <td class="text-end">${d['6']||0}</td>
+        <td class="text-end">${d[String(pick)]||0}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="table-responsive"><table class="table table-sm mb-0">
+      <thead class="table-light"><tr>
+        <th>Jeito de montar o pool</th>
+        <th class="text-end" title="Quantas dezenas entram no conjunto, em média">Tamanho médio</th>
+        <th class="text-end" title="Quantas dezenas do resultado oficial cabiam no pool">Acertos no pool</th>
+        <th class="text-end" title="Acertos no pool ÷ tamanho do pool">Densidade</th>
+        <th class="text-end" title="Quantos acertos esperados num jogo de 7 se o sorteio fosse uniforme no pool">Esperado no jogo de 7</th>
+        <th class="text-end" title="Melhor cobertura num único concurso">Melhor dia</th>
+        <th class="text-end">5</th>
+        <th class="text-end">6</th>
+        <th class="text-end">7</th>
+      </tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function recFold(id, titulo, resumo, explica, inner){
+    const r = resumo ? `<span class="rec-fold-resumo">${resumo}</span>` : '';
+    const e = explica ? `<p class="rec-fold-explica">${explica}</p>` : '';
+    return `<details class="rec-fold" id="${id||''}">
+      <summary><span class="rec-fold-head"><span class="rec-fold-title">${titulo}</span>${r}</span></summary>
+      <div class="rec-fold-body">${e}${inner}</div>
+    </details>`;
+  }
+
+  function recBtLbl(sl){
+    if(!sl || !sl.n) return '';
+    return `Últimos ${sl.n} concursos (#${sl.concurso_de}–#${sl.concurso_ate}). Em ${sl.pct_zero_ausentes||0}% deles, nenhuma ausente saiu.`;
+  }
+
+  function recHumanPars(pa, conc){
+    if(conc.como_ler && (conc.paragrafos||[]).length){
+      return (conc.paragrafos||[]).map(p=>`<p>${p}</p>`).join('');
+    }
+    const det = pa.detalhe||[];
+    const parts = [];
+    if(det.length){
+      const zeros = det.filter(d => Number(d.ausentes_n||0)===0).length;
+      const concs = det.map(d=>'#'+(d.concurso||'—')).join(', ');
+      parts.push(`Nos ${det.length} concurso(s) mais recente(s) (${concs}), ${zeros} saíram sem nenhuma dezena da lista de ausentes.`);
+      parts.push('O que saiu, na prática: '+det.map(d=>
+        '#'+(d.concurso||'—')+': '+(d.nucleo_n||0)+' do núcleo + '+(d.baixa_n||0)+' de baixa presença + '+(d.ausentes_n||0)+' ausente(s)'
+      ).join('; ')+'.');
+    }
+    const sl = (pa.backtest||{})['50']||{};
+    const comp = sl.composicao_media||{};
+    if(sl.n){
+      let t = `Olhando os últimos ${sl.n} concursos um a um (sempre classificando só com os anteriores, sem usar o resultado daquele dia): em média saíram ${comp.nucleo||0} dezena(s) do núcleo, ${comp.baixa_presenca||0} de baixa presença e ${comp.ausentes||0} ausente(s).`;
+      if(sl.pct_zero_ausentes!=null) t += ` Em ${sl.pct_zero_ausentes}% dos concursos, nenhuma ausente saiu.`;
+      parts.push(t);
+    }
+    parts.push('Um conjunto maior (Ausentes + Baixa, uns 26 números) naturalmente “pesca” mais dezenas do resultado. Isso não quer dizer que seja o melhor para um jogo de 7. O critério justo é a densidade: quantos acertos você consegue por dezena colocada no conjunto.');
+    const rec = conc.recomendacao_pool||'nucleo_baixa';
+    if(rec==='nucleo_baixa' || rec==='nucleo_baixa_1aus'){
+      parts.push('Dezena que não saiu na janela não fica “mais provável” por isso. O núcleo que a análise marcou como forte ou repetido precisa entrar no jogo.');
+      parts.push('Na prática: o pool principal é Núcleo + Baixa presença. As ausentes ficam de reserva — no máximo 1 dezena por aposta, só para recuperar alguma atrasada.');
+    } else {
+      parts.push(`Neste recorte, o conjunto «${conc.recomendacao_label||rec}» rendeu mais acertos por dezena usada. Mesmo assim, evite que as ausentes tomem conta de cada jogo.`);
+    }
+    return parts.map(p=>`<p>${p}</p>`).join('');
+  }
+
+  function renderPosAnalise(j){
+    const pa = j.pos_analise;
+    if(!pa){
+      return '';
+    }
+    if(!pa.ok){
+      return `<div class="alert alert-light border small">Pós-análise: ${pa.erro||'indisponível.'}</div>`;
+    }
+    const labels = {
+      muito_forte:'Muito forte', forte:'Forte', repetido:'Repetidas',
+      baixa_presenca:'Baixa presença', ausentes:'Ausentes'
+    };
+    const detalheHtml = (pa.detalhe||[]).map(d=>{
+      const rows = Object.keys(labels).map(k=>{
+        const nums = (d.por_grupo && d.por_grupo[k]) || [];
+        const q = (d.qtd && d.qtd[k]) || 0;
+        return `<tr>
+          <td>${labels[k]}</td>
+          <td class="fw-bold">${q}</td>
+          <td>${(nums.length?nums.map(n=>`<span class="cc-ball ${recGrupoCls(k)}">${pad(n)}</span>`).join(''):'—')}</td>
+        </tr>`;
+      }).join('');
+      const jan = (d.janela_concursos||[]).join(', ');
+      const janLbl = d.classificacao==='atual'
+        ? ('classificação desta janela (concursos '+jan+')')
+        : ('classificado só com os concursos anteriores: '+(jan||'—'));
+      const ballsRes = (d.resultado||[]).map(n=>{
+        let k = 'ausentes';
+        Object.keys(labels).forEach(gk=>{
+          if(((d.por_grupo||{})[gk]||[]).includes(n)) k = gk;
+        });
+        return `<span class="cc-ball ${recGrupoCls(k)}">${pad(n)}</span>`;
+      }).join('');
+      return `<div class="col-lg-6 mb-3">
+        <div class="rec-pos-card">
+          <h3>Concurso #${d.concurso||'—'}</h3>
+          <div class="small text-muted mb-2">${d.data||''} · ${janLbl}</div>
+          <div class="mb-2">${ballsRes || '—'}</div>
+          <div class="table-responsive">
+            <table class="table table-sm mb-2">
+              <thead class="table-light"><tr><th>Grupo do Ciclo</th><th>Qtd</th><th>Dezenas sorteadas</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+          <div class="small"><strong>${d.nucleo_n||0}</strong> do núcleo + <strong>${d.baixa_n||0}</strong> de baixa presença + <strong>${d.ausentes_n||0}</strong> ausente(s)
+            · ${d.padrao_label||''}</div>
+          ${d.tetos?`<div class="small text-muted mt-1">Dezenas do resultado que cabiam em cada pool: Ausentes+Baixa <strong>${d.tetos.ausentes_baixa}</strong> · Núcleo+Baixa <strong>${d.tetos.nucleo_baixa}</strong> · Núcleo+Baixa+1 ausente <strong>${d.tetos.nucleo_baixa_1aus}</strong></div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    const conc = pa.conclusao || {};
+    const pars = recHumanPars(pa, conc);
+    const problema = conc.como_ler
+      ? (conc.problema_atual||'')
+      : 'O pool antigo (Ausentes + Baixa presença) deixa de fora o núcleo — justamente as dezenas que a análise apontou como fortes ou repetidas.';
+    const explicaPos = pa.como_ler || 'Aqui a gente não inventa o jogo: pega o que já saiu e pergunta se aquelas dezenas estavam no núcleo, na baixa presença ou nas ausentes. Se o núcleo aparece no resultado, ele merece lugar na aposta. Se as ausentes quase não saem, não devem dominar o volante.';
+    const explicaBt = pa.backtest_como_ler || 'Para cada concurso antigo, a classificação usa só o que já tinha acontecido — ninguém olha o gabarito daquele dia na hora de montar o conjunto. Depois comparamos quatro formas de escolher as dezenas. A linha destacada é a que rendeu mais acertos por dezena usada, o critério justo para um jogo de 7 números. Um pool enorme acerta mais dezenas no papel, mas dilui o jogo: por isso a densidade pesa mais do que o total bruto.';
+    const explicaConcl = conc.como_ler || 'Esta caixa traduz os números da recorrência em uma decisão prática: quais dezenas entram no pool principal do seu jogo, e quais ficam só como reserva.';
+    const bt = pa.backtest || {};
+    recPosBt = bt;
+    const defaultBt = [50,100,200].find(n => bt[String(n)] && bt[String(n)].ok) || 50;
+    const btBtns = [50,100,200].map(n=>{
+      const sl = bt[String(n)];
+      const dis = !sl || !sl.ok ? ' disabled' : '';
+      const act = n===defaultBt ? ' active' : '';
+      return `<button type="button" class="btn btn-outline-secondary rec-bt-n-btn${act}" data-bt="${n}"${dis}>${n}</button>`;
+    }).join('');
+    const sl0 = bt[String(defaultBt)] || {};
+    const mix = pa.composicao_media_detalhe || {};
+    const posInner = `
+      <div class="row g-0">${detalheHtml}</div>
+      <div class="rec-pos-card mb-0">
+        <h3>O que esses concursos têm em comum</h3>
+        <p class="small mb-1">Em média saíram <strong>${mix.nucleo||0}</strong> do núcleo · <strong>${mix.baixa_presenca||0}</strong> de baixa presença · <strong>${mix.ausentes||0}</strong> ausentes.</p>
+        <p class="small mb-0 text-muted">${(conc.recomendacao_label)?('A leitura recente aponta para «'+conc.recomendacao_label+'». O pool antigo (Ausentes + Baixa) deixa o núcleo de fora.'):'Compare nos cartões: o núcleo entra no resultado ou as ausentes dominam?'}</p>
+      </div>`;
+    const btInner = `
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <span class="small text-muted mb-0">Escolha quantos concursos entrar no teste</span>
+        <div class="btn-group btn-group-sm" role="group">${btBtns}</div>
+      </div>
+      <p class="small text-muted mb-2" id="rec-bt-lbl">${recBtLbl(sl0)}</p>
+      <div id="rec-bt-table">${recBtTable(sl0, sl0.vencedor)}</div>
+      <p class="small mb-0 text-muted">As colunas <strong>5 / 6 / 7</strong> contam em quantos concursos aquele pool cobriu pelo menos esse tanto de dezenas do resultado. <strong>Acertos no pool</strong> é a média. <strong>Densidade</strong> divide isso pelo tamanho do conjunto — assim um pool enorme não “ganha” só por ter mais números.</p>`;
+    const conclInner = `
+      <div class="rec-concl">
+        ${problema?`<p><strong>O que estava errado no pool antigo.</strong> ${problema}</p>`:''}
+        ${pars}
+        <p class="mb-0"><strong>Pool recomendado:</strong> ${conc.recomendacao_label||'Núcleo + Baixa presença'}.</p>
+      </div>`;
+    return `<div id="rec-pos">
+      ${recFold(
+        'rec-fold-pos',
+        'Pós-análise · resultado real × classificação',
+        pa.resumo || 'O resultado oficial de cada concurso, dezena a dezena, nos grupos da janela.',
+        explicaPos,
+        posInner
+      )}
+      ${recFold(
+        'rec-fold-bt',
+        'Backtest automático de pools',
+        pa.backtest_resumo || 'Qual jeito de montar o pool acertou mais, de forma justa, no histórico.',
+        explicaBt,
+        btInner
+      )}
+      ${recFold(
+        'rec-fold-concl',
+        conc.titulo || 'Interpretação da recorrência',
+        conc.resumo || (conc.recomendacao_label ? ('Recomendação: '+conc.recomendacao_label+'.') : ''),
+        explicaConcl,
+        conclInner
+      )}
+    </div>`;
+  }
+
+  let recPosBt = {};
+  function bindRecPosBt(){
+    const wrap = document.getElementById('rec-pos');
+    if(!wrap) return;
+    wrap.querySelectorAll('.rec-bt-n-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const n = String(btn.dataset.bt);
+        const sl = recPosBt[n]||{};
+        wrap.querySelectorAll('.rec-bt-n-btn').forEach(b=>b.classList.toggle('active', b===btn));
+        const lbl = document.getElementById('rec-bt-lbl');
+        const tab = document.getElementById('rec-bt-table');
+        if(lbl) lbl.textContent = recBtLbl(sl);
+        if(tab) tab.innerHTML = recBtTable(sl, sl.vencedor);
+      });
+    });
+  }
+
+  async function loadRecorrencia(n){
+    recN = Number(n)||4;
+    const st = document.getElementById('rec-status');
+    st.textContent = 'Carregando…';
+    try{
+      const r = await fetch(API+'/recorrencia?n='+encodeURIComponent(recN));
+      const j = await parseJson(r);
+      recLoaded = true;
+      renderRecorrencia(j);
+    }catch(e){
+      recLoaded = false;
+      document.getElementById('rec-out').innerHTML = `<div class="alert alert-danger small">${e.message}</div>`;
+      st.textContent = e.message;
+    }
+  }
+
+  document.querySelectorAll('.rec-n-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const n = Number(btn.dataset.n);
+      const u = new URL(location.href);
+      u.searchParams.set('modo','recorrencia');
+      u.searchParams.set('n', String(n));
+      history.replaceState({}, '', u);
+      loadRecorrencia(n);
+    });
+  });
+  const recTabBtn = document.getElementById('tab-btn-recorrencia');
+  if(recTabBtn){
+    recTabBtn.addEventListener('shown.bs.tab', ()=>{ if(!recLoaded) loadRecorrencia(recN); });
+  }
+  loadRecorrencia(recN);
+
+  // Deep-link ?modo=estrategia | ?modo=recorrencia
+  (function activateModoFromQuery(){
+    const m = new URLSearchParams(location.search).get('modo');
+    const id = m === 'recorrencia' ? 'tab-btn-recorrencia' : (m === 'estrategia' ? 'tab-btn-estrategia' : null);
+    if(!id) return;
+    const btn = document.getElementById(id);
+    if(btn && window.bootstrap && bootstrap.Tab){
+      bootstrap.Tab.getOrCreateInstance(btn).show();
+    } else if(btn){
+      btn.click();
+    }
+  })();
+
+  document.getElementById('cc-btn-gerar').addEventListener('click', async ()=>{
+    const st = document.getElementById('cc-status');
+    st.textContent = 'Gerando e conferindo histórico…';
+    const mes = mesPayloadFromSelect('cc-mes');
+    const body = {
+      quantidade: Number(document.getElementById('cc-qtd').value||10),
+      pick: Number(document.getElementById('cc-pick').value||7),
+      filtro_faixas: document.getElementById('cc-f-faixa').checked,
+      filtro_soma: document.getElementById('cc-f-soma').checked,
+      filtro_digitos: document.getElementById('cc-f-dig').checked,
+      mes_num: mes,
+      descartar_historico: document.getElementById('cc-descartar-hist').checked,
+    };
+    try{
+      const r = await fetch(API+'/gerar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await parseJson(r);
+      if(j.contexto) renderCtx(j.contexto);
+      renderApostas21(j);
+      if(j.ok && (j.apostas||[]).length){
+        if(j.backtest) aplicarBacktestUi(j.apostas, j.backtest, 'cc-bt');
+        else await runBacktest(j.apostas, 'cc-bt');
+      }
+    }catch(e){ st.textContent = 'Erro: '+e.message; }
+  });
+
+  document.getElementById('cr-btn-gerar').addEventListener('click', async ()=>{
+    const st = document.getElementById('cr-status');
+    st.textContent = 'Gerando ritmo e conferindo histórico…';
+    const mes = mesPayloadFromSelect('cr-mes');
+    const body = {
+      quantidade: Number(document.getElementById('cr-qtd').value||10),
+      pick: Number(document.getElementById('cr-pick').value||7),
+      mes_num: mes,
+      descartar_historico: document.getElementById('cr-descartar-hist').checked,
+    };
+    try{
+      const r = await fetch(API+'/ritmo/gerar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await parseJson(r);
+      renderRitmoApostas(j);
+      if(j.ok && (j.apostas||[]).length){
+        if(j.backtest) aplicarBacktestUi(j.apostas, j.backtest, 'cr-bt');
+        else await runBacktest(j.apostas, 'cr-bt');
+      }
+    }catch(e){ st.textContent = 'Erro: '+e.message; }
+  });
+
+  document.getElementById('co-btn-gerar').addEventListener('click', async ()=>{
+    const st = document.getElementById('co-status');
+    st.textContent = 'Gerando operacional e conferindo histórico…';
+    const mes = mesPayloadFromSelect('co-mes');
+    const body = {
+      quantidade: Number(document.getElementById('co-qtd').value||10),
+      pick: Number(document.getElementById('co-pick').value||7),
+      modo: document.getElementById('co-modo').value || 'auto',
+      mes_num: mes,
+      descartar_historico: document.getElementById('co-descartar-hist').checked,
+    };
+    try{
+      const r = await fetch(API+'/operacional/gerar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await parseJson(r);
+      renderOpApostas(j);
+      if(j.ok && (j.apostas||[]).length){
+        if(j.backtest) aplicarBacktestUi(j.apostas, j.backtest, 'co-bt');
+        else await runBacktest(j.apostas, 'co-bt');
+      }
+    }catch(e){ st.textContent = 'Erro: '+e.message; }
+  });
+
+  document.getElementById('cf-btn-gerar').addEventListener('click', async ()=>{
+    const st = document.getElementById('cf-status');
+    st.textContent = 'Gerando fechamento e conferindo histórico…';
+    const mes = mesPayloadFromSelect('cf-mes');
+    const body = {
+      quantidade: Number(document.getElementById('cf-qtd').value||10),
+      pick: Number(document.getElementById('cf-pick').value||7),
+      forcar: document.getElementById('cf-forcar').checked,
+      mes_num: mes,
+      descartar_historico: document.getElementById('cf-descartar-hist').checked,
+    };
+    try{
+      const r = await fetch(API+'/fechamento/gerar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await parseJson(r);
+      renderFechApostas(j);
+      if(j.ok && (j.apostas||[]).length){
+        if(j.backtest) aplicarBacktestUi(j.apostas, j.backtest, 'cf-bt');
+        else await runBacktest(j.apostas, 'cf-bt');
+      }
+    }catch(e){ st.textContent = 'Erro: '+e.message; }
+  });
+
+  document.getElementById('ce-btn-gerar').addEventListener('click', async ()=>{
+    const st = document.getElementById('ce-status');
+    st.textContent = 'Gerando estratégia e filtrando…';
+    const mes = mesPayloadFromSelect('ce-mes');
+    const krepRaw = document.getElementById('ce-krep').value;
+    const desdobRaw = document.getElementById('ce-desdob').value || 'auto';
+    const body = {
+      quantidade: Number(document.getElementById('ce-qtd').value||12),
+      pick: Number(document.getElementById('ce-pick').value||7),
+      desdobramento: desdobRaw === 'auto' ? 'auto' : Number(desdobRaw),
+      k_repeticao: krepRaw === '' ? null : Number(krepRaw),
+      usar_evolucao: document.getElementById('ce-usar-evo').checked,
+      bloquear_exato: document.getElementById('ce-bloquear-exato').checked,
+      filtro_estrutura: document.getElementById('ce-filtro-estrut').checked,
+      mes_num: mes,
+      descartar_historico: document.getElementById('ce-descartar-hist').checked,
+    };
+    try{
+      const r = await fetch(API+'/estrategia/gerar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await parseJson(r);
+      renderEstApostas(j);
+      if(j.ok && (j.apostas||[]).length){
+        if(j.backtest) aplicarBacktestUi(stateEst.apostas, j.backtest, 'ce-bt');
+        else await runBacktest(stateEst.apostas, 'ce-bt');
+      }
+    }catch(e){ st.textContent = 'Erro: '+e.message; }
+  });
+
+  document.getElementById('ce-orden').addEventListener('change', ()=>{
+    if(!stateEst.apostas.length) return;
+    renderEstApostas({ok:true, geradas:stateEst.apostas.length, apostas:stateEst.apostas, relatorio:stateEst.relatorio, aviso:`${stateEst.apostas.length} jogo(s)`});
+  });
+
+  document.getElementById('cc-btn-export').addEventListener('click', ()=>exportTxt(state21.apostas, state21.mes || mesPayloadFromSelect('cc-mes')));
+  document.getElementById('cr-btn-export').addEventListener('click', ()=>exportTxt(stateRitmo.apostas, stateRitmo.mes || mesPayloadFromSelect('cr-mes')));
+  document.getElementById('co-btn-export').addEventListener('click', ()=>exportTxt(stateOp.apostas, stateOp.mes || mesPayloadFromSelect('co-mes')));
+  document.getElementById('cf-btn-export').addEventListener('click', ()=>exportTxt(stateFech.apostas, stateFech.mes || mesPayloadFromSelect('cf-mes')));
+  document.getElementById('ce-btn-export').addEventListener('click', ()=>exportTxt(stateEst.apostas, stateEst.mes || mesPayloadFromSelect('ce-mes')));
+  document.getElementById('cc-btn-bt').addEventListener('click', ()=>runBacktest(state21.apostas, 'cc-bt'));
+  document.getElementById('cr-btn-bt').addEventListener('click', ()=>runBacktest(stateRitmo.apostas, 'cr-bt'));
+  document.getElementById('co-btn-bt').addEventListener('click', ()=>runBacktest(stateOp.apostas, 'co-bt'));
+  document.getElementById('cf-btn-bt').addEventListener('click', ()=>runBacktest(stateFech.apostas, 'cf-bt'));
+  document.getElementById('ce-btn-bt').addEventListener('click', ()=>runBacktest(stateEst.apostas, 'ce-bt'));
+})();
+</script>
+{% endblock %}

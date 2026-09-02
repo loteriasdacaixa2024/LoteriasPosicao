@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+{% block content %}
+{% include 'cc_conferencia_shell_start.html' %}
+
+<style>
+    .conf-center {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+    }
+
+    .stats-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+
+    .stat-pill {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+        border-radius: 10px;
+        padding: .45rem .9rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .07);
+        min-width: 70px;
+        border: 1.5px solid #fce7a2;
+    }
+
+    .stat-pill .sp-val {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--primary);
+    }
+
+    .stat-pill .sp-lbl {
+        font-size: .6rem;
+        font-weight: 700;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: .75rem;
+        justify-content: center;
+    }
+
+    .filter-bar .fb-label {
+        font-size: .72rem;
+        font-weight: 700;
+        color: #777;
+        margin-right: 4px;
+    }
+
+    .ac-filter-btn {
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 700;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all .15s;
+        background: #f0f0f0;
+        color: #555;
+    }
+
+    .ac-filter-btn.active {
+        color: #fff;
+    }
+
+    .ac-filter-btn[data-f="all"].active {
+        background: var(--primary);
+    }
+
+    .ac-filter-btn[data-f="7"].active {
+        background: #dc3545;
+    }
+
+    .ac-filter-btn[data-f="6"].active {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .ac-filter-btn[data-f="5"].active {
+        background: #198754;
+    }
+
+    .ac-filter-btn[data-f="mes"].active {
+        background: var(--accent-mes);
+    }
+
+    .result-row {
+        padding: .5rem .75rem;
+        border-bottom: 1px solid #f0d0b0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .result-row:hover {
+        background: var(--accent-light);
+    }
+
+    .result-meta {
+        min-width: 100px;
+    }
+
+    .dez-balls {
+        display: grid;
+        grid-template-columns: repeat(7, 30px);
+        column-gap: 4px;
+    }
+
+    .dez-balls-col {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .dez-balls-ordem {
+        display: grid;
+        grid-template-columns: repeat(7, 30px);
+        column-gap: 4px;
+    }
+
+    .dez-ball-ordem {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .66rem;
+        background: transparent;
+        border: 1.2px solid #ccc;
+        color: #666;
+        justify-self: center;
+    }
+
+    .dez-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .75rem;
+        justify-self: center;
+    }
+
+    .dg-hit {
+        background: var(--accent);
+        color: #2d2d2d;
+        box-shadow: 0 1px 4px rgba(224, 112, 0, .35);
+    }
+
+    .dg-miss {
+        background: #f0f0f0;
+        color: #aaa;
+    }
+
+    .mes-result {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: .73rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-top: 3px;
+        border: 2px solid transparent;
+    }
+
+    .mes-hit {
+        box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--primary);
+    }
+
+    .mes-miss[class*="mes-nome-"] {
+        opacity: .42;
+        filter: grayscale(25%);
+    }
+
+    .mes-miss:not([class*="mes-nome-"]) {
+        background: #eee;
+        color: #aaa;
+    }
+
+    .conf-legenda-meses {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: .45rem;
+    }
+
+    .legenda-mes-chip {
+        display: inline-block;
+        font-size: .58rem;
+        font-weight: 800;
+        color: #fff;
+        padding: 1px 5px;
+        border-radius: 6px;
+        line-height: 1.35;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, .25);
+    }
+
+    .ac-tag {
+        font-weight: 800;
+        border-radius: 8px;
+        padding: 2px 7px;
+        font-size: .72rem;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .ac-7 {
+        background: #dc3545;
+        color: #fff;
+    }
+
+    .ac-6 {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .ac-5 {
+        background: #198754;
+        color: #fff;
+    }
+
+    .ac-other {
+        background: #f0f0f0;
+        color: #888;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #aaa;
+        font-size: .85rem;
+        display: none;
+    }
+</style>
+
+<div class="conf-center">
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div>
+                <h2><i class="fas fa-trophy me-2"></i>Conferência — Dia de Sorte</h2>
+                <p class="mb-0" style="opacity:.85;font-size:.9rem;">Compara os Top-7 Sniper + Mês Top-1 com o histórico
+                    recente (200 conc.)</p>
+            </div>
+            <div class="ms-auto"><button class="btn btn-sm" id="btnRecarregar"
+                    style="background:var(--accent);color:#111;font-weight:700;" onclick="carregar()"><i
+                        class="fas fa-sync-alt me-1"></i>Recarregar</button></div>
+        </div>
+    </div>
+
+    <div class="stats-bar" id="statsBar" style="display:none;"></div>
+    <div class="filter-bar" id="filterBar" style="display:none;">
+        <span class="fb-label"><i class="fas fa-filter me-1"></i>Filtrar:</span>
+        <button class="ac-filter-btn active" data-f="all" onclick="setFiltro(this)">Todos</button>
+        <button class="ac-filter-btn" data-f="7" onclick="setFiltro(this)">7 Acertos</button>
+        <button class="ac-filter-btn" data-f="6" onclick="setFiltro(this)">6 Acertos</button>
+        <button class="ac-filter-btn" data-f="5" onclick="setFiltro(this)">5 Acertos</button>
+        <button class="ac-filter-btn" data-f="mes" onclick="setFiltro(this)">🗓️ Mês</button>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header fw-bold"
+            style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;padding:.7rem 1rem;">
+            <div><i class="fas fa-history me-2"></i>Ouro = Acerto Dezena · Cor do mês = Mês sorteado · ✓ = Acerto Sniper</div>
+            <div class="conf-legenda-meses fw-normal">
+                {% for nome, cor in meses_cores.items() %}
+                <span class="legenda-mes-chip" style="background:{{ cor }};" title="{{ nome }}">{{ nome[:3] }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div id="sniperHeader" class="px-3 py-2 border-bottom"
+                style="display:none;font-size:.78rem;background:#fdfcf8;">
+                <strong style="color:var(--primary);">🎯 Sniper Top-7:</strong>
+                <div class="d-flex gap-1 flex-wrap mt-1 mb-1" id="sniperBalls"></div>
+                <strong style="color:var(--accent-mes);">🗓️ Mês Sniper:</strong><span id="sniperMes"
+                    class="ms-2"></span>
+            </div>
+            <div id="conferencia-corpo">
+                <div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Carregando...</div>
+            </div>
+            <div class="no-results" id="noResults">Nenhum resultado.</div>
+        </div>
+    </div>
+</div>
+{% include 'cc_conferencia_shell_end.html' %}
+{% endblock %}
+{% block scripts %}
+{% include 'cc_conferencia_scripts.html' %}
+
+<script>
+    let _dados = [], _sniper = [], _filtro = 'all';
+    const MESES_ABREV = {
+        Janeiro: 'Jan', Fevereiro: 'Fev', Março: 'Mar', Abril: 'Abr',
+        Maio: 'Mai', Junho: 'Jun', Julho: 'Jul', Agosto: 'Ago',
+        Setembro: 'Set', Outubro: 'Out', Novembro: 'Nov', Dezembro: 'Dez',
+    };
+    const fmtDez = (n) => String(n).padStart(2, '0');
+    const mesAbrevDe = (nome, abrev) => abrev || MESES_ABREV[nome] || (nome || '?').substring(0, 3);
+
+    async function carregar() {
+        const corpo = document.getElementById('conferencia-corpo'), btn = document.getElementById('btnRecarregar');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+        corpo.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
+        document.getElementById('filterBar').style.display = 'none'; document.getElementById('statsBar').style.display = 'none';
+        document.getElementById('sniperHeader').style.display = 'none';
+        try {
+            const r = await fetch('/central-conferencias/api/conferir', { method: 'POST' }); const d = await r.json();
+            if (d.status !== 'success') return corpo.innerHTML = `<div class="text-danger p-3">${d.message}</div>`;
+            _dados = d.resultados;
+            if (_dados.length) {
+                _sniper = _dados[0].sniper_dez || [];
+                document.getElementById('sniperBalls').innerHTML = _sniper.map(dz => `<span class="dez-ball dg-hit">${String(dz).padStart(2, '0')}</span>`).join('');
+                document.getElementById('sniperMes').innerHTML = mesBadgeHtml(_dados[0].sniper_mes_nome, true, _dados[0].sniper_mes_abrev);
+                document.getElementById('sniperHeader').style.display = 'block';
+            }
+            _filtro = 'all'; document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.ac-filter-btn[data-f="all"]').classList.add('active');
+            renderStats(); renderTabela();
+            document.getElementById('filterBar').style.display = 'flex';
+        } catch (e) { corpo.innerHTML = `<div class="text-danger p-3">Erro: ${e.message}</div>`; }
+        finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Recarregar'; } }
+    }
+
+    function setFiltro(btn) { _filtro = btn.dataset.f; document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderTabela(); }
+    function matchFiltro(r) {
+        if (_filtro === 'all') return true;
+        if (_filtro === 'mes') return r.acerto_mes;
+        if (_filtro === '7') return r.acertos_dez >= 7;
+        if (_filtro === '6') return r.acertos_dez >= 6;
+        if (_filtro === '5') return r.acertos_dez >= 5;
+        return true;
+    }
+    function acTag(ad) {
+        if (ad >= 7) return ['ac-7', '7 acertos']; if (ad === 6) return ['ac-6', '6 acertos']; if (ad === 5) return ['ac-5', '5 acertos']; return ['ac-other', ad + ' acrts'];
+    }
+
+    function mesBadgeHtml(mesNome, acerto, mesAbrev) {
+        const nome = mesNome || '?';
+        const abrev = mesAbrevDe(nome, mesAbrev);
+        const cls = ['mes-result'];
+        if (mesNome) cls.push('mes-nome-' + mesNome);
+        cls.push(acerto ? 'mes-hit' : 'mes-miss');
+        return `<span class="${cls.join(' ')}" title="${nome}"><i class="far fa-calendar-alt"></i> ${acerto ? '✓ ' : ''}${abrev}</span>`;
+    }
+
+    function renderDezenasConferencia(res, sniperSet) {
+        const ordem = res.dezenas_ordem && res.dezenas_ordem.length ? res.dezenas_ordem : res.dezenas;
+        const balls = res.dezenas.map(dz => `<span class="dez-ball ${sniperSet.has(dz) ? 'dg-hit' : 'dg-miss'}">${fmtDez(dz)}</span>`).join('');
+        const ordemBalls = ordem.map(dz => `<span class="dez-ball-ordem">${fmtDez(dz)}</span>`).join('');
+        return `<div class="dez-balls-col">
+            <div class="dez-balls">${balls}</div>
+            <div class="dez-balls-ordem">${ordemBalls}</div>
+        </div>`;
+    }
+
+    function renderStats() {
+        let c7 = 0, c6 = 0, c5 = 0, cmes = 0;
+        _dados.forEach(r => { if (r.acertos_dez >= 7) c7++; else if (r.acertos_dez === 6) c6++; else if (r.acertos_dez === 5) c5++; if (r.acerto_mes) cmes++; });
+        const bar = document.getElementById('statsBar'); bar.style.display = 'flex';
+        bar.innerHTML = `<div class="stat-pill"><span class="sp-val">${_dados.length}</span><span class="sp-lbl">Concursos</span></div>
+        <div class="stat-pill" style="border-color:#dc3545;"><span class="sp-val" style="color:#dc3545;">${c7}</span><span class="sp-lbl">7 Dez</span></div>
+        <div class="stat-pill" style="border-color:#ffc107;"><span class="sp-val" style="color:#b28704;">${c6}</span><span class="sp-lbl">6 Dez</span></div>
+        <div class="stat-pill" style="border-color:#198754;"><span class="sp-val" style="color:#198754;">${c5}</span><span class="sp-lbl">5 Dez</span></div>
+        <div class="stat-pill" style="border-color:var(--accent-mes);"><span class="sp-val" style="color:var(--accent-mes);">${cmes}</span><span class="sp-lbl">Meses</span></div>`;
+    }
+
+    function renderTabela() {
+        const corpo = document.getElementById('conferencia-corpo'), sniperSet = new Set(_sniper), filt = _dados.filter(matchFiltro);
+        let html = '';
+        filt.forEach(res => {
+            const [cls, lbl] = acTag(res.acertos_dez);
+            html += `<div class="result-row">
+            <div class="result-meta">
+                <div class="fw-bold" style="color:var(--primary);font-size:.82rem;">#${res.concurso}</div>
+                <div class="text-muted" style="font-size:.68rem;">${res.data}</div>
+                <div class="ac-tag ${cls} mt-1">${lbl}</div>
+                <div class="mt-1">${mesBadgeHtml(res.mes_nome, res.acerto_mes, res.mes_abrev)}</div>
+            </div>
+            ${renderDezenasConferencia(res, sniperSet)}
+        </div>`;
+        });
+        corpo.innerHTML = html || ''; document.getElementById('noResults').style.display = filt.length === 0 ? 'block' : 'none';
+    }
+    // carregar via abas (cc_conferencia_scripts)
+</script>
+{% endblock %}

@@ -1,0 +1,237 @@
+<script>
+(function () {
+    const CONTEXTOS = {
+        'pane-volante': 'Filtros da aba <strong>Volante</strong>: coluna/dígito e repetição no sorteio.',
+        'pane-sequencial': 'Filtros da aba <strong>Repetição sequencial</strong>: colunas que repetiram vs concurso anterior.',
+        'pane-intrasorte': 'Filtros da aba <strong>Repetição no sorteio</strong>: tipo (dupla, trinca…) e quantos dígitos repetiram.',
+    };
+
+    const rows = () => Array.from(document.querySelectorAll('#histTabela .hist-row'));
+    const contador = document.getElementById('histContador');
+    const rodape = document.getElementById('histRodapeVisiveis');
+    const card = document.getElementById('historicoSniperCard');
+    const ctxTxt = document.getElementById('histContextoTxt');
+
+    function qtdBucket(n) {
+        const v = parseInt(n, 10);
+        return v >= 3 ? 3 : v;
+    }
+
+    function aplicarFiltros() {
+        const tipo = document.getElementById('histFiltroTipo')?.value || '';
+        const qtdDig = document.getElementById('histFiltroQtdDig')?.value;
+        const qtdSeq = document.getElementById('histFiltroSeq')?.value;
+        const col = document.getElementById('histFiltroCol')?.value || '';
+        const digCol = document.getElementById('histFiltroDigCol')?.value;
+
+        let vis = 0;
+        rows().forEach(tr => {
+            let ok = true;
+            if (tipo && tr.dataset.tipo !== tipo) ok = false;
+            if (qtdDig !== '' && qtdDig !== undefined && tr.dataset.qtdDig !== String(qtdBucket(qtdDig))) ok = false;
+            if (qtdSeq !== '' && qtdSeq !== undefined && tr.dataset.qtdSeq !== String(qtdBucket(qtdSeq))) ok = false;
+            if (col && digCol !== '' && digCol !== undefined) {
+                const val = tr.dataset['c' + col];
+                if (val !== String(digCol)) ok = false;
+            }
+            tr.style.display = ok ? '' : 'none';
+            if (ok) vis += 1;
+        });
+        if (contador) contador.textContent = vis + ' visíveis';
+        if (rodape) rodape.textContent = 'Exibindo ' + vis + ' de ' + rows().length + ' concursos.';
+    }
+
+    function limparFiltros() {
+        ['histFiltroTipo', 'histFiltroQtdDig', 'histFiltroSeq', 'histFiltroCol'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        const dig = document.getElementById('histFiltroDigCol');
+        if (dig) { dig.value = ''; dig.disabled = true; }
+        document.querySelectorAll('.hist-chip-qtd.active').forEach(b => b.classList.remove('active'));
+        aplicarFiltros();
+    }
+
+    function setFocusHistorico(paneId) {
+        if (!card) return;
+        card.classList.remove('hist-focus-volante', 'hist-focus-sequencial', 'hist-focus-intrasorte');
+        const map = {
+            'pane-volante': 'hist-focus-volante',
+            'pane-sequencial': 'hist-focus-sequencial',
+            'pane-intrasorte': 'hist-focus-intrasorte',
+        };
+        card.classList.add(map[paneId] || 'hist-focus-volante');
+        if (ctxTxt && CONTEXTOS[paneId]) ctxTxt.innerHTML = CONTEXTOS[paneId];
+    }
+
+    document.getElementById('histFiltroCol')?.addEventListener('change', function () {
+        const dig = document.getElementById('histFiltroDigCol');
+        if (!dig) return;
+        dig.disabled = !this.value;
+        if (!this.value) dig.value = '';
+    });
+
+    ['histFiltroTipo', 'histFiltroQtdDig', 'histFiltroSeq', 'histFiltroCol', 'histFiltroDigCol'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', aplicarFiltros);
+    });
+
+    document.getElementById('histLimparFiltros')?.addEventListener('click', limparFiltros);
+
+    document.querySelectorAll('.hist-chip-qtd').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const qtd = this.dataset.qtd;
+            const sel = document.getElementById('histFiltroQtdDig');
+            const ativo = this.classList.contains('active');
+            document.querySelectorAll('.hist-chip-qtd').forEach(b => b.classList.remove('active'));
+            if (ativo) {
+                if (sel) sel.value = '';
+            } else {
+                this.classList.add('active');
+                if (sel) sel.value = qtd;
+            }
+            aplicarFiltros();
+        });
+    });
+
+    document.querySelectorAll('#sniperTabNav button[data-bs-toggle="tab"]').forEach(btn => {
+        btn.addEventListener('shown.bs.tab', function () {
+            const pane = this.getAttribute('data-bs-target')?.replace('#', '');
+            if (pane) setFocusHistorico(pane);
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const hash = location.hash;
+        const tabMap = {
+            '#pane-sequencial': 'tab-sequencial',
+            '#pane-intrasorte': 'tab-intrasorte',
+            '#repeticoes': 'tab-intrasorte',
+            '#pane-volante': 'tab-volante',
+        };
+        const tabId = tabMap[hash];
+        if (tabId) {
+            const btn = document.getElementById(tabId);
+            if (btn && window.bootstrap) bootstrap.Tab.getOrCreateInstance(btn).show();
+        }
+        const paneAtivo = document.querySelector('#sniperTabContent .tab-pane.active')?.id || 'pane-volante';
+        setFocusHistorico(paneAtivo);
+        aplicarFiltros();
+
+        if (hash === '#repeticoes') {
+            setTimeout(() => document.getElementById('repeticoes')?.scrollIntoView({ behavior: 'smooth' }), 200);
+        }
+
+        initTipoExemplosPanel();
+    });
+
+    function initTipoExemplosPanel() {
+        const jsonEl = document.getElementById('tiposExemplosJson');
+        const panel = document.getElementById('tipoExemplosPanel');
+        if (!jsonEl || !panel) return;
+
+        let payload;
+        try {
+            payload = JSON.parse(jsonEl.textContent);
+        } catch (e) {
+            return;
+        }
+        const exemplos = payload.exemplos || {};
+        const track = panel.querySelector('.tipo-exemplos-track');
+        const titleEl = panel.querySelector('.tipo-exemplos-title');
+        const badgeEl = panel.querySelector('.tipo-exemplos-badge');
+        let hideTimer = null;
+        let anchor = null;
+
+        function repSet(ex) {
+            const s = new Set();
+            (ex.repetidos || []).forEach(r => s.add(r.digito));
+            return s;
+        }
+
+        function renderCard(ex) {
+            const reps = repSet(ex);
+            const cols = (ex.digitos || []).map((d, i) => {
+                const cls = reps.has(d) ? 'tipo-ex-dig rep' : 'tipo-ex-dig';
+                return `<div class="tipo-ex-col-item"><span class="tipo-ex-lbl">C${i + 1}</span><span class="${cls}">${d}</span></div>`;
+            }).join('');
+            const repTxt = ex.texto_rep && ex.texto_rep !== '—'
+                ? `<div class="tipo-ex-rep-line">${ex.texto_rep}</div>` : '';
+            return `<article class="tipo-ex-card">
+                <div class="tipo-ex-card-head">
+                    <span class="conc">#${ex.concurso}</span>
+                    <span class="data">${ex.data || ''}</span>
+                </div>
+                <div class="tipo-ex-cols">${cols}</div>
+                ${repTxt}
+            </article>`;
+        }
+
+        function posicionar(el) {
+            const r = el.getBoundingClientRect();
+            const pw = panel.offsetWidth || 400;
+            const ph = panel.offsetHeight || 160;
+            let left = r.left + (r.width / 2) - (pw / 2);
+            left = Math.max(12, Math.min(left, window.innerWidth - pw - 12));
+            let top = r.bottom + 10;
+            if (top + ph > window.innerHeight - 8) {
+                top = r.top - ph - 10;
+            }
+            panel.style.left = left + 'px';
+            panel.style.top = Math.max(8, top) + 'px';
+        }
+
+        function mostrar(item) {
+            clearTimeout(hideTimer);
+            anchor = item;
+            const key = item.dataset.tipoKey;
+            const label = item.dataset.tipoLabel || key;
+            const total = item.dataset.tipoTotal || '0';
+            const lista = exemplos[key] || [];
+
+            document.querySelectorAll('.tipo-sort-item').forEach(li => li.classList.remove('tipo-sort-ativo'));
+            item.classList.add('tipo-sort-ativo');
+
+            titleEl.textContent = label + ' — exemplos';
+            badgeEl.textContent = total + '× no histórico · ' + lista.length + ' amostras';
+
+            if (!lista.length) {
+                track.innerHTML = '<div class="tipo-exemplos-vazio">Nenhum exemplo nesta categoria.</div>';
+            } else {
+                track.innerHTML = lista.map(renderCard).join('');
+            }
+
+            panel.removeAttribute('hidden');
+            panel.classList.add('visivel');
+            requestAnimationFrame(() => posicionar(item));
+            panel.querySelector('.tipo-exemplos-track-wrap')?.scrollTo({ top: 0 });
+        }
+
+        function esconder() {
+            hideTimer = setTimeout(() => {
+                panel.classList.remove('visivel');
+                panel.setAttribute('hidden', '');
+                document.querySelectorAll('.tipo-sort-item').forEach(li => li.classList.remove('tipo-sort-ativo'));
+                anchor = null;
+            }, 220);
+        }
+
+        document.querySelectorAll('.tipo-sort-item[data-tipo-key]').forEach(item => {
+            item.addEventListener('mouseenter', () => mostrar(item));
+            item.addEventListener('focus', () => mostrar(item));
+            item.addEventListener('mouseleave', esconder);
+            item.addEventListener('blur', esconder);
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    mostrar(item);
+                }
+            });
+        });
+
+        panel.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+        panel.addEventListener('mouseleave', esconder);
+        window.addEventListener('scroll', () => { if (anchor && panel.classList.contains('visivel')) posicionar(anchor); }, true);
+        window.addEventListener('resize', () => { if (anchor && panel.classList.contains('visivel')) posicionar(anchor); });
+    }
+})();
+</script>

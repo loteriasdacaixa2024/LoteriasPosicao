@@ -1,0 +1,909 @@
+{% extends "base.html" %}
+{% block title %}Gerador por Concentração (Experimental) — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    {% if meses_cores %}
+    {% for nome, cor in meses_cores.items() %}
+    #conc-gerador .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+    {% endfor %}
+    {% endif %}
+
+    #conc-gerador .cc-panel {
+        border-radius: var(--radius, 12px);
+        border: 1px solid rgba(0, 0, 0, .08);
+        background: var(--surface, #fff);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+        margin-bottom: 1rem;
+    }
+
+    #conc-gerador .cc-como-usar {
+        background: var(--accent-light);
+        border-color: color-mix(in srgb, var(--primary) 22%, transparent);
+        border-left: 4px solid var(--primary);
+    }
+
+    #conc-gerador .cc-passos {
+        margin: 0;
+        padding-left: 1.15rem;
+        line-height: 1.55;
+    }
+
+    #conc-gerador .cc-step-card { border-left-width: 4px; border-left-style: solid; }
+
+    #conc-gerador .cc-step-1 {
+        background: var(--accent-light);
+        border-left-color: var(--primary);
+        border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+        box-shadow: 0 3px 16px color-mix(in srgb, var(--primary) 18%, transparent);
+    }
+    #conc-gerador .cc-step-1 .cc-step-badge { background: var(--primary); color: #fff; }
+
+    #conc-gerador .cc-step-2 {
+        background: color-mix(in srgb, var(--accent-light) 70%, #fff);
+        border-left-color: var(--primary);
+    }
+    #conc-gerador .cc-step-2 .cc-step-badge { background: var(--primary); color: #fff; }
+
+    #conc-gerador .cc-step-3 {
+        background: color-mix(in srgb, var(--accent-light) 55%, #fff);
+        border-left-color: var(--primary-dark);
+    }
+    #conc-gerador .cc-step-3 .cc-step-badge { background: var(--primary-dark); color: #fff; }
+
+    #conc-gerador .cc-step-title {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        font-weight: 700;
+        margin-bottom: .25rem;
+    }
+
+    #conc-gerador .cc-step-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.55rem;
+        height: 1.55rem;
+        padding: 0 .35rem;
+        border-radius: 999px;
+        font-size: .72rem;
+        font-weight: 800;
+        flex-shrink: 0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+    }
+
+    #conc-gerador .cc-step-hint {
+        font-size: .78rem;
+        line-height: 1.45;
+        margin-bottom: .65rem;
+        padding-left: 2rem;
+        color: #555;
+    }
+
+    #conc-gerador .cc-ultimo-sorteio {
+        text-align: right;
+        padding: .45rem .65rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, .92);
+        border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+        min-width: 0;
+        flex: 0 1 auto;
+    }
+
+    #conc-gerador .cc-ultimo-sorteio-label {
+        font-size: .68rem;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #6c757d;
+        font-weight: 700;
+        margin-bottom: .25rem;
+    }
+
+    #conc-gerador .cc-ultimo-sorteio-meta {
+        font-size: .72rem;
+        color: #868e96;
+        margin-bottom: .35rem;
+    }
+
+    #conc-gerador .cc-ultimo-sorteio-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    #conc-gerador .dez-ball-mini {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        font-size: .68rem;
+        font-weight: 700;
+        background: var(--primary);
+        color: #fff;
+    }
+
+    #conc-gerador .cc-ultimo-mes {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .68rem;
+        font-weight: 700;
+        padding: .2rem .5rem;
+        border-radius: 6px;
+        color: #fff;
+    }
+
+    #conc-gerador .badge-exp-inline {
+        font-size: .62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        background: var(--accent-light);
+        color: var(--primary-dark);
+        padding: 2px 7px;
+        border-radius: 5px;
+        vertical-align: middle;
+    }
+
+    #conc-gerador .cc-volante {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 6px;
+        max-width: 420px;
+        margin: 0 auto;
+    }
+
+    #conc-gerador .cc-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #dee2e6;
+        background: #f8f9fa;
+        font-weight: 700;
+        font-size: .82rem;
+        cursor: pointer;
+        user-select: none;
+        transition: all .15s;
+        padding: 0;
+    }
+
+    #conc-gerador .cc-ball:hover:not(.cc-bloqueado) {
+        border-color: var(--primary);
+        background: var(--accent-light);
+    }
+
+    #conc-gerador .cc-ball.selected {
+        color: #fff;
+        transform: scale(1.05);
+    }
+
+    #conc-gerador .cc-ball.faixa-baixa.selected { background: #0d6efd; border-color: #0d6efd; }
+    #conc-gerador .cc-ball.faixa-media.selected { background: #fd7e14; border-color: #fd7e14; }
+    #conc-gerador .cc-ball.faixa-alta.selected { background: #dc3545; border-color: #dc3545; }
+
+    /* Destaque último sorteio — borda dourada arredondada (igual Construtor) */
+    #conc-gerador .cc-ball.cc-ultimo-ref:not(.selected) {
+        background: #fff;
+        border: 2px solid var(--primary);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 55%, transparent);
+        font-weight: 800;
+        color: #333;
+    }
+
+    #conc-gerador .cc-ball.cc-bloqueado {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    #conc-gerador .cc-faixa-legend span {
+        display: inline-block;
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+
+    #conc-gerador .cc-faixa-legend .leg-ultimo {
+        display: inline-block;
+        width: 14px; height: 14px;
+        border-radius: 50%;
+        border: 2px solid var(--primary);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 45%, transparent);
+        background: #fff;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+
+    #conc-gerador .cc-contador { font-weight: 800; color: var(--primary-dark); }
+    #conc-gerador .cc-contador.ok { color: #198754; }
+    #conc-gerador .cc-contador.over { color: #dc3545; }
+
+    #conc-gerador .cc-import-btns .btn { font-size: .72rem; padding: .2rem .45rem; }
+
+    #conc-gerador .nav-tabs .nav-link {
+        font-weight: 700;
+        color: var(--primary-dark);
+    }
+
+    #conc-gerador .nav-tabs .nav-link.active {
+        color: var(--primary);
+    }
+
+    #conc-gerador .nav-tabs .nav-link.cc-tab-desativada {
+        opacity: .72;
+        color: #6c757d !important;
+    }
+
+    #conc-gerador .nav-tabs .nav-link .badge-padrao {
+        font-size: .58rem;
+        font-weight: 700;
+        background: #198754;
+        color: #fff;
+        padding: 1px 5px;
+        border-radius: 4px;
+        margin-left: 4px;
+        vertical-align: middle;
+    }
+
+    #conc-gerador .cc-pane-desativada {
+        position: relative;
+        min-height: 200px;
+    }
+
+    #conc-gerador .cc-pane-desativada > .row {
+        opacity: .35;
+        pointer-events: none;
+        user-select: none;
+        filter: grayscale(.15);
+    }
+
+    #conc-gerador .cc-desativada-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: rgba(255, 253, 248, .82);
+        border-radius: var(--radius, 12px);
+    }
+
+    #conc-gerador .cc-desativada-card {
+        max-width: 520px;
+        background: #fff;
+        border: 1px solid #fce7a2;
+        border-left: 4px solid #b45309;
+        border-radius: 10px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
+    }
+
+    #conc-gerador .cc-banner-padrao {
+        background: linear-gradient(135deg, #f0fdf4, #fffdf8);
+        border: 1px solid #86efac;
+        border-radius: 10px;
+        padding: .65rem .85rem;
+        font-size: .82rem;
+    }
+
+    @media (max-width: 768px) {
+        #conc-gerador .cc-ultimo-sorteio { text-align: left; width: 100%; }
+        #conc-gerador .cc-ultimo-sorteio-row { justify-content: flex-start; }
+        #conc-gerador .cc-volante { grid-template-columns: repeat(7, 1fr); max-width: 100%; }
+    }
+</style>
+
+<div id="conc-gerador">
+    <div class="cc-panel p-3">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-2">
+            <div class="flex-grow-1">
+                <h1 class="h5 mb-1">
+                    <i class="fas fa-bullseye text-success"></i>
+                    Gerador por Concentração
+                    <span class="badge-exp-inline">Experimental</span>
+                </h1>
+                <span class="text-muted small">{{ modality_nome }} — {{ conc_cfg.subtitle_gerador }}</span>
+            </div>
+            <div class="cc-ultimo-sorteio" id="concUltimoSorteio" title="Referência — mesmas dezenas destacadas no volante">
+                <div class="cc-ultimo-sorteio-label">Último sorteio</div>
+                <div class="cc-ultimo-sorteio-meta" id="concUltimoMeta">Carregando…</div>
+                <div class="cc-ultimo-sorteio-row" id="concUltimoRow"></div>
+            </div>
+            <a href="/analise/concentracao-acertos/" class="btn btn-sm btn-outline-secondary align-self-start">
+                Área de Análise
+            </a>
+        </div>
+        <p class="small text-muted mb-2">
+            A <strong>Estratégia {{ conc_cfg.estrategia_padrao }}</strong> (pool {{ conc_cfg.estrategias | selectattr('id', 'equalto', conc_cfg.estrategia_padrao) | map(attribute='pool_size') | first }}) é a padrão do sistema — carregada automaticamente.
+            As demais estratégias permanecem visíveis para futuras validações.
+        </p>
+        <div class="cc-banner-padrao mb-0">
+            <i class="fas fa-check-circle text-success me-1"></i>
+            <strong>Em uso:</strong> {{ conc_cfg.estrategias | selectattr('padrao') | map(attribute='nome') | first }}
+            · pool automático (mais frequentes) · perfil equilibrado
+        </div>
+    </div>
+
+    {% if conc_cfg.extra_mes %}
+    <div class="alert alert-success py-2 px-3 mb-3 small" id="concMesesBanner" style="display:none;">
+        <i class="fas fa-calendar-check me-1"></i>
+        <strong>Meses indicados (últimos 10):</strong>
+        <span id="concMesesTxt">—</span>
+    </div>
+    {% endif %}
+
+    <div class="cc-panel cc-como-usar p-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+            <h2 class="h6 mb-0"><i class="fas fa-book-open text-success"></i> Como usar</h2>
+            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0" id="concToggleComoUsar"
+                aria-expanded="true" aria-controls="concComoUsarCorpo">Ocultar</button>
+        </div>
+        <div id="concComoUsarCorpo">
+            <ul class="cc-passos small text-muted mb-2">
+                <li>A <strong>estratégia ativa</strong> ({{ conc_cfg.estrategias | selectattr('padrao') | map(attribute='nome') | first }}) representa o melhor resultado obtido nos testes mais recentes e é iniciada automaticamente ao abrir esta tela.</li>
+                <li>As estratégias B e C foram <strong>preservadas</strong> no sistema, mas estão temporariamente desativadas para geração até que novos testes indiquem outra recomendação.</li>
+                <li>O desempenho pode mudar com <strong>novos concursos</strong> e análises — a estratégia padrão não é definitiva, apenas a melhor opção conhecida no momento.</li>
+                <li>Recomenda-se executar periodicamente a <strong>comparação A · B · C</strong> na Área de Análise para verificar se houve alteração na estratégia mais eficiente.</li>
+            </ul>
+            <p class="small text-muted mb-0">
+                <strong>Passos rápidos:</strong> o pool padrão é preenchido automaticamente (mais frequentes).
+                Ajuste no volante se desejar, confira os parâmetros e clique em <strong>Gerar apostas</strong>.
+                Dezenas do último sorteio aparecem com <strong>borda dourada</strong> no volante.
+            </p>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-3" id="concEstrategiaTabs" role="tablist">
+        {% for est in conc_cfg.estrategias %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link{% if est.padrao %} active{% endif %}{% if not est.ativa %} cc-tab-desativada{% endif %} small"
+                    id="tab-{{ est.id }}"
+                    data-bs-toggle="tab" data-bs-target="#pane-{{ est.id }}" type="button" role="tab"
+                    data-est="{{ est.id }}" data-ativa="{{ '1' if est.ativa else '0' }}">
+                {{ est.nome }} <span class="text-muted">({{ est.pool_size }} dez)</span>
+                {% if est.padrao %}<span class="badge-padrao">Padrão</span>{% endif %}
+                {% if not est.ativa %}<i class="fas fa-lock ms-1 small opacity-75"></i>{% endif %}
+            </button>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <div class="tab-content" id="concEstrategiaPanes">
+        {% for est in conc_cfg.estrategias %}
+        <div class="tab-pane fade{% if est.padrao %} show active{% endif %}{% if not est.ativa %} cc-pane-desativada{% endif %}"
+             id="pane-{{ est.id }}" role="tabpanel" data-est="{{ est.id }}" data-ativa="{{ '1' if est.ativa else '0' }}">
+            {% if not est.ativa %}
+            <div class="cc-desativada-overlay">
+                <div class="cc-desativada-card">
+                    <h3 class="h6 fw-bold mb-2"><i class="fas fa-pause-circle text-warning"></i> Estratégia temporariamente desativada</h3>
+                    <p class="small mb-0">{{ conc_cfg.msg_estrategia_desativada }}</p>
+                </div>
+            </div>
+            {% endif %}
+            <div class="row g-3">
+                <div class="col-lg-5">
+                    <div class="cc-panel cc-step-card cc-step-1 p-3">
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-0">
+                            <h3 class="h6 cc-step-title mb-0">
+                                <span class="cc-step-badge">1</span> Pool de {{ est.pool_size }} dezenas
+                            </h3>
+                            <span class="cc-contador small" id="counter-{{ est.id }}">0 / {{ est.pool_size }}</span>
+                        </div>
+                        <p class="cc-step-hint">{{ est.desc }}</p>
+                        <div class="cc-faixa-legend small mb-2 text-center" id="cc-faixa-legend-{{ est.id }}">
+                            <span style="background:#0d6efd"></span> Baixas
+                            <span style="background:#fd7e14"></span> Médias
+                            <span style="background:#dc3545"></span> Altas
+                            <span class="leg-ultimo"></span> Último sorteio
+                        </div>
+                        <div class="cc-volante mb-2" id="volante-{{ est.id }}"></div>
+                        <div class="d-flex flex-wrap gap-2 justify-content-center mb-2 cc-import-btns">
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-ciclo"
+                                    data-est="{{ est.id }}" data-tipo="sorteadas">
+                                <i class="fas fa-download"></i> Ciclo — sorteadas
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-ciclo"
+                                    data-est="{{ est.id }}" data-tipo="faltantes">
+                                <i class="fas fa-download"></i> Ciclo — faltantes
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-info btn-analise"
+                                    data-est="{{ est.id }}" data-criterio="atraso">
+                                <i class="fas fa-chart-bar"></i> Análise — atraso
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-info btn-analise"
+                                    data-est="{{ est.id }}" data-criterio="frequencia">
+                                <i class="fas fa-chart-bar"></i> Análise — freq.
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-ultimo"
+                                    data-est="{{ est.id }}" data-pool="{{ est.pool_size }}">
+                                <i class="fas fa-star"></i> Último sorteio
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary btn-limpar" data-est="{{ est.id }}">
+                                <i class="fas fa-eraser"></i> Limpar
+                            </button>
+                        </div>
+                        <div class="small text-muted text-center" id="pool-info-{{ est.id }}">0 dezenas selecionadas</div>
+                    </div>
+
+                    <div class="cc-panel cc-step-card cc-step-2 p-3">
+                        <h3 class="h6 cc-step-title">
+                            <span class="cc-step-badge">2</span> Parâmetros da estratégia
+                        </h3>
+                        <p class="cc-step-hint">Ajustes do motor — salvos por aba ao alternar estratégias.</p>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small mb-0">Quantidade de apostas</label>
+                                <input type="number" class="form-control form-control-sm inp-qtd" data-est="{{ est.id }}"
+                                       value="10" min="1" max="100">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small mb-0">Perfil</label>
+                                <select class="form-select form-select-sm inp-perfil" data-est="{{ est.id }}"
+                                        {% if not est.ativa %}disabled{% endif %}>
+                                    <option value="equilibrado"{% if conc_cfg.parametros_padrao.perfil == 'equilibrado' %} selected{% endif %}>Equilibrado</option>
+                                    <option value="frequencia"{% if conc_cfg.parametros_padrao.perfil == 'frequencia' %} selected{% endif %}>Frequência</option>
+                                    <option value="atraso"{% if conc_cfg.parametros_padrao.perfil == 'atraso' %} selected{% endif %}>Atraso</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="cc-panel cc-step-card cc-step-3 p-3">
+                        <h3 class="h6 cc-step-title">
+                            <span class="cc-step-badge">3</span> Apostas — {{ est.nome }}
+                        </h3>
+                        <p class="cc-step-hint">Pool completo libera o botão Gerar (validação ativa; algoritmo na próxima fase).</p>
+
+                        <label class="form-label small text-muted mb-1">Pool selecionado</label>
+                        <div class="p-2 rounded mb-3" style="background:#f8f9fa;font-size:.8rem;min-height:36px;"
+                             id="pool-preview-{{ est.id }}">
+                            <span class="text-muted">Nenhuma dezena selecionada.</span>
+                        </div>
+
+                        <div id="resultado-{{ est.id }}" class="mb-3" style="display:none;">
+                            <div class="alert alert-warning small mb-0" id="resultado-msg-{{ est.id }}"></div>
+                        </div>
+
+                        <div class="text-center text-muted py-3" id="placeholder-{{ est.id }}">
+                            <i class="fas fa-hourglass-half fa-2x mb-2 opacity-50"></i>
+                            <p class="small mb-0">Complete o pool de {{ est.pool_size }} dezenas para habilitar a geração.</p>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-2">
+                            <button type="button" class="btn btn-success btn-gerar" data-est="{{ est.id }}" disabled>
+                                <i class="fas fa-bolt"></i> Gerar apostas
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-export" data-est="{{ est.id }}" disabled>
+                                <i class="fas fa-download"></i> Exportar TXT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const CFG = {{ conc_cfg | tojson }};
+    let ULTIMO = {{ ultimo_sorteio | tojson if ultimo_sorteio else 'null' }};
+    const DEZ_MIN = CFG.dezena_min;
+    const DEZ_MAX = CFG.dezena_max;
+    const ESTRATEGIAS = CFG.estrategias || [];
+    const ESTRATEGIA_PADRAO = CFG.estrategia_padrao || 'A';
+    const PARAMS_PADRAO = CFG.parametros_padrao || {};
+    const ESTRATEGIAS_ATIVAS = new Set(CFG.estrategias_ativas || [ESTRATEGIA_PADRAO]);
+    let ultimoSet = new Set();
+
+    const estado = {};
+    ESTRATEGIAS.forEach(e => {
+        estado[e.id] = {
+            pool: [],
+            qtd: PARAMS_PADRAO.quantidade || 10,
+            perfil: PARAMS_PADRAO.perfil || 'equilibrado',
+            ativa: ESTRATEGIAS_ATIVAS.has(e.id),
+            apostas: [],
+            apostas_com_mes: [],
+        };
+    });
+
+    function estrategiaAtiva(estId) {
+        return ESTRATEGIAS_ATIVAS.has(estId);
+    }
+
+    function fmt(n) { return String(n).padStart(2, '0'); }
+
+    const FAIXA_LO = DEZ_MIN + Math.floor((DEZ_MAX - DEZ_MIN + 1) / 3);
+    const FAIXA_MID = DEZ_MIN + Math.floor(2 * (DEZ_MAX - DEZ_MIN + 1) / 3);
+
+    function faixaCls(n) {
+        if (n <= FAIXA_LO) return 'faixa-baixa';
+        if (n <= FAIXA_MID) return 'faixa-media';
+        return 'faixa-alta';
+    }
+
+    document.querySelectorAll('.cc-faixa-legend').forEach(el => {
+        el.innerHTML = `
+            <span style="background:#0d6efd"></span> Baixas (${fmt(DEZ_MIN)}–${fmt(FAIXA_LO)})
+            <span style="background:#fd7e14"></span> Médias (${fmt(FAIXA_LO + 1)}–${fmt(FAIXA_MID)})
+            <span style="background:#dc3545"></span> Altas (${fmt(FAIXA_MID + 1)}–${fmt(DEZ_MAX)})
+            <span class="leg-ultimo"></span> Último sorteio`;
+    });
+
+    function getEst(id) {
+        return ESTRATEGIAS.find(e => e.id === id);
+    }
+
+    function syncUltimoSet() {
+        ultimoSet = new Set(
+            (ULTIMO && ULTIMO.dezenas) ? ULTIMO.dezenas.map(Number) : []
+        );
+    }
+
+    function renderUltimoWidget() {
+        const meta = document.getElementById('concUltimoMeta');
+        const row = document.getElementById('concUltimoRow');
+        if (!meta || !row) return;
+        if (!ULTIMO || !ULTIMO.dezenas || !ULTIMO.dezenas.length) {
+            meta.textContent = 'Sem dados no banco.';
+            row.innerHTML = '';
+            return;
+        }
+        meta.innerHTML = 'Concurso <strong>#' + ULTIMO.concurso + '</strong>'
+            + (ULTIMO.data ? ' · ' + ULTIMO.data : '');
+        let html = ULTIMO.dezenas.map(d => (
+            '<span class="dez-ball-mini">' + fmt(d) + '</span>'
+        )).join('');
+        if (ULTIMO.mes_nome || ULTIMO.mes_abrev) {
+            const mn = ULTIMO.mes_nome || '';
+            const ab = ULTIMO.mes_abrev || (mn ? mn.substring(0, 3) : '');
+            html += '<span class="cc-ultimo-mes mes-nome-' + mn + '">' + ab + '</span>';
+        }
+        row.innerHTML = html;
+        syncUltimoSet();
+        ESTRATEGIAS.forEach(e => atualizarUI(e.id));
+    }
+
+    async function carregarUltimo() {
+        if (ULTIMO && ULTIMO.dezenas && ULTIMO.dezenas.length) {
+            renderUltimoWidget();
+            return;
+        }
+        try {
+            const r = await fetch('/geradores-elite/api/concentracao/ultimo-sorteio');
+            if (r.ok) {
+                ULTIMO = await r.json();
+                renderUltimoWidget();
+            } else {
+                renderUltimoWidget();
+            }
+        } catch (e) {
+            renderUltimoWidget();
+        }
+    }
+
+    async function carregarMesesIndicados() {
+        const banner = document.getElementById('concMesesBanner');
+        if (!banner) return;
+        try {
+            const r = await fetch('/analise/api/meses-indicados?janela=10');
+            const j = await r.json();
+            if (j.sucesso && !j.sem_indicados && j.indicados_fmt) {
+                document.getElementById('concMesesTxt').textContent = j.indicados_fmt;
+                banner.style.display = '';
+            }
+        } catch (e) { /* opcional */ }
+    }
+
+    function renderVolante(estId) {
+        const el = document.getElementById('volante-' + estId);
+        if (!el || el.dataset.rendered) return;
+        el.dataset.rendered = '1';
+        const nums = [];
+        for (let d = DEZ_MIN; d <= DEZ_MAX; d++) nums.push(d);
+        el.innerHTML = nums.map(n => (
+            '<button type="button" class="cc-ball ' + faixaCls(n) + '" data-est="' + estId + '" data-dez="' + n + '">' + fmt(n) + '</button>'
+        )).join('');
+    }
+
+    function atualizarUI(estId) {
+        const est = getEst(estId);
+        if (!est) return;
+        const pool = estado[estId].pool;
+        const n = pool.length;
+        const lim = est.pool_size;
+        const completo = n === lim;
+
+        const counter = document.getElementById('counter-' + estId);
+        if (counter) {
+            counter.textContent = n + ' / ' + lim;
+            counter.classList.toggle('ok', completo);
+            counter.classList.toggle('over', n > lim);
+            if (!completo && n === 0) counter.classList.remove('ok', 'over');
+        }
+
+        document.querySelectorAll('#volante-' + estId + ' .cc-ball').forEach(btn => {
+            const d = parseInt(btn.dataset.dez, 10);
+            const sel = pool.includes(d);
+            btn.classList.toggle('selected', sel);
+            btn.classList.toggle('cc-ultimo-ref', ultimoSet.has(d) && !sel);
+            btn.classList.toggle('cc-bloqueado', !sel && n >= lim);
+        });
+
+        const preview = document.getElementById('pool-preview-' + estId);
+        if (preview) {
+            preview.innerHTML = pool.length
+                ? pool.slice().sort((a, b) => a - b).map(d => {
+                    const cls = ultimoSet.has(d) ? 'fw-bold text-warning' : '';
+                    return '<span class="' + cls + '">' + fmt(d) + '</span>';
+                }).join(' · ')
+                : '<span class="text-muted">Nenhuma dezena selecionada.</span>';
+        }
+
+        const info = document.getElementById('pool-info-' + estId);
+        if (info) info.textContent = n + ' dezena' + (n !== 1 ? 's' : '') + ' selecionada' + (n !== 1 ? 's' : '');
+
+        const btnGerar = document.querySelector('.btn-gerar[data-est="' + estId + '"]');
+        if (btnGerar) btnGerar.disabled = !completo;
+
+        const btnExport = document.querySelector('.btn-export[data-est="' + estId + '"]');
+        if (btnExport) {
+            btnExport.disabled = !(estado[estId].apostas && estado[estId].apostas.length);
+        }
+
+        const ph = document.getElementById('placeholder-' + estId);
+        if (ph) ph.style.display = completo ? 'none' : '';
+    }
+
+    function setPool(estId, dezenas) {
+        const est = getEst(estId);
+        const unicos = [...new Set(dezenas.map(Number))].filter(d => d >= DEZ_MIN && d <= DEZ_MAX);
+        estado[estId].pool = unicos.slice(0, est.pool_size).sort((a, b) => a - b);
+        atualizarUI(estId);
+    }
+
+    function toggleDezena(estId, dez) {
+        if (!estrategiaAtiva(estId)) return;
+        const est = getEst(estId);
+        const pool = estado[estId].pool;
+        const idx = pool.indexOf(dez);
+        if (idx >= 0) pool.splice(idx, 1);
+        else if (pool.length < est.pool_size) pool.push(dez);
+        atualizarUI(estId);
+    }
+
+    function limpar(estId) {
+        estado[estId].pool = [];
+        estado[estId].apostas = [];
+        estado[estId].apostas_com_mes = [];
+        document.getElementById('resultado-' + estId).style.display = 'none';
+        atualizarUI(estId);
+    }
+
+    function linhasExport(estId) {
+        const st = estado[estId];
+        if (CFG.extra_mes && st.apostas_com_mes && st.apostas_com_mes.length) {
+            return st.apostas_com_mes.map(function (a) {
+                const dz = (a.dezenas || []).map(function (d) { return fmt(d); }).join(' ');
+                const mes = a.mes_abrev || '';
+                return mes ? (dz + ' ' + mes) : dz;
+            });
+        }
+        return (st.apostas || []).map(function (a) {
+            return a.map(function (d) { return fmt(d); }).join(' ');
+        });
+    }
+
+    function exportarTxt(estId) {
+        const linhas = linhasExport(estId);
+        if (!linhas.length) return;
+        const blob = new Blob([linhas.join('\n') + '\n'], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        const key = CFG.key || 'concentracao';
+        a.download = 'concentracao_' + key + '_est' + estId + '.txt';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function importarUltimo(estId) {
+        if (!ultimoSet.size) {
+            alert('Último sorteio indisponível. Sincronize os dados.');
+            return;
+        }
+        const est = getEst(estId);
+        const pool = [...ultimoSet];
+        const rest = [];
+        for (let d = DEZ_MIN; d <= DEZ_MAX; d++) {
+            if (!pool.includes(d)) rest.push(d);
+        }
+        for (let i = rest.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rest[i], rest[j]] = [rest[j], rest[i]];
+        }
+        while (pool.length < est.pool_size && rest.length) pool.push(rest.pop());
+        setPool(estId, pool);
+    }
+
+    async function importarCiclo(estId, tipo) {
+        const est = getEst(estId);
+        try {
+            const r = await fetch('/geradores-elite/api/construtor-construcoes/ciclo?tipo=' + encodeURIComponent(tipo));
+            const j = await r.json();
+            if (!j.sucesso) { alert(j.erro || 'Falha ao importar ciclo.'); return; }
+            const dz = (j.dezenas || j.pool || []).map(Number);
+            if (dz.length < est.pool_size) {
+                alert('Ciclo retornou menos dezenas que o pool (' + est.pool_size + ').');
+                return;
+            }
+            setPool(estId, dz.slice(0, est.pool_size));
+        } catch (e) {
+            alert('Erro: ' + e.message);
+        }
+    }
+
+    async function importarAnalise(estId, criterio, silencioso) {
+        if (!estrategiaAtiva(estId)) return;
+        const est = getEst(estId);
+        try {
+            const url = '/geradores-elite/api/construtor-construcoes/analise-sugestao?quantidade='
+                + est.pool_size + '&criterio=' + encodeURIComponent(criterio);
+            const r = await fetch(url);
+            const j = await r.json();
+            if (!j.sucesso) {
+                if (!silencioso) alert(j.erro || 'Falha na análise.');
+                return;
+            }
+            const dz = (j.dezenas || j.pool || []).map(Number);
+            setPool(estId, dz);
+        } catch (e) {
+            if (!silencioso) alert('Erro: ' + e.message);
+        }
+    }
+
+    async function iniciarEstrategiaPadrao() {
+        if (!estrategiaAtiva(ESTRATEGIA_PADRAO)) return;
+        const criterio = (PARAMS_PADRAO.criterio_pool === 'atraso') ? 'atraso' : 'frequencia';
+        const perfilEl = document.querySelector('.inp-perfil[data-est="' + ESTRATEGIA_PADRAO + '"]');
+        const qtdEl = document.querySelector('.inp-qtd[data-est="' + ESTRATEGIA_PADRAO + '"]');
+        if (perfilEl && PARAMS_PADRAO.perfil) {
+            perfilEl.value = PARAMS_PADRAO.perfil;
+            estado[ESTRATEGIA_PADRAO].perfil = PARAMS_PADRAO.perfil;
+        }
+        if (qtdEl && PARAMS_PADRAO.quantidade) {
+            qtdEl.value = PARAMS_PADRAO.quantidade;
+            estado[ESTRATEGIA_PADRAO].qtd = PARAMS_PADRAO.quantidade;
+        }
+        await importarAnalise(ESTRATEGIA_PADRAO, criterio, true);
+    }
+
+    async function gerar(estId) {
+        if (!estrategiaAtiva(estId)) {
+            alert(CFG.msg_estrategia_desativada || 'Estratégia desativada.');
+            return;
+        }
+        const est = getEst(estId);
+        const pool = estado[estId].pool;
+        if (pool.length !== est.pool_size) return;
+        const btn = document.querySelector('.btn-gerar[data-est="' + estId + '"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando…';
+        try {
+            const r = await fetch('/geradores-elite/api/concentracao/gerar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    estrategia: estId,
+                    pool: pool,
+                    quantidade: parseInt(document.querySelector('.inp-qtd[data-est="' + estId + '"]').value, 10) || 10,
+                    perfil: document.querySelector('.inp-perfil[data-est="' + estId + '"]').value,
+                }),
+            });
+            let j;
+            try {
+                j = await r.json();
+            } catch (_) {
+                throw new Error(r.status ? ('HTTP ' + r.status) : 'Resposta inválida do servidor');
+            }
+            const box = document.getElementById('resultado-' + estId);
+            const msg = document.getElementById('resultado-msg-' + estId);
+            box.style.display = '';
+            if (j.sucesso) {
+                estado[estId].apostas = j.apostas || [];
+                estado[estId].apostas_com_mes = j.apostas_com_mes || [];
+                msg.className = 'alert alert-success small mb-0';
+                const m = j.metricas_preview || {};
+                msg.innerHTML = '<strong>' + (j.quantidade || 0) + ' apostas geradas.</strong> '
+                    + 'Índice: ' + (m.indice_concentracao ?? '—')
+                    + ' · Média máx.: ' + (m.media_max_acertos ?? '—');
+                if (j.apostas && j.apostas.length) {
+                    const lista = j.apostas.map(function (a) {
+                        return a.map(function (d) { return String(d).padStart(2, '0'); }).join(' · ');
+                    }).join('<br>');
+                    msg.innerHTML += '<div class="mt-2 small font-monospace">' + lista + '</div>';
+                }
+            } else {
+                estado[estId].apostas = [];
+                estado[estId].apostas_com_mes = [];
+                msg.className = 'alert alert-warning small mb-0';
+                msg.innerHTML = '<strong>Falha na geração.</strong> '
+                    + (j.erro || 'Motor de geração na próxima fase.');
+            }
+            atualizarUI(estId);
+        } catch (e) {
+            estado[estId].apostas = [];
+            estado[estId].apostas_com_mes = [];
+            atualizarUI(estId);
+            alert('Falha: ' + e.message);
+        } finally {
+            btn.disabled = pool.length !== est.pool_size;
+            btn.innerHTML = '<i class="fas fa-bolt"></i> Gerar apostas';
+        }
+    }
+
+    document.getElementById('concToggleComoUsar')?.addEventListener('click', function () {
+        const corpo = document.getElementById('concComoUsarCorpo');
+        const oculto = corpo.classList.toggle('d-none');
+        this.textContent = oculto ? 'Mostrar' : 'Ocultar';
+        this.setAttribute('aria-expanded', oculto ? 'false' : 'true');
+    });
+
+    document.getElementById('conc-gerador').addEventListener('click', e => {
+        const ball = e.target.closest('.cc-ball');
+        if (ball && !ball.classList.contains('cc-bloqueado')) {
+            toggleDezena(ball.dataset.est, parseInt(ball.dataset.dez, 10));
+            return;
+        }
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        if (btn.classList.contains('btn-limpar')) { limpar(btn.dataset.est); return; }
+        if (btn.classList.contains('btn-ultimo')) { importarUltimo(btn.dataset.est); return; }
+        if (btn.classList.contains('btn-ciclo')) { importarCiclo(btn.dataset.est, btn.dataset.tipo); return; }
+        if (btn.classList.contains('btn-analise')) { importarAnalise(btn.dataset.est, btn.dataset.criterio); return; }
+        if (btn.classList.contains('btn-gerar')) { gerar(btn.dataset.est); return; }
+        if (btn.classList.contains('btn-export')) { exportarTxt(btn.dataset.est); return; }
+    });
+
+    document.querySelectorAll('.inp-qtd, .inp-perfil').forEach(el => {
+        el.addEventListener('change', () => {
+            const estId = el.dataset.est;
+            if (el.classList.contains('inp-qtd')) estado[estId].qtd = parseInt(el.value, 10) || 10;
+            else estado[estId].perfil = el.value;
+        });
+    });
+
+    document.querySelectorAll('#concEstrategiaTabs .nav-link').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', e => {
+            const estId = e.target.dataset.est;
+            if (estId) {
+                renderVolante(estId);
+                atualizarUI(estId);
+            }
+        });
+    });
+
+    ESTRATEGIAS.forEach(e => {
+        renderVolante(e.id);
+        atualizarUI(e.id);
+    });
+
+    carregarUltimo();
+    carregarMesesIndicados();
+    iniciarEstrategiaPadrao();
+})();
+</script>
+{% endblock %}

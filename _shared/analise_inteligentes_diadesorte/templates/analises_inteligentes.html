@@ -1,0 +1,3113 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+  :root {
+    --cor-sequencia-1: #86efac;
+    --cor-sequencia-1-texto: #14532d;
+    --cor-sequencia-2: #93c5fd;
+    --cor-sequencia-2-texto: #1e3a8a;
+    --cor-sequencia-3: #d8b4fe;
+    --cor-sequencia-3-texto: #581c87;
+    --cor-repetidos: #fcd34d;
+    --cor-repetidos-texto: #78350f;
+  }
+  #ai-root .ai-kpi {
+    background: var(--surface, #fff);
+    border: 1px solid rgba(192,139,0,.22);
+    border-radius: 10px;
+    padding: .65rem .85rem;
+    height: 100%;
+    text-align: center;
+  }
+  #ai-root .ai-kpi .lbl { font-size:.7rem; font-weight:700; color:#6c757d; text-transform:uppercase; }
+  #ai-root .ai-kpi .val { font-size:1.1rem; font-weight:800; color:var(--primary-xdark); }
+  #ai-root .ai-kpi .small { text-align: center; }
+  #ai-root .ai-table { font-size:.82rem; }
+  #ai-root .ai-table thead th {
+    background: var(--primary); color:#fff; font-weight:700;
+    text-align:center; vertical-align:middle; white-space:nowrap;
+  }
+  #ai-root .ai-table td { text-align:center; vertical-align:middle; }
+  #ai-root .ai-table td.td-left { text-align:left !important; }
+  /* Dezenas: uma linha, largura um pouco menor para liberar espaço aos dígitos */
+  #ai-root .ai-table th.col-dezenas,
+  #ai-root .ai-table td.td-dezenas {
+    white-space: nowrap !important;
+    min-width: 9.2rem;
+    width: 9.2rem;
+    max-width: 11rem;
+    letter-spacing: .01em;
+    font-variant-numeric: tabular-nums;
+    font-size: .78rem;
+  }
+  /* Dígitos Ord. / Únicos: SEMPRE na mesma linha */
+  #ai-root .ai-table th.col-digitos-unicos,
+  #ai-root .ai-table td.td-digitos-unicos {
+    white-space: nowrap !important;
+    width: 1%;
+    max-width: none;
+    min-width: 0;
+  }
+  #ai-root .ai-table td.td-digitos-unicos .digitos-chip {
+    margin: 0 1px;
+    padding: .05rem .28rem;
+    font-size: .78rem;
+  }
+  /* Volume: bloco centralizado na célula, números alinhados à esquerda entre si */
+  #ai-root .ai-table th.col-volume,
+  #ai-root .ai-table td.td-volume {
+    text-align: center !important;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    font-size: .78rem;
+  }
+  #ai-root .ai-table td.td-volume .ai-col-alinha {
+    display: inline-block;
+    text-align: left;
+    min-width: 5.6rem;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Soma: mesmo padrão — esquerda entre si, bloco centralizado */
+  #ai-root .ai-table th.col-soma,
+  #ai-root .ai-table td.td-soma {
+    text-align: center !important;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root .ai-table td.td-soma .ai-col-alinha {
+    display: inline-block;
+    text-align: left;
+    min-width: 2.4rem;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Aba 3: Padrão Final — esquerda entre si, bloco centralizado */
+  #ai-root #aiTabelaPadroes th.col-pad-final,
+  #ai-root #aiTabelaPadroes td.td-pad-final {
+    text-align: center !important;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaPadroes td.td-pad-final .ai-col-alinha {
+    display: inline-block;
+    text-align: left;
+    min-width: 7.6rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em;
+  }
+  #ai-root .ai-table th.col-nao-sairam,
+  #ai-root .ai-table td.td-nao-sairam {
+    white-space: nowrap !important;
+    width: 1%;
+    max-width: none;
+    overflow: visible;
+  }
+  #ai-root .ai-table th.col-gerar,
+  #ai-root .ai-table td.td-gerar {
+    max-width: 7.2rem;
+    white-space: normal;
+  }
+  #ai-root .ai-table td.td-gerar .btn-ai { margin-bottom: .15rem; }
+  #ai-root .nav-tabs .nav-link.active {
+    font-weight:800; color:var(--primary-xdark); border-bottom-color:var(--primary);
+  }
+  #ai-root .badge-frequente { background:#198754; color:#fff; }
+  #ai-root .badge-atrasado { background:#fd7e14; color:#fff; }
+  #ai-root .badge-faltante { background:#6c757d; color:#fff; }
+  #ai-root tr.tr-padrao-ultimo { background: rgba(25,135,84,.12); }
+  #ai-root #aiTabelaPadroesII tr.tr-padrao-ultimo > td,
+  #ai-root #aiTabelaJogosPadrao tr.tr-padrao-ultimo > td,
+  #ai-root #aiTabelaJogosPadrao tr.tr-jogo-vencedor > td {
+    background-color: rgba(25,135,84,.12);
+  }
+  #ai-root #aiTabelaJogosPadrao tr.tr-jogo-vencedor.tr-aposta-sel > td {
+    background-color: rgba(25,135,84,.22);
+  }
+  #ai-root #aiTabelaJogosPadrao tr.tr-ja-saiu > td {
+    background-color: rgba(220, 53, 69, .08);
+  }
+  #ai-root #aiTabelaJogosPadrao tr.tr-ja-saiu.tr-aposta-sel > td {
+    background-color: rgba(220, 53, 69, .14);
+  }
+  #ai-root #aiTabelaJogosPadrao tr.tr-ja-saiu.tr-jogo-vencedor > td {
+    background-color: rgba(25,135,84,.12);
+  }
+  #ai-root .badge-ja-saiu {
+    display: inline-block;
+    font-size: .65rem;
+    font-weight: 800;
+    color: #842029;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+    border-radius: 999px;
+    padding: .05rem .4rem;
+    margin-left: .25rem;
+    vertical-align: middle;
+  }
+  #ai-root .ai-chk-th {
+    width: 2.2rem;
+    text-align: center !important;
+  }
+  #ai-root .ai-chk-th .form-check-input {
+    margin: 0;
+    cursor: pointer;
+  }
+  #ai-root .ai-ultimo-bar {
+    font-size: .78rem;
+    color: #495057;
+    background: rgba(25,135,84,.06);
+    border: 1px solid rgba(25,135,84,.22);
+    border-radius: 8px;
+    padding: .4rem .75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 1.15rem;
+    row-gap: .3rem;
+  }
+  #ai-root .ai-ultimo-bar[hidden] { display: none !important; }
+  #ai-root .ai-ultimo-bar .ai-ultimo-lbl {
+    font-weight: 700;
+    color: #198754;
+    text-transform: uppercase;
+    font-size: .68rem;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  #ai-root .ai-ultimo-bar .ai-ultimo-nums {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  #ai-root .ai-ultimo-bar .ai-ultimo-pad {
+    white-space: nowrap;
+  }
+  #ai-root .ai-ultimo-bar .ai-legenda-mini { margin-left: auto; }
+  #ai-root .ai-legenda-mini {
+    font-size: .72rem;
+    color: #198754;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+  #ai-root a.ai-legenda-mini,
+  #ai-root button.ai-legenda-mini {
+    cursor: pointer;
+    text-decoration: underline !important;
+    text-underline-offset: 2px;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: #198754;
+  }
+  #ai-root a.ai-legenda-mini:hover,
+  #ai-root button.ai-legenda-mini:hover {
+    color: #0f5132;
+  }
+  #ai-root .ai-top-freq-card {
+    cursor: pointer;
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  #ai-root .ai-top-freq-card:hover {
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    transform: translateY(-1px);
+  }
+  #ai-root .ai-top-jogos {
+    font-size: .72rem;
+    color: #6c757d;
+    font-weight: 600;
+    margin-top: .15rem;
+  }
+  #ai-root .ai-legenda-dot {
+    display: inline-block;
+    width: .65rem;
+    height: .65rem;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: .3rem;
+  }
+  #ai-root .ai-legenda-dot.verde { background: #198754; }
+  #ai-root .ai-badge-vencedor { font-size: .65rem; font-weight: 700; vertical-align: middle; }
+  #ai-root #aiTabelaPadroesII td.td-padrao,
+  #ai-root #aiTabelaJogosPadrao td.td-padrao {
+    text-align: center !important;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaPadroesII td.td-padrao code,
+  #ai-root #aiTabelaJogosPadrao td.td-padrao code {
+    display: inline-block;
+    min-width: 7.6rem;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em;
+  }
+  #ai-root #aiTabelaPadroesII th.col-dist,
+  #ai-root #aiTabelaPadroesII td.td-dist,
+  #ai-root #aiTabelaPadroesII th.col-jogos,
+  #ai-root #aiTabelaPadroesII td.td-jogos,
+  #ai-root #aiTabelaPadroesII th.col-freq,
+  #ai-root #aiTabelaPadroesII td.td-freq,
+  #ai-root #aiTabelaPadroesII th.col-atraso,
+  #ai-root #aiTabelaPadroesII td.td-atraso {
+    text-align: center !important;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaPadroesII td.td-apostar {
+    font-weight: 800;
+    color: var(--accent-mes, #2e7d32);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+  #ai-root #aiTabelaPadroesII td.td-ja-saiu {
+    font-weight: 700;
+    color: #842029;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    background: #fde8e8;
+  }
+
+  #ai-root #aiTabelaPadroesII .ai-col-alinha {
+    display: inline-block;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaPadroesII td.td-dist .ai-col-alinha { min-width: 7.4rem; }
+  #ai-root #aiTabelaPadroesII td.td-jogos .ai-col-alinha { min-width: 4.8rem; }
+  #ai-root #aiTabelaPadroesII td.td-freq .ai-col-alinha { min-width: 6.2rem; }
+  #ai-root #aiTabelaPadroesII td.td-atraso .ai-col-alinha { min-width: 2.6rem; }
+  #ai-root #aiTabelaJogosPadrao th.col-conc-jogo,
+  #ai-root #aiTabelaJogosPadrao td.td-conc-jogo {
+    text-align: center !important;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    width: 5.5rem;
+  }
+  #ai-root #aiTabelaJogosPadrao td.td-conc-jogo .ai-col-alinha {
+    display: inline-block;
+    min-width: 3.2rem;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaResultados tr.tr-concurso-foco > td {
+    background-color: rgba(25,135,84,.12);
+  }
+  #ai-root tr.tr-top-freq { box-shadow: inset 3px 0 0 var(--primary); }
+  #ai-root #aiTabelaJogosPadrao td.td-dezenas-centro {
+    text-align: center !important;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .02em;
+  }
+  #ai-root #aiTabelaJogosPadrao th.col-dezenas-centro { text-align: center !important; }
+  #ai-root #aiTabelaJogosPadrao .ai-dez-hit {
+    background: #ffe082;
+    color: #4a3b00;
+    font-weight: 800;
+    border-radius: 4px;
+    padding: .02em .18em;
+    box-shadow: 0 0 0 1px #ffc107;
+  }
+  #ai-root .ai-busca-dez-box {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+  }
+  #ai-root #aiJogosPadBuscaDez {
+    width: 11.5rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em;
+  }
+  #ai-root .ai-dez-chip {
+    display: inline-block;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 6px;
+    padding: .05rem .35rem;
+    font-weight: 800;
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root .ai-busca-dez-chips { display: inline-flex; flex-wrap: wrap; gap: .25rem; align-items: center; }
+  #ai-root tr.tr-aposta-sel { background: rgba(212, 179, 26, .18); }
+  #ai-root .ai-collapse-toggle {
+    border: 0; background: transparent; color: var(--primary-xdark);
+    font-size: .82rem; font-weight: 700; padding: .25rem 0;
+    display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+  }
+  #ai-root .ai-collapse-toggle:hover { text-decoration: underline; }
+  #ai-root .ai-collapse-toggle .ai-chevron {
+    transition: transform .15s ease; font-size: .7rem; width: .85rem;
+  }
+  #ai-root .ai-collapse-toggle.is-open .ai-chevron { transform: rotate(90deg); }
+  #ai-root .btn-ai { font-size:.72rem; font-weight:700; padding:.2rem .45rem; }
+  #ai-root .mes-pill {
+    display:inline-block; min-width:2.4rem; padding:.15rem .4rem; border-radius:6px;
+    font-weight:800; font-size:.75rem; color:#fff !important;
+  }
+  #ai-root .mes-pill:not([class*="mes-nome-"]) { background:#6c757d; }
+  {% for nome, cor in (meses_cores or {}).items() %}
+  #ai-root .mes-pill.mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+  {% endfor %}
+  #ai-root .ai-hint {
+    font-size:.8rem; color:#6c757d; border-left:3px solid var(--accent,#ffd54f);
+    padding:.35rem .65rem; background:var(--accent-light);
+  }
+  #ai-root .digitos-chip {
+    display:inline-block; background:#fff8e1; border:1px solid #ffe082;
+    border-radius:6px; padding:.1rem .35rem; font-weight:700; margin:0 1px;
+  }
+  #ai-root .btn-dl-sutil {
+    border:0; background:transparent; color:#8a6d00; font-size:.68rem;
+    padding:0; opacity:.75; text-decoration:underline; cursor:pointer;
+    display:inline; line-height:1.2; white-space:nowrap;
+  }
+  #ai-root .btn-dl-sutil:hover { opacity:1; color:var(--primary-xdark); }
+  #ai-root .ai-table th.col-digitos-if,
+  #ai-root .ai-table td.td-digitos-if {
+    white-space: nowrap !important;
+    width: 1%;
+    max-width: none;
+    min-width: 0;
+    overflow: visible;
+    font-size: .75rem;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root .nao-sairam-cell {
+    display:flex; flex-direction:column; align-items:center; gap:.12rem;
+    padding:.15rem .2rem; white-space:nowrap;
+    cursor: help;
+  }
+  #ai-root .nao-sairam-linha {
+    display:inline-flex; align-items:center; justify-content:center;
+    gap:.35rem; flex-wrap:nowrap; line-height:1.2;
+  }
+  #ai-root .nao-sairam-top {
+    font-size:.95rem; font-weight:800; color:var(--primary-xdark);
+  }
+  #ai-root .nao-sairam-centro {
+    font-size:.9rem; font-weight:800; color:#196f3d;
+    background:rgba(25,111,61,.08); border-radius:5px; padding:.05rem .35rem;
+  }
+  #ai-root .ai-aposta-meta {
+    text-align: center;
+    margin-bottom: .65rem;
+  }
+  #ai-root .ai-aposta-meta > p,
+  #ai-root .ai-aposta-meta .ai-hint {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 52rem;
+  }
+  #ai-root .ai-aposta-meta .ai-aposta-badges,
+  #ai-root .ai-aposta-meta .ai-media-kpis {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: .45rem .65rem;
+  }
+  #ai-root .ai-aposta-resumo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem .65rem;
+    padding: .55rem .8rem;
+    margin: 0 auto .65rem;
+    border-radius: 8px;
+    background: #e8f5e9;
+    border: 1px solid #c8e6c9;
+    font-size: .82rem;
+    text-align: center;
+    max-width: 52rem;
+  }
+  #ai-root .ai-aposta-resumo .ai-aposta-qtd {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1b5e20;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root .ai-aposta-resumo .ai-aposta-sub {
+    color: #4a6350;
+    font-size: .78rem;
+    width: 100%;
+  }
+  #ai-root .ai-aposta-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: .45rem .55rem;
+    margin-bottom: .65rem;
+  }
+  #ai-root #aiTabelaResumoPad thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--primary) !important;
+    color: #fff !important;
+    box-shadow: 0 1px 0 rgba(0,0,0,.12);
+  }
+  #ai-root #aiTabelaResumoPad td.td-apostar {
+    font-weight: 800;
+    color: var(--accent-mes);
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaResumoPad td.td-ja-saiu {
+    font-weight: 700;
+    color: #842029;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaResumoPad tr.tr-resumo-best td {
+    background: color-mix(in srgb, var(--accent) 24%, #fff);
+    box-shadow: inset 4px 0 0 var(--primary);
+  }
+  #ai-root #aiTabelaResumoPad th.ai-sort.ai-sort-asc,
+  #ai-root #aiTabelaResumoPad th.ai-sort.ai-sort-desc {
+    background: var(--primary-xdark) !important;
+    box-shadow: inset 0 -3px 0 var(--accent), 0 1px 0 rgba(0,0,0,.12);
+  }
+  #ai-root #aiTabelaResumoPad td.td-sort-col {
+    background: var(--accent-light) !important;
+    color: var(--primary-xdark);
+    font-weight: 800;
+  }
+  #ai-root #aiTabelaResumoPad td.td-apostar.td-sort-col {
+    background: color-mix(in srgb, var(--accent-mes) 18%, #fff) !important;
+    color: var(--accent-mes);
+  }
+  #ai-root #aiTabelaResumoPad td.td-ja-saiu.td-sort-col {
+    background: #fde8e8 !important;
+  }
+  #ai-root #aiPadIIResumoWrap {
+    text-align: center;
+  }
+  #ai-root #aiPadIIResumoWrap .ai-resumo-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem .85rem;
+    margin-bottom: .5rem;
+  }
+  #ai-root #aiPadIIResumoStatus {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 48rem;
+  }
+  #ai-root .ai-checagem {
+    font-size: .78rem;
+    border: 1px solid #c8e6c9;
+    border-radius: 10px;
+    padding: .75rem 1rem  .85rem;
+    margin: 0 auto .75rem;
+    background: #f1f8f2;
+    text-align: center;
+    max-width: 52rem;
+  }
+  #ai-root .ai-checagem.is-fail {
+    background: #fff5f5;
+    border-color: #f5c2c7;
+  }
+  #ai-root .ai-checagem .ai-checagem-title {
+    font-size: .95rem;
+    font-weight: 800;
+    margin-bottom: .25rem;
+  }
+  #ai-root .ai-checagem .ai-checagem-just {
+    color: #4a6350;
+    font-size: .74rem;
+    max-width: 40rem;
+    margin: 0 auto .65rem;
+    line-height: 1.35;
+  }
+  #ai-root .ai-checagem .ok { color: #1b5e20; font-weight: 700; }
+  #ai-root .ai-checagem .fail { color: #842029; font-weight: 800; }
+  #ai-root .ai-checagem .ai-checagem-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .3rem;
+    text-align: left;
+    max-width: 38rem;
+    margin: 0 auto;
+  }
+  #ai-root .ai-checagem .ai-check-row {
+    display: grid;
+    grid-template-columns: 1.1rem 1fr auto;
+    gap: .4rem .55rem;
+    align-items: baseline;
+    padding: .22rem .4rem;
+    border-radius: 6px;
+    background: rgba(255,255,255,.65);
+  }
+  #ai-root .ai-checagem .ai-check-row .nums {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    font-size: .72rem;
+    color: #555;
+  }
+  #ai-root .ai-checagem .ai-checagem-totais {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .35rem .65rem;
+    margin-top: .65rem;
+    padding-top: .55rem;
+    border-top: 1px dashed rgba(0,0,0,.12);
+    color: #555;
+    font-size: .74rem;
+  }
+  #ai-root .ai-checagem .ai-checagem-totais strong {
+    color: #1b5e20;
+  }
+  #ai-root .ai-aposta-pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .35rem .5rem;
+    margin-top: .45rem;
+  }
+  #ai-root .ai-aposta-pager .ai-page-input {
+    width: 4.2rem;
+    font-size: .78rem;
+    text-align: center;
+  }
+  #ai-root #aiJogosPadTotal.badge-dentro-aposta {
+    background: #1b5e20 !important;
+    color: #fff !important;
+    font-size: .85rem;
+    padding: .4rem .65rem;
+  }
+  #ai-root th.ai-sort { cursor:pointer; user-select:none; white-space:nowrap; }
+  #ai-root th.ai-sort:hover { filter:brightness(.95); }
+  #ai-root th.ai-sort .ai-sort-ind { font-size:.65rem; margin-left:.2rem; opacity:.55; }
+  #ai-root th.ai-sort.ai-sort-asc .ai-sort-ind,
+  #ai-root th.ai-sort.ai-sort-desc .ai-sort-ind { opacity:1; }
+
+  /* Apostas por padrão — visão operacional
+     Fundo verde fica só no vencedor (tr-jogo-vencedor). Status da média = pills/texto. */
+  #ai-root #aiTabelaJogosPadrao td.td-soma-destaque {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root .ai-status-pill {
+    display: inline-flex; align-items: center; gap: .25rem;
+    padding: .1rem .45rem; border-radius: 999px;
+    font-size: .72rem; font-weight: 700; border: 1px solid transparent;
+  }
+  #ai-root .ai-status-pill.dentro { background: #e8f5e9; color: #1b5e20; border-color: #c8e6c9; }
+  #ai-root .ai-status-pill.proxima { background: #fff8e1; color: #8a6d00; border-color: #ffe082; }
+  #ai-root .ai-status-pill.fora { background: #f5f5f5; color: #666; border-color: #e0e0e0; }
+  #ai-root .ai-media-kpis { font-size: .8rem; }
+  #ai-root .ai-media-kpis .badge { font-weight: 700; }
+  #aiBuscaPadII {
+    width: 11.5rem;
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+  }
+  #aiBuscaPadIIMsg {
+    font-size: .78rem;
+    min-height: 1.1em;
+  }
+  #aiBuscaPadIIMsg.erro { color: #b02a37; font-weight: 700; }
+  #aiBtnResetPadII {
+    width: 1.85rem;
+    height: 1.85rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  #aiBtnResetPadII i { font-size: .78rem; }
+
+  /* Aba 7 — panorama centralizado, sem scroll interno */
+  #ai-root #tab-panorama .ai-pan-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #ai-root #tab-panorama .ai-pan-toolbar {
+    justify-content: center;
+    width: 100%;
+  }
+  #ai-root #tab-panorama .ai-pan-table-wrap { overflow: visible; width: auto; }
+  #ai-root #aiTabelaPanoramaHist {
+    width: auto;
+    min-width: 22rem;
+    margin: 0 auto;
+  }
+  #ai-root #aiTabelaPanoramaHist th,
+  #ai-root #aiTabelaPanoramaHist td {
+    text-align: center !important;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  #ai-root #aiTabelaPanoramaHist td.td-padrao {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .03em;
+  }
+  #ai-root #aiTabelaPanoramaHist th.col-pan-num,
+  #ai-root #aiTabelaPanoramaHist td.td-pan-num {
+    font-variant-numeric: tabular-nums;
+    color: #6c757d;
+    width: 2.4rem;
+  }
+  #ai-root #aiTabelaPanoramaHist td.td-pan-vezes .ai-col-alinha {
+    display: inline-block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    min-width: 2.6rem;
+  }
+  #ai-root .ai-pan-resumo {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .55rem .75rem;
+    max-width: 44rem;
+    margin-bottom: .4rem;
+  }
+  #ai-root .ai-pan-resumo .ai-kpi { min-width: 7.2rem; }
+  #ai-root .ai-pan-frase {
+    text-align: center;
+    font-size: .92rem;
+    margin: .2rem 0 .85rem;
+    max-width: 44rem;
+  }
+
+</style>
+
+<div class="container-fluid py-3" id="ai-root"
+     data-api="{{ api_base }}"
+     data-aba="{{ aba_inicial }}"
+     data-n="{{ n_inicial }}"
+     data-digitos="{{ digitos_inicial }}"
+     data-concurso="{{ concurso_inicial }}"
+     data-gc-url="{{ gerador_gc_url }}"
+     data-elite-url="{{ gerador_elite_url }}"
+     data-extra-mes="{{ '1' if extra_mes else '0' }}"
+     data-sorteadas="{{ sorteadas }}"
+     data-modality-key="{{ modality_key }}"
+     data-modality-nome="{{ modality_nome }}"
+     data-dezena-min="{{ dezena_min }}"
+     data-dezena-max="{{ dezena_max }}">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1"><i class="fas fa-brain text-primary"></i> {{ page_title }}</h1>
+      <p class="text-muted small mb-0">{{ page_subtitle }} — {{ modality_nome }}</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <span class="badge bg-light text-dark border" id="aiLblUltimo">—</span>
+      <a class="btn btn-sm btn-outline-success" href="{{ gerador_gc_url }}"><i class="fas fa-magic"></i> Gerador Pro / GC</a>
+      <a class="btn btn-sm btn-outline-warning" href="{{ gerador_elite_url }}"><i class="fas fa-brain"></i> Gerador Elite</a>
+      <a class="btn btn-sm btn-outline-secondary" href="{{ geradores_elite_home }}"><i class="fas fa-home"></i> Geradores Elite</a>
+    </div>
+  </div>
+
+  <div class="ai-hint mb-3">
+    Esta rota é <strong>análise</strong> (7 abas). Em <strong>Padrões II</strong>, a coluna
+    <em>Jogos</em> abre <strong>Padrões II (Apostas)</strong> (selecione, copie ou exporte para apostar).
+    Os padrões selecionados alimentam o
+    <a href="{{ construtor_url }}">Construtor de Construções</a> e os Geradores Elite.
+  </div>
+
+  <ul class="nav nav-tabs mb-3" id="aiTabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-resultados" type="button" data-aba="resultados">1 · Resultados &amp; Dígitos</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-combinacoes" type="button" data-aba="combinacoes">2 · Combinações</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-padroes" type="button" data-aba="padroes">3 · Padrões I</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-padroes-ii" type="button" data-aba="padroes-ii">4 · Padrões II</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-jogos-padrao" type="button" data-aba="jogos-padrao">5 · Apostas por Padrão</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tubular" type="button" data-aba="tubular">6 · Visualização Tubular</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-panorama" type="button" data-aba="panorama">7 · Panorama Histórico</button></li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- ABA 1 -->
+    <div class="tab-pane fade show active" id="tab-resultados">
+      <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
+        <button type="button" class="ai-collapse-toggle" id="aiResToggleInfo"
+                aria-expanded="false" aria-controls="aiResPainelInfo" title="Mostrar ou ocultar detalhes">
+          <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+          <span>Detalhes, filtros e resumo</span>
+        </button>
+        <span class="small fw-bold text-muted">Por página:</span>
+        <select id="aiPageSize" class="form-select form-select-sm" style="width:auto">
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+        </select>
+        <button type="button" class="btn btn-sm btn-primary" id="aiBtnCarregar"><i class="fas fa-sync"></i> Recarregar</button>
+        <button type="button" class="btn btn-sm btn-outline-success" id="aiBtnExportCsv"><i class="fas fa-file-csv"></i> CSV</button>
+        <span class="small text-muted" id="aiRangeLbl">Carregando todos os concursos…</span>
+      </div>
+      <div id="aiResPainelInfo" class="d-none mb-2">
+        <div class="row g-2 mb-3" id="aiKpis"></div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaResultados">
+          <thead>
+            <tr>
+              <th class="ai-sort" data-sort="concurso" data-table="res">Concurso <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="data" data-table="res">Data <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dezenas" data-sort="dezenas_fmt" data-table="res">Dezenas <span class="ai-sort-ind">⇅</span></th>
+              {% if extra_mes %}
+              <th class="ai-sort" data-sort="mes_num" data-table="res">Mês <span class="ai-sort-ind">⇅</span></th>
+              {% endif %}
+              <th class="ai-sort col-digitos-if" data-sort="digitos_fmt" data-table="res">Dígitos (I\|F) <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-digitos-unicos" data-sort="digitos_ordenados_fmt" data-table="res">Dígitos Ord. <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="qtd_digitos" data-table="res">Qtd <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-soma" data-sort="soma" data-table="res">Soma <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-volume" data-sort="volume_combinacoes" data-table="res">Volume C(n,{{ sorteadas }}) <span class="ai-sort-ind">⇅</span></th>
+              <th class="col-gerar">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="ai-pager" id="aiPagerRes" data-table="res"></div>
+    </div>
+
+    <!-- ABA 2 — só análise -->
+    <div class="tab-pane fade" id="tab-combinacoes">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <button type="button" class="ai-collapse-toggle" id="aiCombToggleInfo"
+                aria-expanded="false" aria-controls="aiCombPainelInfo" title="Mostrar ou ocultar detalhes">
+          <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+          <span>Detalhes, N dígitos e resumo</span>
+        </button>
+        <span class="badge bg-light text-dark border" id="aiCombNBadge" title="N do catálogo carregado">—</span>
+      </div>
+      <div id="aiCombPainelInfo" class="d-none mb-2">
+        <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+          <span class="small fw-bold text-muted">N dígitos (catálogo):</span>
+          <select id="aiNDigitos" class="form-select form-select-sm" style="width:auto" title="Ao escolher, o catálogo carrega automaticamente">
+            {% for i in range(1, 11) %}<option value="{{ i }}">{{ i }}d → index{{ i }}</option>{% endfor %}
+          </select>
+          <span class="badge bg-light text-dark border" id="aiNDigitosModaHint" title="N que mais aparece no histórico">—</span>
+          <input type="text" id="aiBuscaDigitos" class="form-control form-control-sm" style="max-width:220px" placeholder="Filtrar ex: 0,1,2,3">
+        </div>
+        <div class="ai-hint mb-2">
+          Ao mudar o <strong>N</strong>, o catálogo carrega sozinho. Na abertura da aba, o N padrão é o que
+          <strong>mais sai</strong> no histórico. Para apostar com perfil do concurso, use <strong>gcN / Elite</strong> na aba Resultados.
+        </div>
+        <div class="row g-2 mb-3" id="aiResumoCatalogo"></div>
+        <div class="row g-2 mb-3" id="aiStatsHist"></div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaCatalogo">
+          <thead>
+            <tr><th>#</th><th>Dígitos</th><th>Nº válidos</th><th>Volume C(n,{{ sorteadas }})</th><th>Gerar apostas em…</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ABA 3 — Padrões I -->
+    <div class="tab-pane fade" id="tab-padroes">
+      <p class="small text-muted mb-2">
+        <strong>Padrões I</strong> — visão por concurso ({% if extra_mes %}mês, {% endif %}inicial/final, pares/ímpares, não saíram).
+        Em <strong>Não Saíram</strong>: quantidade = {{ dezena_max }} − {{ sorteadas }} = <strong>{{ nao_sairam_qtd }}</strong> ·
+        <span class="text-muted">↓ todos</span> baixa a lista ·
+        <span class="text-muted">↓ 16</span> gera conjunto-base para o
+        <a href="{{ construtor_url }}">Construtor</a>.
+        Para apostas com os dígitos do concurso, use a coluna <strong>Gerar</strong> (abre Geradores Elite).
+        Catálogo agregado (freq/atraso/status) → aba <strong>Padrões II</strong>.
+      </p>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaPadroes">
+          <thead>
+            <tr>
+              <th class="ai-sort" data-sort="concurso" data-table="pad">Concurso <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="data" data-table="pad">Data <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dezenas" data-sort="dezenas_fmt" data-table="pad">Dezenas <span class="ai-sort-ind">⇅</span></th>
+              {% if extra_mes %}
+              <th class="ai-sort" data-sort="mes_num" data-table="pad">Mês <span class="ai-sort-ind">⇅</span></th>
+              {% endif %}
+              <th class="ai-sort" data-sort="padrao_inicial" data-table="pad">Padrão Inicial <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-pad-final" data-sort="padrao_final" data-table="pad">Padrão Final <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-digitos-unicos" data-sort="digitos_ordenados_fmt" data-table="pad">Dígitos Únicos <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="qtd_digitos" data-table="pad">Qtd <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-soma" data-sort="soma" data-table="pad">Soma <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="pares" data-table="pad">Pares/Ímpares <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-nao-sairam" data-sort="qtd_nao_sairam" data-table="pad">Não Saíram <span class="ai-sort-ind">⇅</span></th>
+              <th class="col-gerar">Gerar</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="ai-pager" id="aiPagerPad" data-table="pad"></div>
+    </div>
+
+    <!-- ABA 4 — Padrões II (catálogo agregado) -->
+    <div class="tab-pane fade" id="tab-padroes-ii">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <button type="button" class="ai-collapse-toggle" id="aiPadIIToggleInfo"
+                aria-expanded="false" aria-controls="aiPadIIPainelInfo" title="Mostrar ou ocultar detalhes">
+          <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+          <span>Detalhes, filtros e resumo</span>
+        </button>
+        <span class="badge bg-light text-dark border" id="aiPadIISelCountTop">0 selecionados</span>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="aiPadIISelTodos" title="Seleciona todos os padrões visíveis na lista">Selecionar todos</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPadIILimparSel" title="Limpa seleção">Limpar</button>
+        <label class="small text-muted mb-0 d-inline-flex align-items-center gap-1">
+          Padrão
+          <input type="text" id="aiBuscaPadII" class="form-control form-control-sm" placeholder="0 0 0 1 1 1 1" autocomplete="off" spellcheck="false" inputmode="numeric">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiBtnPesquisarPadII">Pesquisar</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiBtnResetPadII" title="Resetar pesquisa" aria-label="Resetar pesquisa">
+            <i class="fas fa-undo-alt"></i>
+          </button>
+        </label>
+        <span id="aiBuscaPadIIMsg" class="small"></span>
+      </div>
+      <div id="aiPadIIPainelInfo" class="d-none mb-2">
+        <p class="small text-muted mb-2">
+          <strong>Padrões II</strong> — catálogo de padrões iniciais com frequência, atraso e status.
+          Clique no número da coluna <strong>Jogos</strong> para ver/marcar as apostas em
+          <strong>Padrões II (Apostas)</strong>. Fonte para o
+          <a href="{{ construtor_url }}">Construtor</a> (Pool Dezenas / Especial).
+        </p>
+        <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+          <select id="aiFiltroStatusPadII" class="form-select form-select-sm" style="width:auto">
+            <option value="">Todos os status</option>
+            <option value="frequente">Frequente</option>
+            <option value="atrasado">Atrasado</option>
+            <option value="faltante">Faltante</option>
+          </select>
+          <a class="btn btn-sm btn-outline-success" id="aiBtnAbrirConstrutorPadII"
+             href="{{ construtor_url }}?from=padroes-ii">
+            <i class="fas fa-layer-group"></i> Abrir Construtor com selecionados
+          </a>
+          <span class="badge bg-light text-dark border" id="aiPadIISelCount">0 selecionados</span>
+        </div>
+        <div class="row g-2 mb-3" id="aiPadIIKpis"></div>
+        <div class="row g-2 mb-3" id="aiPadIITop"></div>
+      </div>
+      <div id="aiPadIIUltimo" class="ai-ultimo-bar mb-2" hidden></div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaPadroesII">
+          <thead>
+            <tr>
+              <th class="ai-chk-th" title="Selecionar / desmarcar todos visíveis">
+                <input type="checkbox" class="form-check-input" id="aiPadIIChkTodos">
+              </th>
+              <th class="text-center" title="Numeração sequencial (ordem atual)">Nº</th>
+              <th class="ai-sort text-center" data-sort="padrao" data-table="p2">Padrão <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dist" data-sort="descricao" data-table="p2">Distribuição <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-jogos" data-sort="jogos_possiveis" data-table="p2">Jogos <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-freq" data-sort="frequencia" data-table="p2">Freq. <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-atraso" data-sort="atraso" data-table="p2">Atraso <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-apostar" data-sort="para_apostar" data-table="p2" title="Dentro da média e ainda não saíram">Para apostar <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-ja-saiu" data-sort="ja_sairam_dentro" data-table="p2" title="Dentro da média e já saíram no histórico">Já saíram <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="status" data-table="p2">Status <span class="ai-sort-ind">⇅</span></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="small text-muted" id="aiPadIIInfo">—</div>
+      <div class="mt-3" id="aiPadIIResumoWrap">
+        <div class="ai-resumo-head">
+          <button type="button" class="btn btn-sm btn-outline-primary" id="aiPadIIBtnResumo" title="Calcula Para apostar / Já saíram dos 85 padrões">
+            <i class="fas fa-sync-alt me-1"></i>Atualizar Para apostar / Já saíram
+          </button>
+        </div>
+        <div class="small text-muted mt-2 mb-2" id="aiPadIIResumoStatus">
+          As colunas <strong>Para apostar</strong> e <strong>Já saíram</strong> entram na tabela acima ao carregar.
+        </div>
+        <div id="aiPadIIChecagem" class="ai-checagem d-none" role="status"></div>
+      </div>
+    </div>
+
+<!-- ABA 5 — Padrões II (Apostas) -->
+    <!-- ABA 5 — Padrões II (Apostas) — visão operacional -->
+    <div class="tab-pane fade" id="tab-jogos-padrao">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <button type="button" class="ai-collapse-toggle" id="aiJogosPadToggleInfo"
+                aria-expanded="false" aria-controls="aiJogosPadPainelInfo" title="Mostrar ou ocultar detalhes">
+          <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+          <span>Detalhes, filtros e resumo</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-primary" id="aiJogosPadVoltarPadII">
+          <i class="fas fa-arrow-left"></i> Voltar para Padrões II
+        </button>
+        <a class="btn btn-sm btn-outline-primary" href="/analise/analises-inteligentes/?aba=padroes-ii" id="aiJogosPadVoltarPagina">
+          <i class="fas fa-home"></i> Resultados &amp; Padrões
+        </a>
+      </div>
+      <div id="aiJogosPadPainelInfo" class="d-none mb-2">
+        <div class="alert alert-info py-2 px-3 mb-2" id="aiJogosPadAvisoVazio" role="status">
+          <strong>Aguardando seleção.</strong> As apostas só aparecem depois que você escolher um padrão
+          na aba <strong>4 · Padrões II</strong> (clique no número da coluna <em>Jogos</em>).
+        </div>
+        <div class="ai-aposta-meta">
+          <p class="small text-muted mb-2">
+            <strong>Apostas por Padrão</strong> — só o que vale apostar:
+            <em>dentro da média</em> e que <strong>ainda não saíram</strong> no histórico
+            (jogos já sorteados ficam indicados e fora da lista padrão).
+          </p>
+          <div class="ai-aposta-badges mb-2">
+            <span class="badge bg-light text-dark border" id="aiJogosPadLbl">Nenhum padrão</span>
+            <span class="badge badge-dentro-aposta" id="aiJogosPadTotal">0 para apostar</span>
+            <span class="badge bg-danger-subtle text-danger border" id="aiJogosPadJaSairam">0 já saíram</span>
+            <span class="badge bg-warning text-dark border" id="aiJogosPadSelCount">0 marcadas</span>
+            <span class="ai-media-kpis" id="aiJogosPadMediaKpis"></span>
+          </div>
+          <div id="aiJogosPadResumoAposta" class="ai-aposta-resumo d-none" role="status"></div>
+          <div class="ai-hint mb-2" id="aiJogosPadHint">
+            Só há conteúdo aqui após selecionar um padrão na aba <strong>4 · Padrões II</strong>
+            (coluna <em>Jogos</em>).
+          </div>
+        </div>
+      </div>
+      <div class="ai-aposta-toolbar">
+        <label class="small text-muted mb-0">Status soma</label>
+        <select id="aiJogosPadFiltroMedia" class="form-select form-select-sm" style="width:auto" title="Filtro operacional para apostar">
+          <option value="dentro_novos" selected>Dentro da média · ainda não saíram (apostar)</option>
+          <option value="dentro_ja">Dentro da média · já saíram (não apostar)</option>
+          <option value="dentro">Dentro da média · todas</option>
+          <option value="alinhadas">Dentro + próximas</option>
+          <option value="proxima">Só próximas</option>
+          <option value="fora">Fora da faixa</option>
+          <option value="all">Todos do padrão</option>
+        </select>
+        <select id="aiJogosPadPageSize" class="form-select form-select-sm" style="width:auto">
+          <option value="50">50 / pág.</option>
+          <option value="100" selected>100 / pág.</option>
+          <option value="250">250 / pág.</option>
+          <option value="500">500 / pág.</option>
+          <option value="1000">1000 / pág.</option>
+          <option value="0">Todos</option>
+        </select>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadFirst" disabled title="Primeira página">«</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadPrev" disabled>‹</button>
+        <label class="small text-muted mb-0 d-inline-flex align-items-center gap-1">
+          Pág.
+          <input type="number" min="1" class="form-control form-control-sm ai-page-input" id="aiJogosPadPageNum" disabled>
+        </label>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadNext" disabled>›</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadLast" disabled title="Última página">»</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadSelPagina" disabled title="Marca todas da página">Marcar página</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="aiJogosPadSelTodas" disabled title="Marca todas do filtro atual (todas as páginas)">Marcar todas</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadLimparSel" disabled>Limpar marcas</button>
+        <button type="button" class="btn btn-sm btn-success" id="aiJogosPadCopiar" disabled title="Copia as marcadas (ou todas do filtro se nenhuma marcada)">
+          <i class="fas fa-copy"></i> Copiar
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-success" id="aiJogosPadExportTxt" disabled>
+          <i class="fas fa-file-export"></i> TXT
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="aiJogosPadExportCsv" disabled>
+          <i class="fas fa-file-csv"></i> CSV
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-success" id="aiJogosPadExportXlsx" disabled title="Excel com o filtro atual (dentro da média)">
+          <i class="fas fa-file-excel"></i> Excel
+        </button>
+        <select id="aiJogosPadEscopoExport" class="form-select form-select-sm" style="width:auto" title="Escopo da cópia/exportação (respeita o filtro)">
+          <option value="auto" selected>Marcadas (ou filtro atual)</option>
+          <option value="all">Todas do filtro (ex.: todas dentro da média)</option>
+          <option value="sel">Só marcadas</option>
+          <option value="page">Só página</option>
+        </select>
+        <span class="ai-busca-dez-box">
+          <input type="search" id="aiJogosPadBuscaDez" class="form-control form-control-sm"
+                 placeholder="06 10 15…" autocomplete="off" spellcheck="false"
+                 title="Busca inteligente: digite 06 e só ficam jogos com 06; depois 10 e só ficam os que têm 06 e 10; e assim por diante.">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadBuscaDezLimpar"
+                  title="Limpar busca de dezenas" disabled>
+            <i class="fas fa-times"></i>
+          </button>
+        </span>
+        <span class="ai-busca-dez-chips" id="aiJogosPadBuscaDezChips"></span>
+      </div>
+      <div id="aiJogosPadUltimo" class="ai-ultimo-bar mb-2" hidden></div>
+      <div class="table-responsive" style="max-height:560px;overflow:auto;">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaJogosPadrao">
+          <thead>
+            <tr>
+              <th class="ai-chk-th" title="Marcar / desmarcar página">
+                <input type="checkbox" class="form-check-input" id="aiJogosPadChkPagina" disabled>
+              </th>
+              <th class="text-center" title="Numeração sequencial (ordem atual)">Nº</th>
+              <th class="ai-sort" data-sort="padrao_inicial" data-table="jogos">Padrão <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dezenas-centro" data-sort="dezenas_fmt" data-table="jogos">Aposta <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="soma" data-table="jogos">Soma <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="status_media" data-table="jogos">Status <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-conc-jogo" data-sort="concurso" data-table="jogos">Concurso <span class="ai-sort-ind">⇅</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="7" class="text-muted">
+              Nenhuma aposta ainda — selecione um padrão na aba <strong>4 · Padrões II</strong> (coluna Jogos).
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="small text-muted" id="aiJogosPadInfo">—</div>
+    </div>
+
+    <!-- ABA 6 — Visualização Tubular (fiel a vizualizacao_tubular.html) -->
+    <div class="tab-pane fade" id="tab-tubular">
+      <div id="ai-tubular-root"
+           data-api="{{ api_base }}"
+           data-meses-cores='{{ (meses_cores or {})|tojson }}'
+           data-extra-mes="{{ '1' if extra_mes else '0' }}"
+           data-dezena-min="{{ dezena_min }}"
+           data-dezena-max="{{ dezena_max }}"
+           data-sorteadas="{{ sorteadas }}">
+        {% if modality_key != 'supersete' %}
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+          <span class="small text-muted fw-semibold">Análise de sequências</span>
+          <a class="btn btn-sm btn-success ms-auto" href="{{ escolha_tubular_url or '/geradores-elite/escolha-tubular-apostas/' }}?aba=manual">
+            <i class="fas fa-bolt me-1"></i>Gerar apostas (Elite) — Manual / Automático
+          </a>
+        </div>
+        {% else %}
+        <ul class="nav nav-pills tb-subnav mb-3 gap-1">
+          <li class="nav-item"><button type="button" class="nav-link active" data-tb-sub="seq">📊 Sequências</button></li>
+          <li class="nav-item"><button type="button" class="nav-link" data-tb-sub="s10">📝 Seção 10 — MANUAL</button></li>
+          <li class="nav-item"><button type="button" class="nav-link" data-tb-sub="s11">⚡ Seção 11 — AUTOMÁTICO</button></li>
+        </ul>
+        {% endif %}
+
+        <!-- Sub 1: Sequências -->
+        <div data-tb-panel="seq">
+          <div class="tb-card">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+              <button type="button" class="ai-collapse-toggle" id="tbToggleInfo"
+                      aria-expanded="false" aria-controls="tbPainelInfo" title="Mostrar ou ocultar detalhes">
+                <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+                <span>Detalhes, KPIs e legenda</span>
+              </button>
+              <span class="small text-muted fw-semibold" id="tbStatusMini">—</span>
+            </div>
+
+            <div id="tbPainelInfo" class="d-none mb-2">
+              <div class="tb-header-center mb-3">
+                <h2 class="h5 mb-1 fw-bold">📊 Visualização Tabular das Sequências (1° ao Último)</h2>
+                <div class="small text-muted fw-semibold" id="tbStatus">—</div>
+              </div>
+
+              <div class="tb-kpi-grid" id="tbKpis"></div>
+
+              <!-- Legenda idêntica à referência (acima da tabela) -->
+              <div class="tb-legend tb-legend-center">
+                <h3>📊 Cores e Significados:</h3>
+                <div class="row g-3 justify-content-center">
+                  <div class="col-md-6">
+                    <h4>📊 Cores Simples (1 condição):</h4>
+                    <div class="d-flex flex-wrap gap-3 justify-content-center">
+                      <div class="d-flex align-items-center gap-2"><div class="tb-swatch seq-2">2</div><span>Sequência de 2</span></div>
+                      <div class="d-flex align-items-center gap-2"><div class="tb-swatch seq-3">3</div><span>Sequência de 3</span></div>
+                      <div class="d-flex align-items-center gap-2"><div class="tb-swatch seq-4">4+</div><span>Sequência de 4+</span></div>
+                      <div class="d-flex align-items-center gap-2"><div class="tb-swatch repetition">R</div><span>Repetição</span></div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h4>🎨 Gradientes (múltiplas condições):</h4>
+                    <div class="d-flex flex-column gap-2 align-items-center">
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="tb-swatch-grad" style="background:linear-gradient(135deg,var(--cor-sequencia-1) 0%,var(--cor-sequencia-1) 50%,var(--cor-repetidos) 50%,var(--cor-repetidos) 100%);color:var(--cor-sequencia-1-texto)">2+R</div>
+                        <span>Seq. 2 + Repetição</span>
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="tb-swatch-grad" style="background:linear-gradient(135deg,var(--cor-sequencia-3) 0%,var(--cor-sequencia-3) 33%,var(--cor-sequencia-2) 33%,var(--cor-sequencia-2) 66%,var(--cor-sequencia-1) 66%,var(--cor-sequencia-1) 100%);color:var(--cor-sequencia-3-texto)">4+3+2</div>
+                        <span>Seq. 4+ + Seq. 3 + Seq. 2</span>
+                      </div>
+                    </div>
+                    <div class="tb-legend-hint">↗️ Passe o mouse sobre os números para ver todas as condições</div>
+                  </div>
+                </div>
+                <div class="tb-qtde-legend mt-3">
+                  <h4>Qtde (dígitos únicos):</h4>
+                  <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    <span class="tb-qtde tb-qtde-5">5</span>
+                    <span class="tb-qtde tb-qtde-6">6</span>
+                    <span class="tb-qtde tb-qtde-7">7</span>
+                    <span class="tb-qtde tb-qtde-8">8</span>
+                    <span class="tb-qtde tb-qtde-9">9</span>
+                    <span class="tb-qtde tb-qtde-10">10</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-center gap-2 align-items-center mb-3">
+              <button type="button" class="btn btn-sm btn-primary" id="tbBtnLoad"><i class="fas fa-sync"></i> Carregar Dados</button>
+              <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-secondary" id="tbViewDraw">Ordem Caixa</button>
+                <button type="button" class="btn btn-outline-secondary active" id="tbViewAsc">Crescente</button>
+              </div>
+              <button type="button" class="btn btn-sm btn-success" id="tbBtnMark">🔍 Marcar Sequências</button>
+              <button type="button" class="btn btn-sm btn-secondary" id="tbBtnReset">Resetar Marcações</button>
+              <label class="small text-muted mb-0 d-flex align-items-center gap-1">
+                Por página
+                <select id="tbPageSize" class="form-select form-select-sm" style="width:auto">
+                  <option value="100" selected>100</option>
+                  <option value="200">200</option>
+                  <option value="500">500</option>
+                  <option value="0">Todos</option>
+                </select>
+              </label>
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="tbExportTXT">TXT</button>
+              <button type="button" class="btn btn-sm btn-outline-success" id="tbExportXLSX">XLSX</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="tbExportHTML">HTML</button>
+              <button type="button" class="btn btn-sm btn-outline-dark" id="tbPrint" title="Imprimir a página atual">🖨 Imprimir</button>
+            </div>
+
+            <div class="tb-wrap">
+              <table class="table table-sm table-bordered tb-table" id="tbTabela">
+                <thead>
+                  <tr>
+                    <th class="tb-sort" data-sort="contest" title="Clique para ordenar">Concurso <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="date" title="Clique para ordenar">Data <span class="tb-sort-ind">⇅</span></th>
+                    {% for i in range(1, sorteadas + 1) %}
+                    <th class="tb-sort tb-dez-h{% if i == 1 %} tb-dez-h-first{% endif %}{% if i == sorteadas %} tb-dez-h-last{% endif %}"
+                        data-sort="dez{{ i - 1 }}" title="Clique para ordenar">{{ i }}º <span class="tb-sort-ind">⇅</span></th>
+                    {% endfor %}
+                    {% if extra_mes %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
+                    <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="rept" title="Clique para ordenar">Rept <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort tb-col-soma" data-sort="soma" title="Clique para ordenar">DEZENAS<br>Soma <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="pares" title="Clique para ordenar">Pares <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="impares" title="Clique para ordenar">Ímpares <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="inicial" title="Clique para ordenar">Inicial <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="final" title="Clique para ordenar">Final <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="qtde" title="Clique para ordenar">Qtde <span class="tb-sort-ind">⇅</span></th>
+                    <th class="tb-sort" data-sort="numeros" title="Clique para ordenar">Números <span class="tb-sort-ind">⇅</span></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-2" id="tbPager"></div>
+
+            <!-- Só o resumo fica embaixo -->
+            <div class="tb-cond-stats tb-cond-stats-below" id="tbCondStats">
+              <button type="button" class="tb-cond-stats-toggle" id="tbCondStatsToggle" aria-expanded="false">
+                <span class="tb-cond-stats-arrow" aria-hidden="true">▶</span>
+                <span>Porcentagem e ocorrências das condições</span>
+                <span class="tb-cond-stats-meta" id="tbCondStatsMeta"></span>
+              </button>
+              <div class="tb-cond-stats-body d-none" id="tbCondStatsBody">
+                <div class="table-responsive">
+                  <table class="table table-sm table-bordered mb-0 tb-cond-stats-table" id="tbCondStatsTable">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Condição</th>
+                        <th>Ocorrências</th>
+                        <th>%</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div class="tb-cond-stats-hint">Base: todos os concursos carregados</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if modality_key == 'supersete' %}
+        {% set show_s10_first = false %}
+        {% include 'partials/tubular_secoes_geracao.html' with context %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ABA 7 — Panorama Histórico completo -->
+    <div class="tab-pane fade" id="tab-panorama">
+      <div class="ai-pan-wrap">
+      <div class="d-flex flex-wrap gap-2 mb-2 align-items-center ai-pan-toolbar">
+        <button type="button" class="ai-collapse-toggle" id="aiPanHistToggleInfo"
+                aria-expanded="false" aria-controls="aiPanHistPainelInfo" title="Mostrar ou ocultar detalhes">
+          <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+          <span>O que é este Panorama</span>
+        </button>
+        <input type="search" id="aiPanHistBusca" class="form-control form-control-sm" style="max-width:14rem"
+               placeholder="Buscar padrão / B+M+A" autocomplete="off">
+        <input type="text" id="aiPanHistPadrao" class="form-control form-control-sm" style="max-width:11rem"
+               placeholder="Padrão exato" autocomplete="off">
+        <button type="button" class="btn btn-sm btn-primary" id="aiPanHistCarregar"><i class="fas fa-sync"></i> Atualizar</button>
+        <span class="small text-muted" id="aiPanHistInfo">—</span>
+      </div>
+      <div id="aiPanHistPainelInfo" class="d-none mb-2" style="max-width:44rem">
+        <div class="ai-hint mb-0">
+          Padrões que <strong>já saíram</strong> no histórico, sem repetição: o padrão, quantas vezes
+          e a distribuição B+M+A. Clique no título da coluna para ordenar.
+        </div>
+      </div>
+      <div id="aiPanHistResumo" class="ai-pan-resumo"></div>
+      <p class="ai-pan-frase text-muted" id="aiPanHistFrase">—</p>
+      <div class="ai-pan-table-wrap">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaPanoramaHist">
+          <thead>
+            <tr>
+              <th class="col-pan-num" title="Posição na lista">Nº</th>
+              <th class="ai-sort" data-sort="padrao_inicial" data-table="pan" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-pan-vezes" data-sort="vezes_padrao" data-table="pan" title="Quantas vezes este padrão já saiu">Vezes <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="descricao_bma" data-table="pan" title="Clique para ordenar">B+M+A <span class="ai-sort-ind">⇅</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" class="text-muted">Carregue o Panorama Histórico…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260901a">
+<style>
+  {% if extra_mes %}
+  {% for nome, cor in (meses_cores or {}).items() %}
+  #ai-tubular-root .mes-cor.mes-nome-{{ nome }} { background-color: {{ cor }} !important; }
+  {% endfor %}
+  {% endif %}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260901a"></script>
+<script>
+(function () {
+  const root = document.getElementById('ai-root');
+  if (!root) return;
+  const API = root.dataset.api;
+  const GC_URL = root.dataset.gcUrl || '/geradores-elite/gerador-gc/';
+  const ELITE_URL = root.dataset.eliteUrl || '/geradores-elite/gerador-elite/';
+  const EXTRA_MES = String(root.dataset.extraMes || '') === '1';
+  const MODALITY_KEY = root.dataset.modalityKey || '';
+  const MODALITY_NOME = root.dataset.modalityNome || MODALITY_KEY || 'Modalidade';
+  let CACHE = [];
+  let CAT = [];
+  let CAT_PAD_II = [];
+  let PAD_II_SEL = new Set();
+  let PAD_II_BUSCA = '';
+  let RESUMO_PAD = [];
+  let RESUMO_PAD_META = null;
+
+  function aplicarResumoNosPadroes() {
+    const m = new Map();
+    (RESUMO_PAD || []).forEach(r => {
+      if (r && r.padrao != null) m.set(String(r.padrao), r);
+    });
+    (CAT_PAD_II || []).forEach(p => {
+      const r = m.get(String(p.padrao));
+      p.para_apostar = r ? r.para_apostar : null;
+      p.ja_sairam_dentro = r ? r.ja_sairam_dentro : null;
+    });
+  }
+
+  let ULTIMO_RESULTADO = null;
+  let MAPA_CONCURSOS = null;
+  let FOCO_CONCURSO = null;
+  let JOGOS_PAD = {
+    padrao: '', total: 0, offset: 0, pageSize: 100,
+    all: [], cache: [], sel: new Set(), descricao: '',
+    soma_faixa: null, soma_media: null, resumo_status: null,
+    filtroMedia: 'dentro_novos',
+    buscaDezenas: [],
+  };
+  let SORT = {
+    res: { key: 'concurso', dir: 'desc' },
+    pad: { key: 'concurso', dir: 'desc' },
+    p2: { key: 'frequencia', dir: 'desc' },
+    jogos: { key: 'distancia', dir: 'asc' },
+    resumo: { key: 'para_apostar', dir: 'desc' },
+    pan: { key: 'vezes_padrao', dir: 'desc' },
+  };
+  let PAGE = { res: 1, pad: 1 };
+  let PAN_HIST = { all: [], filtrados: [], carregado: false, totalTeorico: 0 };
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function parseDigitos(txt) {
+    return String(txt || '').split(/[,;\s]+/).map(x => x.trim()).filter(x => /^[0-9]$/.test(x));
+  }
+  function fmtVol(n) { return Number(n || 0).toLocaleString('pt-BR'); }
+  /** pageSize 0 = Todos (exibe todos os registros do filtro atual). */
+  function tamanhoPaginaJogos(totalHint) {
+    const n = Number(JOGOS_PAD.pageSize);
+    if (!n || n <= 0) {
+      const tot = totalHint != null
+        ? Number(totalHint)
+        : (Number(JOGOS_PAD.total) || (JOGOS_PAD.all || []).length || 0);
+      return Math.max(1, tot || 1);
+    }
+    return n;
+  }
+  function mesBadge(l) {
+    const nome = (l.mes_nome || l.mes_abrev || '').replace(/\s+/g, '');
+    const ab = l.mes_abrev || nome.slice(0, 3).toUpperCase() || '—';
+    const cls = nome ? `mes-nome-${nome}` : '';
+    return `<span class="mes-pill ${cls}">${esc(ab)}</span>`;
+  }
+  function downloadTxt(txt, nome) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([txt], {type:'text/plain'}));
+    a.download = nome;
+    a.click();
+  }
+  function getPageSize() {
+    const el = document.getElementById('aiPageSize');
+    const n = el ? +el.value : 50;
+    return Number.isFinite(n) && n > 0 ? n : 50;
+  }
+  function slicePagina(linhas, table) {
+    const size = getPageSize();
+    const total = linhas.length;
+    const pages = Math.max(1, Math.ceil(total / size) || 1);
+    if (PAGE[table] > pages) PAGE[table] = pages;
+    if (PAGE[table] < 1) PAGE[table] = 1;
+    const page = PAGE[table];
+    const start = (page - 1) * size;
+    return { page, pages, size, total, start, rows: linhas.slice(start, start + size) };
+  }
+  function renderPager(elId, table, meta) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (!meta.total) { el.innerHTML = '<span class="text-muted">Sem dados</span>'; return; }
+    const de = meta.start + 1;
+    const ate = Math.min(meta.start + meta.size, meta.total);
+    el.innerHTML = `
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-act="page" data-table="${table}" data-page="1" ${meta.page<=1?'disabled':''}>«</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-act="page" data-table="${table}" data-page="${meta.page-1}" ${meta.page<=1?'disabled':''}>‹</button>
+      <span class="ai-pager-info">Pág. ${meta.page}/${meta.pages} · ${de}–${ate} de ${meta.total}</span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-act="page" data-table="${table}" data-page="${meta.page+1}" ${meta.page>=meta.pages?'disabled':''}>›</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-act="page" data-table="${table}" data-page="${meta.pages}" ${meta.page>=meta.pages?'disabled':''}>»</button>`;
+  }
+
+  function naoSairamHtml(l) {
+    const qtd = l.qtd_nao_sairam ?? (l.nao_sairam || []).length;
+    const conc = l.concurso;
+    const nums = String(l.nao_sairam_fmt || '').trim();
+    const tip = nums
+      ? `Não saíram: ${nums}`
+      : 'Lista de dezenas que não saíram';
+    return `<div class="nao-sairam-cell" title="${esc(tip)}">
+      <div class="nao-sairam-linha">
+        <span class="nao-sairam-top" title="${esc(tip)}">${esc(qtd)}</span>
+        <button type="button" class="btn-dl-sutil" data-act="dl-nao" data-concurso="${esc(conc)}" title="Baixar todos${nums ? ': ' + esc(nums) : ''}">↓ todos</button>
+        <span class="nao-sairam-centro" title="Conjunto-base Construtor (16)">16</span>
+        <button type="button" class="btn-dl-sutil" data-act="dl-nao16" data-concurso="${esc(conc)}" title="Baixar 16 para o Construtor">↓ 16</button>
+      </div>
+    </div>`;
+  }
+
+  function sortValue(row, key) {
+    const v = row[key];
+    if (v == null || v === '') return '';
+    if (typeof v === 'number') return v;
+    if (Array.isArray(v)) return v.join(' ');
+    const s = String(v);
+    if (key === 'volume_combinacoes' || key === 'soma' || key === 'concurso' || key === 'qtd_digitos' || key === 'mes_num' || key === 'pares' || key === 'qtd_nao_sairam') {
+      const nn = Number(v);
+      return Number.isFinite(nn) ? nn : s;
+    }
+    if (key === 'data') {
+      const m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+      if (m) return `${m[3]}${m[2]}${m[1]}`;
+    }
+    return s.toLowerCase();
+  }
+  function ordenarLinhas(linhas, key, dir) {
+    const mult = dir === 'asc' ? 1 : -1;
+    return [...linhas].sort((a, b) => {
+      const va = sortValue(a, key), vb = sortValue(b, key);
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * mult;
+      return String(va).localeCompare(String(vb), 'pt-BR', { numeric: true }) * mult;
+    });
+  }
+  function atualizarIndicadoresSort() {
+    document.querySelectorAll('#ai-root th.ai-sort').forEach(th => {
+      th.classList.remove('ai-sort-asc', 'ai-sort-desc');
+      const ind = th.querySelector('.ai-sort-ind');
+      const st = SORT[th.dataset.table];
+      if (ind) ind.textContent = '⇅';
+      if (st && st.key === th.dataset.sort) {
+        th.classList.add(st.dir === 'asc' ? 'ai-sort-asc' : 'ai-sort-desc');
+        if (ind) ind.textContent = st.dir === 'asc' ? '▲' : '▼';
+      }
+    });
+  }
+
+  function renderKpis(linhas) {
+    const box = document.getElementById('aiKpis');
+    if (!linhas.length) { box.innerHTML = ''; return; }
+    const ns = {};
+    linhas.forEach(l => { ns[l.qtd_digitos] = (ns[l.qtd_digitos] || 0) + 1; });
+    const topN = Object.entries(ns).sort((a,b)=>b[1]-a[1])[0];
+    box.innerHTML = `
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Concursos</div><div class="val">${linhas.length}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Último</div><div class="val">${esc(Math.max(...linhas.map(x => +x.concurso)))}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">N mais comum</div><div class="val">${topN ? topN[0]+'d ('+topN[1]+')' : '—'}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Média qtd dígitos</div><div class="val">${(linhas.reduce((s,l)=>s+l.qtd_digitos,0)/linhas.length).toFixed(1)}</div></div></div>`;
+  }
+
+  function geLinksHtml(n, dig, concurso) {
+    const q = encodeURIComponent(dig);
+    const conc = concurso ? `&concurso=${encodeURIComponent(concurso)}` : '';
+    let html = '';
+    if (n >= 3) {
+      html += `<a class="btn btn-outline-success btn-ai me-1" href="${GC_URL}?digitos=${q}${conc}" title="Gerar no Pro/GC com perfil do concurso real">gc${n}</a>`;
+    }
+    if (n >= 3 && n <= 9) {
+      html += `<a class="btn btn-outline-warning btn-ai" href="${ELITE_URL}?n=${n}&digitos=${q}${conc}" title="Gerar no Elite com perfil do concurso real">Elite ${n}d</a>`;
+    }
+    return html || '<span class="text-muted small">—</span>';
+  }
+
+  function acoesHtml(l) {
+    const n = l.qtd_digitos;
+    const dig = (l.digitos_ordenados || []).join(',');
+    let html = `<button class="btn btn-outline-primary btn-ai me-1" data-act="comb" data-n="${n}" data-dig="${esc(dig)}" title="Ver catálogo analítico">Combinações</button>`;
+    html += geLinksHtml(n, dig, l.concurso);
+    return html;
+  }
+
+  function fmtDezena(n) {
+    return String(n).padStart(2, '0');
+  }
+  /** Sequência da coluna Dezenas (crescente) — base dos padrões Inicial/Final. */
+  function dezenasOrdenadasDe(l) {
+    const raw = (l && l.dezenas) || [];
+    if (raw.length) return raw.map(Number).filter(Number.isFinite).slice().sort((a, b) => a - b);
+    const fmt = String((l && l.dezenas_fmt) || '').trim();
+    if (!fmt) return [];
+    return fmt.split(/\s+/).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+  }
+  function padraoInicialDe(dez) {
+    return dez.map(d => Math.floor(d / 10)).join(' ');
+  }
+  function padraoFinalDe(dez) {
+    return dez.map(d => d % 10).join(' ');
+  }
+
+  function renderResultados(linhas, opts) {
+    if (!opts || !opts.keepCache) {
+      CACHE = linhas;
+      PAGE.res = 1;
+      PAGE.pad = 1;
+      MAPA_CONCURSOS = null;
+    }
+    const linhasRes = ordenarLinhas(CACHE, SORT.res.key, SORT.res.dir);
+    const linhasPad = ordenarLinhas(CACHE, SORT.pad.key, SORT.pad.dir);
+    const metaRes = slicePagina(linhasRes, 'res');
+    const metaPad = slicePagina(linhasPad, 'pad');
+    renderKpis(CACHE);
+    const colRes = EXTRA_MES ? 10 : 9;
+    const colPad = EXTRA_MES ? 12 : 11;
+    document.querySelector('#aiTabelaResultados tbody').innerHTML = metaRes.rows.map(l => `
+      <tr class="${+l.concurso === FOCO_CONCURSO ? 'tr-concurso-foco' : ''}" data-concurso="${esc(l.concurso)}">
+        <td><strong>${esc(l.concurso)}</strong></td>
+        <td>${esc(l.data)}</td>
+        <td class="td-left text-start td-dezenas">${esc(l.dezenas_fmt)}</td>
+        ${EXTRA_MES ? `<td>${mesBadge(l)}</td>` : ''}
+        <td class="td-left text-start td-digitos-if">${esc(l.digitos_fmt)}</td>
+        <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
+        <td><strong>${esc(l.qtd_digitos)}</strong></td>
+        <td class="td-soma"><strong class="ai-col-alinha">${esc(l.soma)}</strong></td>
+        <td class="td-volume"><span class="ai-col-alinha">${fmtVol(l.volume_combinacoes)}</span></td>
+        <td class="text-nowrap td-gerar">${acoesHtml(l)}</td>
+      </tr>`).join('') || `<tr><td colspan="${colRes}" class="text-muted">Sem dados</td></tr>`;
+    document.querySelector('#aiTabelaPadroes tbody').innerHTML = metaPad.rows.map(l => {
+      const dez = dezenasOrdenadasDe(l);
+      const dezFmt = l.dezenas_fmt || dez.map(fmtDezena).join(' ');
+      const pi = padraoInicialDe(dez) || String(l.padrao_inicial || '').replace(/,/g, ' ');
+      const pf = padraoFinalDe(dez) || String(l.padrao_final || '').replace(/,/g, ' ');
+      return `
+      <tr>
+        <td><strong>${esc(l.concurso)}</strong></td>
+        <td>${esc(l.data)}</td>
+        <td class="td-left text-start td-dezenas">${esc(dezFmt)}</td>
+        ${EXTRA_MES ? `<td>${mesBadge(l)}</td>` : ''}
+        <td class="text-nowrap">${esc(pi)}</td>
+        <td class="text-nowrap td-pad-final"><span class="ai-col-alinha">${esc(pf)}</span></td>
+        <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
+        <td>${esc(l.qtd_digitos)}</td>
+        <td class="td-soma"><strong class="ai-col-alinha">${esc(l.soma)}</strong></td>
+        <td>${esc(l.pares_impares_fmt)}</td>
+        <td class="td-nao-sairam">${naoSairamHtml(l)}</td>
+        <td class="td-gerar">${geLinksHtml(l.qtd_digitos, (l.digitos_ordenados||[]).join(','), l.concurso)}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="${colPad}" class="text-muted">Sem dados</td></tr>`;
+    const concs = CACHE.map(x => +x.concurso).filter(Number.isFinite);
+    const prim = concs.length ? Math.min(...concs) : null;
+    const ult = concs.length ? Math.max(...concs) : null;
+    document.getElementById('aiLblUltimo').textContent = ult != null ? `Concursos ${prim} → ${ult} (${CACHE.length})` : 'Sem dados';
+    const rangeLbl = document.getElementById('aiRangeLbl');
+    if (rangeLbl) rangeLbl.textContent = ult != null ? `Todos no banco: ${prim} → ${ult} (${CACHE.length} concursos)` : 'Sem dados';
+    renderPager('aiPagerRes', 'res', metaRes);
+    renderPager('aiPagerPad', 'pad', metaPad);
+    atualizarIndicadoresSort();
+  }
+
+  async function carregarResultados() {
+    const rangeLbl = document.getElementById('aiRangeLbl');
+    if (rangeLbl) rangeLbl.textContent = 'Carregando todos os concursos…';
+    const r = await fetch(`${API}/resultados?janela=0&base=geral`);
+    const j = await r.json();
+    if (!j.sucesso) { alert(j.erro || 'Falha ao carregar'); return; }
+    renderResultados(j.linhas || []);
+  }
+
+  function renderCatalogo(data) {
+    CAT = data.linhas || [];
+    const res = data.resumo || {};
+    const nCat = +(document.getElementById('aiNDigitos')?.value || data.n_digitos || 8);
+    const badge = document.getElementById('aiCombNBadge');
+    if (badge) badge.textContent = `${nCat}d`;
+    document.getElementById('aiResumoCatalogo').innerHTML = `
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Combinações C(10,N)</div><div class="val">${res.total||0}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Alto volume</div><div class="val text-success">${res.alto_volume||0}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Médio</div><div class="val text-primary">${res.medio_volume||0}</div></div></div>
+      <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">Baixo / zero</div><div class="val">${(res.baixo_volume||0)+(res.insuficientes||0)}</div></div></div>`;
+    const busca = document.getElementById('aiBuscaDigitos').value.trim();
+    let rows = CAT;
+    if (busca) {
+      const parts = parseDigitos(busca);
+      rows = CAT.filter(r => parts.every(p => (r.digitos||[]).includes(p)));
+    }
+    document.querySelector('#aiTabelaCatalogo tbody').innerHTML = rows.map(r => {
+      const dig = (r.digitos || []).join(',');
+      const podeGc = nCat >= 3 && r.pode_gerar_jogo;
+      const podeElite = nCat >= 3 && nCat <= 9 && r.pode_gerar_jogo;
+      let links = '';
+      if (podeGc) links += `<a class="btn btn-outline-success btn-ai me-1" href="${GC_URL}?digitos=${encodeURIComponent(dig)}">Abrir GC</a>`;
+      if (podeElite) links += `<a class="btn btn-outline-warning btn-ai" href="${ELITE_URL}?n=${nCat}&digitos=${encodeURIComponent(dig)}">Abrir Elite</a>`;
+      if (!links) links = '<span class="text-muted small">Pool insuficiente</span>';
+      return `
+      <tr>
+        <td>${esc(r.indice)}</td>
+        <td>${esc(r.digitos_fmt)}</td>
+        <td>${esc(r.qtd_numeros_validos)}</td>
+        <td>${fmtVol(r.volume_combinacoes)}</td>
+        <td class="text-nowrap">${links}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="5" class="text-muted">Sem linhas</td></tr>';
+  }
+
+  async function carregarCatalogo(n) {
+    const r = await fetch(`${API}/catalogo?n=${n}`);
+    const j = await r.json();
+    if (!j.sucesso) { alert(j.erro || 'Falha no catálogo'); return; }
+    renderCatalogo(j);
+  }
+
+  let N_MODA_DIGITOS = null;
+  let COMB_INICIADO = false;
+  let COMB_SKIP_NEXT_AUTO = false;
+
+  async function carregarStatsHist() {
+    const r = await fetch(`${API}/estatisticas-historico?base=geral`);
+    const j = await r.json();
+    if (!j.sucesso) { alert(j.erro || 'Falha nas estatísticas'); return null; }
+    const dist = j.distribuicao_n || [];
+    if (dist.length) {
+      const top = dist.reduce((a, b) => ((+a.frequencia || 0) >= (+b.frequencia || 0) ? a : b));
+      N_MODA_DIGITOS = Math.max(1, Math.min(10, +top.n_digitos || 7));
+      const hint = document.getElementById('aiNDigitosModaHint');
+      if (hint) {
+        hint.textContent = `Mais sai: ${N_MODA_DIGITOS}d (${top.frequencia}x · ${top.pct}%)`;
+      }
+    }
+    document.getElementById('aiStatsHist').innerHTML = `
+      <div class="col-12"><div class="ai-hint mb-2">Distribuição histórica de quantidade de dígitos (${j.total_concursos||0} concursos${j.primeiro_concurso!=null?`: ${j.primeiro_concurso}→${j.ultimo_concurso}`:''}).</div></div>
+      ${dist.map(d => `
+        <div class="col-6 col-md-3 col-lg-2"><div class="ai-kpi${(+d.n_digitos === N_MODA_DIGITOS) ? ' border border-warning' : ''}">
+          <div class="lbl">${d.n_digitos}d${(+d.n_digitos === N_MODA_DIGITOS) ? ' ★' : ''}</div>
+          <div class="val">${d.frequencia} <span class="small text-muted">(${d.pct}%)</span></div>
+          <div class="small text-muted">vol méd. ${fmtVol(d.volume_medio)}</div>
+        </div></div>`).join('')}`;
+    return j;
+  }
+
+  async function iniciarAbaCombinacoes(nForcado) {
+    await carregarStatsHist();
+    const n = nForcado || N_MODA_DIGITOS || 7;
+    const sel = document.getElementById('aiNDigitos');
+    if (sel) sel.value = String(n);
+    await carregarCatalogo(n);
+    COMB_INICIADO = true;
+  }
+
+  function exportCsv() {
+    const header = ['concurso','data','dezenas','mes','digitos','digitos_ordenados','qtd_digitos','soma','volume','padrao_inicial','padrao_final','pares','impares','qtd_nao_sairam','nao_sairam','nao_sairam_16'];
+    const lines = [header.join(';')];
+    CACHE.forEach(l => {
+      lines.push([
+        l.concurso, l.data, l.dezenas_fmt, l.mes_abrev, l.digitos_fmt, l.digitos_ordenados_fmt,
+        l.qtd_digitos, l.soma, l.volume_combinacoes, l.padrao_inicial, l.padrao_final,
+        l.pares, l.impares, l.qtd_nao_sairam, l.nao_sairam_fmt, l.nao_sairam_16_fmt
+      ].map(x => `"${String(x??'').replace(/"/g,'""')}"`).join(';'));
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'}));
+    a.download = 'analises_inteligentes_diadesorte.csv';
+    a.click();
+  }
+
+  function goAba(nome) {
+    const btn = document.querySelector(`#aiTabs [data-aba="${nome}"]`);
+    if (!btn) return;
+    try {
+      if (window.bootstrap && bootstrap.Tab) {
+        bootstrap.Tab.getOrCreateInstance(btn).show();
+        return;
+      }
+    } catch (_) { /* fallback */ }
+    btn.click();
+  }
+
+  function agregarPadroesJaSairam(itens) {
+    const map = new Map();
+    (itens || []).forEach(it => {
+      const p = normalizarPadrao(it && it.padrao_inicial);
+      if (!p) return;
+      const prev = map.get(p);
+      if (prev) {
+        prev.vezes_padrao += 1;
+        return;
+      }
+      map.set(p, {
+        padrao_inicial: p,
+        descricao_bma: it.descricao_bma || '',
+        vezes_padrao: 1,
+      });
+    });
+    return [...map.values()];
+  }
+
+  function filtrarPanoramaHist() {
+    const busca = String(document.getElementById('aiPanHistBusca')?.value || '').trim().toLowerCase();
+    const pad = normalizarPadrao(document.getElementById('aiPanHistPadrao')?.value || '');
+    const buscaDig = digitosPadrao(busca);
+    let rows = agregarPadroesJaSairam(PAN_HIST.all);
+    if (pad) {
+      rows = rows.filter(r => normalizarPadrao(r.padrao_inicial) === pad);
+    }
+    if (busca) {
+      rows = rows.filter(r => {
+        const padNorm = normalizarPadrao(r.padrao_inicial).toLowerCase();
+        const padDig = digitosPadrao(r.padrao_inicial);
+        const desc = String(r.descricao_bma || '').toLowerCase();
+        if (padNorm.includes(busca) || desc.includes(busca)) return true;
+        if (buscaDig && padDig === buscaDig) return true;
+        return false;
+      });
+    }
+    const { key, dir } = SORT.pan;
+    const mul = dir === 'asc' ? 1 : -1;
+    rows.sort((a, b) => {
+      if (key === 'vezes_padrao') {
+        const va = Number(a.vezes_padrao) || 0;
+        const vb = Number(b.vezes_padrao) || 0;
+        if (va !== vb) return (va < vb ? -1 : 1) * mul;
+        return String(a.padrao_inicial).localeCompare(String(b.padrao_inicial), 'pt-BR');
+      }
+      const va = String(a[key] ?? '');
+      const vb = String(b[key] ?? '');
+      if (va !== vb) return (va < vb ? -1 : 1) * mul;
+      return (Number(b.vezes_padrao) - Number(a.vezes_padrao));
+    });
+    PAN_HIST.filtrados = rows;
+    return rows;
+  }
+
+  function renderPanoramaHist() {
+    const tb = document.querySelector('#aiTabelaPanoramaHist tbody');
+    const info = document.getElementById('aiPanHistInfo');
+    if (!tb) return;
+    const itens = filtrarPanoramaHist();
+    if (!itens.length) {
+      tb.innerHTML = `<tr><td colspan="4" class="text-muted">Nenhum padrão no histórico.</td></tr>`;
+    } else {
+      tb.innerHTML = itens.map((it, i) => `<tr>
+        <td class="td-pan-num">${i + 1}</td>
+        <td class="td-padrao">${esc(it.padrao_inicial)}</td>
+        <td class="td-pan-vezes"><span class="ai-col-alinha">${fmtVol(it.vezes_padrao)}</span></td>
+        <td class="td-bma">${esc(it.descricao_bma)}</td>
+      </tr>`).join('');
+    }
+    const totConc = PAN_HIST.all.length;
+    const jaSairam = agregarPadroesJaSairam(PAN_HIST.all).length;
+    const teorico = Number(PAN_HIST.totalTeorico) || 0;
+    const faltam = teorico > 0 ? Math.max(0, teorico - jaSairam) : 0;
+    if (info) {
+      const n = itens.length;
+      info.textContent = n === jaSairam
+        ? `${fmtVol(jaSairam)} na lista`
+        : `${fmtVol(n)} de ${fmtVol(jaSairam)} na lista`;
+    }
+    const resumo = document.getElementById('aiPanHistResumo');
+    if (resumo) {
+      resumo.innerHTML = `
+        <div class="ai-kpi"><div class="lbl">Combinações</div><div class="val">${fmtVol(teorico || jaSairam)}</div></div>
+        <div class="ai-kpi"><div class="lbl">Já saíram</div><div class="val">${fmtVol(jaSairam)}</div></div>
+        <div class="ai-kpi"><div class="lbl">Faltam</div><div class="val">${fmtVol(faltam)}</div></div>
+        <div class="ai-kpi"><div class="lbl">Sorteios</div><div class="val">${fmtVol(totConc)}</div></div>`;
+    }
+    const frase = document.getElementById('aiPanHistFrase');
+    if (frase) {
+      const t = teorico || jaSairam;
+      frase.innerHTML = totConc
+        ? `São um total de <strong>${fmtVol(t)}</strong> combinações. Já saíram <strong>${fmtVol(jaSairam)}</strong>. Faltam <strong>${fmtVol(faltam)}</strong>. De um total de <strong>${fmtVol(totConc)}</strong> sorteios.`
+        : '—';
+    }
+  }
+
+  async function garantirTotalPadroesTeoricos() {
+    if (PAN_HIST.totalTeorico) return PAN_HIST.totalTeorico;
+    if (CAT_PAD_II && CAT_PAD_II.length) {
+      PAN_HIST.totalTeorico = CAT_PAD_II.length;
+      return PAN_HIST.totalTeorico;
+    }
+    try {
+      const r = await fetch(`${API}/catalogo-padroes`);
+      const d = await r.json();
+      PAN_HIST.totalTeorico = Number(d.total_padroes) || (d.padroes || []).length || 0;
+      if (!CAT_PAD_II.length && d.padroes) CAT_PAD_II = d.padroes;
+    } catch (_) {
+      PAN_HIST.totalTeorico = 0;
+    }
+    return PAN_HIST.totalTeorico;
+  }
+
+  async function carregarHistoricoCompleto() {
+    try {
+      await garantirTotalPadroesTeoricos();
+      const r = await fetch(`${API}/historico?limit=5000&offset=0&ordem=desc`);
+      const j = await r.json();
+      PAN_HIST.all = (j && j.itens) || [];
+      PAN_HIST.carregado = true;
+      if (j && j.sucesso === false && j.erro) {
+        const tb = document.querySelector('#aiTabelaPanoramaHist tbody');
+        if (tb) tb.innerHTML = `<tr><td colspan="4" class="text-danger">${esc(j.erro)}</td></tr>`;
+        return j;
+      }
+      renderPanoramaHist();
+      return j;
+    } catch (e) {
+      const tb = document.querySelector('#aiTabelaPanoramaHist tbody');
+      if (tb) tb.innerHTML = `<tr><td colspan="4" class="text-danger">${esc(String(e))}</td></tr>`;
+      return null;
+    }
+  }
+
+  function setFiltroMedia(valor) {
+    const v = valor || 'dentro_novos';
+    const filtroEl = document.getElementById('aiJogosPadFiltroMedia');
+    if (filtroEl) filtroEl.value = v;
+    JOGOS_PAD.filtroMedia = v;
+  }
+
+  function normalizarPadrao(p) {
+    return String(p || '').replace(/,/g, ' ').trim().split(/\s+/).filter(Boolean).join(' ');
+  }
+  function digitosPadrao(p) {
+    return String(p || '').replace(/\D/g, '');
+  }
+  function padraoBate(p, buscaRaw) {
+    const raw = String(buscaRaw || '').trim();
+    if (!raw) return true;
+    const busca = raw.toLowerCase();
+    const buscaNorm = normalizarPadrao(raw).toLowerCase();
+    const buscaDig = digitosPadrao(raw);
+    const padNorm = normalizarPadrao(p && p.padrao).toLowerCase();
+    const padDig = digitosPadrao(p && p.padrao);
+    const desc = String((p && p.descricao) || '').toLowerCase();
+    const st = String((p && p.status) || '').toLowerCase();
+    if (padNorm === buscaNorm) return true;
+    if (buscaDig && padDig === buscaDig) return true;
+    if (buscaNorm && padNorm.includes(buscaNorm)) return true;
+    if (desc.includes(busca) || st.includes(busca)) return true;
+    return false;
+  }
+  function setBuscaPadIIMsg(texto, isErro) {
+    const el = document.getElementById('aiBuscaPadIIMsg');
+    if (!el) return;
+    el.textContent = texto || '';
+    el.classList.toggle('erro', !!isErro);
+  }
+  function pesquisarPadII() {
+    const input = document.getElementById('aiBuscaPadII');
+    const raw = String(input?.value || '').trim();
+    if (!raw) {
+      PAD_II_BUSCA = '';
+      setBuscaPadIIMsg('');
+      renderPadroesII();
+      if (RESUMO_PAD.length) renderResumoOperacionalPadroes();
+      return;
+    }
+    const hits = CAT_PAD_II.filter(p => padraoBate(p, raw));
+    if (!hits.length) {
+      setBuscaPadIIMsg('Padrão não encontrado.');
+      return;
+    }
+    PAD_II_BUSCA = raw;
+    setBuscaPadIIMsg('');
+    renderPadroesII();
+    if (RESUMO_PAD.length) renderResumoOperacionalPadroes();
+  }
+  function resetarPesquisaPadII() {
+    const input = document.getElementById('aiBuscaPadII');
+    if (input) input.value = '';
+    PAD_II_BUSCA = '';
+    setBuscaPadIIMsg('');
+    renderPadroesII();
+    if (RESUMO_PAD.length) renderResumoOperacionalPadroes();
+  }
+
+  function statusBadge(st) {
+    const s = String(st || '');
+    const cls = s === 'frequente' ? 'badge-frequente' : (s === 'atrasado' ? 'badge-atrasado' : 'badge-faltante');
+    const lab = s ? s.charAt(0).toUpperCase() + s.slice(1) : '—';
+    return `<span class="badge ${cls}">${esc(lab)}</span>`;
+  }
+
+  function atualizarSelPadII() {
+    const txt = `${PAD_II_SEL.size} selecionados`;
+    const el = document.getElementById('aiPadIISelCount');
+    if (el) el.textContent = txt;
+    const top = document.getElementById('aiPadIISelCountTop');
+    if (top) top.textContent = txt;
+    const btn = document.getElementById('aiBtnAbrirConstrutorPadII');
+    if (btn) {
+      const base = btn.href.split('?')[0];
+      const qs = PAD_II_SEL.size
+        ? `?from=padroes-ii&padroes=${encodeURIComponent([...PAD_II_SEL].join('|'))}`
+        : '?from=padroes-ii';
+      btn.href = base + qs;
+    }
+    const rows = filtrarPadII();
+    const chk = document.getElementById('aiPadIIChkTodos');
+    if (chk) {
+      const n = rows.length;
+      const nSel = rows.filter(p => PAD_II_SEL.has(p.padrao)).length;
+      chk.disabled = n === 0;
+      chk.checked = n > 0 && nSel === n;
+      chk.indeterminate = nSel > 0 && nSel < n;
+    }
+  }
+
+  function chaveDezenas(src) {
+    let nums = [];
+    if (Array.isArray(src)) nums = src.map(Number).filter(Number.isFinite);
+    else nums = String(src || '').trim().split(/[\s,;]+/).map(Number).filter(Number.isFinite);
+    if (!nums.length) return '';
+    return nums.slice().sort((a, b) => a - b).map(n => String(n).padStart(2, '0')).join(' ');
+  }
+  function limitesDezenaBusca() {
+    const dmin = parseInt(root.dataset.dezenaMin || '1', 10);
+    const dmax = parseInt(root.dataset.dezenaMax || '31', 10);
+    return {
+      min: Number.isFinite(dmin) ? dmin : 1,
+      max: Number.isFinite(dmax) ? dmax : 31,
+    };
+  }
+  function fmtDez2(n) {
+    return String(n).padStart(2, '0');
+  }
+  function parseDezenasBusca(txt) {
+    const s = String(txt || '');
+    if (!s.trim()) return [];
+    const { min, max } = limitesDezenaBusca();
+    const endsSep = /[\s,;./|+-]$/.test(s);
+    const tokens = s.trim().split(/[\s,;./|+-]+/).filter(Boolean);
+    const seen = new Set();
+    const out = [];
+    function add(n) {
+      if (!Number.isFinite(n) || n < min || n > max) return;
+      if (seen.has(n)) return;
+      seen.add(n);
+      out.push(n);
+    }
+    function consume(digits, allowOddSingle) {
+      if (!digits) return;
+      if (digits.length <= 2) {
+        if (digits.length === 1 && !allowOddSingle) return;
+        add(parseInt(digits, 10));
+        return;
+      }
+      for (let i = 0; i + 1 < digits.length; i += 2) {
+        add(parseInt(digits.slice(i, i + 2), 10));
+      }
+    }
+    tokens.forEach((tok, idx) => {
+      const digits = String(tok).replace(/\D/g, '');
+      const isLast = idx === tokens.length - 1;
+      consume(digits, !isLast || endsSep);
+    });
+    return out;
+  }
+  function numsDoJogo(j) {
+    const src = (j && j.dezenas && j.dezenas.length) ? j.dezenas : (j && j.dezenas_fmt);
+    const set = new Set();
+    if (Array.isArray(src)) src.forEach(n => { const v = Number(n); if (Number.isFinite(v)) set.add(v); });
+    else String(src || '').trim().split(/[\s,;]+/).forEach(x => {
+      const v = Number(x);
+      if (Number.isFinite(v)) set.add(v);
+    });
+    return set;
+  }
+  function jogoTemDezenasBusca(j, nums) {
+    if (!nums || !nums.length) return true;
+    const set = numsDoJogo(j);
+    return nums.every(n => set.has(n));
+  }
+  function htmlDezenasComDestaque(fmt, hits) {
+    const hit = new Set((hits || []).map(Number));
+    const parts = String(fmt || '').trim().split(/[\s,;]+/).filter(Boolean);
+    if (!parts.length) return esc(fmt);
+    return parts.map(p => {
+      const n = parseInt(p, 10);
+      if (hit.has(n)) return `<span class="ai-dez-hit">${esc(p)}</span>`;
+      return esc(p);
+    }).join(' ');
+  }
+  function renderBuscaDezChips() {
+    const el = document.getElementById('aiJogosPadBuscaDezChips');
+    if (!el) return;
+    const nums = JOGOS_PAD.buscaDezenas || [];
+    el.innerHTML = nums.map(n => `<span class="ai-dez-chip">${esc(fmtDez2(n))}</span>`).join('');
+  }
+  function syncBuscaDezenas(opts) {
+    const o = opts || {};
+    const el = document.getElementById('aiJogosPadBuscaDez');
+    const nums = parseDezenasBusca(el && el.value);
+    const prev = (JOGOS_PAD.buscaDezenas || []).join(',');
+    const next = nums.join(',');
+    JOGOS_PAD.buscaDezenas = nums;
+    const btn = document.getElementById('aiJogosPadBuscaDezLimpar');
+    if (btn) btn.disabled = !String(el && el.value || '').trim();
+    renderBuscaDezChips();
+    if (prev !== next && o.resetPage !== false) JOGOS_PAD.offset = 0;
+    if (o.apply !== false && JOGOS_PAD.padrao) aplicarPaginaJogos();
+  }
+  function limparBuscaDezenas() {
+    const el = document.getElementById('aiJogosPadBuscaDez');
+    if (el) el.value = '';
+    JOGOS_PAD.buscaDezenas = [];
+    const btn = document.getElementById('aiJogosPadBuscaDezLimpar');
+    if (btn) btn.disabled = true;
+    renderBuscaDezChips();
+    JOGOS_PAD.offset = 0;
+    if (JOGOS_PAD.padrao) aplicarPaginaJogos();
+  }
+  function chaveUltimoDezenas() {
+    const u = ULTIMO_RESULTADO;
+    if (!u) return '';
+    return chaveDezenas((u.dezenas && u.dezenas.length) ? u.dezenas : u.dezenas_fmt);
+  }
+  function ehJogoVencedor(j) {
+    const ku = chaveUltimoDezenas();
+    if (!ku || !j) return false;
+    return chaveDezenas((j.dezenas && j.dezenas.length) ? j.dezenas : j.dezenas_fmt) === ku;
+  }
+  function mapaConcursosPorDezenas() {
+    const map = new Map();
+    (CACHE || []).forEach(l => {
+      const k = chaveDezenas((l.dezenas && l.dezenas.length) ? l.dezenas : l.dezenas_fmt);
+      if (!k) return;
+      const conc = +l.concurso;
+      if (!Number.isFinite(conc)) return;
+      const prev = map.get(k);
+      if (!prev || conc > prev) map.set(k, conc);
+    });
+    return map;
+  }
+  function getMapaConcursos() {
+    if (!MAPA_CONCURSOS) MAPA_CONCURSOS = mapaConcursosPorDezenas();
+    return MAPA_CONCURSOS;
+  }
+  function concursoDoJogo(j) {
+    const k = chaveDezenas((j.dezenas && j.dezenas.length) ? j.dezenas : j.dezenas_fmt);
+    if (!k) return null;
+    const conc = getMapaConcursos().get(k);
+    return conc || null;
+  }
+  function jogoJaSaiu(j) {
+    return !!concursoDoJogo(j);
+  }
+  function jogosDentroMedia() {
+    return (JOGOS_PAD.all || []).filter(j => (j.status_media || 'fora') === 'dentro');
+  }
+  function contarDentroJaSairam() {
+    return jogosDentroMedia().filter(jogoJaSaiu).length;
+  }
+  function contarDentroNovos() {
+    return jogosDentroMedia().filter(j => !jogoJaSaiu(j)).length;
+  }
+  function irParaConcurso(conc) {
+    const n = +conc;
+    if (!Number.isFinite(n) || n <= 0) return;
+    FOCO_CONCURSO = n;
+    if (CACHE && CACHE.length) {
+      const linhas = ordenarLinhas(CACHE, SORT.res.key, SORT.res.dir);
+      const idx = linhas.findIndex(l => +l.concurso === n);
+      if (idx >= 0) {
+        const size = getPageSize();
+        PAGE.res = Math.floor(idx / size) + 1;
+      }
+      renderResultados(CACHE, { keepCache: true });
+    }
+    goAba('resultados');
+    requestAnimationFrame(() => {
+      const tr = document.querySelector(`#aiTabelaResultados tr[data-concurso="${n}"]`);
+      if (tr) tr.scrollIntoView({ block: 'center' });
+    });
+  }
+  function htmlBarraUltimo(extraHtml) {
+    const u = ULTIMO_RESULTADO;
+    if (!u) return '';
+    const conc = u.concurso != null ? u.concurso : '—';
+    const dez = u.dezenas_fmt || chaveDezenas(u.dezenas);
+    const pad = u.padrao || '';
+    return `<span class="ai-ultimo-lbl">Último resultado</span>
+      <span class="ai-ultimo-nums"><strong>${esc(conc)}</strong> — <span class="font-monospace">${esc(dez)}</span></span>
+      ${pad ? `<span class="ai-ultimo-pad text-muted">padrão <code>${esc(pad)}</code></span>` : ''}
+      <button type="button" class="ai-legenda-mini" data-act="ir-vencedor"
+        title="Abrir o padrão vencedor na aba Apostas (só dentro da média)">
+        <span class="ai-legenda-dot verde"></span>Último / Vencedor
+      </button>
+      ${extraHtml || ''}`;
+  }
+  function extraAba5Ultimo() {
+    const u = ULTIMO_RESULTADO;
+    if (!u) return '';
+    const padUlt = normalizarPadrao(u.padrao);
+    const padAtual = normalizarPadrao(JOGOS_PAD.padrao);
+    if (!padAtual) return '';
+    if (padUlt && padAtual && padUlt !== padAtual) {
+      return `<button type="button" class="btn btn-sm btn-outline-success py-0 px-2" data-act="ver-jogos-padrao" data-padrao="${esc(padUlt)}">Ver padrão vencedor</button>`;
+    }
+    const all = JOGOS_PAD.all || [];
+    const idxAll = all.findIndex(ehJogoVencedor);
+    if (idxAll < 0) return '<span class="small text-muted">vencedor fora desta lista</span>';
+    const ordered = linhasOrdenadasJogos();
+    const idx = ordered.findIndex(ehJogoVencedor);
+    if (idx < 0) {
+      return `<span class="small text-muted">vencedor fora do filtro atual</span>
+        <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" data-act="ir-vencedor-todos" title="Mostra todos e destaca o vencedor">Mostrar vencedor</button>`;
+    }
+    const size = tamanhoPaginaJogos(ordered.length);
+    const page = Math.floor(idx / size) + 1;
+    const onPage = idx >= (JOGOS_PAD.offset || 0) && idx < (JOGOS_PAD.offset || 0) + size;
+    if (onPage) return '<span class="small text-success">destacado em verde nesta página</span>';
+    return `<button type="button" class="btn btn-sm btn-outline-success py-0 px-2" data-act="ir-vencedor">Mostrar vencedor (pág. ${page})</button>`;
+  }
+  function renderBarrasUltimo() {
+    const u = ULTIMO_RESULTADO;
+    const el4 = document.getElementById('aiPadIIUltimo');
+    if (el4) {
+      if (u) { el4.innerHTML = htmlBarraUltimo(''); el4.hidden = false; }
+      else { el4.innerHTML = ''; el4.hidden = true; }
+    }
+    const el5 = document.getElementById('aiJogosPadUltimo');
+    if (el5) {
+      if (u) { el5.innerHTML = htmlBarraUltimo(extraAba5Ultimo()); el5.hidden = false; }
+      else { el5.innerHTML = ''; el5.hidden = true; }
+    }
+  }
+  function scrollLinhaVencedora(tbody) {
+    if (!JOGOS_PAD._scrollVencedor) return;
+    JOGOS_PAD._scrollVencedor = false;
+    const tr = tbody && tbody.querySelector('tr.tr-jogo-vencedor');
+    if (!tr) return;
+    const wrap = tbody.closest('.table-responsive');
+    if (wrap) {
+      const wrapRect = wrap.getBoundingClientRect();
+      const trRect = tr.getBoundingClientRect();
+      wrap.scrollTop += (trRect.top - wrapRect.top) - Math.max(40, wrap.clientHeight / 3);
+    } else {
+      tr.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function filtrarPadII() {
+    const st = document.getElementById('aiFiltroStatusPadII')?.value || '';
+    return CAT_PAD_II.filter(p => {
+      if (st && p.status !== st) return false;
+      if (!PAD_II_BUSCA) return true;
+      return padraoBate(p, PAD_II_BUSCA);
+    });
+  }
+
+  function renderPadroesII() {
+    const tbody = document.querySelector('#aiTabelaPadroesII tbody');
+    const info = document.getElementById('aiPadIIInfo');
+    if (!tbody) return;
+    let rows = filtrarPadII();
+    const sk = SORT.p2 || { key: 'frequencia', dir: 'desc' };
+    const dir = sk.dir === 'asc' ? 1 : -1;
+    rows = [...rows].sort((a, b) => {
+      const ka = a[sk.key], kb = b[sk.key];
+      if (sk.key === 'padrao' || sk.key === 'descricao' || sk.key === 'status') {
+        return dir * String(ka || '').localeCompare(String(kb || ''), 'pt-BR');
+      }
+      const na = ka == null ? -1 : +ka;
+      const nb = kb == null ? -1 : +kb;
+      return dir * (na - nb);
+    });
+    document.querySelectorAll('#aiTabelaPadroesII th.ai-sort').forEach(th => {
+      th.classList.toggle('ai-sort-asc', th.dataset.sort === sk.key && sk.dir === 'asc');
+      th.classList.toggle('ai-sort-desc', th.dataset.sort === sk.key && sk.dir === 'desc');
+    });
+    const topSet = new Set((window.__AI_TOP_PAD || []).map(t => t.padrao));
+    tbody.innerHTML = rows.map((p, i) => {
+      const checked = PAD_II_SEL.has(p.padrao) ? 'checked' : '';
+      const cls = [
+        p.eh_padrao_ultimo_concurso ? 'tr-padrao-ultimo' : '',
+        topSet.has(p.padrao) ? 'tr-top-freq' : '',
+      ].filter(Boolean).join(' ');
+      const atraso = p.atraso == null ? '—' : String(p.atraso);
+      const jogosLink = `<a href="#" class="fw-bold text-decoration-underline" data-act="ver-jogos-padrao" data-padrao="${esc(p.padrao)}" title="Ver as ${fmtVol(p.jogos_possiveis)} apostas possíveis (só dentro da média)">${fmtVol(p.jogos_possiveis)}</a>`;
+      return `<tr class="${cls}" data-padrao="${esc(p.padrao)}"${p.eh_padrao_ultimo_concurso ? ' title="Padrão do último resultado (vencedor)"' : ''}>
+        <td><input type="checkbox" class="form-check-input ai-pad-ii-chk" data-padrao="${esc(p.padrao)}" ${checked}></td>
+        <td class="text-center text-muted">${i + 1}</td>
+        <td class="td-padrao"><code>${esc(p.padrao)}</code></td>
+        <td class="td-dist"><span class="ai-col-alinha">${esc(p.descricao)}</span></td>
+        <td class="td-jogos"><span class="ai-col-alinha">${jogosLink}</span></td>
+        <td class="td-freq"><span class="ai-col-alinha">${esc(p.frequencia)}</span></td>
+        <td class="td-atraso"><span class="ai-col-alinha">${esc(atraso)}</span></td>
+        <td class="td-apostar">${p.para_apostar == null ? '—' : fmtVol(p.para_apostar)}</td>
+        <td class="td-ja-saiu">${p.ja_sairam_dentro == null ? '—' : fmtVol(p.ja_sairam_dentro)}</td>
+        <td>${statusBadge(p.status)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="10" class="text-muted">Nenhum padrão com os filtros.</td></tr>';
+    if (info) info.textContent = `Exibindo ${rows.length} de ${CAT_PAD_II.length} padrões`;
+    atualizarSelPadII();
+  }
+
+  function pctResumoPad(r, univ) {
+    if (r.prob_teorica_pct != null) return Number(r.prob_teorica_pct) || 0;
+    return univ ? (100 * Number(r.jogos_possiveis || 0) / univ) : 0;
+  }
+
+  function renderResumoOperacionalPadroes(meta) {
+    if (meta) RESUMO_PAD_META = meta;
+    meta = meta || RESUMO_PAD_META || {};
+    const status = document.getElementById('aiPadIIResumoStatus');
+    const checagemEl = document.getElementById('aiPadIIChecagem');
+    aplicarResumoNosPadroes();
+    renderPadroesII();
+    if (!RESUMO_PAD.length) {
+      if (status) status.textContent = 'Aguardando cálculo de Para apostar / Já saíram…';
+      if (checagemEl) { checagemEl.classList.add('d-none'); checagemEl.innerHTML = ''; }
+      return;
+    }
+    if (status) {
+      const totA = RESUMO_PAD.reduce((s, r) => s + (Number(r.para_apostar) || 0), 0);
+      const totJ = RESUMO_PAD.reduce((s, r) => s + (Number(r.ja_sairam_dentro) || 0), 0);
+      const elapsed = meta.elapsed_ms != null ? ` · ${fmtVol(meta.elapsed_ms)} ms` : '';
+      status.innerHTML = `<strong>${fmtVol(meta.total_padroes != null ? meta.total_padroes : RESUMO_PAD.length)} padrões</strong> ·
+        total para apostar: <strong class="text-success">${fmtVol(meta.total_para_apostar != null ? meta.total_para_apostar : totA)}</strong> ·
+        já saíram (dentro): <strong class="text-danger">${fmtVol(meta.total_ja_sairam_dentro != null ? meta.total_ja_sairam_dentro : totJ)}</strong>${elapsed}`;
+    }
+    if (checagemEl && meta && meta.checagem) {
+      renderChecagemResumo(meta.checagem);
+    }
+  }
+
+  function renderChecagemResumo(ch) {
+    const el = document.getElementById('aiPadIIChecagem');
+    if (!el || !ch) return;
+    el.classList.remove('d-none');
+    el.classList.toggle('is-fail', !ch.ok);
+    const title = ch.ok
+      ? '<div class="ai-checagem-title ok">✓ Checagem OK — números consistentes</div>'
+      : '<div class="ai-checagem-title fail">⚠ Checagem com divergências</div>';
+    const just = `<p class="ai-checagem-just">
+      Justificativa: os padrões particionam o universo da modalidade
+      <strong>C(${esc(ch.max_dezena - ch.min_dezena + 1)},${esc(ch.tamanho_jogo)})</strong>.
+      A soma dos jogos deve fechar 100% desse universo; a soma das frequências deve igualar os
+      <strong>${fmtVol(ch.total_concursos)}</strong> concursos apurados; e
+      <em>para apostar + já saíram = dentro da média</em> em cada padrão.
+    </p>`;
+    const items = (ch.checks || []).map(c => {
+      const cls = c.ok ? 'ok' : 'fail';
+      const mark = c.ok ? '✓' : '✗';
+      return `<div class="ai-check-row ${cls}">
+        <span>${mark}</span>
+        <span>${esc(c.label)}</span>
+        <span class="nums">${fmtVol(c.esperado)} = ${fmtVol(c.obtido)}</span>
+      </div>`;
+    }).join('');
+    const totais = `
+      <div class="ai-checagem-totais">
+        <span>Universo <strong>${fmtVol(ch.total_universo)}</strong> (${esc(ch.pct_universo_coberto)}%)</span>
+        <span>Concursos <strong>${fmtVol(ch.total_concursos)}</strong></span>
+        <span>Dentro <strong>${fmtVol(ch.total_dentro)}</strong></span>
+        <span>Próximas <strong>${fmtVol(ch.total_proxima)}</strong></span>
+        <span>Fora <strong>${fmtVol(ch.total_fora)}</strong></span>
+        <span>Apostar <strong>${fmtVol(ch.total_para_apostar)}</strong></span>
+        <span>Já saíram <strong>${fmtVol(ch.total_ja_sairam_dentro)}</strong></span>
+      </div>`;
+    const errs = (ch.inconsistencias_linha || []).length
+      ? `<div class="fail mt-2">Linhas: ${ch.inconsistencias_linha.map(esc).join(' · ')}</div>`
+      : '';
+    el.innerHTML = `${title}${just}<div class="ai-checagem-grid">${items}</div>${totais}${errs}`;
+  }
+
+  async function carregarResumoOperacionalPadroes() {
+    const status = document.getElementById('aiPadIIResumoStatus');
+    const btn = document.getElementById('aiPadIIBtnResumo');
+    const tbody = null; // tabela resumo removida
+    const checagemEl = document.getElementById('aiPadIIChecagem');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Calculando…'; }
+    if (status) status.textContent = 'Calculando resumo operacional dos padrões (pode levar alguns segundos)…';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="12" class="text-muted text-center">Calculando…</td></tr>';
+    if (checagemEl) { checagemEl.classList.add('d-none'); checagemEl.innerHTML = ''; }
+    try {
+      const r = await fetch(`${API}/resumo-operacional-padroes`);
+      const d = await r.json();
+      if (!d.sucesso) throw new Error(d.erro || 'Falha');
+      RESUMO_PAD = d.padroes || [];
+      renderResumoOperacionalPadroes(d);
+    } catch (e) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="12" class="text-danger text-center">${esc(e.message || e)}</td></tr>`;
+      if (status) status.innerHTML = `<span class="text-danger">${esc(e.message || e)}</span>`;
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Atualizar resumo'; }
+    }
+  }
+
+  async function carregarPadroesII() {
+    const kpis = document.getElementById('aiPadIIKpis');
+    const topEl = document.getElementById('aiPadIITop');
+    if (kpis) kpis.innerHTML = '<div class="col-12 small text-muted">Carregando…</div>';
+    try {
+      const r = await fetch(`${API}/catalogo-padroes`);
+      const d = await r.json();
+      if (!d.sucesso) throw new Error(d.erro || 'Falha');
+      CAT_PAD_II = d.padroes || [];
+      window.__AI_TOP_PAD = d.top_frequencia || [];
+      ULTIMO_RESULTADO = d.ultimo_resultado || null;
+      if (kpis) {
+        kpis.innerHTML = [
+          ['Padrões', d.total_padroes],
+          ['Com frequência', d.total_padroes_com_frequencia],
+          ['Faltantes', d.total_padroes_faltantes],
+          ['Sorteios', d.total_sorteios_analisados],
+        ].map(([lab, val]) => `
+          <div class="col-6 col-md-3"><div class="ai-kpi"><div class="lbl">${esc(lab)}</div>
+          <div class="val">${fmtVol(val)}</div></div></div>`).join('');
+      }
+      if (topEl) {
+        topEl.innerHTML = (d.top_frequencia || []).map((t, i) => `
+          <div class="col-md-4">
+            <div class="ai-kpi ai-top-freq-card" role="button" tabindex="0"
+                 data-act="ver-jogos-padrao" data-padrao="${esc(t.padrao)}"
+                 title="Abrir apostas deste padrão (só dentro da média)">
+              <div class="lbl">Top ${i + 1} frequência</div>
+              <div class="val" style="font-size:.95rem"><code>${esc(t.padrao)}</code></div>
+              <div class="small text-muted">${esc(t.descricao)} · ${esc(t.frequencia)}x (${esc(t.percentual_concursos)}%)</div>
+              <div class="ai-top-jogos">${fmtVol(t.jogos_possiveis)} jogos possíveis</div>
+            </div>
+          </div>`).join('');
+      }
+      renderBarrasUltimo();
+      renderPadroesII();
+      // Resumo operacional (para apostar × já saíram) — carrega em seguida
+      carregarResumoOperacionalPadroes();
+    } catch (e) {
+      if (kpis) kpis.innerHTML = `<div class="col-12 text-danger small">${esc(e.message || e)}</div>`;
+    }
+  }
+
+  function contarStatus(st) {
+    const rs = JOGOS_PAD.resumo_status || {};
+    if (rs && rs[st] != null) return Number(rs[st]) || 0;
+    return (JOGOS_PAD.all || []).filter(j => (j.status_media || 'fora') === st).length;
+  }
+  function atualizarNavJogosPad() {
+    const total = Number(JOGOS_PAD.total) || 0;
+    const bruto = (JOGOS_PAD.all || []).length;
+    const nDentro = contarStatus('dentro');
+    const nJa = contarDentroJaSairam();
+    const nNovos = contarDentroNovos();
+    const size = tamanhoPaginaJogos(total);
+    const pages = Math.max(1, Math.ceil(total / size) || 1);
+    const page = total ? Math.floor((JOGOS_PAD.offset || 0) / size) + 1 : 1;
+    const prev = document.getElementById('aiJogosPadPrev');
+    const next = document.getElementById('aiJogosPadNext');
+    const first = document.getElementById('aiJogosPadFirst');
+    const last = document.getElementById('aiJogosPadLast');
+    const pageNum = document.getElementById('aiJogosPadPageNum');
+    const hasPad = !!JOGOS_PAD.padrao;
+    if (prev) prev.disabled = page <= 1 || !hasPad || total === 0;
+    if (next) next.disabled = page >= pages || !hasPad || total === 0;
+    if (first) first.disabled = page <= 1 || !hasPad || total === 0;
+    if (last) last.disabled = page >= pages || !hasPad || total === 0;
+    if (pageNum) {
+      pageNum.disabled = !hasPad || total === 0;
+      pageNum.max = pages;
+      pageNum.value = total ? page : '';
+    }
+    const filtro = JOGOS_PAD.filtroMedia || 'dentro_novos';
+    const info = document.getElementById('aiJogosPadInfo');
+    const buscaDez = JOGOS_PAD.buscaDezenas || [];
+    const dezLbl = buscaDez.length
+      ? ` · dezenas ${buscaDez.map(fmtDez2).join(' ')}`
+      : '';
+    if (info && hasPad) {
+      if (!total) {
+        info.textContent = `Nenhuma aposta no filtro atual${dezLbl} · dentro da média: ${fmtVol(nDentro)} (${fmtVol(nJa)} já saíram · ${fmtVol(nNovos)} ainda não)`;
+      } else {
+        const de = (JOGOS_PAD.offset || 0) + 1;
+        const ate = Math.min((JOGOS_PAD.offset || 0) + (JOGOS_PAD.cache || []).length, total);
+        const filtroLbl = filtro === 'dentro_novos' ? 'ainda não saíram (apostar)'
+          : (filtro === 'dentro_ja' ? 'já saíram (não apostar)'
+            : (filtro === 'dentro' ? 'dentro da média (todas)' : filtro));
+        info.textContent = `Pág. ${page}/${pages} · ${fmtVol(de)}–${fmtVol(ate)} de ${fmtVol(total)} · ${filtroLbl}${dezLbl} · ${JOGOS_PAD.sel.size} marcadas`;
+      }
+    }
+    const tot = document.getElementById('aiJogosPadTotal');
+    if (tot && hasPad) {
+      tot.className = 'badge badge-dentro-aposta';
+      tot.textContent = `${fmtVol(nNovos)} para apostar`;
+      tot.title = `${fmtVol(nNovos)} jogos dentro da média que ainda não saíram — clique para filtrar`;
+      tot.style.cursor = 'pointer';
+      tot.onclick = () => {
+        setFiltroMedia('dentro_novos');
+        JOGOS_PAD.offset = 0;
+        aplicarPaginaJogos();
+      };
+    }
+    const jaEl = document.getElementById('aiJogosPadJaSairam');
+    if (jaEl && hasPad) {
+      jaEl.textContent = `${fmtVol(nJa)} já saíram`;
+      jaEl.title = `${fmtVol(nJa)} jogos deste padrão (dentro da média) já saíram no histórico — não apostar neles`;
+      jaEl.style.cursor = 'pointer';
+      jaEl.onclick = () => {
+        setFiltroMedia('dentro_ja');
+        JOGOS_PAD.offset = 0;
+        aplicarPaginaJogos();
+      };
+    }
+    const resumo = document.getElementById('aiJogosPadResumoAposta');
+    if (resumo) {
+      if (!hasPad) {
+        resumo.classList.add('d-none');
+        resumo.innerHTML = '';
+      } else {
+        resumo.classList.remove('d-none');
+        const avis = filtro === 'dentro_ja'
+          ? `<div class="ai-aposta-sub text-danger fw-bold">Lista de jogos que JÁ SAÍRAM — não use para apostar.</div>`
+          : (filtro === 'all' || filtro === 'dentro'
+            ? `<div class="ai-aposta-sub">Dica: use «ainda não saíram» para apostar sem repetir resultados históricos.</div>`
+            : '');
+        resumo.innerHTML = `
+          <div>Para apostar: <span class="ai-aposta-qtd">${fmtVol(nNovos)}</span> jogos <strong>dentro da média</strong> que <strong>ainda não saíram</strong></div>
+          <div class="ai-aposta-sub">dentro da média: ${fmtVol(nDentro)} · já saíram: ${fmtVol(nJa)} · padrão completo: ${fmtVol(bruto)} · próximas: ${fmtVol(contarStatus('proxima'))} · fora: ${fmtVol(contarStatus('fora'))}</div>
+          ${avis}`;
+      }
+    }
+    const selCount = document.getElementById('aiJogosPadSelCount');
+    if (selCount) selCount.textContent = `${JOGOS_PAD.sel.size} marcadas`;
+    const pageRows = JOGOS_PAD.cache || [];
+    const chkPag = document.getElementById('aiJogosPadChkPagina');
+    if (chkPag) {
+      const n = pageRows.length;
+      const nSel = pageRows.filter(j => JOGOS_PAD.sel.has(j.dezenas_fmt)).length;
+      chkPag.disabled = !hasPad || n === 0;
+      chkPag.checked = n > 0 && nSel === n;
+      chkPag.indeterminate = nSel > 0 && nSel < n;
+    }
+    ['aiJogosPadSelPagina', 'aiJogosPadSelTodas', 'aiJogosPadLimparSel', 'aiJogosPadCopiar',
+     'aiJogosPadExportTxt', 'aiJogosPadExportCsv', 'aiJogosPadExportXlsx'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = !hasPad;
+    });
+  }
+
+  function fmtDist(d) {
+    if (d == null || d === '') return '—';
+    const n = Number(d);
+    if (!Number.isFinite(n)) return '—';
+    return n > 0 ? `+${n}` : String(n);
+  }
+  function statusPill(st, label) {
+    const s = st || 'fora';
+    const lbl = label || (s === 'dentro' ? 'Dentro da média' : (s === 'proxima' ? 'Próxima da média' : 'Fora da faixa'));
+    const icon = s === 'dentro' || s === 'proxima' ? '●' : '○';
+    return `<span class="ai-status-pill ${esc(s)}" title="${esc(lbl)}">${icon} ${esc(lbl)}</span>`;
+  }
+  function jogosFiltradosPorMedia() {
+    const f = JOGOS_PAD.filtroMedia || 'dentro_novos';
+    const all = JOGOS_PAD.all || [];
+    if (f === 'all') return all;
+    if (f === 'alinhadas') return all.filter(j => j.status_media === 'dentro' || j.status_media === 'proxima');
+    if (f === 'proxima' || f === 'fora') {
+      return all.filter(j => (j.status_media || 'fora') === f);
+    }
+    // dentro / dentro_novos / dentro_ja
+    const dentro = all.filter(j => (j.status_media || 'fora') === 'dentro');
+    if (f === 'dentro_novos') return dentro.filter(j => !jogoJaSaiu(j));
+    if (f === 'dentro_ja') return dentro.filter(jogoJaSaiu);
+    return dentro;
+  }
+  function atualizarKpisMedia() {
+    const el = document.getElementById('aiJogosPadMediaKpis');
+    if (!el) return;
+    const faixa = JOGOS_PAD.soma_faixa;
+    const nDentro = contarStatus('dentro');
+    const nJa = contarDentroJaSairam();
+    const nNovos = contarDentroNovos();
+    const nProx = contarStatus('proxima');
+    const nFora = contarStatus('fora');
+    if (!faixa || faixa.media == null) {
+      el.innerHTML = '';
+      return;
+    }
+    const fonte = faixa.fonte === 'historico' ? 'histórica' : 'teórica';
+    el.innerHTML = `
+      <span class="badge bg-light text-dark border">Média ${esc(faixa.media)} (±${esc(faixa.tol_proxima)}) · ${fonte}</span>
+      <span class="badge ai-status-pill dentro" title="Ainda não saíram — para apostar">Apostar ${fmtVol(nNovos)}</span>
+      <span class="badge ai-status-pill fora" title="Já saíram no histórico">Já saíram ${fmtVol(nJa)}</span>
+      <span class="badge ai-status-pill dentro" title="Total dentro da média">Dentro ${fmtVol(nDentro)}</span>
+      <span class="badge ai-status-pill proxima">Próximas ${fmtVol(nProx)}</span>
+      <span class="badge ai-status-pill fora">Fora ${fmtVol(nFora)}</span>`;
+  }
+  function linhasOrdenadasJogos() {
+    const sk = SORT.jogos || { key: 'distancia', dir: 'asc' };
+    const dir = sk.dir === 'asc' ? 1 : -1;
+    const busca = JOGOS_PAD.buscaDezenas || [];
+    const base = jogosFiltradosPorMedia();
+    const filtrados = busca.length ? base.filter(j => jogoTemDezenasBusca(j, busca)) : base;
+    return [...filtrados].sort((a, b) => {
+      if (sk.key === 'concurso') {
+        return dir * ((concursoDoJogo(a) || 0) - (concursoDoJogo(b) || 0));
+      }
+      if (sk.key === 'status_media') {
+        const ord = { dentro: 0, proxima: 1, fora: 2 };
+        return dir * ((ord[a.status_media] ?? 9) - (ord[b.status_media] ?? 9));
+      }
+      if (sk.key === 'distancia') {
+        const da = Math.abs(Number(a.distancia));
+        const db = Math.abs(Number(b.distancia));
+        const na = Number.isFinite(da) ? da : 99999;
+        const nb = Number.isFinite(db) ? db : 99999;
+        if (na !== nb) return dir * (na - nb);
+        return dir * ((Number(a.soma) || 0) - (Number(b.soma) || 0));
+      }
+      const ka = a[sk.key], kb = b[sk.key];
+      if (sk.key === 'dezenas_fmt' || sk.key === 'padrao_inicial') {
+        return dir * String(ka || '').localeCompare(String(kb || ''), 'pt-BR');
+      }
+      return dir * ((+ka || 0) - (+kb || 0));
+    });
+  }
+
+  function aplicarPaginaJogos() {
+    const sizeEl = document.getElementById('aiJogosPadPageSize');
+    const filtroEl = document.getElementById('aiJogosPadFiltroMedia');
+    if (sizeEl) {
+      const raw = sizeEl.value;
+      const parsed = (raw === '' || raw == null) ? 100 : +raw;
+      JOGOS_PAD.pageSize = Number.isFinite(parsed) ? parsed : 100;
+    } else {
+      JOGOS_PAD.pageSize = 100;
+    }
+    JOGOS_PAD.filtroMedia = filtroEl ? (filtroEl.value || 'dentro_novos') : (JOGOS_PAD.filtroMedia || 'dentro_novos');
+    MAPA_CONCURSOS = null; // reconstrói mapa com CACHE atual
+    const ordered = linhasOrdenadasJogos();
+    JOGOS_PAD.total = ordered.length;
+    const size = tamanhoPaginaJogos(ordered.length);
+    if (JOGOS_PAD._irVencedor) {
+      JOGOS_PAD._irVencedor = false;
+      const idx = ordered.findIndex(ehJogoVencedor);
+      if (idx >= 0) {
+        JOGOS_PAD.offset = Math.floor(idx / size) * size;
+        JOGOS_PAD._scrollVencedor = true;
+      } else {
+        JOGOS_PAD.offset = 0;
+      }
+    }
+    const maxOff = Math.max(0, ordered.length - 1);
+    if (JOGOS_PAD.offset > maxOff) JOGOS_PAD.offset = Math.floor(maxOff / size) * size;
+    JOGOS_PAD.cache = ordered.slice(JOGOS_PAD.offset, JOGOS_PAD.offset + size);
+    document.querySelectorAll('#aiTabelaJogosPadrao th.ai-sort').forEach(th => {
+      const sk = SORT.jogos;
+      th.classList.toggle('ai-sort-asc', th.dataset.sort === sk.key && sk.dir === 'asc');
+      th.classList.toggle('ai-sort-desc', th.dataset.sort === sk.key && sk.dir === 'desc');
+    });
+    renderJogosPadrao();
+  }
+
+  function renderJogosPadrao() {
+    const tbody = document.querySelector('#aiTabelaJogosPadrao tbody');
+    if (!tbody) return;
+    const rows = JOGOS_PAD.cache || [];
+    if (!JOGOS_PAD.padrao) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-muted">
+        Nenhuma aposta ainda — selecione um padrão na aba <strong>4 · Padrões II</strong> (coluna Jogos).
+      </td></tr>`;
+      atualizarNavJogosPad();
+      atualizarKpisMedia();
+      renderBarrasUltimo();
+      return;
+    }
+    const baseNum = Number(JOGOS_PAD.offset) || 0;
+    tbody.innerHTML = rows.map((j, i) => {
+      const key = j.dezenas_fmt;
+      const checked = JOGOS_PAD.sel.has(key) ? 'checked' : '';
+      const isWin = ehJogoVencedor(j);
+      const conc = concursoDoJogo(j);
+      const jaSaiu = !!conc;
+      const st = j.status_media || 'fora';
+      const trCls = [
+        JOGOS_PAD.sel.has(key) ? 'tr-aposta-sel' : '',
+        isWin ? 'tr-padrao-ultimo tr-jogo-vencedor' : '',
+        jaSaiu ? 'tr-ja-saiu' : '',
+      ].filter(Boolean).join(' ');
+      const concTit = conc
+        ? ` title="JÁ SAIU no concurso ${esc(conc)} — não apostar novamente${isWin ? ' (último / vencedor)' : ''}"`
+        : ' title="Ainda não saiu no histórico"';
+      const concHtml = conc
+        ? `<span class="ai-col-alinha"><a href="#" class="fw-bold text-decoration-underline" data-act="ir-concurso" data-concurso="${esc(conc)}" title="Abrir concurso ${esc(conc)} na aba Resultados">${esc(conc)}</a><span class="badge-ja-saiu">já saiu</span></span>`
+        : '<span class="text-muted small">—</span>';
+      return `<tr class="${trCls}"${isWin ? ' data-vencedor="1"' : ''}${jaSaiu ? ' data-ja-saiu="1"' : ''}${concTit}>
+        <td><input type="checkbox" class="form-check-input ai-aposta-chk" data-dez="${esc(key)}" ${checked}></td>
+        <td class="text-center text-muted">${baseNum + i + 1}</td>
+        <td class="td-padrao"><code>${esc(j.padrao_inicial || JOGOS_PAD.padrao)}</code></td>
+        <td class="td-dezenas-centro font-monospace">${htmlDezenasComDestaque(j.dezenas_fmt, JOGOS_PAD.buscaDezenas)}</td>
+        <td class="td-soma-destaque">${esc(j.soma)}</td>
+        <td>${statusPill(st, j.status_media_label)}</td>
+        <td class="td-conc-jogo">${concHtml}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="7" class="text-muted">${(JOGOS_PAD.buscaDezenas || []).length
+      ? `Nenhuma aposta com ${(JOGOS_PAD.buscaDezenas || []).map(fmtDez2).join(' ')} neste filtro.`
+      : 'Sem jogos nesta página.'}</td></tr>`;
+    atualizarNavJogosPad();
+    atualizarKpisMedia();
+    renderBarrasUltimo();
+    scrollLinhaVencedora(tbody);
+  }
+
+  function jogosParaExportar() {
+    const escopo = (document.getElementById('aiJogosPadEscopoExport') || {}).value || 'auto';
+    const filtrados = linhasOrdenadasJogos();
+    if (escopo === 'page') return JOGOS_PAD.cache || [];
+    if (escopo === 'sel') return filtrados.filter(j => JOGOS_PAD.sel.has(j.dezenas_fmt));
+    if (escopo === 'all') return filtrados;
+    if (JOGOS_PAD.sel.size) return filtrados.filter(j => JOGOS_PAD.sel.has(j.dezenas_fmt));
+    return filtrados;
+  }
+
+  async function carregarJogosPadrao(padrao, offset) {
+    const p = String(padrao || '').trim();
+    if (!p) return;
+    if (!CACHE || !CACHE.length) {
+      try { await carregarResultados(); } catch (_) { /* segue sem mapa */ }
+    }
+    if (!ULTIMO_RESULTADO) {
+      await carregarPadroesII();
+    }
+    MAPA_CONCURSOS = null;
+    const same = JOGOS_PAD.padrao === p && (JOGOS_PAD.all || []).length;
+    if (same && offset != null) {
+      const aviso = document.getElementById('aiJogosPadAvisoVazio');
+      if (aviso) aviso.classList.add('d-none');
+      JOGOS_PAD.offset = Math.max(0, +offset);
+      if (+offset === 0) JOGOS_PAD._irVencedor = true;
+      aplicarPaginaJogos();
+      return;
+    }
+    JOGOS_PAD.padrao = p;
+    JOGOS_PAD.offset = Math.max(0, offset == null ? 0 : +offset);
+    JOGOS_PAD.sel = new Set();
+    const lbl = document.getElementById('aiJogosPadLbl');
+    const hint = document.getElementById('aiJogosPadHint');
+    const aviso = document.getElementById('aiJogosPadAvisoVazio');
+    const tbody = document.querySelector('#aiTabelaJogosPadrao tbody');
+    if (aviso) aviso.classList.add('d-none');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Carregando apostas…</td></tr>';
+    if (lbl) lbl.innerHTML = `Padrão <code>${esc(p)}</code>`;
+    try {
+      const url = `${API}/jogos-padrao?padrao=${encodeURIComponent(p)}`;
+      const r = await fetch(url);
+      const d = await r.json();
+      if (!d.sucesso) throw new Error(d.erro || 'Falha');
+      JOGOS_PAD.all = d.jogos || [];
+      JOGOS_PAD.total = d.total || JOGOS_PAD.all.length;
+      JOGOS_PAD.descricao = d.descricao || '';
+      JOGOS_PAD.soma_faixa = d.soma_faixa || null;
+      JOGOS_PAD.soma_media = d.soma_media;
+      JOGOS_PAD.resumo_status = d.resumo_status || null;
+      if (lbl) lbl.innerHTML = `Padrão <code>${esc(d.padrao)}</code> · ${esc(d.descricao || '')}`;
+      const mediaTxt = d.soma_media != null ? ` · média ${d.soma_media}` : '';
+      if (hint) {
+        const nDentro = (d.resumo_status && d.resumo_status.dentro) || 0;
+        // Contagens de já saíram dependem do CACHE de resultados
+        MAPA_CONCURSOS = null;
+        const nJa = (d.jogos || []).filter(j => (j.status_media || 'fora') === 'dentro' && jogoJaSaiu(j)).length;
+        const nNovos = Math.max(0, nDentro - nJa);
+        hint.innerHTML = `Padrão <code>${esc(d.padrao)}</code> (${esc(d.descricao || '')})${mediaTxt}.
+          <strong>${fmtVol(nNovos)} para apostar</strong> (dentro da média e ainda não saíram) ·
+          <strong class="text-danger">${fmtVol(nJa)} já saíram</strong> ·
+          ${fmtVol(nDentro)} dentro da média no total.`;
+      }
+      setFiltroMedia(JOGOS_PAD.filtroMedia || 'dentro_novos');
+      if (offset == null || +offset === 0) JOGOS_PAD._irVencedor = true;
+      aplicarPaginaJogos();
+    } catch (e) {
+      if (aviso) aviso.classList.remove('d-none');
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-danger">${esc(e.message || e)}</td></tr>`;
+    }
+  }
+
+  function abrirJogosPadrao(padrao, opts) {
+    const o = opts || {};
+    // Fluxo de aposta: ainda não saíram + dentro da média (salvo pedido explícito)
+    setFiltroMedia(o.filtroMedia != null ? o.filtroMedia : 'dentro_novos');
+    JOGOS_PAD.offset = 0;
+    if (o.irVencedor) JOGOS_PAD._irVencedor = true;
+    goAba('jogos-padrao');
+    carregarJogosPadrao(padrao, 0);
+  }
+
+  function irParaPaginaJogos(page) {
+    const size = tamanhoPaginaJogos();
+    const total = Number(JOGOS_PAD.total) || 0;
+    const pages = Math.max(1, Math.ceil(total / size) || 1);
+    let p = Math.floor(Number(page) || 1);
+    if (p < 1) p = 1;
+    if (p > pages) p = pages;
+    JOGOS_PAD.offset = (p - 1) * size;
+    aplicarPaginaJogos();
+  }
+
+  async function copiarApostasPadrao() {
+    const rows = jogosParaExportar();
+    if (!rows.length) {
+      alert('Nenhuma aposta para copiar. Marque linhas ou escolha «Todas do padrão».');
+      return;
+    }
+    const txt = rows.map(j => j.dezenas_fmt).join('\n');
+    try {
+      await navigator.clipboard.writeText(txt);
+      const hint = document.getElementById('aiJogosPadHint');
+      if (hint) hint.innerHTML = `<strong>Copiado:</strong> ${rows.length} aposta(s) para a área de transferência.`;
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = txt;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      alert(`${rows.length} aposta(s) copiada(s).`);
+    }
+  }
+
+  async function exportJogosPadrao(formato) {
+    const p = JOGOS_PAD.padrao;
+    if (!p) return;
+    const rows = jogosParaExportar();
+    if (!rows.length) {
+      alert('Nenhuma aposta no escopo/filtro escolhido.');
+      return;
+    }
+    if (formato === 'txt') {
+      const header = `# Padrao: ${p} (${JOGOS_PAD.descricao || ''})\n# Soma media: ${JOGOS_PAD.soma_media ?? ''}\n# Filtro: ${JOGOS_PAD.filtroMedia || 'dentro'}\n# Total exportado: ${rows.length}\n`;
+      const body = header + rows.map(j => j.dezenas_fmt).join('\n') + '\n';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([body], { type: 'text/plain;charset=utf-8' }));
+      a.download = `apostas_padrao_${p.replace(/\s+/g, '')}_dentro.txt`;
+      a.click();
+      return;
+    }
+    // CSV / XLSX via backend — mesma regra e mesmos campos da interface
+    try {
+      const r = await fetch(`${API}/jogos-padrao/export`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          padrao: p,
+          formato: formato === 'xlsx' ? 'xlsx' : 'csv',
+          jogos: rows.map(j => ({
+            id: j.id,
+            dezenas_fmt: j.dezenas_fmt,
+            soma: j.soma,
+            media: j.media,
+            distancia: j.distancia,
+            status_media: j.status_media,
+            status_media_label: j.status_media_label,
+            padrao_inicial: j.padrao_inicial || p,
+            concurso: concursoDoJogo(j) || '',
+          })),
+        }),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.erro || `Falha HTTP ${r.status}`);
+      }
+      const blob = await r.blob();
+      const cd = r.headers.get('Content-Disposition') || '';
+      const m = /filename=\"?([^\";]+)\"?/i.exec(cd);
+      const nome = (m && m[1]) || `apostas_padrao.${formato === 'xlsx' ? 'xlsx' : 'csv'}`;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = nome;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (e) {
+      alert(e.message || e);
+    }
+  }
+
+  // events
+  document.getElementById('aiBtnCarregar').addEventListener('click', carregarResultados);
+  document.getElementById('aiBtnExportCsv').addEventListener('click', exportCsv);
+  document.getElementById('aiPageSize').addEventListener('change', () => {
+    PAGE.res = 1; PAGE.pad = 1;
+    renderResultados(CACHE, { keepCache: true });
+  });
+  document.getElementById('aiNDigitos')?.addEventListener('change', () => {
+    const n = +document.getElementById('aiNDigitos').value;
+    if (n) carregarCatalogo(n);
+  });
+  document.getElementById('aiBuscaDigitos').addEventListener('input', () => {
+    if (CAT.length) renderCatalogo({ linhas: CAT, resumo: {}, n_digitos: +document.getElementById('aiNDigitos').value });
+  });
+  const buscaP2 = document.getElementById('aiBuscaPadII');
+  if (buscaP2) buscaP2.addEventListener('input', renderPadroesII);
+  document.getElementById('aiBtnPesquisarPadII')?.addEventListener('click', pesquisarPadII);
+  document.getElementById('aiBtnResetPadII')?.addEventListener('click', resetarPesquisaPadII);
+  document.getElementById('aiBuscaPadII')?.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      pesquisarPadII();
+    }
+  });
+  const filtroP2 = document.getElementById('aiFiltroStatusPadII');
+  if (filtroP2) filtroP2.addEventListener('change', renderPadroesII);
+  function bindCollapseToggle(btnId, painelId) {
+    document.getElementById(btnId)?.addEventListener('click', () => {
+      const btn = document.getElementById(btnId);
+      const painel = document.getElementById(painelId);
+      if (!btn || !painel) return;
+      const aberto = painel.classList.toggle('d-none') === false;
+      btn.classList.toggle('is-open', aberto);
+      btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+    });
+  }
+  bindCollapseToggle('aiResToggleInfo', 'aiResPainelInfo');
+  document.getElementById('aiPadIIToggleInfo')?.addEventListener('click', () => {
+    const btn = document.getElementById('aiPadIIToggleInfo');
+    const painel = document.getElementById('aiPadIIPainelInfo');
+    if (!btn || !painel) return;
+    const aberto = painel.classList.toggle('d-none') === false;
+    btn.classList.toggle('is-open', aberto);
+    btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+  });
+  document.getElementById('aiCombToggleInfo')?.addEventListener('click', () => {
+    const btn = document.getElementById('aiCombToggleInfo');
+    const painel = document.getElementById('aiCombPainelInfo');
+    if (!btn || !painel) return;
+    const aberto = painel.classList.toggle('d-none') === false;
+    btn.classList.toggle('is-open', aberto);
+    btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+  });
+  bindCollapseToggle('aiJogosPadToggleInfo', 'aiJogosPadPainelInfo');
+  bindCollapseToggle('aiPanHistToggleInfo', 'aiPanHistPainelInfo');
+  document.getElementById('tbToggleInfo')?.addEventListener('click', () => {
+    const btn = document.getElementById('tbToggleInfo');
+    const painel = document.getElementById('tbPainelInfo');
+    if (!btn || !painel) return;
+    const aberto = painel.classList.toggle('d-none') === false;
+    btn.classList.toggle('is-open', aberto);
+    btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+  });
+
+  // Auto-carrega Padrões II / Combinações ao clicar na aba
+  document.querySelectorAll('#aiTabs [data-bs-toggle="tab"]').forEach(btn => {
+    btn.addEventListener('shown.bs.tab', () => {
+      const aba = btn.dataset.aba;
+      if (aba === 'padroes-ii') {
+        if (!CAT_PAD_II.length) carregarPadroesII();
+      }
+      if (aba === 'jogos-padrao') {
+        if (!ULTIMO_RESULTADO) carregarPadroesII();
+        else renderBarrasUltimo();
+      }
+      if (aba === 'combinacoes') {
+        if (COMB_SKIP_NEXT_AUTO) {
+          COMB_SKIP_NEXT_AUTO = false;
+        } else if (!COMB_INICIADO) {
+          iniciarAbaCombinacoes();
+        }
+      }
+      if (aba === 'panorama') {
+        if (!PAN_HIST.carregado) carregarHistoricoCompleto();
+        else renderPanoramaHist();
+      }
+    });
+  });
+
+  document.getElementById('aiJogosPadPrev')?.addEventListener('click', () => {
+    const size = tamanhoPaginaJogos();
+    JOGOS_PAD.offset = Math.max(0, (JOGOS_PAD.offset || 0) - size);
+    aplicarPaginaJogos();
+  });
+  document.getElementById('aiJogosPadNext')?.addEventListener('click', () => {
+    const size = tamanhoPaginaJogos();
+    JOGOS_PAD.offset = (JOGOS_PAD.offset || 0) + size;
+    aplicarPaginaJogos();
+  });
+  document.getElementById('aiJogosPadFirst')?.addEventListener('click', () => irParaPaginaJogos(1));
+  document.getElementById('aiJogosPadLast')?.addEventListener('click', () => {
+    const size = tamanhoPaginaJogos();
+    const total = Number(JOGOS_PAD.total) || 0;
+    const pages = Math.max(1, Math.ceil(total / size) || 1);
+    irParaPaginaJogos(pages);
+  });
+  document.getElementById('aiJogosPadPageNum')?.addEventListener('change', (ev) => {
+    irParaPaginaJogos(ev.target.value);
+  });
+  document.getElementById('aiJogosPadPageNum')?.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      irParaPaginaJogos(ev.target.value);
+    }
+  });
+  document.getElementById('aiJogosPadPageSize')?.addEventListener('change', () => {
+    JOGOS_PAD.offset = 0;
+    aplicarPaginaJogos();
+  });
+  document.getElementById('aiJogosPadExportTxt')?.addEventListener('click', () => exportJogosPadrao('txt'));
+  document.getElementById('aiJogosPadExportCsv')?.addEventListener('click', () => exportJogosPadrao('csv'));
+  document.getElementById('aiJogosPadExportXlsx')?.addEventListener('click', () => exportJogosPadrao('xlsx'));
+  document.getElementById('aiJogosPadFiltroMedia')?.addEventListener('change', () => {
+    JOGOS_PAD.offset = 0;
+    aplicarPaginaJogos();
+  });
+  document.getElementById('aiJogosPadBuscaDez')?.addEventListener('input', () => syncBuscaDezenas());
+  document.getElementById('aiJogosPadBuscaDez')?.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') {
+      ev.preventDefault();
+      limparBuscaDezenas();
+    }
+  });
+  document.getElementById('aiJogosPadBuscaDezLimpar')?.addEventListener('click', limparBuscaDezenas);
+  document.getElementById('aiJogosPadCopiar')?.addEventListener('click', copiarApostasPadrao);
+  document.getElementById('aiJogosPadSelPagina')?.addEventListener('click', () => {
+    (JOGOS_PAD.cache || []).forEach(j => JOGOS_PAD.sel.add(j.dezenas_fmt));
+    renderJogosPadrao();
+  });
+  document.getElementById('aiJogosPadSelTodas')?.addEventListener('click', () => {
+    linhasOrdenadasJogos().forEach(j => JOGOS_PAD.sel.add(j.dezenas_fmt));
+    renderJogosPadrao();
+  });
+  document.getElementById('aiJogosPadChkPagina')?.addEventListener('change', (ev) => {
+    const on = !!ev.target.checked;
+    (JOGOS_PAD.cache || []).forEach(j => {
+      if (on) JOGOS_PAD.sel.add(j.dezenas_fmt);
+      else JOGOS_PAD.sel.delete(j.dezenas_fmt);
+    });
+    renderJogosPadrao();
+  });
+  document.getElementById('aiJogosPadLimparSel')?.addEventListener('click', () => {
+    JOGOS_PAD.sel.clear();
+    renderJogosPadrao();
+  });
+  document.getElementById('aiPadIISelTodos')?.addEventListener('click', () => {
+    filtrarPadII().forEach(p => PAD_II_SEL.add(p.padrao));
+    renderPadroesII();
+  });
+  document.getElementById('aiPadIILimparSel')?.addEventListener('click', () => {
+    PAD_II_SEL.clear();
+    renderPadroesII();
+  });
+  document.getElementById('aiPadIIChkTodos')?.addEventListener('change', (ev) => {
+    const on = !!ev.target.checked;
+    filtrarPadII().forEach(p => {
+      if (on) PAD_II_SEL.add(p.padrao);
+      else PAD_II_SEL.delete(p.padrao);
+    });
+    renderPadroesII();
+  });
+  document.getElementById('aiPadIIBtnResumo')?.addEventListener('click', () => {
+    carregarResumoOperacionalPadroes();
+  });
+  document.getElementById('aiJogosPadVoltarPadII')?.addEventListener('click', () => {
+    goAba('padroes-ii');
+    if (!CAT_PAD_II.length) carregarPadroesII();
+  });
+
+  root.addEventListener('change', (ev) => {
+    const chk = ev.target.closest('.ai-pad-ii-chk');
+    if (chk) {
+      const p = chk.dataset.padrao;
+      if (!p) return;
+      if (chk.checked) PAD_II_SEL.add(p);
+      else PAD_II_SEL.delete(p);
+      atualizarSelPadII();
+      return;
+    }
+    const ap = ev.target.closest('.ai-aposta-chk');
+    if (ap) {
+      const dez = ap.dataset.dez;
+      if (!dez) return;
+      if (ap.checked) JOGOS_PAD.sel.add(dez);
+      else JOGOS_PAD.sel.delete(dez);
+      const tr = ap.closest('tr');
+      if (tr) tr.classList.toggle('tr-aposta-sel', ap.checked);
+      atualizarNavJogosPad();
+    }
+  });
+
+  root.addEventListener('click', (ev) => {
+    const th = ev.target.closest('th.ai-sort');
+    if (th) {
+      const table = th.dataset.table;
+      const key = th.dataset.sort;
+      if (!table || !key || !SORT[table]) return;
+      if (SORT[table].key === key) SORT[table].dir = SORT[table].dir === 'asc' ? 'desc' : 'asc';
+      else {
+        SORT[table].key = key;
+        const DESC_FIRST = new Set(['concurso', 'data', 'frequencia', 'jogos_possiveis', 'soma',
+          'para_apostar', 'ja_sairam_dentro', 'dentro', 'proxima', 'fora', 'soma_media', 'pct',
+          'atraso_padrao', 'vezes_padrao']);
+        SORT[table].dir = key === 'distancia' ? 'asc' : (DESC_FIRST.has(key) ? 'desc' : 'asc');
+      }
+      if (table === 'p2') {
+        renderPadroesII();
+        return;
+      }
+      if (table === 'jogos') {
+        JOGOS_PAD.offset = 0;
+        aplicarPaginaJogos();
+        return;
+      }
+      if (table === 'resumo') {
+        renderResumoOperacionalPadroes();
+        return;
+      }
+      if (table === 'pan') {
+        renderPanoramaHist();
+        return;
+      }
+      PAGE[table] = 1;
+      renderResultados(CACHE, { keepCache: true });
+      return;
+    }
+    const btn = ev.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    if (act === 'page') {
+      const table = btn.dataset.table;
+      PAGE[table] = +(btn.dataset.page || 1);
+      renderResultados(CACHE, { keepCache: true });
+      return;
+    }
+    const n = +(btn.dataset.n || 0);
+    const dig = btn.dataset.dig || '';
+    const conc = +(btn.dataset.concurso || 0);
+    if (act === 'dl-nao' || act === 'dl-nao16') {
+      const row = CACHE.find(x => +x.concurso === conc);
+      if (!row) return;
+      const txt = act === 'dl-nao16' ? (row.nao_sairam_16_fmt || '') : (row.nao_sairam_fmt || '');
+      const suf = act === 'dl-nao16' ? '16_construtor' : 'todos';
+      downloadTxt(txt.replace(/\s+/g, ' ').trim() + '\n', `nao_sairam_c${conc}_${suf}.txt`);
+      return;
+    }
+    if (act === 'comb') {
+      document.getElementById('aiBuscaDigitos').value = dig;
+      COMB_SKIP_NEXT_AUTO = true;
+      goAba('combinacoes');
+      iniciarAbaCombinacoes(n);
+      return;
+    }
+    if (act === 'ver-jogos-padrao') {
+      ev.preventDefault();
+      const pad = btn.dataset.padrao || '';
+      if (pad) abrirJogosPadrao(pad, { filtroMedia: 'dentro_novos' });
+      return;
+    }
+    if (act === 'ir-vencedor') {
+      ev.preventDefault();
+      const u = ULTIMO_RESULTADO;
+      if (!u) {
+        alert('Último resultado ainda não carregado. Aguarde a aba 4 carregar.');
+        return;
+      }
+      const padUlt = normalizarPadrao(u.padrao);
+      if (!padUlt) {
+        alert('Padrão do último resultado não disponível.');
+        return;
+      }
+      // Vencedor já saiu: abre lista com histórico e destaca
+      abrirJogosPadrao(padUlt, { filtroMedia: 'dentro', irVencedor: true });
+      return;
+    }
+    if (act === 'ir-vencedor-todos') {
+      ev.preventDefault();
+      const u = ULTIMO_RESULTADO;
+      const padUlt = normalizarPadrao(u && u.padrao);
+      if (!padUlt) return;
+      abrirJogosPadrao(padUlt, { filtroMedia: 'all', irVencedor: true });
+      return;
+    }
+    if (act === 'ir-concurso') {
+      ev.preventDefault();
+      irParaConcurso(btn.dataset.concurso);
+    }
+  });
+
+  // deep-link
+  const aba0 = (root.dataset.aba || 'resultados').toLowerCase();
+  const n0 = +(root.dataset.n || 0);
+  document.getElementById('aiPanHistCarregar')?.addEventListener('click', () => carregarHistoricoCompleto());
+  let _panBuscaT = null;
+  document.getElementById('aiPanHistBusca')?.addEventListener('input', () => {
+    clearTimeout(_panBuscaT);
+    _panBuscaT = setTimeout(() => {
+      if (PAN_HIST.carregado) renderPanoramaHist();
+      else carregarHistoricoCompleto();
+    }, 320);
+  });
+  document.getElementById('aiPanHistPadrao')?.addEventListener('input', () => {
+    clearTimeout(_panBuscaT);
+    _panBuscaT = setTimeout(() => {
+      if (PAN_HIST.carregado) renderPanoramaHist();
+      else carregarHistoricoCompleto();
+    }, 320);
+  });
+  document.getElementById('aiPanHistPadrao')?.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      if (PAN_HIST.carregado) renderPanoramaHist();
+      else carregarHistoricoCompleto();
+    }
+  });
+  carregarResultados().then(() => {
+    if (aba0 === 'combinacoes') COMB_SKIP_NEXT_AUTO = true;
+    if (aba0 && aba0 !== 'resultados') goAba(aba0);
+    if (aba0 === 'combinacoes') {
+      iniciarAbaCombinacoes(n0 || null);
+    }
+    if (aba0 === 'padroes-ii') carregarPadroesII();
+    if (aba0 === 'jogos-padrao') {
+      const qs = new URLSearchParams(window.location.search);
+      const pad = (qs.get('padrao') || root.dataset.padrao || '').trim();
+      if (pad) abrirJogosPadrao(pad);
+      else goAba('padroes-ii');
+    }
+    if (aba0 === 'tubular' && window.AiTubular) window.AiTubular.load();
+    if (aba0 === 'panorama') carregarHistoricoCompleto();
+  });
+})();
+</script>
+{% endblock %}

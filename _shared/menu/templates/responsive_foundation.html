@@ -1,0 +1,494 @@
+{# Camada estrutural de responsividade — Mobile First.
+   Incluída no <head> de todas as modalidades. Não altera regras de negócio. #}
+<style id="responsive-foundation">
+    /* —— Base fluida —— */
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    body {
+        min-width: 0;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    body:has(#mobilePanel.open) {
+        overflow: hidden;
+    }
+
+    img,
+    video {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .page-content,
+    .container,
+    .container-fluid,
+    .row,
+    [class*="col-"] {
+        min-width: 0;
+    }
+
+    .page-content {
+        width: 100%;
+        max-width: min(87.5rem, 100%);
+        padding-inline: clamp(0.5rem, 2.5vw, 1.5rem);
+        padding-block: clamp(0.75rem, 1.5vw, 1.5rem);
+        overflow-x: clip;
+    }
+
+    @media (min-width: 1600px) {
+        .page-content { max-width: 92rem; }
+    }
+
+    @media (min-width: 1920px) {
+        .page-content { max-width: 100rem; }
+    }
+
+    @media (min-width: 2560px) {
+        .page-content { max-width: 112rem; }
+    }
+
+    /* —— Navbar: hamburger até tablet; desktop a partir de 1200px —— */
+    nav.navbar-main {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        padding: 0 max(0.5rem, env(safe-area-inset-right, 0px));
+        padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+        gap: 0.35rem;
+    }
+
+    a.nav-brand {
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
+    }
+
+    .nav-brand-text {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .nav-brand-text small {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+
+    .nav-toggler {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        flex-shrink: 0;
+        margin-left: 0;
+    }
+
+    .nav-gear-isolated {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        justify-content: center;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    .nav-mobile-panel {
+        height: calc(100dvh - var(--nav-h));
+        max-height: calc(100dvh - var(--nav-h));
+        padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+
+    .mobile-link {
+        min-height: 2.75rem;
+    }
+
+    /* Mobile / tablet: esconde itens desktop (o 900px original deixa overflow em retrato). */
+    @media (max-width: 1199.98px) {
+        .navbar-main .nav-items {
+            display: none;
+        }
+
+        .navbar-main .nav-sep {
+            display: none;
+        }
+
+        .navbar-main .nav-toggler {
+            display: inline-flex;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .navbar-main {
+            padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+            padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+            gap: 1rem;
+        }
+
+        a.nav-brand {
+            flex: 0 0 auto;
+        }
+
+        .navbar-main .nav-toggler {
+            display: none;
+        }
+
+        .nav-mobile-panel,
+        .nav-mobile-panel.open {
+            display: none !important;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .nav-brand-text small {
+            display: none;
+        }
+
+        .nav-brand-text {
+            font-size: 0.82rem;
+        }
+    }
+
+    @media (max-width: 340px) {
+        .nav-brand-icon {
+            width: 2rem;
+            height: 2rem;
+            font-size: 1rem;
+        }
+    }
+
+    /* Celular em paisagem: barra mais baixa, painel usável. */
+    @media (orientation: landscape) and (max-height: 500px) {
+        :root {
+            --nav-h: 3rem;
+        }
+
+        .navbar-main {
+            height: var(--nav-h);
+        }
+
+        body {
+            padding-top: var(--nav-h);
+        }
+
+        .nav-brand-text small {
+            display: none;
+        }
+
+        .nav-mobile-panel {
+            top: var(--nav-h);
+            height: calc(100dvh - var(--nav-h));
+            max-height: calc(100dvh - var(--nav-h));
+            padding-block: 0.5rem;
+        }
+
+        .mobile-link {
+            padding-block: 0.45rem;
+            margin-bottom: 0.1rem;
+        }
+    }
+
+    /* —— Toque e formulários em telas estreitas —— */
+    @media (max-width: 767.98px) {
+        .btn,
+        .form-control,
+        .form-select,
+        .form-check-input {
+            min-height: 2.75rem;
+        }
+
+        .btn-sm,
+        .btn-group-sm > .btn {
+            min-height: 2.5rem;
+            padding-inline: 0.75rem;
+        }
+
+        input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+        select,
+        textarea {
+            font-size: 1rem;
+            max-width: 100%;
+        }
+
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+    }
+
+    /* —— Tabelas: scroll interno, nunca estouram a viewport —— */
+    .table-responsive {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* —— Modais e dropdowns —— */
+    .modal-dialog {
+        max-width: min(var(--bs-modal-width, 31.25rem), calc(100vw - 1rem));
+        margin-inline: 0.5rem;
+    }
+
+    @media (min-width: 576px) {
+        .modal-dialog {
+            margin-inline: auto;
+        }
+    }
+
+    .dropdown-menu {
+        max-width: min(calc(100vw - 1rem), 24rem);
+    }
+
+    /* —— Foco visível —— */
+    :focus-visible {
+        outline: 2px solid var(--accent, currentColor);
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .navbar-main,
+        .nav-dropdown,
+        .nav-btn,
+        .dd-link,
+        .mobile-link {
+            transition: none;
+        }
+    }
+
+    /* —— Homes das modalidades (.page-header / .stat-card / .sync-card) —— */
+    .page-content .page-header {
+        min-width: 0;
+        padding: clamp(1rem, 2.8vw, 1.5rem) clamp(0.85rem, 3vw, 2rem);
+    }
+
+    .page-content .page-header > .d-flex {
+        min-width: 0;
+    }
+
+    .page-content .page-header h2 {
+        font-size: clamp(1.15rem, 4vw, 1.75rem);
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    .page-content .page-header > .d-flex > div {
+        min-width: 0;
+    }
+
+    .page-content .stat-card {
+        min-width: 0;
+        padding: clamp(0.7rem, 2vw, 1.2rem) clamp(0.45rem, 2vw, 1.5rem);
+    }
+
+    .page-content .stat-card .sc-val {
+        font-size: clamp(1.15rem, 3.6vw, 1.8rem);
+        overflow-wrap: anywhere;
+    }
+
+    .page-content .stat-card .sc-lbl {
+        font-size: clamp(0.62rem, 1.7vw, 0.75rem);
+        letter-spacing: 0;
+        line-height: 1.25;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .page-content .sync-card {
+        min-width: 0;
+        padding: clamp(0.9rem, 2.2vw, 1.5rem);
+    }
+
+    .page-content .sync-card a.btn,
+    .page-content .sync-card .btn {
+        white-space: normal;
+        text-align: left;
+    }
+
+    .page-content .ultimo-draw-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.5rem 1rem;
+        align-items: center;
+        justify-items: center;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .page-content .ultimo-draw-row > .fw-bold {
+        text-align: center !important;
+        white-space: normal !important;
+    }
+
+    @media (min-width: 768px) {
+        .page-content .ultimo-draw-row {
+            grid-template-columns: minmax(7.5rem, 12.2rem) minmax(0, 1fr);
+            justify-items: stretch;
+            gap: 2rem;
+        }
+
+        .page-content .ultimo-draw-row > .fw-bold {
+            text-align: right !important;
+        }
+
+        .page-content .ultimo-draw-row--extra {
+            grid-template-columns: minmax(7.5rem, 12.2rem) minmax(0, 1fr) minmax(0, 15rem);
+        }
+    }
+
+    .page-content .draw-dezenas-wrap,
+    .page-content .premiacao-wrap {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .page-content .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        min-width: 0;
+    }
+
+    .page-content .tip-card {
+        min-width: 0;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .page-content .stat-num {
+        font-size: clamp(1.25rem, 4vw, 2rem);
+        overflow-wrap: anywhere;
+    }
+
+    .page-content .stat-label {
+        overflow-wrap: anywhere;
+        white-space: normal;
+        line-height: 1.25;
+    }
+
+    .page-content .mecaica-badge {
+        white-space: normal;
+    }
+
+    .page-content .route-card {
+        min-width: 0;
+    }
+
+    @media (min-width: 768px) {
+        .page-content .hero-grid {
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1.5rem;
+        }
+
+        .page-content .tip-card {
+            min-width: 16.25rem;
+            max-width: 19.375rem;
+            width: auto;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .page-content .page-header > .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+
+        .page-content .page-header .ms-auto {
+            margin-left: 0 !important;
+            width: 100%;
+        }
+
+        .page-content .page-header .btn {
+            width: 100%;
+        }
+
+        .page-content .sync-card .row > .col-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+
+    /* —— Telas internas: abas, barras, tabelas, heatmaps —— */
+    .page-content .page-hdr {
+        min-width: 0;
+        padding: clamp(1rem, 2.8vw, 1.25rem) clamp(0.85rem, 3vw, 1.5rem);
+    }
+
+    .page-content .nav-tabs,
+    .page-content .nav-pills {
+        flex-wrap: wrap;
+        row-gap: 0.25rem;
+    }
+
+    .page-content .nav-tabs .nav-link,
+    .page-content .nav-pills .nav-link {
+        min-height: 2.5rem;
+    }
+
+    .page-content .card-header {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        min-width: 0;
+    }
+
+    .page-content .heatmap-center {
+        max-width: min(47.5rem, 100%);
+    }
+
+    .page-content .heatmap-grid {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .page-content .conf-tab-container {
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+    }
+
+    .page-content .conf-tab-btn {
+        min-height: 2.75rem;
+        flex-shrink: 0;
+    }
+
+    .page-content .conv-upload-zone {
+        padding: clamp(1rem, 4vw, 2rem);
+    }
+
+    .page-content .conv-input-concurso {
+        max-width: 100%;
+        width: min(8.75rem, 100%);
+    }
+
+    .page-content .auto-wrap {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .page-content .pos-excel-block .pos-panels-wrap {
+        max-width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 767.98px) {
+        .page-content .btn-group {
+            flex-wrap: wrap;
+            max-width: 100%;
+        }
+
+        .page-content .comp-bar .comp-field,
+        .page-content .comp-bar .comp-field-sm {
+            flex: 1 1 100%;
+            min-width: 0;
+            max-width: none;
+        }
+    }
+</style>

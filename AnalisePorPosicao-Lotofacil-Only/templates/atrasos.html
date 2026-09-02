@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- ===== PAINEL: APOSTA SNIPER POR MAIOR ATRASO ===== -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 border-top border-5" style="border-color: #d4a017 !important;">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center"
+                style="background: linear-gradient(135deg, #1a0a1a, #3a1a3a);">
+                <h4 class="mb-0 text-white">
+                    <i class="fas fa-bullseye"></i> Aposta Sniper — Dezena Mais Atrasada por Posição
+                </h4>
+                <button class="btn fw-bold" id="btnGerarApostaAtraso" style="background:var(--primary);border-color:var(--primary);color:#fff;">
+                    <i class="fas fa-bolt"></i> Gerar Aposta
+                </button>
+            </div>
+            <div class="card-body" style="background-color: #f9f3ff;">
+                <!-- Loader -->
+                <div id="loaderAposta" class="text-center py-3 text-muted" style="display:none;">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i><br>Calculando...
+                </div>
+
+                <!-- Resultado: dezenas em bolinhas -->
+                <div id="painelApostaAtraso" style="display:none;">
+                    <p class="text-muted mb-2" style="font-size:0.85rem;">
+                        Concurso base: <strong id="lblUltimoConcurso"></strong> &nbsp;|&nbsp;
+                        Uma dezena por posição (P1→P15), priorizando o maior atraso.
+                        <span class="badge bg-secondary ms-2">⚠️ Dezenas com atraso=0 (cinza) excluídas
+                            automaticamente</span>
+                    </p>
+
+                    <!-- Bolinhas das 15 dezenas -->
+                    <div id="bolinhasAposta" class="d-flex flex-wrap gap-2 mb-3"></div>
+
+                    <!-- Tabela detalhada posição a posição -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm text-center mb-0" style="font-size:0.88rem;">
+                            <thead style="background-color:#3a1a3a; color:white;">
+                                <tr>
+                                    <th>Posição</th>
+                                    <th>Dezena Escolhida</th>
+                                    <th>Atraso (Concursos)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyApostaDetalhe"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Placeholder inicial -->
+                <div id="placeholderAposta" class="text-center py-4 text-muted">
+                    <i class="fas fa-crosshairs fa-2x mb-2"></i><br>
+                    Clique em <strong>"Gerar Aposta"</strong> para ver as dezenas mais atrasadas por posição.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== PAINEL: 24 APOSTAS SNIPER VERTICAL ===== -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 border-top border-5" style="border-color: #672666 !important;">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center"
+                style="background: linear-gradient(135deg, #2d003d, #672666);">
+                <div>
+                    <h4 class="mb-0 text-white">
+                        <i class="fas fa-crosshairs"></i> 24 Apostas Sniper Vertical
+                    </h4>
+                    <small class="text-warning">
+                        Lotofácil: 25 dezenas → 1 descartada (atraso=0) → <strong>24 apostas cirúrgicas</strong>
+                    </small>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <span id="badge24" class="badge bg-warning text-dark fs-6" style="display:none;"></span>
+                    <button class="btn btn-outline-light fw-bold" id="btnGerar24">
+                        <i class="fas fa-layer-group"></i> Gerar 24 Apostas
+                    </button>
+                    <button class="btn text-white fw-bold" id="btnDownload24"
+                        style="background-color: #d4a017; display:none;">
+                        <i class="fas fa-download"></i> Baixar TXT
+                    </button>
+                    <a href="/central-conferencias/" class="btn btn-success fw-bold" id="btnConferencia24"
+                        style="display:none;">
+                        <i class="fas fa-trophy"></i> Ir para Conferência
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <!-- Alerta de resultado -->
+                <div id="alerta24" class="alert mx-3 mt-3 mb-0" style="display:none;"></div>
+
+                <!-- Loader -->
+                <div id="loader24" class="text-center py-5 text-muted" style="display:none;">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i><br>Gerando 24 apostas...
+                </div>
+
+                <!-- Placeholder inicial -->
+                <div id="placeholder24" class="text-center py-5 text-muted">
+                    <i class="fas fa-layer-group fa-3x mb-3" style="color:#672666; opacity:0.3;"></i>
+                    <p class="mb-0">Clique em <strong>"Gerar 24 Apostas"</strong> para extrair e baixar as apostas.</p>
+                </div>
+
+                <!-- Tabela de apostas -->
+                <div id="tabela24" style="display:none;">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover text-center mb-0">
+                            <thead style="background-color:#672666; color:white; font-size:0.85rem;">
+                                <tr>
+                                    <th>#</th>
+                                    <th>P1</th>
+                                    <th>P2</th>
+                                    <th>P3</th>
+                                    <th>P4</th>
+                                    <th>P5</th>
+                                    <th>P6</th>
+                                    <th>P7</th>
+                                    <th>P8</th>
+                                    <th>P9</th>
+                                    <th>P10</th>
+                                    <th>P11</th>
+                                    <th>P12</th>
+                                    <th>P13</th>
+                                    <th>P14</th>
+                                    <th>P15</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody24"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== PAINEL: RANKING DE ATRASO POR POSIÇÃO (detalhe) ===== -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 border-top border-5" style="border-color: #672666 !important;">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0" style="color: #672666;">
+                    <i class="fas fa-hourglass-half"></i> Ranking de Atraso por Posição (Detalhe)
+                </h4>
+                <div class="d-flex gap-2">
+                    <select class="form-select border-dark text-dark fw-bold" style="width: auto; cursor: pointer;"
+                        id="filtroPosicao">
+                        {% for i in range(1, 16) %}
+                        <option value="{{ i }}">Posição {{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-center mb-0" style="font-size: 0.95rem;">
+                        <thead class="bg-dark text-white">
+                            <tr>
+                                <th>Top / Rank</th>
+                                <th>Dezena</th>
+                                <th>Atraso Atual (Concursos)</th>
+                                <th>Nível de Análise</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyAtrasos">
+                            <tr>
+                                <td colspan="4" class="py-5 text-muted"><i class="fas fa-spinner fa-spin"></i>
+                                    Carregando base de cálculos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let matrizAtrasosGlobais = null;
+    let apostas24Geradas = [];
+    let conteudoTxt24 = '';
+    let ultimoConcurso24 = 0;
+
+    // ── Carrega a matriz de atrasos ao iniciar
+    document.addEventListener("DOMContentLoaded", async function () {
+        const selectPosicao = document.getElementById("filtroPosicao");
+
+        try {
+            const response = await fetch("/analise/api/atrasos");
+            const data = await response.json();
+
+            if (data.error) {
+                document.getElementById("tbodyAtrasos").innerHTML =
+                    `<tr><td colspan="4" class="text-danger py-4">${data.error}</td></tr>`;
+                return;
+            }
+
+            matrizAtrasosGlobais = data.matriz_atrasos;
+            renderTabelaAtrasos(selectPosicao.value);
+
+        } catch (error) {
+            document.getElementById("tbodyAtrasos").innerHTML =
+                `<tr><td colspan="4" class="text-danger py-4">Falha ao buscar atrasos</td></tr>`;
+        }
+
+        selectPosicao.addEventListener("change", function (e) {
+            renderTabelaAtrasos(e.target.value);
+        });
+
+        document.getElementById("btnGerarApostaAtraso").addEventListener("click", gerarApostaAtraso);
+        document.getElementById("btnGerar24").addEventListener("click", gerar24Apostas);
+        document.getElementById("btnDownload24").addEventListener("click", baixarTxt24);
+    });
+
+    // ── Renderiza tabela de atrasos por posição
+    function renderTabelaAtrasos(posicaoIndex) {
+        if (!matrizAtrasosGlobais) return;
+
+        const atrasosDaPosicao = matrizAtrasosGlobais[`posicao_${posicaoIndex}`];
+        const tbody = document.getElementById("tbodyAtrasos");
+        tbody.innerHTML = "";
+
+        if (!atrasosDaPosicao || atrasosDaPosicao.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-4">Vazio</td></tr>`;
+            return;
+        }
+
+        atrasosDaPosicao.forEach((item, index) => {
+            const rank = index + 1;
+            const atraso = item.atraso;
+            let corBadge, nivelLabel, rowStyle = "";
+
+            if (atraso === 0) {
+                corBadge = "bg-secondary";
+                nivelLabel = "⛔ Recém Sorteada — Não Apostar";
+                rowStyle = "opacity:0.4; background-color:#f0f0f0;";
+            } else if (rank <= 5) {
+                corBadge = "bg-danger";
+                nivelLabel = "🔥 Extremo Atraso — Candidata Forte";
+            } else if (rank <= 12) {
+                corBadge = "bg-warning text-dark";
+                nivelLabel = "⚡ Médio Atraso (Emergindo)";
+            } else {
+                corBadge = "bg-success";
+                nivelLabel = "✅ Quente (Recente)";
+            }
+
+            tbody.innerHTML += `
+                <tr style="${rowStyle}">
+                    <td class="fw-bold fs-6">#${rank}</td>
+                    <td class="fw-bold fs-5">${item.numero}</td>
+                    <td><span class="badge ${corBadge} fs-6 px-3">${atraso} concursos</span></td>
+                    <td class="text-muted small">${nivelLabel}</td>
+                </tr>
+            `;
+        });
+    }
+
+    // ── Gera a aposta única por maior atraso posicional
+    async function gerarApostaAtraso() {
+        const btn = document.getElementById("btnGerarApostaAtraso");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculando...';
+
+        document.getElementById("placeholderAposta").style.display = "none";
+        document.getElementById("painelApostaAtraso").style.display = "none";
+        document.getElementById("loaderAposta").style.display = "block";
+
+        try {
+            const response = await fetch("/analise/api/aposta-sniper-atraso");
+            const data = await response.json();
+
+            document.getElementById("loaderAposta").style.display = "none";
+
+            if (data.error) {
+                alert("Erro: " + data.error);
+                document.getElementById("placeholderAposta").style.display = "block";
+                return;
+            }
+
+            document.getElementById("lblUltimoConcurso").textContent = "#" + data.ultimo_concurso;
+
+            const bolinhasDiv = document.getElementById("bolinhasAposta");
+            bolinhasDiv.innerHTML = "";
+            data.dezenas.forEach(dez => {
+                bolinhasDiv.innerHTML += `
+                    <span style="
+                        display:inline-flex; align-items:center; justify-content:center;
+                        width:48px; height:48px; border-radius:50%;
+                        background: linear-gradient(135deg, #672666, #a040a0);
+                        color:white; font-weight:bold; font-size:1rem;
+                        box-shadow: 0 3px 8px rgba(103,38,102,0.4);
+                    ">${dez}</span>
+                `;
+            });
+
+            const tbody = document.getElementById("tbodyApostaDetalhe");
+            tbody.innerHTML = "";
+            data.aposta.forEach(item => {
+                const atraso = item.atraso;
+                let cor, label, rowStyle = "";
+
+                if (atraso === 0) {
+                    cor = "#6c757d";
+                    label = "⛔ Recém Sorteada — Não Apostar";
+                    rowStyle = "opacity:0.4; background:#f5f5f5;";
+                } else if (atraso >= 100) {
+                    cor = "#8b0000";
+                    label = "🔥🔥 Atraso Extremo — Apostar!";
+                } else if (atraso >= 50) {
+                    cor = "#dc3545";
+                    label = "🔥 Alto Atraso — Boa Candidata";
+                } else {
+                    cor = "#fd7e14";
+                    label = "⚡ Atraso Moderado";
+                }
+
+                tbody.innerHTML += `
+                    <tr style="${rowStyle}">
+                        <td class="fw-bold">P${item.posicao}</td>
+                        <td class="fw-bold" style="font-size:1.15rem; color:#3a1a3a;">${item.dezena}</td>
+                        <td>
+                            <span class="badge px-3" style="background-color:${cor}; font-size:0.9rem;">
+                                ${atraso} concursos
+                            </span>
+                        </td>
+                        <td class="text-muted small">${label}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById("painelApostaAtraso").style.display = "block";
+
+        } catch (err) {
+            document.getElementById("loaderAposta").style.display = "none";
+            document.getElementById("placeholderAposta").style.display = "block";
+            alert("Erro de conexão com o servidor.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-bolt"></i> Gerar Aposta';
+        }
+    }
+
+    // ── Gera as 24 apostas Sniper Vertical
+    async function gerar24Apostas() {
+        const btn = document.getElementById("btnGerar24");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+
+        document.getElementById("placeholder24").style.display = "none";
+        document.getElementById("tabela24").style.display = "none";
+        document.getElementById("alerta24").style.display = "none";
+        document.getElementById("btnDownload24").style.display = "none";
+        document.getElementById("btnConferencia24").style.display = "none";
+        document.getElementById("badge24").style.display = "none";
+        document.getElementById("loader24").style.display = "block";
+
+        try {
+            const response = await fetch("/analise/api/download-24-apostas", { method: "POST" });
+            const data = await response.json();
+
+            document.getElementById("loader24").style.display = "none";
+
+            if (data.error) {
+                const alerta = document.getElementById("alerta24");
+                alerta.className = "alert alert-danger mx-3 mt-3 mb-0";
+                alerta.innerHTML = `<i class="fas fa-times-circle"></i> Erro: ${data.error}`;
+                alerta.style.display = "block";
+                document.getElementById("placeholder24").style.display = "block";
+                return;
+            }
+
+            // Guardar para download posterior
+            apostas24Geradas = data.apostas;
+            conteudoTxt24 = data.conteudo_txt;
+            ultimoConcurso24 = data.ultimo_concurso || 0;
+
+            // Badge e botões
+            const badge = document.getElementById("badge24");
+            badge.textContent = `${data.total_geradas} apostas geradas`;
+            badge.style.display = "inline-block";
+            document.getElementById("btnDownload24").style.display = "inline-block";
+            document.getElementById("btnConferencia24").style.display = "inline-block";
+
+            // Alerta de sucesso
+            const alerta = document.getElementById("alerta24");
+            alerta.className = "alert alert-success mx-3 mt-3 mb-0";
+            alerta.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <strong>${data.total_geradas} apostas Sniper</strong> extraídas com sucesso!
+                (⚠️ ${data.descartadas} descartada(s) por atraso=0 — recém sorteada)<br>
+                <small class="text-muted">Arquivo salvo em: <code>${data.caminho}</code></small>
+            `;
+            alerta.style.display = "block";
+
+            // Preencher tabela
+            const tbody = document.getElementById("tbody24");
+            tbody.innerHTML = "";
+            data.apostas.forEach(aposta => {
+                const cells = aposta.dezenas_formatadas.map(d =>
+                    `<td class="fw-bold" style="color:#3a1a3a;">${d}</td>`
+                ).join('');
+                tbody.innerHTML += `<tr><td class="text-muted">#${aposta.aposta_num}</td>${cells}</tr>`;
+            });
+
+            document.getElementById("tabela24").style.display = "block";
+
+        } catch (err) {
+            document.getElementById("loader24").style.display = "none";
+            document.getElementById("placeholder24").style.display = "block";
+            alert("Erro de conexão com o servidor.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-layer-group"></i> Gerar 24 Apostas';
+        }
+    }
+
+    // ── Baixar TXT das 24 apostas
+    function baixarTxt24() {
+        if (!conteudoTxt24) return;
+        const blob = new Blob([conteudoTxt24], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `[Rank_Vertical_Absoluto_Sniper_LOTOFACIL_SORTEIO]_${ultimoConcurso24}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+<link rel="stylesheet" href="/caixa-excel/premiacao.css?v=20260830e">
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-history me-2"></i>Sorteios e premiação — {{ premiacao_ui.nome }}</span>
+        <button type="button" class="btn btn-sm ms-auto" id="btnPremiacaoCaixa"
+            style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:700;"
+            title="Importa ganhadores, rateio, cidade e UF do Excel CAIXA (não altera as dezenas do banco)">
+            <i class="fas fa-file-excel me-1"></i>Atualizar premiação (Excel)
+        </button>
+    </div>
+    <div id="ultimoResultadoDestaque" class="ultimo-destaque">
+        <div class="text-muted small">Carregando último resultado…</div>
+    </div>
+    <div class="px-ordem-bar">
+        {% if premiacao_ui.ordenar %}
+        <span>Bolas nas colunas:</span>
+        <div class="btn-group" role="group" aria-label="Ordem das bolas">
+            <button type="button" class="btn btn-outline-secondary" id="btnOrdemSorteio" data-ordem="sorteio">ordem do sorteio</button>
+            <button type="button" class="btn btn-outline-secondary" id="btnOrdemCresc" data-ordem="crescente">crescente</button>
+        </div>
+        {% endif %}
+        <label class="small text-muted mb-0 d-inline-flex align-items-center gap-1">
+            Mostrar
+            <select id="premiacaoPageSize" class="form-select form-select-sm" style="width:auto;font-size:.78rem;">
+                <option value="100">100</option>
+                <option value="300">300</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="0" selected>Todos</option>
+            </select>
+        </label>
+        <label class="small text-muted mb-0 d-inline-flex align-items-center gap-1">
+            Concurso
+            <input type="number" id="premiacaoBuscaConcurso" class="form-control form-control-sm" min="1" step="1" inputmode="numeric">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnPremiacaoBuscaConcurso">Pesquisar</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnPremiacaoLimparBusca" title="Resetar pesquisa" aria-label="Resetar pesquisa">
+                <i class="fas fa-undo-alt"></i>
+            </button>
+        </label>
+        <span id="premiacaoBuscaMsg" class="small"></span>
+        <span class="small text-muted" id="premiacaoCaixaStatus">Histórico completo · filtre coluna a coluna como no Excel.</span>
+    </div>
+    <div class="premiacao-wrap">
+        <table class="table table-sm table-bordered mb-0" id="premiacaoCaixaTabela">
+            <thead>
+                <tr id="premiacaoCaixaHeadRow"></tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="16" class="text-muted text-center py-3">Carregando…</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="premiacaoCaixaPager"></div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <i class="fas fa-trophy me-2"></i>Ranking de UF que mais paga
+    </div>
+    <div class="ranking-uf-nota">Cada concurso conta no máximo 1 vez por UF (mesmo com várias cidades no estado). Fonte: Excel complementar.</div>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0" id="rankingUfTabela">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>UF</th>
+                    <th>Quantidade de registros</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="3" class="text-muted text-center py-3">Carregando…</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="ranking-uf-toggle d-none" id="rankingUfToggleWrap">
+        <button type="button" class="btn" id="btnRankingUfToggle" aria-expanded="false">
+            Ver demais UFs <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+</div>
+<script>window.PREMIACAO_UI = {{ premiacao_ui|tojson }};</script>
+<script src="/caixa-excel/premiacao.js?v=20260831s"></script>

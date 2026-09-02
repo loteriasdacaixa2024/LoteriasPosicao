@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+
+{% block content %}
+<style>
+#ati-root .ati-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  color: var(--on-accent, #1a0a00);
+}
+#ati-root .ati-kpi h3 {
+  color: var(--primary);
+  font-weight: 800;
+  margin-bottom: .15rem;
+}
+#ati-root .card-header.ati-head {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: var(--on-accent, #1a0a00);
+  font-weight: 700;
+}
+#ati-root .badge-top1 {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #000; font-weight: 700; padding: 4px 10px; border-radius: 14px;
+}
+#ati-root .badge-top2 {
+  background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+  color: #000; font-weight: 700; padding: 4px 10px; border-radius: 14px;
+}
+#ati-root .badge-top3 {
+  background: linear-gradient(135deg, #CD7F32, #A0522D);
+  color: #fff; font-weight: 700; padding: 4px 10px; border-radius: 14px;
+}
+#ati-root .insight-box {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-left: 5px solid var(--primary);
+  padding: 14px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+}
+#ati-root .insight-box.ati-final {
+  background: linear-gradient(135deg, var(--accent-light, #fff8e1) 0%, #fff3c4 100%);
+  border-left-color: var(--accent);
+}
+#ati-root .janela-btn.active,
+#ati-root .base-tab-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  font-weight: 700;
+}
+#ati-root .table thead {
+  background: color-mix(in srgb, var(--accent) 55%, #fff);
+  color: var(--primary-xdark, #333);
+  font-weight: 700;
+}
+</style>
+
+<div class="container-fluid py-3" id="ati-root"
+     data-api="{{ api_base }}"
+     data-extra-mes="{{ '1' if extra_mes else '0' }}">
+
+  <div class="ati-header mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>
+      <h1 class="h4 mb-1"><i class="fas fa-chart-line"></i> {{ page_title }}</h1>
+      <p class="mb-0 small opacity-90">{{ page_subtitle }} — {{ modality_nome }}</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-sm btn-light" href="{{ escolha_url }}"><i class="fas fa-sliders-h"></i> Escolha Visual</a>
+      <a class="btn btn-sm btn-light" href="{{ inteligentes_url }}"><i class="fas fa-table"></i> Visualização Tubular</a>
+      <a class="btn btn-sm btn-dark" href="{{ gerador_escolha_url }}"><i class="fas fa-dice"></i> Gerar Apostas</a>
+      <button class="btn btn-sm btn-outline-dark" type="button" id="atiBtnAtualizar"><i class="fas fa-sync-alt"></i> Atualizar</button>
+      <a class="btn btn-sm btn-outline-dark" href="{{ gerador_elite_url }}"><i class="fas fa-brain"></i> Geradores Elite</a>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+    <span class="small fw-bold text-muted">Base:</span>
+    <div class="btn-group btn-group-sm" id="atiTabsBase">
+      {% for b in estudos_ui.bases_estatistica %}
+      <button type="button" class="btn btn-outline-secondary base-tab-btn{% if b.id == 'geral' %} active{% endif %}" data-base="{{ b.id }}">{{ b.label }}</button>
+      {% endfor %}
+    </div>
+    <span class="small fw-bold text-muted ms-2">Janela:</span>
+    <div class="btn-group btn-group-sm" id="atiJanelas">
+      {% for j in estudos_ui.janelas %}
+      <button type="button" class="btn btn-outline-secondary janela-btn{% if j == 0 %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div id="atiLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" style="width:3rem;height:3rem"></div>
+    <p class="mt-3 text-muted">Analisando padrões tubulares…</p>
+  </div>
+
+  <div id="atiContent" style="display:none">
+    <div class="card mb-3 border-0 shadow-sm">
+      <div class="card-header ati-head"><i class="fas fa-info-circle"></i> Resumo Geral</div>
+      <div class="card-body">
+        <div class="row text-center ati-kpi" id="atiResumo"></div>
+      </div>
+    </div>
+    <div id="atiRankings"></div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header ati-head"><i class="fas fa-lightbulb"></i> Insights Inteligentes</div>
+      <div class="card-body" id="atiInsights"></div>
+    </div>
+  </div>
+</div>
+<script src="/analise/analise-tubular/static/analise_tubular_inteligente.js"></script>
+{% endblock %}

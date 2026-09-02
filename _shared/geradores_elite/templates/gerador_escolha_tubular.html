@@ -1,0 +1,844 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+
+{% block content %}
+<style>
+#get-root .page-links a,
+#get-hub .page-links a {
+  border-color: var(--primary); color: var(--primary);
+}
+#get-root .page-links a:hover,
+#get-hub .page-links a:hover {
+  background: var(--primary); color: #fff;
+}
+#get-root .get-ball {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent); color: var(--on-accent, #1a0a00);
+  font-weight: 800; font-size: .78rem; margin: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.15);
+}
+#get-root .get-ball.rep { box-shadow: 0 0 0 3px #198754; }
+#get-root .base-tab-btn.active {
+  background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700;
+}
+#get-root .padrao-chip {
+  display: inline-block; font-size: .72rem; font-weight: 600;
+  padding: .2rem .55rem; border-radius: 999px;
+  background: var(--accent-light, #fff8e1); border: 1px solid rgba(0,0,0,.08);
+  margin: 2px;
+}
+#get-root .aposta-card {
+  border: 1px solid #e5e7eb; border-radius: 10px; padding: .75rem 1rem;
+  margin-bottom: .65rem; background: #fff;
+  border-left: 3px solid var(--primary);
+}
+#get-root .ok-pill {
+  display: inline-block; font-size: .65rem; font-weight: 700;
+  padding: .1rem .4rem; border-radius: 999px; margin: 1px;
+  background: #e8f5e9; color: #1b5e20;
+}
+#get-root .ok-pill.off { background: #fce8e6; color: #b71c1c; }
+#get-root .form-check-input:checked {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+#get-root .form-check-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--accent) 35%, transparent);
+}
+#get-root .lista-apostas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem 1rem;
+}
+#get-root .lista-apostas-grid.lista-apostas-hibrido {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 1100px) {
+  #get-root .lista-apostas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #get-root .lista-apostas-grid.lista-apostas-hibrido { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  #get-root .lista-apostas-grid { grid-template-columns: 1fr; }
+}
+#get-root #getBtnBacktest:not(:disabled):hover {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+#get-root .get-exib-btn.active {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+}
+#get-root .volante-oficial-wrap {
+  background: #fff9e6; border: 2px solid #e8d48a; border-radius: 10px;
+  padding: .45rem; margin-top: .35rem;
+}
+#get-root .volante-oficial-grid {
+  display: grid; grid-template-columns: repeat(var(--get-vcols, 10), 1fr); gap: 3px;
+}
+#get-root .volante-cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: .68rem; font-weight: 700; border-radius: 4px;
+  background: #fff; border: 1px solid #ccc; color: #666;
+}
+#get-root .volante-cell.na-aposta {
+  background: var(--accent); border-color: var(--primary); color: #1a0a00;
+}
+#get-root .volante-cell.acerto {
+  background: #198754; border-color: #146c43; color: #fff;
+}
+#get-root .aposta-card-inner.modo-hibrido {
+  display: flex; flex-direction: column; gap: .35rem;
+}
+#get-root details.get-detalhes > summary {
+  cursor: pointer; list-style: none; user-select: none;
+  font-size: .78rem; color: #6b7280; font-weight: 600;
+  display: inline-flex; align-items: center; gap: .35rem;
+  margin-top: .45rem;
+}
+#get-root details.get-detalhes > summary::-webkit-details-marker { display: none; }
+#get-root details.get-detalhes > summary::before {
+  content: '▸'; font-size: .85rem; transition: transform .15s;
+}
+#get-root details.get-detalhes[open] > summary::before {
+  content: '▾';
+}
+#get-root details.get-detalhes .get-detalhes-body {
+  margin-top: .4rem; padding-top: .35rem;
+  border-top: 1px dashed #e5e7eb;
+}
+#get-hub .get-hub-tabs .nav-link {
+  font-weight: 600; color: #495057;
+  border: 1px solid rgba(0,0,0,.08); border-radius: 999px;
+  padding: .35rem .9rem; margin: 0 .15rem .35rem 0;
+  background: #fff;
+}
+#get-hub .get-hub-tabs .nav-link.active {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+}
+#get-hub .get-hub-tabs .nav-link:hover:not(.active) {
+  border-color: var(--primary); color: var(--primary);
+}
+</style>
+
+<div class="container-fluid py-3" id="get-hub" data-aba-inicial="{{ aba_inicial or 'escolha' }}">
+  <div class="d-flex flex-wrap gap-2 mb-3 page-links">
+    <a class="btn btn-sm btn-outline-secondary" href="{{ escolha_url }}"><i class="fas fa-sliders-h"></i> Escolha Visual</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ sequencias_url or '/analise/analises-inteligentes/?aba=tubular' }}"><i class="fas fa-table"></i> Sequências (Análise)</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ tubular_url }}"><i class="fas fa-chart-line"></i> Análise Tubular</a>
+    <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-brain"></i> Elite</a>
+  </div>
+
+  <ul class="nav get-hub-tabs mb-3 flex-wrap justify-content-center" role="tablist">
+    <li class="nav-item"><button type="button" class="nav-link{% if (aba_inicial or 'escolha') == 'escolha' %} active{% endif %}" data-get-hub="escolha">Escolha/Tubular</button></li>
+    <li class="nav-item"><button type="button" class="nav-link{% if aba_inicial == 'manual' %} active{% endif %}" data-get-hub="manual">Seção 10 — Manual</button></li>
+    <li class="nav-item"><button type="button" class="nav-link{% if aba_inicial == 'automatico' %} active{% endif %}" data-get-hub="automatico">Seção 11 — Automático</button></li>
+    <li class="nav-item"><button type="button" class="nav-link{% if aba_inicial == 'comparador' %} active{% endif %}" data-get-hub="comparador">Seção 12 — Volantes</button></li>
+  </ul>
+
+  <div id="get-hub-escolha"{% if aba_inicial in ('manual', 'automatico', 'comparador') %} class="d-none"{% endif %}>
+<div id="get-root" data-api="{{ api_base }}"
+     data-dmin="{{ ctx.dezena_min or dezena_min or 1 }}" data-dmax="{{ ctx.dezena_max or dezena_max or 31 }}"
+     data-vcols="{{ ctx.volante_cols or 10 }}">
+
+  {# —— Opções (fora do card do gerador) —— #}
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label small mb-0">Base</label>
+          <div class="btn-group btn-group-sm d-flex" id="getTabsBase">
+            <button type="button" class="btn btn-outline-secondary base-tab-btn active" data-base="geral">Geral</button>
+            <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="vencedores">Vencedores</button>
+            <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="acumulados">Acum.</button>
+          </div>
+        </div>
+        <div class="col-12 col-md-8">
+          <label class="form-label small mb-0">Concurso de referência (perfil)</label>
+          <select class="form-select form-select-sm" id="getConcRef"></select>
+        </div>
+      </div>
+
+      <div class="row g-2 mt-3 align-items-center">
+        <div class="col-12 text-center">
+          <div class="small fw-bold text-muted mb-2">Âncora de padrão</div>
+          <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center" role="group" aria-label="Âncora de padrão inicial">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input get-ancora" type="checkbox" id="fAncoraAnte" data-ancora="antepenultimo">
+              <label class="form-check-label small" for="fAncoraAnte">Antepenúltimo</label>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input get-ancora" type="checkbox" id="fAncoraPen" data-ancora="penultimo">
+              <label class="form-check-label small" for="fAncoraPen">Penúltimo</label>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input get-ancora" type="checkbox" id="fAncoraUlt" data-ancora="ultimo">
+              <label class="form-check-label small" for="fAncoraUlt">Último</label>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="fAltas">
+              <label class="form-check-label small" for="fAltas">Dezenas altas (≥10)</label>
+            </div>
+          </div>
+          <div class="form-text mb-0 mt-1">Sem âncora: misturá padrões conforme a qtd. Com âncora: um padrão só no lote.</div>
+        </div>
+      </div>
+
+      <div class="row g-2 mt-3 align-items-center border-top pt-3">
+        <div class="col-12 text-center">
+          <div class="small fw-bold text-muted mb-2">Exigir na mesma aposta</div>
+          <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="fPi" checked>
+              <label class="form-check-label small" for="fPi">Par/Ímpar</label>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="fSeq" checked>
+              <label class="form-check-label small" for="fSeq">Sequência</label>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="fFin" checked>
+              <label class="form-check-label small" for="fFin">Finais iguais</label>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="fRep" checked>
+              <label class="form-check-label small" for="fRep">Repetidos do último</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if ctx.extra_mes or ctx.extra_time or ctx.extra_trevo %}
+      <div class="row g-2 mt-3 align-items-end border-top pt-3 justify-content-center">
+        {% if ctx.extra_mes %}
+        <div class="col-12 col-md-4 text-center">
+          <label class="form-label small mb-1 d-block">Mês da Sorte</label>
+          <select class="form-select form-select-sm text-center" id="getMes"></select>
+        </div>
+        {% endif %}
+        {% if ctx.extra_time %}
+        <div class="col-12 col-md-4 text-center">
+          <label class="form-label small mb-1 d-block">Time do Coração</label>
+          <div class="form-control form-control-sm bg-light text-muted">1 time automático por aposta</div>
+        </div>
+        {% endif %}
+        {% if ctx.extra_trevo %}
+        <div class="col-12 col-md-4 text-center">
+          <label class="form-label small mb-1 d-block">Trevos</label>
+          <div class="form-control form-control-sm bg-light text-muted">2 trevos automáticos por aposta</div>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# —— Gerador (padrão do sistema) —— #}
+  <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+    <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark,#1a0a00) 100%);color:#fff;">
+      <i class="fas fa-dice me-2"></i>Gerar apostas a partir da análise
+    </div>
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-2">
+          <label class="form-label small mb-0">Apostas</label>
+          <input type="number" class="form-control form-control-sm" id="getQtd" value="10" min="1" max="500">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label small mb-0">Dezenas ({{ ctx.pick_min or 7 }}–{{ ctx.pick_max or 15 }})</label>
+          <input type="number" class="form-control form-control-sm" id="getPick"
+                 value="{{ ctx.pick_default or 7 }}"
+                 min="{{ ctx.pick_min or 7 }}" max="{{ ctx.pick_max or 15 }}">
+        </div>
+      </div>
+
+      <div class="row g-2 mt-2 align-items-end border-top pt-3">
+        <div class="col-12 col-lg-5">
+          <label class="form-label small mb-0">Conferir apostas com concurso</label>
+          <select class="form-select form-select-sm" id="getConcConf"></select>
+        </div>
+        <div class="col-12 col-lg-7">
+          <span class="fw-bold small text-uppercase text-muted d-block mb-2">Exibição das apostas geradas</span>
+          <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
+            <div class="btn-group flex-shrink-0" role="group" id="getGrpExibicao">
+              <button type="button" class="btn btn-outline-secondary btn-sm get-exib-btn" data-exib="numeros">Números</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm get-exib-btn" data-exib="volante">Volante</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm get-exib-btn active" data-exib="hibrido">Híbrido</button>
+            </div>
+            <p class="mb-0 small text-muted" id="getExibicaoLegenda">Lista em bolinhas e grade do volante juntas.</p>
+          </div>
+          <div class="mt-2 small d-flex flex-wrap gap-3 align-items-center">
+            <span><span class="legenda-cor" style="display:inline-block;width:12px;height:12px;background:var(--accent);border:1px solid var(--primary);vertical-align:middle;"></span> Aposta</span>
+            <span><span class="legenda-cor" style="display:inline-block;width:12px;height:12px;background:#198754;border:1px solid #146c43;vertical-align:middle;"></span> Acerto</span>
+            <span><span class="legenda-cor" style="display:inline-block;width:12px;height:12px;background:#fff;border:1px solid #ccc;vertical-align:middle;"></span> Fora</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 mt-3 align-items-center">
+        <button type="button" class="btn fw-bold" id="getBtnGerar"
+                style="background:var(--primary);border-color:var(--primary);color:#fff;">
+          <i class="fas fa-bolt"></i> Gerar
+        </button>
+        <button type="button" class="btn btn-outline-secondary" id="getBtnExport" disabled>
+          <i class="fas fa-download"></i> Exportar TXT
+        </button>
+        <button type="button" class="btn fw-bold" id="getBtnBacktest" disabled
+                style="background:transparent;border:2px solid var(--primary);color:var(--primary);">
+          <i class="fas fa-chart-line me-1"></i>Back Test
+        </button>
+        <span class="badge ms-auto" id="getBadgeStatus"
+              style="background:var(--accent);color:var(--on-accent,#1a0a00);">Aguardando</span>
+      </div>
+
+      <div class="d-none" aria-hidden="true">
+        <div id="getAlvos"></div>
+        <div id="get-hist-alert"></div>
+      </div>
+      <div id="get-bt" class="mt-2"></div>
+
+      <div id="getResultados" class="mt-3 lista-apostas-grid">
+        <p class="text-muted small mb-0" style="grid-column:1/-1;">
+          Monte as opções e clique em <strong>Gerar</strong> para ver as apostas.
+        </p>
+      </div>
+      <div id="getResumoPadroes" class="mt-3 d-none"></div>
+    </div>
+  </div>
+</div>
+  </div>{# /get-hub-escolha #}
+
+  <div id="ai-tubular-root"
+       class="{% if aba_inicial not in ('manual', 'automatico', 'comparador') %}d-none {% endif %}"
+       data-mode="elite-gen"
+       data-api="{{ tubular_api_base or '/analise/api/inteligentes' }}"
+       data-meses-cores='{{ (meses_cores or {})|tojson }}'
+       data-extra-mes="{{ '1' if (extra_mes or (ctx.extra_mes if ctx is defined else false)) else '0' }}"
+       data-dezena-min="{{ dezena_min or ctx.dezena_min or 1 }}"
+       data-dezena-max="{{ dezena_max or ctx.dezena_max or 31 }}"
+       data-sorteadas="{{ sorteadas or ctx.sorteadas or 7 }}"
+       data-pick-max="{{ ctx.pick_max or 15 }}"
+       data-volante-cols="{{ ctx.volante_cols or 10 }}"
+       data-initial-sub="{{ 's11' if aba_inicial == 'automatico' else ('s12' if aba_inicial == 'comparador' else 's10') }}">
+    {% set show_s10_first = true %}
+    {% set show_s11_toggle = true %}
+    {% set show_comparador_volante = true %}
+    {% set sorteadas = sorteadas or ctx.sorteadas or 7 %}
+    {% set extra_mes = extra_mes or (ctx.extra_mes if ctx is defined else false) %}
+    {% include 'partials/tubular_secoes_geracao.html' with context %}
+  </div>
+</div>{# /get-hub #}
+
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260902c">
+<style>
+  :root {
+    --cor-sequencia-1: #86efac;
+    --cor-sequencia-1-texto: #14532d;
+    --cor-sequencia-2: #93c5fd;
+    --cor-sequencia-2-texto: #1e3a8a;
+    --cor-sequencia-3: #d8b4fe;
+    --cor-sequencia-3-texto: #581c87;
+    --cor-repetidos: #fcd34d;
+    --cor-repetidos-texto: #78350f;
+  }
+  {% if extra_mes %}
+  {% for nome, cor in (meses_cores or {}).items() %}
+  #ai-tubular-root .mes-cor.mes-nome-{{ nome }} { background-color: {{ cor }} !important; }
+  {% endfor %}
+  {% endif %}
+</style>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260902b"></script>
+<script>
+(function () {
+  const hub = document.getElementById('get-hub');
+  if (!hub) return;
+  const panelEscolha = document.getElementById('get-hub-escolha');
+  const panelTubular = document.getElementById('ai-tubular-root');
+  function setHub(key, pushUrl) {
+    hub.querySelectorAll('[data-get-hub]').forEach(b => b.classList.toggle('active', b.dataset.getHub === key));
+    const isEscolha = key === 'escolha';
+    if (panelEscolha) panelEscolha.classList.toggle('d-none', !isEscolha);
+    if (panelTubular) panelTubular.classList.toggle('d-none', isEscolha);
+    if (!isEscolha && window.AiTubular) {
+      const sub = key === 'automatico' ? 's11'
+        : key === 'comparador' ? 's12'
+        : 's10';
+      window.AiTubular.showSub(sub);
+    }
+    if (pushUrl !== false) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('aba', key);
+        history.replaceState(null, '', url.toString());
+      } catch (_) {}
+    }
+  }
+  hub.querySelectorAll('[data-get-hub]').forEach(btn => {
+    btn.addEventListener('click', () => setHub(btn.dataset.getHub));
+  });
+  // Garante aba correta mesmo se o servidor ainda não enviou aba_inicial
+  try {
+    const q = new URL(window.location.href).searchParams.get('aba') || hub.dataset.abaInicial || 'escolha';
+    const key = (q === 'manual' || q === 's10') ? 'manual'
+      : (q === 'automatico' || q === 'auto' || q === 's11') ? 'automatico'
+      : (q === 'comparador' || q === 's12' || q === 'volante' || q === 'volantes') ? 'comparador'
+      : 'escolha';
+    setHub(key, false);
+  } catch (_) {}
+})();
+</script>
+
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
+<script>
+(function () {
+  const root = document.getElementById('get-root');
+  if (!root) return;
+  const API = root.dataset.api || '/geradores-elite/api/escolha-tubular';
+  const DMIN = parseInt(root.dataset.dmin || '1', 10);
+  const DMAX = parseInt(root.dataset.dmax || '31', 10);
+  const VCOLS = parseInt(root.dataset.vcols || '10', 10);
+  root.style.setProperty('--get-vcols', String(VCOLS));
+  let base = 'geral';
+  let lastApostas = [];
+  let lastMes = null;
+  let lastMesCriterio = null;
+  let lastCtx = null;
+  let lastPayload = null;
+  let concursosLista = [];
+  let concursoConf = null;
+  let exibicaoApostas = 'hibrido';
+  const MESES_ABREV = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const LEGENDA_EXIB = {
+    numeros: 'Só lista em bolinhas.',
+    volante: 'Só grade do volante.',
+    hibrido: 'Lista em bolinhas e grade do volante juntas.',
+  };
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  async function fillMesSelect() {
+    const sel = document.getElementById('getMes');
+    if (!sel || !window.MesSorteSelect) return;
+    try {
+      await MesSorteSelect.fillFromApi(sel, API, { defaultPrefer: 'atrasado' });
+    } catch (e) {
+      sel.innerHTML = '<option value="atrasado">+ Atrasado</option><option value="frequente">+ Frequente</option><option value="aleatorio">+ Aleatório</option>';
+      for (let i = 1; i <= 12; i++) {
+        const o = document.createElement('option');
+        o.value = String(i);
+        o.textContent = MESES_ABREV[i] || String(i);
+        sel.appendChild(o);
+      }
+      sel.value = 'atrasado';
+    }
+  }
+
+  function renderAlvos(ctx) {
+    lastCtx = Object.assign({}, lastCtx || {}, ctx || {});
+    if (ctx && ctx.ancoras) lastCtx.ancoras = ctx.ancoras;
+    const p = (ctx && ctx.perfil && ctx.perfil.padroes_resumo) || {};
+    const cruz = ((ctx && ctx.perfil && ctx.perfil.cruzamentos) || []).filter(c => c.quantidade > 0);
+    const anc = (lastCtx && lastCtx.ancoras) || {};
+    let html = `<div class="mb-1"><strong>Concurso ${ctx.concurso_ref || '—'}</strong> — perfil estrutural</div>`;
+    if (anc.ultimo || anc.penultimo || anc.antepenultimo) {
+      [
+        ['Último', anc.ultimo],
+        ['Penúltimo', anc.penultimo],
+        ['Antepenúltimo', anc.antepenultimo],
+      ].forEach(([lab, a]) => {
+        if (!a) return;
+        html += `<div class="padrao-chip"><em>${lab} #${a.concurso}:</em> (${a.padrao || '—'})</div>`;
+      });
+    }
+    html += [
+      ['Pares', p.pares],
+      ['Ímpares', p.impares],
+      ['Repetidos', p.repetidos],
+      ['Sequências', p.sequencias],
+      ['Finais', p.finais],
+    ].filter(x => x[1] != null).map(([k, v]) => `<div class="padrao-chip"><em>${k}:</em> ${v}</div>`).join('');
+    if (cruz.length) {
+      html += '<div class="mt-1 small text-muted">Cruzamentos:</div>';
+      html += cruz.map(c => `<div class="padrao-chip">${c.label} = (${(c.dezenas||[]).map(pad).join(', ')})</div>`).join('');
+    }
+    document.getElementById('getAlvos').innerHTML = html || '<span class="text-muted">Sem perfil.</span>';
+  }
+
+  function fillConcursos(ctx) {
+    const list = ctx.concursos || [];
+    concursosLista = list;
+    const cur = ctx.concurso_ref;
+    const opts = list.map(c =>
+      `<option value="${c.concurso}"${c.concurso === cur ? ' selected' : ''}>#${c.concurso} — ${c.data || ''}</option>`
+    ).join('');
+    const selRef = document.getElementById('getConcRef');
+    const selConf = document.getElementById('getConcConf');
+    if (selRef) selRef.innerHTML = opts;
+    if (selConf) {
+      const prev = selConf.value;
+      selConf.innerHTML = '<option value="">— Sem conferência (só amarelo) —</option>' +
+        list.map(c => `<option value="${c.concurso}">#${c.concurso} — ${c.data || ''}</option>`).join('');
+      if (prev && [...selConf.options].some(o => o.value === prev)) {
+        selConf.value = prev;
+        aplicarConcursoConf(parseInt(prev, 10));
+      } else if (list.length) {
+        selConf.value = String(list[0].concurso);
+        aplicarConcursoConf(parseInt(selConf.value, 10));
+      }
+    }
+  }
+
+  function aplicarConcursoConf(num) {
+    if (!num) {
+      concursoConf = null;
+    } else {
+      const hit = concursosLista.find(c => Number(c.concurso) === Number(num));
+      concursoConf = hit
+        ? { concurso: hit.concurso, dezenas: hit.dezenas || [], data: hit.data || '' }
+        : { concurso: num, dezenas: [] };
+    }
+    if (lastApostas.length) renderApostas(lastPayload || { apostas: lastApostas });
+  }
+
+  function htmlVolante(dezenasAposta) {
+    const apostaSet = new Set(dezenasAposta || []);
+    const oficial = concursoConf && concursoConf.dezenas && concursoConf.dezenas.length
+      ? new Set(concursoConf.dezenas) : null;
+    let cells = '';
+    for (let d = DMIN; d <= DMAX; d++) {
+      let cls = 'volante-cell';
+      const na = apostaSet.has(d);
+      const ac = oficial && na && oficial.has(d);
+      if (ac) cls += ' acerto';
+      else if (na) cls += ' na-aposta';
+      cells += `<div class="${cls}">${pad(d)}</div>`;
+    }
+    return `<div class="volante-oficial-wrap"><div class="volante-oficial-grid">${cells}</div></div>`;
+  }
+
+  async function carregarContexto() {
+    const conc = document.getElementById('getConcRef').value;
+    const qs = new URLSearchParams({ base, janela: '0' });
+    if (conc) qs.set('concurso', conc);
+    const r = await fetch(`${API}/contexto?${qs}`);
+    const data = await r.json();
+    if (!data.sucesso) {
+      document.getElementById('getAlvos').textContent = data.erro || 'Falha';
+      return;
+    }
+    if (!document.getElementById('getConcRef').options.length) fillConcursos(data);
+    else if (![...document.getElementById('getConcRef').options].some(o => o.value == data.concurso_ref)) fillConcursos(data);
+    else if (data.concursos) concursosLista = data.concursos;
+    renderAlvos(data);
+  }
+
+  function renderHistAlert(h) {
+    const el = document.getElementById('get-hist-alert');
+    if (!el) return;
+    if (!h || !h.aplicada) { el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="alert alert-warning py-2 small mb-0">Histórico oficial aplicado · ${h.descartadas || 0} descartada(s) / ${h.marcadas || 0} marcada(s).</div>`;
+  }
+
+  function renderBacktest(bt) {
+    const el = document.getElementById('get-bt');
+    if (!el) return;
+    if (!bt) { el.innerHTML = ''; return; }
+    if (!bt.sucesso) {
+      if (bt.pulado) { el.innerHTML = ''; return; }
+      el.innerHTML = `<div class="alert alert-danger small mb-0">${bt.erro || 'Falha no back test'}</div>`;
+      return;
+    }
+    const faixa = (bt.concurso_de && bt.concurso_ate)
+      ? ` (#${bt.concurso_de}–#${bt.concurso_ate})` : '';
+    const destaques = (bt.destaques || []).length
+      ? `<div class="text-muted mt-1">Destaques: ${(bt.destaques || []).slice(0, 5).map(d => `#${d.concurso} (${d.max_acertos} ac.)`).join(' · ')}</div>`
+      : '<div class="text-muted mt-1">Nenhum destaque (≥4 acertos) nesses concursos.</div>';
+    el.innerHTML = `
+      <div class="border rounded p-2 small" style="border-color:var(--accent)!important;background:color-mix(in srgb, var(--accent) 10%, #fff);">
+        <div class="fw-bold mb-2" style="color:var(--primary);">
+          <i class="fas fa-chart-line me-1"></i>Back Test · últimos ${bt.concursos_analisados || '?'} concursos${faixa}
+        </div>
+        <div class="d-flex flex-wrap gap-2 mb-1">
+          <span class="padrao-chip"><strong>${bt.media_max_acertos ?? '—'}</strong> média máx.</span>
+          <span class="padrao-chip"><strong>${bt.dist_4 || 0}</strong> × 4 acertos</span>
+          <span class="padrao-chip"><strong>${bt.dist_5 || 0}</strong> × 5 acertos</span>
+          <span class="padrao-chip"><strong>${bt.dist_6 || 0}</strong> × 6 acertos</span>
+          <span class="padrao-chip"><strong>${bt.dist_7 || 0}</strong> × 7 acertos</span>
+        </div>
+        ${destaques}
+      </div>`;
+  }
+
+  function renderResumoPadroes(apostas) {
+    const el = document.getElementById('getResumoPadroes');
+    if (!el) return;
+    const rows = (apostas || []).filter(a => (a.padrao_inicial || '').trim());
+    if (!rows.length) {
+      el.classList.add('d-none');
+      el.innerHTML = '';
+      return;
+    }
+    const body = rows.map(a => {
+      const p = (a.padrao_inicial || '').trim();
+      const pi = `${a.pares}P/${a.impares}I`;
+      const soma = a.soma != null ? a.soma : '—';
+      const rep = (a.repetidas_ultimo || []).map(pad).join(' ');
+      return `<tr>
+        <td class="font-monospace text-nowrap pe-3">${p}</td>
+        <td class="text-nowrap pe-3">${pi}</td>
+        <td class="text-nowrap pe-3">soma ${soma}</td>
+        <td class="font-monospace text-nowrap">rep [${rep}]</td>
+      </tr>`;
+    }).join('');
+    el.classList.remove('d-none');
+    el.innerHTML = `
+      <div class="border rounded p-3" style="border-color:var(--accent)!important;background:color-mix(in srgb, var(--accent) 8%, #fff);">
+        <div class="small fw-bold text-muted mb-2">Resumo — padrões iniciais</div>
+        <div class="table-responsive">
+          <table class="table table-sm table-borderless mb-0 align-middle" style="font-size:.9rem;">
+            <tbody>${body}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  function renderApostas(data) {
+    lastApostas = data.apostas || [];
+    lastMes = data.mes_num || null;
+    lastPayload = data;
+    document.getElementById('getBtnExport').disabled = !lastApostas.length;
+    const btnBt = document.getElementById('getBtnBacktest');
+    if (btnBt) btnBt.disabled = !lastApostas.length;
+    document.getElementById('getBadgeStatus').textContent =
+      lastApostas.length ? `${lastApostas.length} apostas geradas` : 'Aguardando';
+    const box = document.getElementById('getResultados');
+    if (!lastApostas.length) {
+      box.classList.remove('lista-apostas-grid', 'lista-apostas-hibrido');
+      box.innerHTML = '<div class="alert alert-warning mb-0">Não foi possível montar apostas com todos os atributos juntos. Tente desmarcar alguma exigência.</div>';
+      renderResumoPadroes([]);
+      return;
+    }
+    const showVolante = exibicaoApostas === 'volante' || exibicaoApostas === 'hibrido';
+    const showLinear = exibicaoApostas === 'numeros' || exibicaoApostas === 'hibrido';
+    box.classList.add('lista-apostas-grid');
+    box.classList.toggle('lista-apostas-hibrido', exibicaoApostas === 'hibrido');
+    const oficial = concursoConf && concursoConf.dezenas ? new Set(concursoConf.dezenas) : null;
+    box.innerHTML = lastApostas.map(a => {
+      const dez = a.dezenas || [];
+      const balls = showLinear
+        ? `<div class="mb-1">${dez.map(n => {
+            const hit = oficial && oficial.has(n);
+            return `<span class="get-ball"${hit ? ' style="background:#198754;color:#fff;"' : ''}>${pad(n)}</span>`;
+          }).join('')}</div>`
+        : '';
+      const vol = showVolante ? htmlVolante(dez) : '';
+      const ok = a.perfil_ok || {};
+      const pills = [
+        ['P/I', ok.pares],
+        ['Seq', ok.sequencia],
+        ['Fin', ok.finais],
+        ['Rep', ok.repetidos],
+      ].map(([lab, v]) => `<span class="ok-pill${v ? '' : ' off'}">${lab}</span>`).join('');
+      const padrao = a.padrao_inicial || '—';
+      const cruz = (a.cruzamentos || []).map(c =>
+        `<span class="padrao-chip">${c.label}=(${(c.dezenas||[]).map(pad).join(',')})</span>`
+      ).join('');
+      const confLinha = oficial
+        ? `<div class="small text-muted mt-1">Coincide com #${concursoConf.concurso}: ${dez.filter(n => oficial.has(n)).length}</div>`
+        : '';
+      return `<div class="aposta-card">
+        <div class="mb-2 d-flex justify-content-between flex-wrap gap-2">
+          <strong>Aposta ${String(a.indice).padStart(2, '0')}</strong>
+          ${a.mes_abrev ? `<span class="padrao-chip">${a.mes_abrev}</span>` : ''}
+          ${a.time_nome ? `<span class="padrao-chip">${a.time_nome}</span>` : ''}
+          ${a.trevos && a.trevos.length ? `<span class="padrao-chip">T ${(a.trevos||[]).map(pad).join('-')}</span>` : ''}
+        </div>
+        <div class="aposta-card-inner${exibicaoApostas === 'hibrido' ? ' modo-hibrido' : ''}">
+          ${balls}${vol}
+        </div>
+        <details class="get-detalhes">
+          <summary>Detalhes da geração</summary>
+          <div class="get-detalhes-body">
+            <div class="mb-1">${pills}</div>
+            <div class="small text-muted">${a.pares}P/${a.impares}I · soma ${a.soma} · rep [${(a.repetidas_ultimo||[]).map(pad).join(' ')}]</div>
+            <div class="mt-1"><span class="padrao-chip">padrão (${padrao})</span>${cruz}</div>
+            ${confLinha}
+          </div>
+        </details>
+      </div>`;
+    }).join('');
+    renderHistAlert(data.historico || data.validacao_historico);
+    renderResumoPadroes(lastApostas);
+  }
+
+  function ancoraSelecionada() {
+    const on = document.querySelector('.get-ancora:checked');
+    return on ? (on.getAttribute('data-ancora') || '') : '';
+  }
+
+  function bindAncoras() {
+    document.querySelectorAll('.get-ancora').forEach((el) => {
+      el.addEventListener('change', () => {
+        if (!el.checked) return;
+        document.querySelectorAll('.get-ancora').forEach((o) => {
+          if (o !== el) o.checked = false;
+        });
+        const key = el.getAttribute('data-ancora');
+        const ref = lastCtx && lastCtx.ancoras && lastCtx.ancoras[key];
+        if (ref && ref.concurso) {
+          const sel = document.getElementById('getConcRef');
+          if (sel) {
+            sel.value = String(ref.concurso);
+            carregarContexto();
+          }
+        }
+      });
+    });
+  }
+
+  async function gerar() {
+    const btn = document.getElementById('getBtnGerar');
+    btn.disabled = true;
+    document.getElementById('getBadgeStatus').textContent = 'Gerando…';
+    const mesEl = document.getElementById('getMes');
+    const mesPayload = (window.MesSorteSelect && mesEl)
+      ? MesSorteSelect.payloadFromSelect(mesEl)
+      : (mesEl && mesEl.value ? mesEl.value : null);
+    const body = {
+      quantidade: parseInt(document.getElementById('getQtd').value, 10) || 10,
+      pick: parseInt(document.getElementById('getPick').value, 10) || 7,
+      base,
+      concurso_ref: parseInt(document.getElementById('getConcRef').value, 10) || null,
+      usar_pares_impares: document.getElementById('fPi').checked,
+      usar_sequencia: document.getElementById('fSeq').checked,
+      usar_finais: document.getElementById('fFin').checked,
+      usar_repetidos: document.getElementById('fRep').checked,
+      usar_soma: false,
+      ancora_padrao: ancoraSelecionada(),
+      dezenas_altas: !!document.getElementById('fAltas')?.checked,
+      mes_num: mesPayload,
+      descartar_historico: true,
+      executar_backtest: false,
+    };
+    try {
+      const r = await fetch(`${API}/gerar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await r.json();
+      if (!data.sucesso && !data.ok) throw new Error(data.erro || 'Falha na geração');
+      lastMesCriterio = mesPayload;
+      renderApostas(data);
+      if (data.perfil) {
+        renderAlvos({
+          concurso_ref: data.concurso_ref,
+          perfil: data.perfil,
+          ancoras: (data.contexto && data.contexto.ancoras) || (lastCtx && lastCtx.ancoras),
+        });
+      }
+    } catch (err) {
+      const box = document.getElementById('getResultados');
+      box.classList.remove('lista-apostas-grid');
+      box.innerHTML = `<div class="alert alert-danger mb-0">${err.message}</div>`;
+      document.getElementById('getBadgeStatus').textContent = 'Erro';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function exportar() {
+    if (!lastApostas.length) return;
+    const lines = lastApostas.map(a => {
+      const dez = (a.dezenas || []).map(pad).join(' ');
+      const parts = [dez];
+      const mn = a.mes_num != null ? Number(a.mes_num) : (lastMes != null ? Number(lastMes) : null);
+      const abrev = a.mes_abrev || (mn ? (MESES_ABREV[mn] || '') : '');
+      if (abrev) parts.push(abrev);
+      if (a.time_nome) parts.push(a.time_nome);
+      if (a.trevos && a.trevos.length) parts.push('T:' + a.trevos.map(pad).join('-'));
+      return parts.join(' ');
+    });
+    const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'apostas_escolha_tubular.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function runBacktest() {
+    if (!lastApostas.length) return;
+    const btn = document.getElementById('getBtnBacktest');
+    if (btn) btn.disabled = true;
+    try {
+      if (lastPayload && lastPayload.backtest) {
+        renderBacktest(lastPayload.backtest);
+        return;
+      }
+      const r = await fetch('/geradores-elite/api/escolha-tubular/gerar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quantidade: lastApostas.length,
+          pick: (lastApostas[0] && lastApostas[0].dezenas && lastApostas[0].dezenas.length) || 7,
+          base,
+          concurso_ref: parseInt(document.getElementById('getConcRef').value, 10) || null,
+          apostas: lastApostas,
+          executar_backtest: true,
+          so_backtest: true,
+        }),
+      });
+      const data = await r.json();
+      if (data.backtest) renderBacktest(data.backtest);
+      else renderBacktest({ sucesso: true, resumo: 'Back test já veio na geração (veja acima) ou indisponível.', concursos_analisados: '—' });
+    } catch (e) {
+      renderBacktest({ sucesso: true, resumo: String(e.message || e), concursos_analisados: '—' });
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  function init() {
+    bindAncoras();
+    document.querySelectorAll('#getTabsBase .base-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#getTabsBase .base-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        base = btn.dataset.base;
+        document.getElementById('getConcRef').innerHTML = '';
+        carregarContexto();
+      });
+    });
+    document.querySelectorAll('.get-exib-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.get-exib-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        exibicaoApostas = btn.dataset.exib || 'hibrido';
+        const leg = document.getElementById('getExibicaoLegenda');
+        if (leg) leg.textContent = LEGENDA_EXIB[exibicaoApostas] || '';
+        if (lastApostas.length) renderApostas(lastPayload || { apostas: lastApostas });
+      });
+    });
+    const selConf = document.getElementById('getConcConf');
+    if (selConf) {
+      selConf.addEventListener('change', () => {
+        const v = selConf.value;
+        aplicarConcursoConf(v ? parseInt(v, 10) : null);
+      });
+    }
+    document.getElementById('getConcRef').addEventListener('change', carregarContexto);
+    document.getElementById('getBtnGerar').addEventListener('click', gerar);
+    document.getElementById('getBtnExport').addEventListener('click', exportar);
+    const btnBt = document.getElementById('getBtnBacktest');
+    if (btnBt) btnBt.addEventListener('click', runBacktest);
+    fillMesSelect();
+    carregarContexto();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+{% endblock %}

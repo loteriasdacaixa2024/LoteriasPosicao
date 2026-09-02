@@ -1,0 +1,11 @@
+        {% if nav_cfg.desdobramento.mode == 'dropdown' %}
+        {% for item in nav_cfg.desdobramento['items'] %}
+        <a class="mobile-link" href="{{ item.href }}" onclick="closeMobileNav()">
+            <i class="{{ item.icon }}"></i> {{ item.title }}
+        </a>
+        {% endfor %}
+        {% else %}
+        <a class="mobile-link" href="{{ nav_cfg.desdobramento.href }}" onclick="closeMobileNav()">
+            <i class="fas fa-sparkles"></i> {{ nav_cfg.desdobramento.title }}
+        </a>
+        {% endif %}

@@ -1,0 +1,50 @@
+:root {
+  --gold-100: #ffffff;
+  --gold-95:  #fcf9e8;
+  --gold-90:  #f9f2d2;
+  --gold-85:  #f7ecbb;
+  --gold-80:  #f4e5a4;
+  --gold-75:  #f1df8e;
+  --gold-70:  #eed877;
+  --gold-65:  #ebd260;
+  --gold-60:  #e9cb49;
+  --gold-55:  #e6c533;
+  --gold-50:  #e3be1c;
+  --gold-47:  #d4b31a; /* cor principal */
+  --gold-45:  #ccab19;
+  --gold-40:  #b69816;
+  --gold-35:  #9f8514;
+  --gold-30:  #887211;
+  --gold-25:  #715f0e;
+  --gold-20:  #5b4c0b;
+  --gold-15:  #443908;
+  --gold-10:  #2d2606;
+  --gold-5:   #171303;
+  --gold-0:   #000000;
+}
+
+
+
+
+.body {
+  background-color: var(--gold-0) !important; /* preto */
+}
+
+.logo {
+  display: block;
+  width: 300px;
+  height: 100px;
+  margin: auto;
+  background-image: url("https://i.postimg.cc/3R2PytCp/diadesorte.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.5;
+  border-radius: 20px 80px;
+  background-color: var(--gold-47); /* cor principal */
+}
+
+.logo:hover {
+  opacity: 1.0;
+  background-color: var(--gold-60); /* exemplo: hover mais claro */
+}

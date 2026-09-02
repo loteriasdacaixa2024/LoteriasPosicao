@@ -1,0 +1,1745 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --mega-green: #0a6b1a;
+        --mega-dark: #04250a;
+        --mega-light: #1ec83a;
+        --gold: #d97706;
+        --gold-light: #fef3c7;
+        --gold-dark: #92400e;
+        --surface-glass: rgba(255, 255, 255, 0.96);
+        --transition-soft: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        /* Cores dos Grupos virtuais */
+        --color-g1: #7c3aed; /* Roxo */
+        --color-g2: #db2777; /* Rosa */
+        --color-g3: #0284c7; /* Azul */
+        --color-g4: #059669; /* Verde */
+        
+        --color-g1-bg: #f5f3ff;
+        --color-g2-bg: #fdf2f8;
+        --color-g3-bg: #f0f9ff;
+        --color-g4-bg: #ecfdf5;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark, #1a1a2e), var(--primary));
+        border-radius: 16px;
+        padding: 2rem 2.5rem;
+        color: #fff;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(4, 37, 10, 0.15);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::after {
+        content: '✨';
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        font-size: 8rem;
+        opacity: 0.08;
+        transform: rotate(15deg);
+    }
+
+    /* Sugestões de Coluna Cards */
+    .sugestao-card {
+        background: #fff;
+        border: 1px solid rgba(10, 107, 26, 0.1);
+        border-radius: 16px;
+        padding: 1.25rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        transition: var(--transition-soft);
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        cursor: pointer;
+    }
+
+    .sugestao-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(10, 107, 26, 0.1);
+        border-color: var(--accent);
+    }
+
+    .sugestao-card:active {
+        transform: translateY(-1px);
+    }
+
+    .sugestao-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+
+    .bg-success-light { background-color: #e8faea; }
+    .bg-warning-light { background-color: #fffbeb; }
+    .bg-primary-light { background-color: #eff6ff; }
+
+    .sugestao-content {
+        flex: 1;
+    }
+
+    .sugestao-badge-row {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .col-badge {
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 2px 7px;
+        border-radius: 6px;
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .col-badge.active-col {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+
+    /* Volante de Dezenas */
+    .volante-container {
+        background: #fff;
+        border-radius: 16px;
+        border: 1.5px solid #d6f0da;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    .volante-grid {
+        display: grid;
+        /* Column 1: Row labels (20px), Column 2: vertical divider (2px), Columns 3-12: the 10 cells */
+        grid-template-columns: 20px 2px repeat(10, 1fr);
+        /* Row 1: Column labels (20px), Row 2: horizontal divider (2px), Rows 3-8: the 6 rows of cells */
+        grid-template-rows: 20px 2px repeat(6, 1fr);
+        gap: 8px;
+        max-width: 550px;
+        margin: 0 auto;
+        align-items: center;
+    }
+
+    /* Subtle green labels matching the print's styling */
+    .col-label-item {
+        color: #558b5f;
+        font-weight: 500;
+        font-size: 0.65rem;
+        text-align: center;
+        user-select: none;
+    }
+
+    .row-label-item {
+        color: #558b5f;
+        font-weight: 500;
+        font-size: 0.65rem;
+        text-align: center;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Discreet light-green divider lines matching the print */
+    .volante-line-horizontal {
+        width: 100%;
+        height: 1.5px;
+        background-color: #ccead4;
+    }
+
+    .volante-line-vertical {
+        height: 100%;
+        width: 1.5px;
+        background-color: #ccead4;
+    }
+
+    .volante-celula {
+        aspect-ratio: 1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.95rem;
+        cursor: pointer;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        color: #334155;
+        transition: var(--transition-soft);
+        user-select: none;
+    }
+
+    .volante-celula:hover {
+        transform: scale(1.12);
+        border-color: var(--accent);
+        color: var(--primary);
+        background: var(--color-g4-bg);
+    }
+
+    .volante-celula.selecionado {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark, #1a1a2e));
+        color: #fff;
+        border-color: var(--primary-dark, #1a1a2e);
+        box-shadow: 0 4px 12px rgba(10, 107, 26, 0.35);
+    }
+
+    /* Destaque das dezenas que já saíram no ciclo */
+    .volante-celula.cycle-drawn {
+        border: 2.5px solid var(--accent) !important;
+        background-color: var(--color-g4-bg) !important;
+        position: relative;
+    }
+    
+    .volante-celula.cycle-drawn.selecionado {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark, #1a1a2e)) !important;
+        border-color: var(--primary-dark, #1a1a2e) !important;
+    }
+
+    .cycle-check {
+        position: absolute;
+        bottom: 1px;
+        font-size: 0.58rem;
+        color: var(--primary);
+        font-weight: 900;
+    }
+    
+    .volante-celula.selecionado .cycle-check {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    /* Badge de contadores */
+    .contador-badge {
+        background: #f3f4f6;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: #4b5563;
+        font-weight: 600;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .contador-badge span {
+        color: var(--primary);
+    }
+
+    .colunas-detalhe-badge {
+        background: #f0fdf4;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: var(--primary);
+        font-weight: 600;
+        border: 1px solid #dcfce7;
+    }
+
+    /* Garantia Modos Cards */
+    .modo-card input[type="radio"] {
+        display: none;
+    }
+
+    .modo-card-content {
+        transition: var(--transition-soft);
+        border: 2px solid #e2e8f0 !important;
+        background: #fff;
+    }
+
+    .modo-card input[type="radio"]:checked + .modo-card-content {
+        border-color: var(--primary) !important;
+        background: #f0fdf4 !important;
+        box-shadow: 0 8px 24px rgba(10, 107, 26, 0.08);
+        transform: translateY(-4px);
+    }
+
+    .modo-badge {
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        padding: 3px 8px;
+        border-radius: 6px;
+    }
+    .modo-badge.bronze { background: #fef3c7; color: #d97706; }
+    .modo-badge.prata { background: #f3f4f6; color: #4b5563; }
+    .modo-badge.ouro { background: #fee2e2; color: #dc2626; }
+    .modo-badge.diamante { background: #eff6ff; color: #2563eb; }
+
+    .modo-title {
+        font-size: 1.15rem;
+        color: var(--primary-dark, #1a1a2e);
+    }
+
+    .modo-desc {
+        font-size: 0.78rem;
+        line-height: 1.3;
+    }
+
+    .modo-preco {
+        font-size: 1rem;
+    }
+
+    /* Histórico */
+    .historico-item {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: var(--transition-soft);
+    }
+
+    .historico-item:hover {
+        border-color: var(--accent);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+
+    .historico-info h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--primary-dark, #1a1a2e);
+    }
+
+    .historico-info p {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #6b7280;
+    }
+
+    .historico-acoes {
+        display: flex;
+        gap: 6px;
+    }
+
+    .btn-small {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition-soft);
+    }
+    
+    .btn-ver {
+        background: var(--primary);
+        color: #fff;
+    }
+    
+    .btn-ver:hover {
+        background: var(--primary-dark, #1a1a2e);
+    }
+
+    .btn-excluir {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .btn-excluir:hover {
+        background: #fca5a5;
+    }
+
+    /* Passos do Desdobramento Visual */
+    .passo-bloco {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    }
+
+    .passo-bloco h3 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--primary-dark, #1a1a2e);
+        margin-bottom: 1.25rem;
+        border-bottom: 2px solid #f3f4f6;
+        padding-bottom: 0.5rem;
+    }
+
+    .grupos-horizontal-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+    }
+
+    .grupo-cartao {
+        border-radius: 12px;
+        padding: 1.25rem;
+        border-left: 5px solid transparent;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .grupo-cartao.g1 { border-left-color: var(--color-g1); background-color: var(--color-g1-bg); }
+    .grupo-cartao.g2 { border-left-color: var(--color-g2); background-color: var(--color-g2-bg); }
+    .grupo-cartao.g3 { border-left-color: var(--color-g3); background-color: var(--color-g3-bg); }
+    .grupo-cartao.g4 { border-left-color: var(--color-g4); background-color: var(--color-g4-bg); }
+
+    .grupo-cartao-cabecalho {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .grupo-cartao-titulo {
+        font-weight: 800;
+        font-size: 0.9rem;
+        color: var(--primary-dark, #1a1a2e);
+    }
+
+    .grupo-cartao-subtitulo {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #6b7280;
+    }
+
+    .grupo-cartao-dezenas {
+        display: flex;
+        gap: 6px;
+    }
+
+    .grupo-cartao-dezena {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #fff;
+        border: 1.5px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.85rem;
+        color: var(--primary-dark, #1a1a2e);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    /* Tabela de pares */
+    .tabela-pares-container {
+        overflow-x: auto;
+    }
+
+    .tabela-pares {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+
+    .tabela-pares th, .tabela-pares td {
+        padding: 0.75rem 1rem;
+        text-align: center;
+        border: 1px solid #e5e7eb;
+    }
+
+    .tabela-pares th {
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        background-color: #f8fafc;
+        color: #475569;
+    }
+
+    .th-g1 { border-top: 3px solid var(--color-g1) !important; }
+    .th-g2 { border-top: 3px solid var(--color-g2) !important; }
+    .th-g3 { border-top: 3px solid var(--color-g3) !important; }
+    .th-g4 { border-top: 3px solid var(--color-g4) !important; }
+
+    .par-tabela-celula {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .par-tabela-celula.g1 { background: var(--color-g1-bg); color: var(--color-g1); }
+    .par-tabela-celula.g2 { background: var(--color-g2-bg); color: var(--color-g2); }
+    .par-tabela-celula.g3 { background: var(--color-g3-bg); color: var(--color-g3); }
+    .par-tabela-celula.g4 { background: var(--color-g4-bg); color: var(--color-g4); }
+
+    /* Grids de Apostas */
+    .blocos-apostas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+    }
+
+    .aposta-box-card {
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+
+    .box-card-cabecalho {
+        padding: 0.85rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1.5px solid #f3f4f6;
+    }
+
+    .box-card-numero {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+    }
+
+    .box-card-cabecalho-texto h4 {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--primary-dark, #1a1a2e);
+    }
+
+    .box-card-cabecalho-texto small {
+        font-size: 0.7rem;
+        color: #888;
+    }
+
+    .box-card-corpo {
+        padding: 1rem;
+    }
+
+    /* Cores das caixas virtuais */
+    .box-purple .box-card-numero { background: var(--color-g1); }
+    .box-pink .box-card-numero { background: var(--color-g2); }
+    .box-cyan .box-card-numero { background: var(--color-g3); }
+    .box-emerald .box-card-numero { background: var(--color-g4); }
+    .box-rose .box-card-numero { background: #e11d48; }
+    .box-amber .box-card-numero { background: #d97706; }
+
+    .box-purple { border-top: 4px solid var(--color-g1); }
+    .box-pink { border-top: 4px solid var(--color-g2); }
+    .box-cyan { border-top: 4px solid var(--color-g3); }
+    .box-emerald { border-top: 4px solid var(--color-g4); }
+    .box-rose { border-top: 4px solid #e11d48; }
+    .box-amber { border-top: 4px solid #d97706; }
+
+    /* Aposta item */
+    .aposta-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.65rem 0.5rem;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .aposta-item:last-child {
+        border-bottom: none;
+    }
+
+    .aposta-num-ref {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #94a3b8;
+    }
+
+    .aposta-conteudo {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .trio-loterico {
+        display: flex;
+        gap: 3px;
+    }
+
+    .trio-separador {
+        width: 1px;
+        height: 16px;
+        background: #cbd5e1;
+    }
+
+    .dezena-aposta-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+
+    .dezena-aposta-num.hit {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary-dark, #1a1a2e);
+        box-shadow: 0 1px 4px rgba(10, 107, 26, 0.4);
+    }
+
+    /* Conferidor acertos */
+    .acerto-box {
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        text-align: center;
+        min-width: 80px;
+        border: 1.5px solid #e2e8f0;
+        background: #fff;
+    }
+    
+    .acerto-box.sena { border-color: #fef08a; background: #fef9c3; }
+    .acerto-box.quina { border-color: #fed7aa; background: #ffedd5; }
+    .acerto-box.quadra { border-color: #bfdbfe; background: #dbeafe; }
+
+    .acerto-titulo {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #475569;
+    }
+
+    .acerto-valor {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: var(--primary-dark, #1a1a2e);
+    }
+
+    .premiado-quadra { background: #eff6ff; }
+    .premiado-quina { background: #fff7ed; }
+    .premiado-sena { background: #fef9c3; }
+
+    .hit-badge-aposta {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 1px 5px;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+
+    .hit-badge-aposta.n-4 { background: #3b82f6; color: #fff; }
+    .hit-badge-aposta.n-5 { background: #f97316; color: #fff; }
+    .hit-badge-aposta.n-6 { background: #eab308; color: #000; }
+    .hit-badge-aposta.hit-simples { background: #e2e8f0; color: #475569; }
+</style>
+
+<!-- HEADER PRINCIPAL -->
+<div class="page-header text-center">
+    <div class="d-flex flex-column align-items-center">
+        <div style="font-size:3rem">✨</div>
+        <h2 class="mb-1 fw-extrabold text-uppercase letter-spacing-1">Desdobramento Inteligente</h2>
+        <p class="mb-0 text-muted-light" style="opacity:.9; font-size:.95rem; max-width: 600px;">
+            Fechamento matemático avançado de 16 dezenas em 4 grupos de 4 colunas (apostas de 6).
+            Um único desdobramento vale para o 1º e o 2º sorteio do mesmo concurso.
+            Selecione os números e escolha a garantia ideal para otimizar suas chances.
+        </p>
+    </div>
+</div>
+
+<!-- ÚLTIMO SORTEIO WIDGET -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#f0fdf4; border-radius:12px;">
+        <div class="d-flex align-items-center gap-3">
+            <span style="font-size:1.8rem;">🏆</span>
+            <div>
+                <h5 class="mb-0 fw-bold var(--primary-dark, #1a1a2e)">Último Concurso Sorteado</h5>
+                <small class="text-muted" style="font-size:0.75rem;">Concurso: <strong id="concurso-numero" style="color:var(--primary);">--</strong> | Data: <strong id="concurso-data">--</strong></small>
+            </div>
+        </div>
+        <div class="dezenas-sorteadas d-flex gap-2" id="dezenas-sorteadas">
+            <span class="dez-ball">--</span>
+            <span class="dez-ball">--</span>
+            <span class="dez-ball">--</span>
+            <span class="dez-ball">--</span>
+            <span class="dez-ball">--</span>
+            <span class="dez-ball">--</span>
+        </div>
+        <div>
+            <button id="btn-atualizar-sorteio" class="btn btn-sm btn-outline-success fw-bold px-3" style="border-radius:8px;">
+                <i class="fas fa-sync-alt me-1"></i> Sincronizar Caixa
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- CARD INFORMATIVO DO CICLO ATIVO -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4" style="border: 1.5px solid rgba(10, 107, 26, 0.15); border-radius: 12px; background: #fff;">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h5 class="mb-2 text-dark fw-bold d-flex align-items-center gap-2">
+                    <i class="fas fa-sync fa-spin text-success" style="font-size:1.1rem;"></i>
+                    Ciclo Ativo Atual da Lotofácil: nº <span class="badge bg-success text-white fw-extrabold">{{ ciclo.ciclo_num }}</span>
+                </h5>
+                <p class="mb-2 text-secondary" style="font-size: 0.85rem;">
+                    Todas as 50 dezenas da Lotofácil são sorteadas até o ciclo fechar. No momento, o ciclo possui <b>{{ ciclo.concursos_no_ciclo }}</b> concurso(s) acumulado(s) desde o início do ciclo.
+                </p>
+                <div class="progress mb-2" style="height: 10px; border-radius: 5px; background-color: #f1f5f9;">
+                    {% set pct = (ciclo.total_sorteadas / 50 * 100)|round(0) %}
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ pct }}%; border-radius: 5px;" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted d-block fw-bold" style="font-size: 0.78rem;">
+                    Progresso: {{ pct }}% — {{ ciclo.total_sorteadas }} já sorteadas (destacadas no volante abaixo), {{ ciclo.total_faltantes }} faltantes para fechar o ciclo.
+                </small>
+            </div>
+            <div class="col-md-5 mt-3 mt-md-0 border-start ps-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary fw-bold" style="font-size: 0.75rem; text-transform: uppercase;">Ainda Faltam no Ciclo ({{ ciclo.total_faltantes }}):</span>
+                    {% if ciclo.dezenas_faltantes %}
+                    <button class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" style="font-size: 0.68rem; border-radius: 6px;" onclick="selecionarFaltantesCiclo()">
+                        <i class="fas fa-magic me-1"></i>Selecionar Faltantes
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="d-flex flex-wrap gap-1" style="max-height: 110px; overflow-y: auto; padding-right: 5px;">
+                    {% if ciclo.dezenas_faltantes %}
+                        {% for d in ciclo.dezenas_faltantes %}
+                        <span class="badge bg-light text-dark border fw-bold" style="font-size: 0.8rem; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">{{ "%02d"|format(d) }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-success fw-bold" style="font-size: 0.8rem;"><i class="fas fa-check-double me-1"></i>Todos os números já saíram!</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BOX DE COLUNAS SUGERIDAS (NOVA FUNCIONALIDADE) -->
+<h4 class="fw-bold mb-3 text-center" style="color: var(--primary-dark, #1a1a2e);"><i class="fas fa-chart-line me-2 text-success"></i>Sugestões Estratégicas de Colunas</h4>
+<div class="row g-3 mb-4 justify-content-center">
+    <div class="col-md-4">
+        <div class="sugestao-card h-100 cursor-pointer" onclick="aplicarSugestao('quentes')">
+            <div class="sugestao-icon bg-success-light"><i class="fas fa-fire text-success"></i></div>
+            <div class="sugestao-content">
+                <h6 class="mb-1 text-success fw-bold">Colunas Quentes</h6>
+                <p class="mb-2 text-muted" style="font-size:0.72rem; line-height: 1.25;">Colunas de maior frequência histórica acumulada nos sorteios. Excelente para dezenas em evidência.</p>
+                <div class="sugestao-badge-row" id="sug-cols-quentes">
+                    <span class="col-badge">Col 1</span>
+                    <span class="col-badge">Col 2</span>
+                    <span class="col-badge">Col 3</span>
+                    <span class="col-badge">Col 4</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="sugestao-card h-100 cursor-pointer" onclick="aplicarSugestao('atrasadas')">
+            <div class="sugestao-icon bg-warning-light"><i class="fas fa-hourglass-half text-warning"></i></div>
+            <div class="sugestao-content">
+                <h6 class="mb-1 text-warning fw-bold">Colunas Atrasadas</h6>
+                <p class="mb-2 text-muted" style="font-size:0.72rem; line-height: 1.25;">Colunas com maiores índices de atraso atual. Uma escolha inteligente para capturar ciclos maduros.</p>
+                <div class="sugestao-badge-row" id="sug-cols-atrasadas">
+                    <span class="col-badge">Col 5</span>
+                    <span class="col-badge">Col 6</span>
+                    <span class="col-badge">Col 7</span>
+                    <span class="col-badge">Col 8</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="sugestao-card h-100 cursor-pointer" onclick="aplicarSugestao('balanceadas')">
+            <div class="sugestao-icon bg-primary-light"><i class="fas fa-balance-scale text-primary"></i></div>
+            <div class="sugestao-content">
+                <h6 class="mb-1 text-primary fw-bold">Sugestão Balanceada</h6>
+                <p class="mb-2 text-muted" style="font-size:0.72rem; line-height: 1.25;">Equilíbrio estatístico perfeito: mescla 2 colunas quentes com 2 colunas atrasadas e as melhores dezenas delas.</p>
+                <div class="sugestao-badge-row" id="sug-cols-balanceadas">
+                    <span class="col-badge">Col 1</span>
+                    <span class="col-badge">Col 2</span>
+                    <span class="col-badge">Col 5</span>
+                    <span class="col-badge">Col 6</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SELETOR E VOLANTE CENTRALIZADOS -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-4">
+        <div class="max-width-xl mx-auto text-center">
+            <h3 class="fw-bold mb-1">Selecione 16 números no Volante</h3>
+            <p class="text-muted small mb-4">Escolha dezenas de exatamente 4 colunas distintas (exatamente 4 em cada coluna) ou use as sugestões acima.</p>
+            
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-6 col-lg-5">
+                    <label for="nome" class="form-label fw-bold small text-muted text-uppercase mb-1">Nome do desdobramento:</label>
+                    <input type="text" id="nome" class="form-control form-control-lg text-center fw-bold shadow-sm" placeholder="Ex: Sorteio Especial" style="border-radius:10px; border: 1.5px solid #d6f0da;">
+                </div>
+            </div>
+
+            <!-- Volante Grid -->
+            <div class="volante-container mb-3 d-inline-block">
+                <div class="volante-grid" id="volante-grid">
+                    <!-- Gerado dinamicamente via JS -->
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap mb-4">
+                <div class="contador-badge">
+                    <span id="contador-selecionados" class="fw-extrabold fs-5">0</span> / 16 números selecionados
+                </div>
+                <div class="colunas-detalhe-badge" id="colunas-selecionadas-info">
+                    Nenhuma coluna selecionada
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-2 flex-wrap mb-2">
+                <button id="btn-limpar" class="btn btn-outline-danger fw-bold px-4" style="border-radius:10px;">
+                    <i class="fas fa-trash-alt me-2"></i>Limpar Volante
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GARANTIA E CONTRATOS -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header fw-bold py-3 text-center border-0" style="background:#e8faea; color:var(--primary-dark, #1a1a2e);">
+        <h4 class="mb-0 fw-bold text-success"><i class="fas fa-shield-alt me-2"></i>Escolha a Garantia de Fechamento</h4>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <label class="modo-card h-100 w-100" for="modo-bronze">
+                    <input type="radio" name="modo_fechamento" id="modo-bronze" value="bronze" checked>
+                    <div class="modo-card-content p-3 h-100 d-flex flex-column align-items-center text-center justify-content-between border rounded-4 cursor-pointer">
+                        <span class="modo-badge bronze mb-2">BRONZE</span>
+                        <span class="modo-title fw-extrabold mb-1">24 Apostas</span>
+                        <span class="modo-desc text-muted mb-2">Fechamento virtual clássico com parceria 1-para-1</span>
+                        <span class="modo-preco fw-bold text-success">R$ 108,00</span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="modo-card h-100 w-100" for="modo-prata">
+                    <input type="radio" name="modo_fechamento" id="modo-prata" value="prata">
+                    <div class="modo-card-content p-3 h-100 d-flex flex-column align-items-center text-center justify-content-between border rounded-4 cursor-pointer">
+                        <span class="modo-badge prata mb-2">PRATA</span>
+                        <span class="modo-title fw-extrabold mb-1">72 Apostas</span>
+                        <span class="modo-desc text-muted mb-2">Segurança ampliada cobrindo rotação das 3 parcerias</span>
+                        <span class="modo-preco fw-bold text-success">R$ 324,00</span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="modo-card h-100 w-100" for="modo-ouro">
+                    <input type="radio" name="modo_fechamento" id="modo-ouro" value="ouro">
+                    <div class="modo-card-content p-3 h-100 d-flex flex-column align-items-center text-center justify-content-between border rounded-4 cursor-pointer">
+                        <span class="modo-badge ouro mb-2">OURO</span>
+                        <span class="modo-title fw-extrabold mb-1">96 Apostas</span>
+                        <span class="modo-desc text-muted mb-2">Fechamento avançado cartesiano cruzado total da linha</span>
+                        <span class="modo-preco fw-bold text-success">R$ 432,00</span>
+                    </div>
+                </label>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="modo-card h-100 w-100" for="modo-diamante">
+                    <input type="radio" name="modo_fechamento" id="modo-diamante" value="diamante">
+                    <div class="modo-card-content p-3 h-100 d-flex flex-column align-items-center text-center justify-content-between border rounded-4 cursor-pointer">
+                        <span class="modo-badge diamante mb-2">DIAMANTE</span>
+                        <span class="modo-title fw-extrabold mb-1">288 Apostas</span>
+                        <span class="modo-desc text-muted mb-2">Garantia matemática integral total das rotações cartesianas</span>
+                        <span class="modo-preco fw-bold text-success">R$ 1.296,00</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- RECOMENDAÇÕES ESTRUTURADAS -->
+        <div class="p-3 border rounded-3 bg-light" style="border-color: #d6f0da !important;">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span style="font-size:1.25rem;">💡</span>
+                <strong class="text-success">Análise de Risco Estratégica: Qual escolher?</strong>
+            </div>
+            <div class="row g-3 small">
+                <div class="col-md-6">
+                    <div class="p-2 bg-white rounded shadow-sm border border-light h-100">
+                        <span class="badge bg-warning text-dark me-1">Opção A (Bronze a Ouro)</span> <strong>Distribuição de risco:</strong>
+                        <p class="mb-0 text-muted mt-1" style="font-size:0.75rem;">Você prefere diluir o capital. É ideal para quem analisa estatísticas e prefere rodar múltiplos fechamentos menores (ex: 2x 96 jogos cobrindo 32 dezenas quentes/atrasadas diferentes) para espalhar suas probabilidades.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-2 bg-white rounded shadow-sm border border-light h-100">
+                        <span class="badge bg-success text-white me-1">Opção B (Diamante)</span> <strong>Alta Convicção:</strong>
+                        <p class="mb-0 text-muted mt-1" style="font-size:0.75rem;">Se você possui convicção absoluta nas 16 dezenas selecionadas (após monitoramento intenso de ciclos e dezenas atrasadas). Garante reter todo o retorno financeiro matemático e extrair até o último centavo de prêmio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button id="btn-gerar" class="btn btn-success btn-lg fw-extrabold px-5 py-3 shadow-lg" style="border-radius:12px; transition: var(--transition-soft);" disabled>
+                <i class="fas fa-magic me-2"></i>GERAR FECHAMENTO MATEMÁTICO
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- SEÇÃO DE RESULTADOS -->
+<div class="card border-0 shadow-sm mb-4" id="resultados" style="display: none;">
+    <div class="card-header fw-bold bg-success text-white py-3 border-0">
+        <h4 class="mb-0"><i class="fas fa-calculator me-2"></i>Resultados Calculados do Fechamento</h4>
+    </div>
+    <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 p-3 border rounded-3 bg-light">
+            <div>
+                <h5 class="mb-1 text-success fw-bold" id="res-nome">Desdobramentos</h5>
+                <p class="mb-0 text-muted" id="res-total-apostas" style="font-size:0.85rem;"></p>
+            </div>
+            
+            <!-- Conferidor Box -->
+            <div class="d-flex align-items-center gap-2 p-2 border rounded bg-white shadow-sm" id="painel-conferidor">
+                <span class="small fw-bold text-muted px-2">Acertos Concurso <span id="conf-concurso">--</span>:</span>
+                <div class="acerto-box sena p-2">
+                    <span class="acerto-titulo">Sena</span>
+                    <span class="acerto-valor" id="total-senas">0</span>
+                </div>
+                <div class="acerto-box quina p-2">
+                    <span class="acerto-titulo">Quina</span>
+                    <span class="acerto-valor" id="total-quinas">0</span>
+                </div>
+                <div class="acerto-box quadra p-2">
+                    <span class="acerto-titulo">Quadra</span>
+                    <span class="acerto-valor" id="total-quadras">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 PASSOS DE VISUALIZAÇÃO -->
+        <div class="passos-desdobramento">
+            <!-- Passo 1: Grupos -->
+            <div class="passo-bloco">
+                <h3>1️⃣ Divisão em Grupos Virtuais (4 Grupos de 4 Dezenas)</h3>
+                <p class="text-muted" style="font-size:0.8rem; margin-top:-0.5rem; margin-bottom:1rem;">As 16 dezenas foram organizadas ascendentemente pelas suas respectivas colunas para manter a fidelidade matemática das uniões.</p>
+                <div class="grupos-horizontal-container" id="container-grupos">
+                    <!-- JS injects here -->
+                </div>
+            </div>
+
+            <!-- Passo 2: Tabela de Pares -->
+            <div class="passo-bloco">
+                <h3>2️⃣ Combinações Parciais Internas (Combinações C(4,2) = 6 pares por grupo)</h3>
+                <p class="text-muted" style="font-size:0.8rem; margin-top:-0.5rem; margin-bottom:1rem;">Cada linha virtual representa a fusão de pares de cada um dos grupos correspondentes.</p>
+                <div class="tabela-pares-container">
+                    <table class="tabela-pares">
+                        <thead>
+                            <tr>
+                                <th>Linha</th>
+                                <th class="th-g1">Grupo 01 (Roxo)</th>
+                                <th class="th-g2">Grupo 02 (Rosa)</th>
+                                <th class="th-g3">Grupo 03 (Azul)</th>
+                                <th class="th-g4">Grupo 04 (Verde)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela-pares">
+                            <!-- JS injects here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Passo 3: Apostas Finais -->
+            <div class="passo-bloco">
+                <h3>3️⃣ Lançamentos das Apostas Geradas (União de Trios)</h3>
+                <p class="text-muted" style="font-size:0.8rem; margin-top:-0.5rem; margin-bottom:1rem;">Junção matemática ordenada. As dezenas são agrupadas em blocos coloridos para fácil cópia, mostrando as marcações com destaque visual do sorteio conferido.</p>
+                <div class="blocos-apostas-grid" id="lista-blocos-apostas">
+                    <!-- JS injects here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <button id="btn-novo" class="btn btn-outline-success fw-bold px-4 py-2" style="border-radius:10px;">
+                <i class="fas fa-plus me-2"></i>Novo Desdobramento
+            </button>
+            <button id="btn-baixar-apostas" class="btn btn-success fw-bold px-5 py-2 shadow" style="border-radius:10px;">
+                <i class="fas fa-file-download me-2"></i>Baixar Apostas (.TXT Caixa)
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- HISTÓRICO DE DESDOBRAMENTOS -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header fw-bold py-3 d-flex align-items-center justify-content-between border-0" style="background:#e8faea;">
+        <h4 class="mb-0 text-success fw-bold"><i class="fas fa-history me-2"></i>Histórico de Fechamentos</h4>
+        <div class="d-flex gap-2">
+            <button id="btn-toggle-historico" class="btn btn-sm btn-success fw-bold px-3" style="border-radius:8px;">Ocultar</button>
+            <button id="btn-atualizar" class="btn btn-sm btn-outline-success fw-bold px-3" style="border-radius:8px;"><i class="fas fa-sync-alt"></i></button>
+        </div>
+    </div>
+    <div class="card-body" id="conteudo-historico">
+        <div id="lista-historico">
+            <div class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Carregando histórico...</div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const MAX_DEZENA = 25;
+    const MIN_DEZENA = 1;
+    const VOLANTE_LINHAS = 3;
+    const SUPORTA_TREVO = false;
+    const dezenasSorteadasCiclo = {{ ciclo.dezenas_sorteadas|tojson }};
+    const dezenasFaltantesCiclo = {{ ciclo.dezenas_faltantes|tojson }};
+
+    let numerosSelecionados = [];
+    let desdobramentoAtual = null;
+    let dezenasSorteadas = [];
+    let cacheSugestoes = null;
+
+    // Inicialização do Volante
+    document.addEventListener('DOMContentLoaded', () => {
+        criarVolanteOficial();
+        carregarSugestoesEstatisticas();
+        atualizarResultadoCaixa();
+        atualizarHistorico();
+        configurarEventosLocal();
+    });
+
+    // Criar Volante Oficial 6x10 com rótulos e divisórias discretos
+    function criarVolanteOficial() {
+        const volante = document.getElementById('volante-grid');
+        volante.innerHTML = '';
+        
+        // 1. Adicionar rótulos das colunas (1 a 10)
+        for (let col = 1; col <= 10; col++) {
+            const lbl = document.createElement('div');
+            lbl.className = 'col-label-item';
+            lbl.style.gridRow = '1';
+            lbl.style.gridColumn = (col + 2).toString();
+            lbl.textContent = col;
+            volante.appendChild(lbl);
+        }
+        
+        // 2. Adicionar linha horizontal divisória
+        const hLine = document.createElement('div');
+        hLine.className = 'volante-line-horizontal';
+        hLine.style.gridRow = '2';
+        hLine.style.gridColumn = '3 / span 10';
+        volante.appendChild(hLine);
+        
+        // 3. Adicionar rótulos de todas as linhas (1 a 6)
+        for (let row = 1; row <= VOLANTE_LINHAS; row++) {
+            const lbl = document.createElement('div');
+            lbl.className = 'row-label-item';
+            lbl.style.gridRow = (row + 2).toString();
+            lbl.style.gridColumn = '1';
+            lbl.textContent = row;
+            volante.appendChild(lbl);
+        }
+        
+        // 4. Adicionar linha vertical divisória
+        const vLine = document.createElement('div');
+        vLine.className = 'volante-line-vertical';
+        vLine.style.gridRow = '3 / span ' + VOLANTE_LINHAS;
+        vLine.style.gridColumn = '2';
+        volante.appendChild(vLine);
+        
+        // 5. Adicionar as células do volante
+        for (let linha = 0; linha < VOLANTE_LINHAS; linha++) {
+            for (let col = 1; col <= 10; col++) {
+                const numero = linha * 10 + col;
+                if (numero < MIN_DEZENA || numero > MAX_DEZENA) continue;
+                const celula = document.createElement('div');
+                celula.className = 'volante-celula';
+                celula.style.gridRow = (linha + 3).toString();
+                celula.style.gridColumn = (col + 2).toString();
+                
+                // Destacar dezenas que já saíram no ciclo ativo
+                const jaSaiuNoCiclo = dezenasSorteadasCiclo.includes(numero);
+                if (jaSaiuNoCiclo) {
+                    celula.classList.add('cycle-drawn');
+                }
+                
+                celula.textContent = numero.toString().padStart(2, '0');
+                celula.dataset.numero = numero;
+                
+                if (jaSaiuNoCiclo) {
+                    const check = document.createElement('span');
+                    check.className = 'cycle-check';
+                    check.innerHTML = '✓';
+                    celula.appendChild(check);
+                }
+                
+                celula.addEventListener('click', () => toggleNumeroLocal(numero, celula));
+                volante.appendChild(celula);
+            }
+        }
+    }
+
+    function toggleNumeroLocal(num, elemento) {
+        if (elemento.classList.contains('selecionado')) {
+            elemento.classList.remove('selecionado');
+            numerosSelecionados = numerosSelecionados.filter(n => n !== num);
+        } else {
+            if (numerosSelecionados.length >= 16) {
+                Swal.fire({ icon: 'warning', title: 'Aviso', text: 'Você já selecionou o limite máximo de 16 dezenas!' });
+                return;
+            }
+
+            const col = (num % 10 === 0) ? 10 : (num % 10);
+            
+            // Contar dezenas por coluna
+            const contagemColunas = {};
+            numerosSelecionados.forEach(n => {
+                const c = (n % 10 === 0) ? 10 : (n % 10);
+                contagemColunas[c] = (contagemColunas[c] || 0) + 1;
+            });
+            
+            const colunasAtivas = Object.keys(contagemColunas).map(Number);
+            const isNovaColuna = !colunasAtivas.includes(col);
+            
+            if (isNovaColuna) {
+                if (colunasAtivas.length >= 4) {
+                    Swal.fire({ icon: 'error', title: 'Regra Inválida', text: 'O desdobramento exige selecionar dezenas em exatamente 4 colunas distintas!' });
+                    return;
+                }
+            } else {
+                if (contagemColunas[col] >= 4) {
+                    Swal.fire({ icon: 'error', title: 'Coluna Cheia', text: `A coluna ${col} já possui o limite de 4 dezenas selecionadas!` });
+                    return;
+                }
+            }
+
+            elemento.classList.add('selecionado');
+            numerosSelecionados.push(num);
+        }
+        atualizarContadoresEFeedback();
+    }
+
+    function atualizarContadoresEFeedback() {
+        // Atualizar contador de selecionados
+        document.getElementById('contador-selecionados').textContent = numerosSelecionados.length;
+        
+        // Habilitar/desabilitar botão gerar
+        const btnGerar = document.getElementById('btn-gerar');
+        btnGerar.disabled = (numerosSelecionados.length !== 16);
+
+        // Feedback das colunas
+        const infoBadge = document.getElementById('colunas-selecionadas-info');
+        
+        const contagemColunas = {};
+        numerosSelecionados.forEach(n => {
+            const c = (n % 10 === 0) ? 10 : (n % 10);
+            contagemColunas[c] = (contagemColunas[c] || 0) + 1;
+        });
+
+        const chaves = Object.keys(contagemColunas).map(Number).sort((a,b)=>a-b);
+        if (chaves.length === 0) {
+            infoBadge.textContent = 'Nenhuma coluna selecionada';
+            infoBadge.style.color = '#6b7280';
+            infoBadge.style.background = '#f3f4f6';
+            infoBadge.style.borderColor = '#e5e7eb';
+        } else {
+            const strings = chaves.map(c => `Col ${c} (${contagemColunas[c]}/4)`);
+            infoBadge.textContent = strings.join(' · ');
+            if (chaves.length === 4 && Object.values(contagemColunas).every(v => v === 4)) {
+                infoBadge.style.color = 'var(--primary)';
+                infoBadge.style.background = '#dcfce7';
+                infoBadge.style.borderColor = '#bbf7d0';
+            } else {
+                infoBadge.style.color = '#b45309';
+                infoBadge.style.background = '#fef3c7';
+                infoBadge.style.borderColor = '#fde68a';
+            }
+        }
+    }
+
+    // Configurar Eventos
+    function configurarEventosLocal() {
+        document.getElementById('btn-limpar').addEventListener('click', limparSelecaoLocal);
+        document.getElementById('btn-gerar').addEventListener('click', enviarGeracaoDesdobramento);
+        document.getElementById('btn-novo').addEventListener('click', resetarInterfaceNovoDesdobramento);
+        document.getElementById('btn-atualizar').addEventListener('click', atualizarHistorico);
+        document.getElementById('btn-atualizar-sorteio').addEventListener('click', atualizarResultadoCaixa);
+        document.getElementById('btn-baixar-apostas').addEventListener('click', baixarApostasCaixaTXT);
+
+        // Toggle do Histórico
+        const btnToggle = document.getElementById('btn-toggle-historico');
+        const conteudo = document.getElementById('conteudo-historico');
+        btnToggle.addEventListener('click', () => {
+            if (conteudo.style.display === 'none') {
+                conteudo.style.display = 'block';
+                btnToggle.textContent = 'Ocultar';
+                btnToggle.className = 'btn btn-sm btn-success fw-bold px-3';
+            } else {
+                conteudo.style.display = 'none';
+                btnToggle.textContent = 'Mostrar';
+                btnToggle.className = 'btn btn-sm btn-outline-success fw-bold px-3';
+            }
+        });
+    }
+
+    // Limpar volante
+    function limparSelecaoLocal() {
+        numerosSelecionados = [];
+        document.querySelectorAll('.volante-celula').forEach(el => {
+            el.classList.remove('selecionado');
+        });
+        atualizarContadoresEFeedback();
+    }
+
+    // Auto-selecionar dezenas faltantes do ciclo respeitando a regra 4x4
+    function selecionarFaltantesCiclo() {
+        limparSelecaoLocal();
+        
+        // Organizar dezenas de 1 a 60 em suas 10 colunas
+        const colunasDezenas = {};
+        for (let c = 1; c <= 10; c++) {
+            colunasDezenas[c] = [];
+            for (let r = 0; r < 6; r++) {
+                colunasDezenas[c].push(r * 10 + c);
+            }
+        }
+        
+        // Calcular para cada coluna quantas faltantes ela possui
+        const colunasScore = [];
+        for (let c = 1; c <= 10; c++) {
+            const faltantesNaColuna = colunasDezenas[c].filter(num => dezenasFaltantesCiclo.includes(num));
+            const sorteadasNaColuna = colunasDezenas[c].filter(num => dezenasSorteadasCiclo.includes(num));
+            colunasScore.push({
+                coluna: c,
+                faltantes: faltantesNaColuna,
+                sorteadas: sorteadasNaColuna,
+                countFaltantes: faltantesNaColuna.length
+            });
+        }
+        
+        // Ordenar colunas pelo número de dezenas faltantes (decrescente)
+        // Se empatar, ordena pela coluna menor
+        colunasScore.sort((a, b) => b.countFaltantes - a.countFaltantes || a.coluna - b.coluna);
+        
+        // Selecionar as top 4 colunas
+        const top4Colunas = colunasScore.slice(0, 4);
+        
+        top4Colunas.forEach(colInfo => {
+            let selecionadasNaColuna = [];
+            // Adiciona as faltantes
+            colInfo.faltantes.forEach(num => {
+                if (selecionadasNaColuna.length < 4) {
+                    selecionadasNaColuna.push(num);
+                }
+            });
+            
+            // Se ainda faltar para completar 4, preenche com as sorteadas da mesma coluna
+            if (selecionadasNaColuna.length < 4) {
+                // Mistura as sorteadas para dar um fator dinâmico
+                const sorteadasMisturadas = [...colInfo.sorteadas].sort(() => Math.random() - 0.5);
+                sorteadasMisturadas.forEach(num => {
+                    if (selecionadasNaColuna.length < 4) {
+                        selecionadasNaColuna.push(num);
+                    }
+                });
+            }
+            
+            // Adiciona ao volante
+            selecionadasNaColuna.forEach(num => {
+                const celula = document.querySelector(`.volante-celula[data-numero="${num}"]`);
+                if (celula) {
+                    celula.classList.add('selecionado');
+                    numerosSelecionados.push(num);
+                }
+            });
+        });
+        
+        atualizarContadoresEFeedback();
+        
+        const colsNomes = top4Colunas.map(c => c.coluna).sort((a,b)=>a-b).join(', ');
+        Swal.fire({
+            icon: 'success',
+            title: 'Dezenas Selecionadas!',
+            text: `Foram auto-selecionadas 16 dezenas das colunas [${colsNomes}], priorizando as dezenas que ainda não saíram no ciclo ativo da Lotofácil.`,
+            timer: 3000,
+            showConfirmButton: true
+        });
+    }
+
+    // Carregar Sugestões
+    async function carregarSugestoesEstatisticas() {
+        try {
+            const response = await fetch('/desdobramento/api/sugestoes-colunas');
+            const data = await response.json();
+            if (data.status === 'success') {
+                cacheSugestoes = data.sugestoes;
+                
+                // Atualizar badges visuais dos cards de sugestão
+                atualizarSugestaoBadgeHTML('quentes', data.sugestoes.quentes.colunas);
+                atualizarSugestaoBadgeHTML('atrasadas', data.sugestoes.atrasadas.colunas);
+                atualizarSugestaoBadgeHTML('balanceadas', data.sugestoes.balanceadas.colunas);
+            }
+        } catch (e) {
+            console.error('Erro ao carregar sugestões estatísticas:', e);
+        }
+    }
+
+    function atualizarSugestaoBadgeHTML(tipo, colunas) {
+        const container = document.getElementById(`sug-cols-${tipo}`);
+        if (container) {
+            container.innerHTML = colunas.map(c => `<span class="col-badge active-col">Col ${c}</span>`).join('');
+        }
+    }
+
+    // Aplicar Sugestão de 16 Dezenas (Auto-selecionar no Volante)
+    function aplicarSugestao(tipo) {
+        if (!cacheSugestoes || !cacheSugestoes[tipo]) {
+            Swal.fire({ icon: 'info', title: 'Aguarde', text: 'Estatísticas de colunas ainda sendo calculadas...' });
+            return;
+        }
+
+        limparSelecaoLocal();
+        const dezenas = cacheSugestoes[tipo].dezenas;
+
+        dezenas.forEach(num => {
+            const celula = document.querySelector(`.volante-celula[data-numero="${num}"]`);
+            if (celula) {
+                celula.classList.add('selecionado');
+                numerosSelecionados.push(num);
+            }
+        });
+
+        atualizarContadoresEFeedback();
+        Swal.fire({
+            icon: 'success',
+            title: `Sugestão ${tipo.toUpperCase()} Aplicada!`,
+            text: `16 dezenas das colunas [${cacheSugestoes[tipo].colunas.join(', ')}] foram auto-selecionadas estrategicamente no volante.`,
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+
+    // Carregar Último Sorteio
+    async function atualizarResultadoCaixa() {
+        const btn = document.getElementById('btn-atualizar-sorteio');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Carregando...';
+
+        try {
+            // Tenta obter o último da analise (que sincroniza automaticamente com o banco e a API)
+            const r = await fetch('/analise/api/ultimos');
+            const d = await r.json();
+            if (d.status === 'success' && d.sorteios.length > 0) {
+                const s = d.sorteios[0];
+                dezenasSorteadas = s.dezenas.map(Number);
+                
+                document.getElementById('concurso-numero').textContent = s.concurso;
+                document.getElementById('concurso-data').textContent = s.data;
+                
+                const container = document.getElementById('dezenas-sorteadas');
+                container.innerHTML = s.dezenas.map(n => `<span class="dez-ball">${String(n).padStart(2, '0')}</span>`).join('');
+                
+                // Se algum desdobramento estiver ativo, refazer conferencia visual
+                if (desdobramentoAtual) {
+                    mostrarResultadosCalculados(desdobramentoAtual);
+                }
+            }
+        } catch (e) {
+            console.error('Erro ao atualizar último sorteio:', e);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sincronizar Caixa';
+        }
+    }
+
+    // Enviar API de Geração
+    async function enviarGeracaoDesdobramento() {
+        const nomeInput = document.getElementById('nome').value.trim();
+        const nome = nomeInput || `Desdobramento ${new Date().toLocaleString('pt-BR')}`;
+        
+        const modoRadio = document.querySelector('input[name="modo_fechamento"]:checked');
+        const modo = modoRadio ? modoRadio.value : 'bronze';
+
+        if (numerosSelecionados.length !== 16) {
+            Swal.fire('Atenção', 'Selecione exatamente 16 dezenas no volante.', 'warning');
+            return;
+        }
+
+        // Ordenar os selecionados por coluna dezenas crescentes
+        const numerosOrdenados = organizarDezenasPorColunaLocal(numerosSelecionados);
+
+        try {
+            Swal.showLoading();
+            const response = await fetch('/desdobramento/api/desdobrar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numeros: numerosOrdenados, nome, modo })
+            });
+
+            const data = await response.json();
+            Swal.close();
+
+            if (data.status === 'success') {
+                numerosSelecionados = numerosOrdenados;
+                limparSelecaoLocal();
+                numerosSelecionados.forEach(num => {
+                    const celula = document.querySelector(`.volante-celula[data-numero="${num}"]`);
+                    if (celula) celula.classList.add('selecionado');
+                });
+                atualizarContadoresEFeedback();
+
+                desdobramentoAtual = data;
+                mostrarResultadosCalculados(data);
+                atualizarHistorico();
+                
+                Swal.fire({ icon: 'success', title: 'Sucesso', text: 'Desdobramento gerado e gravado no banco com sucesso!', timer: 1500, showConfirmButton: false });
+            } else {
+                Swal.fire('Erro', data.message || 'Erro desconhecido ao gerar desdobramento.', 'error');
+            }
+        } catch (err) {
+            Swal.close();
+            Swal.fire('Erro Técnico', err.message, 'error');
+        }
+    }
+
+    // Helper para ordenar crescente por coluna
+    function organizarDezenasPorColunaLocal(numeros) {
+        const colunas = {};
+        numeros.forEach(n => {
+            const c = (n % 10 === 0) ? 10 : (n % 10);
+            if (!colunas[c]) colunas[c] = [];
+            colunas[c].push(n);
+        });
+        
+        for (const c in colunas) {
+            colunas[c].sort((a, b) => a - b);
+        }
+        
+        const chavesOrdenadas = Object.keys(colunas).map(Number).sort((a,b)=>a-b);
+        let resultado = [];
+        chavesOrdenadas.forEach(c => {
+            resultado = resultado.concat(colunas[c]);
+        });
+        return resultado;
+    }
+
+    // Renderizar resultados das 3 etapas na tela
+    function mostrarResultadosCalculados(data) {
+        const containerResultados = document.getElementById('resultados');
+        containerResultados.style.display = 'block';
+
+        document.getElementById('res-nome').textContent = data.nome;
+        document.getElementById('res-total-apostas').textContent = `${data.total_apostas} apostas virtuais gravadas [Garantia: ${data.modo.toUpperCase()}] · Criado em: ${formatarDataLocal(data.data_criacao)}`;
+
+        // Conferidor
+        const concursoNum = document.getElementById('concurso-numero').textContent || '--';
+        document.getElementById('conf-concurso').textContent = concursoNum;
+
+        let totalQuadras = 0;
+        let totalQuinas = 0;
+        let totalSenas = 0;
+
+        // Ordenar grupos ascendentemente
+        data.grupos = data.grupos.map(g => [...g].sort((a, b) => a - b));
+        data.grupos.sort((a, b) => {
+            const colA = (a[0] % 10 === 0) ? 10 : (a[0] % 10);
+            const colB = (b[0] % 10 === 0) ? 10 : (b[0] % 10);
+            return colA - colB;
+        });
+
+        // 1. Grupos Virtuais
+        const containerGrupos = document.getElementById('container-grupos');
+        const coresClasses = ['g1', 'g2', 'g3', 'g4'];
+        const coresNomes = ['Roxo', 'Rosa', 'Azul', 'Verde'];
+
+        containerGrupos.innerHTML = data.grupos.map((g, i) => `
+            <div class="grupo-cartao ${coresClasses[i]}">
+                <div class="grupo-cartao-cabecalho">
+                    <span class="grupo-cartao-titulo">Grupo 0${i + 1}</span>
+                    <span class="grupo-cartao-subtitulo">(${coresNomes[i]})</span>
+                </div>
+                <div class="grupo-cartao-dezenas">
+                    ${g.map(n => `<span class="grupo-cartao-dezena">${n.toString().padStart(2, '0')}</span>`).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        // Reconstituir pares
+        const pares = data.grupos.map(g => {
+            const res = [];
+            for (let i = 0; i < g.length; i++) {
+                for (let j = i + 1; j < g.length; j++) {
+                    res.push([g[i], g[j]]);
+                }
+            }
+            return res;
+        });
+
+        // 2. Tabela de Pares
+        const corpoTabela = document.getElementById('corpo-tabela-pares');
+        let tabelaHTML = '';
+        for (let rIdx = 0; rIdx < 6; rIdx++) {
+            tabelaHTML += `
+                <tr>
+                    <td class="fw-bold text-muted">Comb ${rIdx + 1}</td>
+                    <td><div class="par-tabela-celula g1">${pares[0][rIdx][0].toString().padStart(2, '0')} - ${pares[0][rIdx][1].toString().padStart(2, '0')}</div></td>
+                    <td><div class="par-tabela-celula g2">${pares[1][rIdx][0].toString().padStart(2, '0')} - ${pares[1][rIdx][1].toString().padStart(2, '0')}</div></td>
+                    <td><div class="par-tabela-celula g3">${pares[2][rIdx][0].toString().padStart(2, '0')} - ${pares[2][rIdx][1].toString().padStart(2, '0')}</div></td>
+                    <td><div class="par-tabela-celula g4">${pares[3][rIdx][0].toString().padStart(2, '0')} - ${pares[3][rIdx][1].toString().padStart(2, '0')}</div></td>
+                </tr>
+            `;
+        }
+        corpoTabela.innerHTML = tabelaHTML;
+
+        // 3. Blocos de Apostas
+        const listaBlocos = document.getElementById('lista-blocos-apostas');
+        const boxTemaClasses = ['box-purple', 'box-pink', 'box-cyan', 'box-rose', 'box-emerald', 'box-amber'];
+        const boxTemaNomes = ['Roxo', 'Rosa', 'Azul', 'Vermelho', 'Verde', 'Laranja'];
+
+        let blocosHTML = '';
+        const totalCards = Math.ceil(data.apostas.length / 4);
+
+        for (let boxIdx = 0; boxIdx < totalCards; boxIdx++) {
+            const apostasNoCard = data.apostas.slice(boxIdx * 4, boxIdx * 4 + 4);
+            const classeTema = boxTemaClasses[boxIdx % 6];
+            const nomeTema = boxTemaNomes[boxIdx % 6];
+
+            let htmlApostasInternas = '';
+            apostasNoCard.forEach((ap, localIdx) => {
+                const globalApostaIndex = boxIdx * 4 + localIdx + 1;
+                
+                // Filtrar trios virtuais
+                const t1 = ap.filter(n => data.grupos[0].includes(n) || data.grupos[1].includes(n)).sort((a,b)=>a-b);
+                const t2 = ap.filter(n => data.grupos[2].includes(n) || data.grupos[3].includes(n)).sort((a,b)=>a-b);
+
+                let acertosCount = 0;
+                
+                const t1Html = t1.map(n => {
+                    const isHit = dezenasSorteadas.includes(n);
+                    if (isHit) acertosCount++;
+                    return `<span class="dezena-aposta-num ${isHit ? 'hit' : ''}">${n.toString().padStart(2,'0')}</span>`;
+                }).join('');
+
+                const t2Html = t2.map(n => {
+                    const isHit = dezenasSorteadas.includes(n);
+                    if (isHit) acertosCount++;
+                    return `<span class="dezena-aposta-num ${isHit ? 'hit' : ''}">${n.toString().padStart(2,'0')}</span>`;
+                }).join('');
+
+                let badgeHTML = '';
+                let classePremio = '';
+                if (acertosCount === 4) {
+                    totalQuadras++;
+                    badgeHTML = '<span class="hit-badge-aposta n-4">Quadra</span>';
+                    classePremio = 'premiado-quadra';
+                } else if (acertosCount === 5) {
+                    totalQuinas++;
+                    badgeHTML = '<span class="hit-badge-aposta n-5">Quina</span>';
+                    classePremio = 'premiado-quina';
+                } else if (acertosCount === 6) {
+                    totalSenas++;
+                    badgeHTML = '<span class="hit-badge-aposta n-6">Sena</span>';
+                    classePremio = 'premiado-sena';
+                } else if (acertosCount > 0) {
+                    badgeHTML = `<span class="hit-badge-aposta hit-simples">${acertosCount} pts</span>`;
+                }
+
+                htmlApostasInternas += `
+                    <div class="aposta-item ${classePremio}">
+                        <span class="aposta-num-ref">Jogo ${globalApostaIndex.toString().padStart(3, '0')}</span>
+                        <div class="aposta-conteudo">
+                            <div class="trio-loterico">
+                                ${t1Html}
+                            </div>
+                            <span class="trio-separador"></span>
+                            <div class="trio-loterico">
+                                    ${t2Html}
+                            </div>
+                        </div>
+                        <div class="aposta-resultado">
+                            ${badgeHTML}
+                        </div>
+                    </div>
+                `;
+            });
+
+            blocosHTML += `
+                <div class="aposta-box-card ${classeTema}">
+                    <div class="box-card-cabecalho">
+                        <span class="box-card-numero">${(boxIdx + 1).toString().padStart(2, '0')}</span>
+                        <div class="box-card-cabecalho-texto">
+                            <h4 class="mb-0">Apostas da Linha ${(boxIdx + 1).toString().padStart(2, '0')}</h4>
+                            <small>Grupo de Rotação: ${nomeTema}</small>
+                        </div>
+                    </div>
+                    <div class="box-card-corpo">
+                        ${htmlApostasInternas}
+                    </div>
+                </div>
+            `;
+        }
+
+        listaBlocos.innerHTML = blocosHTML;
+
+        // Atualizar painel acertos
+        document.getElementById('total-quadras').textContent = totalQuadras;
+        document.getElementById('total-quinas').textContent = totalQuinas;
+        document.getElementById('total-senas').textContent = totalSenas;
+
+        const painel = document.getElementById('painel-conferidor');
+        if (totalQuadras > 0 || totalQuinas > 0 || totalSenas > 0) {
+            painel.style.borderColor = 'var(--accent)';
+            painel.style.background = '#f0fdf4';
+        } else {
+            painel.style.borderColor = '#e2e8f0';
+            painel.style.background = '#fff';
+        }
+
+        containerResultados.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Resetar novo desdobramento
+    function resetarInterfaceNovoDesdobramento() {
+        limparSelecaoLocal();
+        desdobramentoAtual = null;
+        document.getElementById('resultados').style.display = 'none';
+        document.getElementById('nome').value = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Histórico de Fechamentos
+    async function atualizarHistorico() {
+        try {
+            const response = await fetch('/desdobramento/api/desdobramentos');
+            const data = await response.json();
+            const container = document.getElementById('lista-historico');
+
+            if (!data.desdobramentos || data.desdobramentos.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted py-3 fs-7">Nenhum desdobramento matemático gravado ainda.</p>';
+                return;
+            }
+
+            container.innerHTML = data.desdobramentos.map(d => `
+                <div class="historico-item">
+                    <div class="historico-info">
+                        <h4>${d.nome}</h4>
+                        <p>${d.total_apostas} apostas · ${d.modo.toUpperCase()} · ${formatarDataLocal(d.data_criacao)}</p>
+                    </div>
+                    <div class="historico-acoes">
+                        <button class="btn-small btn-ver" onclick="carregarDesdobramentoSalvo(${d.id})">Carregar</button>
+                        <button class="btn-small btn-excluir" onclick="removerDesdobramentoSalvo(${d.id})">Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function carregarDesdobramentoSalvo(id) {
+        try {
+            Swal.showLoading();
+            const response = await fetch(`/desdobramento/api/desdobramento/${id}`);
+            const data = await response.json();
+            Swal.close();
+
+            if (data.status === 'success') {
+                const dbd = data.desdobramento;
+                desdobramentoAtual = dbd;
+                numerosSelecionados = dbd.numeros.split(',').map(Number);
+                
+                // Atualizar volante visual
+                limparSelecaoLocal();
+                numerosSelecionados.forEach(n => {
+                    const c = document.querySelector(`.volante-celula[data-numero="${n}"]`);
+                    if (c) c.classList.add('selecionado');
+                });
+                atualizarContadoresEFeedback();
+
+                mostrarResultadosCalculados(dbd);
+                
+                // Atualizar o rádio correspondente ao modo
+                const radio = document.getElementById(`modo-${dbd.modo}`);
+                if (radio) radio.checked = true;
+
+                Swal.fire({ icon: 'success', title: 'Carregado', text: 'Dados importados do SQLite com sucesso!', timer: 1000, showConfirmButton: false });
+            }
+        } catch (e) {
+            Swal.close();
+            Swal.fire('Erro', 'Falha ao recuperar desdobramento.', 'error');
+        }
+    }
+
+    async function removerDesdobramentoSalvo(id) {
+        const confirmacao = await Swal.fire({
+            title: 'Excluir Fechamento?',
+            text: "Deseja realmente remover esta simulação gravada no banco?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#4b5563',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (confirmacao.isConfirmed) {
+            try {
+                Swal.showLoading();
+                const response = await fetch(`/desdobramento/api/desdobramento/${id}`, { method: 'DELETE' });
+                const res = await response.json();
+                Swal.close();
+
+                if (res.status === 'success') {
+                    atualizarHistorico();
+                    Swal.fire('Excluído', 'O registro foi removido com sucesso.', 'success');
+                }
+            } catch (e) {
+                Swal.close();
+                Swal.fire('Erro', 'Falha ao excluir o fechamento.', 'error');
+            }
+        }
+    }
+
+    // Exportação em TXT
+    function baixarApostasCaixaTXT() {
+        if (!desdobramentoAtual) {
+            Swal.fire('Aviso', 'Nenhum desdobramento gerado.', 'warning');
+            return;
+        }
+
+        let txt = '';
+        desdobramentoAtual.apostas.forEach(ap => {
+            txt += ap.map(n => n.toString().padStart(2, '0')).join(' ') + '\r\n';
+        });
+
+        const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        
+        const safeNome = desdobramentoAtual.nome.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+        link.download = `apostas_megasena_${safeNome}.txt`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    function formatarDataLocal(dataIso) {
+        if (!dataIso) return '--';
+        try {
+            const data = new Date(dataIso);
+            return data.toLocaleString('pt-BR');
+        } catch (e) {
+            return dataIso;
+        }
+    }
+</script>
+{% endblock %}

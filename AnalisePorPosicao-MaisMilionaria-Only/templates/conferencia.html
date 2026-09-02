@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% block content %}
+{% include 'cc_conferencia_shell_start.html' %}
+
+<style>
+    .conf-center {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .15);
+    }
+
+    .stats-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+
+    .stat-pill {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+        border-radius: 10px;
+        padding: .45rem .9rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .07);
+        min-width: 70px;
+        border: 1.5px solid #f0e0a0;
+    }
+
+    .stat-pill .sp-val {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--primary);
+    }
+
+    .stat-pill .sp-lbl {
+        font-size: .6rem;
+        font-weight: 700;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: .75rem;
+        justify-content: center;
+    }
+
+    .filter-bar .fb-label {
+        font-size: .72rem;
+        font-weight: 700;
+        color: #777;
+        margin-right: 4px;
+    }
+
+    .ac-filter-btn {
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 700;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all .15s;
+        background: #f0f0f0;
+        color: #555;
+    }
+
+    .ac-filter-btn.active {
+        color: #fff;
+    }
+
+    .ac-filter-btn[data-ac="all"].active {
+        background: var(--primary);
+    }
+
+    .result-row {
+        padding: .5rem .75rem;
+        border-bottom: 1px solid #f0e0a0;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .result-row:hover {
+        background: var(--accent-light);
+    }
+
+    .result-meta {
+        min-width: 90px;
+    }
+
+    .dez-balls {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .dez-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .82rem;
+    }
+
+    .trevo-row {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        margin-top: 4px;
+    }
+
+    .trevo-ball-s {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .7rem;
+    }
+
+    .dg-hit {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 1px 4px rgba(212, 160, 23, .4);
+    }
+
+    .dg-miss {
+        background: #f0f0f0;
+        color: #aaa;
+    }
+
+    .trv-hit {
+        background: var(--accent-trevo);
+        color: #fff;
+        box-shadow: 0 1px 4px rgba(26, 122, 58, .3);
+    }
+
+    .trv-miss {
+        background: #e0e0e0;
+        color: #aaa;
+    }
+
+    .acertos-tag {
+        font-weight: 800;
+        text-align: center;
+        border-radius: 8px;
+        padding: 3px 8px;
+        font-size: .75rem;
+        white-space: nowrap;
+        margin-bottom: 3px;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #aaa;
+        font-size: .85rem;
+        display: none;
+    }
+</style>
+
+<div class="conf-center">
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div>
+                <h2><i class="fas fa-trophy me-2"></i>Conferência Histórica — +Milionária</h2>
+                <p class="mb-0" style="opacity:.85;font-size:.9rem;">Top-6 Sniper dezenas + Top-2 trevos vs. últimos 200
+                    concursos</p>
+            </div>
+            <div class="ms-auto">
+                <button class="btn btn-sm" id="btnRecarregar"
+                    style="background:var(--accent);color:#fff;font-weight:700;" onclick="carregar()">
+                    <i class="fas fa-sync-alt me-1"></i>Recarregar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-bar" id="statsBar" style="display:none;"></div>
+    <div class="filter-bar" id="filterBar" style="display:none;">
+        <span class="fb-label"><i class="fas fa-filter me-1"></i>Filtrar prêmio:</span>
+        <button class="ac-filter-btn active" data-ac="all" onclick="setFiltro(this)">Todos</button>
+        <button class="ac-filter-btn" data-ac="6_2" onclick="setFiltro(this)" style="--ac-bg:#1a0f00;">💰 6+2</button>
+        <button class="ac-filter-btn" data-ac="6_1" onclick="setFiltro(this)" style="--ac-bg:#8b6914;">🥇 6+1</button>
+        <button class="ac-filter-btn" data-ac="6_0" onclick="setFiltro(this)" style="--ac-bg:#005a3a;">🍀 6+0</button>
+        <button class="ac-filter-btn" data-ac="5_2" onclick="setFiltro(this)" style="--ac-bg:#856404;">5+2</button>
+        <button class="ac-filter-btn" data-ac="5_1" onclick="setFiltro(this)">5+1</button>
+        <button class="ac-filter-btn" data-ac="4_2" onclick="setFiltro(this)">4+2</button>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header fw-bold"
+            style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;padding:.7rem 1rem;">
+            <i class="fas fa-history me-2"></i>Resultados Históricos
+        </div>
+        <div class="card-body p-0">
+            <div class="px-3 py-2 border-bottom" id="sniperHeader" style="display:none;font-size:.78rem;">
+                <strong style="color:var(--primary);">🎯 Dezenas Sniper:</strong>
+                <div class="d-flex gap-1 flex-wrap mt-1 mb-1" id="sniperBalls"></div>
+                <strong style="color:var(--accent-trevo);">🍀 Trevos Sniper:</strong>
+                <div class="d-flex gap-1 flex-wrap mt-1" id="sniperTrevos"></div>
+            </div>
+            <div id="conferencia-corpo">
+                <div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Carregando
+                    conferência...</div>
+            </div>
+            <div class="no-results" id="noResults"><i class="fas fa-search me-2"></i>Nenhum resultado para este filtro.
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'cc_conferencia_shell_end.html' %}
+{% endblock %}
+{% block scripts %}
+{% include 'cc_conferencia_scripts.html' %}
+
+<script>
+    let _dados = [], _acFilter = 'all';
+    const FILTER_COLORS = {
+        '6_2': '#1a0f00', '6_1': '#8b6914', '6_0': '#005a3a', '5_2': '#856404', '5_1': '#6e4500', '4_2': '#4a2a00'
+    };
+
+    async function carregar() {
+        const corpo = document.getElementById('conferencia-corpo'), btn = document.getElementById('btnRecarregar');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Carregando...'; }
+        corpo.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Calculando...</div>';
+        document.getElementById('filterBar').style.display = 'none';
+        document.getElementById('statsBar').style.display = 'none';
+        document.getElementById('sniperHeader').style.display = 'none';
+        try {
+            const r = await fetch('/central-conferencias/api/conferir', { method: 'POST' }); const d = await r.json();
+            if (d.status !== 'success') { corpo.innerHTML = `<div class="text-danger p-3">${d.message}</div>`; return; }
+            _dados = d.resultados; _acFilter = 'all';
+            document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.ac-filter-btn[data-ac="all"]').classList.add('active');
+            const sd = _dados[0]?.sniper_dez || [], st = _dados[0]?.sniper_trv || [];
+            document.getElementById('sniperBalls').innerHTML = sd.map(dez => `<span class="dez-ball dg-hit">${String(dez).padStart(2, '0')}</span>`).join('');
+            document.getElementById('sniperTrevos').innerHTML = st.map(trv => `<span class="trevo-ball-s trv-hit">🍀${String(trv).padStart(2, '0')}</span>`).join('');
+            document.getElementById('sniperHeader').style.display = 'block';
+            renderStats(); renderTabela();
+            document.getElementById('filterBar').style.display = 'flex';
+        } catch (e) { corpo.innerHTML = `<div class="text-danger p-3">Erro: ${e.message}</div>`; }
+        finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Recarregar'; } }
+    }
+
+    function setFiltro(btn) {
+        _acFilter = btn.dataset.ac;
+        document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (FILTER_COLORS[_acFilter]) btn.style.background = FILTER_COLORS[_acFilter];
+        renderTabela();
+    }
+
+    function matchFilter(res) {
+        if (_acFilter === 'all') return true;
+        const [fd, ft] = _acFilter.split('_').map(Number);
+        return res.acertos_dez === fd && res.acertos_trv === ft;
+    }
+
+    function acLabel(ad, at) {
+        if (ad === 6 && at === 2) return '💰 6+2'; if (ad === 6 && at === 1) return '🥇 6+1'; if (ad === 6 && at === 0) return '🍀 6+0';
+        if (ad === 5 && at === 2) return '5+2'; if (ad === 5 && at === 1) return '5+1';
+        if (ad === 4 && at === 2) return '4+2'; if (ad === 4 && at === 0) return '4+0';
+        return `${ad}+${at}`;
+    }
+    function acStyle(ad, at) {
+        if (ad === 6 && at === 2) return 'background:#1a0f00;color:var(--accent);';
+        if (ad === 6 && at === 1) return 'background:var(--primary);color:#fff;';
+        if (ad === 6 && at === 0) return 'background:#005a3a;color:#d4f0e4;';
+        if (ad === 5 && at === 2) return 'background:#856404;color:#fff3cd;';
+        if (ad >= 5 || at >= 2) return 'background:#f0e0a0;color:#6e4500;';
+        return 'background:#f5f5f5;color:#aaa;';
+    }
+
+    function renderStats() {
+        const total = _dados.length;
+        let cnt = { '6+2': 0, '6+1': 0, '6+0': 0, '5+2': 0, '5+1': 0, '4+2': 0 };
+        _dados.forEach(r => {
+            const k = `${r.acertos_dez}+${r.acertos_trv}`;
+            if (cnt[k] !== undefined) cnt[k]++;
+        });
+        const bar = document.getElementById('statsBar'); bar.style.display = 'flex';
+        bar.innerHTML = `<div class="stat-pill"><span class="sp-val">${total}</span><span class="sp-lbl">Concursos</span></div>
+        <div class="stat-pill" style="border-color:#1a0f00;"><span class="sp-val" style="color:#1a0f00;">${cnt['6+2']}</span><span class="sp-lbl">6+2</span></div>
+        <div class="stat-pill" style="border-color:var(--primary);"><span class="sp-val">${cnt['6+1']}</span><span class="sp-lbl">6+1</span></div>
+        <div class="stat-pill" style="border-color:#005a3a;"><span class="sp-val" style="color:#005a3a;">${cnt['6+0']}</span><span class="sp-lbl">6+0</span></div>
+        <div class="stat-pill" style="border-color:#856404;"><span class="sp-val" style="color:#856404;">${cnt['5+2']}</span><span class="sp-lbl">5+2</span></div>
+        <div class="stat-pill"><span class="sp-val">${cnt['5+1']}</span><span class="sp-lbl">5+1</span></div>
+        <div class="stat-pill"><span class="sp-val">${cnt['4+2']}</span><span class="sp-lbl">4+2</span></div>`;
+    }
+
+    function renderTabela() {
+        const corpo = document.getElementById('conferencia-corpo');
+        const filtrado = _dados.filter(matchFilter);
+        let html = '';
+        filtrado.forEach(res => {
+            const ad = res.acertos_dez, at = res.acertos_trv;
+            const sniperDez = new Set(res.sniper_dez), sniperTrv = new Set(res.sniper_trv);
+            html += `<div class="result-row">
+            <div class="result-meta">
+                <div class="fw-bold" style="color:var(--primary);font-size:.82rem;">#${res.concurso}</div>
+                <div class="text-muted" style="font-size:.68rem;">${res.data}</div>
+                <div class="acertos-tag mt-1" style="${acStyle(ad, at)}">${acLabel(ad, at)}</div>
+            </div>
+            <div>
+                <div class="dez-balls mb-1">${res.dezenas.map(dez => `<span class="dez-ball ${sniperDez.has(dez) ? 'dg-hit' : 'dg-miss'}">${String(dez).padStart(2, '0')}</span>`).join('')}</div>
+                <div class="trevo-row">
+                    <span style="font-size:.68rem;color:var(--accent-trevo);font-weight:700;margin-right:3px;">🍀</span>
+                    ${res.trevos.map(trv => `<span class="trevo-ball-s ${sniperTrv.has(trv) ? 'trv-hit' : 'trv-miss'}">🍀${String(trv).padStart(2, '0')}</span>`).join('')}
+                </div>
+            </div>
+        </div>`;
+        });
+        corpo.innerHTML = html || '';
+        document.getElementById('noResults').style.display = filtrado.length === 0 ? 'block' : 'none';
+    }
+
+    // carregar via abas (cc_conferencia_scripts)
+</script>
+{% endblock %}

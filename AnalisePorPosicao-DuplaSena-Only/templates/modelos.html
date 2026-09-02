@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+    }
+
+    .modelos-center {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .modelo-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: 2px solid rgba(0,0,0,0.1);
+        border-radius: 8px;
+        padding: .35rem .75rem;
+        font-weight: 600;
+        font-size: .85rem;
+        color: #555;
+        white-space: nowrap;
+        transition: all .2s;
+        line-height: 1.3;
+        background: transparent;
+        cursor: pointer;
+    }
+    .tab-btn:hover {
+        background: rgba(0,0,0,0.05);
+    }
+
+    .tab-btn.active {
+        color: #fff;
+    }
+
+    .modelo-panel {
+        display: none;
+    }
+
+    .modelo-panel.active {
+        display: block;
+    }
+
+    .modelo-header {
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        color: #fff;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .progress-banner {
+        background: linear-gradient(135deg, #350000, #5a0000);
+        border-radius: 10px;
+        color: #fff;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .prog-bar-wrap {
+        background: rgba(255, 255, 255, .2);
+        border-radius: 4px;
+        height: 6px;
+        margin-top: .5rem;
+    }
+
+    .prog-bar {
+        height: 6px;
+        border-radius: 4px;
+        background: var(--accent);
+        transition: width .4s;
+    }
+
+    .aposta-row {
+    position: relative;
+        padding: .5rem .75rem;
+        border-bottom: 1px solid #f8d0d0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .aposta-row:hover {
+        background: var(--accent-light);
+    }
+
+    .aposta-num {
+        font-weight: 700;
+        color: #888;
+        font-size: .75rem;
+        min-width: 28px;
+        text-align: right;
+    }
+
+    .dez-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .85rem;
+    }
+
+    .pool-section {
+        padding: .65rem 1rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .pool-groups {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pool-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .pool-group-label {
+        font-size: .65rem;
+        font-weight: 700;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .pool-dez-row {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pool-dez {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .75rem;
+        border: 1.5px solid;
+    }
+
+    .pool-divider {
+        width: 1px;
+        background: #e0e0e0;
+        align-self: stretch;
+        margin: 0 .25rem;
+    }
+
+    /* BT: prêmio duplo em destaque */
+    .bt-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, .07);
+        overflow: hidden;
+        border: 1px solid #e8e8e8;
+    }
+
+    .bt-header {
+        padding: .7rem 1rem;
+        color: #fff;
+        font-weight: 600;
+        font-size: .88rem;
+    }
+
+    .bt-body {
+        padding: .75rem 1rem;
+    }
+
+    .acertos-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: .4rem;
+    }
+
+    .chip {
+        font-size: .7rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 12px;
+    }
+
+    .score-bar-wrap {
+        background: #eee;
+        border-radius: 4px;
+        height: 6px;
+        margin-top: .4rem;
+    }
+
+    .score-bar {
+        height: 6px;
+        border-radius: 4px;
+    }
+
+    .duplo-badge {
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: #fff;
+        font-size: .65rem;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 12px;
+        letter-spacing: .3px;
+    }
+
+    .btn-download {
+        display: none;
+    }
+
+    #btProgress {
+        display: none;
+    }
+</style>
+
+<div class="progress-banner" id="autoBanner">
+    <div class="d-flex justify-content-between align-items-center">
+        <span id="autoMsg"><i class="fas fa-bolt me-2"></i>Iniciando geração automática...</span>
+        <span id="autoPct" style="font-weight:800;color:var(--accent);">0%</span>
+    </div>
+    <div class="prog-bar-wrap">
+        <div class="prog-bar" id="autoBar" style="width:0%"></div>
+    </div>
+</div>
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div>
+            <h2><i class="fas fa-layer-group me-2"></i>Central de Modelos Estratégicos</h2>
+            <p class="mb-0" style="opacity:.85;font-size:.9rem;">6 modelos · 14 apostas · Backtesting avalia <strong>2
+                    sorteios por concurso</strong> — conta prêmio duplo!</p>
+        </div>
+    </div>
+</div>
+
+<div class="modelos-center">
+    <div class="modelo-tabs">
+        {% for m in modelos %}
+        <button class="tab-btn {% if loop.first %}active{% endif %}" id="tab-btn-{{ m.id }}"
+            style="{% if loop.first %}background:{{ m.cor }};{% endif %}" onclick="showModelo({{ m.id }})">
+            {{ m.emoji }} M{{ m.id }} — {{ m.nome }}
+        </button>
+        {% endfor %}
+        <button class="tab-btn" id="tab-btn-bt" onclick="showModelo('bt')" style="background:#350000;color:#fff;">
+            <i class="fas fa-chart-bar me-1"></i>Backtesting
+        </button>
+    </div>
+
+    {% for m in modelos %}
+    <div class="modelo-panel {% if loop.first %}active{% endif %}" id="pane-{{ m.id }}">
+        <div class="modelo-header" style="background:{{ m.cor }};">
+            <div style="font-size:1.8rem;">{{ m.emoji }}</div>
+            <div>
+                <strong style="font-size:1.05rem;">Modelo {{ m.id }} — {{ m.nome }}</strong><br>
+                <small style="opacity:.85;">{{ m.subtitulo }}</small>
+            </div>
+            <div class="ms-2"><span class="badge" style="background:rgba(255,255,255,.2);font-size:.72rem;">{{
+                    m.estrutura }}</span></div>
+        </div>
+        <div class="card border-0 shadow-sm mb-2">
+            <div class="pool-section d-none" id="pool-{{ m.id }}">
+                <div class="pool-groups">
+                    <div class="pool-group">
+                        <span class="pool-group-label">Top-6 Freq</span>
+                        <div id="poolFreq-{{ m.id }}" class="pool-dez-row"></div>
+                    </div>
+                    <div class="pool-divider"></div>
+                    <div class="pool-group">
+                        <span class="pool-group-label">Top-6 Atraso</span>
+                        <div id="poolAtr-{{ m.id }}" class="pool-dez-row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="aposta-row" style="background:#f8f9fa;font-size:.7rem;font-weight:700;color:#666;">
+                    <span style="min-width:28px;text-align:right;">#</span>
+                    <span style="display:inline-block;width:36px;text-align:center;">C1</span><span style="display:inline-block;width:36px;text-align:center;">C2</span><span style="display:inline-block;width:36px;text-align:center;">C3</span><span style="display:inline-block;width:36px;text-align:center;">C4</span><span style="display:inline-block;width:36px;text-align:center;">C5</span><span style="display:inline-block;width:36px;text-align:center;">C6</span>
+                    <span class="" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size:.65rem;color:#aaa;">↕ concorre a 2 sorteios</span>
+                </div>
+                <div id="tbody-{{ m.id }}">
+                    <div class="text-center text-muted py-4" style="font-size:.85rem;"><i
+                            class="fas fa-clock me-2"></i>Aguardando geração automática...</div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 text-center">
+                <button class="btn btn-sm btn-download" id="dlBtn-{{ m.id }}"
+                    style="background:var(--accent);color:#fff;font-weight:700;" onclick="downloadModelo({{ m.id }})">
+                    <i class="fas fa-download me-1"></i>Download TXT
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="max-width: 100%;margin:1rem auto 0;">
+    <div class="modelo-panel" id="pane-bt">
+        <div class="modelo-header" style="background:linear-gradient(135deg,#350000,#5a0000);">
+            <i class="fas fa-chart-bar" style="font-size:1.5rem;"></i>
+            <div><strong>Backtesting Histórico · Dupla Sena</strong><br><small style="opacity:.8;">Cada aposta
+                    verificada em ambos os sorteios · Prêmio duplo rastreado</small></div>
+        </div>
+        <div id="btProgress">
+            <div class="text-center py-3 text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Analisando...</div>
+        </div>
+        <div id="btResultado"></div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    const TOTAL_MODELOS = 6;
+    const CORES = {
+        1: { bg: '#8b0000', light: '#fff0f0', text: '#3d0000' },
+        2: { bg: '#7a1500', light: '#fdefd6', text: '#3d0800' },
+        3: { bg: '#5a0070', light: '#eed7fa', text: '#280040' },
+        4: { bg: '#003a7a', light: '#d7e8fa', text: '#001a50' },
+        5: { bg: '#005a3a', light: '#d4f0e4', text: '#002a1a' },
+        6: { bg: '#4a1a00', light: '#fae0d4', text: '#200800' },
+    };
+
+    function showModelo(id) {
+        document.querySelectorAll('.modelo-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.style.background = ''; b.style.color = ''; });
+        const panel = document.getElementById(`pane-${id}`), btn = document.getElementById(`tab-btn-${id}`);
+        if (panel) panel.classList.add('active');
+        if (btn) { btn.classList.add('active'); if (id === 'bt') { btn.style.background = '#350000'; btn.style.color = '#fff'; } else if (CORES[id]) { btn.style.background = CORES[id].bg; btn.style.color = '#fff'; } }
+    }
+
+    function setProgress(step, msg) {
+        const total = TOTAL_MODELOS + 1, pct = Math.round((step / total) * 100);
+        document.getElementById('autoBanner').style.display = 'block';
+        document.getElementById('autoMsg').innerHTML = `<i class="fas fa-bolt me-2"></i>${msg}`;
+        document.getElementById('autoPct').textContent = pct + '%';
+        document.getElementById('autoBar').style.width = pct + '%';
+    }
+
+    async function gerarModelo(modeloId) {
+        const tbody = document.getElementById(`tbody-${modeloId}`), dlBtn = document.getElementById(`dlBtn-${modeloId}`);
+        tbody.innerHTML = `<div class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-2"></i>Gerando 14 apostas que concorrem a 2 sorteios...</div>`;
+        try {
+            const r = await fetch(`/modelos/api/gerar/${modeloId}`, { method: 'POST' }); const d = await r.json();
+            if (d.error) { tbody.innerHTML = `<div class="text-danger p-3">${d.error}</div>`; return; }
+            const cor = CORES[modeloId] || CORES[1];
+            let html = '';
+            d.apostas.forEach(a => {
+                html += `<div class="aposta-row"><span class="aposta-num">${a.aposta_num}</span>`;
+                a.dezenas.forEach(dez => { html += `<span class="dez-chip" style="background:${cor.light};color:${cor.bg};">${String(dez).padStart(2, '0')}</span>`; });
+                html += `</div>`;
+            });
+            tbody.innerHTML = html;
+            if (d.pool_info) {
+                const pd = document.getElementById(`pool-${modeloId}`);
+                document.getElementById(`poolFreq-${modeloId}`).innerHTML = d.pool_info.top6_freq.map(dez => `<span class="pool-dez" style="background:${cor.light};color:${cor.bg};border-color:${cor.bg};">${dez}</span>`).join('');
+                document.getElementById(`poolAtr-${modeloId}`).innerHTML = d.pool_info.top6_atr.map(dez => `<span class="pool-dez" style="background:#f0f0f0;color:#555;border-color:#ccc;">${dez}</span>`).join('');
+                pd.classList.remove('d-none');
+            }
+            dlBtn.style.display = 'inline-block';
+            window[`apostasModelo${modeloId}`] = { apostas: d.apostas, nome: d.modelo_nome, concurso: d.ultimo_concurso };
+        } catch (e) { tbody.innerHTML = `<div class="text-danger p-3">Erro: ${e.message}</div>`; }
+    }
+
+    async function executarBacktesting() {
+        const progress = document.getElementById('btProgress'), result = document.getElementById('btResultado');
+        progress.style.display = 'block'; result.innerHTML = '';
+        try {
+            const r = await fetch('/modelos/api/backtesting', { method: 'POST' }); const d = await r.json();
+            if (d.error) { result.innerHTML = `<div class="text-danger p-3">${d.error}</div>`; return; }
+            const ranking = d.ranking, maxScore = ranking[0].score || 1;
+            const medalhas = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
+            let html = `<div class="alert alert-info mb-3" style="border-radius:10px;border-left:4px solid var(--accent);">
+            <i class="fas fa-database me-2"></i>${d.total_sorteios.toLocaleString()} concursos ×
+            <strong>2 sorteios</strong> = ${(d.total_draws || d.total_sorteios * 2).toLocaleString()} draws avaliados
+        </div><div class="row g-3 mb-3">`;
+            ranking.forEach(m => {
+                const cor = CORES[m.modelo_id], pct = maxScore > 0 ? (m.score / maxScore * 100).toFixed(1) : 0, medalha = medalhas[m.posicao - 1] || m.posicao + 'º';
+                html += `<div class="col-md-6 col-lg-4"><div class="bt-card">
+                <div class="bt-header" style="background:${cor.bg};">
+                    <span class="me-2" style="background:rgba(255,255,255,.25);padding:2px 8px;border-radius:12px;">${m.posicao}</span>
+                    ${m.modelo_emoji} M${m.modelo_id} — ${m.modelo_nome}
+                </div>
+                <div class="bt-body">
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                        <div class="fw-bold" style="color:${cor.bg};">${m.total_premios} prêmios ${medalha}</div>
+                        ${m.duplo_premio > 0 ? `<span class="duplo-badge">⚡ ${m.duplo_premio}× duplo!</span>` : ''}
+                    </div>
+                    <div class="acertos-chips">
+                        ${m.hits_6 > 0 ? `<span class="chip" style="background:#350000;color:var(--accent);">Sena×${m.hits_6}</span>` : ''}
+                        <span class="chip" style="background:${cor.bg};color:${cor.light};">Quina×${m.hits_5}</span>
+                        <span class="chip" style="background:#fff3cd;color:#856404;">Quadra×${m.hits_4}</span>
+                    </div>
+                    <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%;background:${cor.bg};"></div></div>
+                    <div class="text-muted mt-1" style="font-size:.72rem;">Score: ${m.score.toLocaleString()} pts ${m.melhor_acerto > 0 ? `| Melhor: <strong>${m.melhor_acerto} dec.</strong> #${m.melhor_concurso}` : ''}</div>
+                </div>
+            </div></div>`;
+            });
+            html += `</div>`;
+            html += `<div class="card border-0 shadow-sm mt-2">
+          <div class="card-header fw-bold" style="color:var(--primary);"><i class="fas fa-table me-2"></i>Comparativo Detalhado</div>
+          <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0" style="font-size:.78rem;">
+          <thead class="table-dark"><tr><th>Pos</th><th>Modelo</th><th>Sena</th><th>Quina</th><th>Quadra</th><th>Total</th><th>⚡ Duplo</th><th>Score</th></tr></thead><tbody>`;
+            ranking.forEach(m => {
+                const cor = CORES[m.modelo_id], medalha = medalhas[m.posicao - 1] || m.posicao + 'º';
+                html += `<tr><td class="fw-bold">${medalha}</td><td><span class="badge" style="background:${cor.bg};">${m.modelo_emoji} M${m.modelo_id}</span> ${m.modelo_nome}</td>
+                <td class="fw-bold text-danger">${m.hits_6}</td><td>${m.hits_5}</td><td class="text-muted">${m.hits_4}</td>
+                <td class="fw-bold">${m.total_premios}</td>
+                <td>${m.duplo_premio > 0 ? `<span class="badge" style="background:linear-gradient(135deg,var(--accent),var(--accent2));">⚡${m.duplo_premio}×</span>` : '-'}</td>
+                <td class="fw-bold" style="color:${cor.bg};">${m.score.toLocaleString()}</td></tr>`;
+            });
+            html += `</tbody></table></div></div></div>`;
+            const v = ranking[0];
+            html += `<div class="alert mt-3" style="background:var(--accent-light);border-left:4px solid var(--accent);border-radius:8px;">
+          🏆 <strong>Recomendação:</strong> <strong>M${v.modelo_id} — ${v.modelo_nome}</strong>:
+          <strong>${v.total_premios}</strong> prêmios${v.duplo_premio > 0 ? ` · <strong style="color:var(--accent);">⚡ ${v.duplo_premio} prêmios duplos!</strong>` : ''} · score <strong>${v.score.toLocaleString()}</strong>
+        </div>`;
+            result.innerHTML = html;
+        } catch (e) { result.innerHTML = `<div class="text-danger p-3">${e.message}</div>`; }
+        finally { progress.style.display = 'none'; }
+    }
+
+    function downloadModelo(id) {
+        const info = window[`apostasModelo${id}`];
+        if (!info) { Swal.fire('Aviso', 'Gere as apostas primeiro!', 'warning'); return; }
+        const linhas = info.apostas.map(a => a.dezenas.map(d => String(d).padStart(2, '0')).join(' '));
+        const blob = new Blob([linhas.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob), link = document.createElement('a');
+        link.href = url; link.download = `[M${id}_${info.nome.replace(/ /g, '_')}]_DUPLASENA_${info.concurso}.txt`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+    }
+
+    async function autoRunAll() {
+        for (let i = 1; i <= TOTAL_MODELOS; i++) { setProgress(i - 1, `Gerando Modelo ${i} de ${TOTAL_MODELOS}...`); await gerarModelo(i); await new Promise(r => setTimeout(r, 150)); }
+        setProgress(TOTAL_MODELOS, 'Executando Backtesting (2 sorteios/concurso)...');
+        showModelo('bt'); await executarBacktesting();
+        setProgress(TOTAL_MODELOS + 1, 'Concluído!');
+        setTimeout(() => { document.getElementById('autoBanner').style.display = 'none'; }, 2500);
+    }
+    document.addEventListener('DOMContentLoaded', () => { autoRunAll(); });
+</script>
+{% endblock %}

@@ -1,0 +1,627 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+{% include 'repeticao_gerador_estilos.html' %}
+{% include 'repeticao_aposta_info_util.html' %}
+
+<style>
+    .sniper-modo-btn.active { background: var(--accent); color: #1a2600; border-color: var(--accent); font-weight: 800; }
+    .evid-box { background: var(--surface); border: 1px solid rgba(112,142,37,.2); border-radius: 10px; padding: .75rem; height: 100%; }
+    .evid-box h6 { font-size: .78rem; font-weight: 800; color: var(--primary-xdark); text-transform: uppercase; margin-bottom: .5rem; }
+    .evid-linha { display: flex; justify-content: space-between; font-size: .8rem; padding: .2rem 0; border-bottom: 1px solid rgba(0,0,0,.04); }
+    .evid-pct { font-weight: 800; color: var(--primary); }
+    .manual-panel { display: none; }
+    body.sniper-modo-manual .manual-panel { display: block; }
+    .auto-preview { display: none; }
+    body.sniper-modo-auto .auto-preview,
+    body.sniper-modo-resumo .auto-preview { display: block; }
+    body.sniper-modo-resumo .comp-janela-toolbar,
+    body.sniper-modo-resumo #painelEvidencias,
+    body.sniper-modo-resumo #painelMotorGeracao,
+    body.sniper-modo-resumo #painelHistoricoComp { display: none; }
+    .pan-conj-table { font-size: .8rem; }
+    .pan-conj-table th { white-space: nowrap; }
+    .pan-conj-ok { color: #198754; font-weight: 700; }
+    .pan-conj-at { color: #b8860b; font-weight: 700; }
+    .aposta-criterios { text-align: left; background: var(--accent-light); border-radius: 8px; padding: .5rem .65rem; color: var(--primary-dark); }
+    .aposta-criterios .crit-line::before { content: '✓ '; color: var(--primary); font-weight: 800; }
+    .janela-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+    .comp-tabela { font-size: .82rem; width: 100%; table-layout: auto; }
+    .comp-tabela th { cursor: pointer; user-select: none; white-space: nowrap; }
+    .comp-tabela th.comp-ind,
+    .comp-tabela td.comp-ind { text-align: center; }
+    .comp-tabela th.filtro-ativo { background: #e8dff5; color: var(--primary-xdark); }
+    .comp-tabela th .filtro-badge { font-size: .65rem; background: var(--primary); color: #fff; border-radius: 4px; padding: 0 4px; margin-left: 2px; }
+    .comp-chip { font-size: .72rem; padding: .15rem .45rem; border-radius: 6px; border: 1px solid #ddd; background: #fff; cursor: pointer; margin: 1px; }
+    .comp-chip:hover, .comp-chip.ativo { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .comp-chip-panel { display: none; position: absolute; z-index: 20; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: .5rem; box-shadow: 0 4px 12px rgba(0,0,0,.12); min-width: 140px; }
+    .comp-chip-panel.aberto { display: block; }
+    .comp-stats-bar { font-size: .8rem; }
+    .reg-alvo { max-width: 4rem; }
+    .mes-abrev-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.6rem;
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.12rem 0.4rem;
+        border-radius: 5px;
+        color: #fff !important;
+        margin-left: 0.2rem;
+        vertical-align: middle;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .mes-abrev-badge:not([class*="mes-nome-"]) { background: #6c757d; }
+    {% include 'comportamento_col_concurso_estilos.html' %}
+    .moda-inline-pct { opacity: 0.75; font-size: 0.92em; margin-left: 0.15rem; }
+    .tm-cell-tip { cursor: help; text-decoration: underline dotted rgba(0,0,0,0.35); }
+    .base-tab-btn.active { background: var(--accent); color: #1a2600; border-color: var(--accent); font-weight: 800; }
+    .colecao-item { font-size: .82rem; border-left: 3px solid var(--accent); padding: .25rem .5rem; margin-bottom: .25rem; background: var(--accent-light); }
+    .evid-toggle-btn { font-size: .78rem; font-weight: 800; color: var(--primary-xdark); border-color: rgba(192,139,0,.35); }
+    .evid-toggle-btn:hover { background: var(--accent-light); color: var(--primary-xdark); border-color: var(--accent); }
+    .evid-toggle-btn i { transition: transform .15s ease; }
+    .evid-toggle-btn[aria-expanded="true"] i { transform: rotate(180deg); }
+    .panorama-matriz { font-size: .78rem; }
+    .panorama-matriz th, .panorama-matriz td { vertical-align: middle; border-color: rgba(0,0,0,.08); }
+    .panorama-matriz thead th { background: var(--bg, #fffdf5); position: sticky; top: 0; z-index: 2; }
+    .panorama-matriz .panorama-rank-col { width: 3.2rem; text-align: center; font-weight: 800; background: #f8f9fa; white-space: nowrap; }
+    .panorama-col-hdr .sigla { font-weight: 800; color: var(--primary-xdark); font-size: .85rem; }
+    .panorama-col-hdr .legenda { font-size: .65rem; color: #6c757d; font-weight: 500; line-height: 1.1; }
+    .panorama-cel { text-align: center; padding: .35rem .25rem !important; min-width: 5.5rem; }
+    .panorama-cel-val { font-weight: 800; font-size: .9rem; color: var(--primary-xdark); line-height: 1.1; }
+    .panorama-cel-val.top1 { color: #b8860b; }
+    .panorama-cel-val.top2 { color: #708090; }
+    .panorama-cel-val.top3 { color: #cd7f32; }
+    .panorama-cel-meta { font-size: .65rem; color: #6c757d; white-space: nowrap; }
+    .panorama-cel-vazia { text-align: center; color: #ccc; }
+    .panorama-matriz tr.linha-top td { background: var(--accent-light); }
+    .panorama-matriz tr.rank-selecionado td { background: #fff3cd; outline: 2px solid var(--accent); outline-offset: -2px; }
+    .panorama-matriz tr.rank-selecionado .panorama-rank-col { background: var(--accent); color: #1a0a00; }
+    .panorama-matriz tr.rank-gerado td { background: var(--accent-light); box-shadow: inset 0 0 0 2px var(--accent); }
+    .panorama-matriz tr.rank-gerado .panorama-rank-col { background: var(--accent); color: var(--on-accent); font-weight: 900; }
+    .panorama-tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+    .pan-modo-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+    .pan-val-btn.active { background: var(--accent); color: #1a2600; border-color: var(--accent); font-weight: 800; }
+    .pan-volante {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 6px;
+        max-width: 420px;
+    }
+    @media (max-width: 576px) {
+        .pan-volante { grid-template-columns: repeat(7, 1fr); max-width: 100%; }
+    }
+    .pan-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #dee2e6;
+        background: #f8f9fa;
+        font-weight: 700;
+        font-size: .82rem;
+        cursor: pointer;
+        user-select: none;
+        transition: all .15s;
+        padding: 0;
+    }
+    .pan-ball.selected { background: var(--accent); color: #1a2600; border-color: var(--accent); transform: scale(1.05); }
+    .pan-ball.pan-ultimo-ref:not(.selected) { box-shadow: inset 0 0 0 2px #198754; border-color: #198754; }
+    .pan-ball.pan-bloqueado:not(.selected) { opacity: .45; cursor: not-allowed; }
+    .pan-ball.pan-cat-highlight { outline: 2px dashed var(--primary); outline-offset: 1px; }
+    .pan-ball.faixa-baixa.selected { background: #0d6efd; border-color: #0d6efd; color: #fff; }
+    .pan-ball.faixa-media.selected { background: #fd7e14; border-color: #fd7e14; color: #fff; }
+    .pan-ball.faixa-alta.selected { background: #dc3545; border-color: #dc3545; color: #fff; }
+    .pan-cotas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); gap: .35rem; }
+    .pan-cota-item { background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 6px; padding: .35rem .5rem; font-size: .78rem; }
+    .pan-cota-item .sigla { font-weight: 800; color: var(--primary-xdark); }
+    .pan-cota-item .val { font-weight: 700; }
+    .pan-val-ok { color: #198754; font-weight: 700; }
+    .pan-val-fail { color: #dc3545; font-weight: 700; }
+    .pan-cat-chip { font-size: .72rem; padding: .2rem .5rem; border-radius: 6px; border: 1px solid #ddd; background: #fff; cursor: pointer; margin: 2px; }
+    .pan-cat-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .pan-validacao-box { font-size: .82rem; background: #fff; border-radius: 8px; padding: .65rem; border: 1px solid rgba(0,0,0,.08); }
+    .comp-toolbar-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: .45rem .65rem;
+    }
+    .comp-controls-center {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    #tabsBaseGerador {
+        justify-content: center;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .comp-panorama-toolbar,
+    .comp-janela-toolbar {
+        background: var(--bg, #fffdf5);
+        border: 1px solid rgba(0,0,0,.07);
+        border-radius: 8px;
+        padding: .45rem .6rem;
+    }
+    .comp-toolbar-seg {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        flex-wrap: nowrap;
+    }
+    .comp-toolbar-lbl {
+        font-size: .66rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #6c757d;
+        white-space: nowrap;
+        margin: 0;
+    }
+    .comp-toolbar-seg .form-select-sm.comp-toolbar-select {
+        font-size: .75rem;
+        padding: .18rem 1.6rem .18rem .4rem;
+        min-width: 6.5rem;
+        width: auto;
+        height: auto;
+    }
+    .comp-toolbar-seg .btn-group-sm > .btn {
+        font-size: .7rem;
+        padding: .18rem .4rem;
+    }
+    .comp-toolbar-seg .badge {
+        font-size: .68rem;
+        font-weight: 600;
+    }
+    .comp-toolbar-seg .btn-sm.btn-outline-secondary {
+        font-size: .75rem;
+        padding: .15rem .4rem;
+    }
+    .comp-section-centered .card-header {
+        text-align: center;
+        justify-content: center;
+    }
+    .comp-section-centered .card-body {
+        text-align: center;
+    }
+    .comp-section-centered .card-body .d-flex.flex-wrap {
+        justify-content: center;
+    }
+    .comp-volante-wrap {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    .comp-volante-wrap .pan-volante {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .comp-text-centered { text-align: center; }
+    @media (min-width: 992px) {
+        .comp-panorama-toolbar { flex-wrap: nowrap; }
+        .comp-janela-toolbar { flex-wrap: nowrap; }
+    }
+    .aposta-lista-linha { word-break: break-word; line-height: 1.35; }
+    .aposta-dezenas-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+    .colecao-item { word-break: break-word; }
+
+    @media (max-width: 576px) {
+        .page-hdr h2 { font-size: 1.05rem; }
+        .page-hdr .small { font-size: .78rem; }
+        #tabsBaseGerador { flex-wrap: wrap; border-bottom: none; }
+        #tabsBaseGerador .nav-link { font-size: .78rem; padding: .35rem .5rem; }
+        #tabsPanoramaBase { display: flex; flex-wrap: wrap; }
+        #tabsPanoramaBase .btn { font-size: .75rem; }
+        #grpJanela, #grpModoGeracao, #grpRigidezPanorama { flex-wrap: wrap; }
+        .comp-panorama-toolbar, .comp-janela-toolbar { padding: .4rem .45rem; }
+        .comp-toolbar-seg { flex-wrap: wrap; }
+        .comp-toolbar-lbl { font-size: .62rem; }
+        .comp-toolbar-seg .btn-group-sm > .btn { font-size: .65rem; padding: .15rem .3rem; }
+        .panorama-matriz { font-size: .68rem; }
+        .panorama-cel { min-width: 4.2rem; padding: .25rem .15rem !important; }
+        .panorama-cel-val { font-size: .8rem; }
+        .panorama-col-hdr .legenda { font-size: .58rem; }
+        .comp-tabela { font-size: .72rem; }
+        .comp-tabela th, .comp-tabela td { padding: .2rem .25rem; }
+        .lista-apostas-grid .aposta-item { padding: .5rem !important; }
+        .dez-ball { margin: 1px !important; }
+        .btn-group-sm > .btn, .btn-sm { font-size: .78rem; }
+        .card-header { font-size: .88rem; }
+        #panoramaCriteriosPreview { font-size: .85rem; }
+    }
+</style>
+
+<div class="page-hdr">
+    <h2 class="h4 mb-1"><i class="fas fa-chart-line me-2"></i>{{ page_title }}</h2>
+    <p class="mb-0 small opacity-90">{{ page_subtitle }}</p>
+    <p class="mb-0 small mt-1">
+        <a href="/analise/comportamento/" class="text-decoration-none">
+            <i class="fas fa-chart-pie me-1"></i>Análise Comportamental (3 bases)
+        </a>
+        <span class="text-muted mx-1">·</span>
+        <a href="/analise/linhas-dd-du/" class="text-decoration-none">
+            <i class="fas fa-th me-1"></i>Linhas &amp; DD × DU
+        </a>
+        {% if modality_key == 'diadesorte' %}
+        <span class="text-muted mx-1">·</span>
+        <a href="/analise/resumo-geral/" class="text-decoration-none">← Voltar para Análise</a>
+        <span class="text-muted mx-1">·</span>
+        <a href="/geradores-elite/ciclo-apostas/?modo=estrategia" class="text-decoration-none">↗ Ciclo — Estratégias</a>
+        {% endif %}
+        <span class="text-muted"> — estatísticas calculadas antes da geração</span>
+    </p>
+</div>
+
+{% if modality_key == 'diadesorte' %}
+<div id="ciclo-dna-box" class="mb-3" hidden></div>
+{% endif %}
+
+{% include 'comportamento_bases_resumo.html' %}
+
+<ul class="nav nav-tabs mb-3" id="tabsBaseGerador" role="tablist">
+    <li class="nav-item"><button type="button" class="nav-link base-tab-btn active" data-base="geral">Geral</button></li>
+    <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="vencedores">Concursos com Vencedores</button></li>
+    <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="acumulados">Concursos Acumulados</button></li>
+    <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="panorama"><i class="fas fa-layer-group me-1"></i>Panorama Top-3</button></li>
+    <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="linhas"><i class="fas fa-bars me-1"></i>Linhas L1–L10</button></li>
+</ul>
+
+<div id="painelModoLinhas" class="d-none">
+    <div class="alert border-0 py-2 small mb-3" style="background:var(--accent-light);color:var(--primary-xdark);">
+        Usa o <strong>ranking de linhas</strong> de
+        <a href="/analise/linhas-dd-du/" class="fw-bold">Análise → Linhas &amp; DD × DU</a>
+        como indicador estatístico para ponderar a geração.
+        Frequência não garante resultado — é um critério comportamental.
+    </div>
+
+    <div class="comp-toolbar-row comp-panorama-toolbar mb-3">
+        <div class="comp-toolbar-seg">
+            <span class="comp-toolbar-lbl">Base:</span>
+            <div class="btn-group btn-group-sm" role="group" id="tabsLinhasBase">
+                <button type="button" class="btn btn-outline-secondary linhas-base-btn active" data-lbase="geral">Geral</button>
+                <button type="button" class="btn btn-outline-secondary linhas-base-btn" data-lbase="vencedores">Vencedores</button>
+                <button type="button" class="btn btn-outline-secondary linhas-base-btn" data-lbase="acumulados">Acumulados</button>
+            </div>
+            <span class="badge bg-light text-dark border" id="lblLinhasTotal">—</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-0" id="btnAtualizarLinhas" title="Atualizar ranking">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        <div class="comp-toolbar-seg">
+            <span class="comp-toolbar-lbl">Janela:</span>
+            <div class="btn-group btn-group-sm" role="group" id="grpJanelaLinhas">
+                {% for j in comportamento_ui.janelas or [10, 20, 25, 0] %}
+                <button type="button" class="btn btn-outline-secondary linhas-janela-btn{% if j == 0 %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="comp-toolbar-seg">
+            <label class="comp-toolbar-lbl mb-0" for="selTopNLinhas">Usar ranking:</label>
+            <select class="form-select form-select-sm comp-toolbar-select" id="selTopNLinhas">
+                <option value="1">Só 1º lugar</option>
+                <option value="2">Top 2</option>
+                <option value="3" selected>Top 3</option>
+                <option value="5">Top 5</option>
+                <option value="10">Todas (L1–L10)</option>
+            </select>
+        </div>
+        <div class="comp-toolbar-seg">
+            <span class="comp-toolbar-lbl">Peso:</span>
+            <div class="btn-group btn-group-sm" role="group" id="grpModoPesoLinhas">
+                <button type="button" class="btn btn-outline-secondary linhas-peso-btn active" data-peso="frequencia" title="Linhas mais frequentes pesam mais">Por frequência</button>
+                <button type="button" class="btn btn-outline-secondary linhas-peso-btn" data-peso="uniforme" title="Todas as linhas do Top-N com o mesmo peso">Uniforme</button>
+                <button type="button" class="btn btn-outline-secondary linhas-peso-btn" data-peso="so_top1" title="Apenas a linha do 1º lugar">Só 1º</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3 border-0" style="border-top:4px solid var(--accent)!important;">
+        <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
+            <i class="fas fa-trophy me-1"></i>Ranking das linhas — <span id="lblLinhasBase">Geral</span>
+        </div>
+        <div class="card-body py-3 px-2 px-sm-3">
+            <div id="linhasRankingTopo" class="mb-3"></div>
+            <div id="linhasRankingCorpo">
+                <p class="text-muted small mb-0">Carregando ranking…</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert border-0 py-2" style="background:var(--accent-light);color:var(--primary-xdark);" id="linhasCriteriosPreview">
+        <strong>Geração:</strong> <span id="linhasCriteriosTxt">—</span>
+    </div>
+</div>
+
+<div id="painelModoPanorama" class="d-none">
+    <div class="alert alert-warning d-none py-2 small mb-3" id="avisoPanoramaGerador"></div>
+
+    <div class="comp-toolbar-row comp-panorama-toolbar mb-3">
+        <div class="comp-toolbar-seg">
+            <span class="comp-toolbar-lbl">Base do panorama:</span>
+            <div class="btn-group btn-group-sm" role="group" id="tabsPanoramaBase">
+                <button type="button" class="btn btn-outline-secondary panorama-tab-btn active" data-pbase="geral">Geral</button>
+                <button type="button" class="btn btn-outline-secondary panorama-tab-btn" data-pbase="vencedores">Vencedores</button>
+                <button type="button" class="btn btn-outline-secondary panorama-tab-btn" data-pbase="acumulados">Acumulados</button>
+            </div>
+            <span class="badge bg-light text-dark border" id="lblPanoramaTotalGer">—</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-0" id="btnAtualizarPanoramaGer" title="Atualizar">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        <div class="comp-toolbar-seg">
+            <label class="comp-toolbar-lbl mb-0" for="selRankPanorama">Ranking alvo:</label>
+            <select class="form-select form-select-sm comp-toolbar-select" id="selRankPanorama">
+                <option value="1" selected>1º ranking</option>
+                <option value="2">2º ranking</option>
+                <option value="3">3º ranking</option>
+            </select>
+        </div>
+        <div class="comp-toolbar-seg">
+            <span class="comp-toolbar-lbl">Modo de geração:</span>
+            <div class="btn-group btn-group-sm" role="group" id="grpModoPanorama">
+                <button type="button" class="btn btn-outline-secondary pan-modo-btn active" data-pmodo="automatico">Automático</button>
+                <button type="button" class="btn btn-outline-secondary pan-modo-btn" data-pmodo="volante_pool">Volante {{ comportamento_ui.pool_panorama or 16 }}</button>
+                <button type="button" class="btn btn-outline-secondary pan-modo-btn" data-pmodo="guiado">Seleção guiada</button>
+            </div>
+            <div class="btn-group btn-group-sm d-none" role="group" id="grpModoValidacaoPan" title="Estrito = todos os indicadores; Relaxar = tolerância ±1">
+                <button type="button" class="btn btn-outline-secondary pan-val-btn active" data-pval="estrito">Estrito</button>
+                <button type="button" class="btn btn-outline-secondary pan-val-btn" data-pval="relaxar">Relaxar</button>
+            </div>
+        </div>
+    </div>
+
+    {% set pan_unidade = 'dígitos' if modality_key == 'supersete' else 'dezenas' %}
+    <div id="painelPanVolante16" class="card shadow-sm mb-3 border-0 comp-section-centered d-none" style="border-top:3px solid var(--primary)!important;">
+        <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
+            <i class="fas fa-th me-1"></i>Volante — pool fixo de {{ comportamento_ui.pool_panorama or 16 }} {{ pan_unidade }}
+        </div>
+        <div class="card-body py-3">
+            <p class="small text-muted mb-2 mx-auto" style="max-width:36rem;">
+                Marque exatamente <strong>{{ comportamento_ui.pool_panorama or 16 }} {{ pan_unidade }}</strong>. Borda verde = saiu no último concurso.
+                As apostas de <strong>{{ comportamento_ui.dezenas_default or 15 }}</strong> serão geradas <strong>somente</strong> dentro deste pool, respeitando o rank escolhido.
+            </p>
+            <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-2">
+                <span class="badge bg-light text-dark border" id="panVolanteContador">0/{{ comportamento_ui.pool_panorama or 16 }}</span>
+                <span class="small text-muted" id="panVolanteInfo">—</span>
+            </div>
+            <div class="comp-volante-wrap mb-2">
+                <div class="pan-volante" id="panVolante16"></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnPanVolanteLimpar">
+                    <i class="fas fa-eraser me-1"></i>Limpar
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="btnPanEnviarConstrutor16" disabled>
+                    <i class="fas fa-external-link-alt me-1"></i>Usar no Construtor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="painelPanGuiado" class="card shadow-sm mb-3 border-0 comp-section-centered d-none" style="border-top:3px solid var(--accent)!important;">
+        <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
+            <i class="fas fa-hand-pointer me-1"></i>Seleção guiada — cotas do rank
+        </div>
+        <div class="card-body py-3">
+            <p class="small text-muted mb-2 mx-auto" style="max-width:36rem;">
+                Escolha o rank acima. Clique nas dezenas para montar sua aposta (quantidade definida em «Dezenas» abaixo).
+                Use os filtros para ver pares, ímpares, Fibonacci etc.
+            </p>
+            <div id="panCotasCorpo" class="pan-cotas-grid mb-2 mx-auto" style="max-width:42rem;"></div>
+            <div class="mb-2">
+                <span class="small fw-bold text-muted text-uppercase me-1">Filtrar:</span>
+                <span id="panCatChips"></span>
+                <button type="button" class="btn btn-link btn-sm p-0 ms-1" id="btnPanCatLimpar">Limpar filtro</button>
+            </div>
+            <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-2">
+                <span class="badge bg-light text-dark border" id="panGuiadoContador">0/{{ comportamento_ui.dezenas_default or 15 }}</span>
+                <span class="small text-muted" id="panGuiadoInfo">—</span>
+            </div>
+            <div class="comp-volante-wrap mb-2">
+                <div class="pan-volante" id="panVolanteGuiado"></div>
+            </div>
+            <div id="panValidacaoCorpo" class="pan-validacao-box mb-2 d-none mx-auto" style="max-width:28rem;text-align:left;"></div>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="btnPanValidarGuiado">
+                    <i class="fas fa-check me-1"></i>Validar seleção
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnPanGuiadoLimpar">
+                    <i class="fas fa-eraser me-1"></i>Limpar
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="btnPanEnviarConstrutorGuiado" disabled>
+                    <i class="fas fa-external-link-alt me-1"></i>Usar no Construtor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3 border-0" style="border-top:4px solid var(--accent)!important;">
+        <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
+            <i class="fas fa-th me-1"></i>Panorama — <span id="lblPanoramaBaseGer">Geral</span>
+        </div>
+        <div class="card-body py-3 px-2 px-sm-3">
+            <div id="panoramaConclusoesGer" class="mb-2"></div>
+            <div id="panoramaIndCorpoGer">
+                <p class="text-muted small mb-0">Carregando panorama…</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert border-0 py-2" style="background:var(--accent-light);color:var(--primary-xdark);" id="panoramaCriteriosPreview">
+        <strong>Geração:</strong> <span id="panoramaCriteriosTxt">—</span>
+    </div>
+</div>
+
+<div id="painelModoBase">
+<div class="alert alert-warning d-none py-2 small mb-3" id="avisoBaseGerador"></div>
+
+<div class="comp-toolbar-row comp-janela-toolbar mb-3">
+    <div class="comp-toolbar-seg">
+        <span class="comp-toolbar-lbl">Período base:</span>
+        <div class="btn-group btn-group-sm" role="group" id="grpJanela">
+            {% for j in comportamento_ui.janelas or [10, 20, 25, 0] %}
+            <button type="button" class="btn btn-outline-secondary janela-btn{% if j == (comportamento_ui.janela_default if comportamento_ui.janela_default is defined else comportamento_ui.janelas[0]) %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+            {% endfor %}
+        </div>
+    </div>
+    <span class="small text-muted" id="lblJanelaInfo">—</span>
+</div>
+
+<div class="comp-controls-center mb-3">
+<div class="btn-group" role="group" id="grpModoGeracao">
+    <button type="button" class="btn btn-outline-secondary sniper-modo-btn active" data-modo="automatico">
+        <i class="fas fa-robot me-1"></i>Automático
+    </button>
+    <button type="button" class="btn btn-outline-secondary sniper-modo-btn" data-modo="manual">
+        <i class="fas fa-hand-pointer me-1"></i>Manual
+    </button>
+    {% if tem_resumo_geral %}
+    <button type="button" class="btn btn-outline-secondary sniper-modo-btn" data-modo="resumo_geral">
+        <i class="fas fa-dna me-1"></i>Resumo Geral da Modalidade
+    </button>
+    {% endif %}
+</div>
+</div>
+
+<div class="card shadow-sm mb-3 border-0" id="painelEvidencias" style="border-top:4px solid var(--accent)!important;">
+    <div class="card-header fw-bold py-2 d-flex flex-wrap align-items-center gap-2"
+        style="background:var(--bg);color:var(--primary-xdark);">
+        <span>
+            <i class="fas fa-chart-pie me-1"></i>Painel de evidências — <span id="lblBaseAtiva">Geral</span>
+            <span class="spinner-border spinner-border-sm ms-2 d-none" id="evidLoader"></span>
+        </span>
+        <button type="button" class="btn btn-sm btn-outline-secondary evid-toggle-btn ms-auto"
+            id="btnToggleEvidencias" aria-expanded="false" aria-controls="evidCorpo">
+            <i class="fas fa-chevron-down me-1"></i><span id="lblToggleEvidencias">Mostrar</span>
+        </button>
+    </div>
+    <div class="card-body py-3 d-none" id="evidCorpo">
+        <p class="text-muted small mb-0">Carregando análises…</p>
+    </div>
+</div>
+
+<div class="alert auto-preview border-0 py-2" style="background:var(--accent-light);color:var(--primary-xdark);" id="autoCriteriosPreview">
+    <strong>Geração:</strong> <span id="autoCriteriosTxt">—</span>
+</div>
+
+<div class="card shadow-sm mb-3 border-0 manual-panel">
+    <div class="card-header fw-bold py-2 small" style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <i class="fas fa-sliders me-1"></i>Regras manuais — indicadores comportamentais
+    </div>
+    <div class="card-body py-3">
+        <p class="small text-muted mb-2">Marque os indicadores a respeitar e ajuste o valor alvo (moda da janela como padrão).</p>
+        <div class="row g-2" id="painelRegrasManuais"></div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3 border-0" id="painelHistoricoComp">
+    <div class="card-header fw-bold py-2 d-flex flex-wrap align-items-center gap-2"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-table me-1"></i>Histórico comportamental</span>
+        <span class="badge bg-light text-dark ms-auto" id="histContador">—</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="p-2 border-bottom bg-light comp-stats-bar" id="filtrosAtivosBar">
+            <span class="text-muted small">Clique no cabeçalho de uma coluna para filtrar.</span>
+        </div>
+        <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+            <table class="table table-sm table-hover mb-0 comp-tabela">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th class="comp-col-concurso-hdr">Concurso</th>
+                        <th>Data</th>
+                        {% for cod in comportamento_ui.indicadores or ['PA','IM','PR','RT','MO','SQ','M3','FB'] %}
+                        <th class="comp-ind" data-ind="{{ cod }}" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ comportamento_ui.indicador_labels.get(cod, cod) }}">{{ cod }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody id="tbodyComportamento"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3 border-0" id="painelMotorGeracao" style="border-top:3px solid var(--accent)!important;">
+    <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
+        <i class="fas fa-cogs me-1"></i>Como as apostas são geradas
+    </div>
+    <div class="card-body py-3">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-lg-5">
+                <label class="form-label small fw-bold mb-1">Motor de geração</label>
+                <select class="form-select form-select-sm" id="selModoMotor">
+                    <option value="perfil_sorteio" selected>Perfil real da tabela</option>
+                    <option value="hibrido">Híbrido (perfil + moda)</option>
+                    <option value="moda">Resumo (moda da janela)</option>
+                </select>
+            </div>
+            <div class="col-12 col-lg-7">
+                <div class="small text-muted" id="motorExplicacao">
+                    Cada aposta tenta reproduzir o comportamento <strong>real</strong> de um concurso da tabela
+                    ({{ comportamento_ui.sorteadas or comportamento_ui.dezenas_default }} dezenas sorteadas por concurso).
+                </div>
+            </div>
+        </div>
+        <ul class="small text-muted mb-0 mt-2 ps-3" id="motorDetalhes">
+            <li>A <strong>1ª aposta</strong> usa o perfil da <strong>1ª linha</strong> da tabela; a 2ª usa a 2ª linha; e assim por diante (rotaciona).</li>
+            <li>As <strong>dezenas</strong> são novas, mas os <strong>indicadores PA–FB</strong> buscam igualar o perfil escolhido.</li>
+            <li><strong>RT</strong> é calculado em relação ao último concurso do banco (próximo sorteio).</li>
+        </ul>
+    </div>
+</div>
+</div>
+
+{% include 'repeticao_gerador_card.html' %}
+
+<div class="card shadow-sm mb-3 border-0 d-none" id="painelPanoramaConjunto" style="border-top:4px solid var(--accent)!important;">
+    <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
+        <i class="fas fa-table me-1"></i>Panorama do conjunto gerado
+    </div>
+    <div class="card-body py-3">
+        <p class="small text-muted mb-2" id="panoramaConjuntoLegenda">—</p>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-2 pan-conj-table" id="tblPanoramaConjunto">
+                <thead class="table-light" id="theadPanoramaConjunto"></thead>
+                <tbody id="tbodyPanoramaConjunto"></tbody>
+            </table>
+        </div>
+        <p class="small mb-0" id="panoramaConjuntoRodape"></p>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3 border-0 comp-section-centered">
+    <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
+        <i class="fas fa-layer-group me-1"></i>Exportação composta
+    </div>
+    <div class="card-body py-3">
+        <p class="small text-muted mb-2 mx-auto" style="max-width:32rem;">
+            Gere apostas em cada aba e adicione à coleção. Exporte um único TXT com a origem de cada aposta.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mb-2">
+            <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddColecao" disabled>
+                <i class="fas fa-plus me-1"></i>Adicionar apostas da aba atual
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" id="btnLimparColecao">
+                <i class="fas fa-trash me-1"></i>Limpar coleção
+            </button>
+            <button type="button" class="btn btn-sm btn-success" id="btnExportComposto" disabled>
+                <i class="fas fa-file-export me-1"></i>Exportar coleção (TXT)
+            </button>
+        </div>
+        <div id="colecaoCorpo" class="small text-muted comp-text-centered">Coleção vazia.</div>
+    </div>
+</div>
+
+<script>window.__REP_API_BASE__ = '{{ api_base }}';</script>
+<script>window.__REP_COMPORTAMENTO__ = true;</script>
+<script>window.__COMPORTAMENTO_UI__ = {{ comportamento_ui | tojson }};</script>
+<script>window.__MESES_CORES__ = {{ meses_cores | default({}) | tojson }};</script>
+<script src="{{ url_for('geradores_elite.static', filename='comportamento_col_concurso.js') }}"></script>
+<script src="{{ url_for('geradores_elite.static', filename='comportamento_bases_resumo.js') }}"></script>
+<script src="{{ url_for('geradores_elite.static', filename='panorama_modos.js') }}"></script>
+{% include 'comportamento_apostas_script.html' %}
+{% endblock %}

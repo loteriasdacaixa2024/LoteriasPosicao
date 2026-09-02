@@ -1,0 +1,692 @@
+﻿<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const EXTRA_UI = window.__REP_EXTRA_UI__ || {};
+    const MESES_CORES = EXTRA_UI.meses_cores || {};
+    const API_BASE = window.__REP_API_BASE__ || '/analise/repeticao-concursos';
+    const API_LEGACY = !window.__REP_API_BASE__;
+    function apiPath(suffix) {
+        return API_LEGACY ? `${API_BASE}/api${suffix}` : `${API_BASE}${suffix}`;
+    }
+    let modoAtual = (CFG.modos && CFG.modos[0]) || 'volante';
+    let ultimasApostas = [];
+    let dadosAnalise = null;
+    let statsDezenas = {};
+    let concursosLista = [];
+    let concursoConf = null;
+    let exibicaoApostas = CFG.show_volante_apostas !== false ? 'hibrido' : 'numeros';
+
+    const DEZENAS_VOLANTE = Array.from(
+        { length: CFG.dezena_max - CFG.dezena_min + 1 },
+        (_, i) => CFG.dezena_min + i
+    );
+    const LEGENDA_EXIBICAO = CFG.layout === 'colunas' ? {
+        numeros: 'Somente os 7 dígitos em sequência (C1 a C7).',
+        volante: 'Grade por coluna: dígitos 0–9 em cada uma das 7 colunas.',
+        hibrido: 'Lista por coluna e grade visual juntas.',
+    } : {
+        numeros: 'Somente a lista linear em bolinhas.',
+        volante: 'Somente a grade do volante.',
+        hibrido: 'Lista em bolinhas e grade do volante juntas.',
+    };
+
+    function colsOficial() {
+        if (!concursoConf) return null;
+        return concursoConf.colunas || concursoConf.dezenas || null;
+    }
+
+    function contagemDigitosAposta(dezenas) {
+        const c = {};
+        (dezenas || []).forEach(d => { c[d] = (c[d] || 0) + 1; });
+        return c;
+    }
+
+    function digitosRepetidosIntra(dezenas) {
+        const c = contagemDigitosAposta(dezenas);
+        return new Set(
+            Object.entries(c).filter(([, q]) => q > 1).map(([d]) => parseInt(d, 10))
+        );
+    }
+
+    function htmlLinearColunas(dezenas) {
+        const cnt = contagemDigitosAposta(dezenas);
+        const repIntra = digitosRepetidosIntra(dezenas);
+        return `<div class="coluna-ball-wrap">${(dezenas || []).map((n, i) => {
+            const intra = cnt[n] > 1;
+            const cls = intra ? 'dez-ball rep-intra' : 'dez-ball';
+            const tip = intra ? ` title="Dígito ${n} aparece ${cnt[n]}× nesta aposta"` : '';
+            return `<div class="coluna-ball-item${intra ? ' rep-intra-col' : ''}"><div class="col-mini-lbl">C${i + 1}</div><span class="${cls}"${tip}>${n}</span></div>`;
+        }).join('')}</div>`;
+    }
+
+    function pad(n) {
+        const w = (CFG.dezena_min === 0 || CFG.layout === 'colunas') ? 1 : 2;
+        return String(n).padStart(w, '0');
+    }
+
+    function isColunas(data) {
+        return CFG.layout === 'colunas' || (data && data.layout === 'colunas');
+    }
+
+    function tendenciaBadge(t) {
+        if (t === 'permanencia') return '<span class="badge badge-perm">Permanência</span>';
+        if (t === 'saida') return '<span class="badge badge-sai">Saída</span>';
+        return '<span class="badge badge-neu">Neutra</span>';
+    }
+
+    function repSetVolante(data) {
+        if (isColunas(data)) return new Set();
+        return new Set((data.resumo_ultimo_par.volante.dezenas || []));
+    }
+
+    function repPosSet(data) {
+        const items = (data.resumo_ultimo_par.posicional.itens || []);
+        if (isColunas(data)) return new Set(items.map(x => x.posicao));
+        return new Set(items.map(x => x.dezena));
+    }
+
+    function renderBolas(containerId, nums, repSet, repPos, data) {
+        const el = document.getElementById(containerId);
+        if (isColunas(data)) {
+            el.innerHTML = (nums || []).map((n, i) => {
+                const rep = repPos && repPos.has(i + 1);
+                const cls = rep ? 'dez-ball rep' : 'dez-ball';
+                return `<span class="${cls}" title="C${i + 1}">${pad(n)}</span>`;
+            }).join('');
+            return;
+        }
+        el.innerHTML = (nums || []).map(n => {
+            const cls = repSet && repSet.has(n) ? 'dez-ball rep' : 'dez-ball';
+            return `<span class="${cls}">${pad(n)}</span>`;
+        }).join('');
+    }
+
+    function tooltipDezena(d) {
+        const st = statsDezenas[d] || statsDezenas[String(d)] || {};
+        const pos = st.posicao_predominante ? `P${st.posicao_predominante}` : '—';
+        return [
+            `Dezena ${pad(d)}`,
+            `Frequência: ${st.frequencia ?? '—'} (${st.freq_pct ?? '—'}%)`,
+            `Atraso: ${st.atraso ?? '—'} concursos`,
+            `Posição predominante: ${pos}`,
+            `Ciclo: ${st.ciclo ?? '—'}`,
+        ].join('\n');
+    }
+
+    function hasExtra() {
+        return !!(CFG.extra_mes || CFG.extra_trevos || CFG.extra_time);
+    }
+
+    function calcConferencia(dezenasAposta, aposta) {
+        if (!concursoConf) return null;
+
+        if (isColunas()) {
+            const oficial = colsOficial();
+            if (!oficial || !dezenasAposta || !dezenasAposta.length) return null;
+            const nCol = CFG.colunas || oficial.length;
+            let acertos = 0;
+            for (let i = 0; i < nCol; i++) {
+                if (dezenasAposta[i] === oficial[i]) acertos++;
+            }
+            const pct = Math.round((acertos / nCol) * 1000) / 10;
+            return { acertos, pct, totalOficial: nCol, modo: 'colunas', extras: [] };
+        }
+
+        if (!concursoConf.dezenas) return null;
+        const apostaSet = new Set(dezenasAposta);
+        const oficial = new Set(concursoConf.dezenas);
+        const acertos = [...apostaSet].filter(d => oficial.has(d)).length;
+        const pct = Math.round((acertos / CFG.sorteadas) * 1000) / 10;
+        const out = { acertos, pct, totalOficial: CFG.sorteadas, extras: [] };
+        if (CFG.extra_mes && aposta && aposta.mes && concursoConf.mes_num) {
+            out.extras.push({
+                label: 'Mês',
+                acertou: aposta.mes === concursoConf.mes_num,
+                previsto: aposta.mes_nome || aposta.mes,
+                sorteado: concursoConf.mes_nome || concursoConf.mes_num,
+            });
+        }
+        if (CFG.extra_time && aposta && aposta.time_num && concursoConf.time_num) {
+            out.extras.push({
+                label: 'Time',
+                acertou: aposta.time_num === concursoConf.time_num,
+                previsto: aposta.time_nome || String(aposta.time_num),
+                sorteado: concursoConf.time_nome || String(concursoConf.time_num),
+            });
+        }
+        if (CFG.extra_trevos && aposta && aposta.trevos && concursoConf.trevos) {
+            const prev = new Set(aposta.trevos);
+            const sort = new Set(concursoConf.trevos);
+            const acT = [...prev].filter(t => sort.has(t)).length;
+            const fmtT = (arr) => (arr || []).map(t => String(t)).join(' ');
+            out.extras.push({
+                label: 'Trevos',
+                acertou: acT > 0,
+                acertos: acT,
+                previsto: fmtT(aposta.trevos),
+                sorteado: fmtT(concursoConf.trevos),
+            });
+        }
+        return out;
+    }
+
+    function htmlExtraAposta(a) {
+        if (CFG.extra_mes && a.mes) {
+            const nome = a.mes_nome || String(a.mes);
+            const label = a.mes_abrev || nome;
+            const cor = MESES_CORES[nome] || '#6c757d';
+            let cls = 'rep-mes-badge';
+            if (concursoConf && concursoConf.mes_num) {
+                cls += a.mes === concursoConf.mes_num ? ' rep-extra-acerto' : ' rep-extra-fora';
+            }
+            return `<div class="mt-1"><span class="${cls}" style="background:${cor}">${label}</span></div>`;
+        }
+        if (CFG.extra_time && a.time_num) {
+            const nome = a.time_nome || `Time ${a.time_num}`;
+            let cls = 'rep-time-badge';
+            if (concursoConf && concursoConf.time_num) {
+                cls += a.time_num === concursoConf.time_num ? ' rep-extra-acerto' : ' rep-extra-fora';
+            }
+            return `<div class="mt-1"><span class="${cls}"><span class="rep-time-icon">⚽</span>${nome}</span></div>`;
+        }
+        if (CFG.extra_trevos && a.trevos && a.trevos.length) {
+            const nums = a.trevos.map(t => String(t)).join(' ');
+            return `<div class="mt-1"><span class="rep-trevo-nums">${nums}</span></div>`;
+        }
+        return '';
+    }
+
+    function padDez(n) {
+        return String(n).padStart(2, '0');
+    }
+
+    function renderHistAlert(hist) {
+        const el = document.getElementById('rep-hist-alert');
+        if (!el) return;
+        const count = hist && (hist.ja_sorteadas_count || (hist.itens_ja_sorteados || []).length || 0);
+        if (!hist || !count) {
+            el.innerHTML = '';
+            return;
+        }
+        const lista = hist.itens || hist.itens_ja_sorteados || [];
+        const itens = lista.map(it =>
+            `#${it.concurso}${it.data ? (' (' + it.data + ')') : ''}: ${(it.dezenas || []).map(padDez).join(' ')}`
+            + (it.ocorrencias > 1 ? ` · ${it.ocorrencias}×` : '')
+        ).join('<br>');
+        el.innerHTML = `<div class="alert alert-warning small mb-0">
+            <strong><i class="fas fa-exclamation-triangle me-1"></i>${count} aposta(s) já sorteada(s) no histórico oficial</strong>
+            ${hist.descartadas
+                ? `<div class="mt-1">${hist.descartadas} removida(s) automaticamente.</div>`
+                : `<div class="mt-1">Mantidas e destacadas em vermelho.</div>`}
+            <div class="mt-2">${itens}</div>
+        </div>`;
+    }
+
+    function renderBacktest(bt) {
+        const el = document.getElementById('rep-bt');
+        if (!el) return;
+        if (!bt) { el.innerHTML = ''; return; }
+        if (!bt.sucesso) {
+            if (bt.pulado) { el.innerHTML = ''; return; }
+            el.innerHTML = `<div class="alert alert-danger small mb-0">${bt.erro || 'Falha no back test'}</div>`;
+            return;
+        }
+        el.innerHTML = `<div class="rep-bt-box small">
+            <div class="fw-bold mb-2"><i class="fas fa-chart-line me-1"></i>Back Test · últimos ${bt.concursos_analisados} concursos (#${bt.concurso_de}–#${bt.concurso_ate})</div>
+            <div class="d-flex flex-wrap gap-1 mb-2">
+                <span class="rep-bt-pill"><strong>${bt.media_max_acertos}</strong><span>média máx.</span></span>
+                <span class="rep-bt-pill"><strong>${bt.dist_4 || 0}</strong><span>4 acertos</span></span>
+                <span class="rep-bt-pill"><strong>${bt.dist_5 || 0}</strong><span>5 acertos</span></span>
+                <span class="rep-bt-pill"><strong>${bt.dist_6 || 0}</strong><span>6 acertos</span></span>
+                <span class="rep-bt-pill"><strong>${bt.dist_7 || 0}</strong><span>7 acertos</span></span>
+            </div>
+            ${(bt.destaques || []).length
+                ? `<div class="text-muted">Destaques: ${(bt.destaques || []).slice(0, 5).map(d => `#${d.concurso} (${d.max_acertos} ac.)`).join(' · ')}</div>`
+                : ''}
+        </div>`;
+    }
+
+    function backtestUrl() {
+        if (API_LEGACY || !window.__REP_API_BASE__) {
+            return '/analise/repeticao-concursos/api/backtest';
+        }
+        // Páginas Elite que reutilizam o card (inteligente/sniper/comportamento)
+        return '/geradores-elite/api/engine-final/backtest';
+    }
+
+    async function runBacktest(apostas) {
+        if (!apostas || !apostas.length) return;
+        renderBacktest({
+            sucesso: true, concursos_analisados: '…', concurso_de: '', concurso_ate: '',
+            media_max_acertos: '…', dist_4: 0, dist_5: 0, dist_6: 0, dist_7: 0, destaques: [],
+        });
+        try {
+            const r = await fetch(backtestUrl(), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ apostas, limite: 30 }),
+            });
+            renderBacktest(await r.json());
+        } catch (e) {
+            renderBacktest({ sucesso: false, erro: e.message });
+        }
+    }
+
+    function htmlVolanteColunas(colunasAposta, jogoId, apostaObj) {
+        const digMin = CFG.digito_min ?? 0;
+        const digMax = CFG.digito_max ?? 9;
+        const nCol = CFG.colunas || 7;
+        const oficial = colsOficial();
+        const cols = colunasAposta || [];
+        const cntAp = contagemDigitosAposta(cols);
+        const boxes = [];
+        for (let c = 0; c < nCol; c++) {
+            const valAposta = cols[c];
+            const valOf = oficial ? oficial[c] : null;
+            let digits = '';
+            for (let d = digMin; d <= digMax; d++) {
+                let cls = 'dig-cell-aposta';
+                const naAposta = valAposta === d;
+                const acertou = naAposta && valOf !== null && valOf !== undefined && valOf === d;
+                const intraRep = naAposta && cntAp[d] > 1;
+                if (acertou) cls += ' acerto';
+                else if (naAposta) cls += intraRep ? ' na-aposta rep-intra' : ' na-aposta';
+                digits += `<div class="${cls}">${d}</div>`;
+            }
+            boxes.push(`<div class="coluna-aposta-box"><div class="col-lbl">C${c + 1}</div>${digits}</div>`);
+        }
+        return `<div class="volante-colunas-wrap" id="volante-jogo-${jogoId}">
+            <div class="volante-colunas-grid">${boxes.join('')}</div>
+        </div>`;
+    }
+
+    function htmlVolanteCell(d, apostaSet, oficial, gridPos) {
+        let cls = 'volante-cell';
+        const naAposta = apostaSet.has(d);
+        const acertou = oficial && naAposta && oficial.has(d);
+        if (acertou) cls += ' acerto';
+        else if (naAposta) cls += ' na-aposta';
+        let posStyle = '';
+        if (gridPos && gridPos.row != null && gridPos.col != null) {
+            posStyle = ` style="grid-row:${gridPos.row};grid-column:${gridPos.col}"`;
+        } else if (gridPos && gridPos.col != null) {
+            posStyle = ` style="grid-column:${gridPos.col}"`;
+        }
+        return `<div class="${cls}"${posStyle}>${pad(d)}</div>`;
+    }
+
+    function htmlVolanteGridBody(apostaSet, oficial) {
+        const rows = CFG.volante_rows;
+        if (rows && rows.length) {
+            const cols = CFG.grid_cols || 10;
+            const parts = [];
+            rows.forEach(([lo, hi], rowIdx) => {
+                const gridRow = rowIdx + 1;
+                const n = hi - lo + 1;
+                if (n === 1) {
+                    let col = 1;
+                    if (CFG.volante_solo_col != null) {
+                        col = CFG.volante_solo_col;
+                    } else if (CFG.volante_solo_center) {
+                        col = Math.ceil(cols / 2);
+                    }
+                    parts.push(htmlVolanteCell(lo, apostaSet, oficial, { row: gridRow, col }));
+                    return;
+                }
+                for (let d = lo; d <= hi; d++) {
+                    const col = (d - lo) + 1;
+                    parts.push(htmlVolanteCell(d, apostaSet, oficial, { row: gridRow, col }));
+                }
+            });
+            return parts.join('');
+        }
+        return DEZENAS_VOLANTE.map(d => htmlVolanteCell(d, apostaSet, oficial)).join('');
+    }
+
+    function htmlVolante(dezenasAposta, jogoId, apostaObj) {
+        if (CFG.show_volante_apostas === false) return '';
+        if (isColunas()) return htmlVolanteColunas(dezenasAposta, jogoId, apostaObj);
+        const apostaSet = new Set(dezenasAposta);
+        const oficial = concursoConf && concursoConf.dezenas ? new Set(concursoConf.dezenas) : null;
+        const stacked = CFG.volante_rows && CFG.volante_rows.length;
+        const gridCls = stacked
+            ? 'volante-oficial-grid volante-oficial-unified'
+            : 'volante-oficial-grid';
+        const cells = htmlVolanteGridBody(apostaSet, oficial);
+        const conf = calcConferencia(dezenasAposta, apostaObj);
+        const confHtml = window.__htmlConfMini ? window.__htmlConfMini(conf) : '';
+        const compactCls = (CFG.key === 'lotofacil' || CFG.dezena_max === 25) ? ' volante-lf-compacto' : '';
+        return `<div class="volante-oficial-wrap${compactCls}" id="volante-jogo-${jogoId}">
+            <div class="${gridCls}">${cells}</div>${confHtml}
+        </div>`;
+    }
+
+    function initTooltips(root) {
+        if (!window.bootstrap) return;
+        (root || document).querySelectorAll('[data-bs-toggle="tooltip"]:not(.volante-cell)').forEach(el => {
+            const old = bootstrap.Tooltip.getInstance(el);
+            if (old) old.dispose();
+            new bootstrap.Tooltip(el, { trigger: 'hover', html: false });
+        });
+    }
+
+    function atualizarLegendaExibicao() {
+        const el = document.getElementById('exibicaoLegendaTexto');
+        if (el) el.textContent = LEGENDA_EXIBICAO[exibicaoApostas] || '';
+    }
+
+    function renderAnalise(data) {
+        dadosAnalise = data;
+        statsDezenas = data.stats_dezenas || {};
+        document.getElementById('loaderAnalise').style.display = 'none';
+        document.getElementById('painelAnalise').style.display = 'block';
+
+        const rep = data.resumo_ultimo_par.volante;
+        const pos = data.resumo_ultimo_par.posicional;
+        document.getElementById('lblParConcursos').textContent =
+            `#${data.penultimo_concurso} → #${data.ultimo_concurso}`;
+
+        const linkComp = document.getElementById('linkCompararVisual');
+        if (linkComp) {
+            linkComp.href =
+                `/analise/comparar-concursos/?concurso_a=${data.penultimo_concurso}&concurso_b=${data.ultimo_concurso}&modo=${modoAtual}`;
+        }
+
+        const rs = repSetVolante(data);
+        const rp = repPosSet(data);
+        renderBolas('bolasPenultimo', data.penultimo_sorteio, rs, rp, data);
+        renderBolas('bolasUltimo', data.ultimo_sorteio, rs, rp, data);
+
+        let htmlResumo = '';
+        if (isColunas(data)) {
+            htmlResumo += `<div class="fs-5 fw-bold text-success">${pos.quantidade} colunas repetidas</div>`;
+            htmlResumo += `<div class="mt-1">${(pos.itens || []).map(x =>
+                `<span class="dez-ball rep" title="C${x.posicao}">${pad(x.dezena)}</span>`
+            ).join('')}</div>`;
+        } else {
+            htmlResumo += `<div class="fs-5 fw-bold text-success">${rep.quantidade} dezenas repetidas (volante)</div>`;
+            htmlResumo += `<div class="mt-1">${(rep.dezenas || []).map(n =>
+                `<span class="dez-ball rep">${pad(n)}</span>`
+            ).join('')}</div>`;
+            htmlResumo += `<div class="small mt-2">Pares: <strong>${rep.pares}</strong> · Ímpares: <strong>${rep.impares}</strong></div>`;
+            if (modoAtual !== 'volante') {
+                htmlResumo += `<div class="small mt-1">Posicional: <strong>${pos.quantidade}</strong> posições com mesma dezena</div>`;
+            }
+        }
+        htmlResumo += `<div class="small text-muted mt-2">Média histórica: ${data.resumo_ultimo_par.media_historica_quantidade_volante} repetidas por par</div>`;
+        document.getElementById('resumoRep').innerHTML = htmlResumo;
+
+        const padroes = data.padroes_grupo || {};
+        if (isColunas(data)) {
+            document.getElementById('resumoPadroes').innerHTML =
+                `Média histórica de colunas repetidas por par: <strong>${data.resumo_ultimo_par.media_historica_posicional}</strong>.`;
+        } else {
+            document.getElementById('resumoPadroes').innerHTML =
+                `Quando há repetição no histórico, em média <strong>${padroes.media_pares_quando_repete}</strong> pares e ` +
+                `<strong>${padroes.media_impares_quando_repete}</strong> ímpares no grupo repetido. ` +
+                `Permanência média após repetição: <strong>${padroes.media_permanencia_apos_repeticao_pct}%</strong>.`;
+        }
+
+        renderExtraResumo(data.extra);
+
+        const tb = document.getElementById('tbodyDezenas');
+        tb.innerHTML = (data.dezenas || []).map(row => {
+            let repAgora = '—';
+            if (isColunas(data)) {
+                repAgora = row.repetiu_ultimo_par_posicional ? 'âœ“' : '';
+            } else if (modoAtual === 'volante') {
+                repAgora = row.repetiu_ultimo_par_volante ? 'âœ“' : '';
+            } else if (modoAtual === 'posicional') {
+                repAgora = row.repetiu_ultimo_par_posicional ? 'âœ“' : '';
+            } else {
+                repAgora = (row.repetiu_ultimo_par_volante ? 'V' : '') + (row.repetiu_ultimo_par_posicional ? 'P' : '');
+            }
+            const colLabel = isColunas(data) ? (row.label || row.dezena) : pad(row.dezena);
+            const piCol = isColunas(data) ? '' : `<td>${row.par ? 'Par' : 'Ímpar'}</td>`;
+            return `<tr>
+                <td><strong>${colLabel}</strong></td>
+                <td class="text-center">${repAgora}</td>
+                <td>${row.freq_repeticao_vezes}</td>
+                <td>${row.freq_repeticao_pct}%</td>
+                <td>${row.permanencia_pct}% <span class="text-muted">(${row.permanencia_vezes}/${row.permanencia_eventos})</span></td>
+                <td>${tendenciaBadge(row.tendencia)}</td>
+                ${piCol}
+            </tr>`;
+        }).join('');
+    }
+
+    function renderExtraResumo(extra) {
+        const el = document.getElementById('resumoExtra');
+        if (!el || !extra) return;
+        let html = `<div class="fw-bold mb-1">${extra.titulo || 'Extra'}</div>`;
+        if (extra.tipo === 'mes' || extra.tipo === 'time') {
+            const rep = extra.repetiu_ultimo_par
+                ? ' <span class="text-success fw-bold">(repetiu no último par!)</span>' : '';
+            const pen = extra.penultimo || {};
+            const ult = extra.ultimo || {};
+            html += `<div class="small">Penúltimo: <strong>${pen.nome || pen.num || '—'}</strong></div>`;
+            html += `<div class="small">Último: <strong>${ult.nome || ult.num || '—'}</strong>${rep}</div>`;
+            html += `<div class="small text-muted mt-1">Taxa histórica de repetição: <strong>${extra.taxa_repeticao_pct}%</strong> dos pares</div>`;
+            if (extra.ranking && extra.ranking.length) {
+                html += `<div class="small mt-1">Mais repetem: ${extra.ranking.map(r =>
+                    `${r.nome || r.valor} (${r.vezes}×)`).join(' · ')}</div>`;
+            }
+        } else if (extra.tipo === 'trevos') {
+            const rep = (extra.repetidos_ultimo_par || []).length
+                ? ` <span class="text-success fw-bold">(${extra.repetidos_ultimo_par.join(', ')})</span>` : '';
+            html += `<div class="small">Penúltimo: <strong>${(extra.penultimo || []).join(', ') || '—'}</strong></div>`;
+            html += `<div class="small">Último: <strong>${(extra.ultimo || []).join(', ') || '—'}</strong>${rep}</div>`;
+            html += `<div class="small text-muted mt-1">Média de trevos repetidos por par: <strong>${extra.media_trevos_repetidos_por_par}</strong></div>`;
+            if (extra.ranking && extra.ranking.length) {
+                html += `<div class="small mt-1">Trevos que mais repetem: ${extra.ranking.map(r =>
+                    `${r.valor} (${r.vezes}×)`).join(' · ')}</div>`;
+            }
+        }
+        el.innerHTML = html;
+    }
+
+    async function carregarAnalise() {
+        document.getElementById('loaderAnalise').style.display = 'block';
+        document.getElementById('painelAnalise').style.display = 'none';
+        const r = await fetch(`${apiPath('/analise')}?modo=${modoAtual}`);
+        const data = await r.json();
+        if (!data.sucesso) {
+            document.getElementById('loaderAnalise').innerHTML = `<span class="text-danger">${data.erro || 'Erro'}</span>`;
+            return;
+        }
+        renderAnalise(data);
+        if (typeof window.__sniperCarregarAnaliseHook === 'function') {
+            window.__sniperCarregarAnaliseHook(data);
+        }
+    }
+
+    function renderApostas(apostas, aviso) {
+        ultimasApostas = apostas || [];
+        document.getElementById('btnExport').disabled = !ultimasApostas.length;
+        const btnBt = document.getElementById('btnRepBacktest');
+        if (btnBt) btnBt.disabled = !ultimasApostas.length;
+        const el = document.getElementById('listaApostas');
+        const showVolante = CFG.show_volante_apostas !== false &&
+            (exibicaoApostas === 'volante' || exibicaoApostas === 'hibrido');
+        const showLinear = exibicaoApostas === 'numeros' || exibicaoApostas === 'hibrido';
+        el.classList.toggle('lista-apostas-grid', ultimasApostas.length > 0);
+        el.classList.toggle('lista-apostas-hibrido', exibicaoApostas === 'hibrido' && showVolante);
+        el.classList.toggle('layout-colunas', isColunas() && ultimasApostas.length > 0);
+        if (!ultimasApostas.length) {
+            el.classList.remove('lista-apostas-grid', 'lista-apostas-hibrido');
+            el.innerHTML = aviso
+                ? `<div class="alert alert-warning py-2 small mb-0">${aviso}</div>`
+                : '<p class="text-muted small mb-0">Nenhuma aposta gerada.</p>';
+            return;
+        }
+        const avisoHtml = aviso
+            ? `<div class="alert alert-warning py-2 small mb-2">${aviso}</div>`
+            : '';
+        const linearHtml = (a) => {
+            if (window.__REP_SNIPER_INTELIGENTE__ && typeof window.__sniperHtmlLinearColunas === 'function') {
+                return window.__sniperHtmlLinearColunas(a.dezenas, a.marcas);
+            }
+            return isColunas() ? htmlLinearColunas(a.dezenas) : (() => {
+                const cnt = contagemDigitosAposta(a.dezenas);
+                return a.dezenas.map(n => {
+                    const cls = cnt[n] > 1 ? 'dez-ball rep-intra' : 'dez-ball';
+                    return `<span class="${cls}">${pad(n)}</span>`;
+                }).join('');
+            })();
+        };
+        const criteriosHtml = (a) => (
+            window.__REP_SNIPER_INTELIGENTE__ && typeof window.__sniperHtmlCriterios === 'function'
+                ? window.__sniperHtmlCriterios(a) : ''
+        );
+        el.innerHTML = avisoHtml + ultimasApostas.map(a => `
+            <div class="border rounded p-2 mb-2 aposta-item${isColunas() ? ' item-colunas' : ''}${a.ja_sorteada ? ' ja-hist' : ''}" data-aposta="${a.numero}">
+                ${window.__htmlApostaHead ? window.__htmlApostaHead(a.numero) : `<div class="aposta-num-label fw-bold text-muted mb-1">Aposta ${String(a.numero).padStart(2, '0')}${a.ja_sorteada ? ` · <span class="text-danger">já sorteada #${a.concurso_historico || '?'}</span>` : ''}</div>`}
+                ${a.ja_sorteada && !window.__htmlApostaHead ? `<div class="small text-danger mb-1">Histórico oficial · ${a.data_historico || ''} · ${a.ocorrencias_historico || 1}×</div>` : ''}
+                <div class="aposta-card-inner ${exibicaoApostas === 'hibrido' ? 'modo-hibrido' : ''}">
+                    ${showLinear ? `
+                    <div class="aposta-linear ${showVolante ? '' : 'w-100'}">
+                        <div class="my-1">${linearHtml(a)}</div>
+                        ${htmlExtraAposta(a)}
+                    </div>` : `<div class="mb-2">${htmlExtraAposta(a)}</div>`}
+                    ${showVolante ? htmlVolante(a.dezenas, a.numero, a) : ''}
+                </div>
+                ${criteriosHtml(a)}
+            </div>
+        `).join('');
+        initTooltips(el);
+        if (window.__bindApostaInfoToggle) window.__bindApostaInfoToggle(el);
+    }
+
+    async function carregarConcursos() {
+        const r = await fetch(`${apiPath('/concursos')}?limit=150`);
+        const data = await r.json();
+        if (!data.sucesso) return;
+        concursosLista = data.concursos || [];
+        const sel = document.getElementById('selConcursoConf');
+        const atual = sel.value;
+        sel.innerHTML = '<option value="">— Sem conferência (só amarelo) —</option>' +
+            concursosLista.map(c => {
+                const extra = c.colunas ? ` · ${c.colunas.join('-')}` : '';
+                return `<option value="${c.concurso}">#${c.concurso} — ${c.data || ''}${extra}</option>`;
+            }).join('');
+        if (atual) sel.value = atual;
+        else if (concursosLista.length) {
+            sel.value = String(concursosLista[0].concurso);
+            aplicarConcursoConf(parseInt(sel.value, 10));
+        }
+    }
+
+    function aplicarConcursoConf(concursoNum) {
+        if (!concursoNum) {
+            concursoConf = null;
+        } else {
+            concursoConf = concursosLista.find(c => c.concurso === concursoNum) || null;
+        }
+        if (ultimasApostas.length) renderApostas(ultimasApostas);
+    }
+
+    async function gerar() {
+        let body = {
+            modo: modoAtual,
+            quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+            dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || CFG.dezenas_default,
+            perfil: document.getElementById('inpPerfil').value,
+            usar_ultimo_par: document.getElementById('chkUltimoPar')?.checked !== false,
+            so_permanencia: document.getElementById('chkPermanencia').checked,
+            respeitar_par_impar: document.getElementById('chkParImpar') ? document.getElementById('chkParImpar').checked : false,
+            descartar_historico: !!document.getElementById('chkDescartarHist')?.checked,
+            politica_historico: document.getElementById('chkDescartarHist')?.checked ? 'descartar' : 'marcar',
+            executar_backtest: true,
+        };
+        if (window.__REP_SNIPER_INTELIGENTE__ && typeof window.__sniperBuildGerarBody === 'function') {
+            try {
+                body = window.__sniperBuildGerarBody(body);
+            } catch (e) {
+                alert(e.message || String(e));
+                return;
+            }
+        } else if (window.__REP_API_BASE__) {
+            body.usar_sequencial = !!document.getElementById('chkSniperSequencial')?.checked;
+            body.usar_volante_atraso = !!document.getElementById('chkSniperVolante')?.checked;
+        }
+        const r = await fetch(apiPath('/gerar'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!data.sucesso) {
+            alert(data.erro || 'Erro ao gerar');
+            return;
+        }
+        if (typeof window.__sniperAfterGerar === 'function') window.__sniperAfterGerar(data);
+        const st = document.getElementById('rep-status');
+        if (st) {
+            const n = (data.apostas || []).length;
+            st.textContent = data.aviso || `${n} jogo(s) gerados` +
+                (data.validacao_historico && data.validacao_historico.aplicada
+                    ? ` · histórico + back test`
+                    : '');
+        }
+        renderHistAlert(data.historico || data.validacao_historico);
+        renderBacktest(data.backtest);
+        renderApostas(data.apostas, data.aviso);
+    }
+
+    function exportarTxt() {
+        if (!ultimasApostas.length) return;
+        const blob = new Blob([ultimasApostas.map(a => a.texto).join('\n')], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${CFG.key}_repeticao_${Date.now()}.txt`;
+        a.click();
+    }
+
+    function atualizarLegendaModo(modo) {
+        document.querySelectorAll('.modo-legenda-inline').forEach(el => {
+            el.classList.toggle('ativo', el.dataset.legenda === modo);
+        });
+    }
+
+    document.querySelectorAll('.modo-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.modo-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            modoAtual = btn.dataset.modo;
+            atualizarLegendaModo(modoAtual);
+            carregarAnalise();
+        });
+    });
+    atualizarLegendaModo(modoAtual);
+    const btnAtualizar = document.getElementById('btnAtualizar');
+    if (btnAtualizar) btnAtualizar.addEventListener('click', carregarAnalise);
+    const elGerar = document.getElementById('btnGerar');
+    if (elGerar) {
+        elGerar.addEventListener('click', gerar);
+        document.getElementById('btnExport').addEventListener('click', exportarTxt);
+        const btnBt = document.getElementById('btnRepBacktest');
+        if (btnBt) btnBt.addEventListener('click', () => runBacktest(ultimasApostas));
+        document.getElementById('selConcursoConf').addEventListener('change', (e) => {
+            const v = parseInt(e.target.value, 10);
+            aplicarConcursoConf(v || null);
+        });
+        document.querySelectorAll('.exibicao-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.exibicao-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                exibicaoApostas = btn.dataset.exib;
+                atualizarLegendaExibicao();
+                if (ultimasApostas.length) renderApostas(ultimasApostas);
+            });
+        });
+        if (CFG.show_volante_apostas !== false) atualizarLegendaExibicao();
+        carregarConcursos();
+        if (window.__bindConferirTxtHistorico && CFG.key === 'lotofacil') {
+            window.__bindConferirTxtHistorico();
+        }
+    }
+    if (!window.__REP_SNIPER_INTELIGENTE__ && (document.getElementById('painelAnalise') || elGerar)) {
+        carregarAnalise();
+    }
+})();
+</script>

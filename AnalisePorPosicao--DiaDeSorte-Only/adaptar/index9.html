@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Combinações de 9 Dígitos - Mega Sena</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS para exportação Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+	
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1B9A67',
+                        secondary: '#149954'
+                    }
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-200 min-h-screen">
+    <!-- Detecção de tema escuro -->
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+    <!-- Conteúdo principal -->
+    <div class="container mx-auto p-4 max-w-6xl">
+        <h1 class="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            🌌 Todas as Combinações de 9 Dígitos - Mega Sena
+        </h1>
+        
+        <!-- Aviso especial para 9 dígitos -->
+        <div class="bg-gradient-to-r from-red-100 via-orange-100 to-yellow-100 dark:from-red-900/40 dark:via-orange-900/40 dark:to-yellow-900/40 border-2 border-red-300 dark:border-red-700 rounded-xl p-6 mb-6 shadow-lg">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="text-4xl animate-pulse">🚨</div>
+                <h2 class="text-xl font-bold text-red-800 dark:text-red-200">CONFIGURAÇÃO UNIVERSAL - 9 DÍGITOS</h2>
+                <div class="text-4xl animate-pulse">🚨</div>
+            </div>
+            <div class="text-sm text-red-800 dark:text-red-200 space-y-2">
+                <p><strong>🌍 Cobertura Universal:</strong> Com 9 dígitos, você terá acesso a praticamente TODOS os números de 01 a 60.</p>
+                <p><strong>♾️ Volumes Incalculáveis:</strong> Essa configuração gera volumes que superam qualquer capacidade de processamento.</p>
+                <p><strong>🔬 Apenas Teórico:</strong> Esta análise existe exclusivamente para fins científicos e educacionais.</p>
+                <p><strong>🚫 NÃO UTILIZÁVEL:</strong> Completamente impraticável para qualquer aplicação real.</p>
+            </div>
+        </div>
+        
+        <!-- Controles de filtro e busca -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-4">
+                <div class="flex items-center gap-4">
+                    <label class="text-sm font-semibold">Filtros Teóricos:</label>
+                    <select id="filter-by-combinations" class="border dark:border-gray-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary dark:bg-gray-700">
+                        <option value="all">Todas as combinações</option>
+                        <option value="valid">Apenas com combinações válidas</option>
+                        <option value="universal">Volumes Universais (Incalculáveis)</option>
+                        <option value="galactic">Volumes Galácticos (1000T+)</option>
+                        <option value="extreme">Volumes Extremos (1T-1000T)</option>
+                        <option value="high">Volumes Altos (1B-1T)</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="digits-search" placeholder="Buscar dígitos (ex: 0,1,2,3,4,5,6,7,8)" 
+                        class="border dark:border-gray-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary dark:bg-gray-700">
+                    <button id="generate-all-btn" class="bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white py-2 px-4 rounded-md font-bold text-sm shadow-lg">
+                        Gerar Todas
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de todas as combinações -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">🎯 Todas as Combinações de 9 Dígitos:</h2>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    Total: <span id="total-digit-combinations" class="font-bold text-primary dark:text-green-400">0</span> combinações
+                </div>
+            </div>
+            
+            <div class="mb-4 overflow-auto max-h-96">
+                <table class="min-w-full border-collapse">
+                    <thead class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 sticky top-0">
+                        <tr>
+                            <th class="py-2 px-3 text-left text-sm font-semibold">#</th>
+                            <th class="py-2 px-3 text-left text-sm font-semibold">Dígitos</th>
+                            <th class="py-2 px-3 text-left text-sm font-semibold">Números Válidos</th>
+                            <th class="py-2 px-3 text-left text-sm font-semibold">Volume Teórico</th>
+                            <th class="py-2 px-3 text-left text-sm font-semibold">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-combinations-table-body">
+                        <tr>
+                            <td colspan="5" class="py-8 text-center">
+                                <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+                                <p class="mt-2 text-sm">Calculando todas as combinações de 9 dígitos para Mega Sena...</p>
+                                <p class="mt-1 text-xs text-gray-500">Preparando análise teórica universal...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resumo Estatístico -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">📊 Resumo Estatístico Universal</h2>
+            
+            <div id="statistics-summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-red-600 dark:text-red-400" id="stat-insuficiente">-</div>
+                    <div class="text-sm text-red-700 dark:text-red-300">Insuficientes</div>
+                    <div class="text-xs text-red-600 dark:text-red-400 mt-1">(0 jogos)</div>
+                </div>
+                
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400" id="stat-alto">-</div>
+                    <div class="text-sm text-green-700 dark:text-green-300">Alto Volume</div>
+                    <div class="text-xs text-green-600 dark:text-green-400 mt-1">(1B-1T)</div>
+                </div>
+                
+                <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="stat-extremo">-</div>
+                    <div class="text-sm text-purple-700 dark:text-purple-300">Extremo</div>
+                    <div class="text-xs text-purple-600 dark:text-purple-400 mt-1">(1T-1000T)</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 dark:from-pink-900/20 dark:via-purple-900/20 dark:to-indigo-900/20 border-2 border-pink-300 dark:border-pink-700 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent" id="stat-universal">-</div>
+                    <div class="text-sm font-bold bg-gradient-to-r from-pink-700 to-purple-700 bg-clip-text text-transparent">Universal</div>
+                    <div class="text-xs text-pink-600 dark:text-pink-400 mt-1">(♾️ Incalculável)</div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-700/50 dark:to-blue-900/20 rounded-lg p-4">
+                    <h3 class="font-semibold mb-3 text-primary dark:text-green-400">🌌 Categorias Universais:</h3>
+                    <div class="space-y-2 text-sm" id="specific-volumes">
+                        <!-- Conteúdo será gerado dinamicamente -->
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-700/50 dark:to-purple-900/20 rounded-lg p-4">
+                    <h3 class="font-semibold mb-3 text-primary dark:text-green-400">🏆 Estatísticas Cósmicas:</h3>
+                    <div class="space-y-2 text-sm" id="highlights">
+                        <div class="flex justify-between">
+                            <span>Volume máximo:</span>
+                            <span class="font-bold text-pink-600 dark:text-pink-400" id="max-volume">♾️ Universal</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Volume mínimo:</span>
+                            <span class="font-bold text-blue-600 dark:text-blue-400" id="min-volume">🌌 Galáctico</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Cobertura média:</span>
+                            <span class="font-bold text-purple-600 dark:text-purple-400" id="avg-coverage">~99.9%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Total combinações:</span>
+                            <span class="font-bold" id="total-10">10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-4 bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 dark:from-red-900/30 dark:via-orange-900/30 dark:to-yellow-900/30 border-2 border-orange-300 dark:border-orange-700 rounded-lg">
+                <p class="text-sm text-orange-800 dark:text-orange-200">
+                    <strong>💡 Análise Universal:</strong> Com 9 dígitos, existem apenas 10 combinações possíveis para a Mega Sena. 
+                    Esta é a configuração mais próxima da totalidade - oferecendo cobertura quase completa de números válidos (01-60), 
+                    proporcionando volumes que <strong>transcendem qualquer capacidade de processamento conhecida</strong>. 
+                    <strong>⚠️ Volumes universais - existem apenas para contemplação teórica!</strong>
+                </p>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-3">🎲 Escolha 9 dígitos (0-9):</h2>
+            
+            <div class="mb-4 p-4 bg-gradient-to-r from-red-100 via-pink-100 to-purple-100 dark:from-red-900/40 dark:via-pink-900/40 dark:to-purple-900/40 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                <p class="text-sm text-red-800 dark:text-red-200">
+                    <strong>♾️ Configuração Universal Mega Sena:</strong> O jogo Mega Sena aceita números de 01 a 60. 
+                    Com 9 dígitos, você terá cobertura <strong>quase total</strong> de números válidos, gerando volumes <strong>que transcendem a realidade</strong>. 
+                    <strong>🌌 IMPOSSÍVEL de usar na prática - existe apenas como exercício de contemplação matemática.</strong>
+                </p>
+            </div>
+            
+            <!-- Prévia das estatísticas -->
+            <div id="preview-stats" class="mb-4 p-3 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-700/50 dark:to-blue-900/20 border border-gray-200 dark:border-gray-700 rounded-md">
+                <h3 class="font-bold mb-2">📋 Prévia Universal:</h3>
+                <p>Dígitos selecionados: <span id="preview-selected-digits" class="font-bold text-primary">Nenhum</span> (<span id="preview-digit-count">0</span>/9)</p>
+                <p>Números válidos possíveis: <span id="preview-valid-numbers" class="font-bold">0</span></p>
+                <p>Volume teórico: <span id="preview-combinations" class="font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">0</span></p>
+            </div>
+            
+            <div class="grid grid-cols-5 gap-2 mb-6">
+                <!-- Checkboxes para os dígitos 0-9 -->
+                <div v-for="digit in 10" class="flex items-center justify-center">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="digit-${digit}" value="${digit}" class="digit-checkbox w-5 h-5 accent-primary text-primary focus:ring-primary">
+                        <span class="text-lg">${digit}</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="flex flex-col space-y-3">
+                <div id="error-message" class="hidden text-red-500 text-center"></div>
+                <button id="generate-btn" class="bg-gradient-to-r from-primary via-purple-600 to-pink-600 hover:from-secondary hover:via-purple-700 hover:to-pink-700 text-white py-3 px-6 rounded-lg font-bold transition shadow-lg">
+                    🌌 Iniciar Contemplação Universal
+                </button>
+            </div>
+        </div>
+        
+        <div id="result-container" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hidden">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold">📈 Análise Universal:</h3>
+                <div class="p-4 mt-2 bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 dark:from-green-900/30 dark:via-blue-900/30 dark:to-purple-900/30 border-2 border-green-300 dark:border-green-700 rounded-lg">
+                    <p><strong>Dígitos selecionados:</strong> <span id="selected-digits" class="font-bold text-primary"></span></p>
+                    <p><strong>Números válidos formados:</strong> <span id="valid-numbers-count" class="font-bold"></span> (entre 01 e 60)</p>
+                    <p class="text-lg mt-2"><strong>Volume teórico estimado:</strong> <span id="total-combinations" class="font-semibold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent"></span></p>
+                    <p class="text-xs mt-1 text-gray-600 dark:text-gray-400">
+                        🌌 Os volumes são formados pegando 6 números dentre os números válidos que podem ser formados com os dígitos selecionados.
+                    </p>
+                </div>
+                
+                <!-- Aviso para volumes universais -->
+                <div id="universal-volume-warning" class="hidden mt-3 p-4 bg-gradient-to-r from-red-100 via-pink-100 to-purple-100 dark:from-red-900/40 dark:via-pink-900/40 dark:to-purple-900/40 border-2 border-red-300 dark:border-red-700 rounded-lg">
+                    <p class="text-sm text-red-800 dark:text-red-200">
+                        <strong>♾️ Volume Universal:</strong> Esta combinação transcende qualquer capacidade de processamento. 
+                        Os números são tão grandes que nem existem termos adequados para descrevê-los. 
+                        <strong>Esta análise existe apenas no plano teórico da matemática pura!</strong>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-semibold">🌌 Contemplação Teórica:</h3>
+                    <div class="flex space-x-2">
+                        <button id="download-txt-btn" class="text-primary hover:text-secondary text-sm font-bold">
+                            📄 Contemplação TXT
+                        </button>
+                        <button id="download-html-btn" class="text-purple-600 hover:text-purple-800 text-sm font-bold">
+                            🌐 Contemplação HTML
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2 relative">
+                    <input type="text" id="search-input" placeholder="🚫 Busca impossível em volumes universais" disabled
+                        class="w-full border dark:border-gray-700 rounded-md px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-primary dark:bg-gray-700 opacity-50 cursor-not-allowed">
+                    <div id="search-info" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Com 9 dígitos, os volumes transcendem qualquer possibilidade de busca ou processamento.
+                    </div>
+                </div>
+            </div>
+            
+            <div id="combinations-container" class="max-h-96 overflow-y-auto border dark:border-gray-700 rounded-md p-3 text-sm">
+                <div id="combinations" class="grid grid-cols-1 gap-2"></div>
+                <div id="loading" class="text-center py-4 hidden">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+                    <p class="mt-2">🔄 Contemplando o infinito...</p>
+                    <p class="mt-1 text-xs text-gray-500">Volumes universais - transcendendo a realidade...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Selecionando elementos do DOM
+        const generateBtn = document.getElementById('generate-btn');
+        const resultContainer = document.getElementById('result-container');
+        const selectedDigitsEl = document.getElementById('selected-digits');
+        const totalCombinationsEl = document.getElementById('total-combinations');
+        const combinationsEl = document.getElementById('combinations');
+        const errorMessageEl = document.getElementById('error-message');
+        const downloadBtn = document.getElementById('download-btn');
+        const searchInput = document.getElementById('search-input');
+        const loadingEl = document.getElementById('loading');
+        
+        // Variável global para armazenar as combinações atuais
+        let currentCombinations = [];
+        
+        // Inicializar os checkboxes para os dígitos 0-9
+        for (let i = 0; i <= 9; i++) {
+            const checkbox = document.getElementById(`digit-${i}`);
+            if (checkbox) {
+                checkbox.value = i;
+            }
+        }
+        
+        // Função para gerar todas as combinações válidas para a Mega Sena (números de 1 a 60)
+        function generateCombinations(digits) {
+            // Com 9 dígitos, JAMAIS gerar combinações na memória - volumes universais
+            console.warn(`Volume universal: 9 dígitos resultariam em volumes incalculáveis`);
+            return []; // Sempre retornar vazio para 9 dígitos
+        }
+        
+        // Função para formatar números com dois dígitos (01, 02, etc.)
+        function formatTwoDigits(num) {
+            return num < 10 ? `0${num}` : `${num}`;
+        }
+        
+        // Função para exibir contemplação universal
+        function displayUniversalContemplation(theoreticalTotal, validNumbers, digits) {
+            combinationsEl.innerHTML = '';
+            
+            // Criar card contemplativo
+            const contemplationCard = document.createElement('div');
+            contemplationCard.className = 'bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-indigo-900/20 border-2 border-purple-300 dark:border-purple-700 rounded-xl p-8 shadow-lg';
+            
+            contemplationCard.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="text-6xl mb-4 animate-pulse">♾️</div>
+                    <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Contemplação Universal</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Volumes que transcendem a realidade</p>
+                </div>
+                
+                <div class="space-y-4 text-sm">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
+                        <strong class="text-purple-600 dark:text-purple-400">🎯 Configuração Universal:</strong><br>
+                        <span class="font-mono text-lg bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">${digits.join(', ')}</span>
+                        <div class="text-xs text-gray-500 mt-1">9 dos 10 dígitos possíveis</div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-green-200 dark:border-green-700">
+                        <strong class="text-green-600 dark:text-green-400">🌍 Cobertura Quase Total (01-60):</strong><br>
+                        <div class="font-mono text-sm bg-gray-50 dark:bg-gray-700 rounded p-2 mt-2 max-h-20 overflow-y-auto">
+                            ${validNumbers.map(n => formatTwoDigits(n)).join(', ')}
+                        </div>
+                        <div class="flex justify-between mt-2 text-xs">
+                            <span class="text-gray-600 dark:text-gray-400">Total: ${validNumbers.length} números válidos</span>
+                            <span class="text-green-600 dark:text-green-400 font-bold">${((validNumbers.length / 60) * 100).toFixed(1)}% de cobertura</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 rounded-lg p-4 border border-pink-200 dark:border-pink-700">
+                        <strong class="text-purple-600 dark:text-purple-400">♾️ Volume Universal Estimado:</strong><br>
+                        <div class="text-center py-4">
+                            <div class="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent animate-pulse">
+                                ${formatUniversalNumber(theoreticalTotal)}
+                            </div>
+                            <div class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                                Fórmula: C(${validNumbers.length}, 6) = ${theoreticalTotal > 1e15 ? 'INCALCULÁVEL' : theoreticalTotal.toExponential(2)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-red-100 via-orange-100 to-yellow-100 dark:from-red-900/30 dark:via-orange-900/30 dark:to-yellow-900/30 border-2 border-red-300 dark:border-red-700 rounded-lg p-4">
+                        <strong class="text-red-800 dark:text-red-200">🚨 Contemplação Filosófica:</strong><br>
+                        <div class="text-red-700 dark:text-red-300 mt-2 space-y-1">
+                            <p>• Este volume transcende qualquer realidade física</p>
+                            <p>• Supera o número de átomos no universo observável</p>
+                            <p>• Excede qualquer capacidade computacional concebível</p>
+                            <p>• Existe apenas no plano da matemática pura</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
+                        <strong class="text-blue-800 dark:text-blue-200">🔬 Contexto Científico:</strong><br>
+                        <div class="text-blue-700 dark:text-blue-300 mt-2 text-xs space-y-1">
+                            <p>• Átomos no universo: ~10^80</p>
+                            <p>• Este volume: ${theoreticalTotal > 1e80 ? '>>10^80' : '~10^' + Math.log10(theoreticalTotal).toFixed(0)}</p>
+                            <p>• Categoria: Universal/Incalculável</p>
+                            <p>• Aplicação prática: Impossível</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            combinationsEl.appendChild(contemplationCard);
+        }
+        
+        // Função para processar a análise universal
+        function processCombinationsInBatches(digits) {
+            // Mostrar indicador de carregamento
+            loadingEl.classList.remove('hidden');
+            
+            // Calcular as combinações em segundo plano
+            setTimeout(() => {
+                // Primeiro, calcular os números válidos
+                const validNumbers = [];
+                for (let i = 1; i <= 60; i++) {
+                    const numStr = i.toString();
+                    if (numStr.split('').every(digit => digits.includes(parseInt(digit)))) {
+                        validNumbers.push(i);
+                    }
+                }
+                
+                // Atualizar a contagem de números válidos
+                document.getElementById('valid-numbers-count').textContent = validNumbers.length;
+                
+                // Calcular número teórico de combinações (usando aproximação para números extremos)
+                function universalCombinations(n, r) {
+                    if (n < r) return 0;
+                    if (r === 0 || r === n) return 1;
+                    
+                    // Para números extremamente grandes, usar aproximação logarítmica avançada
+                    if (n > 55) {
+                        // Aproximação de Stirling melhorada
+                        function logFactorial(x) {
+                            if (x < 2) return 0;
+                            return x * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI * x);
+                        }
+                        
+                        const logResult = logFactorial(n) - logFactorial(r) - logFactorial(n - r);
+                        const result = Math.exp(logResult);
+                        
+                        // Se o resultado é muito grande, retornar Infinity
+                        return isFinite(result) ? result : Infinity;
+                    }
+                    
+                    // Para números menores, cálculo tradicional
+                    if (r > n - r) r = n - r;
+                    
+                    let result = 1;
+                    for (let i = 0; i < r; i++) {
+                        result = result * (n - i) / (i + 1);
+                        // Proteção contra overflow
+                        if (!isFinite(result)) return Infinity;
+                    }
+                    return Math.round(result);
+                }
+                
+                const theoreticalCombinations = validNumbers.length >= 6 ? 
+                    universalCombinations(validNumbers.length, 6) : 0;
+                
+                // Sempre mostrar aviso universal para 9 dígitos
+                const universalVolumeWarning = document.getElementById('universal-volume-warning');
+                universalVolumeWarning.classList.remove('hidden');
+                
+                // Para 9 dígitos, nunca gerar combinações na memória
+                currentCombinations = [];
+                
+                // Ocultar indicador de carregamento
+                loadingEl.classList.add('hidden');
+                
+                // Mostrar volume teórico e contemplação
+                totalCombinationsEl.textContent = formatUniversalNumber(theoreticalCombinations);
+                displayUniversalContemplation(theoreticalCombinations, validNumbers, digits);
+                
+                // Configurar downloads contemplativos
+                setupContemplativeDownloads(digits.join(','), theoreticalCombinations, validNumbers);
+            }, 150);
+        }
+        
+        // Função para formatar números universais
+        function formatUniversalNumber(num) {
+            if (!isFinite(num)) {
+                return "♾️ INFINITO";
+            } else if (num >= 1e15) { // Quatrilhão
+                return `♾️ UNIVERSAL`;
+            } else if (num >= 1e12) { // Trilhão
+                return `${(num / 1e12).toFixed(1)}Q`; // Quatrilhão
+            } else if (num >= 1e9) { // Bilhão
+                return `${(num / 1e12).toFixed(2)}T`; // Trilhão
+            } else if (num >= 1e6) { // Milhão
+                return `${(num / 1e9).toFixed(1)}B`; // Bilhão
+            } else if (num >= 1e3) {
+                return `${(num / 1e6).toFixed(1)}M`; // Milhão
+            } else {
+                return num.toLocaleString('pt-BR');
+            }
+        }
+        
+        // Configurar downloads contemplativos apenas
+        function setupContemplativeDownloads(digitsStr, theoreticalTotal, validNumbers) {
+            const downloadTxtBtn = document.getElementById('download-txt-btn');
+            const downloadHtmlBtn = document.getElementById('download-html-btn');
+            
+            // Remover event listeners antigos
+            downloadTxtBtn.replaceWith(downloadTxtBtn.cloneNode(true));
+            downloadHtmlBtn.replaceWith(downloadHtmlBtn.cloneNode(true));
+            
+            // Reobter referências dos novos elementos
+            const newDownloadTxtBtn = document.getElementById('download-txt-btn');
+            const newDownloadHtmlBtn = document.getElementById('download-html-btn');
+            
+            // Botão para download de contemplação em TXT
+            newDownloadTxtBtn.addEventListener('click', () => {
+                const content = `MEGA SENA - CONTEMPLAÇÃO UNIVERSAL 9 DÍGITOS
+===============================================
+
+♾️ CONFIGURAÇÃO UNIVERSAL ♾️
+
+Dígitos selecionados: ${digitsStr}
+Configuração: Cobertura quase total (9 de 10 dígitos)
+
+🌍 NÚMEROS VÁLIDOS FORMADOS (01-60):
+${validNumbers.map(n => formatTwoDigits(n)).join(', ')}
+
+Total de números válidos: ${validNumbers.length}
+Cobertura da Mega Sena: ${((validNumbers.length / 60) * 100).toFixed(1)}%
+
+♾️ VOLUME UNIVERSAL ESTIMADO:
+${formatUniversalNumber(theoreticalTotal)}
+${isFinite(theoreticalTotal) ? `(${theoreticalTotal.toExponential(2)})` : '(INCALCULÁVEL)'}
+Fórmula: C(${validNumbers.length}, 6)
+
+🌌 ANÁLISE FILOSÓFICA:
+===============================================
+
+MAGNITUDE INCOMPREENSÍVEL:
+- Este volume transcende qualquer realidade física conhecida
+- Supera vastamente o número de átomos no universo observável (~10^80)
+- Excede qualquer capacidade computacional concebível
+- Os números são tão grandes que desafiam a compreensão humana
+
+CONTEXTO CÓSMICO:
+- Partículas subatômicas no universo: ~10^90
+- Este volume: ${theoreticalTotal > 1e90 ? 'SUPERIOR AO UNIVERSO' : 'CÓSMICO'}
+- Categoria: Universal/Transcendental
+- Aplicação prática: COMPLETAMENTE IMPOSSÍVEL
+
+CONTEMPLAÇÃO MATEMÁTICA:
+- Representa o limite extremo da combinatória
+- Demonstra a vastidão infinita da matemática
+- Ilustra conceitos que existem apenas no plano teórico
+- Uma janela para o infinito através da combinação
+
+🚨 AVISO FUNDAMENTAL:
+===============================================
+Este volume existe EXCLUSIVAMENTE no reino da matemática pura.
+Qualquer tentativa de aplicação prática é física e tecnologicamente impossível.
+Esta análise serve apenas para contemplação científica e educacional.
+
+O universo inteiro não possui recursos suficientes para processar
+ou armazenar informações desta magnitude.
+
+Esta é a fronteira onde a matemática encontra o infinito.
+
+🔬 DADOS TÉCNICOS:
+===============================================
+Sistema: Mega Sena (6 dezenas de 01 a 60)
+Configuração: 9 dígitos (cobertura quase universal)
+Gerado em: ${new Date().toLocaleString('pt-BR')}
+Categoria: UNIVERSAL/INCALCULÁVEL
+
+"Diante do infinito, toda compreensão se torna contemplação."
+`;
+                downloadFile(content, `mega-sena-contemplacao-9digitos-${digitsStr}.txt`, 'text/plain');
+            });
+            
+            // Botão para download de contemplação em HTML
+            newDownloadHtmlBtn.addEventListener('click', () => {
+                const htmlContent = `
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Contemplação Universal 9 Dígitos - Mega Sena</title>
+                    <style>
+                        body { 
+                            font-family: 'Arial', sans-serif; 
+                            margin: 0;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            min-height: 100vh;
+                            color: white;
+                        }
+                        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+                        h1 { 
+                            text-align: center; 
+                            font-size: 3em;
+                            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                            margin-bottom: 10px;
+                        }
+                        .subtitle {
+                            text-align: center;
+                            font-size: 1.2em;
+                            opacity: 0.9;
+                            margin-bottom: 30px;
+                        }
+                        .card { 
+                            background: rgba(255,255,255,0.95); 
+                            color: #333;
+                            padding: 25px; 
+                            border-radius: 15px; 
+                            box-shadow: 0 8px 25px rgba(0,0,0,0.2); 
+                            margin: 25px 0;
+                            backdrop-filter: blur(10px);
+                        }
+                        .universe { 
+                            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+                            background-size: 300% 300%;
+                            animation: galaxyMove 10s ease infinite;
+                            color: white;
+                            text-align: center;
+                            padding: 40px;
+                            border-radius: 20px;
+                            margin: 30px 0;
+                        }
+                        @keyframes galaxyMove {
+                            0% { background-position: 0% 50%; }
+                            50% { background-position: 100% 50%; }
+                            100% { background-position: 0% 50%; }
+                        }
+                        .warning { 
+                            background: linear-gradient(45deg, #ff9a9e, #fecfef, #fecfef, #ff9a9e);
+                            color: #8b0000; 
+                            padding: 25px; 
+                            margin: 25px 0; 
+                            border-radius: 15px;
+                            font-weight: bold;
+                            border: 3px solid #ff6b6b;
+                        }
+                        .numbers { 
+                            background: #f8f9fa; 
+                            padding: 20px; 
+                            border-radius: 10px; 
+                            margin: 15px 0;
+                            font-family: 'Courier New', monospace;
+                            word-wrap: break-word;
+                            border-left: 5px solid #667eea;
+                        }
+                        .stats { 
+                            display: grid; 
+                            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+                            gap: 20px; 
+                            margin: 25px 0;
+                        }
+                        .stat-card { 
+                            background: linear-gradient(135deg, #667eea, #764ba2); 
+                            color: white;
+                            padding: 20px; 
+                            border-radius: 12px; 
+                            text-align: center;
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                        }
+                        .volume { 
+                            font-size: 3em; 
+                            font-weight: bold; 
+                            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                            margin: 15px 0;
+                            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                        }
+                        .infinity { 
+                            font-size: 6em;
+                            animation: pulse 2s infinite;
+                        }
+                        @keyframes pulse {
+                            0% { transform: scale(1); }
+                            50% { transform: scale(1.1); }
+                            100% { transform: scale(1); }
+                        }
+                        .cosmic { 
+                            background: radial-gradient(circle, #1a1a2e, #16213e, #0f3460);
+                            color: #eee;
+                            padding: 30px;
+                            border-radius: 20px;
+                            margin: 25px 0;
+                            border: 2px solid #4ecdc4;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="infinity">♾️</div>
+                        <h1>Contemplação Universal</h1>
+                        <div class="subtitle">9 Dígitos - Mega Sena - Transcendendo a Realidade</div>
+                        
+                        <div class="card">
+                            <h2>📊 Configuração Universal</h2>
+                            <div class="stats">
+                                <div class="stat-card">
+                                    <strong>🎯 Dígitos Selecionados</strong><br>
+                                    <span style="font-family: 'Courier New'; font-size: 1.3em;">${digitsStr}</span>
+                                </div>
+                                <div class="stat-card">
+                                    <strong>📈 Números Válidos</strong><br>
+                                    <span style="font-size: 2em;">${validNumbers.length}</span>
+                                </div>
+                                <div class="stat-card">
+                                    <strong>📊 Cobertura Mega Sena</strong><br>
+                                    <span style="font-size: 2em; color: #4ecdc4;">${((validNumbers.length / 60) * 100).toFixed(1)}%</span>
+                                </div>
+                                <div class="stat-card">
+                                    <strong>📅 Contemplado em</strong><br>
+                                    <span style="font-size: 0.9em;">${new Date().toLocaleString('pt-BR')}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="numbers">
+                            <strong>🌍 Números válidos formados (01-60):</strong><br>
+                            ${validNumbers.map(n => formatTwoDigits(n)).join(', ')}
+                        </div>
+                        
+                        <div class="universe">
+                            <h2 style="margin-top: 0;">♾️ Volume Universal</h2>
+                            <div class="volume">${formatUniversalNumber(theoreticalTotal)}</div>
+                            <div style="font-size: 0.9em; margin-top: 15px; opacity: 0.9;">
+                                ${isFinite(theoreticalTotal) ? 
+                                    `(${theoreticalTotal.toExponential(2)} combinações exatas)` : 
+                                    '(VOLUME INCALCULÁVEL)'}
+                            </div>
+                            <div style="font-size: 0.8em; margin-top: 10px; opacity: 0.8;">
+                                Fórmula: C(${validNumbers.length}, 6)
+                            </div>
+                        </div>
+                        
+                        <div class="cosmic">
+                            <h3 style="margin-top: 0; color: #4ecdc4;">🌌 Contexto Cósmico</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; text-align: center;">
+                                <div>
+                                    <div style="font-size: 1.5em; color: #ff6b6b;">~10⁸⁰</div>
+                                    <div style="font-size: 0.8em;">Átomos no Universo</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5em; color: #4ecdc4;">${theoreticalTotal > 1e80 ? '>>10⁸⁰' : '~10^' + Math.log10(theoreticalTotal).toFixed(0)}</div>
+                                    <div style="font-size: 0.8em;">Este Volume</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5em; color: #feca57;">♾️</div>
+                                    <div style="font-size: 0.8em;">Categoria Universal</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="warning">
+                            <h3 style="margin-top: 0;">🚨 CONTEMPLAÇÃO FILOSÓFICA</h3>
+                            <ul style="text-align: left; margin: 15px 0;">
+                                <li><strong>Este volume transcende qualquer realidade física</strong></li>
+                                <li><strong>Supera vastamente o número de átomos no universo</strong></li>
+                                <li><strong>Excede qualquer capacidade computacional concebível</strong></li>
+                                <li><strong>Existe apenas no plano da matemática pura</strong></li>
+                                <li><strong>Representa a fronteira entre o finito e o infinito</strong></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>📋 Classificação Final</h3>
+                            <p><strong>Categoria:</strong> ♾️ UNIVERSAL/TRANSCENDENTAL</p>
+                            <p><strong>Sistema:</strong> Mega Sena (6 dezenas de 01 a 60)</p>
+                            <p><strong>Configuração:</strong> 9 dígitos (cobertura quase total)</p>
+                            <p><strong>Aplicabilidade:</strong> EXCLUSIVAMENTE TEÓRICA</p>
+                            <p><strong>Significado:</strong> Contemplação do infinito matemático</p>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 40px; font-style: italic; opacity: 0.8;">
+                            <p>"Diante do infinito, toda compreensão se torna contemplação."</p>
+                            <p style="font-size: 0.9em; margin-top: 15px;">
+                                🌌 Esta análise representa o limite extremo da combinatória aplicada 🌌
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                `;
+                downloadFile(htmlContent, `mega-sena-contemplacao-9digitos-${digitsStr}.html`, 'text/html');
+            });
+        }
+        
+        // Função auxiliar para download de arquivos
+        function downloadFile(content, filename, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+        
+        // Evento para gerar combinações
+        generateBtn.addEventListener('click', () => {
+            // Limpar mensagens de erro
+            errorMessageEl.classList.add('hidden');
+            errorMessageEl.textContent = '';
+            
+            // Obter dígitos selecionados
+            const selectedDigits = [];
+            for (let i = 0; i <= 9; i++) {
+                const checkbox = document.getElementById(`digit-${i}`);
+                if (checkbox && checkbox.checked) {
+                    selectedDigits.push(parseInt(checkbox.value));
+                }
+            }
+            
+            // Validar se exatamente 9 dígitos foram selecionados
+            if (selectedDigits.length !== 9) {
+                errorMessageEl.textContent = `❌ Selecione exatamente 9 dígitos. Você selecionou ${selectedDigits.length}.`;
+                errorMessageEl.classList.remove('hidden');
+                return;
+            }
+            
+            // Exibir dígitos selecionados
+            selectedDigitsEl.textContent = selectedDigits.join(', ');
+            
+            // Exibir contêiner de resultados
+            resultContainer.classList.remove('hidden');
+            
+            // Processar contemplação universal
+            processCombinationsInBatches(selectedDigits);
+        });
+        
+        // Calcular combinações possíveis para uma lista de dígitos
+        function calculateCombinationStats(digits) {
+            // Se não tivermos exatamente 9 dígitos, não calcular as estatísticas completas
+            if (digits.length !== 9) {
+                return {
+                    validNumbers: [],
+                    combinations: []
+                };
+            }
+            
+            // Calcular números válidos
+            const validNumbers = [];
+            for (let i = 1; i <= 60; i++) {
+                const numStr = i.toString();
+                if (numStr.split('').every(digit => digits.includes(parseInt(digit)))) {
+                    validNumbers.push(i);
+                }
+            }
+            
+            // Se não tiver números suficientes para formar combinações
+            if (validNumbers.length < 6) {
+                return {
+                    validNumbers: validNumbers,
+                    combinations: []
+                };
+            }
+            
+            // Calcular número de combinações possíveis usando aproximação avançada
+            function universalCombinations(n, r) {
+                if (n < r) return 0;
+                if (r === 0 || r === n) return 1;
+                
+                // Para números extremamente grandes, usar aproximação logarítmica de alta precisão
+                if (n > 55) {
+                    function logFactorial(x) {
+                        if (x < 2) return 0;
+                        return x * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI * x);
+                    }
+                    
+                    const logResult = logFactorial(n) - logFactorial(r) - logFactorial(n - r);
+                    const result = Math.exp(logResult);
+                    
+                    return isFinite(result) ? result : Infinity;
+                }
+                
+                // Para números menores, cálculo tradicional otimizado
+                if (r > n - r) r = n - r;
+                
+                let result = 1;
+                for (let i = 0; i < r; i++) {
+                    result = result * (n - i) / (i + 1);
+                    if (!isFinite(result)) return Infinity;
+                }
+                return Math.round(result);
+            }
+            
+            const totalCombinations = universalCombinations(validNumbers.length, 6);
+            
+            return {
+                validNumbers: validNumbers,
+                totalCombinations: totalCombinations
+            };
+        }
+        
+        // Atualizar estatísticas de prévia quando a seleção mudar
+        function updatePreviewStats() {
+            // Obter dígitos selecionados
+            const selectedDigits = [];
+            for (let i = 0; i <= 9; i++) {
+                const checkbox = document.getElementById(`digit-${i}`);
+                if (checkbox && checkbox.checked) {
+                    selectedDigits.push(parseInt(checkbox.value));
+                }
+            }
+            
+            // Determinar número máximo de dígitos permitidos
+            const maxDigits = 9;
+            const remainingDigits = maxDigits - selectedDigits.length;
+            
+            // Desabilitar checkboxes adicionais se já tivermos atingido o limite
+            for (let i = 0; i <= 9; i++) {
+                const checkbox = document.getElementById(`digit-${i}`);
+                if (checkbox && !checkbox.checked) {
+                    checkbox.disabled = remainingDigits <= 0;
+                    checkbox.parentElement.classList.toggle('opacity-50', remainingDigits <= 0);
+                }
+            }
+            
+            // Atualizar contagem e dígitos selecionados
+            const previewDigitCount = document.getElementById('preview-digit-count');
+            const previewSelectedDigits = document.getElementById('preview-selected-digits');
+            const previewValidNumbers = document.getElementById('preview-valid-numbers');
+            const previewCombinations = document.getElementById('preview-combinations');
+            
+            if (previewDigitCount) previewDigitCount.textContent = selectedDigits.length;
+            
+            if (selectedDigits.length === 0) {
+                if (previewSelectedDigits) previewSelectedDigits.textContent = 'Nenhum';
+                if (previewValidNumbers) previewValidNumbers.textContent = '0';
+                if (previewCombinations) previewCombinations.textContent = '0';
+                return;
+            }
+            
+            if (previewSelectedDigits) previewSelectedDigits.textContent = selectedDigits.join(', ');
+            
+            // Calcular estatísticas
+            const stats = calculateCombinationStats(selectedDigits);
+            
+            // Atualizar números válidos
+            if (previewValidNumbers) previewValidNumbers.textContent = stats.validNumbers.length;
+            
+            // Atualizar combinações possíveis
+            if (previewCombinations) {
+                if (stats.totalCombinations) {
+                    previewCombinations.textContent = formatUniversalNumber(stats.totalCombinations);
+                } else {
+                    previewCombinations.textContent = '0';
+                }
+            }
+        }
+        
+        // Função para gerar todas as combinações de 9 dígitos
+        function generateAllDigitCombinations() {
+            const allCombinations = [];
+            const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            
+            // Para 9 dígitos, gerar as 10 combinações possíveis manualmente
+            for (let excludeDigit = 0; excludeDigit <= 9; excludeDigit++) {
+                const combination = digits.filter(d => d !== excludeDigit);
+                allCombinations.push(combination);
+            }
+            
+            return allCombinations;
+        }
+        
+        // Função para atualizar as estatísticas do resumo
+        function updateStatistics(combinationsData) {
+            // Categorizar as combinações (para 9 dígitos, categorias mais extremas)
+            let insuficiente = 0;
+            let alto = 0;
+            let extremo = 0;
+            let universal = 0;
+            
+            let maxVolume = 0;
+            let minVolume = Infinity;
+            let totalVolume = 0;
+            let validCombinations = 0;
+            
+            combinationsData.forEach(data => {
+                const volume = data.totalCombinations;
+                
+                if (volume === 0) {
+                    insuficiente++;
+                } else {
+                    if (volume < 1e12) { // Menor que 1 trilhão
+                        alto++;
+                    } else if (volume < 1e15) { // 1 trilhão a 1 quatrilhão
+                        extremo++;
+                    } else {
+                        universal++;
+                    }
+                    
+                    validCombinations++;
+                    if (isFinite(volume)) {
+                        totalVolume += volume;
+                        maxVolume = Math.max(maxVolume, volume);
+                        minVolume = Math.min(minVolume, volume);
+                    }
+                }
+            });
+            
+            // Atualizar elementos na UI
+            const statElements = {
+                'stat-insuficiente': insuficiente,
+                'stat-alto': alto,
+                'stat-extremo': extremo,
+                'stat-universal': universal,
+                'max-volume': maxVolume > 0 ? formatUniversalNumber(maxVolume) : '♾️ Universal',
+                'min-volume': minVolume < Infinity ? formatUniversalNumber(minVolume) : '🌌 Galáctico',
+                'avg-coverage': '~99.9%' // Com 9 dígitos, quase sempre cobertura quase total
+            };
+            
+            Object.keys(statElements).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = statElements[id];
+                }
+            });
+
+            // Criar resumo das categorias universais
+            const specificVolumesContainer = document.getElementById('specific-volumes');
+            if (specificVolumesContainer) {
+                specificVolumesContainer.innerHTML = '';
+
+                const categories = [
+                    { key: 'universal', label: '♾️ Universal (Incalculável)', count: universal, color: 'text-pink-600 dark:text-pink-400' },
+                    { key: 'extremo', label: '🌌 Extremo (1T-1000T)', count: extremo, color: 'text-purple-600 dark:text-purple-400' },
+                    { key: 'alto', label: '⚡ Alto (1B-1T)', count: alto, color: 'text-green-600 dark:text-green-400' },
+                    { key: 'insuficiente', label: '❌ Insuficiente (0)', count: insuficiente, color: 'text-red-500' }
+                ];
+
+                categories.forEach(category => {
+                    if (category.count > 0) {
+                        const div = document.createElement('div');
+                        div.className = 'flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-md';
+                        
+                        const label = document.createElement('span');
+                        label.textContent = category.label;
+                        label.className = 'text-sm';
+                        
+                        const value = document.createElement('span');
+                        value.className = `font-bold ${category.color}`;
+                        value.textContent = `${category.count} combinações`;
+                        
+                        div.appendChild(label);
+                        div.appendChild(value);
+                        specificVolumesContainer.appendChild(div);
+                    }
+                });
+
+                // Se nenhuma categoria tiver valores > 0, mostrar mensagem
+                if (specificVolumesContainer.children.length === 0) {
+                    const div = document.createElement('div');
+                    div.className = 'text-center text-gray-500 dark:text-gray-400 py-4';
+                    div.textContent = 'Contemplando o universo infinito...';
+                    specificVolumesContainer.appendChild(div);
+                }
+            }
+        }
+        
+        // Função para popular a tabela com todas as combinações
+        function populateAllCombinationsTable() {
+            const tableBody = document.getElementById('all-combinations-table-body');
+            const filterSelect = document.getElementById('filter-by-combinations');
+            const searchInput = document.getElementById('digits-search');
+            
+            // Gerar todas as combinações de 9 dígitos (10 possibilidades)
+            const allDigitCombinations = generateAllDigitCombinations();
+            
+            // Calcular estatísticas para cada combinação
+            const combinationsData = allDigitCombinations.map((digitSet, index) => {
+                // Calcular números válidos
+                const validNumbers = [];
+                for (let i = 1; i <= 60; i++) {
+                    const numStr = i.toString();
+                    if (numStr.split('').every(digit => digitSet.includes(parseInt(digit)))) {
+                        validNumbers.push(i);
+                    }
+                }
+                
+                // Calcular número de combinações possíveis
+                let totalCombinations = 0;
+                if (validNumbers.length >= 6) {
+                    function universalCombinations(n, r) {
+                        if (n < r) return 0;
+                        if (r === 0 || r === n) return 1;
+                        
+                        if (n > 55) {
+                            function logFactorial(x) {
+                                if (x < 2) return 0;
+                                return x * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI * x);
+                            }
+                            
+                            const logResult = logFactorial(n) - logFactorial(r) - logFactorial(n - r);
+                            const result = Math.exp(logResult);
+                            return isFinite(result) ? result : Infinity;
+                        }
+                        
+                        if (r > n - r) r = n - r;
+                        
+                        let result = 1;
+                        for (let i = 0; i < r; i++) {
+                            result = result * (n - i) / (i + 1);
+                            if (!isFinite(result)) return Infinity;
+                        }
+                        return Math.round(result);
+                    }
+                    
+                    totalCombinations = universalCombinations(validNumbers.length, 6);
+                }
+                
+                return {
+                    index: index + 1,
+                    digits: digitSet,
+                    validNumbersCount: validNumbers.length,
+                    totalCombinations: totalCombinations,
+                    excludedDigit: [0,1,2,3,4,5,6,7,8,9].find(d => !digitSet.includes(d))
+                };
+            });
+            
+            // Ordenar pelo maior número de combinações
+            combinationsData.sort((a, b) => {
+                if (!isFinite(a.totalCombinations)) return -1;
+                if (!isFinite(b.totalCombinations)) return 1;
+                return b.totalCombinations - a.totalCombinations;
+            });
+            
+            // Atualizar estatísticas do resumo
+            updateStatistics(combinationsData);
+            
+            // Função para filtrar e exibir dados
+            function displayFilteredData(data = combinationsData) {
+                const filter = filterSelect.value;
+                const searchQuery = searchInput.value.toLowerCase().replace(/\s/g, '');
+                
+                let filteredData = [...data];
+                
+                // Aplicar filtro de combinações
+                switch (filter) {
+                    case 'valid':
+                        filteredData = filteredData.filter(item => item.totalCombinations > 0);
+                        break;
+                    case 'universal':
+                        filteredData = filteredData.filter(item => !isFinite(item.totalCombinations) || item.totalCombinations >= 1e15);
+                        break;
+                    case 'galactic':
+                        filteredData = filteredData.filter(item => isFinite(item.totalCombinations) && item.totalCombinations >= 1e15);
+                        break;
+                    case 'extreme':
+                        filteredData = filteredData.filter(item => item.totalCombinations >= 1e12 && item.totalCombinations < 1e15);
+                        break;
+                    case 'high':
+                        filteredData = filteredData.filter(item => item.totalCombinations >= 1e9 && item.totalCombinations < 1e12);
+                        break;
+                }
+                
+                // Aplicar filtro de busca
+                if (searchQuery) {
+                    filteredData = filteredData.filter(item => 
+                        item.digits.join('').includes(searchQuery) ||
+                        item.digits.join(',').includes(searchQuery) ||
+                        item.excludedDigit.toString().includes(searchQuery)
+                    );
+                }
+                
+                // Limpar tabela
+                tableBody.innerHTML = '';
+                
+                // Atualizar contagem total
+                const totalElement = document.getElementById('total-digit-combinations');
+                if (totalElement) totalElement.textContent = filteredData.length;
+                
+                // Preencher tabela com dados filtrados
+                filteredData.forEach((data, displayIndex) => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50 dark:hover:from-green-900/20 dark:hover:to-blue-900/20';
+                    
+                    // Coluna de índice
+                    const indexCell = document.createElement('td');
+                    indexCell.className = 'py-2 px-3 border-t dark:border-gray-700 text-sm';
+                    indexCell.textContent = displayIndex + 1;
+                    row.appendChild(indexCell);
+                    
+                    // Coluna de dígitos
+                    const digitsCell = document.createElement('td');
+                    digitsCell.className = 'py-2 px-3 border-t dark:border-gray-700 font-mono font-bold text-primary';
+                    digitsCell.innerHTML = `${data.digits.join(', ')} <span class="text-xs text-red-500">(exceto ${data.excludedDigit})</span>`;
+                    row.appendChild(digitsCell);
+                    
+                    // Coluna de números válidos
+                    const validNumbersCell = document.createElement('td');
+                    validNumbersCell.className = 'py-2 px-3 border-t dark:border-gray-700 text-center font-semibold';
+                    validNumbersCell.textContent = data.validNumbersCount;
+                    row.appendChild(validNumbersCell);
+                    
+                    // Coluna de combinações
+                    const combinationsCell = document.createElement('td');
+                    combinationsCell.className = 'py-2 px-3 border-t dark:border-gray-700 font-bold text-center';
+                    if (data.totalCombinations > 0) {
+                        combinationsCell.textContent = formatUniversalNumber(data.totalCombinations);
+                        
+                        // Cor baseada no volume
+                        if (!isFinite(data.totalCombinations) || data.totalCombinations >= 1e15) {
+                            combinationsCell.classList.add('bg-gradient-to-r', 'from-pink-600', 'to-purple-600', 'bg-clip-text', 'text-transparent');
+                        } else if (data.totalCombinations >= 1e12) {
+                            combinationsCell.classList.add('text-purple-600', 'dark:text-purple-400');
+                        } else {
+                            combinationsCell.classList.add('text-primary', 'dark:text-green-400');
+                        }
+                    } else {
+                        combinationsCell.textContent = 'Insuficiente';
+                        combinationsCell.classList.add('text-red-500');
+                    }
+                    row.appendChild(combinationsCell);
+                    
+                    // Coluna de ações
+                    const actionCell = document.createElement('td');
+                    actionCell.className = 'py-2 px-3 border-t dark:border-gray-700 text-center';
+                    
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'flex gap-1 justify-center';
+                    
+                    // Botão de seleção rápida
+                    const selectBtn = document.createElement('button');
+                    selectBtn.className = 'text-xs bg-primary/10 hover:bg-primary/20 text-primary dark:text-green-400 py-1 px-2 rounded';
+                    selectBtn.textContent = '✓ Usar';
+                    selectBtn.title = 'Usar esta combinação de dígitos';
+                    selectBtn.addEventListener('click', () => {
+                        // Desmarcar todos os checkboxes
+                        for (let i = 0; i <= 9; i++) {
+                            const checkbox = document.getElementById(`digit-${i}`);
+                            if (checkbox) {
+                                checkbox.checked = false;
+                                checkbox.disabled = false;
+                                checkbox.parentElement.classList.remove('opacity-50', 'opacity-75');
+                            }
+                        }
+                        
+                        // Marcar os checkboxes correspondentes aos dígitos
+                        for (const digit of data.digits) {
+                            const checkbox = document.getElementById(`digit-${digit}`);
+                            if (checkbox) {
+                                checkbox.checked = true;
+                            }
+                        }
+                        
+                        // Atualizar estatísticas
+                        updatePreviewStats();
+                        
+                        // Rolar para a seção de seleção
+                        const previewStats = document.querySelector('#preview-stats');
+                        if (previewStats) previewStats.scrollIntoView({ behavior: 'smooth' });
+                    });
+                    
+                    actionsDiv.appendChild(selectBtn);
+                    
+                    // Para 9 dígitos, TODOS os volumes são universais ou extremos
+                    const contemplateBtn = document.createElement('button');
+                    
+                    if (!isFinite(data.totalCombinations) || data.totalCombinations >= 1e15) {
+                        contemplateBtn.className = 'text-xs bg-gradient-to-r from-pink-100 to-purple-100 text-pink-600 py-1 px-2 rounded ml-1';
+                        contemplateBtn.textContent = '♾️ Universal';
+                        contemplateBtn.title = 'Volume universal - transcende a realidade';
+                    } else if (data.totalCombinations >= 1e12) {
+                        contemplateBtn.className = 'text-xs bg-purple-100 text-purple-600 py-1 px-2 rounded ml-1';
+                        contemplateBtn.textContent = '🌌 Extremo';
+                        contemplateBtn.title = 'Volume extremo - trilhões';
+                    } else if (data.totalCombinations > 0) {
+                        contemplateBtn.className = 'text-xs bg-blue-100 text-blue-600 py-1 px-2 rounded ml-1';
+                        contemplateBtn.textContent = '🔮 Contemplar';
+                        contemplateBtn.title = 'Clique em "Usar" para contemplação';
+                    } else {
+                        contemplateBtn.className = 'text-xs bg-gray-100 text-gray-400 py-1 px-2 rounded ml-1 cursor-not-allowed';
+                        contemplateBtn.textContent = '❌ Inválido';
+                        contemplateBtn.title = 'Combinação insuficiente';
+                        contemplateBtn.disabled = true;
+                    }
+                    
+                    if (data.totalCombinations > 0) {
+                        contemplateBtn.addEventListener('click', () => {
+                            // Usar esta combinação para contemplação
+                            selectedDigitsEl.textContent = data.digits.join(', ');
+                            resultContainer.classList.remove('hidden');
+                            processCombinationsInBatches(data.digits);
+                            
+                            // Rolar para os resultados
+                            resultContainer.scrollIntoView({ behavior: 'smooth' });
+                        });
+                    }
+                    
+                    actionsDiv.appendChild(contemplateBtn);
+                    
+                    actionCell.appendChild(actionsDiv);
+                    row.appendChild(actionCell);
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Se não houver resultados
+                if (filteredData.length === 0) {
+                    const noResultsRow = document.createElement('tr');
+                    const noResultsCell = document.createElement('td');
+                    noResultsCell.colSpan = 5;
+                    noResultsCell.className = 'py-8 text-center text-gray-500';
+                    noResultsCell.textContent = 'Nenhuma combinação encontrada com os filtros aplicados.';
+                    noResultsRow.appendChild(noResultsCell);
+                    tableBody.appendChild(noResultsRow);
+                }
+            }
+            
+            // Event listeners para filtros
+            filterSelect.addEventListener('change', () => displayFilteredData());
+            searchInput.addEventListener('input', () => displayFilteredData());
+            
+            // Exibir dados iniciais
+            displayFilteredData();
+        }
+        
+        // Preencher os checkboxes no HTML e adicionar eventos
+        window.onload = function() {
+            const checkboxesContainer = document.querySelector('.grid.grid-cols-5');
+            if (!checkboxesContainer) return;
+            
+            checkboxesContainer.innerHTML = '';
+            
+            for (let i = 0; i <= 9; i++) {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'flex items-center justify-center';
+                
+                const label = document.createElement('label');
+                label.className = 'flex items-center space-x-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded';
+                
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = `digit-${i}`;
+                input.value = i;
+                input.className = 'digit-checkbox w-5 h-5 accent-primary text-primary focus:ring-primary';
+                
+                // Adicionar evento para atualizar estatísticas quando o checkbox for alterado
+                input.addEventListener('change', updatePreviewStats);
+                
+                const span = document.createElement('span');
+                span.className = 'text-lg font-semibold';
+                span.textContent = i;
+                
+                label.appendChild(input);
+                label.appendChild(span);
+                checkboxDiv.appendChild(label);
+                
+                checkboxesContainer.appendChild(checkboxDiv);
+            }
+            
+            // Adicionar evento para o botão "Gerar Todas"
+            const generateAllBtn = document.getElementById('generate-all-btn');
+            if (generateAllBtn) {
+                generateAllBtn.addEventListener('click', () => {
+                    // Mostrar loading na tabela
+                    const tableBody = document.getElementById('all-combinations-table-body');
+                    if (tableBody) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="5" class="py-8 text-center">
+                                    <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+                                    <p class="mt-2 text-sm">🔄 Contemplando todas as combinações de 9 dígitos...</p>
+                                    <p class="mt-1 text-xs text-gray-500">Preparando as 10 configurações universais...</p>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    
+                    // Processar em background para não travar a UI
+                    setTimeout(() => {
+                        populateAllCombinationsTable();
+                    }, 100);
+                });
+            }
+            
+            // Gerar automaticamente todas as combinações ao carregar
+            setTimeout(() => {
+                populateAllCombinationsTable();
+            }, 500);
+            
+            // Inicializar a prévia
+            updatePreviewStats();
+        };
+    </script>
+</body>
+</html>

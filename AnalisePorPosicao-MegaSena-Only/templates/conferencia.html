@@ -1,0 +1,1055 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .conf-center {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+
+    .conf-center-wide {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .cd-card {
+        border: 1px solid rgba(10, 107, 26, 0.15);
+        transition: box-shadow 0.2s;
+    }
+
+    .cd-card:hover {
+        box-shadow: 0 4px 14px rgba(10, 107, 26, 0.12);
+    }
+
+    .conf-tab-container {
+        background: #fff;
+        border-radius: 12px;
+        padding: 0.4rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        display: flex;
+        gap: 6px;
+        margin-bottom: 1.25rem;
+        overflow-x: auto;
+        border: 1px solid rgba(10, 107, 26, 0.1);
+    }
+
+    .conf-tab-btn {
+        padding: 0.65rem 1.2rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        background: transparent;
+        color: #555;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .conf-tab-btn:hover {
+        background: rgba(10, 107, 26, 0.05);
+        color: var(--primary);
+    }
+
+    .conf-tab-btn.active {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(10, 107, 26, 0.2);
+    }
+
+    .conf-placeholder {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: #888;
+    }
+
+    .conf-conversor-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .conv-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(10, 107, 26, 0.1);
+    }
+
+    .conv-section-title {
+        color: var(--primary);
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary);
+        font-size: 1rem;
+    }
+
+    .conv-upload-zone {
+        border: 3px dashed var(--primary);
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        background: rgba(10, 107, 26, 0.04);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .conv-upload-zone:hover,
+    .conv-upload-zone.conv-drag-over {
+        background: rgba(10, 107, 26, 0.1);
+        border-color: var(--primary-dark);
+    }
+
+    .conv-upload-zone i {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .conv-input-concurso {
+        border: 2px solid var(--primary);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        width: 140px;
+    }
+
+    .conv-exemplo {
+        background: #e8f5e9;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.82rem;
+        margin-top: 0.75rem;
+    }
+
+    .conv-pre {
+        background: #f4fbf5;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        overflow-x: auto;
+        border: 1px solid #d6f0da;
+    }
+
+    .conv-tabela thead th {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .conv-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .conv-badge-ok {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .conv-badge-err {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .conv-preview-box {
+        background: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 2px solid var(--primary);
+        text-align: center;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .15);
+    }
+
+    .stats-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+
+    .stat-pill {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+        border-radius: 10px;
+        padding: .45rem .9rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .07);
+        min-width: 70px;
+        border: 1.5px solid #d6f0da;
+    }
+
+    .stat-pill .sp-val {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--primary);
+    }
+
+    .stat-pill .sp-lbl {
+        font-size: .6rem;
+        font-weight: 700;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: .75rem;
+        justify-content: center;
+    }
+
+    .filter-bar .fb-label {
+        font-size: .72rem;
+        font-weight: 700;
+        color: #777;
+        margin-right: 4px;
+    }
+
+    .ac-filter-btn {
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 700;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all .15s;
+        background: #f0f0f0;
+        color: #555;
+    }
+
+    .ac-filter-btn.active {
+        color: #fff;
+    }
+
+    .ac-filter-btn[data-ac="all"].active {
+        background: var(--primary);
+    }
+
+    .ac-filter-btn[data-ac="6"].active {
+        background: #02200a;
+    }
+
+    .ac-filter-btn[data-ac="5"].active {
+        background: #0a5c1a;
+    }
+
+    .ac-filter-btn[data-ac="4"].active {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .result-row {
+        padding: .4rem .75rem;
+        border-bottom: 1px solid #d6f0da;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .result-row:hover {
+        background: var(--accent-light);
+    }
+
+    .result-meta {
+        min-width: 80px;
+    }
+
+    .dez-balls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .dez-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .85rem;
+    }
+
+    .dg-hit {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 1px 4px rgba(30, 200, 58, .4);
+    }
+
+    .dg-miss {
+        background: #f0f0f0;
+        color: #aaa;
+    }
+
+    .acertos-tag {
+        font-weight: 800;
+        text-align: center;
+        border-radius: 8px;
+        padding: 3px 8px;
+        font-size: .78rem;
+        white-space: nowrap;
+    }
+
+    .ac-6 {
+        background: #02200a;
+        color: #1ec83a;
+    }
+
+    .ac-5 {
+        background: #0a5c1a;
+        color: #d6f0da;
+    }
+
+    .ac-4 {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .ac-low {
+        background: #f8f8f8;
+        color: #ccc;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #aaa;
+        font-size: .85rem;
+        display: none;
+    }
+
+    /* Paleta Mega-Sena (#1B9A67) */
+    :root {
+        --ms-0: #000000;
+        --ms-5: #04160f;
+        --ms-10: #082b1d;
+        --ms-15: #0b412c;
+        --ms-20: #0f573a;
+        --ms-25: #136c49;
+        --ms-30: #178257;
+        --ms-35: #1b9a67;
+        --ms-40: #1fad74;
+        --ms-45: #22c383;
+        --ms-50: #26d991;
+        --ms-55: #3cdd9c;
+        --ms-60: #52e0a7;
+        --ms-65: #67e4b2;
+        --ms-70: #7de8bd;
+        --ms-75: #93ecc8;
+        --ms-80: #a8f0d3;
+        --ms-85: #bef4de;
+        --ms-90: #d4f7e9;
+        --ms-95: #e9fbf4;
+        --ms-100: #ffffff;
+    }
+
+    .cr-aposta-card {
+        border-color: var(--ms-75) !important;
+        background: var(--ms-100);
+    }
+
+    .cr-aposta-card.cr-card-premio-alto {
+        border-color: var(--ms-35) !important;
+        background: var(--ms-95);
+        box-shadow: 0 2px 12px rgba(27, 154, 103, 0.2);
+    }
+
+    .cr-aposta-card.cr-card-quadra {
+        border-color: var(--ms-60) !important;
+        background: var(--ms-95);
+    }
+
+    .cr-dez {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 35px;
+        padding: 6px 10px;
+        font-size: 14px;
+        font-weight: 800;
+        border-radius: 6px;
+        border: 2px solid transparent;
+    }
+
+    .cr-dez-neutro {
+        background: var(--ms-80);
+        color: var(--ms-20);
+    }
+
+    /* Acerto forte (Sena/Quina): verde bem mais escuro */
+    .cr-dez-acerto {
+        background: var(--ms-20);
+        color: var(--ms-100);
+        border-color: var(--ms-5);
+        box-shadow: 0 0 0 2px var(--ms-70);
+    }
+
+    /* Acerto Quadra: verde bem mais claro que a Sena/Quina */
+    .cr-dez-acerto-quadra {
+        background: var(--ms-60);
+        color: var(--ms-10);
+        border-color: var(--ms-35);
+    }
+
+    /* Cards: proximidade com sorteados (±1/±2) — estilo amarelo do exemplo */
+    .cr-dez-prox1 {
+        background: #ffc107;
+        color: #1f2a37;
+        border-color: #e0a800;
+    }
+
+    .cr-dez-prox2 {
+        background: #ffe8a1;
+        color: #1f2a37;
+        border-color: #f7d774;
+    }
+
+    .cr-dez-extra {
+        background: var(--ms-85);
+        color: var(--ms-20);
+        border: 1px dashed var(--ms-60);
+    }
+
+    .cr-dez-extra.cr-dez-acerto,
+    .cr-dez-extra.cr-dez-acerto-quadra {
+        border-style: solid;
+    }
+
+    .cr-badge-ms {
+        background: var(--ms-30);
+        color: var(--ms-100);
+    }
+
+    .cr-badge-ms-alto {
+        background: var(--ms-35);
+        color: var(--ms-100);
+    }
+
+    .cr-badge-ms-quadra {
+        background: var(--ms-55);
+        color: var(--ms-10);
+    }
+
+    .cr-link-historico {
+        color: var(--ms-30);
+        font-weight: 600;
+    }
+
+    .cr-link-historico:hover {
+        color: var(--ms-20);
+    }
+
+    /* Variância — visual padronizado (Mega-Sena / Dia de Sorte) */
+    :root {
+        --var-amarelo: #ffc107;
+        --var-amarelo-borda: #e0a800;
+        --var-vermelho: #dc3545;
+        --var-verde-acerto: #1b9a67;
+        --var-verde-borda: #136c49;
+        --var-borda-cel: #dee2e6;
+        --var-header-bg: #f1f3f5;
+    }
+
+  .cr-cel-num {
+        width: 26px;
+        height: 26px;
+        line-height: 26px;
+        margin: 0 auto;
+        border-radius: 4px;
+        font-weight: 400;
+        font-size: 0.8rem;
+    }
+
+    .cr-cel-plain {
+        background: #fff;
+        color: #333;
+        border: 1px solid var(--var-borda-cel);
+    }
+
+    .cr-cel-match {
+        background: var(--var-verde-acerto);
+        color: #fff;
+        border: 2px solid var(--var-verde-borda);
+    }
+
+    .cr-cel-quase {
+        background: var(--var-amarelo);
+        color: #1f2a37;
+        border: 2px solid var(--var-amarelo-borda);
+        font-weight: 400;
+    }
+
+    .cr-var-td {
+        border: 1px dashed var(--var-borda-cel) !important;
+        background: #fff;
+    }
+
+    .cr-var-data {
+        width: 195px;
+        color: #6c757d;
+        font-weight: 400;
+        border-right: 2px solid var(--var-borda-cel) !important;
+    }
+
+    .cr-diff-plain {
+        color: #333;
+        background: transparent !important;
+        font-weight: 400;
+        font-size: 0.85rem;
+    }
+
+    .cr-diff-prox1 {
+        background: var(--var-amarelo) !important;
+        color: #1f2a37 !important;
+        font-weight: 400;
+        font-size: 0.85rem;
+        border-radius: 4px;
+    }
+
+    .cr-diff-neg {
+        color: var(--var-vermelho) !important;
+        background: transparent !important;
+        font-weight: 400;
+        font-size: 0.85rem;
+    }
+
+    .cr-abs-cel {
+        font-size: 0.85rem;
+    }
+
+    .cr-var-th-data,
+    .cr-var-th-group,
+    .cr-var-th-abs,
+    .cr-var-th-acerto {
+        font-weight: 400 !important;
+        letter-spacing: 1px;
+        color: #333;
+    }
+
+    .cr-var-th-data {
+        width: 195px;
+        border-right: 2px solid var(--var-borda-cel);
+    }
+
+    .cr-var-th-abs {
+        width: 44px;
+        border-right: 2px solid var(--var-borda-cel);
+    }
+
+    .cr-var-subhead {
+        font-size: 0.8rem;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid var(--var-borda-cel);
+    }
+
+    .cr-var-legenda {
+        background: #f8f9fa;
+        border-top: 1px solid var(--var-borda-cel);
+        color: #6c757d;
+    }
+
+    .cr-var-table-inner {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .cr-var-sep {
+        padding: 0 !important;
+        border: none !important;
+        background: #fff !important;
+        width: 10px;
+        min-width: 10px;
+    }
+
+    .cr-var-sep-jog-sort {
+        width: 40px;
+        min-width: 40px;
+        background: #f8f9fa !important;
+        border-left: 2px solid var(--var-borda-cel) !important;
+        border-right: 2px solid var(--var-borda-cel) !important;
+    }
+
+    .cr-var-sep-acerto {
+        width: 6px;
+        min-width: 6px;
+    }
+
+    .cr-var-sep-bloco {
+        width: 10px;
+        min-width: 10px;
+    }
+
+    .cr-var-fim-bloco {
+        border-right: 2px solid #adb5bd !important;
+    }
+
+    .cr-th-acerto {
+        font-size: 0.75rem;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+        max-width: 72px;
+    }
+
+    .cr-acerto-th,
+    .cr-acerto-cel {
+        width: 20px !important;
+        min-width: 20px !important;
+        max-width: 22px !important;
+        padding: 2px 1px !important;
+        font-size: 0.7rem;
+        line-height: 1.1;
+    }
+
+    .cr-acerto-4 { background: #e0e0e0; color: #333; }
+    .cr-acerto-5 { background: #c0c0c0; color: #333; }
+    .cr-acerto-6 { background: #f1c40f; color: #000; }
+
+    .cr-bola-oficial {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--ms-55);
+        color: var(--ms-10);
+        font-weight: 800;
+        font-size: 0.95rem;
+        box-shadow: 0 2px 6px rgba(27, 154, 103, 0.25);
+        border: 2px solid var(--ms-35);
+    }
+
+    .cr-cobertura-card {
+        background: linear-gradient(to right, #f8f9fa, #e9ecef);
+    }
+
+    .cr-visao-toggle {
+        background: #fff;
+        padding: 5px;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+    }
+
+    .cr-visao-toggle .btn.active {
+        background: var(--ms-35);
+        color: #fff;
+        border-color: var(--ms-30);
+    }
+
+    .cr-valor-ganho-badge {
+        font-size: 9px;
+        padding: 2px 5px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: #fff;
+        margin-left: 4px;
+        font-weight: bold;
+    }
+
+    #cdAreaResultados .nav-tabs .nav-link {
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .cr-variancia-table {
+        font-size: 0.82rem;
+        font-weight: 400;
+    }
+
+    .cr-variancia-table td,
+    .cr-variancia-table th,
+    .cr-variancia-table .fw-bold {
+        font-weight: 400 !important;
+    }
+
+    #panel-concursos.conf-panel-wide {
+        max-width: 100%;
+    }
+</style>
+
+<div class="conf-center conf-center-wide">
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div>
+                <h2><i class="fas fa-trophy me-2"></i>Central de Conferências</h2>
+                <p class="mb-0" style="opacity:.85;font-size:.9rem;">Mega-Sena — conferência de resultados e ferramentas de apostas</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="conf-tab-container" id="confTabs">
+        <button type="button" class="conf-tab-btn active" data-tab="historico" onclick="setConfTab('historico')">
+            <i class="fas fa-history"></i> Conferência Histórica
+        </button>
+        <button type="button" class="conf-tab-btn" data-tab="conversor" onclick="setConfTab('conversor')">
+            <i class="fas fa-right-left"></i> Conversor de Apostas
+        </button>
+        <button type="button" class="conf-tab-btn" data-tab="concursos" onclick="setConfTab('concursos')">
+            <i class="fas fa-folder-open"></i> Concursos Disponíveis
+        </button>
+    </div>
+
+    <!-- Aba: Conferência Histórica -->
+    <div class="conf-panel" id="panel-historico">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <p class="text-muted small mb-0">Top-6 Sniper (mais frequentes) vs. histórico de concursos reais</p>
+            <button class="btn btn-sm" id="btnRecarregar"
+                style="background:var(--accent);color:#fff;font-weight:700;" onclick="carregar()">
+                <i class="fas fa-sync-alt me-1"></i>Recarregar
+            </button>
+        </div>
+
+        <div class="stats-bar" id="statsBar" style="display:none;"></div>
+        <div class="filter-bar" id="filterBar" style="display:none;">
+            <span class="fb-label"><i class="fas fa-filter me-1"></i>Filtrar acertos:</span>
+            <button class="ac-filter-btn active" data-ac="all" onclick="setFiltroAc(this)">Todos</button>
+            <button class="ac-filter-btn" data-ac="6" onclick="setFiltroAc(this)">🎉 Sena (6)</button>
+            <button class="ac-filter-btn" data-ac="5" onclick="setFiltroAc(this)">🥇 Quina (5)</button>
+            <button class="ac-filter-btn" data-ac="4" onclick="setFiltroAc(this)">✅ Quadra (4)</button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header fw-bold"
+                style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;padding:.7rem 1rem;">
+                <i class="fas fa-history me-2"></i>Resultados Históricos
+            </div>
+            <div class="card-body p-0">
+                <div class="px-3 py-2 border-bottom" id="sniperHeader" style="display:none;font-size:.78rem;">
+                    <strong style="color:var(--primary);">🎯 Aposta Sniper (Top-6 freq):</strong>
+                    <div class="d-flex gap-2 flex-wrap mt-1" id="sniperBalls"></div>
+                </div>
+                <div id="conferencia-corpo">
+                    <div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Carregando
+                        conferência...</div>
+                </div>
+                <div class="no-results" id="noResults"><i class="fas fa-search me-2"></i>Nenhum resultado para este filtro.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba: Conversor de Apostas -->
+    <div class="conf-panel" id="panel-conversor" style="display:none;">
+        <div class="conf-conversor-wrap">
+            <div class="page-header mb-3" style="margin-bottom:1rem !important;">
+                <h2 class="h4 mb-1"><i class="fas fa-right-left me-2"></i>Conversor de Apostas — Mega-Sena</h2>
+                <p class="mb-0 small" style="opacity:.9;">Converta apostas entre formatos TXT e JSON · Aceita de 6 a 15 dezenas por aposta (01 a 60)</p>
+            </div>
+
+            <div class="conv-card" style="border: 2px solid var(--primary); background: rgba(10,107,26,0.04);">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-8">
+                        <label for="convNumeroConcurso" class="form-label fw-bold text-success mb-1">
+                            <i class="fas fa-trophy"></i> Número do Concurso que irá sair no arquivo JSON:
+                        </label>
+                        <p class="text-muted small mb-2" id="convInstrucaoConcurso">
+                            <i class="fas fa-database"></i> Consultando último concurso no banco local...
+                        </p>
+                        <input type="number" id="convNumeroConcurso" class="conv-input-concurso" min="1" value="">
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="conv-card">
+                <h3 class="conv-section-title"><i class="fas fa-cloud-upload-alt me-2"></i>Upload de Arquivo</h3>
+                <div class="conv-upload-zone" id="convUploadZone">
+                    <i class="fas fa-file-upload d-block"></i>
+                    <h5 class="mb-1">Arraste e solte seu arquivo aqui</h5>
+                    <p class="text-muted small mb-0">ou clique para selecionar · .txt, .json</p>
+                    <input type="file" id="convFileInput" accept=".txt,.json" hidden>
+                </div>
+                <div id="convArquivoSel" class="mt-3" style="display:none;">
+                    <p class="mb-2"><strong>Arquivo:</strong> <span id="convNomeArquivo"></span></p>
+                    <button type="button" class="btn btn-success fw-bold" onclick="convProcessarArquivo()">
+                        <i class="fas fa-cogs me-1"></i> Processar Arquivo
+                    </button>
+                </div>
+            </div>
+
+            <div class="conv-card">
+                <h3 class="conv-section-title"><i class="fas fa-paste me-2"></i>Colar Texto de Apostas</h3>
+                <div class="conv-exemplo">
+                    <strong>Formatos aceitos (6 a 20 dezenas, volante 01–60):</strong><br>
+                    · Aposta simples: 03 15 22 33 45 60<br>
+                    · Aposta com 10: 03 08 15 22 28 33 40 45 52 60<br>
+                    · Separadores: espaço, vírgula, pipe (|), ponto-e-vírgula<br>
+                    · Uma aposta por linha (ou sequência contínua no buffer)
+                </div>
+                <textarea class="form-control mt-3 font-monospace" id="convTextoApostas" rows="8" placeholder="Cole aqui suas apostas...
+
+Exemplos:
+03 15 22 33 45 60
+01 05 10 20 35 40 45 50 55 60
+04, 12, 18, 27, 39, 44, 51, 58"></textarea>
+                <div class="mt-3 d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-success fw-bold" onclick="convConverterTexto()">
+                        <i class="fas fa-arrow-right me-1"></i> Converter para JSON
+                    </button>
+                    <button type="button" class="btn btn-secondary fw-bold" onclick="convLimparTexto()">
+                        <i class="fas fa-eraser me-1"></i> Limpar
+                    </button>
+                </div>
+            </div>
+
+            <div class="conv-card" id="convAreaResultado" style="display:none;">
+                <h3 class="conv-section-title"><i class="fas fa-check-circle me-2"></i>Resultado da Conversão</h3>
+                <div id="convInfoValidacao"></div>
+                <div class="mt-2" id="convConteudoResultado"></div>
+                <div class="mt-3 d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-success btn-sm fw-bold" onclick="convDownloadJson()">
+                        <i class="fas fa-download me-1"></i> Download JSON
+                    </button>
+                    <button type="button" class="btn btn-success btn-sm fw-bold" onclick="convDownloadTxt()">
+                        <i class="fas fa-download me-1"></i> Download TXT
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm" onclick="convVerJson()">
+                        <i class="fas fa-code me-1"></i> Ver JSON
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="convVerTxt()">
+                        <i class="fas fa-file-alt me-1"></i> Ver TXT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba: Concursos Disponíveis -->
+    <div class="conf-panel conf-panel-wide" id="panel-concursos" style="display:none;">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header fw-bold text-white"
+                style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));">
+                <i class="fas fa-folder-open me-2"></i>Selecionar Concursos para Processar
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">
+                    Pastas em <code>conferencia_apostas\NUMERO_CONCURSO\apostas.json</code> —
+                    conferência com o resultado gravado no banco local.
+                </p>
+
+                <div id="cdLoading" class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin text-success fa-2x"></i>
+                    <p class="text-muted mt-2 mb-0">Procurando concursos disponíveis...</p>
+                </div>
+
+                <div id="cdLista" style="display:none;">
+                    <div class="row mb-3 align-items-center g-2">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="cdSelecionarTodos">
+                                <label class="form-check-label fw-bold" for="cdSelecionarTodos">Selecionar Todos</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8 text-md-end d-flex flex-wrap gap-2 justify-content-md-end">
+                            <span class="badge bg-info align-self-center" id="cdTotalBadge">0 concursos</span>
+                            <button type="button" class="btn btn-success btn-sm fw-bold" id="cdBtnProcessarTopo" disabled>
+                                <i class="fas fa-play me-1"></i> Processar Selecionados
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="cdBtnRecarregarTopo">
+                                <i class="fas fa-sync me-1"></i> Recarregar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row g-3" id="cdContainer"></div>
+                    <div class="mt-3 d-flex gap-2">
+                        <button type="button" class="btn btn-success fw-bold" id="cdBtnProcessar" disabled>
+                            <i class="fas fa-play me-1"></i> Processar Selecionados
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="cdBtnRecarregar">
+                            <i class="fas fa-sync me-1"></i> Recarregar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="cdEmpty" class="text-center py-5" style="display:none;">
+                    <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhum concurso encontrado</h5>
+                    <p class="text-muted small">Crie a pasta <code>conferencia_apostas\3011\</code> com o arquivo <code>apostas.json</code>.</p>
+                </div>
+
+                <div id="cdErrorState" class="alert alert-danger mt-3" style="display:none;">
+                    <i class="fas fa-exclamation-triangle"></i> <span id="cdErrorMessage"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="cdCardProgresso" style="display:none;" class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-info text-white fw-bold py-2">
+                <i class="fas fa-tasks me-2"></i>Processamento
+            </div>
+            <div class="card-body py-2" id="cdProgressoItems"></div>
+        </div>
+
+        <div id="cdAreaResultados" style="display:none;" class="card border-0 shadow-sm mt-3">
+            <div class="card-header text-white fw-bold py-2"
+                style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));">
+                <i class="fas fa-chart-bar me-2"></i>Resultados do Processamento
+            </div>
+            <div class="card-body">
+                <div id="cdSemResultados" class="text-center py-4 text-muted" style="display:none;">
+                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                    <p class="mb-0">Processe um ou mais concursos para ver o relatório completo.</p>
+                </div>
+                <div id="cdConteudoResultados" style="display:none;">
+                    <ul class="nav nav-tabs mb-3 flex-wrap" id="cdTabsConcursos" role="tablist" style="gap:3px;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cd-consolidado" type="button">
+                                <i class="fas fa-chart-pie"></i> Consolidado
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="cdTabsContent">
+                        <div class="tab-pane fade show active" id="cd-consolidado" role="tabpanel">
+                            <div id="cdRelatorioConsolidado"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/conversor-apostas.js"></script>
+<script src="/static/js/conferencia-resultados-ui.js"></script>
+<script src="/static/js/concursos-disponiveis.js"></script>
+<script>
+    let _dados = [], _sniper = [], _acFilter = 'all';
+    let _confTabAtiva = 'historico';
+    let _historicoCarregado = false;
+
+    function setConfTab(tabId, atualizarHash) {
+        if (atualizarHash === undefined) atualizarHash = true;
+        _confTabAtiva = tabId;
+        document.querySelectorAll('.conf-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabId);
+        });
+        document.querySelectorAll('.conf-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+        const panel = document.getElementById('panel-' + tabId);
+        if (panel) panel.style.display = 'block';
+        if (tabId === 'historico' && !_historicoCarregado) {
+            carregar();
+        }
+        if (tabId === 'conversor' && window.ConversorApostas) {
+            ConversorApostas.init();
+            if (typeof convRecarregarConcurso === 'function') convRecarregarConcurso();
+        }
+        if (tabId === 'concursos' && window.ConcursosDisponiveis) {
+            ConcursosDisponiveis.init();
+        }
+        if (atualizarHash && location.hash !== '#' + tabId) {
+            history.replaceState(null, '', '#' + tabId);
+        }
+    }
+
+    function initConfTabs() {
+        const hash = (location.hash || '').replace('#', '');
+        const tabsValidas = ['historico', 'conversor', 'concursos'];
+        const tab = tabsValidas.includes(hash) ? hash : 'historico';
+        setConfTab(tab, false);
+        if (location.hash !== '#' + tab) {
+            history.replaceState(null, '', '#' + tab);
+        }
+    }
+
+    async function carregar() {
+        const corpo = document.getElementById('conferencia-corpo'), btn = document.getElementById('btnRecarregar');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Carregando...'; }
+        corpo.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Calculando...</div>';
+        document.getElementById('filterBar').style.display = 'none';
+        document.getElementById('statsBar').style.display = 'none';
+        document.getElementById('sniperHeader').style.display = 'none';
+        try {
+            const r = await fetch('/central-conferencias/api/conferir', { method: 'POST' }); const d = await r.json();
+            if (d.status !== 'success') { corpo.innerHTML = `<div class="text-danger p-3">${d.message}</div>`; return; }
+            _dados = d.resultados; _sniper = d.resultados[0]?.aposta_sniper || []; _acFilter = 'all';
+            document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.ac-filter-btn[data-ac="all"]').classList.add('active');
+            document.getElementById('sniperBalls').innerHTML = _sniper.map(dez => `<span class="dez-ball dg-hit">${String(dez).padStart(2, '0')}</span>`).join('');
+            document.getElementById('sniperHeader').style.display = 'block';
+            renderStats(); renderTabela();
+            document.getElementById('filterBar').style.display = 'flex';
+            _historicoCarregado = true;
+        } catch (e) { corpo.innerHTML = `<div class="text-danger p-3">Erro: ${e.message}</div>`; }
+        finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Recarregar'; } }
+    }
+
+    function setFiltroAc(btn) {
+        _acFilter = btn.dataset.ac;
+        document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active'); renderTabela();
+    }
+
+    function acClass(ac) { if (ac === 6) return 'ac-6'; if (ac === 5) return 'ac-5'; if (ac === 4) return 'ac-4'; return 'ac-low'; }
+    function acLabel(ac) { if (ac === 6) return '🎉 Sena!'; if (ac === 5) return 'Quina'; if (ac === 4) return 'Quadra'; return ac + '/6'; }
+
+    function renderStats() {
+        const total = _dados.length, cnt = { 6: 0, 5: 0, 4: 0, outro: 0 };
+        _dados.forEach(r => { if (r.acertos >= 6) cnt[6]++; else if (r.acertos >= 5) cnt[5]++; else if (r.acertos >= 4) cnt[4]++; else cnt.outro++; });
+        const bar = document.getElementById('statsBar'); bar.style.display = 'flex';
+        bar.innerHTML = `<div class="stat-pill"><span class="sp-val">${total}</span><span class="sp-lbl">Concursos</span></div>
+        <div class="stat-pill" style="border-color:#02200a;"><span class="sp-val" style="color:#02200a;">${cnt[6]}</span><span class="sp-lbl">Sena</span></div>
+        <div class="stat-pill" style="border-color:#0a5c1a;"><span class="sp-val" style="color:#0a5c1a;">${cnt[5]}</span><span class="sp-lbl">Quina</span></div>
+        <div class="stat-pill" style="border-color:var(--accent);"><span class="sp-val" style="color:var(--accent);">${cnt[4]}</span><span class="sp-lbl">Quadra</span></div>
+        <div class="stat-pill"><span class="sp-val">${cnt.outro}</span><span class="sp-lbl">Outros</span></div>`;
+    }
+
+    function renderTabela() {
+        const corpo = document.getElementById('conferencia-corpo');
+        const sniperSet = new Set(_sniper);
+        const filtrado = _dados.filter(res => {
+            if (_acFilter === 'all') return true;
+            return res.acertos === parseInt(_acFilter);
+        });
+        let html = '';
+        filtrado.forEach(res => {
+            const ac = res.acertos;
+            html += `<div class="result-row">
+            <div class="result-meta">
+                <div class="fw-bold" style="color:var(--primary);font-size:.82rem;">#${res.concurso}</div>
+                <div class="text-muted" style="font-size:.68rem;">${res.data}</div>
+                <div class="acertos-tag ${acClass(ac)} mt-1">${acLabel(ac)}</div>
+            </div>
+            <div class="dez-balls">`;
+            res.dezenas.forEach(dez => {
+                html += `<span class="dez-ball ${sniperSet.has(dez) ? 'dg-hit' : 'dg-miss'}">${String(dez).padStart(2, '0')}</span>`;
+            });
+            html += `</div></div>`;
+        });
+        corpo.innerHTML = html || '';
+        document.getElementById('noResults').style.display = filtrado.length === 0 ? 'block' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', initConfTabs);
+</script>
+{% endblock %}

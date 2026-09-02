@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include 'cc_conferencia_shell_start.html' %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 border-top border-5" style="border-color: #672666 !important;">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <h4 class="mb-0" style="color: #672666;">
+                    <i class="fas fa-trophy"></i> Conferência Histórica (Lotofácil)
+                </h4>
+                <button class="btn text-white fw-bold" style="background-color: #672666;" id="btnConferir">
+                    <i class="fas fa-sync-alt"></i> Recarregar Conferência
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-center mb-0" style="font-size: 0.9rem;">
+                        <thead class="bg-dark text-white">
+                            <tr>
+                                <th style="width: 50px; cursor: pointer;" onclick="sortTable('rank')">Pos. Snipe <i
+                                        class="fas fa-sort"></i></th>
+                                <th style="cursor: pointer;" onclick="sortTable('dezenasText')">Matriz (15 Números) <i
+                                        class="fas fa-sort"></i></th>
+                                <th style="cursor: pointer;" onclick="sortTable('total_premios')">Vitórias Históricas <i
+                                        class="fas fa-sort"></i></th>
+                                <th style="cursor: pointer;" onclick="sortTable('hits_15')">15 Ac. <i
+                                        class="fas fa-sort"></i></th>
+                                <th style="cursor: pointer;" onclick="sortTable('hits_14')">14 Ac. <i
+                                        class="fas fa-sort"></i></th>
+                                <th style="cursor: pointer;" onclick="sortTable('hits_13')">13 Ac. <i
+                                        class="fas fa-sort"></i></th>
+                                <th style="cursor: pointer;" onclick="sortTable('hits_12')">12 Ac. <i
+                                        class="fas fa-sort"></i></th>
+                                <th style="cursor: pointer;" onclick="sortTable('hits_11')">11 Ac. <i
+                                        class="fas fa-sort"></i></th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyConferencia">
+                            <tr>
+                                <td colspan="9" class="py-5 text-muted">Aguardando geração do Sniper na aba anterior
+                                    para processar...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal do Histograma -->
+<div class="modal fade" id="modalHistograma" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0">
+            <div class="modal-header text-white" style="background-color: #2b2b2b; border-bottom: 3px solid var(--accent);">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-chart-bar text-warning me-2"></i> Histograma de Vitórias
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <div class="text-center mb-4">
+                    <p class="mb-1 text-muted fw-bold">Dezenas Avaliadas:</p>
+                    <div id="histDezenasContainer" class="d-flex justify-content-center flex-wrap gap-2">
+                        <!-- Dezenas entrarão aqui como badges redondos -->
+                    </div>
+                    <h6 class="mt-3 fw-bold text-dark">Matriz Posicional: <span class="text-warning"
+                            id="histRankSpan"></span></h6>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover text-center align-middle bg-white shadow-sm rounded">
+                        <thead class="text-white" style="background-color: #2b2b2b;">
+                            <tr>
+                                <th class="py-3">CONCURSO</th>
+                                <th class="py-3">DATA</th>
+                                <th class="py-3">ACERTOS</th>
+                                <th class="py-3">SITUAÇÃO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyHistograma">
+                            <!-- JS preenche -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top-0 d-flex justify-content-center pb-4">
+                <button type="button" class="btn text-white fw-bold px-5 py-2 rounded-pill"
+                    style="background-color: #2b2b2b;" data-bs-dismiss="modal">
+                    <i class="fas fa-check me-2"></i> Fechar Histograma
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'cc_conferencia_shell_end.html' %}
+{% endblock %}
+
+{% block scripts %}
+{% include 'cc_conferencia_scripts.html' %}
+<script>
+    let resultadosConferencia = [];
+    let currentSortCol = '';
+    let currentSortAsc = false;
+
+    window.sortTable = function (col) {
+        if (resultadosConferencia.length === 0) return;
+
+        if (currentSortCol === col) {
+            currentSortAsc = !currentSortAsc;
+        } else {
+            currentSortCol = col;
+            currentSortAsc = false; // Descending default
+        }
+
+        resultadosConferencia.sort((a, b) => {
+            let valA = a[col];
+            let valB = b[col];
+
+            if (col === 'dezenasText') {
+                return currentSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            }
+            return currentSortAsc ? valA - valB : valB - valA;
+        });
+
+        renderTable();
+    };
+
+    function renderTable() {
+        const tbody = document.getElementById("tbodyConferencia");
+        tbody.innerHTML = "";
+
+        if (resultadosConferencia.length > 0) {
+            resultadosConferencia.forEach(res => {
+                const corLinha = res.hits_15 > 0 ? "table-success fw-bold" : (res.hits_14 > 0 ? "table-warning" : "");
+
+                const badge15 = res.hits_15 > 0 ? `<span class="badge bg-success fs-6">${res.hits_15}</span>` : `<span class="text-muted">${res.hits_15}</span>`;
+                const badge14 = res.hits_14 > 0 ? `<span class="badge bg-warning text-dark fs-6">${res.hits_14}</span>` : `<span class="text-muted">${res.hits_14}</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="${corLinha}">
+                        <td>#${res.rank}</td>
+                        <td class="fw-bold">${res.dezenasText}</td>
+                        <td><span class="badge bg-primary text-white fs-6">${res.total_premios}</span></td>
+                        <td>${badge15}</td>
+                        <td>${badge14}</td>
+                        <td class="text-secondary">${res.hits_13}</td>
+                        <td class="text-secondary">${res.hits_12}</td>
+                        <td class="text-secondary">${res.hits_11}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-dark" onclick="abrirHistograma(${res.rank})"><i class="fas fa-eye"></i> Histograma</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="9" class="py-5 text-muted">Nenhum dado retornado.</td></tr>';
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("btnConferir").addEventListener("click", rodarConferencia);
+    });
+
+    async function rodarConferencia() {
+        const btn = document.getElementById("btnConferir");
+        const tbody = document.getElementById("tbodyConferencia");
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Conferindo...';
+        tbody.innerHTML = '<tr><td colspan="9" class="py-5 text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Auditando o histórico completo da Lotofácil... aguarde.</td></tr>';
+
+        try {
+            const response = await fetch("/central-conferencias/api/conferir", { method: "POST" });
+            const data = await response.json();
+
+            if (data.status === "error") {
+                Swal.fire("Erro", data.message, "error");
+                tbody.innerHTML = `<tr><td colspan="9" class="py-5 text-danger">${data.message}</td></tr>`;
+                return;
+            }
+
+            if (data.resultados && data.resultados.length > 0) {
+                resultadosConferencia = data.resultados.map(res => {
+                    res.dezenasText = res.dezenas.join(" - ");
+                    return res;
+                });
+
+                currentSortCol = 'rank';
+                currentSortAsc = true;
+                resultadosConferencia.sort((a, b) => a.rank - b.rank);
+
+                renderTable();
+            } else {
+                resultadosConferencia = [];
+                renderTable();
+            }
+        } catch (error) {
+            console.error("Erro ao conferir:", error);
+            tbody.innerHTML = '<tr><td colspan="9" class="py-5 text-danger">Erro de conexão com o servidor.</td></tr>';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sync-alt"></i> Recarregar Conferência';
+        }
+    }
+
+    // Função que abre o modal de histograma
+    window.abrirHistograma = function (rankDesejado) {
+        // Localiza os dados na variável global da sessão atual
+        const res = resultadosConferencia.find(r => r.rank === rankDesejado);
+        if (!res) return;
+
+        // Preenche dezenas do visual
+        const container = document.getElementById("histDezenasContainer");
+        container.innerHTML = "";
+        res.dezenas.forEach(dez => {
+            container.innerHTML += `<span class="badge rounded-circle p-2 fs-6 text-white shadow-sm" style="background-color: #2b2b2b; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">${dez}</span>`;
+        });
+
+        document.getElementById("histRankSpan").innerText = `#${res.rank}`;
+
+        // Monta tabela
+        const tbody = document.getElementById("tbodyHistograma");
+        tbody.innerHTML = "";
+
+        if (!res.detalhes || res.detalhes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-muted">A aposta não pontuou (Nenhuma vez atingiu 11+ pontos).</td></tr>`;
+        } else {
+            res.detalhes.forEach(det => {
+                let badgeColor = "bg-secondary";
+                let textStyle = "";
+                if (det.acertos === 15) { badgeColor = "bg-success"; textStyle = "text-success fw-bold fs-5"; }
+                else if (det.acertos === 14) badgeColor = "bg-warning text-dark";
+                else if (det.acertos === 13) badgeColor = "bg-info text-dark";
+                else if (det.acertos === 12) badgeColor = "bg-primary";
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">#${det.concurso}</td>
+                        <td class="text-muted">${det.data || '-'}</td>
+                        <td><span class="badge ${badgeColor} px-3 py-2 fs-6 shadow-sm">${det.acertos} Acertos</span></td>
+                        <td class="${textStyle}">${det.acertos} acertos na Lotofácil</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Exibe o modal Bootstrap
+        const modal = new bootstrap.Modal(document.getElementById('modalHistograma'));
+        modal.show();
+    };
+</script>
+{% endblock %}

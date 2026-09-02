@@ -1,0 +1,18 @@
+            <div class="nav-item-wrap">
+                <button class="nav-btn"><i class="fas fa-bolt nav-icon"></i> {{ nav_cfg.geradores_elite.title }} <i
+                        class="fas fa-chevron-down caret"></i></button>
+                <div class="nav-dropdown">
+                    <div class="dd-header">{{ nav_cfg.geradores_elite.title }}</div>
+                    {% for item in nav_cfg.geradores_elite['items'] %}
+                    <a class="dd-link" href="{{ item.href }}">
+                        <span class="dd-icon" style="background:var(--accent-light);color:var(--primary);">
+                            <i class="{{ item.icon }}"></i>
+                        </span>
+                        <span class="dd-text-block">
+                            <span class="dd-title">{{ item.title }}</span>
+                            <span class="dd-desc">{{ item.desc }}</span>
+                        </span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>

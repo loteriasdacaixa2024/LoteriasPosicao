@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+  {% if meses_cores %}
+  {% for nome, cor in meses_cores.items() %}
+  .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+  {% endfor %}
+  {% endif %}
+  #gcg-root .gcg-fonte {
+    border: 1px solid #e5e7eb; border-radius: 12px; background: #fff;
+    padding: 1rem 1.1rem; box-shadow: 0 1px 2px rgba(16,24,40,.04);
+  }
+  #gcg-root .gcg-fonte h2 {
+    font-size: .95rem; font-weight: 800; letter-spacing: .02em;
+    text-transform: uppercase; color: var(--primary-xdark, #1a0a00); margin: 0 0 .75rem;
+  }
+  #gcg-root .form-switch .form-check-input {
+    width: 2.4em; height: 1.25em; cursor: pointer;
+  }
+  #gcg-root .form-check-input:checked {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+  }
+  #gcg-root .gcg-sessao.off { opacity: .45; }
+  #gcg-root .janela-btn.active, #gcg-root .base-tab-btn.active {
+    background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700;
+  }
+  #gcg-root .gcg-ball {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent, #ffd54f); color: var(--on-accent, #1a0a00);
+    font-weight: 800; font-size: .75rem; margin: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  #gcg-root .gcg-aposta {
+    border: 1px solid #e5e7eb; border-radius: 10px; padding: .65rem .85rem;
+    margin-bottom: .55rem; background: #fff; border-left: 3px solid var(--primary);
+  }
+  #gcg-root .gcg-aposta .num {
+    font-weight: 800; font-variant-numeric: tabular-nums; min-width: 2rem;
+  }
+  #gcg-root .mes-badge {
+    display: inline-flex; align-items: center;
+    padding: .15rem .5rem; border-radius: 6px;
+    font-size: .6875rem; font-weight: 700;
+  }
+  #gcg-root .leitura-btn.active {
+    background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700;
+  }
+  #gcg-root .gcg-hint {
+    font-size: .8rem; color: #6c757d;
+    border-left: 3px solid var(--accent, #ffd54f);
+    padding: .35rem .65rem; background: var(--accent-light, #fff8e1);
+  }
+</style>
+
+<div class="container-fluid py-3" id="gcg-root"
+     data-api="{{ api_base }}"
+     data-analise="{{ analise_url }}"
+     data-has-mes="{{ '1' if has_mes else '0' }}">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1"><i class="fas fa-dice text-primary"></i> {{ page_title }}</h1>
+      <p class="text-muted small mb-0">{{ page_subtitle }} — {{ modality_nome }}</p>
+    </div>
+    <a class="btn btn-sm btn-outline-primary" href="{{ analise_url }}">
+      <i class="fas fa-ruler-horizontal"></i> Abrir análise
+    </a>
+  </div>
+
+  <div class="gcg-fonte mb-3">
+    <h2>Fonte das análises</h2>
+    <p class="small text-muted mb-3">Ative só a Sessão 1, só a Sessão 2, ou as duas. Sessão desligada não entra na geração.</p>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="form-check form-switch gcg-sessao" id="gcgWrapS1">
+          <input class="form-check-input" type="checkbox" role="switch" id="gcgS1" checked>
+          <label class="form-check-label fw-bold" for="gcgS1">Sessão 1 — Gaps</label>
+          <div class="small text-muted">Padrões de distância entre dezenas consecutivas</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-check form-switch gcg-sessao" id="gcgWrapS2">
+          <input class="form-check-input" type="checkbox" role="switch" id="gcgS2" checked>
+          <label class="form-check-label fw-bold" for="gcgS2">Sessão 2 — Inicial + Ciclo</label>
+          <div class="small text-muted">POS1 = inicial · demais posições = anterior + ciclo</div>
+        </div>
+      </div>
+      <div class="col-12" id="gcgLeituraWrap">
+        <div class="small fw-bold text-muted mb-1">Leitura dos gaps (Sessão 1)</div>
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-secondary leitura-btn" data-leitura="classificado">Classificado</button>
+          <button type="button" class="btn btn-outline-secondary leitura-btn" data-leitura="sorteio">Ordem de sorteio</button>
+          <button type="button" class="btn btn-outline-secondary leitura-btn active" data-leitura="ambos">Ranking comparativo</button>
+        </div>
+        <div class="small text-muted mt-1">Classificado = divulgação da Caixa. Sorteio = posições em que saíram. Comparativo junta as duas sequências.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+    <span class="small fw-bold text-muted me-1">Base:</span>
+    <div class="btn-group btn-group-sm">
+      <button type="button" class="btn btn-outline-secondary base-tab-btn active" data-base="geral">Geral</button>
+      <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="vencedores">Vencedores</button>
+      <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="acumulados">Acumulados</button>
+    </div>
+    <span class="small fw-bold text-muted ms-2 me-1">Janela:</span>
+    <div class="btn-group btn-group-sm">
+      {% for j in gc_spec.janelas_ui %}
+      <button type="button" class="btn btn-outline-secondary janela-btn{% if j == gc_spec.janela_default %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="row g-2 align-items-end mb-3">
+    <div class="col-6 col-md-2" id="gcgIniCol">
+      <label class="form-label small mb-0" for="gcgInicial">Número inicial</label>
+      <select id="gcgInicial" class="form-select form-select-sm"></select>
+    </div>
+    <div class="col-6 col-md-3" id="gcgPerfilCol">
+      <label class="form-label small mb-0" for="gcgPerfil">Perfil de ciclo (Sessão 2 só)</label>
+      <select id="gcgPerfil" class="form-select form-select-sm">
+        <option value="ultimo">Último concurso</option>
+        <option value="frequente">Padrão mais frequente</option>
+        <option value="moda_posicao">Moda por posição</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small mb-0" for="gcgQtd">Quantidade</label>
+      <input id="gcgQtd" type="number" class="form-control form-control-sm"
+             min="1" max="{{ gc_spec.qtd_apostas_max }}" value="{{ gc_spec.qtd_apostas_default }}">
+    </div>
+    {% if has_mes %}
+    <div class="col-6 col-md-3">
+      <label class="form-label small mb-0" for="gcgMes">Mês da Sorte</label>
+      <select id="gcgMes" class="form-select form-select-sm cc-mes-sorte">
+        <option value="">Carregando…</option>
+      </select>
+    </div>
+    {% endif %}
+    <div class="col d-flex flex-wrap gap-2">
+      <button type="button" class="btn btn-sm fw-bold" id="gcgBtnGerar"
+              style="background:var(--primary);color:#fff;border:none;">Gerar apostas</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="gcgBtnExport" disabled>Exportar TXT</button>
+    </div>
+  </div>
+
+  <p class="gcg-hint mb-2" id="gcgStatus">Escolha as sessões e gere as apostas.</p>
+  <div id="gcgOut"></div>
+</div>
+
+{% if has_mes %}
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
+{% endif %}
+<script>
+  window.__GCG_SPEC__ = {{ gc_spec | tojson }};
+  window.__GCG_API__ = {{ api_base | tojson }};
+  window.__GCG_HAS_MES__ = {{ 'true' if has_mes else 'false' }};
+</script>
+<script src="/geradores-elite/gaps-ciclo-apostas/static/gerador_gaps_ciclo.js?v=dupla1"></script>
+{% endblock %}

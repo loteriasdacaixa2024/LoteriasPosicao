@@ -1,0 +1,1424 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .07);
+        padding: 1.2rem 1.5rem;
+        border: 1px solid #fce7a2;
+        text-align: center;
+    }
+
+    .stat-card .sc-val {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--primary);
+    }
+
+    .stat-card .sc-lbl {
+        font-size: .75rem;
+        color: #888;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .sync-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .07);
+        border: 1px solid #fce7a2;
+    }
+
+    .draw-dezenas-wrap {
+        max-width: 100%;
+    }
+
+    .draw-dezenas-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dez-ball {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #2d2d2d;
+        font-weight: 800;
+        font-size: .78rem;
+        box-shadow: 0 2px 5px rgba(230, 168, 0, .4);
+        flex: 0 0 auto;
+    }
+
+    .ultimo-destaque {
+        padding: .55rem .9rem;
+        border-bottom: 1px solid #f0e2b8;
+        background: #fffdf8;
+    }
+    .ultimo-destaque .ud-inline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: .3rem .45rem;
+        line-height: 1.3;
+    }
+    .ultimo-destaque .ud-titulo {
+        font-weight: 800;
+        color: var(--primary);
+        font-size: .95rem;
+        margin: 0;
+        white-space: nowrap;
+    }
+    .ultimo-destaque .ud-sep {
+        color: #888;
+        font-weight: 700;
+        font-size: .9rem;
+        margin: 0 .1rem;
+    }
+    .ultimo-destaque .ud-mes {
+        margin: 0;
+        font-size: .82rem;
+        color: #555;
+        white-space: nowrap;
+    }
+    .ultimo-destaque .ud-mes .mes-badge {
+        vertical-align: middle;
+    }
+    .ultimo-destaque .dez-ball {
+        width: 26px;
+        height: 26px;
+        font-size: .7rem;
+    }
+
+    #premiacaoCaixaTabela thead th.px-th {
+        cursor: default;
+        user-select: none;
+        position: relative;
+    }
+    #premiacaoCaixaTabela thead th.px-th .px-th-inner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .2rem;
+        max-width: 100%;
+    }
+    #premiacaoCaixaTabela thead th.px-th .px-th-label {
+        font-weight: 700;
+    }
+    #premiacaoCaixaTabela thead th.px-th .px-sort-ind {
+        font-size: .62rem;
+        opacity: .55;
+        font-weight: 700;
+    }
+    #premiacaoCaixaTabela thead th.px-th.px-sort-on .px-sort-ind,
+    #premiacaoCaixaTabela thead th.px-th.px-filter-on .px-filter-btn {
+        opacity: 1;
+    }
+    #premiacaoCaixaTabela thead th.px-th.px-sort-on {
+        box-shadow: inset 0 -2px 0 var(--accent);
+    }
+    #premiacaoCaixaTabela thead th.px-th.px-filter-on {
+        background: #3d2a6b;
+    }
+    .px-filter-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.15rem;
+        height: 1.15rem;
+        padding: 0;
+        border: 1px solid rgba(255,255,255,.45);
+        border-radius: 3px;
+        background: rgba(255,255,255,.18);
+        color: #fff;
+        font-size: .55rem;
+        line-height: 1;
+        cursor: pointer;
+        opacity: .85;
+    }
+    .px-filter-btn:hover,
+    .px-filter-btn.open {
+        background: rgba(255,255,255,.35);
+        opacity: 1;
+    }
+    .px-excel-menu {
+        position: fixed;
+        z-index: 1080;
+        min-width: 15.5rem;
+        max-width: 18rem;
+        background: #fff;
+        border: 1px solid #c8c8c8;
+        border-radius: 4px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.18);
+        font-size: .78rem;
+        color: #222;
+        padding: .35rem 0 .45rem;
+    }
+    .px-excel-menu .px-m-item {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        text-align: left;
+        padding: .38rem .75rem;
+        cursor: pointer;
+        color: #222;
+    }
+    .px-excel-menu .px-m-item:hover:not(:disabled) { background: #f0f0f0; }
+    .px-excel-menu .px-m-item:disabled { color: #999; cursor: default; }
+    .px-excel-menu .px-m-item.active { background: #e8f0fe; font-weight: 700; }
+    .px-excel-menu .px-m-sep {
+        height: 1px; background: #e0e0e0; margin: .3rem 0;
+    }
+    .px-excel-menu .px-m-search {
+        margin: .25rem .6rem .4rem;
+    }
+    .px-excel-menu .px-m-search input {
+        width: 100%;
+        border: 1px solid #c8c8c8;
+        border-radius: 3px;
+        padding: .28rem .45rem;
+        font-size: .78rem;
+    }
+    .px-excel-menu .px-m-list {
+        max-height: 11rem;
+        overflow: auto;
+        margin: 0 .45rem .45rem;
+        border: 1px solid #e5e5e5;
+        border-radius: 3px;
+        padding: .2rem .35rem;
+        background: #fafafa;
+    }
+    .px-excel-menu .px-m-check {
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .12rem .15rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .px-excel-menu .px-m-check input { margin: 0; }
+    .px-excel-menu .px-m-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: .4rem;
+        padding: .15rem .6rem 0;
+    }
+    .px-excel-menu .px-m-actions .btn {
+        font-size: .72rem;
+        padding: .2rem .65rem;
+        min-width: 3.6rem;
+    }
+    .px-ordem-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: .45rem .75rem;
+        padding: .35rem .9rem .15rem;
+        font-size: .8rem;
+        color: #666;
+        text-align: center;
+    }
+    .px-ordem-bar .btn-group .btn {
+        font-size: .72rem;
+        padding: .15rem .55rem;
+        font-weight: 700;
+    }
+    #premiacaoBuscaConcurso {
+        width: 5.5rem;
+        font-size: .78rem;
+    }
+    #premiacaoBuscaMsg {
+        font-size: .78rem;
+        min-height: 1.1em;
+    }
+    #premiacaoBuscaMsg.erro { color: #b02a37; font-weight: 700; }
+    #btnPremiacaoLimparBusca {
+        width: 1.85rem;
+        height: 1.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+    #btnPremiacaoLimparBusca i { font-size: .78rem; }
+
+    .mes-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--accent-mes);
+        color: #fff;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 4px 8px;
+        font-size: .85rem;
+        line-height: 1.2;
+        white-space: nowrap;
+        width: fit-content;
+        margin: 0;
+    }
+
+    .mes-badge .mes-nome-completo {
+        display: none;
+    }
+
+    .mes-abrev {
+        font-weight: 700;
+        color: var(--accent-mes);
+    }
+
+    .premiacao-wrap {
+        width: 100%;
+    }
+    #premiacaoCaixaTabela {
+        width: max-content;
+        min-width: 100%;
+        table-layout: auto;
+        font-size: .78rem;
+        margin-bottom: 0;
+    }
+    #premiacaoCaixaTabela thead th {
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: .4rem .3rem;
+    }
+    #premiacaoCaixaTabela td {
+        vertical-align: middle;
+        font-variant-numeric: tabular-nums;
+        padding: .35rem .3rem;
+    }
+    #premiacaoCaixaTabela td.td-cidade,
+    #premiacaoCaixaTabela th.col-cidade {
+        text-align: left;
+        padding-left: .5rem;
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.25;
+        max-width: 9.5rem;
+    }
+    #premiacaoCaixaTabela td.td-uf,
+    #premiacaoCaixaTabela th.col-uf {
+        text-align: center;
+        white-space: normal;
+        line-height: 1.25;
+        width: 2.6rem;
+    }
+    #premiacaoCaixaTabela td.td-num,
+    #premiacaoCaixaTabela th.col-num {
+        text-align: center;
+        white-space: nowrap;
+    }
+    #premiacaoCaixaTabela td.td-reais,
+    #premiacaoCaixaTabela th.col-reais {
+        text-align: right;
+        vertical-align: middle;
+        white-space: nowrap;
+        padding-left: .45rem;
+        padding-right: .55rem;
+    }
+    #premiacaoCaixaTabela td.td-reais .rateio-val {
+        display: block;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+        width: 100%;
+    }
+    #premiacaoCaixaTabela th.col-reais .px-th-inner {
+        justify-content: flex-end;
+    }
+    #premiacaoCaixaTabela td.td-bola {
+        text-align: center;
+        white-space: nowrap;
+        padding: .25rem .15rem;
+        min-width: 2rem;
+    }
+    #premiacaoCaixaTabela td.td-bola .dez-ball {
+        width: 22px;
+        height: 22px;
+        font-size: .62rem;
+        box-shadow: 0 1px 3px rgba(230, 168, 0, .35);
+        margin: 0 auto;
+    }
+    #premiacaoCaixaTabela td.td-mes {
+        text-align: center;
+        white-space: nowrap;
+    }
+    #premiacaoCaixaPager {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: .35rem;
+        font-size: .82rem;
+        padding: .75rem .85rem;
+        width: 100%;
+    }
+    #premiacaoCaixaPager .px-page {
+        min-width: 2rem;
+        font-weight: 700;
+    }
+    #premiacaoCaixaPager .px-page.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+    #rankingUfTabela {
+        font-size: .82rem;
+        width: 100%;
+        margin-bottom: 0;
+    }
+    #rankingUfTabela thead th {
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+    #rankingUfTabela td {
+        vertical-align: middle;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+    #rankingUfTabela tr.uf-top1 td {
+        background: #fff8e1;
+        font-weight: 800;
+    }
+    #rankingUfTabela tr.uf-top2 td {
+        background: #f5f5f5;
+        font-weight: 700;
+    }
+    #rankingUfTabela tr.uf-top3 td {
+        background: #fff3e0;
+        font-weight: 700;
+    }
+    #rankingUfTabela .uf-trophy {
+        margin-right: .35rem;
+        color: #c9a227;
+    }
+    #rankingUfTabela tr.uf-top1 .uf-trophy { color: #d4af37; }
+    #rankingUfTabela tr.uf-top2 .uf-trophy { color: #9e9e9e; }
+    #rankingUfTabela tr.uf-top3 .uf-trophy { color: #cd7f32; }
+    #rankingUfTabela tr.uf-rest { display: none; }
+    #rankingUfTabela.uf-expandido tr.uf-rest { display: table-row; }
+    .ranking-uf-nota {
+        text-align: center;
+        padding: .5rem .9rem .35rem;
+        font-size: .8rem;
+        color: #666;
+    }
+    .ranking-uf-toggle {
+        display: flex;
+        justify-content: center;
+        padding: .35rem .5rem .55rem;
+    }
+    .ranking-uf-toggle .btn {
+        font-size: .78rem;
+        font-weight: 700;
+        padding: .2rem .75rem;
+        color: var(--primary);
+        border: none;
+        background: transparent;
+    }
+    .ranking-uf-toggle .btn:hover { color: var(--primary-xdark); }
+    .ranking-uf-toggle .btn .fa-chevron-down,
+    .ranking-uf-toggle .btn .fa-chevron-up {
+        margin-left: .35rem;
+        font-size: .7rem;
+    }
+</style>
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div style="font-size:2.5rem">🍀</div>
+        <div>
+            <h2 class="mb-0">Dia de Sorte Absoluto</h2>
+            <p class="mb-0 mt-1" style="opacity:.85;font-size:.9rem;">31 dezenas (sorteia 7) · <strong>1 Mês de
+                    Sorte</strong></p>
+        </div>
+        <div class="ms-auto">
+            <button class="btn btn-sm" id="btnSync"
+                style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:700;"
+                onclick="sincronizar()">
+                <i class="fas fa-satellite-dish me-1"></i>Sincronizar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="alert mb-4"
+    style="background:#fff;border:2px solid var(--accent-mes);border-radius:12px;box-shadow:0 2px 10px rgba(25,111,61,.08);">
+    <div class="row align-items-center g-3">
+        <div class="col-auto" style="font-size:2rem;">📅</div>
+        <div class="col" style="font-size:.84rem;">
+            <strong style="color:var(--accent-mes);">⚡ Mecânica do Mês da Sorte</strong><br>
+            Além de escolher <strong>7 dezenas</strong> (de 01 a 31), você também escolhe <strong>1 Mês da
+                Sorte</strong> entre os 12 meses do ano.
+            Se acertar o Mês, você ganha prêmio mesmo com <strong>apenas 1 dezena certa</strong>! O Mês funciona como
+            uma categoria de premiação independente.
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="sc-val" id="statConcursos">—</div>
+            <div class="sc-lbl">Concursos</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="sc-val" id="statUltimo">—</div>
+            <div class="sc-lbl">Último</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="sc-val" style="color:var(--accent);">31</div>
+            <div class="sc-lbl">Dezenas</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="sc-val" style="color:var(--accent-mes);">12</div>
+            <div class="sc-lbl">Meses de Sorte</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="sync-card h-100">
+            <h5><i class="fas fa-satellite-dish me-2" style="color:var(--accent);"></i>Base de Dados</h5>
+            <p class="text-muted mb-3" style="font-size:.85rem;">
+                Importa <strong>todos</strong> os concursos faltantes da API oficial (concurso 1 até o último atual).
+            </p>
+            <div id="statusBanco" class="alert alert-warning py-2 small mb-3">Verificando base...</div>
+            <div class="progress mb-2 d-none" id="syncProgressWrap" style="height:8px;">
+                <div class="progress-bar bg-success" id="syncProgressBar" style="width:0%"></div>
+            </div>
+            <button class="btn w-100 fw-bold" id="btnSyncMain" style="background:var(--accent);color:#fff;"
+                onclick="sincronizar()">
+                <i class="fas fa-cloud-download-alt me-2"></i>Sincronizar histórico completo
+            </button>
+            <div id="syncLog" class="mt-3" style="font-size:.8rem;"></div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="sync-card h-100">
+            <h5><i class="fas fa-rocket me-2" style="color:var(--accent);"></i>Acessos Rápidos</h5>
+            <div class="row g-2 mt-1">
+                <div class="col-6 col-lg-4"><a href="/analise/resumo-geral/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-clipboard-list me-2"></i>Resumo Geral<br><small
+                            class="fw-normal opacity-75">DNA · checklist da modalidade</small></a></div>
+                <div class="col-6 col-lg-4"><a href="/analise/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-crosshairs me-2"></i>{{ nav_cfg.sniper.title }}<br><small
+                            class="fw-normal opacity-75">Freq 31 dez + meses</small></a></div>
+                <div class="col-6 col-lg-4"><a href="/modelos/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-th-large me-2"></i>Central de Modelos<br><small
+                            class="fw-normal opacity-75">14 apostas c/ mês</small></a></div>
+                <div class="col-6 col-lg-4"><a href="/central-conferencias/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-trophy me-2"></i>Conferência<br><small
+                            class="fw-normal opacity-75">Top-7 vs. histórico</small></a></div>
+                <div class="col-6 col-lg-4"><a href="/geradores-elite/escolha-tubular-apostas/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-dice me-2"></i>Escolha Tubular — Apostas<br><small
+                            class="fw-normal opacity-75">Manual · Automático</small></a></div>
+                <div class="col-6 col-lg-4"><a href="/geradores-elite/construtor-construcoes/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-layer-group me-2"></i>Construtor de Construções<br><small
+                            class="fw-normal opacity-75">Pool · engenharias</small></a></div>
+                <div class="col-6 col-lg-4"><a href="/geradores-elite/comportamento-apostas/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-chart-line me-2"></i>Comportamento — Apostas<br><small
+                            class="fw-normal opacity-75">PA · PR · RT · MS</small></a></div>
+                <div class="col-6 col-lg-4"><a href="/analise/escolha-visual/" class="btn w-100 text-start"
+                        style="background:var(--accent-light);color:var(--primary);font-weight:600;border-radius:10px;"><i
+                            class="fas fa-eye me-2"></i>Escolha Visual<br><small
+                            class="fw-normal opacity-75">Seleção visual de dezenas</small></a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-history me-2"></i>Sorteios e premiação — Dia de Sorte</span>
+        <button type="button" class="btn btn-sm ms-auto" id="btnPremiacaoCaixa"
+            style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:700;"
+            title="Busca ganhadores, rateio, cidade e UF na API da CAIXA (mesma fonte das dezenas)">
+            <i class="fas fa-cloud-download-alt me-1"></i>Atualizar premiação (API)
+        </button>
+    </div>
+    <div id="ultimoResultadoDestaque" class="ultimo-destaque">
+        <div class="text-muted small">Carregando último resultado…</div>
+    </div>
+    <div class="px-ordem-bar">
+        <span>Bolas nas colunas:</span>
+        <div class="btn-group" role="group" aria-label="Ordem das bolas">
+            <button type="button" class="btn btn-outline-secondary" id="btnOrdemSorteio" data-ordem="sorteio">ordem do sorteio</button>
+            <button type="button" class="btn btn-outline-secondary" id="btnOrdemCresc" data-ordem="crescente">crescente</button>
+        </div>
+        <label class="small text-muted mb-0 d-inline-flex align-items-center gap-1">
+            Mostrar
+            <select id="premiacaoPageSize" class="form-select form-select-sm" style="width:auto;font-size:.78rem;">
+                <option value="100">100</option>
+                <option value="300">300</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="0" selected>Todos</option>
+            </select>
+        </label>
+        <label class="small text-muted mb-0 d-inline-flex align-items-center gap-1">
+            Concurso
+            <input type="number" id="premiacaoBuscaConcurso" class="form-control form-control-sm" min="1" step="1" placeholder="1263" inputmode="numeric">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnPremiacaoBuscaConcurso">Pesquisar</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnPremiacaoLimparBusca" title="Resetar pesquisa" aria-label="Resetar pesquisa">
+                <i class="fas fa-undo-alt"></i>
+            </button>
+        </label>
+        <span id="premiacaoBuscaMsg" class="small"></span>
+        <span class="small text-muted" id="premiacaoCaixaStatus">Histórico completo · filtre coluna a coluna como no Excel.</span>
+    </div>
+    <div class="premiacao-wrap">
+        <table class="table table-sm table-bordered mb-0" id="premiacaoCaixaTabela">
+            <thead>
+                <tr id="premiacaoCaixaHeadRow"></tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="16" class="text-muted text-center py-3">Carregando…</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="premiacaoCaixaPager"></div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <i class="fas fa-trophy me-2"></i>Ranking de UF que mais paga
+    </div>
+    <div class="ranking-uf-nota">Cada concurso conta no máximo 1 vez por UF (mesmo com várias cidades no estado).</div>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0" id="rankingUfTabela">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>UF</th>
+                    <th>Quantidade de registros</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="3" class="text-muted text-center py-3">Carregando…</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="ranking-uf-toggle d-none" id="rankingUfToggleWrap">
+        <button type="button" class="btn" id="btnRankingUfToggle" aria-expanded="false">
+            Ver demais UFs <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    async function carregarStatusBanco() {
+        const box = document.getElementById('statusBanco');
+        const progWrap = document.getElementById('syncProgressWrap');
+        const progBar = document.getElementById('syncProgressBar');
+        const log = document.getElementById('syncLog');
+        if (!box) return null;
+        try {
+            const r = await fetch('/api/status-banco');
+            const raw = await r.text();
+            let d;
+            try { d = JSON.parse(raw); } catch (_) {
+                throw new Error(r.status === 404
+                    ? 'Rota /api/status-banco não encontrada — reinicie o Flask desta modalidade.'
+                    : 'Resposta inválida do servidor. Reinicie o Flask e use Ctrl+F5.');
+            }
+            if (!r.ok || d.status !== 'success') throw new Error(d.message || `HTTP ${r.status}`);
+            const api = d.ultimo_concurso_api || '—';
+            if (d.completo) {
+                box.className = 'alert alert-success py-2 small mb-3';
+                box.innerHTML = `<strong>Base completa:</strong> ${d.total_registros.toLocaleString()} concursos (1 a ${api}).`;
+                if (progWrap && progBar) { progWrap.classList.remove('d-none'); progBar.style.width = '100%'; }
+                if (log) {
+                    log.innerHTML = `<span class="text-success"><i class="fas fa-cloud-download-alt me-1"></i>Base completa: ${d.total_registros.toLocaleString()} concursos (1 a ${api}).</span>`
+                        + `<br><span class="text-success fw-bold">Total importado nesta sessão: 0</span>`;
+                }
+            } else {
+                box.className = 'alert alert-warning py-2 small mb-3';
+                const alvo = d.alvo_sincronizacao || api || d.concurso_maximo;
+                let txt = `<strong>Atenção:</strong> só <strong>${d.total_registros.toLocaleString()}</strong> concursos gravados, `
+                    + `mas o intervalo vai até <strong>#${alvo}</strong>. `
+                    + `Faltam <strong>${d.concursos_faltantes.toLocaleString()}</strong> concursos no meio do histórico.`;
+                if (d.api_offline) txt += ` <span class="text-danger">(API Caixa indisponível agora — tente de novo.)</span>`;
+                txt += ` Clique em <strong>Sincronizar</strong> abaixo.`;
+                box.innerHTML = txt;
+                if (progWrap) progWrap.classList.add('d-none');
+                if (log) log.innerHTML = '';
+            }
+            return d;
+        } catch (e) {
+            box.className = 'alert alert-danger py-2 small mb-3';
+            box.textContent = 'Erro ao verificar base: ' + e.message;
+            return null;
+        }
+    }
+
+    async function sincronizar() {
+        const btn = document.getElementById('btnSync'), btn2 = document.getElementById('btnSyncMain'), log = document.getElementById('syncLog');
+        const progWrap = document.getElementById('syncProgressWrap'), progBar = document.getElementById('syncProgressBar');
+        [btn, btn2].forEach(b => { if (b) { b.disabled = true; b.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sincronizando...'; } });
+        progWrap.classList.remove('d-none');
+        let continuar = true, totalImportado = 0, faltantesInicial = 0;
+        try {
+            while (continuar) {
+                log.innerHTML = '<i class="fas fa-spinner fa-spin me-2 text-warning"></i>Baixando lote da API Caixa...';
+                const r = await fetch('/api/sincronizar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ modo: 'completo', limite: 80 }),
+                });
+                const d = await r.json();
+                if (d.status === 'error') throw new Error(d.message);
+                if (!faltantesInicial && d.faltantes_total) faltantesInicial = d.faltantes_total;
+                totalImportado += d.news || 0;
+                continuar = !!d.continuar;
+                const total = faltantesInicial || d.faltantes_total || 1;
+                const feito = total - (d.faltantes_restantes || 0);
+                progBar.style.width = Math.min(100, Math.round((feito / total) * 100)) + '%';
+                log.innerHTML = `<span class="text-success"><i class="fas fa-cloud-download-alt me-1"></i>${d.message}</span>`;
+                await carregarStats();
+                if (!continuar) break;
+                await new Promise(res => setTimeout(res, 400));
+            }
+            await carregarStatusBanco();
+            await carregarPremiacaoCaixa();
+            if (totalImportado > 0) log.innerHTML += `<br><span class="text-success fw-bold">Total importado nesta sessão: ${totalImportado}</span>`;
+        } catch (e) {
+            log.innerHTML = `<span class="text-danger">${e.message}</span>`;
+        } finally {
+            [btn, btn2].forEach(b => {
+                if (b) {
+                    b.disabled = false;
+                    b.innerHTML = b.id === 'btnSync'
+                        ? '<i class="fas fa-satellite-dish me-1"></i>Sincronizar Dados'
+                        : '<i class="fas fa-cloud-download-alt me-2"></i>Sincronizar histórico completo';
+                }
+            });
+        }
+    }
+
+    async function carregarStats() {
+        try {
+            const st = await fetch('/api/status-banco').then(r => r.json());
+            if (st.status === 'success') {
+                document.getElementById('statConcursos').textContent = st.total_registros.toLocaleString();
+                document.getElementById('statUltimo').textContent = '#' + (st.ultimo_concurso_api || st.concurso_maximo);
+            }
+        } catch (e) { }
+    }
+    let PREMIACAO_PAGE = 1;
+    let PREMIACAO_SIZE = 0; // 0 = Todos
+    let PREMIACAO_DEZ_CRESCENTE = false;
+    let PREMIACAO_LINHAS = [];
+    let PREMIACAO_SORT = { key: 'concurso', dir: 'desc' };
+    let PREMIACAO_FILTERS = {};
+    let PREMIACAO_BUSCA_CONCURSO = '';
+    let PREMIACAO_ULTIMO = null;
+    let PREMIACAO_MENU = null;
+    const PREMIACAO_COLS = [
+        { key: 'concurso', label: 'Concurso', cls: 'col-num', type: 'num' },
+        { key: 'data', label: 'Data', cls: 'col-num', type: 'text' },
+        { key: 'b1', label: 'P1', cls: '', type: 'bola', idx: 0 },
+        { key: 'b2', label: 'P2', cls: '', type: 'bola', idx: 1 },
+        { key: 'b3', label: 'P3', cls: '', type: 'bola', idx: 2 },
+        { key: 'b4', label: 'P4', cls: '', type: 'bola', idx: 3 },
+        { key: 'b5', label: 'P5', cls: '', type: 'bola', idx: 4 },
+        { key: 'b6', label: 'P6', cls: '', type: 'bola', idx: 5 },
+        { key: 'b7', label: 'P7', cls: '', type: 'bola', idx: 6 },
+        { key: 'mes', label: 'Mês', cls: '', type: 'text' },
+        { key: 'cidade', label: 'Cidade', cls: 'col-cidade', type: 'text' },
+        { key: 'uf', label: 'UF', cls: 'col-uf', type: 'text' },
+        { key: 'g7', label: 'Ganh. 7', cls: 'col-num', type: 'num' },
+        { key: 'r7', label: '', cls: 'col-reais', type: 'money', filterTitle: 'Valor 7' },
+        { key: 'g6', label: 'Ganh. 6', cls: 'col-num', type: 'num' },
+        { key: 'r6', label: '', cls: 'col-reais', type: 'money', filterTitle: 'Valor 6' },
+    ];
+    function pageSizeAtual() {
+        const el = document.getElementById('premiacaoPageSize');
+        if (!el) return PREMIACAO_SIZE;
+        const n = Number(el.value);
+        return Number.isFinite(n) ? n : 0;
+    }
+    function escHtml(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    const fmtDez = (n) => String(n).padStart(2, '0');
+    function htmlDezenas(nums) {
+        const balls = (nums || []).filter(n => n != null).map(d => `<span class="dez-ball">${fmtDez(d)}</span>`).join('');
+        return `<div class="draw-dezenas-wrap"><div class="draw-dezenas-grid">${balls}</div></div>`;
+    }
+    function htmlBola(n) {
+        if (n == null || n === '') return '—';
+        return `<span class="dez-ball">${fmtDez(n)}</span>`;
+    }
+    function htmlLocCampo(locs, campo) {
+        const vals = (locs || []).map(l => String((l && l[campo]) || '').trim());
+        if (!vals.some(v => v)) return '';
+        return vals.map(v => escHtml(v)).join('<br>');
+    }
+    function mesAbrevDe(r) {
+        const nome = (r && (r.mes_nome || r.mes_sorte)) || '';
+        if (!nome) return '';
+        return r.mes_abrev || nome.substring(0, 3);
+    }
+    function htmlMes(r) {
+        const nome = r.mes_nome || r.mes_sorte || '';
+        const abrev = mesAbrevDe(r);
+        if (!abrev) return '';
+        return `<span class="mes-badge mes-nome-${escHtml(nome)}" title="${escHtml(nome)}">${escHtml(abrev)}</span>`;
+    }
+    function htmlRateio(txt) {
+        if (!txt || txt === '—') return '—';
+        return `<span class="rateio-val">${escHtml(txt)}</span>`;
+    }
+    function dezenasDaLinha(l) {
+        return PREMIACAO_DEZ_CRESCENTE ? (l.dezenas || []) : (l.dezenas_ordem || l.dezenas || []);
+    }
+    function bolaDaLinha(l, idx) {
+        const arr = dezenasDaLinha(l);
+        return arr[idx] != null ? Number(arr[idx]) : null;
+    }
+    function renderUltimoDestaque() {
+        const box = document.getElementById('ultimoResultadoDestaque');
+        if (!box) return;
+        const r = PREMIACAO_ULTIMO;
+        if (!r) {
+            box.innerHTML = '<div class="text-muted small text-center">Sincronize os dados para ver o último resultado.</div>';
+            return;
+        }
+        const dez = dezenasDaLinha(r);
+        const abrev = mesAbrevDe(r);
+        box.innerHTML = `
+            <div class="ud-inline">
+                <div class="ud-titulo">${escHtml(r.concurso)}</div>
+                <span class="ud-sep">-</span>
+                ${htmlDezenas(dez)}
+                ${abrev ? `<span class="ud-sep">-</span><div class="ud-mes">${htmlMes(r)}</div>` : ''}
+            </div>`;
+    }
+    function dataSortKey(s) {
+        const m = String(s || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (!m) return String(s || '');
+        return `${m[3]}${m[2].padStart(2,'0')}${m[1].padStart(2,'0')}`;
+    }
+    function colDef(key) {
+        return PREMIACAO_COLS.find(c => c.key === key);
+    }
+    function valorFiltro(l, key) {
+        const col = colDef(key);
+        if (!col) return '';
+        if (col.type === 'bola') {
+            const n = bolaDaLinha(l, col.idx);
+            return n == null ? '' : String(n);
+        }
+        if (key === 'concurso') return String(l.concurso ?? '');
+        if (key === 'data') return String(l.data || '');
+        if (key === 'mes') return mesAbrevDe(l) || String(l.mes_nome || '');
+        if (key === 'cidade') return String(l.cidade || '').trim() || '(vazio)';
+        if (key === 'uf') return String(l.uf || '').trim() || '(vazio)';
+        if (key === 'g7') return String(l.g7 ?? 0);
+        if (key === 'g6') return String(l.g6 ?? 0);
+        if (key === 'r7') return String(l.r7 || '—');
+        if (key === 'r6') return String(l.r6 || '—');
+        return '';
+    }
+    function valorSort(l, key) {
+        const col = colDef(key);
+        if (col && col.type === 'bola') {
+            const n = bolaDaLinha(l, col.idx);
+            return n == null ? -1 : n;
+        }
+        if (key === 'concurso') return Number(l.concurso) || 0;
+        if (key === 'data') return dataSortKey(l.data);
+        if (key === 'mes') return Number(l.mes_num) || String(l.mes_nome || '').toLowerCase();
+        if (key === 'cidade') return String(l.cidade || '').toLowerCase();
+        if (key === 'uf') return String(l.uf || '').toLowerCase();
+        if (key === 'g7') return Number(l.g7) || 0;
+        if (key === 'r7') return Number(l.r7n) || 0;
+        if (key === 'g6') return Number(l.g6) || 0;
+        if (key === 'r6') return Number(l.r6n) || 0;
+        return '';
+    }
+    function linhasFiltradas() {
+        let rows = PREMIACAO_LINHAS.slice();
+        if (PREMIACAO_BUSCA_CONCURSO) {
+            const alvo = PREMIACAO_BUSCA_CONCURSO;
+            rows = rows.filter(l => String(l.concurso) === alvo);
+            return rows;
+        }
+        Object.keys(PREMIACAO_FILTERS).forEach(key => {
+            const allowed = PREMIACAO_FILTERS[key];
+            if (!allowed) return;
+            rows = rows.filter(l => allowed.has(valorFiltro(l, key)));
+        });
+        return rows;
+    }
+    function setBuscaMsg(texto, isErro) {
+        const el = document.getElementById('premiacaoBuscaMsg');
+        if (!el) return;
+        el.textContent = texto || '';
+        el.classList.toggle('erro', !!isErro);
+    }
+    function pesquisarConcurso() {
+        const input = document.getElementById('premiacaoBuscaConcurso');
+        const raw = String(input?.value || '').trim();
+        if (!raw) {
+            PREMIACAO_BUSCA_CONCURSO = '';
+            PREMIACAO_PAGE = 1;
+            setBuscaMsg('');
+            renderPremiacao();
+            return;
+        }
+        const num = String(parseInt(raw, 10));
+        if (!num || num === 'NaN') {
+            setBuscaMsg('Informe o número do concurso.', true);
+            return;
+        }
+        const found = PREMIACAO_LINHAS.find(l => String(l.concurso) === num);
+        if (!found) {
+            setBuscaMsg('Concurso não encontrado.', true);
+            return;
+        }
+        PREMIACAO_BUSCA_CONCURSO = String(found.concurso);
+        PREMIACAO_PAGE = 1;
+        setBuscaMsg('');
+        renderPremiacao();
+    }
+    function resetarPesquisaConcurso() {
+        const input = document.getElementById('premiacaoBuscaConcurso');
+        if (input) input.value = '';
+        PREMIACAO_BUSCA_CONCURSO = '';
+        PREMIACAO_PAGE = 1;
+        setBuscaMsg('');
+        renderPremiacao();
+    }
+    function linhasExibicao() {
+        const rows = linhasFiltradas();
+        const { key, dir } = PREMIACAO_SORT;
+        if (!key) return rows;
+        const mul = dir === 'asc' ? 1 : -1;
+        rows.sort((a, b) => {
+            const va = valorSort(a, key), vb = valorSort(b, key);
+            if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * mul;
+            return String(va).localeCompare(String(vb), 'pt-BR', { numeric: true, sensitivity: 'base' }) * mul;
+        });
+        return rows;
+    }
+    function fecharMenuFiltro() {
+        if (PREMIACAO_MENU) {
+            PREMIACAO_MENU.remove();
+            PREMIACAO_MENU = null;
+        }
+        document.querySelectorAll('.px-filter-btn.open').forEach(b => b.classList.remove('open'));
+    }
+    function valoresUnicosColuna(key) {
+        const set = new Set();
+        PREMIACAO_LINHAS.forEach(l => set.add(valorFiltro(l, key)));
+        const arr = [...set];
+        const col = colDef(key);
+        arr.sort((a, b) => {
+            if (col && (col.type === 'bola' || col.type === 'num')) {
+                const na = Number(a), nb = Number(b);
+                if (Number.isFinite(na) && Number.isFinite(nb)) return na - nb;
+            }
+            return String(a).localeCompare(String(b), 'pt-BR', { numeric: true, sensitivity: 'base' });
+        });
+        return arr;
+    }
+    function abrirMenuFiltro(th, key) {
+        fecharMenuFiltro();
+        const btn = th.querySelector('.px-filter-btn');
+        if (btn) btn.classList.add('open');
+        const rect = (btn || th).getBoundingClientRect();
+        const values = valoresUnicosColuna(key);
+        const current = PREMIACAO_FILTERS[key] ? new Set(PREMIACAO_FILTERS[key]) : new Set(values);
+        const menu = document.createElement('div');
+        menu.className = 'px-excel-menu';
+        menu.setAttribute('role', 'dialog');
+        const colLabel = colDef(key)?.label || key;
+        menu.innerHTML = `
+            <button type="button" class="px-m-item" data-act="asc">
+                <span>↑</span> Classificar do Menor para o Maior
+            </button>
+            <button type="button" class="px-m-item" data-act="desc">
+                <span>↓</span> Classificar do Maior para o Menor
+            </button>
+            <div class="px-m-sep"></div>
+            <button type="button" class="px-m-item" data-act="clear" ${PREMIACAO_FILTERS[key] ? '' : 'disabled'}>
+                <span>✕</span> Limpar Filtro de "${escHtml(colLabel)}"
+            </button>
+            <div class="px-m-sep"></div>
+            <div class="px-m-search"><input type="search" placeholder="Pesquisar" autocomplete="off"></div>
+            <div class="px-m-list"></div>
+            <div class="px-m-actions">
+                <button type="button" class="btn btn-sm btn-primary" data-act="ok">OK</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-act="cancel">Cancelar</button>
+            </div>`;
+        const list = menu.querySelector('.px-m-list');
+        const search = menu.querySelector('.px-m-search input');
+        function paintList(q) {
+            const qq = String(q || '').trim().toLowerCase();
+            const visible = values.filter(v => !qq || String(v).toLowerCase().includes(qq));
+            const allOn = visible.length > 0 && visible.every(v => current.has(v));
+            list.innerHTML = `
+                <label class="px-m-check"><input type="checkbox" data-all ${allOn ? 'checked' : ''}> (Selecionar Tudo)</label>
+                ${visible.map(v => {
+                    const label = (colDef(key)?.type === 'bola' && v !== '') ? fmtDez(v) : v;
+                    return `<label class="px-m-check"><input type="checkbox" data-v="${escHtml(v)}" ${current.has(v) ? 'checked' : ''}> ${escHtml(label)}</label>`;
+                }).join('')}`;
+        }
+        paintList('');
+        document.body.appendChild(menu);
+        PREMIACAO_MENU = menu;
+        const mw = menu.offsetWidth;
+        const mh = menu.offsetHeight;
+        let left = rect.left;
+        let top = rect.bottom + 4;
+        if (left + mw > window.innerWidth - 8) left = Math.max(8, window.innerWidth - mw - 8);
+        if (top + mh > window.innerHeight - 8) top = Math.max(8, rect.top - mh - 4);
+        menu.style.left = left + 'px';
+        menu.style.top = top + 'px';
+
+        if (PREMIACAO_SORT.key === key) {
+            const act = PREMIACAO_SORT.dir === 'asc' ? 'asc' : 'desc';
+            menu.querySelector(`[data-act="${act}"]`)?.classList.add('active');
+        }
+
+        menu.addEventListener('click', (ev) => {
+            const checkRow = ev.target.closest('.px-m-check');
+            if (checkRow) {
+                const all = checkRow.querySelector('input[data-all]');
+                const one = checkRow.querySelector('input[data-v]');
+                if (all) {
+                    const checks = [...list.querySelectorAll('input[data-v]')];
+                    const visibleSet = new Set(checks.map(c => c.dataset.v));
+                    checks.forEach(c => { c.checked = all.checked; });
+                    values.forEach(v => {
+                        if (!visibleSet.has(v)) return;
+                        if (all.checked) current.add(v); else current.delete(v);
+                    });
+                    return;
+                }
+                if (one) {
+                    if (one.checked) current.add(one.dataset.v);
+                    else current.delete(one.dataset.v);
+                    return;
+                }
+            }
+            const actBtn = ev.target.closest('[data-act]');
+            if (!actBtn) return;
+            const act = actBtn.getAttribute('data-act');
+            if (act === 'asc' || act === 'desc') {
+                PREMIACAO_SORT = { key, dir: act };
+                PREMIACAO_PAGE = 1;
+                fecharMenuFiltro();
+                renderPremiacao();
+                return;
+            }
+            if (act === 'clear') {
+                delete PREMIACAO_FILTERS[key];
+                PREMIACAO_PAGE = 1;
+                fecharMenuFiltro();
+                renderPremiacao();
+                return;
+            }
+            if (act === 'cancel') {
+                fecharMenuFiltro();
+                return;
+            }
+            if (act === 'ok') {
+                const qq = String(search.value || '').trim().toLowerCase();
+                let selected = new Set(current);
+                if (qq) {
+                    const visible = values.filter(v => String(v).toLowerCase().includes(qq));
+                    selected = new Set(visible.filter(v => current.has(v)));
+                }
+                if (!selected.size) PREMIACAO_FILTERS[key] = new Set();
+                else if (selected.size >= values.length) delete PREMIACAO_FILTERS[key];
+                else PREMIACAO_FILTERS[key] = selected;
+                PREMIACAO_PAGE = 1;
+                fecharMenuFiltro();
+                renderPremiacao();
+            }
+        });
+        search.addEventListener('input', () => paintList(search.value));
+        search.focus();
+    }
+    function renderCabecalho() {
+        const tr = document.getElementById('premiacaoCaixaHeadRow');
+        if (!tr) return;
+        tr.innerHTML = PREMIACAO_COLS.map(col => {
+            const filtered = !!PREMIACAO_FILTERS[col.key];
+            const sorted = PREMIACAO_SORT.key === col.key;
+            const ind = sorted ? (PREMIACAO_SORT.dir === 'asc' ? '▲' : '▼') : '';
+            const cls = [
+                'px-th',
+                col.cls || '',
+                sorted ? 'px-sort-on' : '',
+                filtered ? 'px-filter-on' : '',
+            ].filter(Boolean).join(' ');
+            const filterTitle = col.filterTitle || col.label || col.key;
+            return `<th class="${cls}" data-key="${col.key}">
+                <span class="px-th-inner">
+                    <span class="px-th-label">${escHtml(col.label)}</span>
+                    ${ind ? `<span class="px-sort-ind">${ind}</span>` : ''}
+                    <button type="button" class="px-filter-btn" data-filter="${col.key}" title="Filtrar / classificar ${escHtml(filterTitle)}">▼</button>
+                </span>
+            </th>`;
+        }).join('');
+    }
+    function atualizarBotoesOrdem() {
+        const bS = document.getElementById('btnOrdemSorteio');
+        const bC = document.getElementById('btnOrdemCresc');
+        [bS, bC].forEach(b => {
+            if (!b) return;
+            b.classList.remove('btn-primary', 'active');
+            b.classList.add('btn-outline-secondary');
+        });
+        const on = PREMIACAO_DEZ_CRESCENTE ? bC : bS;
+        if (on) {
+            on.classList.add('btn-primary', 'active');
+            on.classList.remove('btn-outline-secondary');
+        }
+    }
+    function htmlPager(p, pages) {
+        let start = Math.max(1, p - 2);
+        let end = Math.min(pages, start + 4);
+        start = Math.max(1, end - 4);
+        const nums = [];
+        for (let i = start; i <= end; i++) nums.push(i);
+        return `
+            <button type="button" class="btn btn-sm btn-outline-secondary" ${p<=1?'disabled':''} data-px="${p-1}">‹ Anterior</button>
+            ${nums.map(n => `<button type="button" class="btn btn-sm btn-outline-secondary px-page${n===p?' active':''}" data-px="${n}">${n}</button>`).join('')}
+            <button type="button" class="btn btn-sm btn-outline-secondary" ${p>=pages?'disabled':''} data-px="${p+1}">Próximo ›</button>`;
+    }
+    function linhasPremiacao(registros) {
+        const rows = [];
+        const seen = new Set();
+        (registros || []).forEach(r => {
+            const conc = r.concurso;
+            if (conc == null || seen.has(conc)) return;
+            seen.add(conc);
+            const ordem = r.dezenas_ordem || r.bolas || [];
+            const sorted = (r.dezenas && r.dezenas.length)
+                ? r.dezenas
+                : [...ordem].filter(n => n != null).sort((a, b) => a - b);
+            const locs = (r.localidades && r.localidades.length) ? r.localidades : [];
+            rows.push({
+                concurso: conc,
+                data: r.data || '',
+                dezenas: sorted,
+                dezenas_ordem: ordem,
+                mes_nome: r.mes_nome || r.mes_sorte || '',
+                mes_abrev: r.mes_abrev || '',
+                mes_sorte: r.mes_sorte || '',
+                mes_num: r.mes_num || 0,
+                locs,
+                cidade: locs.map(l => l.cidade || '').filter(Boolean).join(' '),
+                uf: locs.map(l => l.uf || '').filter(Boolean).join(' '),
+                g7: r.ganhadores_7 ?? 0,
+                r7: r.rateio_7_fmt || '—',
+                r7n: Number(r.rateio_7) || 0,
+                g6: r.ganhadores_6 ?? 0,
+                r6: r.rateio_6_fmt || '—',
+                r6n: Number(r.rateio_6) || 0,
+            });
+        });
+        return rows;
+    }
+    function renderPremiacao() {
+        const tbody = document.querySelector('#premiacaoCaixaTabela tbody');
+        const status = document.getElementById('premiacaoCaixaStatus');
+        const pager = document.getElementById('premiacaoCaixaPager');
+        if (!tbody) return;
+        renderCabecalho();
+        atualizarBotoesOrdem();
+        renderUltimoDestaque();
+        const all = linhasExibicao();
+        PREMIACAO_SIZE = pageSizeAtual();
+        const size = PREMIACAO_SIZE > 0 ? PREMIACAO_SIZE : Math.max(all.length, 1);
+        const pages = Math.max(1, Math.ceil(all.length / size) || 1);
+        if (PREMIACAO_PAGE > pages) PREMIACAO_PAGE = pages;
+        const start = PREMIACAO_SIZE > 0 ? (PREMIACAO_PAGE - 1) * PREMIACAO_SIZE : 0;
+        const pageRows = PREMIACAO_SIZE > 0
+            ? all.slice(start, start + PREMIACAO_SIZE)
+            : all;
+        const colCount = PREMIACAO_COLS.length;
+        if (!PREMIACAO_LINHAS.length) {
+            tbody.innerHTML = `<tr><td colspan="${colCount}" class="text-muted text-center py-3">Sincronize os dados para ver os sorteios e a premiação.</td></tr>`;
+            if (pager) pager.innerHTML = '';
+            return;
+        }
+        if (!pageRows.length) {
+            tbody.innerHTML = `<tr><td colspan="${colCount}" class="text-muted text-center py-3">Nenhum concurso com os filtros atuais.</td></tr>`;
+        } else {
+            tbody.innerHTML = pageRows.map(l => {
+                const dez = dezenasDaLinha(l);
+                const bolas = [0,1,2,3,4,5,6].map(i => `<td class="td-bola">${htmlBola(dez[i])}</td>`).join('');
+                return `<tr>
+                    <td class="td-num"><strong>${escHtml(l.concurso)}</strong></td>
+                    <td class="td-num">${escHtml(l.data)}</td>
+                    ${bolas}
+                    <td class="td-mes">${htmlMes(l)}</td>
+                    <td class="td-cidade">${htmlLocCampo(l.locs, 'cidade')}</td>
+                    <td class="td-uf">${htmlLocCampo(l.locs, 'uf')}</td>
+                    <td class="td-num">${escHtml(l.g7)}</td>
+                    <td class="td-reais">${htmlRateio(l.r7)}</td>
+                    <td class="td-num">${escHtml(l.g6)}</td>
+                    <td class="td-reais">${htmlRateio(l.r6)}</td>
+                </tr>`;
+            }).join('');
+        }
+        const nFiltros = Object.keys(PREMIACAO_FILTERS).length;
+        const modo = PREMIACAO_DEZ_CRESCENTE ? 'crescente' : 'ordem do sorteio';
+        if (status) {
+            status.textContent = `${all.length} de ${PREMIACAO_LINHAS.length} concursos`
+                + (PREMIACAO_BUSCA_CONCURSO
+                    ? ` · concurso ${PREMIACAO_BUSCA_CONCURSO}`
+                    : (nFiltros ? ` · ${nFiltros} filtro(s)` : ''))
+                + ` · bolas em ${modo}`
+                + (PREMIACAO_SIZE > 0 ? ` · pág. ${PREMIACAO_PAGE}/${pages}` : ' · todos');
+        }
+        if (pager) {
+            if (PREMIACAO_SIZE > 0 && pages > 1) {
+                pager.innerHTML = htmlPager(PREMIACAO_PAGE, pages);
+                pager.querySelectorAll('[data-px]').forEach(b => {
+                    b.addEventListener('click', () => {
+                        PREMIACAO_PAGE = +b.dataset.px;
+                        renderPremiacao();
+                    });
+                });
+            } else {
+                pager.innerHTML = '';
+            }
+        }
+    }
+    async function carregarPremiacaoCaixa() {
+        const tbody = document.querySelector('#premiacaoCaixaTabela tbody');
+        const status = document.getElementById('premiacaoCaixaStatus');
+        if (!tbody) return;
+        tbody.innerHTML = `<tr><td colspan="${PREMIACAO_COLS.length}" class="text-muted text-center py-3">Carregando…</td></tr>`;
+        try {
+            const r = await fetch('/api/premiacao-caixa?all=1');
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Falha');
+            const linhas = linhasPremiacao(d.registros || []);
+            PREMIACAO_LINHAS = linhas;
+            PREMIACAO_FILTERS = {};
+            PREMIACAO_BUSCA_CONCURSO = '';
+            PREMIACAO_PAGE = 1;
+            setBuscaMsg('');
+            if (linhas.length) {
+                PREMIACAO_ULTIMO = linhas.reduce((a, b) => (Number(a.concurso) > Number(b.concurso) ? a : b));
+            } else {
+                PREMIACAO_ULTIMO = null;
+            }
+            if (status) status.textContent = `Histórico: ${d.total || linhas.length} concursos carregados.`;
+            renderPremiacao();
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="${PREMIACAO_COLS.length}" class="text-danger text-center py-3">${escHtml(e.message || e)}</td></tr>`;
+        }
+    }
+    function definirOrdemBolas(modo) {
+        PREMIACAO_DEZ_CRESCENTE = modo === 'crescente';
+        ['b1','b2','b3','b4','b5','b6','b7'].forEach(k => { delete PREMIACAO_FILTERS[k]; });
+        if (String(PREMIACAO_SORT.key || '').startsWith('b')) {
+            PREMIACAO_SORT = { key: 'concurso', dir: 'desc' };
+        }
+        PREMIACAO_PAGE = 1;
+        renderPremiacao();
+    }
+    async function atualizarPremiacaoCaixa() {
+        const btn = document.getElementById('btnPremiacaoCaixa');
+        const status = document.getElementById('premiacaoCaixaStatus');
+        const labelOk = '<i class="fas fa-cloud-download-alt me-1"></i>Atualizar premiação (API)';
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Buscando na API…'; }
+        if (status) status.textContent = 'Buscando ganhadores, rateio, cidade e UF na API da CAIXA…';
+        let continuar = true, totalOk = 0;
+        try {
+            while (continuar) {
+                const r = await fetch('/api/premiacao-caixa/atualizar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fonte: 'api', limite: 80 }),
+                });
+                const d = await r.json();
+                if (d.status === 'error') throw new Error(d.message || 'Falha ao atualizar');
+                totalOk += d.sucessos || 0;
+                continuar = !!d.continuar;
+                if (status) status.textContent = d.message || 'Atualizando…';
+                await carregarPremiacaoCaixa();
+                if (!continuar) break;
+                await new Promise(res => setTimeout(res, 400));
+            }
+            if (status && totalOk) {
+                status.textContent = `Premiação da API atualizada: ${totalOk} concurso(s) neste ciclo.`;
+            }
+            await carregarRankingUf();
+        } catch (e) {
+            if (status) status.textContent = 'Erro: ' + (e.message || e);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = labelOk;
+            }
+        }
+    }
+
+    async function carregarRankingUf() {
+        const tabela = document.getElementById('rankingUfTabela');
+        const tbody = tabela?.querySelector('tbody');
+        const toggleWrap = document.getElementById('rankingUfToggleWrap');
+        const btnToggle = document.getElementById('btnRankingUfToggle');
+        if (!tbody) return;
+        try {
+            const r = await fetch('/api/ranking-uf-pagamentos');
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Falha');
+            const itens = d.ranking || [];
+            if (!itens.length) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-muted text-center py-3">Sem registros de cidade/UF para montar o ranking.</td></tr>';
+                if (toggleWrap) toggleWrap.classList.add('d-none');
+                return;
+            }
+            tabela?.classList.remove('uf-expandido');
+            tbody.innerHTML = itens.map(it => {
+                const pos = Number(it.posicao) || 0;
+                const isTop = pos >= 1 && pos <= 3;
+                const topCls = pos === 1 ? 'uf-top1' : (pos === 2 ? 'uf-top2' : (pos === 3 ? 'uf-top3' : 'uf-rest'));
+                const trophy = isTop
+                    ? `<i class="fas fa-trophy uf-trophy" title="${pos}º lugar"></i>`
+                    : '';
+                return `<tr class="${topCls}">
+                    <td>${trophy}${escHtml(it.posicao)}º</td>
+                    <td><strong>${escHtml(it.uf)}</strong></td>
+                    <td>${escHtml(it.quantidade)}</td>
+                </tr>`;
+            }).join('');
+            const restos = itens.filter(it => (Number(it.posicao) || 0) > 3).length;
+            if (toggleWrap && btnToggle) {
+                if (restos > 0) {
+                    toggleWrap.classList.remove('d-none');
+                    btnToggle.setAttribute('aria-expanded', 'false');
+                    btnToggle.innerHTML = `Ver demais UFs (${restos}) <i class="fas fa-chevron-down"></i>`;
+                } else {
+                    toggleWrap.classList.add('d-none');
+                }
+            }
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center py-3">${escHtml(e.message || e)}</td></tr>`;
+            if (toggleWrap) toggleWrap.classList.add('d-none');
+        }
+    }
+
+    function alternarRankingUf() {
+        const tabela = document.getElementById('rankingUfTabela');
+        const btn = document.getElementById('btnRankingUfToggle');
+        if (!tabela || !btn) return;
+        const aberto = tabela.classList.toggle('uf-expandido');
+        const restos = tabela.querySelectorAll('tr.uf-rest').length;
+        btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+        btn.innerHTML = aberto
+            ? `Ocultar demais UFs <i class="fas fa-chevron-up"></i>`
+            : `Ver demais UFs (${restos}) <i class="fas fa-chevron-down"></i>`;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await carregarStatusBanco();
+        await carregarStats();
+        await carregarPremiacaoCaixa();
+        await carregarRankingUf();
+        document.getElementById('btnPremiacaoCaixa')?.addEventListener('click', atualizarPremiacaoCaixa);
+        document.getElementById('btnOrdemSorteio')?.addEventListener('click', () => definirOrdemBolas('sorteio'));
+        document.getElementById('btnOrdemCresc')?.addEventListener('click', () => definirOrdemBolas('crescente'));
+        document.getElementById('btnRankingUfToggle')?.addEventListener('click', alternarRankingUf);
+        document.getElementById('premiacaoPageSize')?.addEventListener('change', () => {
+            PREMIACAO_PAGE = 1;
+            PREMIACAO_SIZE = pageSizeAtual();
+            renderPremiacao();
+        });
+        document.getElementById('btnPremiacaoBuscaConcurso')?.addEventListener('click', pesquisarConcurso);
+        document.getElementById('btnPremiacaoLimparBusca')?.addEventListener('click', resetarPesquisaConcurso);
+        document.getElementById('premiacaoBuscaConcurso')?.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') {
+                ev.preventDefault();
+                pesquisarConcurso();
+            }
+        });
+        document.querySelector('#premiacaoCaixaTabela thead')?.addEventListener('click', (ev) => {
+            const fbtn = ev.target.closest('.px-filter-btn');
+            if (!fbtn) return;
+            ev.preventDefault();
+            ev.stopPropagation();
+            const key = fbtn.dataset.filter;
+            const th = fbtn.closest('th');
+            if (key && th) abrirMenuFiltro(th, key);
+        });
+        document.addEventListener('click', (ev) => {
+            if (!PREMIACAO_MENU) return;
+            if (ev.target.closest('.px-excel-menu') || ev.target.closest('.px-filter-btn')) return;
+            fecharMenuFiltro();
+        });
+        document.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') fecharMenuFiltro();
+        });
+        window.addEventListener('scroll', (ev) => {
+            if (!PREMIACAO_MENU) return;
+            if (PREMIACAO_MENU.contains(ev.target)) return;
+            fecharMenuFiltro();
+        }, true);
+        window.addEventListener('resize', () => { if (PREMIACAO_MENU) fecharMenuFiltro(); });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+<script src="{{ url_for('cc_static.static', filename='js/conversor-apostas.js') }}"></script>
+<script src="{{ url_for('cc_static.static', filename='js/conferencia-resultados-ui.js') }}"></script>
+<script src="{{ url_for('cc_static.static', filename='js/concursos-disponiveis.js') }}"></script>
+<script>
+    let _confTabAtiva = 'historico';
+    let _historicoCarregado = false;
+
+    function setConfTab(tabId, atualizarHash) {
+        if (atualizarHash === undefined) atualizarHash = true;
+        _confTabAtiva = tabId;
+        document.querySelectorAll('.conf-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabId);
+        });
+        document.querySelectorAll('.conf-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+        const panel = document.getElementById('panel-' + tabId);
+        if (panel) panel.style.display = 'block';
+        if (tabId === 'historico' && !_historicoCarregado) {
+            _historicoCarregado = true;
+            if (typeof carregar === 'function') carregar();
+            else if (typeof rodarConferencia === 'function') rodarConferencia();
+        }
+        if (tabId === 'conversor' && window.ConversorApostas) {
+            ConversorApostas.init();
+            if (typeof convRecarregarConcurso === 'function') convRecarregarConcurso();
+        }
+        if (tabId === 'concursos' && window.ConcursosDisponiveis) {
+            ConcursosDisponiveis.init();
+        }
+        if (atualizarHash && location.hash !== '#' + tabId) {
+            history.replaceState(null, '', '#' + tabId);
+        }
+    }
+
+    function initConfTabs() {
+        const hash = (location.hash || '').replace('#', '');
+        const tabsValidas = ['historico', 'conversor', 'concursos'];
+        const tab = tabsValidas.includes(hash) ? hash : 'historico';
+        setConfTab(tab, false);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initConfTabs();
+    });
+</script>

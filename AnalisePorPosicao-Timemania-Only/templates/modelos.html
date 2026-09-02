@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+    }
+
+    .modelos-center {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .modelo-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: 2px solid rgba(0,0,0,0.1);
+        border-radius: 8px;
+        padding: .35rem .75rem;
+        font-weight: 600;
+        font-size: .85rem;
+        color: #555;
+        white-space: nowrap;
+        transition: all .2s;
+        line-height: 1.3;
+        background: transparent;
+        cursor: pointer;
+    }
+    .tab-btn:hover {
+        background: rgba(0,0,0,0.05);
+    }
+
+    .tab-btn.active {
+        color: #fff;
+    }
+
+    .modelo-panel {
+        display: none;
+    }
+
+    .modelo-panel.active {
+        display: block;
+    }
+
+    .modelo-header {
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        color: #fff;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .progress-banner {
+        background: linear-gradient(135deg, #441a00, #6e2d00);
+        border-radius: 10px;
+        color: #fff;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .prog-bar-wrap {
+        background: rgba(255, 255, 255, .2);
+        border-radius: 4px;
+        height: 6px;
+        margin-top: .5rem;
+    }
+
+    .prog-bar {
+        height: 6px;
+        border-radius: 4px;
+        background: var(--accent);
+        transition: width .4s;
+    }
+
+    .aposta-row {
+    position: relative;
+        padding: .5rem .75rem;
+        border-bottom: 1px solid #f0d0b0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .aposta-row:hover {
+        background: var(--accent-light);
+    }
+
+    .aposta-num {
+        font-weight: 700;
+        color: #888;
+        font-size: .75rem;
+        min-width: 28px;
+        text-align: right;
+    }
+
+    .dez-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .78rem;
+    }
+
+    .time-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--accent-time);
+        color: #fff;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 3px 8px;
+        font-size: .7rem;
+        margin-left: 4px;
+    }
+
+    .pool-section {
+        padding: .65rem 1rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .pool-groups {
+        display: flex;
+        gap: 1.2rem;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pool-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .pool-group-label {
+        font-size: .62rem;
+        font-weight: 700;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .pool-dez-row {
+        display: flex;
+        gap: 3px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pool-dez {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: .68rem;
+        border: 1.5px solid;
+    }
+
+    .pool-divider {
+        width: 1px;
+        background: #e0e0e0;
+        align-self: stretch;
+        margin: 0 .15rem;
+    }
+
+    .bt-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, .07);
+        overflow: hidden;
+        border: 1px solid #e8e8e8;
+    }
+
+    .bt-header {
+        padding: .7rem 1rem;
+        color: #fff;
+        font-weight: 600;
+        font-size: .88rem;
+    }
+
+    .bt-body {
+        padding: .75rem 1rem;
+    }
+
+    .acertos-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px;
+        margin-bottom: .4rem;
+    }
+
+    .chip {
+        font-size: .66rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 12px;
+    }
+
+    .score-bar-wrap {
+        background: #eee;
+        border-radius: 4px;
+        height: 6px;
+        margin-top: .4rem;
+    }
+
+    .score-bar {
+        height: 6px;
+        border-radius: 4px;
+    }
+
+    .btn-download {
+        display: none;
+    }
+
+    #btProgress {
+        display: none;
+    }
+</style>
+
+<div class="progress-banner" id="autoBanner">
+    <div class="d-flex justify-content-between align-items-center">
+        <span id="autoMsg"><i class="fas fa-bolt me-2"></i>Iniciando geração automática...</span>
+        <span id="autoPct" style="font-weight:800;color:var(--accent);">0%</span>
+    </div>
+    <div class="prog-bar-wrap">
+        <div class="prog-bar" id="autoBar" style="width:0%"></div>
+    </div>
+</div>
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div>
+            <h2><i class="fas fa-layer-group me-2"></i>Central de Modelos — Timemania</h2>
+            <p class="mb-0" style="opacity:.85;font-size:.9rem;">6 modelos · 14 apostas (10 dezenas + 1 Time do Coração)
+                · Backtesting com 8 categorias de prêmio</p>
+        </div>
+    </div>
+</div>
+
+<div class="modelos-center">
+    <div class="modelo-tabs">
+        {% for m in modelos %}
+        <button class="tab-btn {% if loop.first %}active{% endif %}" id="tab-btn-{{ m.id }}"
+            style="{% if loop.first %}background:{{ m.cor }};{% endif %}" onclick="showModelo({{ m.id }})">
+            {{ m.emoji }} M{{ m.id }} — {{ m.nome }}
+        </button>
+        {% endfor %}
+        <button class="tab-btn" id="tab-btn-bt" onclick="showModelo('bt')" style="background:#441a00;color:#fff;">
+            <i class="fas fa-chart-bar me-1"></i>Backtesting
+        </button>
+    </div>
+
+    {% for m in modelos %}
+    <div class="modelo-panel {% if loop.first %}active{% endif %}" id="pane-{{ m.id }}">
+        <div class="modelo-header" style="background:{{ m.cor }};">
+            <div style="font-size:1.8rem;">{{ m.emoji }}</div>
+            <div>
+                <strong style="font-size:1.05rem;">Modelo {{ m.id }} — {{ m.nome }}</strong><br>
+                <small style="opacity:.85;">{{ m.subtitulo }}</small>
+            </div>
+            <div class="ms-2"><span class="badge" style="background:rgba(255,255,255,.2);font-size:.72rem;">{{
+                    m.estrutura }}</span></div>
+        </div>
+        <div class="card border-0 shadow-sm mb-2">
+            <div class="pool-section d-none" id="pool-{{ m.id }}">
+                <div class="pool-groups">
+                    <div class="pool-group">
+                        <span class="pool-group-label">Top-6 Freq Dez</span>
+                        <div id="poolFreq-{{ m.id }}" class="pool-dez-row"></div>
+                    </div>
+                    <div class="pool-divider"></div>
+                    <div class="pool-group">
+                        <span class="pool-group-label">Top-6 Atr Dez</span>
+                        <div id="poolAtr-{{ m.id }}" class="pool-dez-row"></div>
+                    </div>
+                    <div class="pool-divider"></div>
+                    <div class="pool-group">
+                        <span class="pool-group-label">⚽ Top Times</span>
+                        <div id="poolTimes-{{ m.id }}" class="pool-dez-row"
+                            style="flex-direction:column;align-items:flex-start;gap:2px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="aposta-row" style="background:#f8f9fa;font-size:.68rem;font-weight:700;color:#666;">
+                    <span style="min-width:28px;text-align:right;">#</span>
+                    <span style="display:inline-block;width:32px;text-align:center;">C1</span><span style="display:inline-block;width:32px;text-align:center;">C2</span><span style="display:inline-block;width:32px;text-align:center;">C3</span><span style="display:inline-block;width:32px;text-align:center;">C4</span><span style="display:inline-block;width:32px;text-align:center;">C5</span>
+                    <span style="display:inline-block;width:32px;text-align:center;">C6</span><span style="display:inline-block;width:32px;text-align:center;">C7</span><span style="display:inline-block;width:32px;text-align:center;">C8</span><span style="display:inline-block;width:32px;text-align:center;">C9</span><span style="display:inline-block;width:32px;text-align:center;">C10</span>
+                    <span style="margin-left:auto;color:var(--accent-time);">⚽ Time do Coração</span>
+                </div>
+                <div id="tbody-{{ m.id }}">
+                    <div class="text-center text-muted py-4" style="font-size:.85rem;"><i
+                            class="fas fa-clock me-2"></i>Aguardando geração...</div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 text-center">
+                <button class="btn btn-sm btn-download" id="dlBtn-{{ m.id }}"
+                    style="background:var(--accent);color:#fff;font-weight:700;" onclick="downloadModelo({{ m.id }})">
+                    <i class="fas fa-download me-1"></i>Download TXT
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="max-width: 100%;margin:1rem auto 0;">
+    <div class="modelo-panel" id="pane-bt">
+        <div class="modelo-header" style="background:linear-gradient(135deg,#441a00,#6e2d00);">
+            <i class="fas fa-chart-bar" style="font-size:1.5rem;"></i>
+            <div><strong>Backtesting Histórico — Timemania</strong><br><small style="opacity:.8;">7 a 3 dezenas · só
+                    time</small></div>
+        </div>
+        <div id="btProgress">
+            <div class="text-center py-3 text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Analisando...</div>
+        </div>
+        <div id="btResultado"></div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    const TOTAL_MODELOS = 6;
+    const CORES = {
+        1: { bg: '#8b3a00', light: '#fff3e0', text: '#441a00' },
+        2: { bg: '#006b4f', light: '#c8f0e4', text: '#003028' },
+        3: { bg: '#6b3800', light: '#fde8d0', text: '#3d1a00' },
+        4: { bg: '#003a6b', light: '#d7e8fa', text: '#001a50' },
+        5: { bg: '#4a006b', light: '#eed7fa', text: '#280040' },
+        6: { bg: '#6b0010', light: '#fad7d7', text: '#3d0000' },
+    };
+
+    function showModelo(id) {
+        document.querySelectorAll('.modelo-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.style.background = ''; b.style.color = ''; });
+        const panel = document.getElementById(`pane-${id}`), btn = document.getElementById(`tab-btn-${id}`);
+        if (panel) panel.classList.add('active');
+        if (btn) { btn.classList.add('active'); if (id === 'bt') { btn.style.background = '#441a00'; btn.style.color = '#fff'; } else if (CORES[id]) { btn.style.background = CORES[id].bg; btn.style.color = '#fff'; } }
+    }
+
+    function setProgress(step, msg) {
+        const total = TOTAL_MODELOS + 1, pct = Math.round((step / total) * 100);
+        document.getElementById('autoBanner').style.display = 'block';
+        document.getElementById('autoMsg').innerHTML = `<i class="fas fa-bolt me-2"></i>${msg}`;
+        document.getElementById('autoPct').textContent = pct + '%';
+        document.getElementById('autoBar').style.width = pct + '%';
+    }
+
+    async function gerarModelo(modeloId) {
+        const tbody = document.getElementById(`tbody-${modeloId}`), dlBtn = document.getElementById(`dlBtn-${modeloId}`);
+        tbody.innerHTML = `<div class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-2"></i>Gerando 14 apostas (10 dez + time)...</div>`;
+        try {
+            const r = await fetch(`/modelos/api/gerar/${modeloId}`, { method: 'POST' }); const d = await r.json();
+            if (d.error) { tbody.innerHTML = `<div class="text-danger p-3">${d.error}</div>`; return; }
+            const cor = CORES[modeloId] || CORES[1];
+            let html = '';
+            d.apostas.forEach(a => {
+                html += `<div class="aposta-row"><span class="aposta-num">${a.aposta_num}</span>`;
+                a.dezenas.forEach(dez => { html += `<span class="dez-chip" style="background:${cor.light};color:${cor.bg};">${String(dez).padStart(2, '0')}</span>`; });
+                html += `<span class="time-chip">⚽ ${a.time_nome}</span></div>`;
+            });
+            tbody.innerHTML = html;
+            if (d.pool_info) {
+                const pd = document.getElementById(`pool-${modeloId}`);
+                document.getElementById(`poolFreq-${modeloId}`).innerHTML = (d.pool_info.top6_freq || []).map(dez => `<span class="pool-dez" style="background:${cor.light};color:${cor.bg};border-color:${cor.bg};">${dez}</span>`).join('');
+                document.getElementById(`poolAtr-${modeloId}`).innerHTML = (d.pool_info.top6_atr || []).map(dez => `<span class="pool-dez" style="background:#f0f0f0;color:#555;border-color:#ccc;">${dez}</span>`).join('');
+                document.getElementById(`poolTimes-${modeloId}`).innerHTML = (d.pool_info.top_times || []).map(t => `<span style="font-size:.68rem;font-weight:600;color:var(--accent-time);">⚽ ${t.num}. ${t.nome}</span>`).join('');
+                pd.classList.remove('d-none');
+            }
+            dlBtn.style.display = 'inline-block';
+            window[`apostasModelo${modeloId}`] = { apostas: d.apostas, nome: d.modelo_nome, concurso: d.ultimo_concurso };
+        } catch (e) { tbody.innerHTML = `<div class="text-danger p-3">Erro: ${e.message}</div>`; }
+    }
+
+    async function executarBacktesting() {
+        const progress = document.getElementById('btProgress'), result = document.getElementById('btResultado');
+        progress.style.display = 'block'; result.innerHTML = '';
+        try {
+            const r = await fetch('/modelos/api/backtesting', { method: 'POST' }); const d = await r.json();
+            if (d.error) { result.innerHTML = `<div class="text-danger p-3">${d.error}</div>`; return; }
+            const ranking = d.ranking, maxScore = ranking[0].score || 1;
+            const medalhas = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'];
+            let html = `<div class="alert alert-info mb-3" style="border-radius:10px;border-left:4px solid var(--accent);">
+            <i class="fas fa-database me-2"></i><strong>${d.total_sorteios.toLocaleString()}</strong> concursos · 8 categorias de prêmio avaliadas
+        </div><div class="row g-3 mb-3">`;
+            ranking.forEach(m => {
+                const cor = CORES[m.modelo_id], pct = maxScore > 0 ? (m.score / maxScore * 100).toFixed(1) : 0, medalha = medalhas[m.posicao - 1] || m.posicao + 'º';
+                html += `<div class="col-md-6 col-lg-4"><div class="bt-card">
+                <div class="bt-header" style="background:${cor.bg};">${m.modelo_emoji} M${m.modelo_id} — ${m.modelo_nome} <span style="background:rgba(255,255,255,.2);padding:2px 7px;border-radius:8px;font-size:.75rem;">${m.posicao}</span></div>
+                <div class="bt-body">
+                    <div class="fw-bold mb-1" style="color:${cor.bg};">${m.total_premios} prêmios ${medalha}</div>
+                    <div class="acertos-chips">
+                        ${m.hits_7 > 0 ? `<span class="chip" style="background:#441a00;color:var(--accent);">7×${m.hits_7}</span>` : ''}
+                        ${m.hits_6 > 0 ? `<span class="chip" style="background:${cor.bg};color:#fff;">6×${m.hits_6}</span>` : ''}
+                        ${m.hits_5 > 0 ? `<span class="chip" style="background:#006b4f;color:#c8f0e4;">5×${m.hits_5}</span>` : ''}
+                        ${m.hits_4 > 0 ? `<span class="chip" style="background:#aaa;color:#fff;">4×${m.hits_4}</span>` : ''}
+                        <span class="chip" style="background:#f0f0f0;color:#666;">3×${m.hits_3}</span>
+                        <span class="chip" style="background:var(--accent-time);color:#fff;">⚽×${m.hits_0}</span>
+                    </div>
+                    <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%;background:${cor.bg};"></div></div>
+                    <div class="text-muted mt-1" style="font-size:.7rem;">Score: ${m.score.toLocaleString()} pts</div>
+                </div>
+            </div></div>`;
+            });
+            html += `</div>`;
+            html += `<div class="card border-0 shadow-sm"><div class="card-header fw-bold" style="color:var(--primary);"><i class="fas fa-table me-2"></i>Comparativo Detalhado</div>
+          <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0" style="font-size:.75rem;text-align:center;">
+          <thead class="table-dark"><tr><th class="text-start">Pos</th><th class="text-start">Modelo</th><th>7 Acertos</th><th>6</th><th>5</th><th>4</th><th>3</th><th>⚽ Só Time</th><th>Total</th><th>Score</th></tr></thead><tbody>`;
+            ranking.forEach(m => {
+                const cor = CORES[m.modelo_id], medalha = medalhas[m.posicao - 1] || m.posicao + 'º';
+                html += `<tr><td class="fw-bold text-start">${medalha}</td><td class="text-start"><span class="badge" style="background:${cor.bg};">${m.modelo_emoji} M${m.modelo_id}</span></td>
+                <td class="fw-bold text-success">${m.hits_7}</td><td>${m.hits_6}</td><td class="text-success">${m.hits_5}</td><td>${m.hits_4}</td>
+                <td class="text-muted">${m.hits_3}</td><td style="color:var(--accent-time);font-weight:700;">${m.hits_0}</td>
+                <td class="fw-bold">${m.total_premios}</td><td class="fw-bold" style="color:${cor.bg};">${m.score.toLocaleString()}</td></tr>`;
+            });
+            html += `</tbody></table></div></div></div>`;
+            const v = ranking[0];
+            html += `<div class="alert mt-3" style="background:var(--accent-light);border-left:4px solid var(--accent);border-radius:8px;">🏆 <strong>M${v.modelo_id} — ${v.modelo_nome}</strong>: ${v.total_premios} prêmios · score ${v.score.toLocaleString()} pts</div>`;
+            result.innerHTML = html;
+        } catch (e) { result.innerHTML = `<div class="text-danger p-3">${e.message}</div>`; }
+        finally { progress.style.display = 'none'; }
+    }
+
+    function downloadModelo(id) {
+        const info = window[`apostasModelo${id}`];
+        if (!info) { Swal.fire('Aviso', 'Gere primeiro!', 'warning'); return; }
+        const linhas = info.apostas.map(a => a.dezenas.map(d => String(d).padStart(2, '0')).join(' ') + ` ${a.time_nome}`);
+        const blob = new Blob([linhas.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob), link = document.createElement('a');
+        link.href = url; link.download = `[M${id}_${info.nome.replace(/ /g, '_')}]_TIMEMANIA_${info.concurso}.txt`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+    }
+
+    async function autoRunAll() {
+        for (let i = 1; i <= TOTAL_MODELOS; i++) { setProgress(i - 1, `Gerando Modelo ${i}...`); await gerarModelo(i); await new Promise(r => setTimeout(r, 150)); }
+        setProgress(TOTAL_MODELOS, 'Backtesting (8 categorias)...'); showModelo('bt'); await executarBacktesting();
+        setProgress(TOTAL_MODELOS + 1, 'Concluído!');
+        setTimeout(() => { document.getElementById('autoBanner').style.display = 'none'; }, 2500);
+    }
+    document.addEventListener('DOMContentLoaded', () => { autoRunAll(); });
+</script>
+{% endblock %}

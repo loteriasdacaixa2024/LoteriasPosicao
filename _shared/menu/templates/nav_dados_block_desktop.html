@@ -1,0 +1,31 @@
+                    <a class="dd-link" href="/">
+                        <span class="dd-icon" style="background:var(--accent-light);color:var(--primary);">
+                            <i class="fas fa-satellite-dish"></i>
+                        </span>
+                        <span class="dd-text-block">
+                            <span class="dd-title">{{ nav_cfg.sync.title }}</span>
+                            <span class="dd-desc">{{ nav_cfg.sync.desc }}</span>
+                        </span>
+                    </a>
+                    {% include 'ac_nav_comparar_desktop.html' %}
+                    {% include 'ac_nav_repeticao_desktop.html' %}
+                    <a class="dd-link" href="{{ nav_cfg.stats.href }}">
+                        <span class="dd-icon" style="background:{{ nav_cfg.stats.icon_bg }};color:{{ nav_cfg.stats.icon_color }};">
+                            <i class="{{ nav_cfg.stats.icon }}"></i>
+                        </span>
+                        <span class="dd-text-block">
+                            <span class="dd-title">{{ nav_cfg.stats.title }}</span>
+                            <span class="dd-desc">{{ nav_cfg.stats.desc }}</span>
+                        </span>
+                    </a>
+                    {% for extra in nav_cfg.dados_extras %}
+                    <a class="dd-link" href="{{ extra.href }}">
+                        <span class="dd-icon" style="background:{{ extra.icon_bg }};color:{{ extra.icon_color }};">
+                            <i class="{{ extra.icon }}"></i>
+                        </span>
+                        <span class="dd-text-block">
+                            <span class="dd-title">{{ extra.title }}</span>
+                            <span class="dd-desc">{{ extra.desc }}</span>
+                        </span>
+                    </a>
+                    {% endfor %}

@@ -1,0 +1,2519 @@
+(function () {
+    'use strict';
+
+    const root = document.getElementById('ge-construtor');
+    if (!root) return;
+
+    const API = window.__CC_API__ || root.dataset.api;
+    const UI = window.__CC_UI__ || {};
+    const PICK_MIN = parseInt(root.dataset.pickMin, 10) || UI.pick_min || 7;
+    const PICK_MAX = parseInt(root.dataset.pickMax, 10) || UI.pick_max || 15;
+    const PICK_DEFAULT = UI.pick_default || PICK_MIN;
+    const QTD_APOSTAS = parseInt(root.dataset.qtdApostas, 10) || 10;
+    const CONJUNTO_MAX = parseInt(root.dataset.conjuntoMax, 10) || UI.max_conjunto_base || 16;
+    const ORIGEM_APOSTAS_10X7 = 'apostas_10x7';
+    const APOSTAS_LINHAS = 10;
+    const APOSTAS_POR_LINHA = PICK_DEFAULT;
+    const DEZENA_MIN = UI.dezena_min != null ? UI.dezena_min : 1;
+    const DEZENA_MAX = UI.total_dezenas || 31;
+    const DEZENA_WIDTH = (UI.dezena_fmt_width != null ? UI.dezena_fmt_width : 2);
+    const ACERTOS_MIN = UI.acertos_min_relevante || 4;
+    const ACERTOS_MAX = UI.acertos_max_possivel || 7;
+    const ACERTOS_TIERS = (UI.acertos_tiers && UI.acertos_tiers.length)
+        ? UI.acertos_tiers
+        : Array.from({ length: ACERTOS_MAX - ACERTOS_MIN + 1 }, (_, i) => ACERTOS_MIN + i);
+    const FAIXA_LIMITES = UI.faixa_limites || {
+        baixas: [1, 10], medias: [11, 20], altas: [21, 31]
+    };
+    const HAS_MES = !!UI.has_mes;
+    const HAS_TIME = !!UI.has_time;
+    const HAS_TREVOS = !!UI.has_trevos;
+    const PADROES_II_API = '/geradores-elite/api/construtor-construcoes/catalogo-padroes';
+    let padroesIICatalogo = [];
+    let padroesIISelecionados = new Set();
+    let ultimoDiagnosticoPadII = [];
+    let lastSessaoBoardExtra = null;
+    const VOLANTE_COLS = UI.volante_cols || 10;
+
+    let selecionadas = new Set();
+    let sessaoAtual = null;
+    let origemConjunto = 'manual';
+    let modoEntrada = 'volante'; // 'volante' | 'apostas10x7'
+    let editandoConstrucaoId = null;
+    let exportandoConstrucaoId = null;
+    let exportandoSessaoTodas = false;
+    let modalEditar = null;
+    let modalExport = null;
+    let modalConfHist = null;
+
+    const MESES = UI.meses || [];
+    const ultimoSorteioSet = new Set((window.__CC_ULTIMO__ && window.__CC_ULTIMO__.dezenas) || []);
+    const cicloFaltantesSet = new Set();
+
+    const $ = (id) => document.getElementById(id);
+
+    function escHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function formatarBrl(valor) {
+        if (valor == null || valor === '') return '';
+        const n = Number(valor);
+        if (!Number.isFinite(n)) return '';
+        return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function precoLoteLocal(nDezenas, nApostas) {
+        const map = UI.precos_map || {};
+        const unit = map[String(nDezenas)];
+        if (unit == null) return { total: null, total_fmt: '', unitario: null, unitario_fmt: '' };
+        const qtd = Math.max(0, Number(nApostas) || 0);
+        const total = Math.round(Number(unit) * qtd * 100) / 100;
+        return {
+            unitario: Number(unit),
+            unitario_fmt: formatarBrl(unit),
+            total,
+            total_fmt: formatarBrl(total),
+        };
+    }
+
+    function valorConstrucaoFmt(c) {
+        if (c && c.valor_total_fmt) return c.valor_total_fmt;
+        const n = (c && (c.qtd_apostas != null ? c.qtd_apostas : (c.apostas || []).length)) || QTD_APOSTAS;
+        const k = ((c && c.apostas && c.apostas[0] && c.apostas[0].dezenas) || []).length
+            || (sessaoAtual && sessaoAtual.dezenas_por_aposta)
+            || PICK_DEFAULT;
+        return precoLoteLocal(k, n).total_fmt;
+    }
+
+    function abrirColinha(auto) {
+        const pop = $('ccColinhaPop');
+        const btn = $('ccColinhaBtn');
+        if (!pop) return;
+        pop.classList.add('aberto');
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+        if (auto) pop.classList.add('cc-colinha-auto');
+    }
+
+    function fecharColinha() {
+        const pop = $('ccColinhaPop');
+        const btn = $('ccColinhaBtn');
+        if (!pop) return;
+        pop.classList.remove('aberto', 'cc-colinha-auto');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+        try { localStorage.setItem(COLINHA_KEY, '1'); } catch (_) {}
+    }
+
+    function toggleColinha() {
+        const pop = $('ccColinhaPop');
+        if (pop && pop.classList.contains('aberto')) fecharColinha();
+        else abrirColinha(false);
+    }
+
+    function avisoLimite() {
+        abrirColinha(true);
+        const info = $('ccPoolInfo');
+        if (info) {
+            info.className = 'small text-danger';
+            info.textContent = `Limite de ${CONJUNTO_MAX} dezenas no conjunto-base. Desmarque uma para trocar.`;
+        }
+    }
+
+    function maxConjuntoParaOrigem(origem) {
+        const o = origem != null ? origem : origemConjunto;
+        return o === ORIGEM_APOSTAS_10X7 ? DEZENA_MAX : CONJUNTO_MAX;
+    }
+
+    function labelMaxConjunto() {
+        return maxConjuntoParaOrigem();
+    }
+
+    function setModoEntrada(modo, limparAoTrocar) {
+        if (!$('ccModoApostasWrap')) return;
+        const novo = modo === 'apostas10x7' ? 'apostas10x7' : 'volante';
+        const anterior = modoEntrada;
+        modoEntrada = novo;
+
+        const wrapV = $('ccModoVolanteWrap');
+        const wrapA = $('ccModoApostasWrap');
+        const btnV = $('ccModoVolanteBtn');
+        const btnA = $('ccModoApostasBtn');
+        const hint = $('ccStep1Hint');
+
+        if (wrapV) wrapV.style.display = novo === 'volante' ? '' : 'none';
+        if (wrapA) wrapA.style.display = novo === 'apostas10x7' ? '' : 'none';
+        if (btnV) btnV.classList.toggle('active', novo === 'volante');
+        if (btnA) btnA.classList.toggle('active', novo === 'apostas10x7');
+
+        if (hint) {
+            if (novo === 'apostas10x7') {
+                hint.textContent =
+                    'Cole exatamente 10 apostas com ' + APOSTAS_POR_LINHA +
+                    ' dezenas. O conjunto-base será a união dessas dezenas (pode passar de ' +
+                    CONJUNTO_MAX + ').';
+            } else {
+                hint.textContent =
+                    'Marque as dezenas da matéria-prima ou importe do ciclo/análise. Máximo ' +
+                    CONJUNTO_MAX + ' números.';
+            }
+        }
+
+        if (limparAoTrocar && anterior !== novo) {
+            if (novo === 'volante') {
+                if (origemConjunto === ORIGEM_APOSTAS_10X7 && selecionadas.size > CONJUNTO_MAX) {
+                    setSelecionadas([...selecionadas].slice(0, CONJUNTO_MAX), 'manual',
+                        `Modo volante limita a ${CONJUNTO_MAX}; mantidas as primeiras.`);
+                } else if (origemConjunto === ORIGEM_APOSTAS_10X7) {
+                    origemConjunto = 'manual';
+                    updatePoolInfo();
+                }
+            }
+        }
+        updatePoolInfo();
+    }
+
+    function extrairNumsLinha(linha) {
+        const parts = String(linha || '').match(/\d+/g) || [];
+        return parts.map((x) => parseInt(x, 10));
+    }
+
+    function parseApostas10x7(texto) {
+        const raw = String(texto || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+        if (!raw) {
+            return { ok: false, erro: 'Cole as 10 apostas no campo de texto.' };
+        }
+        let linhas = raw.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+        let apostas = [];
+
+        if (linhas.length === APOSTAS_LINHAS) {
+            for (let i = 0; i < linhas.length; i++) {
+                const nums = extrairNumsLinha(linhas[i]);
+                if (nums.length !== APOSTAS_POR_LINHA) {
+                    return {
+                        ok: false,
+                        erro: `Linha ${i + 1}: esperado ${APOSTAS_POR_LINHA} dezenas, veio ${nums.length}.`
+                    };
+                }
+                apostas.push(nums);
+            }
+        } else {
+            const todos = extrairNumsLinha(raw);
+            if (todos.length === APOSTAS_LINHAS * APOSTAS_POR_LINHA) {
+                for (let i = 0; i < APOSTAS_LINHAS; i++) {
+                    const ini = i * APOSTAS_POR_LINHA;
+                    apostas.push(todos.slice(ini, ini + APOSTAS_POR_LINHA));
+                }
+            } else {
+                return {
+                    ok: false,
+                    erro: `Precisa de exatamente ${APOSTAS_LINHAS} linhas com ${APOSTAS_POR_LINHA} dezenas ` +
+                        `(ou ${APOSTAS_LINHAS * APOSTAS_POR_LINHA} números no total). ` +
+                        `Encontrado: ${linhas.length} linha(s), ${todos.length} número(s).`
+                };
+            }
+        }
+
+        const uniao = new Set();
+        for (let i = 0; i < apostas.length; i++) {
+            const ap = apostas[i];
+            const vistos = new Set();
+            for (const n of ap) {
+                if (!Number.isFinite(n) || n < DEZENA_MIN || n > DEZENA_MAX) {
+                    return {
+                        ok: false,
+                        erro: `Aposta ${i + 1}: dezena ${fmt(n)} fora de ${fmt(DEZENA_MIN)}–${fmt(DEZENA_MAX)}.`
+                    };
+                }
+                if (vistos.has(n)) {
+                    return {
+                        ok: false,
+                        erro: `Aposta ${i + 1}: dezena ${fmt(n)} repetida na mesma linha.`
+                    };
+                }
+                vistos.add(n);
+                uniao.add(n);
+            }
+        }
+
+        const pool = [...uniao].sort((a, b) => a - b);
+        if (pool.length < PICK_MIN) {
+            return {
+                ok: false,
+                erro: `União das dezenas tem só ${pool.length}; mínimo ${PICK_MIN}.`
+            };
+        }
+        return { ok: true, apostas, pool };
+    }
+
+    function atualizarInfoParseApostas() {
+        const el = $('ccApostasParseInfo');
+        const ta = $('ccApostasTexto');
+        if (!el || !ta) return;
+        const texto = ta.value;
+        if (!String(texto || '').trim()) {
+            el.className = 'small text-muted mb-1';
+            el.textContent = '';
+            return;
+        }
+        const r = parseApostas10x7(texto);
+        if (!r.ok) {
+            el.className = 'small text-danger mb-1';
+            el.textContent = r.erro;
+            return;
+        }
+        el.className = 'small text-success mb-1';
+        el.textContent =
+            `OK: ${APOSTAS_LINHAS}×${APOSTAS_POR_LINHA} — união: ${r.pool.length} dezenas distintas ` +
+            `(${r.pool.map(fmt).join(' ')}).`;
+    }
+
+    function aplicarApostas10x7(silencioso) {
+        const ta = $('ccApostasTexto');
+        if (!ta) return false;
+        const r = parseApostas10x7(ta.value);
+        if (!r.ok) {
+            if (!silencioso) alert(r.erro);
+            atualizarInfoParseApostas();
+            return false;
+        }
+        setSelecionadas(r.pool, ORIGEM_APOSTAS_10X7);
+        atualizarInfoParseApostas();
+        if (!silencioso) {
+            const info = $('ccPoolInfo');
+            if (info) {
+                info.className = 'small text-success';
+                info.textContent +=
+                    ` · 10×${APOSTAS_POR_LINHA} aplicadas (${r.pool.length} únicas). Salve o conjunto-base para gerar.`;
+            }
+        }
+        return true;
+    }
+
+    function faixaClass(n) {
+        const iso = FAIXA_LIMITES.isolada;
+        if (iso && n >= iso[0] && n <= iso[1]) return 'faixa-isolada';
+        const b = FAIXA_LIMITES.baixas || [1, 10];
+        const m = FAIXA_LIMITES.medias || [11, 20];
+        if (n >= b[0] && n <= b[1]) return 'faixa-baixa';
+        if (n >= m[0] && n <= m[1]) return 'faixa-media';
+        return 'faixa-alta';
+    }
+
+    function faixaContagem(n) {
+        const iso = FAIXA_LIMITES.isolada;
+        if (iso && n >= iso[0] && n <= iso[1]) return 'i';
+        const b = FAIXA_LIMITES.baixas || [1, 10];
+        const m = FAIXA_LIMITES.medias || [11, 20];
+        if (n >= b[0] && n <= b[1]) return 'b';
+        if (n >= m[0] && n <= m[1]) return 'm';
+        return 'a';
+    }
+
+    function fmt(n) {
+        return String(n).padStart(DEZENA_WIDTH, '0');
+    }
+
+    function renderVolante() {
+        const vol = $('ccVolante');
+        if (!vol) return;
+        vol.style.gridTemplateColumns = `repeat(${VOLANTE_COLS}, 1fr)`;
+        const noLimite = selecionadas.size >= CONJUNTO_MAX;
+        vol.innerHTML = '';
+        for (let n = DEZENA_MIN; n <= DEZENA_MAX; n++) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            const sel = selecionadas.has(n);
+            const faltCiclo = cicloFaltantesSet.has(n);
+            btn.className = 'cc-ball ' + faixaClass(n);
+            if (!sel && noLimite) btn.classList.add('cc-bloqueado');
+            btn.textContent = fmt(n);
+            btn.dataset.n = n;
+            if (sel) btn.classList.add('selected');
+            else if (ultimoSorteioSet.has(n)) btn.classList.add('cc-ultimo-ref');
+            if (faltCiclo) btn.classList.add('cc-ciclo-falt');
+            if (faltCiclo) {
+                btn.title = sel
+                    ? 'No conjunto-base · faltante do ciclo atual'
+                    : 'Faltante do ciclo atual — ainda não saiu';
+            } else {
+                btn.title = ultimoSorteioSet.has(n) && !sel ? 'Saiu no último sorteio' : '';
+            }
+            btn.addEventListener('click', () => {
+                if (selecionadas.has(n)) {
+                    selecionadas.delete(n);
+                } else {
+                    if (selecionadas.size >= CONJUNTO_MAX) {
+                        avisoLimite();
+                        return;
+                    }
+                    selecionadas.add(n);
+                }
+                origemConjunto = 'manual';
+                renderVolante();
+                updatePoolInfo();
+            });
+            vol.appendChild(btn);
+        }
+    }
+
+    function updatePoolInfo() {
+        const arr = [...selecionadas].sort((a, b) => a - b);
+        let b = 0, m = 0, a = 0, iso = 0;
+        arr.forEach(n => {
+            const f = faixaContagem(n);
+            if (f === 'b') b++;
+            else if (f === 'm') m++;
+            else if (f === 'i') iso++;
+            else a++;
+        });
+        const cont = $('ccContador');
+        const maxLabel = labelMaxConjunto();
+        if (cont) {
+            cont.textContent = `${arr.length}/${maxLabel}`;
+            cont.classList.toggle('cc-limite', arr.length >= maxLabel);
+        }
+        const info = $('ccPoolInfo');
+        if (info) {
+            info.className = 'small text-muted';
+            const isoTxt = (FAIXA_LIMITES.isolada && iso) ? ` · 31:${iso}` : (FAIXA_LIMITES.isolada ? ` · 31:${iso}` : '');
+            info.textContent =
+                `${arr.length}/${maxLabel} dezenas — B:${b} M:${m} A:${a}${isoTxt} · origem: ${origemConjunto}`;
+        }
+        atualizarSomasDigitosLive(arr);
+    }
+
+    function digitosDoPool(arr) {
+        const digs = new Set();
+        arr.forEach((n) => {
+            String(n).padStart(DEZENA_WIDTH, '0').split('').forEach((ch) => {
+                if (/\d/.test(ch)) digs.add(ch);
+            });
+        });
+        const ordenados = [...digs].sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+        return { digitos: ordenados, qtd: ordenados.length, soma: arr.reduce((s, n) => s + n, 0) };
+    }
+
+    let sdHistoricoCache = null;
+
+    function regrasSomasDigitos() {
+        const panel = $('ccSomasDigitosPanel');
+        if (!panel) return null;
+        const somaMinEl = $('ccSomaMin');
+        const somaMaxEl = $('ccSomaMax');
+        const exigir = $('ccExigirDigitos') && $('ccExigirDigitos').checked;
+        const digitos = $('ccDigitosExigidos') ? parseInt($('ccDigitosExigidos').value, 10) : null;
+        const somaMin = somaMinEl && somaMinEl.value !== '' ? parseInt(somaMinEl.value, 10) : null;
+        const somaMax = somaMaxEl && somaMaxEl.value !== '' ? parseInt(somaMaxEl.value, 10) : null;
+        if (somaMin == null && somaMax == null && !exigir) return null;
+        return {
+            soma_min: Number.isFinite(somaMin) ? somaMin : null,
+            soma_max: Number.isFinite(somaMax) ? somaMax : null,
+            exigir_digitos: !!exigir,
+            digitos_exigidos: exigir && Number.isFinite(digitos) ? digitos : null,
+        };
+    }
+
+    function atualizarSomasDigitosLive(arr) {
+        const resumo = $('ccSdResumoAtual');
+        const valid = $('ccSdValidacao');
+        if (!resumo) return;
+        if (!arr.length) {
+            resumo.innerHTML = 'Selecione dezenas para ver soma atual e dígitos distintos.';
+            if (valid) valid.textContent = '';
+            return;
+        }
+        const m = digitosDoPool(arr);
+        resumo.innerHTML =
+            `<strong>Soma atual:</strong> ${m.soma}` +
+            ` · <strong>Dígitos:</strong> ${m.digitos.join(', ') || '—'} (${m.qtd})`;
+
+        const regras = regrasSomasDigitos();
+        if (!valid) return;
+        if (!regras) {
+            valid.className = 'small mt-1 text-muted';
+            valid.textContent = 'Sem regra ativa — o save não bloqueia por soma/dígitos.';
+            return;
+        }
+        const erros = [];
+        if (regras.soma_min != null && m.soma < regras.soma_min) {
+            erros.push(`❌ Soma ${m.soma} abaixo do mínimo ${regras.soma_min}.`);
+        }
+        if (regras.soma_max != null && m.soma > regras.soma_max) {
+            erros.push(`❌ Soma ${m.soma} acima do máximo ${regras.soma_max}.`);
+        }
+        if (regras.exigir_digitos && regras.digitos_exigidos != null && m.qtd !== regras.digitos_exigidos) {
+            erros.push(`❌ Precisa de ${regras.digitos_exigidos} dígitos distintos (atual: ${m.qtd}).`);
+        }
+        if (erros.length) {
+            valid.className = 'small mt-1 text-danger';
+            valid.innerHTML = erros.join('<br>');
+        } else {
+            valid.className = 'small mt-1 text-success';
+            valid.textContent = '✅ Dentro da faixa / regra definida.';
+        }
+    }
+
+    async function carregarGuiaSomasDigitos() {
+        const el = $('ccSdGuiaHistorico');
+        if (!el) return;
+        try {
+            const data = await apiGet('/estatisticas-somas-digitos?janela=0&base=geral');
+            if (!data.sucesso) {
+                el.textContent = data.erro || 'Guia histórico indisponível.';
+                return;
+            }
+            sdHistoricoCache = data;
+            const hs = data.historico_somas || {};
+            const hd = data.historico_digitos || {};
+            const topFaixa = (data.distribuicao_faixas || []).find((f) => f.destaque);
+            el.innerHTML =
+                `<strong>Guia histórico (${PICK_DEFAULT} dezenas):</strong> ` +
+                `min ${hs.soma_minima ?? '—'} · max ${hs.soma_maxima ?? '—'} · média ${hs.soma_media ?? '—'}` +
+                ` · faixa +freq: <strong>${hs.faixa_mais_frequente || (topFaixa && topFaixa.faixa) || '—'}</strong>` +
+                `<br><strong>★★ Recomendado:</strong> ${hd.qtd_recomendada ?? PICK_DEFAULT} dígitos distintos ` +
+                `(${(hd.qtd_recomendada_pct != null ? String(hd.qtd_recomendada_pct).replace('.', ',') : '—')}%)` +
+                ` · dígito +sai: <strong>${hd.digito_mais_frequente ?? '—'}</strong>`;
+            const sel = $('ccDigitosExigidos');
+            if (sel && hd.qtd_recomendada != null) {
+                sel.value = String(hd.qtd_recomendada);
+            }
+        } catch (e) {
+            el.textContent = 'Guia histórico indisponível.';
+        }
+    }
+
+    function fillSelectDezenas() {
+        const sel = $('ccDezenasAposta');
+        sel.innerHTML = '';
+        for (let k = PICK_MIN; k <= PICK_MAX; k++) {
+            const opt = document.createElement('option');
+            opt.value = k;
+            opt.textContent = k + ' dezenas';
+            if (k === PICK_DEFAULT) opt.selected = true;
+            sel.appendChild(opt);
+        }
+    }
+
+    function fillEstrategias() {
+        const sel = $('ccEstrategia');
+        sel.innerHTML = '';
+        const DEFAULT_ESTRATEGIA = 'conforme_comportamento';
+        (UI.estrategias || []).forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.id;
+            opt.textContent = e.label;
+            opt.title = e.desc || '';
+            if (e.id === DEFAULT_ESTRATEGIA) opt.selected = true;
+            sel.appendChild(opt);
+        });
+        if (![...sel.options].some(o => o.value === DEFAULT_ESTRATEGIA) && sel.options.length) {
+            sel.selectedIndex = 0;
+        } else {
+            sel.value = DEFAULT_ESTRATEGIA;
+        }
+        sel.addEventListener('change', onEstrategiaChange);
+        onEstrategiaChange();
+    }
+
+    function onEstrategiaChange() {
+        const v = $('ccEstrategia').value;
+        $('ccPersonalizadaWrap').style.display = v === 'personalizada' ? '' : 'none';
+        const showJanela = v === 'conforme_comportamento';
+        $('ccJanelaWrap').style.display = showJanela ? '' : 'none';
+        const hint = $('ccJanelaHint');
+        if (hint) hint.classList.toggle('d-none', !showJanela);
+    }
+
+    function atualizarBotoesSessaoConstrucoes() {
+        const has = !!(sessaoAtual && sessaoAtual.construcoes && sessaoAtual.construcoes.length);
+        if ($('ccBtnConferirTodas')) $('ccBtnConferirTodas').disabled = !has;
+        if ($('ccBtnExportTodas')) $('ccBtnExportTodas').disabled = !has;
+        if ($('ccBtnManualTodas')) $('ccBtnManualTodas').disabled = !has;
+        if ($('ccBtnManualUltima')) $('ccBtnManualUltima').disabled = !has;
+        atualizarPainelRefinar();
+    }
+
+    const MANUAL_S10_URL = '/geradores-elite/escolha-tubular-apostas/?aba=manual';
+    const MANUAL_S10_KEY = 'tb_manual10_import';
+
+    function mesInfoConstrucao(c) {
+        const num = c && c.mes_num != null ? parseInt(c.mes_num, 10) : 0;
+        if (!HAS_MES || !num || num < 1 || num > 12) {
+            return { mes_num: 0, mes_nome: '' };
+        }
+        const found = MESES.find(m => parseInt(m.num, 10) === num);
+        return {
+            mes_num: num,
+            mes_nome: (found && found.nome) || '',
+        };
+    }
+
+    function nomeMesPorNum(num) {
+        const n = parseInt(num, 10);
+        if (!Number.isFinite(n) || n < 1 || n > 12) return '';
+        const found = MESES.find(m => parseInt(m.num, 10) === n);
+        if (found && found.nome) return found.nome;
+        const data = window.MesSorteSelect && MesSorteSelect.cached;
+        if (data && data.meses) {
+            const hit = data.meses.find(m => Number(m.mes_num || m.num) === n);
+            if (hit) return hit.nome || hit.mes_nome || '';
+        }
+        return '';
+    }
+
+    function jogosDeConstrucao(c) {
+        const mesDefault = mesInfoConstrucao(c);
+        const apostas = (c.apostas || []).filter(
+            a => (a.dezenas || []).map(Number).length >= PICK_MIN
+        );
+        let mesesLote = null;
+        if (HAS_MES) {
+            const sel = $('ccManualMes');
+            if (sel && String(sel.value || '').trim()) {
+                if (window.MesSorteSelect) {
+                    mesesLote = MesSorteSelect.resolveLote(
+                        sel.value,
+                        apostas.length,
+                        MesSorteSelect.cached
+                    );
+                } else {
+                    const n = parseInt(sel.value, 10);
+                    if (Number.isFinite(n) && n >= 1 && n <= 12) {
+                        mesesLote = Array(apostas.length).fill(n);
+                    }
+                }
+            }
+        }
+        return apostas.map((a, i) => {
+            const mesNum = (mesesLote && mesesLote[i])
+                ? parseInt(mesesLote[i], 10)
+                : mesDefault.mes_num;
+            return {
+                dezenas: (a.dezenas || []).map(Number),
+                mes_num: mesNum || 0,
+                mes_nome: mesNum ? nomeMesPorNum(mesNum) : (mesDefault.mes_nome || ''),
+            };
+        });
+    }
+
+    function fillManualMesSelect() {
+        if (!HAS_MES) return;
+        const sel = $('ccManualMes');
+        if (!sel) return;
+        // Mesmo padrão do export: + Atrasado → + Frequente → meses → + Aleatório
+        // + opção vazia = manter mês da construção
+        const applyPadrao = (data) => {
+            MesSorteSelect.fill(sel, data, {
+                includeEmpty: true,
+                emptyLabel: 'Mês: da construção',
+                selected: 'atrasado',
+                defaultPrefer: 'atrasado',
+            });
+            // mantém "da construção" como escolha inicial (padrão do sistema fica disponível no select)
+            sel.value = '';
+        };
+        const fallbackSimples = () => {
+            sel.innerHTML = '<option value="">Mês: da construção</option>';
+            MESES.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.num;
+                opt.textContent = `${m.nome} (${m.abrev})`;
+                sel.appendChild(opt);
+            });
+        };
+        if (window.MesSorteSelect) {
+            if (MesSorteSelect.cached) applyPadrao(MesSorteSelect.cached);
+            else MesSorteSelect.load(API).then(applyPadrao).catch(fallbackSimples);
+            return;
+        }
+        fallbackSimples();
+    }
+
+    function abrirManualS10() {
+        const w = window.open(MANUAL_S10_URL, '_blank');
+        if (!w) {
+            window.location.href = MANUAL_S10_URL;
+        }
+    }
+
+    function enviarParaManualS10(construcoes, aviso) {
+        const lista = Array.isArray(construcoes) ? construcoes : [construcoes];
+        const jogos = [];
+        lista.forEach(c => {
+            jogosDeConstrucao(c).forEach(j => jogos.push(j));
+        });
+        if (!jogos.length) {
+            alert('Nenhuma aposta para enviar ao Manual.\nGere uma construção primeiro (passo 3).');
+            return;
+        }
+        try {
+            sessionStorage.setItem(MANUAL_S10_KEY, JSON.stringify({
+                origem: 'construtor_construcoes',
+                replace: false,
+                jogos,
+                aviso: aviso || `Importado do Construtor (${jogos.length} apostas).`,
+            }));
+        } catch (e) {
+            alert('Não foi possível preparar o envio: ' + (e.message || e));
+            return;
+        }
+        abrirManualS10();
+    }
+
+    function enviarConstrucaoManual(construcaoId) {
+        if (!sessaoAtual) return;
+        const c = (sessaoAtual.construcoes || []).find(x => x.id === construcaoId);
+        if (!c) {
+            alert('Construção não encontrada.');
+            return;
+        }
+        enviarParaManualS10(c, `Importado da Construção #${c.numero} do Construtor.`);
+    }
+
+    function enviarUltimaManual() {
+        if (!sessaoAtual || !(sessaoAtual.construcoes || []).length) {
+            alert('Gere ao menos uma construção antes de enviar ao Manual S10.');
+            return;
+        }
+        const lista = sessaoAtual.construcoes;
+        const c = lista[lista.length - 1];
+        enviarParaManualS10(c, `Importado da Construção #${c.numero} (última) do Construtor.`);
+    }
+
+    function enviarTodasManual() {
+        if (!sessaoAtual || !(sessaoAtual.construcoes || []).length) {
+            alert('Não há construções para enviar.');
+            return;
+        }
+        const n = sessaoAtual.construcoes.length;
+        enviarParaManualS10(
+            sessaoAtual.construcoes,
+            `Importado de ${n} construção(ões) do Construtor.`
+        );
+    }
+
+    function atualizarEstadoGerar() {
+        const btn = $('ccBtnGerar');
+        const hint = $('ccGerarHint');
+        if (!btn) return;
+        const liberado = !!sessaoAtual;
+        btn.disabled = !liberado;
+        if (hint) {
+            if (liberado) {
+                hint.className = 'cc-sessao-head text-success';
+                hint.innerHTML = `<i class="fas fa-check-circle"></i> Sessão #${sessaoAtual.id} ativa — pode gerar construções.`;
+            } else {
+                hint.className = 'cc-sessao-head text-muted';
+                hint.innerHTML = '<i class="fas fa-info-circle"></i> Para liberar: selecione o conjunto-base e clique em <strong>Salvar conjunto-base (sessão)</strong>.';
+            }
+        }
+        renderSessaoBoardBase(lastSessaoBoardExtra);
+    }
+
+    function sessaoDlRow(label, valueHtml) {
+        if (valueHtml == null || valueHtml === '') return '';
+        return `<div class="cc-sessao-row"><dt>${escHtml(label)}</dt><dd>${valueHtml}</dd></div>`;
+    }
+
+    function renderSessaoBoardBase(extra) {
+        const dl = $('ccSessaoDl');
+        if (!dl) return;
+        const sessao = sessaoAtual;
+        if (!sessao && !(extra && extra.erro)) {
+            dl.hidden = true;
+            dl.innerHTML = '';
+            return;
+        }
+        const k = (sessao && sessao.dezenas_por_aposta) || PICK_DEFAULT;
+        const nConstr = sessao
+            ? (sessao.total_construcoes != null ? sessao.total_construcoes : (sessao.construcoes || []).length)
+            : 0;
+        const nApostasSessao = sessao && sessao.qtd_apostas != null
+            ? sessao.qtd_apostas
+            : (sessao && sessao.construcoes
+                ? sessao.construcoes.reduce((acc, c) => acc + ((c.apostas || []).length), 0)
+                : 0);
+        const valorSessao = (sessao && sessao.valor_total_fmt)
+            || (extra && extra.valor_sessao_fmt)
+            || precoLoteLocal(k, nApostasSessao).total_fmt;
+        const limiarPct = extra && extra.limiar_similaridade_pct != null
+            ? extra.limiar_similaridade_pct
+            : Math.round((1 - (parseFloat(($('ccSimMin') && $('ccSimMin').value) || '80') / 100)) * 1000) / 10;
+        const padIIAtivos = extra && extra.padroes_ii_ativos != null
+            ? extra.padroes_ii_ativos
+            : padroesIISelecionados.size > 0;
+        let rows = '';
+        rows += sessaoDlRow('Sessão atual', sessao ? `#${sessao.id}` : '—');
+        rows += sessaoDlRow(
+            'Status da sessão',
+            sessao ? 'Ativa — pode gerar construções.' : 'Aguardando conjunto-base.'
+        );
+        if (extra && extra.construcao) {
+            const c = extra.construcao;
+            const nAp = extra.qtd_apostas != null ? extra.qtd_apostas : (c.qtd_apostas != null ? c.qtd_apostas : (c.apostas || []).length);
+            const valorC = extra.valor_total_fmt || c.valor_total_fmt || valorConstrucaoFmt(c);
+            const simAnt = extra.similaridade_max_anterior != null
+                ? extra.similaridade_max_anterior
+                : c.similaridade_anterior;
+            const diff = extra.diferenca_min_pct != null ? extra.diferenca_min_pct : c.diferenca_pct;
+            rows += sessaoDlRow('Construção gerada', `#${c.numero}`);
+            rows += sessaoDlRow(
+                'Construções na sessão',
+                String(extra.qtd_construcoes_sessao ?? extra.qtd_construcoes ?? nConstr)
+            );
+            rows += sessaoDlRow('Quantidade de apostas', String(nAp));
+            if (valorC) {
+                rows += sessaoDlRow('Valor total (construção)', `<span class="cc-valor-rs">${escHtml(valorC)}</span>`);
+            }
+            if (valorSessao) {
+                rows += sessaoDlRow('Valor total (sessão)', `<span class="cc-valor-rs">${escHtml(valorSessao)}</span>`);
+            }
+            if (diff != null) {
+                rows += sessaoDlRow('Diferença vs. anterior', `${diff}%`);
+            }
+            if (simAnt != null) {
+                const simPct = (Number(simAnt) <= 1 ? Number(simAnt) * 100 : Number(simAnt));
+                rows += sessaoDlRow('Similaridade vs. anterior', `${simPct.toFixed(1)}%`);
+            }
+            rows += sessaoDlRow('Limiar configurado', `${limiarPct}% (similaridade máxima)`);
+            if (extra.qtd_padroes_distintos != null) {
+                rows += sessaoDlRow('Padrões iniciais distintos', String(extra.qtd_padroes_distintos));
+            }
+            rows += sessaoDlRow(
+                'Padrões II',
+                padIIAtivos
+                    ? `Ativos (${escHtml((extra.padroes_ii_usados || [...padroesIISelecionados]).join(' · ') || (padroesIISelecionados.size + ' selecionados'))})`
+                    : 'Nenhum selecionado (não influenciam a geração).'
+            );
+            if (extra.rejeitadas_validacao_trocadas) {
+                rows += sessaoDlRow('Candidatas trocadas (validação)', String(extra.rejeitadas_validacao_trocadas));
+            }
+            if (extra.melhor_resultado) {
+                rows += sessaoDlRow('Melhor resultado encontrado', escHtml(extra.melhor_resultado));
+            }
+            if (extra.ms != null) {
+                rows += sessaoDlRow('Tempo de processamento', `${extra.ms} ms`);
+            }
+        } else {
+            rows += sessaoDlRow('Construções na sessão', String(nConstr));
+            if (nApostasSessao) {
+                rows += sessaoDlRow('Quantidade de apostas', String(nApostasSessao));
+            }
+            if (valorSessao) {
+                rows += sessaoDlRow('Valor total (sessão)', `<span class="cc-valor-rs">${escHtml(valorSessao)}</span>`);
+            }
+            rows += sessaoDlRow('Padrões II', padroesIISelecionados.size
+                ? `${padroesIISelecionados.size} selecionado(s)`
+                : 'Nenhum selecionado (não influenciam a geração).');
+        }
+        dl.innerHTML = rows;
+        dl.hidden = false;
+    }
+
+    function htmlSugestaoPadII(problemas, oferece) {
+        if (!oferece || !(problemas && problemas.length)) return '';
+        return `<div class="cc-pad-sugestao mt-2">
+            <p class="mb-1">Deseja receber uma sugestão de ajuste no POOL para que este padrão possa ser utilizado?</p>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="ccBtnSugestaoPool">
+                Sim, mostrar sugestão
+            </button>
+            <div id="ccSugestaoPoolDetalhe" class="mt-2 small" hidden></div>
+        </div>`;
+    }
+
+    function mostrarSugestaoPool() {
+        const box = $('ccSugestaoPoolDetalhe');
+        if (!box) return;
+        const problemas = ultimoDiagnosticoPadII || [];
+        if (!problemas.length) {
+            box.hidden = false;
+            box.textContent = 'Não há sugestão disponível para os padrões atuais.';
+            return;
+        }
+        box.hidden = false;
+        box.innerHTML = problemas.map((p) => {
+            const sug = p.sugestao || {};
+            const cands = (sug.dezenas_candidatas || []).map(fmt).join(' ') || '—';
+            const faltas = (sug.faltas || []).map((f) =>
+                `dígito inicial ${f.digito}: precisa ${f.precisa}, no POOL ${f.no_pool}, faltam ${f.faltam}`
+            ).join('; ');
+            return `<div class="border rounded p-2 mb-1 bg-white">
+                <strong>Padrão II — ${escHtml(p.padrao)}:</strong>
+                <div>${escHtml(p.detalhe || 'As dezenas selecionadas no POOL não são suficientes para gerar uma aposta compatível com este padrão.')}</div>
+                ${faltas ? `<div class="text-muted mt-1">${escHtml(faltas)}</div>` : ''}
+                <div class="mt-1">Dezenas que poderiam viabilizar o padrão (não serão adicionadas automaticamente): <code>${escHtml(cands)}</code></div>
+                <div class="text-muted">A decisão de alterar o POOL permanece com você.</div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderGerarErro(data) {
+        ultimoDiagnosticoPadII = data.padroes_problema || [];
+        const codigo = data.erro_codigo || '';
+        let titulo = '⚠️ Construção não gerada';
+        if (codigo === 'pool_insuficiente') titulo = '⚠️ POOL insuficiente';
+        else if (codigo === 'padrao_nao_atendido') titulo = '⚠️ Padrão não atendido';
+        else if (codigo === 'duplicidade_total') titulo = '⚠️ Construção não gerada';
+        const problemas = data.padroes_problema || [];
+        const blocos = problemas.map((p) =>
+            `<div class="mt-1"><strong>Padrão II — ${escHtml(p.padrao)}:</strong> ${escHtml(p.detalhe || '')}</div>`
+        ).join('');
+        const status = $('ccGerarStatus');
+        if (!status) return;
+        status.className = 'mt-2 small text-danger';
+        status.innerHTML =
+            `<div class="cc-gerar-erro"><strong>${titulo}</strong>`
+            + `<div>${escHtml(data.erro || 'Não foi possível gerar a construção.')}</div>`
+            + blocos
+            + htmlSugestaoPadII(problemas, data.oferece_sugestao)
+            + '</div>';
+        lastSessaoBoardExtra = { erro: true };
+        renderSessaoBoardBase(lastSessaoBoardExtra);
+    }
+
+    async function apiGet(path) {
+        const r = await fetch(API + path);
+        return r.json();
+    }
+
+    async function apiPost(path, body) {
+        const r = await fetch(API + path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        return r.json();
+    }
+
+    async function apiPut(path, body) {
+        const r = await fetch(API + path, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        return r.json();
+    }
+
+    async function apiDelete(path) {
+        const r = await fetch(API + path, { method: 'DELETE' });
+        return r.json();
+    }
+
+    function fillMesSelect(sel, selected) {
+        if (!sel) return;
+        const prefer = selected != null && selected !== '' ? selected : 'atrasado';
+        if (window.MesSorteSelect) {
+            const apply = (data) => {
+                MesSorteSelect.fill(sel, data, { selected: prefer, defaultPrefer: 'atrasado' });
+            };
+            if (MesSorteSelect.cached) apply(MesSorteSelect.cached);
+            else MesSorteSelect.load(API).then(apply).catch(() => {
+                sel.innerHTML = '';
+                MESES.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.num;
+                    opt.textContent = `${m.nome} (${m.abrev})`;
+                    if (selected && parseInt(selected, 10) === m.num) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+            });
+            return;
+        }
+        sel.innerHTML = '';
+        MESES.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.num;
+            opt.textContent = `${m.nome} (${m.abrev})`;
+            if (selected && parseInt(selected, 10) === m.num) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    }
+
+    function mesNumFromSelect(sel) {
+        if (!sel || !sel.value) return null;
+        if (window.MesSorteSelect) {
+            return MesSorteSelect.resolveFromSelect(sel, MesSorteSelect.cached);
+        }
+        const n = parseInt(sel.value, 10);
+        return isNaN(n) ? null : n;
+    }
+
+    function mesPayloadFromSelect(sel) {
+        if (!sel || !sel.value) return null;
+        // Envia o valor do select (atrasado|frequente|aleatorio|N) — backend resolve
+        return sel.value;
+    }
+
+    function parseDezenasInput(txt) {
+        return txt.trim().split(/[\s,;]+/).filter(Boolean).map(x => parseInt(x, 10)).filter(n => !isNaN(n));
+    }
+
+    function downloadTxt(nome, texto) {
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nome;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
+
+    function setSelecionadas(nums, origem, aviso) {
+        const unicos = [...new Set(nums)].sort((a, b) => a - b);
+        const origemNova = origem || 'manual';
+        const maxOk = maxConjuntoParaOrigem(origemNova);
+        if (unicos.length > maxOk) {
+            selecionadas = new Set(unicos.slice(0, maxOk));
+            origemConjunto = origemNova;
+            renderVolante();
+            updatePoolInfo();
+            abrirColinha(true);
+            const info = $('ccPoolInfo');
+            if (info) {
+                info.className = 'small text-warning';
+                info.textContent = (aviso || `Importação tinha ${unicos.length} dezenas; mantidas ${maxOk}.`) +
+                    ` — B/M/A atualizados.`;
+            }
+            return;
+        }
+        selecionadas = new Set(unicos);
+        origemConjunto = origemNova;
+        renderVolante();
+        updatePoolInfo();
+        if (aviso) {
+            const info = $('ccPoolInfo');
+            if (info) {
+                info.className = 'small text-warning';
+                info.textContent += ' · ' + aviso;
+            }
+        }
+    }
+
+    async function importarCiclo(tipo) {
+        const data = await apiGet('/ciclo?tipo=' + tipo);
+        if (!data.sucesso) { alert(data.erro || 'Erro'); return; }
+        setSelecionadas(data.dezenas, data.origem, data.aviso);
+    }
+
+    async function importarAnalise(criterio) {
+        const qtd = Math.min(parseInt($('ccQtdImport').value, 10) || CONJUNTO_MAX, CONJUNTO_MAX);
+        const data = await apiGet(`/analise-sugestao?quantidade=${qtd}&criterio=${criterio}`);
+        if (!data.sucesso) { alert(data.erro || 'Erro'); return; }
+        setSelecionadas(data.dezenas, data.origem, data.aviso);
+    }
+
+    async function salvarSessao() {
+        if (modoEntrada === 'apostas10x7') {
+            const ta = $('ccApostasTexto');
+            const temTexto = ta && String(ta.value || '').trim();
+            if (temTexto) {
+                if (!aplicarApostas10x7(true)) return;
+            } else if (origemConjunto !== ORIGEM_APOSTAS_10X7 || selecionadas.size < PICK_MIN) {
+                alert(`Cole as 10 apostas × ${APOSTAS_POR_LINHA} dezenas e clique em “Usar estas 10 apostas”, ou carregue uma sessão.`);
+                return;
+            }
+        }
+        const arr = [...selecionadas].sort((a, b) => a - b);
+        if (arr.length < PICK_MIN) {
+            alert(`Selecione ao menos ${PICK_MIN} dezenas no conjunto-base.`);
+            return;
+        }
+        const maxOk = maxConjuntoParaOrigem(origemConjunto);
+        if (arr.length > maxOk) {
+            abrirColinha(true);
+            alert(`Conjunto-base limitado a ${maxOk} dezenas.`);
+            return;
+        }
+        const regras = regrasSomasDigitos();
+        if (regras) {
+            const m = digitosDoPool(arr);
+            if (regras.soma_min != null && m.soma < regras.soma_min) {
+                alert(`❌ Soma ${m.soma} fora da faixa (mín. ${regras.soma_min}).`);
+                return;
+            }
+            if (regras.soma_max != null && m.soma > regras.soma_max) {
+                alert(`❌ Soma ${m.soma} fora da faixa (máx. ${regras.soma_max}).`);
+                return;
+            }
+            if (regras.exigir_digitos && regras.digitos_exigidos != null && m.qtd !== regras.digitos_exigidos) {
+                alert(`❌ Exigidos ${regras.digitos_exigidos} dígitos distintos (atual: ${m.qtd}).`);
+                return;
+            }
+        }
+        const body = {
+            nome: $('ccNomeSessao').value.trim(),
+            conjunto_base: arr,
+            dezenas_por_aposta: parseInt($('ccDezenasAposta').value, 10),
+            origem_conjunto: origemConjunto,
+            sessao_id: sessaoAtual ? sessaoAtual.id : null,
+        };
+        if (regras) body.regras_somas_digitos = regras;
+        const data = await apiPost('/sessao', body);
+        if (!data.sucesso) {
+            $('ccSessaoStatus').className = 'mt-2 small text-danger';
+            $('ccSessaoStatus').textContent = data.erro || 'Erro ao salvar.';
+            return;
+        }
+        sessaoAtual = data.sessao;
+        $('ccSessaoStatus').className = 'mt-2 small text-success';
+        $('ccSessaoStatus').textContent = `Sessão #${sessaoAtual.id} salva — ${sessaoAtual.conjunto_base.length} dezenas.`;
+        atualizarEstadoGerar();
+        $('ccBtnConferir').disabled = false;
+        atualizarBotoesSessaoConstrucoes();
+        await carregarSessoes();
+        renderConstrucoes(sessaoAtual);
+        carregarAnaliseHistorica();
+    }
+
+    let gerarProgressTimer = null;
+    let gerarProgressPct = 0;
+
+    function setGerarProgress(pct, opts) {
+        opts = opts || {};
+        const wrap = $('ccGerarProgress');
+        const bar = $('ccGerarProgressBar');
+        const barWrap = $('ccGerarProgressBarWrap');
+        const label = $('ccGerarProgressLabel');
+        const pctEl = $('ccGerarProgressPct');
+        if (!wrap || !bar) return;
+        const n = Math.max(0, Math.min(100, Math.round(pct)));
+        gerarProgressPct = n;
+        bar.style.width = n + '%';
+        if (pctEl) pctEl.textContent = n + '%';
+        if (barWrap) {
+            barWrap.setAttribute('aria-valuenow', String(n));
+        }
+        if (opts.label && label) label.textContent = opts.label;
+        wrap.classList.toggle('is-active', !!opts.active || n > 0);
+        wrap.classList.toggle('is-done', !!opts.done);
+        wrap.classList.toggle('is-error', !!opts.error);
+        wrap.setAttribute('aria-hidden', wrap.classList.contains('is-active') ? 'false' : 'true');
+        if (opts.animated === false) {
+            bar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+        } else if (opts.active) {
+            bar.classList.add('progress-bar-animated', 'progress-bar-striped');
+        }
+    }
+
+    function startGerarProgress() {
+        stopGerarProgress(false);
+        gerarProgressPct = 0;
+        setGerarProgress(2, {
+            active: true,
+            done: false,
+            error: false,
+            label: 'Gerando construção…',
+            animated: true,
+        });
+        const status = $('ccGerarStatus');
+        if (status) {
+            status.className = 'mt-2 small text-muted';
+            status.textContent = 'Gerando construção… aguarde, o processo está em andamento.';
+        }
+        // Avanço assintótico até ~92% enquanto a API responde (sem parecer travado)
+        gerarProgressTimer = setInterval(() => {
+            const atual = gerarProgressPct;
+            if (atual >= 92) return;
+            let passo;
+            if (atual < 25) passo = 3.2;
+            else if (atual < 50) passo = 2.1;
+            else if (atual < 75) passo = 1.2;
+            else passo = 0.45;
+            setGerarProgress(Math.min(92, atual + passo), {
+                active: true,
+                label: atual < 40
+                    ? 'Montando apostas…'
+                    : (atual < 70 ? 'Validando histórico…' : 'Finalizando construção…'),
+                animated: true,
+            });
+        }, 220);
+    }
+
+    function stopGerarProgress(ok, finalLabel) {
+        if (gerarProgressTimer) {
+            clearInterval(gerarProgressTimer);
+            gerarProgressTimer = null;
+        }
+        if (ok === true) {
+            setGerarProgress(100, {
+                active: true,
+                done: true,
+                error: false,
+                label: finalLabel || 'Construção gerada',
+                animated: false,
+            });
+            setTimeout(() => {
+                const wrap = $('ccGerarProgress');
+                if (wrap && wrap.classList.contains('is-done')) {
+                    wrap.classList.remove('is-active', 'is-done');
+                    wrap.setAttribute('aria-hidden', 'true');
+                }
+            }, 1800);
+        } else if (ok === false) {
+            setGerarProgress(Math.max(gerarProgressPct, 8), {
+                active: true,
+                done: false,
+                error: true,
+                label: finalLabel || 'Falha na geração',
+                animated: false,
+            });
+        }
+    }
+
+    async function gerarConstrucao() {
+        if (!sessaoAtual) {
+            alert('Salve a sessão antes de gerar.');
+            return;
+        }
+        const btn = $('ccBtnGerar');
+        if (btn) btn.disabled = true;
+        startGerarProgress();
+        const body = {
+            sessao_id: sessaoAtual.id,
+            estrategia: $('ccEstrategia').value,
+            similaridade_min_pct: parseFloat($('ccSimMin').value),
+            janela_comportamento: parseInt($('ccJanela').value, 10),
+            executar_backtest: false,
+        };
+        if (body.estrategia === 'personalizada') {
+            body.personalizada = {
+                baixas: parseInt($('ccPersB').value, 10) || 0,
+                medias: parseInt($('ccPersM').value, 10) || 0,
+                altas: parseInt($('ccPersA').value, 10) || 0,
+            };
+        }
+        if (padroesIISelecionados.size) {
+            body.padroes_selecionados = [...padroesIISelecionados];
+        }
+        const t0 = performance.now();
+        let data;
+        try {
+            data = await apiPost('/gerar', body);
+        } catch (e) {
+            stopGerarProgress(false, 'Falha na requisição');
+            $('ccGerarStatus').className = 'mt-2 small text-danger';
+            $('ccGerarStatus').textContent = 'Falha na requisição: ' + (e.message || e);
+            atualizarEstadoGerar();
+            return;
+        }
+        if (!data.sucesso) {
+            stopGerarProgress(false, 'Não foi possível gerar');
+            renderGerarErro(data);
+            atualizarEstadoGerar();
+            return;
+        }
+        const ms = Math.round(performance.now() - t0);
+        stopGerarProgress(true, 'Construção gerada');
+        const refreshed = await apiGet('/sessao/' + sessaoAtual.id);
+        if (refreshed.sucesso) {
+            sessaoAtual = refreshed.sessao;
+            atualizarBotoesSessaoConstrucoes();
+            renderConstrucoes(sessaoAtual);
+        }
+        ultimoDiagnosticoPadII = data.padroes_problema || [];
+        const aviso = data.aviso || '';
+        const melhorMatch = aviso.match(/melhor resultado encontrado[^.]*\.?/i);
+        $('ccGerarStatus').className = 'mt-2 small text-success';
+        const valorC = data.valor_total_fmt || (data.construcao && data.construcao.valor_total_fmt) || '';
+        let resumo = `Construção #${data.construcao.numero} gerada`;
+        const totalSessao = data.qtd_construcoes_sessao
+            ?? data.qtd_construcoes
+            ?? (sessaoAtual && sessaoAtual.construcoes ? sessaoAtual.construcoes.length : data.construcao.numero);
+        resumo += ` · ${totalSessao} construção(ões) na sessão`;
+        if (data.qtd_apostas != null) resumo += ` · ${data.qtd_apostas} apostas`;
+        if (valorC) resumo += ` · ${valorC}`;
+        $('ccGerarStatus').innerHTML = `<div>${escHtml(resumo)}</div>`
+            + (aviso ? `<div class="text-muted mt-1">${escHtml(aviso)}</div>` : '')
+            + htmlSugestaoPadII(data.padroes_problema, data.oferece_sugestao);
+        lastSessaoBoardExtra = {
+            construcao: data.construcao,
+            qtd_apostas: data.qtd_apostas,
+            qtd_construcoes: data.qtd_construcoes,
+            qtd_construcoes_sessao: totalSessao,
+            valor_total_fmt: valorC,
+            valor_sessao_fmt: data.valor_sessao_fmt || (sessaoAtual && sessaoAtual.valor_total_fmt) || '',
+            similaridade_max_anterior: data.similaridade_max_anterior,
+            diferenca_min_pct: data.diferenca_min_pct != null ? data.diferenca_min_pct : data.construcao.diferenca_pct,
+            limiar_similaridade: data.limiar_similaridade,
+            limiar_similaridade_pct: data.limiar_similaridade_pct,
+            qtd_padroes_distintos: data.qtd_padroes_distintos,
+            padroes_ii_ativos: data.padroes_ii_ativos,
+            padroes_ii_usados: data.padroes_ii_usados,
+            rejeitadas_validacao_trocadas: data.rejeitadas_validacao_trocadas,
+            melhor_resultado: melhorMatch ? melhorMatch[0] : '',
+            ms,
+        };
+        renderSessaoBoardBase(lastSessaoBoardExtra);
+        atualizarEstadoGerar();
+    }
+
+    function atualizarContadorPadII() {
+        const el = $('ccPadIICount');
+        if (el) el.textContent = `${padroesIISelecionados.size} selecionados`;
+    }
+
+    function renderListaPadroesII() {
+        const box = $('ccPadIILista');
+        if (!box) return;
+        const busca = (($('ccPadIIBusca') && $('ccPadIIBusca').value) || '').trim().toLowerCase();
+        const st = ($('ccPadIIStatus') && $('ccPadIIStatus').value) || '';
+        const rows = (padroesIICatalogo || []).filter((p) => {
+            if (st && p.status !== st) return false;
+            if (!busca) return true;
+            return `${p.padrao} ${p.descricao} ${p.status}`.toLowerCase().includes(busca);
+        }).slice(0, 80);
+        if (!rows.length) {
+            box.innerHTML = '<span class="text-muted">Nenhum padrão (carregue o catálogo ou ajuste o filtro).</span>';
+            return;
+        }
+        box.innerHTML = rows.map((p) => {
+            const checked = padroesIISelecionados.has(p.padrao) ? 'checked' : '';
+            const atraso = p.atraso == null ? '—' : `${p.atraso}c`;
+            return `<label class="d-flex align-items-center gap-2 border-bottom py-1 mb-0" style="cursor:pointer">
+                <input type="checkbox" class="form-check-input cc-pad-ii-chk" data-padrao="${String(p.padrao).replace(/"/g, '&quot;')}" ${checked}>
+                <code class="small">${p.padrao}</code>
+                <span class="text-muted">${p.descricao}</span>
+                <span class="ms-auto small">${p.frequencia}x · ${atraso} · ${p.status}</span>
+            </label>`;
+        }).join('');
+        atualizarContadorPadII();
+    }
+
+    async function carregarPadroesII(preselect) {
+        const box = $('ccPadIILista');
+        if (box) box.innerHTML = '<span class="text-muted">Carregando catálogo Padrões II…</span>';
+        try {
+            const r = await fetch(PADROES_II_API);
+            const d = await r.json();
+            if (!d.sucesso) throw new Error(d.erro || 'Falha ao carregar padrões');
+            padroesIICatalogo = d.padroes || [];
+            if (Array.isArray(preselect) && preselect.length) {
+                preselect.forEach((p) => {
+                    if (p) padroesIISelecionados.add(String(p).trim());
+                });
+            }
+            renderListaPadroesII();
+        } catch (e) {
+            if (box) box.innerHTML = `<span class="text-danger">${e.message || e}</span>`;
+        }
+    }
+
+    function initPadroesII() {
+        $('ccBtnPadIILoad')?.addEventListener('click', () => carregarPadroesII());
+        $('ccBtnPadIILimpar')?.addEventListener('click', () => {
+            padroesIISelecionados.clear();
+            renderListaPadroesII();
+        });
+        $('ccPadIIBusca')?.addEventListener('input', renderListaPadroesII);
+        $('ccPadIIStatus')?.addEventListener('change', renderListaPadroesII);
+        $('ccPadIILista')?.addEventListener('change', (ev) => {
+            const chk = ev.target.closest('.cc-pad-ii-chk');
+            if (!chk) return;
+            const p = chk.dataset.padrao;
+            if (!p) return;
+            if (chk.checked) padroesIISelecionados.add(p);
+            else padroesIISelecionados.delete(p);
+            atualizarContadorPadII();
+        });
+        // Deep-link: ?padroes=0+1+1+2+2+2+3|0+0+1+2+2+3+3
+        try {
+            const qs = new URLSearchParams(window.location.search);
+            const raw = qs.get('padroes') || '';
+            const lista = raw
+                ? raw.split('|').map((s) => s.replace(/\+/g, ' ').trim()).filter(Boolean)
+                : [];
+            if (qs.get('from') === 'padroes-ii' || lista.length) {
+                carregarPadroesII(lista);
+            }
+        } catch (_) { /* ignore */ }
+    }
+
+    function renderMatrizSim(matriz) {
+        const el = $('ccMatrizSim');
+        if (!matriz || !matriz.length) {
+            el.innerHTML = '';
+            return;
+        }
+        el.innerHTML = '<div class="small fw-semibold mb-1">Similaridade entre construções</div>' +
+            matriz.map(m =>
+                `<span class="cc-sim-badge me-1 mb-1">C${m.de}↔C${m.para}: ${m.diferenca_pct}% diferente</span>`
+            ).join('');
+    }
+
+    function labelEstrategia(id) {
+        const e = (UI.estrategias || []).find(x => x.id === id || x.key === id);
+        return e ? (e.label || e.nome || id) : id;
+    }
+
+    function descEstrategia(id) {
+        const e = (UI.estrategias || []).find(x => x.id === id);
+        return e ? (e.desc || '') : '';
+    }
+
+    function detalheEstrategia(c) {
+        const dist = c.distribuicao || {};
+        const params = c.estrategia_params || {};
+        if (c.estrategia === 'personalizada' && (dist.baixas || dist.medias || dist.altas)) {
+            return `${dist.baixas || 0}B · ${dist.medias || 0}M · ${dist.altas || 0}A`;
+        }
+        if (c.estrategia === 'conforme_comportamento') {
+            const moda = params.comportamento_moda;
+            if (moda) {
+                return `Moda ${moda.baixas || 0}B · ${moda.medias || 0}M · ${moda.altas || 0}A`;
+            }
+            const j = params.janela_comportamento;
+            return j != null ? `Janela de comportamento: ${j === 0 ? 'todos os concursos' : j + ' concursos'}` : '';
+        }
+        if (dist.baixas != null && !['somente_baixas', 'somente_medias', 'somente_altas'].includes(c.estrategia)) {
+            return `${dist.baixas || 0}B · ${dist.medias || 0}M · ${dist.altas || 0}A`;
+        }
+        return '';
+    }
+
+    function htmlEstrategiaBadge(c) {
+        const id = c.estrategia || 'automatica';
+        const label = labelEstrategia(id);
+        const desc = descEstrategia(id);
+        const det = detalheEstrategia(c);
+        const detHtml = det ? `<span class="cc-estrategia-detalhe">· ${det}</span>` : '';
+        return `<div class="cc-estrategia-badge cc-estrategia-${id}" title="${desc.replace(/"/g, '&quot;')}">
+            <i class="fas fa-sliders"></i>
+            <span>Estratégia: ${label}${detHtml}</span>
+        </div>`;
+    }
+
+    function renderBalls(dezenas, sorteadasSet) {
+        const conferindo = sorteadasSet && sorteadasSet.size > 0;
+        return dezenas.map(d => {
+            const hit = conferindo && sorteadasSet.has(d);
+            let cls = 'dez-ball-mini';
+            if (conferindo) cls += hit ? ' cc-acerto' : ' cc-erro';
+            return `<span class="${cls}">${fmt(d)}</span>`;
+        }).join('');
+    }
+
+    function renderApostas(apostas, editavel, sorteadasSet) {
+        if (editavel) {
+            return apostas.map(a => {
+                const txt = a.dezenas.map(d => fmt(d)).join(' ');
+                return `<div class="cc-edit-aposta row g-1 mb-1 align-items-center" data-linha="${a.linha}">
+                    <div class="col-auto cc-aposta-num">${a.linha}.</div>
+                    <div class="col">
+                        <input type="text" class="form-control form-control-sm cc-input-dezenas"
+                            value="${txt}" data-linha="${a.linha}">
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        return apostas.map(a => {
+            const ac = a.acertos;
+            const clsAc = ac != null ? (ac >= 5 ? 'text-success fw-bold' : ac >= 4 ? 'text-warning' : '') : '';
+            const acHtml = ac != null
+                ? `<span class="cc-aposta-acertos ${clsAc}">${ac} ac.</span>`
+                : '';
+            return `<div class="cc-aposta-row">
+                <span class="cc-aposta-num">${a.linha}.</span>
+                <div class="cc-aposta-balls">${renderBalls(a.dezenas, sorteadasSet)}</div>
+                ${acHtml}
+            </div>`;
+        }).join('');
+    }
+
+    function renderConstrucoes(sessao) {
+        renderMatrizSim(sessao.matriz_similaridade);
+        const el = $('ccConstrucoes');
+        if (!sessao.construcoes || !sessao.construcoes.length) {
+            el.innerHTML = '<p class="text-muted small mb-0">Nenhuma construção ainda.</p>';
+            atualizarPainelRefinar();
+            return;
+        }
+        el.innerHTML = sessao.construcoes.map(c => {
+            const dist = c.distribuicao || {};
+            const diff = c.diferenca_pct != null
+                ? `<span class="cc-sim-badge">${c.diferenca_pct}% diferente da anterior</span>`
+                : '';
+            const mesBadge = c.mes_abrev
+                ? `<span class="cc-mes-badge ms-1" title="Mês da Sorte">${c.mes_abrev}</span>`
+                : '';
+            const ch = c.conferencia_historico;
+            const confBadge = ch
+                ? `<span class="cc-conf-badge ms-1" title="Conferida em ${ch.data_execucao || ''}">
+                    Hist: média ${ch.media_max_acertos} · ${textoAcertosResumo(ch)}
+                   </span>`
+                : '';
+            return `<div class="cc-construcao-card" data-id="${c.id}" data-num="${c.numero}">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-1">
+                    <div>
+                        <strong>Construção ${c.numero}</strong>${mesBadge}${confBadge}
+                    </div>
+                    ${diff}
+                </div>
+                ${htmlEstrategiaBadge(c)}
+                <div class="cc-acoes">
+                    <button type="button" class="btn btn-outline-success cc-btn-conf-hist" data-id="${c.id}" data-num="${c.numero}"
+                        title="Conferir contra todo o histórico e salvar">
+                        <i class="fas fa-history"></i> Conferir histórico
+                    </button>
+                    <button type="button" class="btn btn-outline-primary cc-btn-editar" data-id="${c.id}">
+                        <i class="fas fa-pen"></i> Editar
+                    </button>
+                    <button type="button" class="btn btn-outline-danger cc-btn-excluir" data-id="${c.id}" data-num="${c.numero}">
+                        <i class="fas fa-trash"></i> Excluir
+                    </button>
+                    <button type="button" class="btn btn-outline-primary cc-btn-refinar" data-id="${c.id}"
+                        title="Abrir o painel de refinamento nesta construção">
+                        <i class="fas fa-recycle"></i> Refinar
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary cc-btn-export" data-id="${c.id}" data-num="${c.numero}">
+                        <i class="fas fa-file-export"></i> Exportar .TXT
+                    </button>
+                    <button type="button" class="btn btn-success cc-btn-manual"
+                        data-id="${c.id}" data-num="${c.numero}"
+                        title="Enviar as apostas desta construção para a Seção 10 Manual">
+                        <i class="fas fa-share-from-square"></i> Enviar → Manual S10
+                    </button>
+                </div>
+                <div class="small text-muted mb-1">
+                    Distribuição aplicada: B:${dist.baixas || 0} M:${dist.medias || 0} A:${dist.altas || 0}
+                    · ${(c.qtd_apostas != null ? c.qtd_apostas : (c.apostas || []).length) || QTD_APOSTAS} apostas${valorConstrucaoFmt(c) ? ` · <span class="cc-valor-rs">${escHtml(valorConstrucaoFmt(c))}</span>` : ''}
+                </div>
+                ${renderApostas(c.apostas, false, null)}
+                ${renderRefinadas(c)}
+            </div>`;
+        }).join('');
+        atualizarPainelRefinar();
+    }
+
+    function renderRefinadas(c) {
+        const r = c && c.refinamento;
+        const pares = (r && r.apostas) || [];
+        if (!pares.length) return '';
+        const rows = pares.map(p => {
+            const falt = (p.faltante_ciclo || []).map(fmt).join(' ');
+            return `<div class="cc-refinada-row">
+                <span class="cc-aposta-num">R${p.linha_origem}.</span>
+                <div class="cc-aposta-balls">${renderBalls(p.refinada || [], null)}</div>
+                <div class="cc-refinada-meta">mantém ${(p.mantidas||[]).length} · troca ${p.n_trocadas||0} · distância ${p.distancia} · ABS ${p.abs_interno}${falt ? ' · ciclo '+falt : ''}</div>
+            </div>`;
+        }).join('');
+        return `<div class="mt-2 pt-1">
+            <strong class="small">Apostas refinadas (${pares.length})</strong>
+            <span class="small text-muted"> — originais intactas acima</span>
+            ${rows}
+        </div>`;
+    }
+
+    function atualizarPainelRefinar() {
+        const box = $('ccRefinarBox');
+        const sel = $('ccRefinarConstrucao');
+        const has = !!(sessaoAtual && sessaoAtual.construcoes && sessaoAtual.construcoes.length);
+        if (box) box.hidden = !has;
+        if (!sel || !has) {
+            if ($('ccBtnExportRefinadas')) $('ccBtnExportRefinadas').disabled = true;
+            return;
+        }
+        const prev = sel.value;
+        sel.innerHTML = sessaoAtual.construcoes.map(c =>
+            `<option value="${c.id}">#${c.numero}</option>`
+        ).join('');
+        if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+        else sel.selectedIndex = sel.options.length - 1;
+        const c = sessaoAtual.construcoes.find(x => String(x.id) === String(sel.value));
+        const hasRef = !!(c && c.refinamento && (c.refinamento.apostas || []).length);
+        if ($('ccBtnExportRefinadas')) $('ccBtnExportRefinadas').disabled = !hasRef;
+    }
+
+    async function executarRefinar() {
+        const id = parseInt($('ccRefinarConstrucao') && $('ccRefinarConstrucao').value, 10);
+        const st = $('ccRefinarStatus');
+        const btn = $('ccBtnRefinar');
+        if (!id) {
+            alert('Gere ou escolha uma construção primeiro.');
+            return;
+        }
+        if (st) st.textContent = 'Refinando…';
+        if (btn) btn.disabled = true;
+        try {
+            const data = await apiPost(`/construcao/${id}/refinar`, {
+                modo: ($('ccRefinarModo') && $('ccRefinarModo').value) || 'inteligente',
+                intensidade: ($('ccRefinarIntensidade') && $('ccRefinarIntensidade').value) || 'leve',
+                qtd_apostas: ($('ccRefinarQtd') && $('ccRefinarQtd').value) || 'todas',
+                variacoes: parseInt(($('ccRefinarVar') && $('ccRefinarVar').value) || '1', 10),
+                distancia: ($('ccRefinarDist') && $('ccRefinarDist').value) || 'media',
+            });
+            if (!data.sucesso) {
+                if (st) st.textContent = data.erro || 'Falha.';
+                alert(data.erro || 'Não foi possível refinar.');
+                return;
+            }
+            if (data.sessao) {
+                sessaoAtual = data.sessao;
+                renderConstrucoes(sessaoAtual);
+            }
+            const n = (data.refinamento && data.refinamento.n_refinadas) || 0;
+            if (st) st.textContent = n ? (n + ' aposta(s) refinada(s). Originais preservadas.') : 'Concluído.';
+        } catch (err) {
+            if (st) st.textContent = 'Falha de rede.';
+            alert('Não foi possível refinar. Reinicie o servidor 5153 se a rota for nova.');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    async function exportarRefinadas() {
+        const id = parseInt($('ccRefinarConstrucao') && $('ccRefinarConstrucao').value, 10);
+        if (!id) return;
+        const payload = { somente_refinadas: true };
+        if (HAS_MES) {
+            const c = (sessaoAtual.construcoes || []).find(x => x.id === id);
+            payload.mes_num = c && c.mes_num != null ? c.mes_num : 'atrasado';
+        }
+        const data = await apiPost(`/construcao/${id}/export-txt`, payload);
+        if (!data.sucesso) {
+            alert(data.erro || 'Erro ao exportar refinadas.');
+            return;
+        }
+        downloadTxt(data.nome_arquivo || 'apostas_refinadas.txt', data.texto);
+    }
+
+    function focarRefinar(construcaoId) {
+        const sel = $('ccRefinarConstrucao');
+        const box = $('ccRefinarBox');
+        if (sel && construcaoId) sel.value = String(construcaoId);
+        atualizarPainelRefinar();
+        if (box) {
+            box.hidden = false;
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    function abrirEditar(construcaoId) {
+        if (!sessaoAtual) return;
+        const c = (sessaoAtual.construcoes || []).find(x => x.id === construcaoId);
+        if (!c) return;
+        editandoConstrucaoId = construcaoId;
+        $('ccEditNumero').textContent = '#' + c.numero;
+        $('ccEditPoolHint').textContent = (sessaoAtual.conjunto_base || []).map(fmt).join(' ');
+        fillMesSelect($('ccEditMes'), c.mes_num || 'atrasado');
+        $('ccEditApostas').innerHTML = renderApostas(c.apostas, true);
+        modalEditar?.show();
+    }
+
+    async function salvarEdicao() {
+        if (!editandoConstrucaoId) return;
+        const inputs = document.querySelectorAll('#ccEditApostas .cc-input-dezenas');
+        const apostas = [];
+        for (const inp of inputs) {
+            const linha = parseInt(inp.dataset.linha, 10);
+            apostas.push({ linha, dezenas: parseDezenasInput(inp.value) });
+        }
+        const data = await apiPut(`/construcao/${editandoConstrucaoId}`, {
+            apostas,
+            mes_num: mesPayloadFromSelect($('ccEditMes')),
+        });
+        if (!data.sucesso) {
+            alert(data.erro || 'Erro ao salvar.');
+            return;
+        }
+        modalEditar?.hide();
+        editandoConstrucaoId = null;
+        if (data.sessao) {
+            sessaoAtual = data.sessao;
+            renderConstrucoes(sessaoAtual);
+        }
+    }
+
+    async function excluirConstrucao(construcaoId, numero) {
+        if (!confirm(`Excluir a Construção ${numero}? Esta ação não pode ser desfeita.`)) return;
+        const data = await apiDelete(`/construcao/${construcaoId}`);
+        if (!data.sucesso) {
+            alert(data.erro || 'Erro ao excluir.');
+            return;
+        }
+        if (data.sessao) {
+            sessaoAtual = data.sessao;
+            renderConstrucoes(sessaoAtual);
+        }
+    }
+
+    function abrirExport(construcaoId, numero) {
+        if (!sessaoAtual) return;
+        const c = (sessaoAtual.construcoes || []).find(x => x.id === construcaoId);
+        exportandoConstrucaoId = construcaoId;
+        exportandoSessaoTodas = false;
+        $('ccExportNumero').textContent = '#' + numero;
+        if (HAS_MES) fillMesSelect($('ccExportMes'), c?.mes_num || 'atrasado');
+        modalExport?.show();
+    }
+
+    function abrirExportTodas() {
+        if (!sessaoAtual || !(sessaoAtual.construcoes || []).length) {
+            alert('Não há construções para exportar.');
+            return;
+        }
+        exportandoConstrucaoId = null;
+        exportandoSessaoTodas = true;
+        const n = sessaoAtual.construcoes.length;
+        $('ccExportNumero').textContent = `1–${n} (todas)`;
+        if (HAS_MES) fillMesSelect($('ccExportMes'), sessaoAtual.construcoes[0]?.mes_num || 'atrasado');
+        modalExport?.show();
+    }
+
+    async function confirmarExport() {
+        const payload = {};
+        if (HAS_MES) {
+            payload.mes_num = mesPayloadFromSelect($('ccExportMes'));
+        }
+        let data;
+        if (exportandoSessaoTodas) {
+            if (!sessaoAtual) return;
+            data = await apiPost(`/sessao/${sessaoAtual.id}/export-txt`, payload);
+        } else {
+            if (!exportandoConstrucaoId) return;
+            data = await apiPost(`/construcao/${exportandoConstrucaoId}/export-txt`, payload);
+        }
+        if (!data.sucesso) {
+            alert(data.erro || 'Erro ao exportar.');
+            return;
+        }
+        downloadTxt(data.nome_arquivo || 'construcao.txt', data.texto);
+        modalExport?.hide();
+        const sid = sessaoAtual?.id;
+        exportandoConstrucaoId = null;
+        exportandoSessaoTodas = false;
+        if (sid) {
+            const refreshed = await apiGet('/sessao/' + sid);
+            if (refreshed.sucesso) {
+                sessaoAtual = refreshed.sessao;
+                renderConstrucoes(sessaoAtual);
+            }
+        }
+    }
+
+    function bindConstrucoesAcoes() {
+        const el = $('ccConstrucoes');
+        if (!el || el.dataset.bound) return;
+        el.dataset.bound = '1';
+        el.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const id = parseInt(btn.dataset.id, 10);
+            if (btn.classList.contains('cc-btn-editar')) abrirEditar(id);
+            else if (btn.classList.contains('cc-btn-excluir')) {
+                excluirConstrucao(id, parseInt(btn.dataset.num, 10));
+            } else if (btn.classList.contains('cc-btn-refinar')) {
+                focarRefinar(id);
+            } else if (btn.classList.contains('cc-btn-export')) {
+                abrirExport(id, parseInt(btn.dataset.num, 10));
+            } else if (btn.classList.contains('cc-btn-manual')) {
+                enviarConstrucaoManual(id);
+            } else if (btn.classList.contains('cc-btn-conf-hist')) {
+                conferirHistoricoConstrucao(id, parseInt(btn.dataset.num, 10));
+            }
+        });
+    }
+
+    function contadoresAcertos(r) {
+        const base = r || {};
+        const out = {};
+        ACERTOS_TIERS.forEach(t => { out['c' + t] = base['concursos_' + t] ?? 0; });
+        return out;
+    }
+
+    function textoAcertosResumo(r) {
+        return ACERTOS_TIERS.map(t => `${t}:${contadoresAcertos(r)['c' + t]}`).join(' · ');
+    }
+
+    function chaveTotalAcertos(r) {
+        const k0 = ACERTOS_TIERS[0];
+        const k1 = ACERTOS_TIERS[ACERTOS_TIERS.length - 1];
+        return r['concursos_' + k0 + '_a_' + k1]
+            ?? ACERTOS_TIERS.reduce((s, t) => s + (r['concursos_' + t] ?? 0), 0);
+    }
+
+    function htmlBadgesAcertos(r) {
+        const c = contadoresAcertos(r);
+        return ACERTOS_TIERS.map(t =>
+            `<span class="cc-conf-badge">${t} ac.: ${c['c' + t]}</span>`
+        ).join('');
+    }
+
+    function theadAcertosCols() {
+        return ACERTOS_TIERS.map(t => `<th>${t} ac.</th>`).join('');
+    }
+
+    function tbodyAcertosCols(r) {
+        const c = contadoresAcertos(r);
+        return ACERTOS_TIERS.map(t => `<td>${c['c' + t]}</td>`).join('');
+    }
+
+    function htmlResumoConferencia(conf) {
+        const r = conf.resumo || {};
+        const melhor = r.melhor_concurso;
+        const melhorTxt = melhor
+            ? `#${melhor.concurso} (${melhor.max_acertos} ac.)`
+            : '—';
+        const k0 = ACERTOS_TIERS[0];
+        const k1 = ACERTOS_TIERS[ACERTOS_TIERS.length - 1];
+        return `<div class="small">
+            <div class="row g-2 mb-2">
+                <div class="col-6 col-md-3"><strong>${r.concursos_total || 0}</strong><br><span class="text-muted">concursos</span></div>
+                <div class="col-6 col-md-3"><strong>${r.total_pontos || 0}</strong><br><span class="text-muted">soma máx. acertos</span></div>
+                <div class="col-6 col-md-3"><strong>${r.media_max_acertos ?? '—'}</strong><br><span class="text-muted">média máx./concurso</span></div>
+                <div class="col-6 col-md-3"><strong>${chaveTotalAcertos(r)}</strong><br><span class="text-muted">total ${k0}–${k1} ac.</span></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mb-2">${htmlBadgesAcertos(r)}</div>
+            <div class="text-muted mb-2">
+                Melhor concurso: ${melhorTxt}
+                · Atualizado: ${conf.data_execucao ? conf.data_execucao.slice(0, 16).replace('T', ' ') : '—'}
+            </div>
+            <p class="text-muted mb-0" style="font-size:.72rem;">
+                Sorteio com ${ACERTOS_MAX} dezenas — acertos por aposta vão de 0 a ${ACERTOS_MAX}.
+                Contamos concursos com melhor aposta em ${ACERTOS_MIN} a ${ACERTOS_MAX} acertos.
+            </p>
+        </div>`;
+    }
+
+    function renderAnaliseHistorica(analise) {
+        const el = $('ccAnaliseHistorica');
+        if (!el) return;
+        if (!analise || !analise.tem_dados) {
+            el.innerHTML = `<p class="text-muted small mb-0">${(analise && analise.mensagem) || 'Nenhuma conferência histórica salva ainda.'}</p>`;
+            return;
+        }
+        const p = analise.perguntas || {};
+        const cardHtml = (titulo, constrNum, estrategia, detalhe) =>
+            `<div class="cc-analise-card">
+                <div class="cc-analise-pergunta">${titulo}</div>
+                <div class="cc-analise-valor">Constr. ${constrNum}</div>
+                <div class="cc-analise-detalhe">${labelEstrategia(estrategia)}<br>${detalhe}</div>
+            </div>`;
+
+        const mp = p.mais_pontos;
+        const cardPontos = mp
+            ? cardHtml('Mais pontos no histórico', mp.construcao_numero, mp.estrategia, `${mp.valor} pts`)
+            : '';
+
+        const ba = p.melhor_acertos;
+        const k0 = ACERTOS_TIERS[0];
+        const k1 = ACERTOS_TIERS[ACERTOS_TIERS.length - 1];
+        const cardAcertos = ba
+            ? cardHtml(
+                `Melhor desempenho (${k0}–${k1} ac.)`,
+                ba.construcao_numero,
+                ba.estrategia,
+                textoAcertosResumo(ba)
+            )
+            : '';
+
+        const mm = p.maior_media;
+        const cardMedia = mm
+            ? cardHtml('Maior média de acertos', mm.construcao_numero, mm.estrategia, `${mm.valor} ac./concurso`)
+            : '';
+
+        const est = p.melhor_estrategia;
+        const cardEstrategia = est
+            ? `<div class="cc-analise-estrategia-linha">
+                <div class="cc-analise-card cc-analise-card-estrategia">
+                    <div class="cc-analise-pergunta">Melhor estratégia (mesmo conjunto-base)</div>
+                    <div class="cc-analise-valor">${labelEstrategia(est.estrategia)}</div>
+                    <div class="cc-analise-detalhe">
+                        <span class="cc-analise-soma-label">Soma de ${est.qtd_construcoes ?? 1} construção(ões)</span><br>
+                        ${ACERTOS_TIERS.map(t => `${t} ac.: ${est['concursos_' + t] ?? 0}`).join(' · ')}<br>
+                        Média: ${est.media_max_acertos} ac./concurso
+                    </div>
+                </div>
+               </div>`
+            : '';
+        const ranking = (analise.ranking_acertos || analise.ranking_media || []).map((r, i) =>
+            `<tr class="${i === 0 ? 'cc-top' : ''}">
+                <td>${r.construcao_numero}</td>
+                <td>${labelEstrategia(r.estrategia)}</td>
+                ${tbodyAcertosCols(r)}
+                <td>${r.media_max_acertos}</td>
+                <td>${r.total_pontos}</td>
+            </tr>`
+        ).join('');
+        const faltam = (analise.sem_conferencia || []).length
+            ? `<p class="small text-warning mb-2 cc-analise-alerta">Sem conferência: construção(ões) ${analise.sem_conferencia.join(', ')}.</p>`
+            : '';
+        el.innerHTML = `${faltam}
+            <div class="cc-analise-resumo">
+                <div class="cc-analise-resumo-titulo">Resumo comparativo</div>
+                <div class="cc-analise-painel">
+                    ${cardPontos}${cardAcertos}${cardMedia}
+                </div>
+                ${cardEstrategia}
+            </div>
+            <p class="small text-muted cc-analise-hint mb-2">Cada coluna: concursos em que a <strong>melhor aposta</strong> teve exatamente N acertos (máx. ${ACERTOS_MAX}). Ordenação: ${[...ACERTOS_TIERS].reverse().join(' → ')} ac.</p>
+            <div class="table-responsive">
+                <table class="table table-sm cc-ranking-hist mb-0">
+                    <thead><tr>
+                        <th>#</th><th>Estratégia</th>${theadAcertosCols()}<th>Média máx.</th><th>Pontos</th>
+                    </tr></thead>
+                    <tbody>${ranking}</tbody>
+                </table>
+            </div>`;
+    }
+
+    async function carregarAnaliseHistorica() {
+        if (!sessaoAtual) return;
+        const data = await apiGet('/sessao/' + sessaoAtual.id + '/analise-comparativa');
+        if (data.sucesso && data.analise) renderAnaliseHistorica(data.analise);
+    }
+
+    function renderPanoramaGeral(data) {
+        const el = $('ccPanoramaGeral');
+        if (!el) return;
+        const k0 = ACERTOS_TIERS[0];
+        const k1 = ACERTOS_TIERS[ACERTOS_TIERS.length - 1];
+        const totalEstKey = `total_${k0}_a_${k1}`;
+        if (!data || !data.sucesso) {
+            el.innerHTML = `<p class="text-danger small mb-0">${(data && data.erro) || 'Erro ao carregar panorama.'}</p>`;
+            return;
+        }
+        if (!data.ranking || !data.ranking.length) {
+            el.innerHTML = '<p class="text-muted small mb-0">Nenhuma conferência histórica salva no banco ainda.</p>';
+            return;
+        }
+        const rows = data.ranking.map((r, i) => {
+            const dataConf = r.data_execucao
+                ? r.data_execucao.slice(0, 16).replace('T', ' ')
+                : '—';
+            return `<tr class="${i === 0 ? 'cc-top' : ''}">
+                <td>S#${r.sessao_id}</td>
+                <td class="text-start">${r.sessao_nome || '—'}</td>
+                <td>C${r.construcao_numero}</td>
+                <td class="text-start">${labelEstrategia(r.estrategia)}</td>
+                ${tbodyAcertosCols(r)}
+                <td>${r.media_max_acertos}</td>
+                <td>${r.total_pontos}</td>
+                <td class="small text-muted">${dataConf}</td>
+            </tr>`;
+        }).join('');
+
+        const est = data.melhor_estrategia;
+        const cardEstrategia = est
+            ? `<div class="cc-analise-resumo mb-3">
+                <div class="cc-analise-resumo-titulo">Soma geral — melhor estratégia no banco</div>
+                <div class="cc-analise-estrategia-linha">
+                    <div class="cc-analise-card cc-analise-card-estrategia">
+                        <div class="cc-analise-pergunta">Estratégia campeã (todas as sessões)</div>
+                        <div class="cc-analise-valor">${labelEstrategia(est.estrategia)}</div>
+                        <div class="cc-analise-detalhe">
+                            <span class="cc-analise-soma-label">Soma de ${est.qtd_construcoes} construção(ões) · ${est.qtd_sessoes} sessão(ões)</span><br>
+                            ${ACERTOS_TIERS.map(t => `${t} ac.: ${est['concursos_' + t] ?? 0}`).join(' · ')}<br>
+                            Total ${k0}–${k1} ac.: ${est[totalEstKey] ?? chaveTotalAcertos(est)} · Pontos: ${est.total_pontos} · Média: ${est.media_max_acertos} ac./concurso
+                        </div>
+                    </div>
+                </div>
+               </div>`
+            : '';
+
+        const estrategiasRows = (data.estrategias || []).map((e, i) =>
+            `<tr class="${i === 0 ? 'cc-top' : ''}">
+                <td class="text-start">${labelEstrategia(e.estrategia)}</td>
+                <td>${e.qtd_construcoes}</td>
+                <td>${e.qtd_sessoes}</td>
+                ${tbodyAcertosCols(e)}
+                <td>${e[totalEstKey] ?? chaveTotalAcertos(e)}</td>
+                <td>${e.total_pontos}</td>
+                <td>${e.media_max_acertos}</td>
+            </tr>`
+        ).join('');
+
+        const tabelaEstrategias = (data.estrategias || []).length
+            ? `<div class="cc-analise-resumo mb-3">
+                <div class="cc-analise-resumo-titulo">Soma por estratégia (todas as sessões)</div>
+                <div class="table-responsive">
+                    <table class="table table-sm cc-ranking-hist mb-0">
+                        <thead><tr>
+                            <th>Estratégia</th><th>Constr.</th><th>Sessões</th>
+                            ${theadAcertosCols()}
+                            <th>Σ ${k0}–${k1}</th><th>Pontos</th><th>Média</th>
+                        </tr></thead>
+                        <tbody>${estrategiasRows}</tbody>
+                    </table>
+                </div>
+               </div>`
+            : '';
+
+        el.innerHTML = `
+            ${cardEstrategia}
+            ${tabelaEstrategias}
+            <p class="small text-muted mb-2 cc-analise-hint">
+                <strong>${data.total}</strong> conferência(s) salva(s) — detalhe por construção.
+                Cada coluna = concursos em que a melhor aposta teve exatamente N acertos (${k0} a ${k1}).
+            </p>
+            <div class="table-responsive">
+                <table class="table table-sm cc-ranking-hist mb-0">
+                    <thead><tr>
+                        <th>Sessão</th><th>Nome</th><th>Constr.</th><th>Estratégia</th>
+                        ${theadAcertosCols()}
+                        <th>Média máx.</th><th>Pontos</th><th>Conferida em</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    }
+
+    async function carregarPanoramaGeral() {
+        const el = $('ccPanoramaGeral');
+        if (el) el.innerHTML = '<p class="text-muted small mb-0">Carregando panorama…</p>';
+        const data = await apiGet('/panorama-conferencias');
+        renderPanoramaGeral(data);
+    }
+
+    async function conferirHistoricoConstrucao(construcaoId, num) {
+        const incremental = $('ccHistIncremental')?.checked || false;
+        const btn = document.querySelector(`.cc-btn-conf-hist[data-id="${construcaoId}"]`);
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conferindo…';
+        }
+        try {
+            const data = await apiPost('/construcao/' + construcaoId + '/conferir-historico', { incremental });
+            if (!data.sucesso) {
+                alert(data.erro || 'Erro na conferência.');
+                return;
+            }
+            if (data.conferencia) {
+                abrirModalConfHist(num, data.conferencia, data.mensagem);
+            }
+            if (sessaoAtual) {
+                const refreshed = await apiGet('/sessao/' + sessaoAtual.id);
+                if (refreshed.sucesso) {
+                    sessaoAtual = refreshed.sessao;
+                    renderConstrucoes(sessaoAtual);
+                }
+                await carregarAnaliseHistorica();
+                await carregarPanoramaGeral();
+            }
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-history"></i> Conferir histórico';
+            }
+        }
+    }
+
+    async function conferirHistoricoTodas() {
+        if (!sessaoAtual) return;
+        const incremental = $('ccHistIncremental')?.checked || false;
+        const btn = $('ccBtnConferirTodas');
+        const pane = $('ccTabHistoricoPane');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analisando…';
+        }
+        if (pane) pane.classList.add('cc-hist-loading');
+        try {
+            const data = await apiPost('/sessao/' + sessaoAtual.id + '/conferir-historico', { incremental });
+            if (!data.sucesso) {
+                alert(data.erro || 'Erro na análise.');
+                return;
+            }
+            const tab = document.getElementById('ccTabHistorico');
+            if (tab && typeof bootstrap !== 'undefined') bootstrap.Tab.getOrCreateInstance(tab).show();
+            if (data.analise) renderAnaliseHistorica(data.analise);
+            else await carregarAnaliseHistorica();
+            const refreshed = await apiGet('/sessao/' + sessaoAtual.id);
+            if (refreshed.sucesso) {
+                sessaoAtual = refreshed.sessao;
+                renderConstrucoes(sessaoAtual);
+            }
+            const n = data.processadas || 0;
+            $('ccSessaoStatus').textContent = `Análise histórica: ${n} construção(ões) processada(s).`;
+            await carregarPanoramaGeral();
+        } finally {
+            if (btn) {
+                btn.disabled = !(sessaoAtual && sessaoAtual.construcoes && sessaoAtual.construcoes.length);
+                btn.innerHTML = '<i class="fas fa-history"></i> Analisar todas no histórico';
+            }
+            if (pane) pane.classList.remove('cc-hist-loading');
+        }
+    }
+
+    function abrirModalConfHist(num, conf, mensagem) {
+        $('ccConfHistNum').textContent = '#' + num;
+        const corpo = $('ccConfHistCorpo');
+        const msg = mensagem ? `<div class="alert alert-success py-2 small">${mensagem}</div>` : '';
+        corpo.innerHTML = msg + htmlResumoConferencia(conf);
+        modalConfHist?.show();
+    }
+
+    async function carregarSessoes() {
+        const data = await apiGet('/sessoes');
+        const sel = $('ccSelectSessao');
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">— Carregar sessão —</option>';
+        if (data.sucesso && data.sessoes) {
+            data.sessoes.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `#${s.id} ${s.nome} (${s.conjunto_base.length} dz)`;
+                sel.appendChild(opt);
+            });
+        }
+        if (cur) sel.value = cur;
+    }
+
+    async function carregarSessao(id) {
+        const data = await apiGet('/sessao/' + id);
+        if (!data.sucesso) return;
+        sessaoAtual = data.sessao;
+        const base = sessaoAtual.conjunto_base || [];
+        const origem = sessaoAtual.origem_conjunto || 'manual';
+        if (origem === ORIGEM_APOSTAS_10X7) {
+            setModoEntrada('apostas10x7', false);
+            setSelecionadas(base, ORIGEM_APOSTAS_10X7);
+            const el = $('ccApostasParseInfo');
+            if (el) {
+                el.className = 'small text-muted mb-1';
+                el.textContent =
+                    `Sessão carregada com origem 10×${APOSTAS_POR_LINHA} — pool união: ${base.length} dezenas ` +
+                    `(${base.map(fmt).join(' ')}). Cole as 10 apostas de novo só se quiser alterar.`;
+            }
+        } else if (base.length > CONJUNTO_MAX) {
+            setModoEntrada('volante', false);
+            setSelecionadas(base, origem,
+                `Sessão antiga tinha ${base.length} dezenas; exibindo ${CONJUNTO_MAX}. Salve novamente para atualizar.`);
+        } else {
+            setModoEntrada('volante', false);
+            setSelecionadas(base, origem);
+        }
+        $('ccNomeSessao').value = sessaoAtual.nome;
+        $('ccDezenasAposta').value = sessaoAtual.dezenas_por_aposta;
+        atualizarEstadoGerar();
+        $('ccBtnConferir').disabled = false;
+        atualizarBotoesSessaoConstrucoes();
+        $('ccSessaoStatus').textContent = `Sessão #${sessaoAtual.id} carregada.`;
+        renderConstrucoes(sessaoAtual);
+        carregarAnaliseHistorica();
+    }
+
+    async function carregarConcursos() {
+        const data = await apiGet('/concursos?limit=150');
+        const sel = $('ccConcurso');
+        sel.innerHTML = '';
+        if (data.sucesso && data.concursos) {
+            data.concursos.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.concurso;
+                opt.textContent = `#${c.concurso} — ${c.data}`;
+                sel.appendChild(opt);
+            });
+        }
+    }
+
+    async function conferir() {
+        if (!sessaoAtual) return;
+        const concurso = parseInt($('ccConcurso').value, 10);
+        const data = await apiPost('/conferir', { sessao_id: sessaoAtual.id, concurso });
+        const el = $('ccConferencia');
+        if (!data.sucesso) {
+            el.innerHTML = `<div class="text-danger small">${data.erro}</div>`;
+            return;
+        }
+        const sorteadasSet = new Set(data.sorteadas || []);
+        const sortBalls = (data.sorteadas || []).map(d =>
+            `<span class="dez-ball-mini cc-acerto">${fmt(d)}</span>`
+        ).join('');
+        const mesInfo = data.mes_nome
+            ? ` · Mês: <strong>${data.mes_nome}</strong>`
+            : '';
+        let html = `<div class="small mb-2">
+            <strong>Concurso ${data.concurso}</strong> (${data.data})${mesInfo}
+            <div class="cc-sorteadas-row">${sortBalls}</div>
+        </div>`;
+        if (data.melhor_construcao) {
+            html += `<div class="alert alert-success py-2 small mb-2">
+                Melhor: <strong>Construção ${data.melhor_construcao}</strong>
+            </div>`;
+        }
+        html += data.ranking.map(r => {
+            const cls = r.construcao_numero === data.melhor_construcao ? ' cc-melhor' : '';
+            const cRef = {
+                estrategia: r.estrategia,
+                distribuicao: r.distribuicao || {},
+                estrategia_params: r.estrategia_params || {},
+            };
+            const apRows = renderApostas(
+                r.apostas.map(a => ({ linha: a.linha, dezenas: a.dezenas, acertos: a.acertos })),
+                false,
+                sorteadasSet,
+            );
+            return `<div class="cc-construcao-card${cls}">
+                <div class="d-flex justify-content-between mb-1">
+                    <strong>Construção ${r.construcao_numero}</strong>
+                </div>
+                ${htmlEstrategiaBadge(cRef)}
+                <div class="small mb-1">
+                    Máx: <strong>${r.max_acertos}</strong> ac.
+                    · Total: ${r.total_acertos}
+                    · Média: ${r.media_acertos}
+                </div>
+                ${apRows}
+            </div>`;
+        }).join('');
+        el.innerHTML = html;
+    }
+
+    async function carregarMesesIndicadosBanner() {
+        const banner = $('ccMesesIndicadosBanner');
+        const txt = $('ccMesesIndicadosTxt');
+        if (!banner || !txt) return;
+        try {
+            const r = await fetch('/geradores-elite/api/meses-indicados');
+            const d = await r.json();
+            if (!d.sucesso) {
+                txt.textContent = d.erro || 'Indisponível';
+                banner.classList.remove('alert-success');
+                banner.classList.add('alert-warning');
+                banner.style.display = '';
+                return;
+            }
+            if (d.sem_indicados) {
+                txt.textContent = 'Nenhum (todos os 12 meses saíram na janela)';
+                banner.classList.remove('alert-success');
+                banner.classList.add('alert-warning');
+            } else {
+                txt.textContent = (d.meses_indicados || []).map(m => m.mes_abrev).join(' · ') || '—';
+            }
+            banner.style.display = '';
+            window.__CC_MESES_INDICADOS__ = d;
+        } catch (e) {
+            txt.textContent = 'Erro ao carregar';
+            banner.style.display = '';
+        }
+    }
+
+    function processarImportPendente() {
+        try {
+            const raw = sessionStorage.getItem('cc_import_pending');
+            if (!raw) return;
+            const pending = JSON.parse(raw);
+            if (!Array.isArray(pending) || !pending.length) {
+                sessionStorage.removeItem('cc_import_pending');
+                return;
+            }
+            mostrarBannerPending(pending);
+        } catch (_) {
+            sessionStorage.removeItem('cc_import_pending');
+        }
+    }
+
+    function mostrarBannerPending(pending) {
+        if (!pending || !pending.length) return;
+        let banner = document.getElementById('ccImportPendingBanner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'ccImportPendingBanner';
+            banner.className = 'alert alert-info py-2 small mb-2 d-flex flex-wrap align-items-center gap-2';
+            const anchor = document.querySelector('#ge-construtor .cc-panel');
+            if (anchor) anchor.insertAdjacentElement('afterend', banner);
+        }
+        const next = pending[0];
+        const label = (next.origem || '').includes('posicional') ? 'Posicional' : 'Ordenadas';
+        banner.innerHTML = `
+            <span><i class="fas fa-clock me-1"></i> Conjunto <strong>${label}</strong> do Diferencial Cruzado aguardando importação.</span>
+            <button type="button" class="btn btn-sm btn-primary" id="ccBtnImportPending">Importar agora</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="ccBtnDismissPending">Descartar</button>
+        `;
+        $('ccBtnImportPending')?.addEventListener('click', () => {
+            const item = pending.shift();
+            if (item && item.dezenas && item.dezenas.length) {
+                setSelecionadas(
+                    item.dezenas,
+                    item.origem || 'diferencial',
+                    item.aviso || 'Importado do Diferencial Cruzado.'
+                );
+            }
+            if (pending.length) {
+                sessionStorage.setItem('cc_import_pending', JSON.stringify(pending));
+                mostrarBannerPending(pending);
+            } else {
+                sessionStorage.removeItem('cc_import_pending');
+                banner.remove();
+            }
+        }, { once: true });
+        $('ccBtnDismissPending')?.addEventListener('click', () => {
+            sessionStorage.removeItem('cc_import_pending');
+            banner.remove();
+        }, { once: true });
+    }
+
+    function parseDezenasParam(raw) {
+        return [...new Set(String(raw || '').split(/[,;\-\s+]+/)
+            .map((s) => parseInt(String(s).trim(), 10))
+            .filter((n) => Number.isFinite(n) && n >= DEZENA_MIN && n <= DEZENA_MAX))];
+    }
+
+    function aplicarFaltantesDaUrl() {
+        try {
+            const qs = new URLSearchParams(window.location.search);
+            const falt = parseDezenasParam(qs.get('faltantes') || '');
+            if (!falt.length) return;
+            cicloFaltantesSet.clear();
+            falt.forEach((n) => cicloFaltantesSet.add(n));
+        } catch (_) { /* ignore */ }
+    }
+
+    function renderCicloVisao(c) {
+        const box = $('ccCicloVisao');
+        const meta = $('ccCicloVisaoMeta');
+        const balls = $('ccCicloVisaoBalls');
+        if (!box || !meta) return;
+        if (!c || !c.sucesso) {
+            box.hidden = true;
+            return;
+        }
+        box.hidden = false;
+        const nCiclo = c.ciclo_num != null ? '#' + c.ciclo_num : '';
+        const pct = c.percentual != null
+            ? (Number(c.percentual).toFixed(1).replace(/\.0$/, '') + '%')
+            : '—';
+        const nFalt = (c.faltantes || []).length;
+        meta.textContent = (`Ciclo ${nCiclo} · ${pct} fechado · falta ${nFalt}`).replace(/\s+/g, ' ').trim();
+        if (!balls) return;
+        if (!nFalt) {
+            balls.innerHTML = '<span class="cc-ciclo-visao-ok">Ciclo fechado</span>';
+            return;
+        }
+        balls.innerHTML = (c.faltantes || []).map((d) =>
+            `<span class="dez-ball-mini" title="Ainda não saiu neste ciclo">${fmt(d)}</span>`
+        ).join('');
+    }
+
+    async function carregarVisaoCiclo() {
+        if (!$('ccCicloVisao')) return;
+        try {
+            const data = await apiGet('/ciclo-visao');
+            if (!data.sucesso) {
+                renderCicloVisao(null);
+                return;
+            }
+            cicloFaltantesSet.clear();
+            (data.faltantes || []).forEach((n) => cicloFaltantesSet.add(Number(n)));
+            renderCicloVisao(data);
+            renderVolante();
+        } catch (_) {
+            renderCicloVisao(null);
+        }
+    }
+
+    function aplicarDezenasDaUrl() {
+        try {
+            const qs = new URLSearchParams(window.location.search);
+            const raw = qs.get('dezenas') || qs.get('base') || '';
+            if (!raw) return false;
+            const unicos = parseDezenasParam(raw);
+            if (!unicos.length) return false;
+            aplicarFaltantesDaUrl();
+            try {
+                if ($('ccModoVolanteBtn') && modoEntrada !== 'volante') {
+                    setModoEntrada('volante', false);
+                }
+            } catch (_) { /* ignore */ }
+            const origem = (qs.get('origem') || '').toLowerCase();
+            const falta = Math.max(0, CONJUNTO_MAX - unicos.length);
+            let aviso = `Pool da análise Comparar (${unicos.length} dezenas).`;
+            if (origem === 'recorrencia') {
+                const nFalt = cicloFaltantesSet.size;
+                aviso = nFalt
+                    ? `Recorrência: ${unicos.length} dezenas no conjunto-base, com ${nFalt} faltante(s) do ciclo já incluída(s).`
+                    : `Recorrência do ciclo: ${unicos.length} dezenas no conjunto-base.`;
+            } else if (falta === 1) {
+                aviso = `Pool de ${unicos.length} da análise Comparar. Falta 1 para o conjunto-base (máx. ${CONJUNTO_MAX}) — pode ser do último sorteio.`;
+            } else if (falta > 1) {
+                aviso = `Pool de ${unicos.length} da análise Comparar. Faltam ${falta} para o conjunto-base (máx. ${CONJUNTO_MAX}).`;
+            }
+            setSelecionadas(unicos, origem === 'recorrencia' ? 'recorrencia' : 'analise-comparar', aviso);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function init() {
+        if (HAS_MES) carregarMesesIndicadosBanner();
+        renderVolante();
+        fillSelectDezenas();
+        fillEstrategias();
+        updatePoolInfo();
+        atualizarEstadoGerar();
+        try {
+            const raw = sessionStorage.getItem('cc_panorama_import');
+            if (raw) {
+                const imp = JSON.parse(raw);
+                if (imp.dezenas && imp.dezenas.length) {
+                    setSelecionadas(
+                        imp.dezenas,
+                        imp.origem || 'panorama',
+                        imp.aviso || 'Importado da aba Panorama Top-3.'
+                    );
+                    sessionStorage.removeItem('cc_panorama_import');
+                }
+            }
+        } catch (_) { /* ignore */ }
+        aplicarFaltantesDaUrl();
+        aplicarDezenasDaUrl();
+        carregarVisaoCiclo();
+        processarImportPendente();
+        carregarSessoes();
+        carregarConcursos();
+        bindConstrucoesAcoes();
+
+        if (typeof bootstrap !== 'undefined') {
+            const elEdit = document.getElementById('ccModalEditar');
+            const elExp = document.getElementById('ccModalExport');
+            const elHist = document.getElementById('ccModalConfHist');
+            if (elEdit) modalEditar = new bootstrap.Modal(elEdit);
+            if (elExp) modalExport = new bootstrap.Modal(elExp);
+            if (elHist) modalConfHist = new bootstrap.Modal(elHist);
+        }
+        fillMesSelect($('ccEditMes'), 'atrasado');
+        if (HAS_MES) fillMesSelect($('ccExportMes'), 'atrasado');
+        if (HAS_MES) fillManualMesSelect();
+
+        $('ccBtnSalvarEdicao')?.addEventListener('click', salvarEdicao);
+        $('ccBtnConfirmarExport')?.addEventListener('click', confirmarExport);
+
+        $('ccBtnCicloSorteadas').addEventListener('click', () => importarCiclo('sorteadas'));
+        $('ccBtnCicloFaltantes').addEventListener('click', () => importarCiclo('faltantes'));
+        $('ccBtnAnaliseAtraso').addEventListener('click', () => importarAnalise('atraso'));
+        $('ccBtnAnaliseFreq').addEventListener('click', () => importarAnalise('frequencia'));
+        $('ccBtnLimpar').addEventListener('click', () => setSelecionadas([], 'manual'));
+        $('ccModoVolanteBtn')?.addEventListener('click', () => setModoEntrada('volante', true));
+        $('ccModoApostasBtn')?.addEventListener('click', () => setModoEntrada('apostas10x7', true));
+        $('ccBtnAplicarApostas')?.addEventListener('click', () => aplicarApostas10x7(false));
+        $('ccBtnLimparApostas')?.addEventListener('click', () => {
+            const ta = $('ccApostasTexto');
+            if (ta) ta.value = '';
+            selecionadas = new Set();
+            origemConjunto = ORIGEM_APOSTAS_10X7;
+            updatePoolInfo();
+            atualizarInfoParseApostas();
+        });
+        $('ccApostasTexto')?.addEventListener('input', atualizarInfoParseApostas);
+        const drop = $('ccApostasDrop');
+        if (drop) {
+            ['dragenter', 'dragover'].forEach((ev) => {
+                drop.addEventListener(ev, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    drop.classList.add('cc-dragover');
+                });
+            });
+            ['dragleave', 'drop'].forEach((ev) => {
+                drop.addEventListener(ev, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    drop.classList.remove('cc-dragover');
+                });
+            });
+            drop.addEventListener('drop', (e) => {
+                const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const ta = $('ccApostasTexto');
+                    if (ta) ta.value = String(reader.result || '');
+                    atualizarInfoParseApostas();
+                    aplicarApostas10x7(false);
+                };
+                reader.readAsText(file);
+            });
+        }
+        $('ccBtnSalvarSessao').addEventListener('click', salvarSessao);
+        $('ccExigirDigitos')?.addEventListener('change', () => {
+            const on = !!($('ccExigirDigitos') && $('ccExigirDigitos').checked);
+            if ($('ccDigitosExigidos')) $('ccDigitosExigidos').disabled = !on;
+            atualizarSomasDigitosLive([...selecionadas].sort((a, b) => a - b));
+        });
+        $('ccDigitosExigidos')?.addEventListener('change', () => {
+            atualizarSomasDigitosLive([...selecionadas].sort((a, b) => a - b));
+        });
+        $('ccSomaMin')?.addEventListener('input', () => {
+            atualizarSomasDigitosLive([...selecionadas].sort((a, b) => a - b));
+        });
+        $('ccSomaMax')?.addEventListener('input', () => {
+            atualizarSomasDigitosLive([...selecionadas].sort((a, b) => a - b));
+        });
+        carregarGuiaSomasDigitos();
+        $('ccBtnGerar').addEventListener('click', gerarConstrucao);
+        $('ccSessaoBoard')?.addEventListener('click', (ev) => {
+            const btn = ev.target && ev.target.closest && ev.target.closest('#ccBtnSugestaoPool');
+            if (!btn) return;
+            mostrarSugestaoPool();
+        });
+        initPadroesII();
+        $('ccBtnConferir').addEventListener('click', conferir);
+        $('ccBtnExportTodas')?.addEventListener('click', abrirExportTodas);
+        $('ccBtnRefinar')?.addEventListener('click', executarRefinar);
+        $('ccBtnExportRefinadas')?.addEventListener('click', exportarRefinadas);
+        $('ccRefinarConstrucao')?.addEventListener('change', atualizarPainelRefinar);
+        $('ccRefinarInfoBtn')?.addEventListener('click', () => {
+            const box = $('ccRefinarInfoBox');
+            const btn = $('ccRefinarInfoBtn');
+            if (!box || !btn) return;
+            box.hidden = !box.hidden;
+            btn.setAttribute('aria-expanded', box.hidden ? 'false' : 'true');
+        });
+        $('ccBtnManualTodas')?.addEventListener('click', enviarTodasManual);
+        $('ccBtnManualUltima')?.addEventListener('click', enviarUltimaManual);
+        $('ccBtnConferirTodas')?.addEventListener('click', conferirHistoricoTodas);
+        $('ccBtnAtualizarPanorama')?.addEventListener('click', carregarPanoramaGeral);
+        $('ccBtnIrPanorama')?.addEventListener('click', () => {
+            const tab = document.getElementById('ccTabPanorama');
+            if (tab && typeof bootstrap !== 'undefined') {
+                bootstrap.Tab.getOrCreateInstance(tab).show();
+            }
+            carregarPanoramaGeral();
+        });
+        $('ccTabPanorama')?.addEventListener('shown.bs.tab', carregarPanoramaGeral);
+        $('ccColinhaBtn')?.addEventListener('click', toggleColinha);
+        $('ccColinhaFechar')?.addEventListener('click', fecharColinha);
+        $('ccToggleComoUsar')?.addEventListener('click', () => {
+            const corpo = $('ccComoUsarCorpo');
+            const btn = $('ccToggleComoUsar');
+            if (!corpo || !btn) return;
+            const oculto = corpo.classList.toggle('d-none');
+            btn.textContent = oculto ? 'Mostrar' : 'Ocultar';
+            btn.setAttribute('aria-expanded', oculto ? 'false' : 'true');
+        });
+        $('ccSelectSessao').addEventListener('change', function () {
+            if (this.value) carregarSessao(this.value);
+        });
+
+        try {
+            if (!localStorage.getItem(COLINHA_KEY)) {
+                setTimeout(() => abrirColinha(true), 600);
+            }
+        } catch (_) {}
+    }
+
+    /** Hook para a aba Especial carregar pool no motor atual (sem duplicar gerador). */
+    window.__CC_aplicarPoolDezenas = function (nums, origem, aviso) {
+        try {
+            const btnVol = document.getElementById('ccModoVolanteBtn');
+            if (btnVol && modoEntrada !== 'volante') {
+                setModoEntrada('volante', false);
+            }
+        } catch (_) {}
+        setSelecionadas(nums, origem || 'distribuicao-especial', aviso);
+        const tab = document.getElementById('ccTabDezenas');
+        if (tab && typeof bootstrap !== 'undefined') {
+            bootstrap.Tab.getOrCreateInstance(tab).show();
+        }
+        return true;
+    };
+
+    init();
+})();

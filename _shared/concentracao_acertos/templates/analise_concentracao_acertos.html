@@ -1,0 +1,497 @@
+{% extends "base.html" %}
+{% block title %}Concentração de Acertos — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    {% if meses_cores %}
+    {% for nome, cor in meses_cores.items() %}
+    #conc-analise .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+    {% endfor %}
+    {% endif %}
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        color: #fff;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+    }
+    .badge-exp { background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; }
+    .badge-beta { background: #16a34a; color: #fff; font-size: .68rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+    .modulo-card { border: 1px solid #fce7a2; border-radius: 12px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.06); height: 100%; }
+    .modulo-card.ativo { border-color: #86efac; }
+    .modulo-card .card-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: .65rem; background: #f0fdf4; color: #15803d; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+    @media (min-width: 768px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+    .kpi-box { background: #fffdf8; border: 1px solid #fce7a2; border-radius: 8px; padding: .6rem .75rem; text-align: center; }
+    .kpi-box .val { font-size: 1.15rem; font-weight: 800; color: var(--primary); }
+    .kpi-box .lbl { font-size: .65rem; color: #6b7280; text-transform: uppercase; }
+    .cc-ultimo-sorteio { text-align: right; padding: .45rem .65rem; border-radius: 10px; background: rgba(255,255,255,.72); border: 1px solid rgba(192,139,0,.28); }
+    .dez-ball-mini { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; font-size: .68rem; font-weight: 700; background: var(--primary); color: #fff; }
+    .cc-table-wrap { max-height: 320px; overflow: auto; }
+    .valid-ok { color: #15803d; font-weight: 700; }
+    .valid-fail { color: #b45309; font-weight: 600; }
+    .rank-row-lider { background: #f0fdf4; }
+    .dez-ball-mini.cc-hit {
+        background: var(--accent, #e6a800) !important;
+        color: #2d2d2d !important;
+        box-shadow: 0 0 0 2px rgba(230, 168, 0, .5);
+    }
+    .dez-ball-mini.cc-miss { opacity: .35; filter: grayscale(.2); }
+    .cc-mes-badge {
+        display: inline-block;
+        font-size: .62rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 6px;
+        margin-left: 4px;
+        vertical-align: middle;
+    }
+    .cc-mes-badge.cc-mes-hit { box-shadow: 0 0 0 2px rgba(25, 135, 84, .75); }
+    .cc-mes-badge.cc-mes-miss { opacity: .45; filter: grayscale(.85); }
+    .cc-aposta-balls { display: inline-flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+    #ca-limite { max-width: 9.5rem; }
+    .cc-export-btns .btn { white-space: nowrap; }
+</style>
+
+<div id="conc-analise">
+    <div class="page-header">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                    <h2 class="mb-0">Concentração de Acertos</h2>
+                    <span class="badge-exp">Experimental</span>
+                    <span class="badge-beta" id="badge-fase">Beta</span>
+                </div>
+                <p class="mb-0 mt-1" style="opacity:.9;font-size:.88rem;">{{ conc_cfg.subtitle_analise }}</p>
+                <p class="mb-0 mt-1 small" id="status-msg" style="opacity:.85;"></p>
+            </div>
+            {% if ultimo_sorteio %}
+            <div class="cc-ultimo-sorteio">
+                <div class="small text-muted">Último sorteio</div>
+                <div class="small">Concurso <strong>{{ ultimo_sorteio.concurso }}</strong>{% if ultimo_sorteio.data %} · {{ ultimo_sorteio.data }}{% endif %}</div>
+                <div class="d-flex flex-wrap gap-1 justify-content-end mt-1">
+                    {% for d in ultimo_sorteio.dezenas %}<span class="dez-ball-mini">{{ '%02d'|format(d) }}</span>{% endfor %}
+                    {% if ultimo_sorteio.mes_abrev %}
+                    <span class="cc-mes-badge mes-nome-{{ ultimo_sorteio.mes_nome|default('') }}">{{ ultimo_sorteio.mes_abrev }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            <a href="/geradores-elite/gerador-concentracao/" class="btn btn-sm btn-light align-self-start"><i class="fas fa-bolt"></i> Ir ao Gerador</a>
+        </div>
+    </div>
+
+    <div class="modulo-card p-3 mb-4">
+        <h6 class="fw-bold mb-3"><i class="fas fa-sliders text-warning"></i> Parâmetros da análise</h6>
+        <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+                <label class="form-label small mb-0">Estratégia</label>
+                <select id="ca-estrategia" class="form-select form-select-sm">
+                    {% for e in conc_cfg.estrategias %}
+                    <option value="{{ e.id }}"{% if e.padrao %} selected{% endif %}>{{ e.id }} — pool {{ e.pool_size }}{% if e.padrao %} (padrão){% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small mb-0">Pool automático</label>
+                <select id="ca-criterio" class="form-select form-select-sm">
+                    <option value="freq" selected>Mais frequentes</option>
+                    <option value="atraso">Mais atrasadas</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small mb-0">Perfil apostas</label>
+                <select id="ca-perfil" class="form-select form-select-sm">
+                    <option value="equilibrado">Equilibrado</option>
+                    <option value="frequencia">Frequência</option>
+                    <option value="atraso">Comportamento</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small mb-0">Janela (concursos)</label>
+                <select id="ca-limite" class="form-select form-select-sm" title="Quantidade de concursos no backtest">
+                    <option value="30">30 últimos</option>
+                    <option value="50">50 últimos</option>
+                    <option value="100">100 últimos</option>
+                    <option value="150">150 últimos</option>
+                    <option value="200">200 últimos</option>
+                    <option value="300">300 últimos</option>
+                    <option value="500">500 últimos</option>
+                    <option value="1000" selected>1.000 últimos</option>
+                    <option value="0">Todos no banco</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <button type="button" class="btn btn-sm w-100" style="background:var(--primary);border-color:var(--primary);color:#fff;" id="btn-executar">
+                    <i class="fas fa-play"></i> Executar análise completa
+                </button>
+            </div>
+        </div>
+        <div class="form-text mt-1" id="ca-limite-hint" style="font-size:.7rem;"></div>
+    </div>
+
+    {% if conc_cfg.extra_mes %}
+    <div class="alert alert-success py-2 px-3 mb-3 small" id="ca-meses-banner" style="display:none;">
+        <i class="fas fa-calendar-check me-1"></i>
+        <strong>Mês da Sorte — pool indicado (últimos 10 concursos):</strong>
+        <span id="ca-meses-txt">—</span>
+        <span class="text-muted ms-2" id="ca-mes-kpi"></span>
+    </div>
+    {% endif %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-4">
+            <div class="modulo-card ativo p-3">
+                <div class="card-icon"><i class="fas fa-bullseye"></i></div>
+                <h6 class="fw-bold mb-2">Índice de Concentração</h6>
+                <p class="text-muted small mb-2">Quanto os acertos se concentram na mesma aposta.</p>
+                <div class="kpi-grid" id="kpis-indice">
+                    <div class="kpi-box"><div class="val">—</div><div class="lbl">Índice</div></div>
+                    <div class="kpi-box"><div class="val">—</div><div class="lbl">Média máx.</div></div>
+                    <div class="kpi-box"><div class="val">—</div><div class="lbl">Média top 2</div></div>
+                    <div class="kpi-box"><div class="val">—</div><div class="lbl">Score</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="modulo-card ativo p-3">
+                <div class="card-icon"><i class="fas fa-clock-rotate-left"></i></div>
+                <h6 class="fw-bold mb-2">Backtest Histórico</h6>
+                <p class="text-muted small mb-2">Simulação nos últimos concursos do banco.</p>
+                <div class="kpi-grid" id="kpis-backtest">
+                    <div class="kpi-box"><div class="val">—</div><div class="lbl">4 ac.</div></div>
+                    <div class="kpi-box"><div class="val">—</div><div class="lbl">5 ac.</div></div>
+                    <div class="kpi-box"><div class="val">—</div><div class="lbl">6 ac.</div></div>
+                    <div class="kpi-box"><div class="val">—</div><div class="lbl">7 ac.</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="modulo-card ativo p-3">
+                <div class="card-icon"><i class="fas fa-flask"></i></div>
+                <h6 class="fw-bold mb-2">Validações</h6>
+                <p class="text-muted small mb-2">Critérios mínimos antes de usar em produção.</p>
+                <ul class="small mb-0 ps-3" id="lista-validacoes">
+                    <li class="text-muted">Execute a análise para validar.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="modulo-card ativo p-3">
+                <div class="card-icon"><i class="fas fa-scale-balanced"></i></div>
+                <h6 class="fw-bold mb-2">Comparação de Estratégias (A · B · C)</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead><tr><th>Pos.</th><th>Est.</th><th>Pool</th><th>Índice</th><th>Média máx.</th><th>Score</th><th>Mês</th></tr></thead>
+                        <tbody id="tb-comparar"><tr><td colspan="7" class="text-muted text-center">Aguardando análise…</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="modulo-card ativo p-3">
+                <div class="card-icon"><i class="fas fa-chart-bar"></i></div>
+                <h6 class="fw-bold mb-2">Estatísticas — destaques</h6>
+                <div class="cc-table-wrap">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Concurso</th><th>Data</th><th>Máx.</th><th>Melhor aposta</th><th>Mês</th></tr></thead>
+                        <tbody id="tb-destaques"><tr><td colspan="5" class="text-muted text-center">—</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modulo-card ativo p-3 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <h6 class="fw-bold mb-0"><i class="fas fa-file-lines"></i> Relatório do backtest</h6>
+            <div class="d-flex flex-wrap gap-2 cc-export-btns">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-exportar-json" disabled>
+                    <i class="fas fa-download"></i> JSON
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-exportar-csv" disabled>
+                    <i class="fas fa-file-csv"></i> CSV
+                </button>
+            </div>
+        </div>
+        <div class="cc-table-wrap">
+            <table class="table table-sm table-striped mb-0">
+                <thead><tr><th>Concurso</th><th>Data</th><th>Máx. acertos</th><th>Melhor aposta</th><th>Mês</th></tr></thead>
+                <tbody id="tb-backtest"><tr><td colspan="5" class="text-muted text-center">Execute a análise.</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const API = '/analise/api/concentracao-acertos';
+    const MESES_ABREV = {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+    const MESES_NOME = {1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
+    let ultimoRelatorio = null;
+    let ultimoComparar = null;
+
+    function params() {
+        return {
+            estrategia: document.getElementById('ca-estrategia').value,
+            criterio_pool: document.getElementById('ca-criterio').value,
+            perfil: document.getElementById('ca-perfil').value,
+            limite: parseInt(document.getElementById('ca-limite').value, 10) || 50,
+            quantidade: 10,
+        };
+    }
+
+    function htmlApostaDestaque(l) {
+        const acertadas = new Set(l.acertadas || []);
+        const nums = l.melhor_aposta || [];
+        if (!nums.length) return '—';
+        return '<span class="cc-aposta-balls">' + nums.map(function (d) {
+            const n = parseInt(d, 10);
+            const hit = acertadas.has(n);
+            return '<span class="dez-ball-mini ' + (hit ? 'cc-hit' : 'cc-miss') + '">'
+                + String(n).padStart(2, '0') + '</span>';
+        }).join('') + '</span>';
+    }
+
+    function htmlMesLinha(l) {
+        const ms = l.mes_sorteio || {};
+        const ap = l.mes_aposta;
+        if (!ms.mes_num && !ap) return '—';
+        const nomeSort = ms.mes_nome || MESES_NOME[ms.mes_num] || '';
+        const abSort = ms.mes_abrev || MESES_ABREV[ms.mes_num] || '';
+        const abAp = MESES_ABREV[ap] || '';
+        const nomeAp = MESES_NOME[ap] || nomeSort;
+        let html = '';
+        if (ap) {
+            html += '<span class="cc-mes-badge mes-nome-' + nomeAp + ' '
+                + (l.mes_acertou ? 'cc-mes-hit' : 'cc-mes-miss') + '">' + abAp + '</span>';
+        }
+        if (ms.mes_num) {
+            html += '<span class="text-muted small ms-1">(' + abSort + ')</span>';
+        }
+        return html || '—';
+    }
+
+    function renderMesesIndicados(analise, metricas) {
+        const banner = document.getElementById('ca-meses-banner');
+        const txt = document.getElementById('ca-meses-txt');
+        const kpi = document.getElementById('ca-mes-kpi');
+        if (!banner || !txt) return;
+        if (!analise || !analise.sucesso) {
+            banner.style.display = 'none';
+            return;
+        }
+        const ind = analise.meses_indicados || [];
+        txt.textContent = ind.length
+            ? ind.map(function (m) { return m.mes_abrev || MESES_ABREV[m.mes_num]; }).join(' · ')
+            : 'Nenhum mês no pool (todos saíram na janela).';
+        banner.style.display = '';
+        if (kpi && metricas && metricas.mes_acertos != null) {
+            kpi.textContent = 'Backtest: ' + metricas.mes_acertos + ' acerto(s) de mês · '
+                + (metricas.mes_taxa != null ? metricas.mes_taxa + '%' : '—');
+        }
+    }
+
+    function renderKpisIndice(m) {
+        if (!m) return;
+        const boxes = document.getElementById('kpis-indice').children;
+        boxes[0].querySelector('.val').textContent = m.indice_concentracao ?? '—';
+        boxes[1].querySelector('.val').textContent = m.media_max_acertos ?? '—';
+        boxes[2].querySelector('.val').textContent = m.media_top2 ?? '—';
+        boxes[3].querySelector('.val').textContent = m.score ?? '—';
+    }
+
+    function renderKpisDist(m) {
+        if (!m) return;
+        const boxes = document.getElementById('kpis-backtest').children;
+        boxes[0].querySelector('.val').textContent = m.dist_4 ?? 0;
+        boxes[1].querySelector('.val').textContent = m.dist_5 ?? 0;
+        boxes[2].querySelector('.val').textContent = m.dist_6 ?? 0;
+        boxes[3].querySelector('.val').textContent = m.dist_7 ?? 0;
+    }
+
+    function renderValidacoes(v) {
+        const ul = document.getElementById('lista-validacoes');
+        if (!v || !v.checks) {
+            ul.innerHTML = '<li class="text-muted">Execute a análise para validar.</li>';
+            return;
+        }
+        ul.innerHTML = v.checks.map(function (c) {
+            return '<li class="' + (c.ok ? 'valid-ok' : 'valid-fail') + '">'
+                + (c.ok ? '✓' : '○') + ' ' + c.nome + ' <span class="text-muted">(' + c.valor + ')</span></li>';
+        }).join('');
+    }
+
+    function renderComparar(data) {
+        const tb = document.getElementById('tb-comparar');
+        const lista = (data && data.ranking_ordenado && data.ranking_ordenado.length)
+            ? data.ranking_ordenado
+            : ((data && data.ranking) || []);
+        if (!lista.length) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-muted text-center">Sem dados</td></tr>';
+            return;
+        }
+        const lider = data.lider && data.lider.estrategia;
+        tb.innerHTML = lista.map(function (r) {
+            if (!r.sucesso) {
+                return '<tr><td colspan="7" class="text-danger small">' + r.estrategia + ': ' + (r.erro || 'Erro') + '</td></tr>';
+            }
+            const m = r.metricas || {};
+            const mesTxt = (r.mes_acertos != null)
+                ? r.mes_acertos + ' (' + (r.mes_taxa != null ? r.mes_taxa : m.mes_taxa) + '%)'
+                : '—';
+            return '<tr class="' + (r.estrategia === lider ? 'rank-row-lider' : '') + '">'
+                + '<td><strong>' + (r.posicao_label || r.posicao || '—') + '</strong></td>'
+                + '<td><strong>' + r.estrategia + '</strong></td>'
+                + '<td>' + r.pool_size + '</td>'
+                + '<td>' + (m.indice_concentracao ?? '—') + '</td>'
+                + '<td>' + (m.media_max_acertos ?? '—') + '</td>'
+                + '<td>' + (m.score ?? '—') + '</td>'
+                + '<td class="small">' + mesTxt + '</td></tr>';
+        }).join('');
+    }
+
+    function renderTabelaBacktest(id, linhas, cols) {
+        const tb = document.getElementById(id);
+        if (!linhas || !linhas.length) {
+            tb.innerHTML = '<tr><td colspan="' + cols + '" class="text-muted text-center">Nenhum dado</td></tr>';
+            return;
+        }
+        tb.innerHTML = linhas.map(function (l) {
+            return '<tr><td>' + l.concurso + '</td><td>' + (l.data || '—') + '</td>'
+                + '<td><strong>' + l.max_acertos + '</strong></td>'
+                + '<td>' + htmlApostaDestaque(l) + '</td>'
+                + '<td>' + htmlMesLinha(l) + '</td></tr>';
+        }).join('');
+    }
+
+    function setExportEnabled(on) {
+        document.getElementById('btn-exportar-json').disabled = !on;
+        document.getElementById('btn-exportar-csv').disabled = !on;
+    }
+
+    function pacoteExportacao() {
+        return {
+            exportado_em: new Date().toISOString(),
+            backtest: ultimoRelatorio,
+            comparar: ultimoComparar,
+        };
+    }
+
+    function exportarJson() {
+        if (!ultimoRelatorio) return;
+        const blob = new Blob([JSON.stringify(pacoteExportacao(), null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'concentracao-acertos-' + (ultimoRelatorio.estrategia || 'A') + '.json';
+        a.click();
+    }
+
+    function exportarCsv() {
+        if (!ultimoRelatorio || !ultimoRelatorio.linhas) return;
+        const linhas = ultimoRelatorio.linhas;
+        const head = ['concurso', 'data', 'max_acertos', 'melhor_aposta', 'acertadas', 'mes_aposta', 'mes_sorteio', 'mes_acertou'];
+        const rows = linhas.map(function (l) {
+            const ms = l.mes_sorteio || {};
+            return [
+                l.concurso,
+                l.data || '',
+                l.max_acertos,
+                (l.melhor_aposta_fmt || []).join(' '),
+                (l.acertadas_fmt || []).join(' '),
+                l.mes_aposta || '',
+                ms.mes_abrev || ms.mes_num || '',
+                l.mes_acertou ? 'sim' : 'nao',
+            ];
+        });
+        const csv = [head.join(';')].concat(rows.map(function (r) {
+            return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(';');
+        })).join('\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'backtest-concentracao-' + (ultimoRelatorio.estrategia || 'A') + '.csv';
+        a.click();
+    }
+
+    let totalConcursosBanco = 0;
+
+    async function carregarStatus() {
+        try {
+            const r = await fetch(API + '/status');
+            const j = await r.json();
+            document.getElementById('status-msg').textContent = j.mensagem || '';
+            document.getElementById('badge-fase').textContent = (j.fase || 'beta').toUpperCase();
+            totalConcursosBanco = parseInt(j.total_sorteios, 10) || 0;
+            const hint = document.getElementById('ca-limite-hint');
+            const optTodos = document.querySelector('#ca-limite option[value="0"]');
+            if (optTodos && totalConcursosBanco > 0) {
+                optTodos.textContent = 'Todos (' + totalConcursosBanco.toLocaleString('pt-BR') + ')';
+            }
+            if (hint) {
+                hint.textContent = totalConcursosBanco
+                    ? totalConcursosBanco + ' concursos no banco · janelas maiores podem demorar um pouco mais.'
+                    : '';
+            }
+        } catch (e) { /* silencioso */ }
+    }
+
+    async function executar() {
+        const btn = document.getElementById('btn-executar');
+        const p = params();
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando…';
+        try {
+            const [rBt, rCmp] = await Promise.all([
+                fetch(API + '/backtest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(p),
+                }),
+                fetch(API + '/comparar?' + new URLSearchParams({
+                    criterio_pool: p.criterio_pool,
+                    perfil: p.perfil,
+                    limite: String(p.limite),
+                })),
+            ]);
+            const bt = await rBt.json();
+            const cmp = await rCmp.json();
+            if (!bt.sucesso) {
+                alert(bt.erro || 'Falha no backtest.');
+                return;
+            }
+            ultimoRelatorio = bt;
+            ultimoComparar = cmp;
+            const m = bt.metricas || {};
+            const analisados = bt.concursos_analisados || bt.limite || 0;
+            document.getElementById('status-msg').textContent =
+                'Análise em ' + analisados.toLocaleString('pt-BR') + ' concurso(s)'
+                + (bt.concurso_de && bt.concurso_ate
+                    ? ' (de ' + bt.concurso_de + ' até ' + bt.concurso_ate + ').' : '.');
+            renderKpisIndice(m);
+            renderKpisDist(m);
+            renderValidacoes(bt.validacoes);
+            renderMesesIndicados(bt.meses_indicados, m);
+            renderTabelaBacktest('tb-backtest', bt.linhas, 5);
+            renderTabelaBacktest('tb-destaques', bt.destaques, 5);
+            renderComparar(cmp);
+            setExportEnabled(true);
+        } catch (e) {
+            alert('Erro: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play"></i> Executar análise completa';
+        }
+    }
+
+    document.getElementById('btn-executar').addEventListener('click', executar);
+    document.getElementById('btn-exportar-json').addEventListener('click', exportarJson);
+    document.getElementById('btn-exportar-csv').addEventListener('click', exportarCsv);
+
+    carregarStatus();
+})();
+</script>
+{% endblock %}

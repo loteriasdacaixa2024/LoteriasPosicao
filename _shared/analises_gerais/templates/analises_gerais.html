@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análises Gerais — Central</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        .header-bar {
+            background: linear-gradient(135deg, #1e3a5f, #0a6b1a);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .table-wrap {
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            overflow: hidden;
+        }
+        .table { color: #e2e8f0; font-size: 0.82rem; margin: 0; }
+        .table thead { background: rgba(0,0,0,0.35); }
+        .table td, .table th { border-color: rgba(255,255,255,0.08); vertical-align: middle; }
+        .table tbody tr:hover { background: rgba(255,255,255,0.06); }
+        .badge-teorico { background: #1e40af; }
+        .badge-vivo { background: #15803d; }
+        .insight-box {
+            background: rgba(255,255,255,0.05);
+            border-left: 3px solid #22c55e;
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+            margin-top: 0.35rem;
+        }
+        .na { color: #64748b; }
+        .nav-tabs-comportamento .nav-link {
+            color: #94a3b8;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04);
+        }
+        .nav-tabs-comportamento .nav-link.active {
+            color: #fff;
+            background: #15803d;
+            border-color: #15803d;
+        }
+        .card-comportamento {
+            border-radius: 12px;
+            height: 100%;
+            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+            overflow: hidden;
+        }
+        .card-comportamento .card-header {
+            background: rgba(0,0,0,0.22);
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+        }
+        .card-comportamento .card-meta { opacity: 0.88; font-size: 0.72rem; }
+        .card-comportamento .resumo-exec { color: rgba(255,255,255,0.88); }
+        .card-comportamento .badge-ind {
+            font-size: 0.65rem;
+            background: rgba(255,255,255,0.18);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.22);
+        }
+        .card-comportamento .tbl-wrap-inner {
+            background: rgba(0,0,0,0.35);
+            border-radius: 8px;
+            padding: 0.25rem 0.35rem;
+            overflow: hidden;
+        }
+        .card-comportamento .table-responsive {
+            overflow: visible;
+            background: transparent;
+        }
+        .card-comportamento .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: rgba(255,255,255,0.95);
+            --bs-table-border-color: rgba(255,255,255,0.14);
+            --bs-table-hover-bg: rgba(255,255,255,0.08);
+            --bs-table-striped-bg: rgba(0,0,0,0.12);
+            --bs-table-striped-color: rgba(255,255,255,0.95);
+            margin-bottom: 0;
+            background: transparent !important;
+            color: rgba(255,255,255,0.95) !important;
+        }
+        .card-comportamento .tbl-mini thead { background: rgba(0,0,0,0.35); }
+        .card-comportamento .tbl-mini td,
+        .card-comportamento .tbl-mini th {
+            color: rgba(255,255,255,0.95) !important;
+            background: transparent !important;
+            border-color: rgba(255,255,255,0.12) !important;
+        }
+        .card-comportamento .tbl-mini tbody tr:nth-child(even) td {
+            background: rgba(0,0,0,0.14) !important;
+        }
+        .card-comportamento .na { color: rgba(255,255,255,0.55) !important; }
+        .mes-abrev-badge {
+            display: inline-block;
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 0.12rem 0.38rem;
+            border-radius: 4px;
+            color: #fff !important;
+            margin-left: 0.15rem;
+            vertical-align: middle;
+            line-height: 1.2;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        }
+        .moda-inline-pct { opacity: 0.82; font-size: 0.92em; margin-left: 0.2rem; }
+        .tm-cell-tip { cursor: help; text-decoration: underline dotted rgba(255,255,255,0.45); }
+        .tbl-mini { font-size: 0.7rem; margin: 0; }
+        .tbl-mini td, .tbl-mini th {
+            padding: 0.2rem 0.35rem;
+            border-color: rgba(255,255,255,0.06);
+            white-space: nowrap;
+        }
+        .resumo-exec { font-size: 0.75rem; line-height: 1.35; }
+        .comp-pa-im-row { border-left: 4px solid transparent; }
+        .comp-pa-im-row:hover { background: rgba(255,255,255,0.06) !important; }
+        .col-pa { background: rgba(59,130,246,0.08); }
+        .col-im { background: rgba(244,114,182,0.08); }
+        .seq-pa-im { font-size: 0.72rem; letter-spacing: 0.02em; font-family: ui-monospace, monospace; }
+        .th-modalidade { min-width: 140px; }
+        .linhas-rank-card {
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03); overflow: hidden; height: 100%;
+        }
+        .linhas-rank-card .lr-head {
+            padding: .55rem .85rem; font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center; gap: .5rem;
+        }
+        .linhas-rank-card .lr-body { padding: .75rem .85rem; }
+        .linhas-rank-card .lr-meta { font-size: .75rem; color: #9aa3af; margin-bottom: .55rem; }
+        .linhas-rank-podium {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; margin-bottom: .65rem;
+        }
+        @media (max-width: 576px) {
+            .linhas-rank-podium { grid-template-columns: 1fr; }
+        }
+        .linhas-rank-podium .pod {
+            border-radius: 8px; padding: .45rem .55rem; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.18); font-size: .78rem;
+        }
+        .linhas-rank-podium .pod.p1 { border-color: #c9a227; background: rgba(201,162,39,0.15); }
+        .linhas-rank-podium .pod.p2 { border-color: #9aa0a6; background: rgba(154,160,166,0.12); }
+        .linhas-rank-podium .pod.p3 { border-color: #c47b3a; background: rgba(196,123,58,0.12); }
+        .linhas-rank-podium .pod .pos { font-size: .68rem; opacity: .85; text-transform: uppercase; font-weight: 700; }
+        .linhas-rank-podium .pod .ln { font-size: 1.1rem; font-weight: 800; }
+        .tbl-linhas-rank { font-size: .75rem; margin: 0; }
+        .tbl-linhas-rank th, .tbl-linhas-rank td { padding: .25rem .4rem; white-space: nowrap; }
+        .tbl-linhas-rank tr.r1 { background: rgba(201,162,39,0.12); font-weight: 700; }
+        .tbl-linhas-rank tr.r2 { background: rgba(154,160,166,0.1); font-weight: 700; }
+        .tbl-linhas-rank tr.r3 { background: rgba(196,123,58,0.1); font-weight: 700; }
+        .linhas-rank-toolbar .form-select {
+            background: #1a2332; color: #e8edf5; border-color: #2a3548; font-size: .85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <a href="/" class="text-white text-decoration-none small opacity-75"><i class="fas fa-arrow-left me-1"></i>Central</a>
+            <h1 class="h3 mb-0 mt-1 fw-bold">Análises Gerais</h1>
+            <p class="mb-0 small opacity-75">Sincroniza pela Central (8083) direto no SQLite — não precisa da Mega na porta 5156</p>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="badge bg-light text-dark" id="lbl-atualizado">—</span>
+            <button class="btn btn-warning btn-sm fw-bold text-dark" id="btn-sync" type="button">
+                <i class="fas fa-cloud-download-alt me-1"></i>Sincronizar todas (Caixa)
+            </button>
+            <button class="btn btn-outline-light btn-sm fw-bold" id="btn-refresh" type="button" title="Só relê o banco, sem chamar a Caixa">
+                <i class="fas fa-table me-1"></i>Recarregar tabela
+            </button>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4 pb-5">
+        <div id="painel-sync" class="alert alert-info d-none mb-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="fas fa-spinner fa-spin"></i>
+                <strong id="sync-titulo">Sincronizando modalidades…</strong>
+            </div>
+            <div class="progress mb-2" style="height:8px">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="sync-progress" style="width:0%"></div>
+            </div>
+            <ul class="small mb-0 ps-3" id="sync-log"></ul>
+        </div>
+        <div id="avisos" class="alert alert-warning d-none"></div>
+
+        <ul class="nav nav-tabs nav-tabs-comportamento mb-3" id="tabs-principais" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" id="tab-volantes" data-bs-toggle="tab"
+                    data-bs-target="#pane-volantes" type="button" role="tab">
+                    <i class="fas fa-table me-1"></i>Volantes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="tab-comportamento" data-bs-toggle="tab"
+                    data-bs-target="#pane-comportamento" type="button" role="tab">
+                    <i class="fas fa-chart-line me-1"></i>Comportamento
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="conteudo-principal">
+        <div class="tab-pane fade show active" id="pane-volantes" role="tabpanel">
+
+        <p class="small text-secondary mb-3">
+            <strong>Coluna 2+</strong> = % de concursos com pelo menos duas dezenas no mesmo final.
+            <strong>Finais distintos</strong> = todas as dezenas com finais diferentes.
+            <strong>Último (Caixa)</strong> = último concurso já sorteado na série regular (API).
+            Concursos especiais (ex.: Quina 7051 São João) aparecem abaixo quando cadastrados.
+            <strong>Base gravada</strong> = registros no SQLite; lacunas na faixa 1..último são preenchidas ao sincronizar.
+        </p>
+
+        <h5 class="mb-2 fw-bold">Volantes (dezenas)</h5>
+        <div class="table-wrap">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Modalidade</th>
+                            <th>Aposta</th>
+                            <th class="text-end">Último (Caixa)</th>
+                            <th class="text-end" title="Registros no SQLite e lacunas">Base gravada</th>
+                            <th class="text-end">Col. 2+ (vivo)</th>
+                            <th class="text-end">Finais dist. (vivo)</th>
+                            <th class="text-end">Teórico col. 2+</th>
+                            <th class="text-end">Linha 2+</th>
+                            <th>Par/Ímpar</th>
+                            <th class="text-end">Primos (moda)</th>
+                            <th class="text-end">Ciclo faltam</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-modalidades"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <h5 class="mt-4 mb-2 fw-bold">Super Sete <span class="badge bg-info text-dark">posicional</span></h5>
+        <p class="small text-secondary mb-2">
+            Não é volante de dezenas: são <strong>7 colunas C1–C7</strong>, cada uma com <strong>1 dígito de 0 a 9</strong>.
+            Métricas de “final de dezena” e “coluna 2+” do quadro acima <em>não se aplicam</em>.
+        </p>
+        <div class="table-wrap mb-2" id="wrap-supersete">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Modalidade</th>
+                            <th>Estrutura</th>
+                            <th class="text-end">Último (Caixa)</th>
+                            <th class="text-end">Base gravada</th>
+                            <th class="text-end">Mesmo dígito 2+ col.</th>
+                            <th class="text-end">7 dígitos distintos</th>
+                            <th>Par/Ímpar (7 pos.)</th>
+                            <th class="text-end">Primos (moda)</th>
+                            <th class="text-end">Ciclo (média faltam)</th>
+                            <th class="text-end">Soma média</th>
+                            <th>Dígitos mais frequentes</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-supersete"></tbody>
+                </table>
+            </div>
+        </div>
+        <p class="small text-secondary mb-0" id="nota-supersete"></p>
+
+        <h5 class="mt-4 mb-3 fw-bold"><i class="fas fa-lightbulb text-warning me-2"></i>Insights para apostas</h5>
+        <div class="row g-3" id="cards-insights"></div>
+
+        </div><!-- pane-volantes -->
+
+        <div class="tab-pane fade" id="pane-comportamento" role="tabpanel">
+            <p class="small text-secondary mb-3">
+                Panorama dos indicadores comportamentais (PA, IM, PR, RT, MO, SQ, M3, FB e extras por modalidade)
+                e do <strong>Ranking das Linhas L1–L10</strong> (frequência de presença por concurso).
+                Os cards de indicadores usam a <strong>cor oficial da modalidade</strong> e os <strong>últimos 10 concursos</strong>.
+            </p>
+
+            <div class="mb-4" id="sec-linhas-ranking">
+                <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-2">
+                    <div>
+                        <h5 class="mb-1 fw-bold"><i class="fas fa-trophy text-warning me-2"></i>Ranking das Linhas (L1–L10)</h5>
+                        <p class="small text-secondary mb-0">
+                            Comportamento das linhas oficiais: quais mais aparecem no histórico.
+                            Mesma regra da página <code>/analise/linhas-dd-du/</code> de cada modalidade.
+                        </p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 linhas-rank-toolbar">
+                        <div>
+                            <label class="small text-secondary d-block mb-0" for="sel-linhas-mod">Modalidade</label>
+                            <select id="sel-linhas-mod" class="form-select form-select-sm" style="min-width:11rem">
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="small text-secondary d-block mb-0" for="sel-linhas-janela">Janela</label>
+                            <select id="sel-linhas-janela" class="form-select form-select-sm" style="min-width:8rem">
+                                <option value="0" selected>Todos</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3" id="grid-linhas-ranking">
+                    <div class="col-12 text-secondary small" id="linhas-ranking-loading">
+                        <i class="fas fa-spinner fa-spin me-1"></i>Carregando ranking das linhas…
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="mb-2 fw-bold"><i class="fas fa-balance-scale me-2"></i>Comparativo — Pares e Ímpares</h5>
+            <p class="small text-secondary mb-2">
+                PA = quantidade de dezenas/dígitos pares · IM = ímpares · valores da janela de 10 concursos.
+            </p>
+            <div class="table-wrap mb-4">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="th-modalidade">Modalidade</th>
+                                <th class="text-center">Sorteadas</th>
+                                <th class="text-center col-pa" title="Pares — último concurso">PA últ.</th>
+                                <th class="text-center col-pa" title="Pares — moda da janela">PA moda</th>
+                                <th class="text-center col-pa" title="Pares — média da janela">PA méd.</th>
+                                <th class="text-center col-im" title="Ímpares — último concurso">IM últ.</th>
+                                <th class="text-center col-im" title="Ímpares — moda da janela">IM moda</th>
+                                <th class="text-center col-im" title="Ímpares — média da janela">IM méd.</th>
+                                <th class="col-pa">Últimos 10 PA</th>
+                                <th class="col-im">Últimos 10 IM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-comparativo-pa-im">
+                            <tr><td colspan="10" class="na small">Carregando comparativo…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h5 class="mb-3 fw-bold"><i class="fas fa-th-large me-2"></i>Detalhe por modalidade</h5>
+            <div class="row g-3" id="grid-comportamento">
+                <div class="col-12 text-secondary small" id="comportamento-loading">
+                    <i class="fas fa-spinner fa-spin me-1"></i>Carregando comportamento…
+                </div>
+            </div>
+        </div><!-- pane-comportamento -->
+
+        </div><!-- tab-content -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>window.__MESES_CORES__ = {{ meses_cores | default({}) | tojson }};</script>
+    <script>
+    const API_RESUMO = '/analises-gerais/api/resumo';
+    const API_ATUALIZAR = '/analises-gerais/api/atualizar';
+    const API_COMPORTAMENTO = '/analises-gerais/api/comportamento-panorama';
+    const API_LINHAS_RANKING = '/analises-gerais/api/linhas-ranking-panorama';
+    let comportamentoCarregado = false;
+    let linhasRankingCarregado = false;
+    let linhasRankingCache = null;
+    let MESES_CORES = window.__MESES_CORES__ || {};
+    const MESES_NOME_NUM = {
+        1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',
+        7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'
+    };
+
+    function fmtPct(v) {
+        if (v == null || v === undefined) return '<span class="na">—</span>';
+        return `<span class="badge badge-vivo">${v}%</span>`;
+    }
+
+    function fmtTeorico(v) {
+        if (v == null) return '<span class="na">—</span>';
+        return `<span class="badge badge-teorico">${v}%</span>`;
+    }
+
+    function fmtUltimoCaixa(m) {
+        const api = m.ultimo_oficial_api;
+        if (!api) return '<span class="na" title="API Caixa indisponível">—</span>';
+        let badge = m.desatualizado
+            ? `<span class="badge bg-warning text-dark" title="Último sorteado (série regular)">${api}</span>`
+            : (m.sincronizado
+                ? `<span class="badge badge-vivo" title="Último sorteado">${api}</span>`
+                : `<span class="badge bg-secondary">${api}</span>`);
+        const prox = m.proximo_regular;
+        if (prox) {
+            badge += `<br><small class="text-secondary" title="Próximo concurso regular">Próx. ${prox}</small>`;
+        }
+        const esp = (m.concursos_especiais || []);
+        if (esp.length) {
+            const linhas = esp.map(e =>
+                `<small class="text-info d-block" title="${e.label || ''}">${e.concurso} — ${e.label || 'Especial'}</small>`
+            ).join('');
+            badge += linhas;
+        }
+        return badge;
+    }
+
+    function fmtBaseGravada(m) {
+        const n = m.total_gravados != null ? m.total_gravados : (m.total_concursos || 0);
+        const max = m.concurso_max_local;
+        const falt = m.faltantes_qtd || 0;
+        let html = `${n}`;
+        if (max && max !== m.ultimo_oficial_api) {
+            html += ` <small class="text-warning" title="Maior concurso gravado">(máx ${max})</small>`;
+        }
+        if (falt > 0) {
+            html += `<br><small class="text-danger">${falt} faltando</small>`;
+        } else if (m.sincronizado) {
+            html += `<br><small class="text-success">ok</small>`;
+        }
+        return html;
+    }
+
+    function renderResumo(d) {
+            document.getElementById('lbl-atualizado').textContent = d.atualizado_em || '—';
+
+            const av = document.getElementById('avisos');
+            const syncAvisos = (d.sincronizacao && d.sincronizacao.resultados)
+                ? d.sincronizacao.resultados.filter(x => !x.ok).map(x =>
+                    `${x.nome}: ${x.message}`)
+                : [];
+            const todos = [...syncAvisos, ...(d.avisos || [])];
+            if (todos.length) {
+                av.classList.remove('d-none');
+                av.innerHTML = todos.map(a => `<div>${a}</div>`).join('');
+            } else {
+                av.classList.add('d-none');
+            }
+
+            const tb = document.getElementById('tbody-modalidades');
+            tb.innerHTML = (d.modalidades || []).map(m => {
+                const links = m.links || {};
+                return `<tr>
+                    <td class="fw-bold">${m.nome}</td>
+                    <td>${m.aposta_label || '—'}</td>
+                    <td class="text-end">${fmtUltimoCaixa(m)}</td>
+                    <td class="text-end">${fmtBaseGravada(m)}</td>
+                    <td class="text-end">${fmtPct(m.pct_coluna_2plus)}</td>
+                    <td class="text-end">${fmtPct(m.pct_finais_distintos)}</td>
+                    <td class="text-end">${fmtTeorico(m.teorico_pct_coluna_2plus)}</td>
+                    <td class="text-end">${fmtPct(m.pct_linha_2plus)}</td>
+                    <td>${m.par_impar_moda || '—'}</td>
+                    <td class="text-end">${m.primos_moda != null ? m.primos_moda : '—'}</td>
+                    <td class="text-end">${m.ciclo_faltantes != null ? m.ciclo_faltantes : '—'}</td>
+                    <td class="text-nowrap">
+                        <a href="${links.analise || '#'}" target="_blank" class="btn btn-outline-light btn-sm py-0" title="Análise">📊</a>
+                        <a href="${links.gerador || '#'}" target="_blank" class="btn btn-success btn-sm py-0" title="Gerar apostas">🎯</a>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            const ss = d.supersete;
+            const tbSs = document.getElementById('tbody-supersete');
+            const notaSs = document.getElementById('nota-supersete');
+            if (!ss) {
+                tbSs.innerHTML = '<tr><td colspan="11" class="na">Super Sete não carregada</td></tr>';
+                notaSs.textContent = '';
+            } else {
+                const links = ss.links || {};
+                const rank = (ss.colunas_rank || []).map(c =>
+                    `${c.coluna}: <strong>${c.digito_mais_freq}</strong> (${c.pct}%)`
+                ).join(' · ') || '—';
+                const ult = (ss.ultimo_digitos || []).length
+                    ? `Último (#${ss.ultimo_concurso || '?'}) C1–C7: ${ss.ultimo_digitos.join(' · ')}`
+                    : '';
+                tbSs.innerHTML = `<tr>
+                    <td class="fw-bold">${ss.nome}</td>
+                    <td>${ss.aposta_label || '7 colunas (0–9)'}</td>
+                    <td class="text-end">${fmtUltimoCaixa(ss)}</td>
+                    <td class="text-end">${fmtBaseGravada(ss)}</td>
+                    <td class="text-end">${fmtPct(ss.pct_mesmo_digito_2colunas)}</td>
+                    <td class="text-end">${fmtPct(ss.pct_7_digitos_distintos)}</td>
+                    <td>${ss.par_impar_moda || '—'}</td>
+                    <td class="text-end">${ss.primos_moda != null ? ss.primos_moda : '—'}</td>
+                    <td class="text-end">${ss.ciclo_faltantes_media != null ? ss.ciclo_faltantes_media : '—'}</td>
+                    <td class="text-end">${ss.soma_media != null ? ss.soma_media : '—'}</td>
+                    <td class="small">${rank}</td>
+                    <td class="text-nowrap">
+                        <a href="${links.analise || '#'}" target="_blank" class="btn btn-outline-light btn-sm py-0" title="Análise C1–C7">📊</a>
+                        <a href="${links.gerador || '#'}" target="_blank" class="btn btn-success btn-sm py-0" title="Gerar apostas">🎯</a>
+                    </td>
+                </tr>`;
+                notaSs.textContent = [ss.nota, ult].filter(Boolean).join(' — ');
+            }
+
+            const todasInsights = [...(d.modalidades || []), ...(ss ? [ss] : [])];
+            document.getElementById('cards-insights').innerHTML = todasInsights.map(m => {
+                const ins = m.insight || {};
+                const links = m.links || {};
+                return `<div class="col-md-6 col-xl-4">
+                    <div class="card bg-dark border-secondary h-100">
+                        <div class="card-body">
+                            <h6 class="fw-bold text-success">${ins.titulo || m.nome}</h6>
+                            <p class="small mb-2">${ins.texto || ''}</p>
+                            <p class="small text-warning mb-2"><strong>Ação:</strong> ${ins.acao || ''}</p>
+                            <a href="${links.gerador || '#'}" target="_blank" class="btn btn-success btn-sm">
+                                Apostas inteligentes
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+    }
+
+    function cardThemeStyle(theme) {
+        if (!theme || !theme.primary) return '';
+        const dark = theme.dark || theme.primary;
+        const text = theme.text || '#fff';
+        return `background: linear-gradient(145deg, ${theme.primary} 0%, ${dark} 100%); color: ${text};`;
+    }
+
+    function fmtSeq(vals) {
+        if (!vals || !vals.length) return '<span class="na">—</span>';
+        return vals.map(v => v != null ? v : '—').join(' · ');
+    }
+
+    function escAttr(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    }
+
+    function fmtModaInline(moda, pct) {
+        if (moda == null || moda === undefined) return '<span class="na">—</span>';
+        if (pct != null && pct !== '') {
+            return `${moda}<span class="moda-inline-pct">${pct}%</span>`;
+        }
+        return String(moda);
+    }
+
+    function fmtIndicadorCell(m, l, c) {
+        const val = l[c] != null ? l[c] : '—';
+        if (m.key === 'timemania' && c === 'TM' && l.time_nome) {
+            return `<td class="tm-cell-tip" title="${escAttr(l.time_nome)}" data-bs-toggle="tooltip" data-bs-placement="top">${val}</td>`;
+        }
+        return `<td>${val}</td>`;
+    }
+
+    function initCompTooltips(root) {
+        if (!window.bootstrap) return;
+        (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+            const old = bootstrap.Tooltip.getInstance(el);
+            if (old) old.dispose();
+            new bootstrap.Tooltip(el, { trigger: 'hover', delay: { show: 300, hide: 80 } });
+        });
+    }
+
+    function corMes(l) {
+        const nome = l.mes_nome || MESES_NOME_NUM[l.mes_num] || '';
+        return MESES_CORES[nome] || '#6c757d';
+    }
+
+    function badgeMesAbrev(l) {
+        const abrev = l.mes_abrev || ({1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'}[l.mes_num] || '');
+        if (!abrev) return '';
+        return `<span class="mes-abrev-badge" style="background:${corMes(l)}">${abrev}</span>`;
+    }
+
+    function fmtConcursoCell(m, l) {
+        if (m.key === 'diadesorte' && (l.mes_abrev || l.mes_num)) {
+            return `<strong>${l.concurso}</strong>${badgeMesAbrev(l)}`;
+        }
+        return `<strong>${l.concurso}</strong>`;
+    }
+
+    function renderComparativoPaIm(rows) {
+        const tb = document.getElementById('tbody-comparativo-pa-im');
+        if (!rows || !rows.length) {
+            tb.innerHTML = '<tr><td colspan="10" class="na">Sem dados comparativos.</td></tr>';
+            return;
+        }
+        tb.innerHTML = rows.map(r => {
+            const t = r.theme || {};
+            const border = t.primary ? `border-left-color:${t.primary};` : '';
+            const nomeStyle = t.primary ? `color:${t.primary};` : '';
+            return `<tr class="comp-pa-im-row" style="${border}">
+                <td class="fw-bold th-modalidade">
+                    <span style="${nomeStyle}">${r.titulo || r.nome}</span>
+                </td>
+                <td class="text-center">${r.sorteadas != null ? r.sorteadas : '—'}</td>
+                <td class="text-center col-pa fw-bold">${r.pa_ultimo != null ? r.pa_ultimo : '—'}</td>
+                <td class="text-center col-pa">${fmtModaInline(r.pa_moda, r.pa_moda_pct)}</td>
+                <td class="text-center col-pa">${r.pa_media != null ? r.pa_media : '—'}</td>
+                <td class="text-center col-im fw-bold">${r.im_ultimo != null ? r.im_ultimo : '—'}</td>
+                <td class="text-center col-im">${fmtModaInline(r.im_moda, r.im_moda_pct)}</td>
+                <td class="text-center col-im">${r.im_media != null ? r.im_media : '—'}</td>
+                <td class="col-pa seq-pa-im">${fmtSeq(r.ultimos_pa)}</td>
+                <td class="col-im seq-pa-im">${fmtSeq(r.ultimos_im)}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function fmtPctNum(v) {
+        if (v == null || v === undefined || Number.isNaN(Number(v))) return '—';
+        return Number(v).toLocaleString('pt-BR') + '%';
+    }
+
+    function fillLinhasModSelect(mods) {
+        const sel = document.getElementById('sel-linhas-mod');
+        if (!sel) return;
+        const cur = sel.value;
+        const opts = '<option value="">Todas</option>' + (mods || []).map(m =>
+            `<option value="${m.key}">${m.nome || m.key}</option>`
+        ).join('');
+        if (sel.dataset.filled !== '1') {
+            sel.innerHTML = opts;
+            sel.dataset.filled = '1';
+        }
+        if (cur) sel.value = cur;
+    }
+
+    function renderLinhasRankingCard(m) {
+        const th = m.theme || {};
+        const primary = th.primary || '#334155';
+        const text = th.text || '#fff';
+        const headStyle = `background:${primary};color:${text}`;
+        if (m.erro) {
+            return `<div class="col-md-6 col-xl-4">
+                <div class="linhas-rank-card">
+                    <div class="lr-head" style="${headStyle}"><span>${m.nome || m.key}</span>
+                        <span class="badge bg-danger">erro</span></div>
+                    <div class="lr-body"><p class="small text-warning mb-2">${m.erro}</p>
+                        <a class="btn btn-outline-light btn-sm" href="${m.link_linhas || '#'}" target="_blank">Abrir Linhas &amp; DD×DU</a>
+                    </div>
+                </div>
+            </div>`;
+        }
+        const medals = ['🥇', '🥈', '🥉'];
+        const labels = ['1º Lugar', '2º Lugar', '3º Lugar'];
+        const top = m.top3 || [];
+        const pods = [0, 1, 2].map(i => {
+            const t = top[i];
+            if (!t) return `<div class="pod p${i + 1}"><div class="pos">${medals[i]} ${labels[i]}</div><div class="text-secondary">—</div></div>`;
+            return `<div class="pod p${i + 1}" title="${t.linha} · ${t.ocorrencias} ocorrências · ${fmtPctNum(t.pct)}">
+                <div class="pos">${medals[i]} ${labels[i]}</div>
+                <div class="ln">${t.linha}</div>
+                <div>${t.ocorrencias} · ${fmtPctNum(t.pct)}</div>
+                <div class="small text-secondary">${t.label || ''}</div>
+            </div>`;
+        }).join('');
+        const rows = (m.ranking || []).map(r => {
+            const cls = r.posicao <= 3 ? ` class="r${r.posicao}"` : '';
+            const medal = r.posicao <= 3 ? medals[r.posicao - 1] + ' ' : '';
+            return `<tr${cls}>
+                <td>${medal}${r.posicao}º</td>
+                <td><strong>${r.linha}</strong></td>
+                <td>${r.label || '—'}</td>
+                <td class="text-end">${r.ocorrencias}</td>
+                <td class="text-end">${fmtPctNum(r.pct)}</td>
+                <td class="text-end">${r.atraso ?? '—'}</td>
+            </tr>`;
+        }).join('');
+        return `<div class="col-md-6 col-xl-4">
+            <div class="linhas-rank-card d-flex flex-column">
+                <div class="lr-head" style="${headStyle}">
+                    <span>${m.nome || m.key}</span>
+                    <a href="${m.link_linhas || '#'}" target="_blank" class="btn btn-sm btn-light py-0 px-2" title="Análise completa">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+                <div class="lr-body flex-grow-1 d-flex flex-column">
+                    <div class="lr-meta">Concursos ${m.primeiro_concurso ?? '—'} → ${m.ultimo_concurso ?? '—'}
+                        · ${m.total_concursos || 0} · ${m.qtd_linhas || 0} linhas</div>
+                    <div class="linhas-rank-podium">${pods}</div>
+                    <div class="table-responsive flex-grow-1">
+                        <table class="table table-sm table-dark tbl-linhas-rank mb-0">
+                            <thead><tr>
+                                <th>Pos.</th><th>Linha</th><th>Faixa</th>
+                                <th class="text-end">Ocorr.</th><th class="text-end">%</th><th class="text-end">Atraso</th>
+                            </tr></thead>
+                            <tbody>${rows || '<tr><td colspan="6" class="text-secondary">Sem dados</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                    <a href="${m.link_linhas || '#'}" target="_blank" class="btn btn-outline-light btn-sm w-100 mt-2">
+                        <i class="fas fa-th me-1"></i>Linhas &amp; DD × DU
+                    </a>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function renderLinhasRanking(d) {
+        const grid = document.getElementById('grid-linhas-ranking');
+        const mods = d.modalidades || [];
+        if (!mods.length) {
+            grid.innerHTML = '<div class="col-12 text-secondary small">Nenhuma modalidade carregada.</div>';
+            return;
+        }
+        grid.innerHTML = mods.map(renderLinhasRankingCard).join('');
+        linhasRankingCarregado = true;
+    }
+
+    async function carregarLinhasRanking() {
+        const grid = document.getElementById('grid-linhas-ranking');
+        const janela = document.getElementById('sel-linhas-janela')?.value || '0';
+        const mod = document.getElementById('sel-linhas-mod')?.value || '';
+        grid.innerHTML = '<div class="col-12 text-secondary small"><i class="fas fa-spinner fa-spin me-1"></i>Carregando ranking das linhas…</div>';
+        try {
+            const qs = new URLSearchParams({ janela: String(janela) });
+            if (mod) qs.set('modalidade', mod);
+            const r = await fetch(API_LINHAS_RANKING + '?' + qs.toString());
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Erro');
+            if (!mod) {
+                linhasRankingCache = d;
+                fillLinhasModSelect(d.modalidades || []);
+            } else if (linhasRankingCache && linhasRankingCache.modalidades) {
+                fillLinhasModSelect(linhasRankingCache.modalidades);
+            } else {
+                fillLinhasModSelect(d.modalidades || []);
+            }
+            renderLinhasRanking(d);
+        } catch (e) {
+            console.error(e);
+            grid.innerHTML = `<div class="col-12 alert alert-danger py-2 small">Erro no ranking das linhas: ${e.message}</div>`;
+        }
+    }
+
+    function renderComportamento(d) {
+        renderComparativoPaIm(d.comparativo_pa_im);
+        const grid = document.getElementById('grid-comportamento');
+        const mods = d.modalidades || [];
+        if (!mods.length) {
+            grid.innerHTML = '<div class="col-12 na">Nenhuma modalidade carregada.</div>';
+            return;
+        }
+
+        grid.innerHTML = mods.map(m => {
+            const themeStyle = cardThemeStyle(m.theme);
+            if (m.erro) {
+                return `<div class="col-md-6 col-xl-4">
+                    <div class="card-comportamento h-100" style="${themeStyle}">
+                        <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center">
+                            <strong>${m.titulo || m.nome}</strong>
+                            <span class="badge bg-danger">erro</span>
+                        </div>
+                        <div class="card-body py-2 px-3">
+                            <p class="small mb-2" style="opacity:0.9">${m.erro}</p>
+                            <a href="${m.link_comportamento || '#'}" target="_blank" class="btn btn-outline-light btn-sm">
+                                Abrir Comportamento
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            const inds = (m.indicadores || []).map(i => i.codigo);
+            const headCols = inds.map(c => `<th>${c}</th>`).join('');
+            const linhas = (m.linhas || []).slice(0, 10);
+            const bodyRows = linhas.map(l => {
+                const cols = inds.map(c => fmtIndicadorCell(m, l, c)).join('');
+                let extra = '';
+                if (l.trevos) extra = `<br><small style="opacity:0.85">T ${l.trevos.join('-')}</small>`;
+                return `<tr>
+                    <td>${fmtConcursoCell(m, l)}${extra}</td>
+                    ${cols}
+                </tr>`;
+            }).join('');
+
+            const modaBadges = inds.slice(0, 6).map(c => {
+                const r = (m.resumo || {})[c] || {};
+                const moda = r.moda != null ? r.moda : '—';
+                const pct = r.moda_pct != null ? r.moda_pct : 0;
+                return `<span class="badge badge-ind me-1 mb-1">${c} ${moda}<span class="moda-inline-pct">${pct}%</span></span>`;
+            }).join('');
+
+            return `<div class="col-md-6 col-xl-4">
+                <div class="card-comportamento h-100 d-flex flex-column" style="${themeStyle}">
+                    <div class="card-header py-2 px-3">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div>
+                                <strong>${m.titulo || m.nome}</strong>
+                                <div class="card-meta">#${m.ultimo_concurso || '—'} · ${m.total_concursos || 0} concursos · janela ${m.janela || 10}</div>
+                            </div>
+                            <a href="${m.link_comportamento || '#'}" target="_blank" class="btn btn-light btn-sm py-0 px-2" title="Análise completa">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body py-2 px-3 flex-grow-1 d-flex flex-column">
+                        <p class="resumo-exec mb-2">${m.resumo_executivo || ''}</p>
+                        <div class="mb-2">${modaBadges}</div>
+                        <div class="tbl-wrap-inner">
+                            <div class="table-responsive">
+                            <table class="table tbl-mini mb-0">
+                                <thead><tr><th>#</th>${headCols}</tr></thead>
+                                <tbody>${bodyRows || '<tr><td colspan="99" class="na">—</td></tr>'}</tbody>
+                            </table>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <a href="${m.link_comportamento || '#'}" target="_blank" class="btn btn-outline-light btn-sm w-100">
+                                <i class="fas fa-chart-line me-1"></i>Comportamento completo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+        comportamentoCarregado = true;
+        initCompTooltips(document.getElementById('grid-comportamento'));
+    }
+
+    async function carregarComportamento() {
+        const grid = document.getElementById('grid-comportamento');
+        try {
+            const r = await fetch(API_COMPORTAMENTO + '?janela=10');
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Erro');
+            if (d.meses_cores) MESES_CORES = d.meses_cores;
+            renderComportamento(d);
+        } catch (e) {
+            console.error(e);
+            grid.innerHTML = `<div class="col-12 alert alert-danger py-2 small">Erro ao carregar comportamento: ${e.message}</div>`;
+        }
+    }
+
+    async function carregarResumo() {
+        const btn = document.getElementById('btn-refresh');
+        btn.disabled = true;
+        try {
+            const r = await fetch(API_RESUMO);
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Erro');
+            renderResumo(d);
+        } catch (e) {
+            console.error(e);
+            alert('Erro ao carregar: ' + e.message);
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    async function sincronizarTodasEAtualizar() {
+        const btnSync = document.getElementById('btn-sync');
+        const btnRef = document.getElementById('btn-refresh');
+        const painel = document.getElementById('painel-sync');
+        const log = document.getElementById('sync-log');
+        const prog = document.getElementById('sync-progress');
+        btnSync.disabled = true;
+        btnRef.disabled = true;
+        painel.classList.remove('d-none');
+        log.innerHTML = '<li>Sincronização direta pela Central (sem depender das portas 515x)…</li>';
+        prog.style.width = '15%';
+        document.getElementById('sync-titulo').textContent = 'Sincronizando… (pode levar alguns minutos)';
+
+        try {
+            const r = await fetch(API_ATUALIZAR, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: '{}',
+            });
+            const d = await r.json();
+            if (d.status !== 'success') throw new Error(d.message || 'Falha na sincronização');
+
+            const sync = d.sincronizacao || {};
+            log.innerHTML = (sync.resultados || []).map(s => {
+                const ic = s.ok ? '✅' : (s.offline ? '⚠️' : '❌');
+                return `<li>${ic} <strong>${s.nome}</strong> — ${s.message || ''}</li>`;
+            }).join('');
+            prog.style.width = '100%';
+            document.getElementById('sync-titulo').textContent =
+                `Concluído: ${sync.sucesso || 0}/${sync.total || 9} modalidades sincronizadas`;
+
+            renderResumo(d);
+            await carregarComportamento();
+        } catch (e) {
+            console.error(e);
+            log.innerHTML += `<li class="text-danger">Erro: ${e.message}</li>`;
+            alert('Erro: ' + e.message);
+        } finally {
+            btnSync.disabled = false;
+            btnRef.disabled = false;
+            setTimeout(() => painel.classList.add('d-none'), 8000);
+        }
+    }
+
+    document.getElementById('btn-sync').addEventListener('click', sincronizarTodasEAtualizar);
+    document.getElementById('btn-refresh').addEventListener('click', async () => {
+        await carregarResumo();
+        await carregarComportamento();
+        if (document.getElementById('pane-comportamento')?.classList.contains('active')
+            || document.getElementById('pane-comportamento')?.classList.contains('show')) {
+            await carregarLinhasRanking();
+        } else {
+            linhasRankingCarregado = false;
+        }
+    });
+
+    document.getElementById('sel-linhas-mod')?.addEventListener('change', () => carregarLinhasRanking());
+    document.getElementById('sel-linhas-janela')?.addEventListener('change', () => {
+        linhasRankingCache = null;
+        document.getElementById('sel-linhas-mod').dataset.filled = '';
+        carregarLinhasRanking();
+    });
+
+    document.getElementById('tab-comportamento').addEventListener('shown.bs.tab', () => {
+        if (!comportamentoCarregado) carregarComportamento();
+        if (!linhasRankingCarregado) carregarLinhasRanking();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarResumo();
+        if (window.location.hash === '#comportamento') {
+            const tab = document.getElementById('tab-comportamento');
+            bootstrap.Tab.getOrCreateInstance(tab).show();
+            carregarComportamento();
+            carregarLinhasRanking();
+        }
+    });
+    </script>
+</body>
+</html>

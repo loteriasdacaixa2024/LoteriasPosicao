@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-hdr {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-xdark) 100%);
+        color: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    }
+    .dez-ball {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 34px; height: 34px; border-radius: 50%;
+        background: var(--accent); color: #1a0a00; font-weight: 800; font-size: .85rem; margin: 2px;
+    }
+    .dez-ball.rep { box-shadow: 0 0 0 3px #198754; }
+    .dez-ball.dim { opacity: .35; }
+    .how-box { background: #f8f5fc; border: 1px solid #e8dff5; border-radius: 10px; }
+    .badge-perm { background: #198754; }
+    .badge-neu { background: #6c757d; }
+    .badge-sai { background: #dc3545; }
+    .modo-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .modo-legenda-wrap {
+        flex: 1; min-width: 200px; min-height: 1.4em; position: relative;
+    }
+    .modo-legenda-inline {
+        font-size: .84rem; color: #5c5c5c; line-height: 1.4; margin: 0;
+        opacity: 0; transform: translateY(4px);
+        transition: opacity .22s ease, transform .22s ease;
+        position: absolute; left: 0; right: 0; top: 0;
+        pointer-events: none;
+    }
+    .modo-legenda-inline.ativo {
+        opacity: 1; transform: translateY(0); position: relative; pointer-events: auto;
+    }
+    .modo-legenda-inline em { font-style: normal; font-weight: 600; color: var(--primary); }
+    .exibicao-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .exibicao-legenda-inline { flex: 1; min-width: 160px; font-size: .84rem; color: #5c5c5c; }
+
+    .lista-apostas-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .75rem 1rem;
+        align-items: start;
+    }
+    @media (max-width: 1100px) {
+        .lista-apostas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+        .lista-apostas-grid { grid-template-columns: 1fr; }
+    }
+    .lista-apostas-grid > .alert-warning { grid-column: 1 / -1; }
+    .lista-apostas-grid.lista-apostas-hibrido {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    @media (max-width: 1100px) {
+        .lista-apostas-grid.lista-apostas-hibrido { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+        .lista-apostas-grid.lista-apostas-hibrido { grid-template-columns: 1fr; }
+    }
+
+    /* Volante oficial 5×5 — tamanho fixo e menor */
+    .volante-oficial-wrap {
+        background: #fff9e6; border: 2px solid #e8d48a; border-radius: 10px;
+        padding: .45rem; width: 200px; max-width: 200px; margin: .35rem auto 0;
+        box-sizing: border-box;
+    }
+    .volante-conf-resumo { text-align: center; }
+    .volante-oficial-grid {
+        display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px;
+    }
+    .volante-cell {
+        aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: .62rem; border-radius: 3px;
+        border: 1px solid #c9c9c9; background: #fff; color: #333;
+        cursor: default; transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .volante-cell:hover { transform: scale(1.08); z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+    .volante-cell.na-aposta { background: var(--accent); border-color: var(--primary); color: var(--on-accent); }
+    .volante-cell.acerto { background: #198754; border-color: #146c43; color: #fff; }
+    .volante-conf-resumo {
+        font-size: .65rem; color: #444; margin-top: .35rem; line-height: 1.35;
+    }
+    .volante-legenda-mini {
+        font-size: .7rem; color: #666; margin-top: .35rem;
+        display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .5rem;
+    }
+    .volante-legenda-mini .legenda-cor {
+        display: inline-block; width: 12px; height: 12px; border-radius: 2px;
+        vertical-align: middle; flex-shrink: 0;
+    }
+    .volante-legenda-mini .legenda-nota {
+        display: inline; white-space: normal; line-height: 1.35;
+    }
+    .aposta-item {
+        background: #fff;
+        width: 100%;
+        max-width: none;
+        padding: .5rem .6rem !important;
+        margin: 0;
+        box-sizing: border-box;
+    }
+    .aposta-card-inner {
+        display: flex; flex-direction: column; gap: .35rem;
+        align-items: center; text-align: center;
+    }
+    .aposta-linear { width: 100%; max-width: 100%; text-align: center; }
+    .aposta-linear .my-1 { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; }
+    .aposta-linear .dez-ball {
+        width: 26px; height: 26px; font-size: .7rem; margin: 1px;
+    }
+</style>
+
+<div class="page-hdr">
+    <h2 class="h4 mb-1"><i class="fas fa-clone me-2"></i>Repetição entre concursos</h2>
+    <p class="mb-0 small opacity-90">Lotofácil · estatísticas de repetição · gera apostas de 15 a 20 dezenas</p>
+</div>
+
+<div class="alert alert-light border mb-3 d-flex flex-wrap align-items-center gap-2">
+    <span class="small text-muted">
+        <i class="fas fa-columns me-1"></i>
+        Para ver dois sorteios em <strong>volante 5×5</strong> (sem gerador), use
+    </span>
+    <a class="btn btn-sm btn-outline-primary" id="linkCompararVisual" href="/analise/comparar-concursos/">
+        <i class="fas fa-columns me-1"></i>Comparar concursos
+    </a>
+</div>
+
+<div class="how-box mb-3">
+    <button class="btn btn-link text-decoration-none w-100 text-start fw-bold" type="button"
+        data-bs-toggle="collapse" data-bs-target="#collapseComoUsar">
+        <i class="fas fa-circle-info me-1"></i> Como usar esta análise
+    </button>
+    <div class="collapse show" id="collapseComoUsar">
+        <div class="px-3 pb-3 small text-muted">
+            <p class="mb-2"><strong>O que faz:</strong> mostra quantas dezenas repetiram entre dois concursos seguidos,
+                a frequência histórica de cada dezena em repetições, padrões par/ímpar e tendência de permanência no concurso seguinte.</p>
+            <p class="mb-2"><strong>Gerar apostas:</strong> use
+                <a href="/geradores-elite/repeticao-apostas/"><strong>Geradores de Elite → Repetição → Apostas</strong></a>
+                — escolha quantas apostas, dezenas (15–20), perfil e filtros; clique em <strong>Gerar</strong>.
+                Use o <strong>volante 5×5</strong> para conferir (amarelo = aposta, verde = acerto).
+                <strong>Exportar TXT</strong> baixa uma linha por aposta.</p>
+            <p class="mb-0">Isto descreve padrões do passado, não garante acerto no próximo concurso.</p>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="mb-3">
+            <span class="fw-bold small text-uppercase text-muted d-block mb-2">Modo de leitura</span>
+            <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
+                <div class="btn-group flex-shrink-0" role="group" id="grpModo">
+                    <button type="button" class="btn btn-outline-secondary btn-sm modo-btn active" data-modo="volante">Volante</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm modo-btn" data-modo="posicional">Posicional</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm modo-btn" data-modo="hibrido">Híbrido</button>
+                </div>
+                <div class="modo-legenda-wrap" id="modoLegendaWrap" aria-live="polite">
+                    <p class="modo-legenda-inline ativo" data-legenda="volante">
+                        <em>Volante</em> — mesma dezena nas 15 sorteadas do concurso.
+                    </p>
+                    <p class="modo-legenda-inline" data-legenda="posicional">
+                        <em>Posicional</em> — mesma dezena na mesma coluna (P1 a P15).
+                    </p>
+                    <p class="modo-legenda-inline" data-legenda="hibrido">
+                        <em>Híbrido</em> — destaca volante e posicional (tabela: V = volante, P = posicional).
+                    </p>
+                </div>
+                <button class="btn btn-sm btn-outline-primary flex-shrink-0 ms-md-auto" id="btnAtualizar">
+                    <i class="fas fa-sync-alt"></i> Atualizar
+                </button>
+            </div>
+        </div>
+        <div id="loaderAnalise" class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+        <div id="painelAnalise" style="display:none;">
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <div class="border rounded p-3 h-100">
+                        <div class="small text-muted">Último par de concursos</div>
+                        <div class="fw-bold" id="lblParConcursos">—</div>
+                        <div class="mt-2" id="bolasPenultimo"></div>
+                        <div class="small text-muted mt-1">Penúltimo</div>
+                        <div class="mt-1" id="bolasUltimo"></div>
+                        <div class="small text-muted mt-1">Último</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="border rounded p-3 h-100">
+                        <div class="fw-bold mb-2">Repetidas agora</div>
+                        <div id="resumoRep"></div>
+                        <hr class="my-2">
+                        <div class="small" id="resumoPadroes"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive" style="max-height:420px;">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Dez.</th>
+                            <th>Rep. agora</th>
+                            <th>Freq. hist. (vezes)</th>
+                            <th>Freq. %</th>
+                            <th>Permanência %</th>
+                            <th>Tendência</th>
+                            <th>P/I</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyDezenas"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-light border mb-3 d-flex flex-wrap align-items-center gap-2">
+    <span class="small text-muted"><i class="fas fa-dice me-1"></i> O gerador de apostas está em</span>
+    <a class="btn btn-sm fw-bold" href="/geradores-elite/repeticao-apostas/" style="background:var(--primary);border-color:var(--primary);color:#fff;">
+        <i class="fas fa-bolt me-1"></i>Geradores de Elite → Repetição entre concursos
+    </a>
+</div>
+
+{% include 'repeticao_gerador_page_script_lotofacil.html' %}
+{% endblock %}

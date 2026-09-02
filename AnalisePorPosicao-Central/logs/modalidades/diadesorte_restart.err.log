@@ -1,0 +1,11 @@
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.1.218:5153
+Press CTRL+C to quit
+D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'servicebus2.caixa.gov.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'servicebus2.caixa.gov.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+127.0.0.1 - - [01/Sep/2026 14:17:33] "GET /analise/api/inteligentes/historico?limit=5000 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Sep/2026 14:17:34] "GET /analise/analises-inteligentes/?aba=panorama HTTP/1.1" 200 -

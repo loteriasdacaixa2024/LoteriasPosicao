@@ -1,0 +1,2357 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .page-hdr {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-xdark) 100%);
+        color: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    }
+    .how-box { background: #f8f5fc; border: 1px solid #e8dff5; border-radius: 10px; }
+    .modo-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .comp-bar {
+        display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: .5rem .85rem;
+    }
+    .comp-bar .comp-field { flex: 1 1 100%; min-width: 0; max-width: none; }
+    .comp-bar .comp-field-sm { flex: 1 1 100%; min-width: 0; max-width: none; }
+    @media (min-width: 576px) {
+        .comp-bar .comp-field { flex: 1 1 150px; min-width: 140px; max-width: 230px; }
+        .comp-bar .comp-field-sm { flex: 0 1 110px; min-width: 96px; max-width: 140px; }
+    }
+    .comp-bar .comp-btn { flex: 0 0 auto; }
+    .comp-bar .comp-modos { flex: 0 1 auto; text-align: center; }
+    .comp-meta {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+        gap: .45rem 1.2rem; text-align: center;
+        margin: .7rem 0 1rem; padding-top: .55rem; border-top: 1px solid #eee;
+    }
+    .modo-legenda-wrap { flex: 0 1 auto; min-width: 180px; min-height: 1.4em; position: relative; text-align: center; }
+    .modo-legenda-inline {
+        font-size: .84rem; color: #5c5c5c; line-height: 1.4; margin: 0;
+        opacity: 0; transform: translateY(4px);
+        transition: opacity .22s ease, transform .22s ease;
+        position: absolute; left: 0; right: 0; top: 0; pointer-events: none;
+    }
+    .modo-legenda-inline.ativo {
+        opacity: 1; transform: translateY(0); position: relative; pointer-events: auto;
+    }
+    .modo-legenda-inline em { font-style: normal; font-weight: 600; color: var(--primary); }
+    .comp-meta .legenda-comp { margin: 0; flex: 0 1 auto; }
+    .volante-mes {
+        text-align: center; font-size: .78rem; font-weight: 700;
+        color: var(--primary); margin: .4rem 0 0; line-height: 1.35;
+    }
+    .volante-mes-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: .08rem .45rem; border-radius: 999px; margin-left: .15rem;
+        color: #fff; font-weight: 800; font-size: .72rem; line-height: 1.2;
+        vertical-align: middle;
+    }
+    .comparar-grid {
+        display: grid; grid-template-columns: 1fr; gap: 1rem; align-items: start;
+        min-width: 0;
+    }
+    .comparar-meio { order: -1; }
+    @media (min-width: 769px) {
+        .comparar-grid { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+        .comparar-meio { order: 0; }
+    }
+    .volante-sorteio-wrap {
+        background: #fff9e6; border: 2px solid #e8d48a; border-radius: 10px;
+        padding: .55rem; margin: 0 auto;
+        max-width: {{ cfg.volante_max_width | default(300) }}px;
+    }
+    .volante-head {
+        max-width: {{ cfg.volante_max_width | default(300) }}px;
+        margin: 0 auto .45rem; text-align: center;
+    }
+    .volante-head .form-label { color: var(--primary); font-weight: 700; }
+    .volante-head .form-select { font-weight: 700; text-align: center; }
+    .volante-sorteio-grid {
+        display: grid; grid-template-columns: repeat({{ cfg.grid_cols | default(10) }}, 1fr); gap: 3px;
+    }
+    .volante-sorteio-cell {
+        aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: {{ cfg.cell_font_rem | default(0.62) }}rem; border-radius: 4px;
+        border: 1px solid #d0d0d0; background: #f5f5f5; color: #aaa;
+    }
+    .volante-sorteio-cell.sorteado {
+        background: var(--accent); border-color: #c4a818; color: #1a0a00;
+    }
+    .volante-sorteio-cell.rep-v {
+        box-shadow: 0 0 0 3px #198754; background: #d4edda; border-color: #198754; color: #0f5132;
+    }
+    .volante-sorteio-cell.rep-p {
+        box-shadow: 0 0 0 3px #0d6efd; background: #cfe2ff; border-color: #0d6efd; color: #052c65;
+    }
+    .volante-sorteio-cell.rep-v.rep-p {
+        background: linear-gradient(135deg, #d4edda 50%, #cfe2ff 50%);
+        box-shadow: 0 0 0 2px #198754, 0 0 0 4px #0d6efd;
+    }
+    .volante-bolas { text-align: center; margin-top: .45rem; }
+    .btn-ordem-bolas {
+        display: inline-block; border: 0; background: none; padding: 0; margin-top: .2rem;
+        font-size: .68rem; color: #8a8a8a; cursor: pointer; font-weight: 600;
+        text-decoration: underline; text-underline-offset: 2px;
+    }
+    .btn-ordem-bolas:hover { color: var(--primary); }
+    .resumo-qtd { font-size: 2rem; font-weight: 900; color: #198754; line-height: 1; }
+    .dez-ball {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; border-radius: 50%;
+        background: var(--accent); color: #1a0a00; font-weight: 800; font-size: .75rem; margin: 2px;
+    }
+    .dez-ball.rep-v { box-shadow: 0 0 0 3px #198754; }
+    .dez-ball.rep-p { box-shadow: 0 0 0 3px #0d6efd; }
+    .legenda-comp { font-size: .75rem; color: #666; }
+    .legenda-comp span {
+        display: inline-block; width: 14px; height: 14px; border-radius: 3px;
+        vertical-align: middle; margin-right: 4px; border: 1px solid #ccc;
+    }
+    .legenda-comp .lg-sort { background: var(--accent); border-color: #c4a818; }
+    .legenda-comp .lg-repv { box-shadow: 0 0 0 2px #198754; background: #d4edda; }
+    .legenda-comp .lg-repp { box-shadow: 0 0 0 2px #0d6efd; background: #cfe2ff; }
+    .colunas-wrap { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
+    .coluna-box { text-align: center; min-width: 52px; }
+    .coluna-box .lbl { font-size: .7rem; font-weight: 700; color: var(--primary); margin-bottom: .25rem; }
+    .dig-cell {
+        width: 28px; height: 28px; margin: 2px auto; display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: .72rem; border-radius: 4px; border: 1px solid #ccc; background: #f5f5f5; color: #aaa;
+    }
+    .dig-cell.ativo { background: var(--accent); color: #1a0a00; border-color: #c4a818; }
+    .dig-cell.rep { box-shadow: 0 0 0 3px #198754; background: #d4edda; }
+    .volante-sorteio-cell { cursor: pointer; }
+    .extra-panel { background: #f8f9fa; border-radius: 8px; padding: .75rem; margin-top: 1rem; }
+
+    .ix-wrap { overflow: auto; max-width: 100%; max-height: min(70vh, 56rem); }
+    .ix-table {
+        border-collapse: collapse; width: max-content; min-width: 100%;
+        font-size: .72rem; font-variant-numeric: tabular-nums;
+    }
+    .ix-table th, .ix-table td {
+        border: 1px solid #d9d9d9; text-align: center; vertical-align: middle;
+        padding: 0; line-height: 1;
+    }
+    .ix-table thead th {
+        background: #f3f3f3; font-weight: 800; color: #333;
+        padding: .35rem .25rem; white-space: nowrap;
+    }
+    .ix-sticky-col {
+        position: sticky; left: 0; z-index: 2; background: #fff;
+        min-width: 4.4rem; max-width: 6.5rem; padding: .35rem .4rem !important;
+        font-weight: 800; color: var(--primary); text-align: left !important;
+    }
+    thead .ix-sticky-col { z-index: 3; background: #f3f3f3; }
+    .ix-span-nums { letter-spacing: .04em; }
+    .ix-acertos-h {
+        background: #ececec; min-width: 4.6rem; padding: .35rem .3rem !important;
+        border-left: 3px solid #222 !important;
+    }
+    td.ix-acertos {
+        min-width: 4.6rem; font-weight: 800; font-size: .85rem;
+        border-left: 3px solid #222; padding: .25rem .35rem !important;
+    }
+    .ix-cell {
+        width: 1.7rem; min-width: 1.7rem; height: 1.55rem;
+        cursor: pointer; user-select: none; color: #333; background: #fff;
+    }
+    thead th.ix-cell {
+        cursor: default; background: #f3f3f3; font-weight: 700;
+    }
+    thead th.ix-cell:hover { filter: none; }
+    .ix-cell.ix-indicado { background: #ffe566; font-weight: 800; }
+    .ix-cell.ix-sorteado { background: #8fd19e; font-weight: 800; color: #0f3d1f; }
+    tbody .ix-cell:hover { filter: brightness(.96); }
+    .ix-super-link, .ix-super-btn {
+        color: var(--primary); font-weight: 800; text-decoration: none;
+        background: none; border: 0; padding: 0; cursor: pointer;
+    }
+    .ix-super-link:hover, .ix-super-btn:hover { text-decoration: underline; }
+    .ix-ellipsis { color: #888; letter-spacing: .15em; font-weight: 700; }
+    .ix-qtd { color: var(--primary); font-weight: 900; font-size: 1.08em; }
+    .ix-sort { cursor: pointer; user-select: none; }
+    .ix-sort:hover { filter: brightness(.96); }
+    .ix-sort .ix-sort-ind { font-size: .65rem; margin-left: .15rem; opacity: .5; }
+    .ix-sort.ix-sort-on { box-shadow: inset 0 -2px 0 var(--primary); }
+    .ix-sort.ix-sort-on .ix-sort-ind { opacity: 1; }
+    .ix-toast {
+        position: fixed; right: 1.2rem; bottom: 1.2rem; z-index: 1080;
+        max-width: 22rem; background: #fff; border: 1px solid #f0e2b8;
+        border-left: 4px solid var(--accent); border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.14); padding: .85rem 1rem;
+        font-size: .86rem; color: #333;
+    }
+    .ix-origem {
+        text-align: center; padding: .55rem 1rem .35rem;
+        font-size: .86rem; color: #666;
+    }
+    .ix-rank {
+        padding: .15rem 1rem .75rem; font-size: .8rem; text-align: center; color: #444;
+    }
+    .ix-rank-resumo { margin-bottom: .45rem; }
+    .ix-rank-resumo strong { color: var(--primary); }
+    .ix-cmp {
+        margin: .35rem auto 0; border-collapse: collapse;
+        font-size: .78rem; font-variant-numeric: tabular-nums;
+    }
+    .ix-cmp th, .ix-cmp td {
+        border: 1px solid #d9d9d9; padding: .28rem .75rem; text-align: right;
+        white-space: nowrap;
+    }
+    .ix-cmp th {
+        background: #f3f3f3; font-weight: 800; color: #333;
+    }
+    .ix-cmp td:nth-child(2) { background: #fffdf2; font-weight: 700; }
+    .ix-cmp td:nth-child(3) { background: #f7f8f9; font-weight: 700; }
+    .auto-wrap { overflow-x: auto; }
+    .auto-tbl {
+        border-collapse: collapse; width: 100%; min-width: 720px;
+        font-size: .78rem; font-variant-numeric: tabular-nums;
+    }
+    .auto-tbl th, .auto-tbl td {
+        border: 1px solid #d9d9d9; padding: .32rem .45rem; text-align: right; white-space: nowrap;
+    }
+    .auto-tbl th { background: #f3f3f3; font-weight: 800; color: #333; }
+    .auto-tbl td.auto-lbl, .auto-tbl th.auto-lbl { text-align: left; }
+    .auto-tbl .auto-col7 {
+        background: #fff3b0; font-weight: 900; color: #5c4300;
+        box-shadow: inset 0 0 0 2px #e6c200;
+    }
+    .auto-tbl th.auto-col7 { background: #ffe566; }
+    .auto-tbl .auto-col6 { background: #f7fbf8; font-weight: 800; }
+    .auto-tbl tr.auto-ref td { background: #f7f3ff; }
+    .auto-tbl tr.auto-open { cursor: pointer; }
+    .auto-tbl tr.auto-open:hover td { filter: brightness(.97); }
+    .auto-det {
+        font-size: .78rem; color: #555; padding: .55rem .75rem .7rem;
+        background: #fafafa; text-align: center;
+    }
+    .auto-det .mb-1 { margin-bottom: .45rem !important; }
+    .auto-conc-box {
+        margin: .55rem auto 0; padding: .55rem .7rem; max-width: 28rem;
+        background: #fff; border: 1px solid #ececec; border-radius: 8px;
+        text-align: center;
+    }
+    .auto-dez {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 1.7rem; height: 1.55rem; margin: 1px; padding: 0 .28rem;
+        border-radius: 4px; background: #ffe566; font-weight: 800; font-size: .72rem;
+    }
+    .auto-dez-miss {
+        background: #f0f0f0; color: #888; font-weight: 700;
+    }
+    .auto-dez-hit {
+        background: #8fd19e; color: #0f3d1f; font-weight: 800;
+    }
+    .auto-conc {
+        display: inline-block; margin: 0 .15rem .2rem; padding: .05rem .4rem;
+        border: 1px solid #d0d0d0; border-radius: 999px; background: #fff;
+        font-weight: 700; font-size: .75rem; color: var(--primary);
+        cursor: pointer; text-decoration: none;
+    }
+    .auto-conc:hover { background: #fff6c2; border-color: #e6c200; }
+    .auto-conc.auto-conc-on { background: #ffe566; border-color: #c4a818; }
+
+    #compAbas .nav-link, #cvVista .nav-link { color: var(--primary); font-weight: 700; }
+    #compAbas .nav-link.active, #cvVista .nav-link.active {
+        color: var(--primary-xdark); background: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+    }
+    #cv-root {
+        --cv-sel: {{ cfg.fill_selected | default('#198754') }};
+        --cv-cell: 1.85rem;
+        --cv-gap: 4px;
+        --cv-cols: {{ cfg.grid_cols | default(10) }};
+    }
+    .cv-ultimo-box, .cv-info {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start;
+        gap: .3rem .65rem;
+        background: #fff; border: 1px solid #eee; border-radius: 8px;
+        padding: .4rem .75rem; margin-bottom: .5rem;
+    }
+    .cv-info .cv-meta { font-weight: 800; color: var(--primary); font-size: .88rem; }
+    .cv-info-foco {
+        border-color: var(--primary); background: var(--accent-light, #fffaf0);
+    }
+    .cv-cmp {
+        display: grid;
+        grid-template-columns: minmax(8.2rem, max-content) max-content;
+        column-gap: .7rem;
+        row-gap: .45rem;
+        align-items: center;
+        width: max-content;
+        max-width: 100%;
+        margin: .35rem auto .6rem;
+        overflow-x: auto;
+        padding: .15rem .1rem .35rem;
+    }
+    .cv-cmp-lab {
+        font-size: .78rem; font-weight: 800; color: var(--primary);
+        line-height: 1.25; text-align: right; padding-right: .15rem;
+    }
+    .cv-cmp-lab .small { font-weight: 600; color: #555; }
+    .cv-cmp-lab .cv-meta { font-weight: 900; color: var(--primary); }
+    .cv-cmp-lab .cv-acertos { min-width: 0; font-size: .85rem; }
+    .cv-cmp-lab .volante-mes-badge { font-size: .7rem; margin: .1rem 0; }
+    .cv-cmp-lab .cv-kicker {
+        font-size: .62rem; font-weight: 800; letter-spacing: .06em;
+        text-transform: uppercase; color: #888;
+    }
+    .cv-cmp-split {
+        grid-column: 1 / -1;
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+        gap: .35rem .5rem;
+        font-size: .72rem; font-weight: 800; color: #888;
+        padding: .2rem 0 .15rem;
+    }
+    .cv-alvo-btn {
+        border: 1px solid #d0d0d0; background: #fff; color: var(--primary);
+        font-size: .72rem; font-weight: 800; border-radius: 999px;
+        padding: .15rem .7rem; cursor: pointer;
+    }
+    .cv-alvo-btn:hover { border-color: var(--primary); }
+    .cv-alvo-btn.active {
+        background: var(--primary); color: #fff; border-color: var(--primary);
+    }
+    .cv-cell.cv-anel {
+        box-shadow: 0 0 0 2px var(--primary); border-color: var(--primary);
+        background: #fff; color: #333;
+    }
+    .cv-cell.cv-marca::after {
+        content: ''; position: absolute; top: -3px; left: 50%;
+        width: 7px; height: 9px;
+        background: var(--primary-xdark, #664a00);
+        border-radius: 50% 50% 50% 0;
+        transform: translateX(-50%) rotate(-45deg);
+        pointer-events: none; z-index: 1;
+    }
+    .cv-cell.cv-anel.cv-marca { background: #fffdf5; }
+    #cv-root.cv-modo-resultado { --cv-cell: 1.7rem; --cv-gap: 3px; }
+    #cv-root.cv-modo-resultado #cvCtrls {
+        display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end;
+        gap: .65rem 1rem;
+    }
+    #cvBtnOrdemLista { margin: 0 0 .35rem; align-self: flex-end; }
+    #cv-root.cv-modo-resultado .cv-sticky,
+    #cv-root.cv-modo-alinhado .cv-sticky,
+    #cv-root.cv-modo-resultado .cv-info { display: none; }
+    .cv-strip-wrap {
+        display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start;
+        padding: .45rem .2rem;
+    }
+    .cv-row.cv-row-on { background: var(--accent-light, #fff8e6); box-shadow: inset 0 0 0 2px var(--primary); }
+    #cvVista.nav-tabs { justify-content: center; }
+    .cv-board { padding: .15rem 0 .2rem; overflow-x: auto; }
+    .cv-board-lab {
+        font-size: .75rem; font-weight: 800; color: var(--primary);
+        margin: .35rem 0 .2rem;
+    }
+    .cv-grid {
+        display: grid;
+        grid-template-columns: repeat(var(--cv-cols), var(--cv-cell));
+        gap: var(--cv-gap);
+        width: max-content;
+        max-width: 100%;
+    }
+    .cv-grid > .cv-cell { width: 100%; min-width: 0; box-sizing: border-box; margin: 0; }
+    .cv-grid-res .cv-cell,
+    .cv-grid-res .cv-col-digits .cv-cell { cursor: default; pointer-events: none; }
+    .cv-row-al { flex-direction: column; align-items: center; gap: .35rem; }
+    .cv-row-al .cv-grid, .cv-row-al .cv-strip-wrap { margin-left: auto; margin-right: auto; }
+    .cv-row-head {
+        display: flex; flex-direction: row; flex-wrap: wrap;
+        align-items: center; justify-content: center;
+        gap: .2rem .55rem; width: 100%; text-align: center;
+    }
+    .cv-cell {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: var(--cv-cell, 1.85rem); height: var(--cv-cell, 1.85rem); padding: 0;
+        box-sizing: border-box; margin: 0; position: relative;
+        border: 1px solid #d0d0d0; border-radius: 4px; background: #fff; color: #555;
+        font-weight: 800; font-size: .72rem; line-height: 1; cursor: pointer; user-select: none;
+        appearance: none; -webkit-appearance: none; overflow: visible;
+    }
+    .cv-cell.cv-ultimo { box-shadow: 0 0 0 2px var(--primary); border-color: var(--primary); }
+    .cv-cell.cv-sel { background: var(--cv-sel); color: #fff; border-color: var(--cv-sel); }
+    .cv-cell.cv-sel.cv-ultimo, .cv-cell.cv-sel.cv-saiu {
+        box-shadow: 0 0 0 2px var(--primary);
+    }
+    .cv-cell.cv-saiu {
+        background: var(--accent); color: var(--on-accent, #1a0a00); border-color: var(--accent);
+    }
+    span.cv-cell { cursor: default; }
+    .cv-cell.cv-off { background: #ececec; color: #bbb; cursor: not-allowed; }
+    .cv-col { display: inline-flex; flex-direction: column; align-items: center; margin: 0 .35rem .4rem; }
+    .cv-col-lbl { font-size: .68rem; font-weight: 800; color: var(--primary); margin-bottom: .2rem; }
+    .cv-col-digits { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; max-width: 11rem; }
+    .cv-sticky {
+        position: sticky; top: var(--nav-h, 3.5rem); z-index: 6;
+        background: #fff; border: 1px solid #eee; border-radius: 10px;
+        padding: .55rem .85rem; box-shadow: 0 4px 12px rgba(0,0,0,.04);
+    }
+    .cv-contador { font-weight: 900; color: var(--primary); font-variant-numeric: tabular-nums; }
+    .cv-lista {
+        max-height: 50vh; overflow: auto; border: 1px solid #eee; border-radius: 10px;
+        background: #fff;
+    }
+    .cv-lista.cv-lista-cols {
+        display: grid;
+        grid-template-columns: repeat(6, max-content);
+        justify-content: center;
+        justify-items: start;
+        align-items: center;
+        column-gap: .45rem;
+        padding: .15rem .6rem .25rem;
+    }
+    .cv-lista.cv-lista-cols > .text-muted { grid-column: 1 / -1; }
+    .cv-lista.cv-lista-cols .cv-lista-hdr,
+    .cv-lista.cv-lista-cols .cv-row:not(.cv-row-al) {
+        display: grid;
+        grid-template-columns: subgrid;
+        grid-column: 1 / -1;
+        align-items: center;
+        column-gap: .45rem;
+        padding: .38rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        justify-items: start;
+    }
+    .cv-lista.cv-lista-cols .cv-row:not(.cv-row-al):last-child { border-bottom: 0; }
+    .cv-lista.cv-lista-cols .cv-lista-hdr { border-bottom: 0; cursor: default; padding-bottom: .1rem; }
+    .cv-lista-hdr .btn-ordem-bolas { margin: 0; font-size: .75rem; }
+    @supports not (grid-template-columns: subgrid) {
+        .cv-lista.cv-lista-cols { display: block; padding: .15rem .6rem; }
+        .cv-lista.cv-lista-cols .cv-lista-hdr,
+        .cv-lista.cv-lista-cols .cv-row:not(.cv-row-al) {
+            display: grid;
+            grid-template-columns: repeat(6, max-content);
+            justify-content: center;
+            column-gap: .45rem;
+            width: 100%;
+        }
+    }
+    .cv-row {
+        padding: .4rem .75rem; border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+    }
+    .cv-row:last-child { border-bottom: 0; }
+    .cv-row-n { font-weight: 900; color: var(--primary); white-space: nowrap; }
+    .cv-row-data { font-size: .8rem; color: #666; white-space: nowrap; }
+    .cv-row-extra { display: inline-flex; align-items: center; gap: .3rem; }
+    .cv-row-bolas { display: inline-flex; flex-wrap: nowrap; align-items: center; }
+    .cv-row .volante-mes-badge { margin: 0; }
+    .cv-acertos {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 1.35rem; padding: .08rem .38rem; border-radius: 4px;
+        font-weight: 900; font-size: .8rem; font-variant-numeric: tabular-nums;
+        white-space: nowrap; line-height: 1.2;
+    }
+    .cv-acertos.cv-ac-max { background: #dc3545; color: #fff; }
+    .cv-acertos.cv-ac-6 { background: #ffc107; color: #000; }
+    .cv-acertos.cv-ac-5 { background: #198754; color: #fff; }
+    .cv-acertos.cv-ac-4 { background: #e9ecef; color: #495057; }
+    .cv-acertos.cv-ac-low { background: #f0f0f0; color: #888; }
+    .cv-ball {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 1.65rem; height: 1.65rem; border-radius: 50%;
+        font-weight: 800; font-size: .68rem; margin: 1px;
+    }
+    .cv-ball.hit { background: var(--cv-sel); color: #fff; }
+    .cv-ball.miss { background: #fff; border: 1.5px solid #bbb; color: #666; }
+    .cv-ball.oficial {
+        background: var(--accent); color: var(--on-accent, #1a0a00); border: 0;
+    }
+    #cvBtnUltimo.active, #cvVista .btn.active {
+        background: var(--primary); color: #fff; border-color: var(--primary);
+    }
+    .cv-chip {
+        display: inline-flex; align-items: center; padding: .05rem .45rem;
+        border-radius: 999px; font-size: .72rem; font-weight: 800;
+        background: var(--accent-light, #fff8e6); color: var(--primary);
+    }
+    .cv-chip-time { background: #e8f5f3; color: #00695c; }
+    .cv-al-row { display: flex; flex-wrap: wrap; gap: 3px; }
+    .cv-al-cell {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 1.55rem; height: 1.55rem; border-radius: 3px;
+        border: 1px solid #e5e5e5; background: #fafafa; color: #ccc;
+        font-weight: 800; font-size: .62rem;
+    }
+    .cv-al-cell.saiu { background: var(--accent); color: var(--on-accent, #1a0a00); border-color: var(--accent); }
+    .cv-al-cell.hit { background: var(--cv-sel); color: #fff; border-color: var(--cv-sel); }
+    .cv-hide {
+        border: 0; background: none; color: #888; font-size: .75rem; font-weight: 700;
+        cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+    }
+    .cv-hide:hover { color: var(--primary); }
+    .cv-sublbl { font-size: .68rem; font-weight: 800; color: #888; min-width: 1.6rem; }
+</style>
+
+<div class="page-hdr">
+    <h2 class="h4 mb-1"><i class="fas fa-columns me-2"></i>Comparar concursos — {{ cfg.nome }}</h2>
+    <p class="mb-0 small opacity-90">{{ cfg.subtitle }} · só sorteios reais</p>
+</div>
+
+<ul class="nav nav-tabs mb-3" id="compAbas" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tabDois" data-bs-toggle="tab" data-bs-target="#paneDois"
+            type="button" role="tab" aria-controls="paneDois" aria-selected="true">
+            <i class="fas fa-columns me-1"></i>Dois concursos
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tabVisual" data-bs-toggle="tab" data-bs-target="#paneVisual"
+            type="button" role="tab" aria-controls="paneVisual" aria-selected="false">
+            <i class="fas fa-grip-lines me-1"></i>Comparação visual
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+<div class="tab-pane fade show active" id="paneDois" role="tabpanel" aria-labelledby="tabDois">
+
+<div class="how-box mb-3">
+    <button class="btn btn-link text-decoration-none w-100 text-start fw-bold" type="button"
+        data-bs-toggle="collapse" data-bs-target="#collapseComoUsar">
+        <i class="fas fa-circle-info me-1"></i> Como usar
+    </button>
+    <div class="collapse show" id="collapseComoUsar">
+        <div class="px-3 pb-3 small text-muted">
+            <p class="mb-0">Escolha dois concursos e compare visualmente. Esta página mostra apenas o que foi
+                <strong>sorteado</strong> — não gera apostas.</p>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        {% if cfg.modos | length > 1 %}
+        <div class="comp-bar">
+            <div class="comp-modos" id="wrapModos">
+                <span class="fw-bold small text-uppercase text-muted d-block mb-1">Modo de leitura</span>
+                <div class="btn-group" role="group" id="grpModo">
+                    {% if 'volante' in cfg.modos %}
+                    <button type="button" class="btn btn-outline-secondary btn-sm modo-btn active" data-modo="volante">Volante</button>
+                    {% endif %}
+                    {% if 'posicional' in cfg.modos %}
+                    <button type="button" class="btn btn-outline-secondary btn-sm modo-btn{% if cfg.modos | length == 1 %} active{% endif %}" data-modo="posicional">Posicional</button>
+                    {% endif %}
+                    {% if 'hibrido' in cfg.modos %}
+                    <button type="button" class="btn btn-outline-secondary btn-sm modo-btn" data-modo="hibrido">Híbrido</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="comp-meta">
+            {% if cfg.modos | length > 1 %}
+            <div class="modo-legenda-wrap" id="modoLegendaWrap" aria-live="polite">
+                <p class="modo-legenda-inline ativo" data-legenda="volante">
+                    <em>Volante</em> — mesma dezena nos dois concursos.
+                </p>
+                <p class="modo-legenda-inline" data-legenda="posicional">
+                    <em>Posicional</em> — mesma dezena na mesma coluna/posição.
+                </p>
+                <p class="modo-legenda-inline" data-legenda="hibrido">
+                    <em>Híbrido</em> — verde = volante · azul = posicional.
+                </p>
+            </div>
+            {% endif %}
+            {% if cfg.layout == 'grid' %}
+            <div class="legenda-comp">
+                <span class="lg-sort"></span> Sorteada neste concurso
+                <span class="lg-repv" style="margin-left:12px"></span> Repetição (volante)
+                {% if cfg.modos | length > 1 %}
+                <span class="lg-repp" style="margin-left:12px"></span> Repetição (posicional)
+                {% endif %}
+                <span style="margin-left:12px;color:#aaa">□</span> Não sorteada
+            </div>
+            {% endif %}
+        </div>
+
+        <div id="loaderComp" class="text-center py-2 text-muted" style="display:none;">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <div id="painelComp">
+            <div class="comparar-grid" id="gridPadrao">
+                <div>
+                    <div class="volante-head">
+                        <label class="form-label small mb-0" for="selConcursoA">Concurso A (mais antigo)</label>
+                        <select class="form-select form-select-sm" id="selConcursoA"></select>
+                        {% if cfg.dual_sorteio %}
+                        <label class="form-label small mb-0 mt-1" for="selSorteioA">Sorteio A</label>
+                        <select class="form-select form-select-sm" id="selSorteioA">
+                            <option value="1">1º sorteio</option>
+                            <option value="2">2º sorteio</option>
+                        </select>
+                        {% endif %}
+                        {% if cfg.extra_mes %}
+                        <div class="volante-mes" id="mesVolanteA">—</div>
+                        {% endif %}
+                    </div>
+                    <div class="volante-sorteio-wrap" id="wrapVolanteA">
+                        <div class="volante-sorteio-titulo" id="tituloA" style="display:none;"></div>
+                        <div class="volante-sorteio-grid" id="volanteA"></div>
+                    </div>
+                    <div class="colunas-wrap mt-2" id="colunasA" style="display:none;"></div>
+                    <div class="volante-bolas">
+                        <div id="listaLinearA"></div>
+                        <button type="button" class="btn-ordem-bolas" data-ordem-bolas>ordem de sorteio</button>
+                    </div>
+                </div>
+                <div class="comparar-meio">
+                    <button class="btn btn-primary btn-sm mb-3" id="btnComparar">
+                        <i class="fas fa-sync-alt me-1"></i> Comparar
+                    </button>
+                    <div class="small text-muted mb-1">Repetidas</div>
+                    <div class="resumo-qtd" id="resumoQtd">—</div>
+                    <div class="small fw-bold text-muted mb-2" id="resumoModoLbl">—</div>
+                    <div id="resumoBolas" class="mb-2"></div>
+                    <div class="small" id="resumoParImpar"></div>
+                    <div class="small text-muted mt-2" id="resumoPosicional"></div>
+                </div>
+                <div>
+                    <div class="volante-head">
+                        <label class="form-label small mb-0" for="selConcursoB">Concurso B (mais recente)</label>
+                        <select class="form-select form-select-sm" id="selConcursoB"></select>
+                        {% if cfg.dual_sorteio %}
+                        <label class="form-label small mb-0 mt-1" for="selSorteioB">Sorteio B</label>
+                        <select class="form-select form-select-sm" id="selSorteioB">
+                            <option value="1">1º sorteio</option>
+                            <option value="2">2º sorteio</option>
+                        </select>
+                        {% endif %}
+                        {% if cfg.extra_mes %}
+                        <div class="volante-mes" id="mesVolanteB">—</div>
+                        {% endif %}
+                    </div>
+                    <div class="volante-sorteio-wrap" id="wrapVolanteB">
+                        <div class="volante-sorteio-titulo" id="tituloB" style="display:none;"></div>
+                        <div class="volante-sorteio-grid" id="volanteB"></div>
+                    </div>
+                    <div class="colunas-wrap mt-2" id="colunasB" style="display:none;"></div>
+                    <div class="volante-bolas">
+                        <div id="listaLinearB"></div>
+                        <button type="button" class="btn-ordem-bolas" data-ordem-bolas>ordem de sorteio</button>
+                    </div>
+                </div>
+            </div>
+            <div id="painelExtra"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3" id="ixCard">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-table me-2"></i>Indicados × sorteios anteriores</span>
+        <button type="button" class="btn btn-sm ms-auto" id="ixBtnAjuda"
+            style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);"
+            title="Como ler esta análise">
+            <i class="fas fa-circle-question me-1"></i>Como usar
+        </button>
+    </div>
+    <div class="px-3 pt-2 pb-0" id="ixAjudaBox" style="display:none;">
+        <p class="small text-muted mb-2">
+            A linha <strong>SUPER</strong> é a indicação atual (fundo amarelo). Clique em qualquer número
+            do volante para incluir ou tirar da indicação.
+            Nas linhas dos concursos, o fundo <strong>verde</strong> marca o que foi sorteado.
+            Em <em>ACERTOS</em>, <strong>Indicado</strong> = sorteadas que estavam no SUPER;
+            <strong>Ñ indicado</strong> = sorteadas que não estavam.
+        </p>
+    </div>
+    <div class="ix-origem small text-muted" id="ixOrigemLbl">Carregando indicação…</div>
+    <div class="ix-rank" id="ixRanking"></div>
+    <div class="ix-wrap">
+        <table class="ix-table" id="ixTabela">
+            <thead>
+                <tr>
+                    <th class="ix-sticky-col"></th>
+                    <th class="ix-span-nums" id="ixThIndicados" colspan="1">INDICADO</th>
+                    <th class="ix-acertos-h" colspan="2">ACERTOS</th>
+                </tr>
+                <tr>
+                    <th class="ix-sticky-col"></th>
+                    <th class="ix-nums-head" id="ixThNums" colspan="1"></th>
+                    <th class="ix-acertos-h">Indicado</th>
+                    <th class="ix-acertos-h">Ñ indicado</th>
+                </tr>
+            </thead>
+            <tbody id="ixTbody">
+                <tr><td colspan="4" class="text-muted text-center py-3">Carregando…</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if cfg.layout != 'colunas' and (cfg.dezena_max - cfg.dezena_min + 1) >= 15 %}
+<div class="card shadow-sm mb-3" id="autoCard">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span><i class="fas fa-list-ol me-2"></i>Combinações automáticas — desempenho histórico</span>
+    </div>
+    <div class="px-3 pt-2 small text-muted">
+        Pools de <strong>15 dezenas</strong>, gerados com regras já existentes (frequência, atraso, concentração).
+        Teste na base histórica completa. Ranking: <strong>7 acertos</strong> (prêmio principal), depois <strong>6</strong>.
+        A indicação SUPER manual não é alterada.
+        <span class="d-block mt-1">Resultado histórico — não é previsão do próximo concurso.</span>
+    </div>
+    <div class="px-3 py-2 d-flex flex-wrap align-items-center gap-2">
+        <button type="button" class="btn btn-sm btn-primary" id="autoBtnGerar">
+            <i class="fas fa-play me-1"></i> Gerar e testar
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="autoBtnExport" disabled>
+            <i class="fas fa-download me-1"></i> Exportar dezenas
+        </button>
+        <span class="small text-muted" id="autoStatus"></span>
+    </div>
+    <div class="auto-wrap px-2 pb-3" id="autoWrap">
+        <div class="text-muted small text-center py-3">Clique em <strong>Gerar e testar</strong> para montar o ranking.</div>
+    </div>
+</div>
+{% endif %}
+
+</div><!-- paneDois -->
+
+<div class="tab-pane fade" id="paneVisual" role="tabpanel" aria-labelledby="tabVisual">
+<div id="cv-root" class="cv-modo-resultado">
+    <div class="how-box mb-2">
+        <button class="btn btn-link text-decoration-none w-100 text-start fw-bold" type="button"
+            data-bs-toggle="collapse" data-bs-target="#collapseComoVisual">
+            <i class="fas fa-circle-info me-1"></i> Como usar
+        </button>
+        <div class="collapse" id="collapseComoVisual">
+            <div class="px-3 pb-3 small text-muted">
+                <strong>Em cima:</strong> o último sorteio vem destacado. Marque de
+                {% if cfg.pick_min and cfg.pick_max and cfg.pick_min != cfg.pick_max %}
+                {{ cfg.pick_min }} a {{ cfg.pick_max }}
+                {% elif cfg.pick_min %}
+                {{ cfg.pick_min }}
+                {% else %}
+                quantas
+                {% endif %}
+                dezenas do próximo jogo — antes da apuração.
+                <span class="d-block mt-1">
+                <strong>Embaixo:</strong> a comparação é sempre com o resultado real.
+                Use <em>Último sorteio</em> depois da apuração, ou <em>Sorteio escolhido</em> para um concurso da lista.
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-2" id="cvVista" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" type="button" data-vista="resultado" role="tab">Resultado</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" type="button" data-vista="alinhado" role="tab">Alinhado</button>
+        </li>
+    </ul>
+
+    <div class="cv-cmp" id="cvCmp">
+        <div class="cv-cmp-lab" id="cvCmpLabSel">Último sorteio</div>
+        <div class="cv-grid" id="cvStrip"></div>
+        {% if cfg.extra_trevos %}
+        <div class="cv-cmp-lab">Trevos — seleção</div>
+        <div class="cv-grid" id="cvStripTrevos" style="--cv-cols:6"></div>
+        {% endif %}
+        <div class="cv-cmp-split" id="cvAlvo">
+            <span>Comparar com</span>
+            <button type="button" class="cv-alvo-btn active" data-cv-alvo="ultimo">Último sorteio</button>
+            <button type="button" class="cv-alvo-btn" data-cv-alvo="escolhido">Sorteio escolhido</button>
+        </div>
+        <div class="cv-cmp-lab" id="cvCmpLabRes">Resultado</div>
+        <div class="cv-grid" id="cvUltimoGrid"></div>
+        {% if cfg.dual_sorteio %}
+        <div class="cv-cmp-lab">2º sorteio</div>
+        <div class="cv-grid" id="cvUltimoGrid2"></div>
+        {% endif %}
+        {% if cfg.extra_trevos %}
+        <div class="cv-cmp-lab">Trevos — resultado</div>
+        <div class="cv-grid" id="cvUltimoTrevos" style="--cv-cols:6"></div>
+        {% endif %}
+    </div>
+
+    <div class="cv-sticky mb-3" id="cvSticky">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <strong>Minha seleção</strong>
+            <span class="cv-contador" id="cvContador">0/{{ cfg.pick_max or 0 }}</span>
+            <span class="small text-muted" id="cvAvisoMin"></span>
+            <button type="button" class="btn btn-link btn-sm py-0 ms-auto" id="cvBtnLimparSel">Limpar seleção</button>
+        </div>
+        <div id="cvSelBolas" class="mt-1"></div>
+    </div>
+
+    <div class="d-flex flex-wrap align-items-end gap-2 mb-2" id="cvCtrls">
+        <div>
+            <label class="form-label small mb-0" for="cvJanela">Janela</label>
+            <select class="form-select form-select-sm" id="cvJanela" style="width:auto;">
+                <option value="10" selected>10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="0">todos</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="cvBtnUltimo">Só último</button>
+        <div>
+            <label class="form-label small mb-0" for="cvIrInput">Concurso nº</label>
+            <div class="input-group input-group-sm" style="max-width:13rem;">
+                <input type="text" class="form-control" id="cvIrInput" placeholder="20, 25" inputmode="numeric">
+                <button type="button" class="btn btn-primary" id="cvBtnIr">Ir</button>
+            </div>
+        </div>
+        <button type="button" class="btn-ordem-bolas" id="cvBtnOrdemLista" data-cv-ordem>ordem de sorteio</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="cvBtnLimparFiltro">Limpar filtros</button>
+    </div>
+
+    <div class="cv-lista" id="cvLista">
+        <div class="text-muted small text-center py-3">Carregando…</div>
+    </div>
+</div>
+</div><!-- paneVisual -->
+</div><!-- tab-content -->
+
+<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const API = '/analise/comparar-concursos';
+    let modoAtual = (CFG.modos && CFG.modos[0]) || 'volante';
+    let concursosLista = [];
+    let ordemBolas = 'classificado';
+    let linearSorteioA = [];
+    let linearSorteioB = [];
+    let linearRepV = new Set();
+    let linearRepP = new Set();
+    const params = new URLSearchParams(window.location.search);
+
+    function pad(n) {
+        const w = (CFG.dezena_min === 0 || CFG.layout === 'colunas') ? 2 : 2;
+        return String(n).padStart(w, '0');
+    }
+
+    function atualizarLegendaModo() {
+        document.querySelectorAll('.modo-legenda-inline').forEach(p => {
+            p.classList.toggle('ativo', p.dataset.legenda === modoAtual);
+        });
+    }
+
+    function classesCelula(cel, lado) {
+        const sorteado = lado === 'a' ? cel.em_a : cel.em_b;
+        let cls = 'volante-sorteio-cell';
+        if (!sorteado) return cls;
+        cls += ' sorteado';
+        const rv = cel.repetiu_volante;
+        const rp = cel.repetiu_posicional;
+        if (modoAtual === 'volante' && rv) cls += ' rep-v';
+        else if (modoAtual === 'posicional' && rp) cls += ' rep-p';
+        else if (modoAtual === 'hibrido') {
+            if (rv && rp) cls += ' rep-v rep-p';
+            else if (rv) cls += ' rep-v';
+            else if (rp) cls += ' rep-p';
+        }
+        return cls;
+    }
+
+    function htmlVolante(grade, elId, lado) {
+        const el = document.getElementById(elId);
+        const nums = grade.map(cel => {
+            const cls = classesCelula(cel, lado);
+            return `<div class="${cls}">${pad(cel.dezena)}</div>`;
+        }).join('');
+        el.innerHTML = nums;
+    }
+
+    function htmlColunas(gradeCol, elId, lado) {
+        const el = document.getElementById(elId);
+        el.innerHTML = gradeCol.map(col => {
+            const val = lado === 'a' ? col.valor_a : col.valor_b;
+            let digits = '';
+            for (let d = CFG.digito_min; d <= CFG.digito_max; d++) {
+                let c = 'dig-cell';
+                if (val === d) c += ' ativo';
+                if (col.repetiu && val === d) c += ' rep';
+                digits += `<div class="${c}">${d}</div>`;
+            }
+            return `<div class="coluna-box"><div class="lbl">Col ${col.coluna}</div>${digits}</div>`;
+        }).join('');
+    }
+
+    function renderLinear(dezenas, elId, repV, repP) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        el.innerHTML = (dezenas || []).map(n => {
+            let cls = 'dez-ball';
+            if (modoAtual === 'volante' && repV.has(n)) cls += ' rep-v';
+            else if (modoAtual === 'posicional' && repP.has(n)) cls += ' rep-p';
+            else if (modoAtual === 'hibrido') {
+                if (repV.has(n)) cls += ' rep-v';
+                if (repP.has(n)) cls += ' rep-p';
+            }
+            return `<span class="${cls}">${pad(n)}</span>`;
+        }).join('');
+    }
+    function dezenasNaOrdem(lista) {
+        const arr = (lista || []).map(Number);
+        if (ordemBolas === 'classificado') return [...arr].sort((x, y) => x - y);
+        return arr;
+    }
+    function atualizarBotoesOrdem() {
+        const txt = ordemBolas === 'classificado' ? 'ordem de sorteio' : 'classificar';
+        const tip = ordemBolas === 'classificado'
+            ? 'Mostrar na ordem em que as dezenas foram sorteadas'
+            : 'Classificar as dezenas em ordem crescente';
+        document.querySelectorAll('[data-ordem-bolas]').forEach(b => {
+            b.textContent = txt;
+            b.title = tip;
+        });
+    }
+    function pintarLinhasBolas() {
+        renderLinear(dezenasNaOrdem(linearSorteioA), 'listaLinearA', linearRepV, linearRepP);
+        renderLinear(dezenasNaOrdem(linearSorteioB), 'listaLinearB', linearRepV, linearRepP);
+        atualizarBotoesOrdem();
+    }
+
+    function pintarMesVolantes(data) {
+        const elA = document.getElementById('mesVolanteA');
+        const elB = document.getElementById('mesVolanteB');
+        if (!elA && !elB) return;
+        const lado = (qual) => {
+            const pack = data && data.mes && data.mes[qual];
+            if (pack && (pack.num || pack.nome)) return pack;
+            const c = data && (qual === 'a' ? data.concurso_a : data.concurso_b);
+            if (c && (c.mes_num || c.mes_nome)) return { num: c.mes_num, nome: c.mes_nome };
+            return null;
+        };
+        const ma = lado('a');
+        const mb = lado('b');
+        const repetiu = !!(data && data.mes && data.mes.repetiu)
+            || !!(ma && mb && ma.num && ma.num === mb.num);
+        function htmlMes(m, extra) {
+            if (!m || (!m.num && !m.nome)) return '—';
+            const nome = String(m.nome || '');
+            const num = m.num ? m.num + ' — ' : '';
+            const cls = nome.replace(/\s+/g, '');
+            const badge = nome
+                ? `<span class="volante-mes-badge mes-nome-${cls}">${nome}</span>`
+                : '—';
+            const suf = extra ? ' <span class="text-success fw-bold">(mesmo mês!)</span>' : '';
+            return `${num}${badge}${suf}`;
+        }
+        if (elA) elA.innerHTML = htmlMes(ma, false);
+        if (elB) elB.innerHTML = htmlMes(mb, repetiu);
+    }
+
+    function renderExtra(data) {
+        const el = document.getElementById('painelExtra');
+        let html = '';
+        if (data.trevos) {
+            const t = data.trevos;
+            html += `<div class="extra-panel"><strong>Trevos</strong> — A: ${t.a.join(', ') || '—'} · B: ${t.b.join(', ') || '—'}<br>
+                Repetidos: <strong>${t.quantidade}</strong> ${t.repetidos.length ? '(' + t.repetidos.join(', ') + ')' : ''}</div>`;
+        }
+        if (data.time) {
+            const tm = data.time;
+            const rep = tm.repetiu ? ' <span class="text-success fw-bold">(mesmo time!)</span>' : '';
+            html += `<div class="extra-panel"><strong>Time do Coração</strong><br>
+                A: #${tm.a.num} ${tm.a.nome || ''}<br>
+                B: #${tm.b.num} ${tm.b.nome || ''}${rep}</div>`;
+        }
+        el.innerHTML = html;
+        pintarMesVolantes(data);
+    }
+
+    function renderComparacao(data) {
+        document.getElementById('loaderComp').style.display = 'none';
+        document.getElementById('painelComp').style.display = 'block';
+
+        const a = data.concurso_a;
+        const b = data.concurso_b;
+        let titA = `#${a.concurso} · ${a.data || '—'}`;
+        let titB = `#${b.concurso} · ${b.data || '—'}`;
+        if (CFG.dual_sorteio) {
+            titA += ` · ${data.sorteio_a}º sort.`;
+            titB += ` · ${data.sorteio_b}º sort.`;
+        }
+        document.getElementById('tituloA').textContent = titA;
+        document.getElementById('tituloB').textContent = titB;
+
+        const wrapA = document.getElementById('wrapVolanteA');
+        const wrapB = document.getElementById('wrapVolanteB');
+        const colA = document.getElementById('colunasA');
+        const colB = document.getElementById('colunasB');
+
+        if (data.layout === 'colunas') {
+            wrapA.style.display = 'none';
+            wrapB.style.display = 'none';
+            colA.style.display = 'flex';
+            colB.style.display = 'flex';
+            htmlColunas(data.grade_colunas, 'colunasA', 'a');
+            htmlColunas(data.grade_colunas, 'colunasB', 'b');
+            document.getElementById('listaLinearA').textContent = (a.colunas || []).join(' · ');
+            document.getElementById('listaLinearB').textContent = (b.colunas || []).join(' · ');
+            document.querySelectorAll('[data-ordem-bolas]').forEach(b => { b.style.display = 'none'; });
+        } else {
+            wrapA.style.display = 'block';
+            wrapB.style.display = 'block';
+            colA.style.display = 'none';
+            colB.style.display = 'none';
+            htmlVolante(data.grade, 'volanteA', 'a');
+            htmlVolante(data.grade, 'volanteB', 'b');
+            linearSorteioA = a.dezenas_exibicao && a.dezenas_exibicao.length ? a.dezenas_exibicao : (a.dezenas || []);
+            linearSorteioB = b.dezenas_exibicao && b.dezenas_exibicao.length ? b.dezenas_exibicao : (b.dezenas || []);
+            linearRepV = new Set(data.resumo.volante.dezenas);
+            linearRepP = new Set((data.resumo.posicional.detalhe || []).map(x => x.dezena));
+            document.querySelectorAll('[data-ordem-bolas]').forEach(b => { b.style.display = ''; });
+            pintarLinhasBolas();
+        }
+
+        const rv = data.resumo.volante;
+        const rp = data.resumo.posicional;
+        let qtd = rv.quantidade;
+        let lbl = 'volante';
+        if (modoAtual === 'posicional') { qtd = rp.quantidade; lbl = 'posicional'; }
+        else if (modoAtual === 'hibrido') { lbl = 'volante + posicional'; }
+        if (data.layout === 'colunas') { qtd = rp.quantidade; lbl = 'por coluna'; }
+
+        document.getElementById('resumoQtd').textContent = qtd;
+        document.getElementById('resumoModoLbl').textContent = lbl;
+
+        const repV = new Set(rv.dezenas);
+        const repP = new Set((rp.detalhe || []).map(x => x.dezena));
+        const bolas = (modoAtual === 'posicional' || data.layout === 'colunas')
+            ? (rp.detalhe || []).map(x => x.dezena)
+            : rv.dezenas;
+        document.getElementById('resumoBolas').innerHTML = bolas.map(n => {
+            let cls = 'dez-ball';
+            if (repV.has(n)) cls += ' rep-v';
+            if (repP.has(n)) cls += ' rep-p';
+            return `<span class="${cls}">${pad(n)}</span>`;
+        }).join('') || '<span class="text-muted">Nenhuma</span>';
+
+        document.getElementById('resumoParImpar').innerHTML = data.layout === 'grid'
+            ? `Pares: <strong>${rv.pares}</strong> · Ímpares: <strong>${rv.impares}</strong> (grupo volante)`
+            : '';
+        document.getElementById('resumoPosicional').innerHTML =
+            (modoAtual !== 'volante' || data.layout === 'colunas')
+                ? `Posicional: <strong>${rp.quantidade}</strong> ${data.layout === 'colunas' ? 'colunas iguais' : 'posições iguais'}`
+                : '';
+
+        renderExtra(data);
+    }
+
+    async function carregarConcursos() {
+        const r = await fetch(`${API}/api/concursos?limit=150`);
+        const data = await r.json();
+        if (!data.sucesso) return;
+        concursosLista = data.concursos || [];
+        const opts = concursosLista.map(c => {
+            const extra = c.colunas ? ` · ${c.colunas.join('-')}` : '';
+            return `<option value="${c.concurso}">#${c.concurso} — ${c.data || ''}${extra}</option>`;
+        }).join('');
+        document.getElementById('selConcursoA').innerHTML = opts;
+        document.getElementById('selConcursoB').innerHTML = opts;
+
+        const qa = params.get('concurso_a');
+        const qb = params.get('concurso_b');
+        if (qa) document.getElementById('selConcursoA').value = qa;
+        else if (concursosLista.length >= 2) document.getElementById('selConcursoA').value = concursosLista[1].concurso;
+        if (qb) document.getElementById('selConcursoB').value = qb;
+        else if (concursosLista.length >= 1) document.getElementById('selConcursoB').value = concursosLista[0].concurso;
+    }
+
+    async function comparar() {
+        const ca = document.getElementById('selConcursoA').value;
+        const cb = document.getElementById('selConcursoB').value;
+        if (ca === cb) { alert('Selecione dois concursos diferentes.'); return; }
+        document.getElementById('loaderComp').style.display = 'block';
+        let url = `${API}/api/comparar?modo=${modoAtual}&concurso_a=${ca}&concurso_b=${cb}`;
+        if (CFG.dual_sorteio) {
+            url += `&sorteio_a=${document.getElementById('selSorteioA').value}`;
+            url += `&sorteio_b=${document.getElementById('selSorteioB').value}`;
+        }
+        const r = await fetch(url);
+        const data = await r.json();
+        if (!data.sucesso) {
+            document.getElementById('loaderComp').innerHTML =
+                `<span class="text-danger">${data.erro || 'Erro ao comparar'}</span>`;
+            return;
+        }
+        renderComparacao(data);
+    }
+
+    document.querySelectorAll('.modo-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.modo-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            modoAtual = btn.dataset.modo;
+            atualizarLegendaModo();
+            comparar();
+        });
+    });
+    document.querySelectorAll('[data-ordem-bolas]').forEach(btn => {
+        btn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            ordemBolas = ordemBolas === 'classificado' ? 'sorteio' : 'classificado';
+            pintarLinhasBolas();
+        });
+    });
+    document.getElementById('btnComparar').addEventListener('click', comparar);
+
+    (async function init() {
+        const m = params.get('modo');
+        if (m && document.querySelector(`.modo-btn[data-modo="${m}"]`)) {
+            document.querySelectorAll('.modo-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.modo-btn[data-modo="${m}"]`).classList.add('active');
+            modoAtual = m;
+        }
+        atualizarLegendaModo();
+        await carregarConcursos();
+        await comparar();
+    })();
+})();
+</script>
+<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const API = '/analise/comparar-concursos';
+    const STORE = 'ix-indicados-' + (CFG.key || 'mod');
+    let dmin = Number(CFG.dezena_min);
+    let dmax = Number(CFG.dezena_max);
+    if (!Number.isFinite(dmin)) dmin = 1;
+    if (!Number.isFinite(dmax)) dmax = 31;
+    let nums = [];
+    let indicados = new Set();
+    let concursos = [];
+    let origem = { label: '', url: '/analise/' };
+    const MAX_PADRAO = { lotofacil: 18, lotomania: 30, quina: 15, megasena: 15, duplasena: 15, maismilionaria: 15, timemania: 20, supersete: 7, diadesorte: 15 };
+    let maxInd = Number(CFG.indicacao_max) || MAX_PADRAO[CFG.key] || 15;
+    let sortKey = 'concurso';
+    let sortDir = 'desc';
+    let avisoLimiteFeito = false;
+
+    function padN(n) {
+        return String(n).padStart((dmin === 0 || dmax >= 100) ? 2 : (n < 10 ? 1 : 2), '0');
+    }
+    function faixa() {
+        const a = [];
+        for (let i = dmin; i <= dmax; i++) a.push(i);
+        return a;
+    }
+    function salvar() {
+        try { localStorage.setItem(STORE, JSON.stringify([...indicados])); } catch (e) {}
+    }
+    function lidoSalvo() {
+        try {
+            const raw = localStorage.getItem(STORE);
+            if (!raw) return null;
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr) && arr.length) return arr.map(Number).filter(n => n >= dmin && n <= dmax);
+        } catch (e) {}
+        return null;
+    }
+    function toggleN(n) {
+        n = Number(n);
+        if (!Number.isFinite(n) || n < dmin || n > dmax) return;
+        if (indicados.has(n)) {
+            indicados.delete(n);
+            avisoLimiteFeito = false;
+            salvar();
+            renderGrade();
+            return;
+        }
+        if (indicados.size >= maxInd) return;
+        indicados.add(n);
+        salvar();
+        renderGrade();
+        if (indicados.size >= maxInd && !avisoLimiteFeito) {
+            avisoLimiteFeito = true;
+            mostrarAvisoLimite();
+        }
+    }
+    function mostrarAvisoLimite() {
+        document.getElementById('ixToast')?.remove();
+        const el = document.createElement('div');
+        el.id = 'ixToast';
+        el.className = 'ix-toast';
+        el.setAttribute('role', 'status');
+        el.innerHTML = `<strong>Indicação concluída!</strong><br>
+            Você já atingiu as <strong>${maxInd} indicações permitidas</strong> para esta modalidade.`;
+        document.body.appendChild(el);
+        setTimeout(() => { el.remove(); }, 4500);
+    }
+    function htmlNumCells(mode, drawnSet) {
+        return nums.map(n => {
+            let cls = 'ix-cell';
+            if (mode === 'super' && indicados.has(n)) cls += ' ix-indicado';
+            if (mode === 'draw' && drawnSet && drawnSet.has(n)) cls += ' ix-sorteado';
+            return `<td class="${cls}" data-n="${n}">${padN(n)}</td>`;
+        }).join('');
+    }
+    function acertosDe(drawnList) {
+        const lista = drawnList || [];
+        const ind = lista.filter(n => indicados.has(Number(n))).length;
+        return { ind, nind: Math.max(0, lista.length - ind) };
+    }
+    function concursosOrdenados() {
+        const rows = concursos.map(c => {
+            const drawn = c.dezenas_exibicao && c.dezenas_exibicao.length ? c.dezenas_exibicao : (c.dezenas || []);
+            const ac = acertosDe(drawn.map(Number));
+            return { c, drawn, ac, setD: new Set((c.dezenas || []).map(Number)) };
+        });
+        const mul = sortDir === 'asc' ? 1 : -1;
+        rows.sort((a, b) => {
+            let va, vb;
+            if (sortKey === 'ind') { va = a.ac.ind; vb = b.ac.ind; }
+            else if (sortKey === 'nind') { va = a.ac.nind; vb = b.ac.nind; }
+            else { va = Number(a.c.concurso) || 0; vb = Number(b.c.concurso) || 0; }
+            if (va !== vb) return (va - vb) * mul;
+            return (Number(a.c.concurso) - Number(b.c.concurso)) * mul;
+        });
+        return rows;
+    }
+    function indSort(key) {
+        return sortKey === key ? (sortDir === 'asc' ? '▲' : '▼') : '⇅';
+    }
+    function clsSort(key) {
+        return 'ix-sort' + (sortKey === key ? ' ix-sort-on' : '');
+    }
+    function desempenhoIndicacao() {
+        const distInd = {};
+        const distNind = {};
+        let soma = 0;
+        let maxHits = -1;
+        let melhores = [];
+        let maxFaixa = 0;
+        concursos.forEach(c => {
+            const drawn = c.dezenas_exibicao && c.dezenas_exibicao.length ? c.dezenas_exibicao : (c.dezenas || []);
+            const ac = acertosDe(drawn.map(Number));
+            maxFaixa = Math.max(maxFaixa, drawn.length, ac.ind, ac.nind);
+            distInd[ac.ind] = (distInd[ac.ind] || 0) + 1;
+            distNind[ac.nind] = (distNind[ac.nind] || 0) + 1;
+            soma += ac.ind;
+            if (ac.ind > maxHits) {
+                maxHits = ac.ind;
+                melhores = [c.concurso];
+            } else if (ac.ind === maxHits) {
+                melhores.push(c.concurso);
+            }
+        });
+        const total = concursos.length;
+        const zero = distInd[0] || 0;
+        return {
+            total,
+            soma,
+            media: total ? soma / total : 0,
+            comAcerto: total - zero,
+            distInd,
+            distNind,
+            maxFaixa,
+            maxHits: maxHits < 0 ? 0 : maxHits,
+            melhores,
+        };
+    }
+    function fmtN(n) {
+        return Number(n).toLocaleString('pt-BR');
+    }
+    function fmt1(n) {
+        return Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    }
+    function renderRanking() {
+        const box = document.getElementById('ixRanking');
+        if (!box) return;
+        if (!concursos.length) {
+            box.innerHTML = '';
+            return;
+        }
+        const d = desempenhoIndicacao();
+        const pct = d.total ? Math.round((d.comAcerto / d.total) * 1000) / 10 : 0;
+        const melhores = d.melhores.slice(0, 6).map(n => `#${n}`).join(', ')
+            + (d.melhores.length > 6 ? '…' : '');
+        const linhas = [];
+        for (let h = d.maxFaixa; h >= 0; h--) {
+            const lbl = h === 1 ? '1 acerto' : `${h} acertos`;
+            linhas.push(`<tr>
+                <td>${lbl}</td>
+                <td>${fmtN(d.distInd[h] || 0)}</td>
+                <td>${fmtN(d.distNind[h] || 0)}</td>
+            </tr>`);
+        }
+        box.innerHTML = `
+            <div class="ix-rank-resumo">
+                A indicação foi <strong>acertiva em ${fmtN(d.comAcerto)}</strong> de ${fmtN(d.total)} concursos
+                (${fmt1(pct).replace(',0', '')}%) — média de <strong>${fmt1(d.media)}</strong> acertos por concurso.
+                ${d.maxHits > 0 ? `Melhor: <strong>${d.maxHits} acerto${d.maxHits === 1 ? '' : 's'}</strong> (${melhores}).` : ''}
+            </div>
+            <table class="ix-cmp">
+                <thead>
+                    <tr>
+                        <th>Acertos</th>
+                        <th>Indicados</th>
+                        <th>Não Indicados</th>
+                    </tr>
+                </thead>
+                <tbody>${linhas.join('')}</tbody>
+            </table>`;
+    }
+    function renderGrade() {
+        const nCount = nums.length || 1;
+        const thead = document.querySelector('#ixTabela thead');
+        if (thead) {
+            thead.innerHTML = `
+                <tr>
+                    <th class="ix-sticky-col"></th>
+                    <th class="ix-span-nums" colspan="${nCount}">INDICADO</th>
+                    <th class="ix-acertos-h" colspan="2">ACERTOS</th>
+                </tr>
+                <tr>
+                    <th class="${clsSort('concurso')} ix-sticky-col" data-sort="concurso">Nº <span class="ix-sort-ind">${indSort('concurso')}</span></th>
+                    ${nums.map(n => `<th class="ix-cell">${padN(n)}</th>`).join('')}
+                    <th class="${clsSort('ind')} ix-acertos-h" data-sort="ind">Indicado <span class="ix-sort-ind">${indSort('ind')}</span></th>
+                    <th class="${clsSort('nind')} ix-acertos-h" data-sort="nind">Ñ indicado <span class="ix-sort-ind">${indSort('nind')}</span></th>
+                </tr>`;
+        }
+        const superLbl = origem.url
+            ? `<a class="ix-super-link" href="${origem.url}" title="${(origem.label || 'Origem da indicação').replace(/"/g, '&quot;')}">SUPER</a>`
+            : `<span class="ix-super-btn" title="${(origem.label || '').replace(/"/g, '&quot;')}">SUPER</span>`;
+        const linhas = [`<tr>
+            <th class="ix-sticky-col">${superLbl}</th>
+            ${htmlNumCells('super')}
+            <td class="ix-acertos"></td>
+            <td class="ix-acertos"></td>
+        </tr>`];
+        concursosOrdenados().forEach(({ c, ac, setD }) => {
+            linhas.push(`<tr>
+                <th class="ix-sticky-col" title="${c.data || ''}">${c.concurso}</th>
+                ${htmlNumCells('draw', setD)}
+                <td class="ix-acertos">${ac.ind}</td>
+                <td class="ix-acertos">${ac.nind}</td>
+            </tr>`);
+        });
+        const tb = document.getElementById('ixTbody');
+        if (tb) tb.innerHTML = linhas.join('');
+        const origEl = document.getElementById('ixOrigemLbl');
+        if (origEl) {
+            const qtd = indicados.size;
+            origEl.innerHTML = origem.url
+                ? `Indicação <strong>SUPER</strong> (<strong class="ix-qtd">${qtd}</strong> dezenas) — origem:
+                   <a href="${origem.url}">${origem.label || 'ver fonte'}</a>. Clique nos números para ajustar.`
+                : `Indicação SUPER (<strong class="ix-qtd">${qtd}</strong> dezenas). Clique nos números para ajustar.`;
+        }
+        renderRanking();
+    }
+    async function carregarIndicacao() {
+        const r = await fetch(`${API}/api/indicacao-padrao`);
+        const d = await r.json();
+        if (d.dezena_min != null) dmin = Number(d.dezena_min);
+        if (d.dezena_max != null) dmax = Number(d.dezena_max);
+        nums = faixa();
+        origem = d.origem || origem;
+        if (d.indicacao_max != null) maxInd = Number(d.indicacao_max) || maxInd;
+        const salvo = lidoSalvo();
+        let arr = (salvo && salvo.length ? salvo : (d.dezenas || [])).map(Number)
+            .filter(n => Number.isFinite(n) && n >= dmin && n <= dmax);
+        const excedeu = arr.length > maxInd;
+        if (excedeu) arr = arr.slice(0, maxInd);
+        indicados = new Set(arr);
+        if (indicados.size >= maxInd) avisoLimiteFeito = true;
+        if (excedeu) salvar();
+    }
+    async function carregarHistorico() {
+        concursos = [];
+        let off = 0;
+        for (let i = 0; i < 200; i++) {
+            const r = await fetch(`${API}/api/historico-indicados?limit=80&offset=${off}`);
+            const d = await r.json();
+            if (!d.sucesso) throw new Error(d.erro || 'Falha ao carregar histórico');
+            const batch = d.concursos || [];
+            concursos = concursos.concat(batch);
+            off = concursos.length;
+            if (!d.tem_mais || !batch.length) break;
+        }
+    }
+    document.getElementById('ixBtnAjuda')?.addEventListener('click', () => {
+        const box = document.getElementById('ixAjudaBox');
+        if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    });
+    document.getElementById('ixTabela')?.addEventListener('click', (ev) => {
+        const sortEl = ev.target.closest('th.ix-sort');
+        if (!sortEl || !sortEl.dataset.sort) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        const key = sortEl.dataset.sort;
+        if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        else { sortKey = key; sortDir = 'asc'; }
+        renderGrade();
+    });
+    document.addEventListener('click', (ev) => {
+        if (ev.target.closest('#ixTabela thead, th.ix-sort')) return;
+        const ix = ev.target.closest('#ixTbody .ix-cell[data-n]');
+        if (ix) { toggleN(ix.dataset.n); return; }
+        const v = ev.target.closest('.volante-sorteio-cell');
+        if (v) {
+            const n = parseInt(v.textContent, 10);
+            if (!Number.isNaN(n)) toggleN(n);
+            return;
+        }
+        const dg = ev.target.closest('.dig-cell');
+        if (dg) {
+            const n = parseInt(dg.textContent, 10);
+            if (!Number.isNaN(n)) toggleN(n);
+        }
+    });
+    (async function initIx() {
+        try {
+            await carregarIndicacao();
+            await carregarHistorico();
+            renderGrade();
+        } catch (e) {
+            const tb = document.getElementById('ixTbody');
+            if (tb) tb.innerHTML = `<tr><td colspan="4" class="text-danger text-center py-3">${e.message || e}</td></tr>`;
+        }
+    })();
+})();
+</script>
+{% if cfg.layout != 'colunas' and (cfg.dezena_max - cfg.dezena_min + 1) >= 15 %}
+<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const API = '/analise/comparar-concursos';
+    const STORE = 'ix-indicados-' + (CFG.key || 'mod');
+    let ranking = [];
+    let aberto = null;
+    let concAberto = null;
+    let ordemConc = 'classificado';
+
+    function pad2(n) {
+        return String(n).padStart(2, '0');
+    }
+    function fmtN(n) {
+        return Number(n).toLocaleString('pt-BR');
+    }
+    function lidoManual() {
+        try {
+            const raw = localStorage.getItem(STORE);
+            if (!raw) return [];
+            const arr = JSON.parse(raw);
+            if (!Array.isArray(arr)) return [];
+            return arr.map(Number).filter(n => Number.isFinite(n));
+        } catch (e) { return []; }
+    }
+    function faixaVal(r, k) {
+        const f = r.faixas || {};
+        return fmtN(f[k] != null ? f[k] : (f[String(k)] != null ? f[String(k)] : 0));
+    }
+    function renderAuto() {
+        const wrap = document.getElementById('autoWrap');
+        const btnEx = document.getElementById('autoBtnExport');
+        if (!wrap) return;
+        if (btnEx) btnEx.disabled = !ranking.length;
+        if (!ranking.length) {
+            wrap.innerHTML = '<div class="text-muted small text-center py-3">Nenhuma combinação gerada.</div>';
+            return;
+        }
+        const maxF = Math.max(7, ...ranking.map(r => Number(r.melhor_acerto) || 0));
+        const cols = [];
+        for (let h = maxF; h >= 0; h--) cols.push(h);
+        const headFaixas = cols.map(h => {
+            const cls = h === 7 ? 'auto-col7' : (h === 6 ? 'auto-col6' : '');
+            return `<th class="${cls}" title="${h === 7 ? 'Prêmio principal' : ''}">${h}</th>`;
+        }).join('');
+        const rows = ranking.map(r => {
+            const ref = r.referencia ? ' auto-ref' : '';
+            const fa = cols.map(h => {
+                const cls = h === 7 ? 'auto-col7' : (h === 6 ? 'auto-col6' : '');
+                return `<td class="${cls}">${faixaVal(r, h)}</td>`;
+            }).join('');
+            const dets = r.melhores_detalhe || [];
+            const concBtns = dets.map(d => {
+                const on = concAberto && concAberto.id === r.id && Number(concAberto.concurso) === Number(d.concurso) ? ' auto-conc-on' : '';
+                return `<button type="button" class="auto-conc${on}" data-auto-conc="${r.id}" data-conc="${d.concurso}">#${d.concurso}</button>`;
+            }).join(' ') || '—';
+            let concBox = '';
+            if (concAberto && concAberto.id === r.id) {
+                const d = dets.find(x => Number(x.concurso) === Number(concAberto.concurso));
+                if (d) {
+                    const hit = new Set((d.acertadas || []).map(Number));
+                    let lista = (d.dezenas || []).map(Number);
+                    if (ordemConc === 'classificado') lista = [...lista].sort((a, b) => a - b);
+                    const bolas = lista.map(n => {
+                        const ok = hit.has(Number(n));
+                        return `<span class="auto-dez ${ok ? 'auto-dez-hit' : 'auto-dez-miss'}" title="${ok ? 'acertou (estava no pool)' : 'não estava no pool'}">${pad2(n)}</span>`;
+                    }).join('');
+                    const rotuloOrdem = ordemConc === 'classificado' ? 'ordem de sorteio' : 'classificar';
+                    const tipOrdem = ordemConc === 'classificado'
+                        ? 'Mostrar na ordem em que as dezenas foram sorteadas'
+                        : 'Classificar as dezenas em ordem crescente';
+                    concBox = `<div class="auto-conc-box">
+                        <div class="mb-1"><strong>#${d.concurso}</strong>${d.data ? ' · ' + d.data : ''}
+                            · <strong>${d.acertos}</strong> acerto${d.acertos === 1 ? '' : 's'} neste concurso</div>
+                        <div class="mb-1">${bolas}</div>
+                        <button type="button" class="btn-ordem-bolas" data-auto-ordem title="${tipOrdem}">${rotuloOrdem}</button>
+                        <div class="small">Verde = saiu e estava no pool de 15 · Cinza = saiu e <em>não</em> estava no pool</div>
+                    </div>`;
+                }
+            }
+            const det = aberto === r.id ? `<tr><td class="auto-det" colspan="${4 + cols.length}">
+                <div class="mb-1"><strong>Dezenas (15):</strong>
+                    ${(r.dezenas || []).map(n => `<span class="auto-dez">${pad2(n)}</span>`).join('')}
+                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2 py-0" data-auto-copy="${r.id}">Copiar dezenas</button>
+                    <a class="btn btn-sm btn-outline-primary ms-1 py-0" data-auto-construtor
+                       href="${urlBaseConstrutor(r.dezenas)}" target="_blank" rel="noopener">Base Construtor</a>
+                </div>
+                <div>Concursos testados: <strong>${fmtN(r.concursos_testados)}</strong>
+                    · Melhor acerto (${r.melhor_acerto}) em ${fmtN(dets.length)} concurso(s) — clique para ver:
+                    <span class="d-inline-block mt-1">${concBtns}</span></div>
+                ${concBox}
+            </td></tr>` : '';
+            return `<tr class="auto-open${ref}" data-auto-id="${r.id}">
+                <td>${r.posicao}º</td>
+                <td class="auto-lbl">${r.label}${r.referencia ? ' <span class="text-muted">(referência)</span>' : ''}</td>
+                ${fa}
+                <td>${r.melhor_acerto}</td>
+                <td>${Number(r.media).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>${det}`;
+        }).join('');
+        wrap.innerHTML = `<table class="auto-tbl">
+            <thead><tr>
+                <th>Ranking</th>
+                <th class="auto-lbl">Combinação</th>
+                ${headFaixas}
+                <th>Melhor</th>
+                <th>Média</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+        </table>`;
+    }
+    function csvEscape(v) {
+        const s = String(v == null ? '' : v);
+        if (/[",;\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+        return s;
+    }
+    function exportar() {
+        if (!ranking.length) return;
+        const maxF = Math.max(7, ...ranking.map(r => Number(r.melhor_acerto) || 0));
+        const cols = [];
+        for (let h = maxF; h >= 0; h--) cols.push(h);
+        const header = ['ranking', 'combinacao', 'dezenas', ...cols.map(h => 'acertos_' + h), 'melhor', 'media', 'concursos_testados'].join(';');
+        const lines = ranking.map(r => {
+            const dez = (r.dezenas || []).map(pad2).join('-');
+            const fvals = cols.map(h => {
+                const f = r.faixas || {};
+                return f[h] != null ? f[h] : (f[String(h)] != null ? f[String(h)] : 0);
+            });
+            return [r.posicao, r.label, dez, ...fvals, r.melhor_acerto, r.media, r.concursos_testados].map(csvEscape).join(';');
+        });
+        const blob = new Blob(['\ufeff' + header + '\n' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'combinacoes-auto-' + (CFG.key || 'mod') + '.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+    function urlBaseConstrutor(dezenas) {
+        const qs = (dezenas || []).map(pad2).join('-');
+        return '/geradores-elite/construtor-construcoes/?dezenas=' + encodeURIComponent(qs);
+    }
+    function copiarDezenas(id) {
+        const r = ranking.find(x => x.id === id);
+        if (!r) return;
+        const txt = (r.dezenas || []).map(pad2).join(' ');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(txt);
+        } else {
+            window.prompt('Dezenas', txt);
+        }
+        const st = document.getElementById('autoStatus');
+        if (st) st.textContent = 'Dezenas copiadas: ' + txt;
+    }
+    async function gerar() {
+        const btn = document.getElementById('autoBtnGerar');
+        const st = document.getElementById('autoStatus');
+        const wrap = document.getElementById('autoWrap');
+        if (btn) btn.disabled = true;
+        if (st) st.textContent = 'Gerando e testando no histórico…';
+        if (wrap) wrap.innerHTML = '<div class="text-center py-3 text-muted"><i class="fas fa-spinner fa-spin"></i></div>';
+        try {
+            const r = await fetch(API + '/api/combinacoes-auto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dezenas_manual: lidoManual() }),
+            });
+            const d = await r.json();
+            if (!d.sucesso) throw new Error(d.erro || 'Falha ao gerar');
+            ranking = d.ranking || [];
+            aberto = ranking[0] ? ranking[0].id : null;
+            if (st) st.textContent = (d.aviso || '') + ' · ' + ranking.length + ' combinação(ões) · '
+                + (d.concursos_testados || 0).toLocaleString('pt-BR') + ' concursos.';
+            renderAuto();
+        } catch (e) {
+            ranking = [];
+            if (wrap) wrap.innerHTML = `<div class="text-danger small text-center py-3">${e.message || e}</div>`;
+            if (st) st.textContent = '';
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+    document.getElementById('autoBtnGerar')?.addEventListener('click', gerar);
+    document.getElementById('autoBtnExport')?.addEventListener('click', exportar);
+    document.getElementById('autoWrap')?.addEventListener('click', (ev) => {
+        const copy = ev.target.closest('[data-auto-copy]');
+        if (copy) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            copiarDezenas(copy.getAttribute('data-auto-copy'));
+            return;
+        }
+        const construtor = ev.target.closest('[data-auto-construtor]');
+        if (construtor) {
+            ev.stopPropagation();
+            return;
+        }
+        const ordemBtn = ev.target.closest('[data-auto-ordem]');
+        if (ordemBtn) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            ordemConc = ordemConc === 'classificado' ? 'sorteio' : 'classificado';
+            renderAuto();
+            return;
+        }
+        const concBtn = ev.target.closest('[data-auto-conc]');
+        if (concBtn) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            const id = concBtn.getAttribute('data-auto-conc');
+            const conc = Number(concBtn.getAttribute('data-conc'));
+            if (concAberto && concAberto.id === id && Number(concAberto.concurso) === conc) concAberto = null;
+            else concAberto = { id, concurso: conc };
+            renderAuto();
+            return;
+        }
+        const tr = ev.target.closest('tr.auto-open');
+        if (!tr) return;
+        const id = tr.getAttribute('data-auto-id');
+        aberto = aberto === id ? null : id;
+        renderAuto();
+    });
+})();
+</script>
+{% endif %}
+<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const API = '/analise/comparar-concursos';
+    const IS_COL = CFG.layout === 'colunas';
+    const IS_DUAL = !!CFG.dual_sorteio;
+    const PICK_MIN = Number(CFG.pick_min || 0);
+    const PICK_MAX = Number(CFG.pick_max || 0);
+    const AC_MAX = Number(CFG.sorteadas || 7);
+    const NCOL = Number(CFG.colunas || 7);
+    const DMIN = IS_COL ? Number(CFG.digito_min ?? 0) : Number(CFG.dezena_min);
+    const DMAX = IS_COL ? Number(CFG.digito_max ?? 9) : Number(CFG.dezena_max);
+    const TREVO_MAX = Number(CFG.trevo_max || CFG.trevo_total || 6);
+    const TREVO_PICK_MAX = Number(CFG.trevo_pick_max || 6);
+    const TREVO_PICK_MIN = Number(CFG.trevo_pick_min || 2);
+
+    const sel = new Set();
+    const selTrevos = new Set();
+    const selCols = Array.from({ length: NCOL }, () => new Set());
+    const hidden = new Set();
+    let ultimo = null;
+    let historico = [];
+    let vista = 'resultado';
+    let ordemCv = 'crescente';
+    let focoConc = null;
+    let alvoCmp = 'ultimo';
+    let soUltimo = false;
+    let filtroNums = [];
+    let loaded = false;
+
+    function pad(n) {
+        if (IS_COL) return String(n);
+        return String(n).padStart(2, '0');
+    }
+    function parseNums(s) {
+        return String(s || '').split(/[,\s;]+/).map(x => parseInt(x, 10)).filter(n => n > 0);
+    }
+    function isAlvoUltimo() { return alvoCmp === 'ultimo'; }
+    function focoRow() {
+        if (isAlvoUltimo()) return ultimo;
+        return historico.find(r => r.concurso === focoConc) || ultimo;
+    }
+    function comparadoConc() {
+        const row = focoRow();
+        return row ? row.concurso : null;
+    }
+    function rowNums(row) {
+        if (!row) return [];
+        if (IS_COL) return row.colunas || [];
+        return row.dezenas_exibicao && row.dezenas_exibicao.length ? row.dezenas_exibicao : (row.dezenas || []);
+    }
+    function ordemNums(lista) {
+        const arr = (lista || []).map(Number);
+        if (ordemCv === 'crescente') return [...arr].sort((a, b) => a - b);
+        return arr;
+    }
+    function focoDrawnSet() {
+        return new Set(rowNums(focoRow()).map(Number));
+    }
+    function mesBadge(row) {
+        if (!row || !row.mes_nome) return '';
+        const cls = String(row.mes_nome).replace(/\s+/g, '');
+        return `<span class="volante-mes-badge mes-nome-${cls}">${row.mes_nome}</span>`;
+    }
+    function lastSet() {
+        if (!ultimo) return new Set();
+        if (IS_DUAL) {
+            return new Set([...(ultimo.sorteio1 || []), ...(ultimo.sorteio2 || [])].map(Number));
+        }
+        return new Set(rowNums(ultimo).map(Number));
+    }
+    function lastCols() {
+        return (ultimo && ultimo.colunas) || [];
+    }
+    function lastTrevos() {
+        return new Set((ultimo && ultimo.trevos) || []);
+    }
+    function atMaxDez() {
+        if (IS_COL) return false;
+        return PICK_MAX > 0 && sel.size >= PICK_MAX;
+    }
+    function atMaxTrevo() {
+        return TREVO_PICK_MAX > 0 && selTrevos.size >= TREVO_PICK_MAX;
+    }
+    function hitsOf(nums, chosen) {
+        let c = 0;
+        (nums || []).forEach(n => { if (chosen.has(Number(n))) c += 1; });
+        return c;
+    }
+    function acertosCls(n) {
+        n = Number(n) || 0;
+        if (n >= AC_MAX) return 'cv-ac-max';
+        if (n === AC_MAX - 1) return 'cv-ac-6';
+        if (n === AC_MAX - 2) return 'cv-ac-5';
+        if (n === AC_MAX - 3) return 'cv-ac-4';
+        return 'cv-ac-low';
+    }
+    function acertosHtml(n) {
+        n = Number(n) || 0;
+        return `<span class="cv-acertos ${acertosCls(n)}" title="${n} acerto${n === 1 ? '' : 's'}">${n}</span>`;
+    }
+    function hitsCols(cols) {
+        let c = 0;
+        (cols || []).forEach((d, i) => {
+            if (selCols[i] && selCols[i].has(Number(d))) c += 1;
+        });
+        return c;
+    }
+
+    function isAlinhado() { return vista === 'alinhado'; }
+    function cmpGridCols() {
+        if (IS_COL) return Number(CFG.grid_cols || 10);
+        if (isAlinhado()) return Number(CFG.grid_cols || 10);
+        return DMAX - DMIN + 1;
+    }
+    function applyCmpCols(el) {
+        if (el) el.style.setProperty('--cv-cols', String(cmpGridCols()));
+    }
+
+    function cellClass(on, drawn, off) {
+        let cls = 'cv-cell';
+        if (on) cls += ' cv-sel';
+        if (drawn) cls += isAlinhado() ? ' cv-saiu' : ' cv-ultimo';
+        if (off && !on) cls += ' cv-off';
+        return cls;
+    }
+
+    function universeHtml(opts) {
+        const tag = opts.click ? 'button' : 'span';
+        const extra = opts.click ? ' type="button"' : '';
+        const attr = opts.attr || 'data-cv-dez';
+        const drawn = opts.drawn || new Set();
+        const chosen = opts.chosen || new Set();
+        const padFn = opts.padFn || pad;
+        let html = '';
+        for (let n = opts.from; n <= opts.to; n++) {
+            const on = chosen.has(n);
+            const sai = drawn.has(n);
+            const off = !!opts.maxed && !on;
+            const dis = opts.click && off ? ' disabled' : '';
+            const data = opts.click ? ` ${attr}="${n}"` : '';
+            html += `<${tag}${extra} class="${cellClass(on, sai, off)}"${data}${dis}>${padFn(n)}</${tag}>`;
+        }
+        return html;
+    }
+
+    function renderSs(el, clickable, drawnCols) {
+        if (!el) return;
+        const cols = drawnCols || [];
+        el.className = clickable ? 'cv-strip-wrap' : 'cv-strip-wrap cv-grid-res';
+        el.innerHTML = Array.from({ length: NCOL }, (_, i) => {
+            const drawn = cols[i];
+            let digits = '';
+            for (let d = DMIN; d <= DMAX; d++) {
+                const on = selCols[i].has(d);
+                const sai = drawn === d;
+                const tag = clickable ? 'button' : 'span';
+                const extra = clickable ? ' type="button"' : '';
+                const data = clickable ? ` data-cv-col="${i}" data-cv-dig="${d}"` : '';
+                digits += `<${tag}${extra} class="${cellClass(on, sai, false)}"${data}>${d}</${tag}>`;
+            }
+            return `<div class="cv-col"><div class="cv-col-lbl">Col ${i + 1}</div><div class="cv-col-digits">${digits}</div></div>`;
+        }).join('');
+    }
+
+    function applyVistaChrome() {
+        const root = document.getElementById('cv-root');
+        if (root) {
+            root.classList.toggle('cv-modo-resultado', !isAlinhado());
+            root.classList.toggle('cv-modo-alinhado', isAlinhado());
+        }
+        document.querySelectorAll('#cvVista [data-vista]').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-vista') === vista);
+        });
+        document.querySelectorAll('#cvAlvo [data-cv-alvo]').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-cv-alvo') === alvoCmp);
+        });
+        const lista = document.getElementById('cvLista');
+        if (lista) lista.classList.toggle('cv-lista-cols', !isAlinhado());
+    }
+
+    function renderStrip() {
+        const el = document.getElementById('cvStrip');
+        if (!el) return;
+        applyVistaChrome();
+        if (IS_COL) {
+            renderSs(el, true, lastCols());
+            return;
+        }
+        el.className = 'cv-grid';
+        applyCmpCols(el);
+        el.innerHTML = universeHtml({
+            from: DMIN, to: DMAX, click: true,
+            chosen: sel, drawn: lastSet(),
+            maxed: atMaxDez(),
+        });
+    }
+
+    function renderUltimoGrid() {
+        const el = document.getElementById('cvUltimoGrid');
+        if (!el) return;
+        const row = focoRow();
+        if (IS_COL) {
+            renderSs(el, false, rowNums(row));
+            return;
+        }
+        el.className = 'cv-grid cv-grid-res';
+        applyCmpCols(el);
+        if (IS_DUAL) {
+            el.innerHTML = universeHtml({
+                from: DMIN, to: DMAX, click: false,
+                chosen: new Set(), drawn: new Set((row && row.sorteio1) || []),
+            });
+            const el2 = document.getElementById('cvUltimoGrid2');
+            if (el2) {
+                el2.className = 'cv-grid cv-grid-res';
+                applyCmpCols(el2);
+                el2.innerHTML = universeHtml({
+                    from: DMIN, to: DMAX, click: false,
+                    chosen: new Set(), drawn: new Set((row && row.sorteio2) || []),
+                });
+            }
+            return;
+        }
+        el.innerHTML = universeHtml({
+            from: DMIN, to: DMAX, click: false,
+            chosen: new Set(), drawn: focoDrawnSet(),
+        });
+    }
+
+    function renderTrevosStrip() {
+        const el = document.getElementById('cvStripTrevos');
+        if (!el) return;
+        el.className = 'cv-grid';
+        el.style.setProperty('--cv-cols', '6');
+        el.innerHTML = universeHtml({
+            from: 1, to: TREVO_MAX, click: true, attr: 'data-cv-trevo',
+            chosen: selTrevos, drawn: lastTrevos(),
+            maxed: atMaxTrevo(),
+            padFn: (n) => String(n),
+        });
+        const lastEl = document.getElementById('cvUltimoTrevos');
+        if (lastEl) {
+            lastEl.className = 'cv-grid cv-grid-res';
+            lastEl.style.setProperty('--cv-cols', '6');
+            lastEl.innerHTML = universeHtml({
+                from: 1, to: TREVO_MAX, click: false,
+                chosen: new Set(),
+                drawn: new Set(((focoRow() && focoRow().trevos) || []).map(Number)),
+                padFn: (n) => String(n),
+            });
+        }
+    }
+
+    function labBlock(kicker, row, extra) {
+        if (!row) return `<div class="cv-kicker">${kicker}</div>`;
+        return `<div class="cv-kicker">${kicker}</div>
+            <span class="cv-meta">#${row.concurso}</span>
+            <div class="small">${row.data || '—'}</div>
+            <div>${mesBadge(row)}</div>
+            ${row.time_nome ? `<div class="cv-chip cv-chip-time">${row.time_nome}</div>` : ''}
+            ${extra || ''}`;
+    }
+
+    function renderCmpLabs() {
+        const selLab = document.getElementById('cvCmpLabSel');
+        const resLab = document.getElementById('cvCmpLabRes');
+        const n = IS_COL ? selCols.filter(s => s.size).length : sel.size;
+        const maxLbl = IS_COL ? NCOL : (PICK_MAX || n);
+        const falta = IS_COL
+            ? Math.max(0, NCOL - n)
+            : (PICK_MIN > 0 ? Math.max(0, PICK_MIN - n) : 0);
+        const faixa = !IS_COL && PICK_MIN > 0 && PICK_MAX > 0 && PICK_MIN !== PICK_MAX
+            ? `${PICK_MIN} a ${PICK_MAX} dezenas`
+            : '';
+        const selExtra = `<div>Minha seleção <span class="cv-contador">${n}/${maxLbl}</span></div>
+            ${faixa ? `<div class="small text-muted">${faixa}</div>` : ''}
+            ${falta ? `<div class="small text-muted">faltam ${falta} para um jogo Caixa</div>` : ''}
+            <button type="button" class="btn btn-link btn-sm py-0" data-cv-limpar>Limpar seleção</button>`;
+        if (selLab) selLab.innerHTML = labBlock('Último sorteio', ultimo, selExtra);
+        if (resLab) {
+            const row = focoRow();
+            const kicker = isAlvoUltimo() ? 'Último sorteio' : 'Sorteio escolhido';
+            if (!row) {
+                resLab.innerHTML = labBlock(kicker, null);
+                return;
+            }
+            const ac = IS_COL ? hitsCols(row.colunas || []) : hitsOf(rowNums(row), sel);
+            const extra = `${acertosHtml(ac)}
+                <div class="cv-row-bolas">${compactBolas(row, true)}</div>`;
+            resLab.innerHTML = labBlock(kicker, row, extra);
+        }
+    }
+
+    function renderSticky() {
+        const cont = document.getElementById('cvContador');
+        const aviso = document.getElementById('cvAvisoMin');
+        const bolas = document.getElementById('cvSelBolas');
+        if (IS_COL) {
+            const colsOn = selCols.filter(s => s.size > 0).length;
+            const totalDig = selCols.reduce((a, s) => a + s.size, 0);
+            const falta = Math.max(0, NCOL - colsOn);
+            if (cont) cont.textContent = `${colsOn}/${NCOL} colunas · ${totalDig} dígitos`;
+            if (aviso) aviso.textContent = falta ? `faltam ${falta} para um jogo Caixa` : '';
+            if (bolas) {
+                bolas.innerHTML = selCols.map((s, i) => {
+                    if (!s.size) return '';
+                    const ds = [...s].sort((a, b) => a - b).map(d => `<span class="cv-ball hit">${d}</span>`).join('');
+                    return `<span class="cv-sublbl">C${i + 1}</span>${ds}`;
+                }).join(' ');
+            }
+            renderCmpLabs();
+            return;
+        }
+        const n = sel.size;
+        const maxLbl = PICK_MAX || n;
+        if (cont) cont.textContent = `${n}/${maxLbl}`;
+        const falta = PICK_MIN > 0 ? Math.max(0, PICK_MIN - n) : 0;
+        if (aviso) aviso.textContent = falta ? `faltam ${falta} para um jogo Caixa` : '';
+        if (bolas) {
+            const nums = [...sel].sort((a, b) => a - b).map(d =>
+                `<button type="button" class="cv-ball hit" data-cv-dez="${d}" title="Retirar">${pad(d)}</button>`
+            ).join('');
+            let extra = '';
+            if (CFG.extra_trevos && selTrevos.size) {
+                extra = ' · trevos ' + [...selTrevos].sort((a, b) => a - b).map(t =>
+                    `<button type="button" class="cv-ball hit" data-cv-trevo="${t}">${t}</button>`
+                ).join('');
+            }
+            bolas.innerHTML = nums + extra;
+        }
+        renderCmpLabs();
+    }
+
+    function extraHtml(row) {
+        let s = mesBadge(row);
+        if (row.time_nome) s += `<span class="cv-chip cv-chip-time">${row.time_nome}</span>`;
+        return s;
+    }
+
+    function ballsHtml(nums, chosen) {
+        return (nums || []).map(n => {
+            const hit = chosen.has(Number(n));
+            return `<span class="cv-ball ${hit ? 'hit' : 'miss'}">${pad(n)}</span>`;
+        }).join('');
+    }
+
+    function alinhadoHtml(drawnSet, chosen) {
+        return `<div class="cv-grid">${universeHtml({
+            from: DMIN, to: DMAX, click: false,
+            chosen: chosen, drawn: drawnSet,
+        })}</div>`;
+    }
+
+    function alinhadoCols(cols) {
+        const wrap = document.createElement('div');
+        wrap.className = 'cv-strip-wrap';
+        renderSs(wrap, false, cols);
+        return wrap.outerHTML;
+    }
+
+    function rowHtml(row) {
+        const on = comparadoConc() === row.concurso ? ' cv-row-on' : '';
+        const hideBtn = `<button type="button" class="cv-hide" data-cv-hide="${row.concurso}">Ocultar</button>`;
+        const nEl = `<span class="cv-row-n">#${row.concurso}</span>`;
+        const dEl = `<span class="cv-row-data">${row.data || '—'}</span>`;
+        const xEl = `<span class="cv-row-extra">${extraHtml(row)}</span>`;
+
+        if (IS_COL) {
+            const ac = hitsCols(row.colunas || row.dezenas_exibicao || []);
+            const cols = row.colunas || [];
+            const acTxt = acertosHtml(ac);
+            if (isAlinhado()) {
+                return `<div class="cv-row cv-row-al${on}" data-cv-foco="${row.concurso}"><div class="cv-row-head">${nEl}${dEl}${xEl}${acTxt}</div>${alinhadoCols(cols)}${hideBtn}</div>`;
+            }
+            const corpo = cols.map((d, i) => {
+                const hit = selCols[i] && selCols[i].has(Number(d));
+                return `<span class="cv-ball ${hit ? 'hit' : 'miss'}">${d}</span>`;
+            }).join('');
+            return `<div class="cv-row${on}" data-cv-foco="${row.concurso}">${nEl}${dEl}${xEl}${acTxt}<div class="cv-row-bolas">${corpo}</div>${hideBtn}</div>`;
+        }
+
+        if (IS_DUAL) {
+            const s1 = ordemNums(row.sorteio1 || []);
+            const s2 = ordemNums(row.sorteio2 || []);
+            const a1 = hitsOf(s1, sel);
+            const a2 = hitsOf(s2, sel);
+            if (isAlinhado()) {
+                return `<div class="cv-row cv-row-al${on}" data-cv-foco="${row.concurso}">
+                    <div class="cv-row-head">${nEl}${dEl}${xEl}</div>
+                    <div class="cv-sublbl">1º · ${acertosHtml(a1)}</div>
+                    ${alinhadoHtml(new Set((row.sorteio1 || []).map(Number)), sel)}
+                    <div class="cv-sublbl">2º · ${acertosHtml(a2)}</div>
+                    ${alinhadoHtml(new Set((row.sorteio2 || []).map(Number)), sel)}
+                    ${hideBtn}
+                </div>`;
+            }
+            const bolas = `<span class="cv-sublbl">1º</span>${ballsHtml(s1, sel)} <span class="cv-sublbl">2º</span>${ballsHtml(s2, sel)}`;
+            return `<div class="cv-row${on}" data-cv-foco="${row.concurso}">${nEl}${dEl}${xEl}${acertosHtml(a1)}${acertosHtml(a2)}<div class="cv-row-bolas">${bolas}</div>${hideBtn}</div>`;
+        }
+
+        const nums = ordemNums(row.dezenas_exibicao && row.dezenas_exibicao.length ? row.dezenas_exibicao : (row.dezenas || []));
+        const ac = hitsOf(nums, sel);
+        const acTxt = acertosHtml(ac);
+        if (isAlinhado()) {
+            let corpo = alinhadoHtml(new Set(nums.map(Number)), sel);
+            if (CFG.extra_trevos && (row.trevos || []).length) {
+                const th = hitsOf(row.trevos, selTrevos);
+                corpo += `<div class="cv-sublbl">trevos ${th}/${row.trevos.length}</div>` +
+                    `<div class="cv-grid" style="--cv-cols:6">${universeHtml({
+                        from: 1, to: TREVO_MAX, click: false,
+                        chosen: selTrevos, drawn: new Set((row.trevos || []).map(Number)),
+                        padFn: (n) => String(n),
+                    })}</div>`;
+            }
+            return `<div class="cv-row cv-row-al${on}" data-cv-foco="${row.concurso}"><div class="cv-row-head">${nEl}${dEl}${xEl}${acTxt}</div>${corpo}${hideBtn}</div>`;
+        }
+        let bolas = ballsHtml(nums, sel);
+        if (CFG.extra_trevos && (row.trevos || []).length) {
+            const th = hitsOf(row.trevos, selTrevos);
+            bolas += ` <span class="cv-chip">trevos ${th}/${row.trevos.length}</span> ` +
+                ballsHtml(ordemNums(row.trevos), selTrevos);
+        }
+        return `<div class="cv-row${on}" data-cv-foco="${row.concurso}">${nEl}${dEl}${xEl}${acTxt}<div class="cv-row-bolas">${bolas}</div>${hideBtn}</div>`;
+    }
+
+    function visiveis() {
+        let rows = historico.filter(r => !hidden.has(r.concurso));
+        if (soUltimo && ultimo) {
+            rows = rows.filter(r => r.concurso === ultimo.concurso);
+            if (!rows.length) rows = [ultimo];
+        }
+        return rows;
+    }
+
+    function renderLista() {
+        const el = document.getElementById('cvLista');
+        if (!el) return;
+        const rows = visiveis();
+        if (!rows.length) {
+            el.innerHTML = '<div class="text-muted small text-center py-3">Nenhum concurso nesta janela.</div>';
+            return;
+        }
+        el.innerHTML = rows.map(rowHtml).join('');
+        ordemBtnHtml();
+    }
+
+    function officialBalls(nums) {
+        return (nums || []).map(n => `<span class="cv-ball oficial">${pad(n)}</span>`).join('');
+    }
+
+    function ordemBtnHtml() {
+        const txt = ordemCv === 'crescente' ? 'ordem de sorteio' : 'ordem crescente';
+        const tip = ordemCv === 'crescente'
+            ? 'Mostrar na ordem em que as dezenas foram sorteadas'
+            : 'Classificar as dezenas em ordem crescente';
+        const btn = document.getElementById('cvBtnOrdemLista');
+        if (btn) {
+            btn.textContent = txt;
+            btn.title = tip;
+        }
+        return `<button type="button" class="btn-ordem-bolas" data-cv-ordem title="${tip}">${txt}</button>`;
+    }
+
+    function compactBolas(row, vsSel) {
+        if (!row) return '';
+        if (IS_COL) {
+            const cols = row.colunas || [];
+            if (!vsSel) return officialBalls(cols);
+            return cols.map((d, i) => {
+                const hit = selCols[i] && selCols[i].has(Number(d));
+                return `<span class="cv-ball ${hit ? 'hit' : 'miss'}">${d}</span>`;
+            }).join('');
+        }
+        if (IS_DUAL) {
+            const s1 = ordemNums(row.sorteio1 || []);
+            const s2 = ordemNums(row.sorteio2 || []);
+            const b1 = vsSel ? ballsHtml(s1, sel) : officialBalls(s1);
+            const b2 = vsSel ? ballsHtml(s2, sel) : officialBalls(s2);
+            return `<span class="cv-sublbl">1º</span>${b1} <span class="cv-sublbl">2º</span>${b2}`;
+        }
+        const nums = ordemNums(rowNums(row));
+        return vsSel ? ballsHtml(nums, sel) : officialBalls(nums);
+    }
+
+    function renderUltimo() {
+        const el = document.getElementById('cvUltimo');
+        if (!el) return;
+        if (!ultimo) {
+            el.textContent = 'Sem concursos no banco.';
+            return;
+        }
+        const ac = IS_COL ? hitsCols(ultimo.colunas || []) : hitsOf(rowNums(ultimo), sel);
+        el.innerHTML = `<span class="cv-meta">Último #${ultimo.concurso}</span>
+            <span class="cv-row-data">${ultimo.data || '—'}</span>
+            ${mesBadge(ultimo)}${ultimo.time_nome ? `<span class="cv-chip cv-chip-time">${ultimo.time_nome}</span>` : ''}
+            ${acertosHtml(ac)}
+            <span>${compactBolas(ultimo, true)}</span>
+            ${ordemBtnHtml()}`;
+    }
+
+    function renderFoco() {
+        const el = document.getElementById('cvFoco');
+        if (!el) return;
+        const row = focoRow();
+        if (!row || !ultimo || row.concurso === ultimo.concurso) {
+            el.hidden = true;
+            el.innerHTML = '';
+            return;
+        }
+        const ac = IS_COL ? hitsCols(row.colunas || []) : hitsOf(rowNums(row), sel);
+        el.hidden = false;
+        el.innerHTML = `<span class="cv-meta">Em foco #${row.concurso}</span>
+            <span class="cv-row-data">${row.data || '—'}</span>
+            ${mesBadge(row)}${row.time_nome ? `<span class="cv-chip cv-chip-time">${row.time_nome}</span>` : ''}
+            ${acertosHtml(ac)}
+            <span>${compactBolas(row, true)}</span>`;
+    }
+
+    function renderAll() {
+        renderStrip();
+        renderUltimoGrid();
+        renderTrevosStrip();
+        renderSticky();
+        renderLista();
+        renderUltimo();
+        renderFoco();
+    }
+
+    async function carregar() {
+        const janela = Number(document.getElementById('cvJanela')?.value || 10);
+        const qs = new URLSearchParams();
+        if (filtroNums.length) qs.set('concursos', filtroNums.join(','));
+        else qs.set('limit', String(janela));
+        const r = await fetch(`${API}/api/historico-visual?${qs.toString()}`);
+        if (!r.ok) throw new Error('Falha HTTP ' + r.status);
+        const data = await r.json();
+        if (!data.sucesso) throw new Error(data.erro || 'Falha ao carregar');
+        ultimo = data.ultimo || null;
+        historico = data.concursos || [];
+        const aindaNoHistorico = historico.some(r => r.concurso === focoConc);
+        if (focoConc == null || !aindaNoHistorico) {
+            const outro = historico.find(r => !ultimo || r.concurso !== ultimo.concurso);
+            focoConc = outro ? outro.concurso : (ultimo && ultimo.concurso);
+        }
+        renderAll();
+    }
+
+    function toggleDez(n) {
+        n = Number(n);
+        if (sel.has(n)) sel.delete(n);
+        else {
+            if (atMaxDez()) return;
+            sel.add(n);
+        }
+        renderAll();
+    }
+    function toggleTrevo(t) {
+        t = Number(t);
+        if (selTrevos.has(t)) selTrevos.delete(t);
+        else {
+            if (atMaxTrevo()) return;
+            selTrevos.add(t);
+        }
+        renderAll();
+    }
+    function toggleCol(i, d) {
+        i = Number(i); d = Number(d);
+        if (!selCols[i]) return;
+        if (selCols[i].has(d)) selCols[i].delete(d);
+        else selCols[i].add(d);
+        renderAll();
+    }
+
+    document.getElementById('cv-root')?.addEventListener('click', (ev) => {
+        const limpar = ev.target.closest('[data-cv-limpar]');
+        if (limpar) {
+            sel.clear();
+            selTrevos.clear();
+            selCols.forEach(s => s.clear());
+            renderAll();
+            return;
+        }
+        const alvoBtn = ev.target.closest('[data-cv-alvo]');
+        if (alvoBtn) {
+            alvoCmp = alvoBtn.getAttribute('data-cv-alvo') === 'escolhido' ? 'escolhido' : 'ultimo';
+            if (alvoCmp === 'escolhido' && (focoConc == null) && ultimo) {
+                const outro = historico.find(r => r.concurso !== ultimo.concurso);
+                focoConc = outro ? outro.concurso : ultimo.concurso;
+            }
+            renderAll();
+            return;
+        }
+        const hide = ev.target.closest('[data-cv-hide]');
+        if (hide) {
+            hidden.add(Number(hide.getAttribute('data-cv-hide')));
+            renderLista();
+            return;
+        }
+        const ordem = ev.target.closest('[data-cv-ordem]');
+        if (ordem) {
+            ordemCv = ordemCv === 'crescente' ? 'sorteio' : 'crescente';
+            renderAll();
+            return;
+        }
+        const focoEl = ev.target.closest('[data-cv-foco]');
+        if (focoEl && !ev.target.closest('[data-cv-dez],[data-cv-col],[data-cv-trevo]')) {
+            alvoCmp = 'escolhido';
+            focoConc = Number(focoEl.getAttribute('data-cv-foco'));
+            renderAll();
+            return;
+        }
+        const col = ev.target.closest('[data-cv-col]');
+        if (col) {
+            toggleCol(col.getAttribute('data-cv-col'), col.getAttribute('data-cv-dig'));
+            return;
+        }
+        const trevo = ev.target.closest('[data-cv-trevo]');
+        if (trevo) {
+            toggleTrevo(trevo.getAttribute('data-cv-trevo'));
+            return;
+        }
+        const dez = ev.target.closest('[data-cv-dez]');
+        if (dez) toggleDez(dez.getAttribute('data-cv-dez'));
+    });
+
+    document.getElementById('cvBtnLimparSel')?.addEventListener('click', () => {
+        sel.clear();
+        selTrevos.clear();
+        selCols.forEach(s => s.clear());
+        renderAll();
+    });
+    document.getElementById('cvJanela')?.addEventListener('change', () => {
+        filtroNums = [];
+        soUltimo = false;
+        document.getElementById('cvBtnUltimo')?.classList.remove('active');
+        hidden.clear();
+        carregar().catch(e => {
+            document.getElementById('cvLista').innerHTML = `<div class="text-danger small text-center py-3">${e.message || e}</div>`;
+        });
+    });
+    document.getElementById('cvVista')?.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-vista]');
+        if (!btn) return;
+        vista = btn.getAttribute('data-vista');
+        document.querySelectorAll('#cvVista [data-vista]').forEach(b => b.classList.toggle('active', b === btn));
+        renderAll();
+    });
+    document.getElementById('cvBtnUltimo')?.addEventListener('click', (ev) => {
+        soUltimo = !soUltimo;
+        ev.currentTarget.classList.toggle('active', soUltimo);
+        renderAll();
+    });
+    document.getElementById('cvBtnIr')?.addEventListener('click', () => {
+        const nums = parseNums(document.getElementById('cvIrInput')?.value);
+        if (!nums.length) return;
+        filtroNums = nums;
+        soUltimo = false;
+        alvoCmp = 'escolhido';
+        focoConc = nums[0];
+        document.getElementById('cvBtnUltimo')?.classList.remove('active');
+        hidden.clear();
+        carregar().catch(e => {
+            document.getElementById('cvLista').innerHTML = `<div class="text-danger small text-center py-3">${e.message || e}</div>`;
+        });
+    });
+    document.getElementById('cvIrInput')?.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') document.getElementById('cvBtnIr')?.click();
+    });
+    document.getElementById('cvBtnLimparFiltro')?.addEventListener('click', () => {
+        filtroNums = [];
+        soUltimo = false;
+        hidden.clear();
+        const inp = document.getElementById('cvIrInput');
+        if (inp) inp.value = '';
+        document.getElementById('cvBtnUltimo')?.classList.remove('active');
+        carregar().catch(() => {});
+    });
+
+    function setAbaUrl(visual) {
+        const u = new URL(window.location.href);
+        if (visual) u.searchParams.set('aba', 'visual');
+        else u.searchParams.delete('aba');
+        history.replaceState({}, '', u);
+    }
+
+    async function initVisual() {
+        if (loaded) return;
+        loaded = true;
+        try {
+            await carregar();
+        } catch (e) {
+            const el = document.getElementById('cvLista');
+            if (el) el.innerHTML = `<div class="text-danger small text-center py-3">${e.message || e}</div>`;
+            const lab = document.getElementById('cvCmpLabRes');
+            if (lab) lab.textContent = 'Não foi possível carregar o histórico.';
+        }
+    }
+
+    document.getElementById('tabVisual')?.addEventListener('shown.bs.tab', () => {
+        setAbaUrl(true);
+        initVisual();
+    });
+    document.getElementById('tabDois')?.addEventListener('shown.bs.tab', () => setAbaUrl(false));
+
+    const aba = new URLSearchParams(window.location.search).get('aba');
+    if (aba === 'visual' || aba === 'comparacao') {
+        const tab = document.getElementById('tabVisual');
+        if (tab && window.bootstrap) {
+            bootstrap.Tab.getOrCreateInstance(tab).show();
+        } else {
+            initVisual();
+        }
+    }
+})();
+</script>
+{% endblock %}

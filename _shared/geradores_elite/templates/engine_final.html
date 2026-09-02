@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+{% block title %}Engine Final — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    {% if meses_cores %}
+    {% for nome, cor in meses_cores.items() %}
+    #ge-engine-final .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+    {% endfor %}
+    {% endif %}
+    #ge-engine-final .ge-panel {
+        border-radius: var(--radius, 12px);
+        border: 1px solid rgba(0, 0, 0, .08);
+        background: var(--surface, #fff);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+    }
+    #ge-engine-final #geResultados {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    #ge-engine-final .ge-row-aposta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        padding: .55rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    #ge-engine-final .ge-mes-slot {
+        flex-shrink: 0;
+        margin-left: 4px;
+    }
+    #ge-engine-final .ge-conf-bar {
+        width: 100%;
+        border-bottom: 1px solid #eee;
+        padding-bottom: .65rem;
+        margin-bottom: .5rem;
+    }
+    #ge-engine-final .ge-stat-pill {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 3rem;
+        padding: .2rem .55rem;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: #fafafa;
+        font-size: .72rem;
+        line-height: 1.15;
+    }
+    #ge-engine-final .ge-stat-pill .ge-sp-val {
+        font-weight: 800;
+        font-size: .95rem;
+    }
+    #ge-engine-final .ge-stat-pill .ge-sp-lbl {
+        color: #6c757d;
+        font-size: .65rem;
+    }
+    #ge-engine-final .ge-dez-hit {
+        background: var(--accent, #e6a800) !important;
+        color: #2d2d2d !important;
+        box-shadow: 0 0 0 2px rgba(230, 168, 0, .45) !important;
+    }
+    #ge-engine-final .ge-dez-miss {
+        opacity: .38;
+        filter: grayscale(.25);
+    }
+    #ge-engine-final .mes-badge.ge-mes-hit,
+    #ge-engine-final .mes-badge.ge-mes-hit[class*="mes-nome-"] {
+        box-shadow: 0 0 0 2px rgba(25, 135, 84, .75) !important;
+    }
+    #ge-engine-final .mes-badge.ge-mes-miss,
+    #ge-engine-final .mes-badge.ge-mes-miss[class*="mes-nome-"] {
+        opacity: .45;
+        filter: grayscale(.85);
+    }
+    #ge-engine-final .ge-ac-badge {
+        font-size: .75rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 10px;
+        background: #f1f3f5;
+        color: #495057;
+        flex-shrink: 0;
+    }
+    #ge-engine-final .ge-ac-badge.ge-ac-7 { background: #fde8ea; color: #dc3545; }
+    #ge-engine-final .ge-ac-badge.ge-ac-6 { background: #fff8e1; color: #b28704; }
+    #ge-engine-final .ge-ac-badge.ge-ac-5 { background: #e8f5e9; color: #198754; }
+    #ge-engine-final .ge-sorteadas-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+        margin-top: .35rem;
+    }
+    #ge-engine-final .ge-destaque-item {
+        font-size: .72rem;
+        padding: .15rem .45rem;
+        border-radius: 6px;
+        background: #f8f9fa;
+        border: 1px solid #eee;
+        cursor: pointer;
+    }
+    #ge-engine-final .ge-destaque-item:hover { background: #eef2f7; }
+    #ge-engine-final .ge-destaque-item.active {
+        border-color: var(--accent, #e6a800);
+        background: #fffbf0;
+    }
+    #ge-engine-final .ge-tabs .nav-link {
+        font-size: .85rem;
+        padding: .45rem .9rem;
+    }
+    #ge-engine-final .ge-tabs .nav-link.active {
+        font-weight: 600;
+    }
+    #ge-engine-final .ge-compare-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        width: 100%;
+    }
+    @media (max-width: 768px) {
+        #ge-engine-final .ge-compare-wrap { grid-template-columns: 1fr; }
+    }
+    #ge-engine-final .ge-compare-col {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: .75rem;
+        background: #fafafa;
+    }
+    #ge-engine-final .ge-compare-col.ge-col-opt {
+        border-color: rgba(25, 135, 84, .35);
+        background: #f8fff9;
+    }
+    #ge-engine-final .ge-compare-title {
+        font-size: .8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #6c757d;
+        margin-bottom: .5rem;
+        text-align: center;
+    }
+    #ge-engine-final .ge-compare-col.ge-col-opt .ge-compare-title { color: #198754; }
+    #ge-engine-final .ge-opt-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .4rem;
+        justify-content: center;
+        margin-bottom: .75rem;
+        padding-bottom: .65rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    #ge-engine-final .ge-dez-moved {
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, .55) !important;
+    }
+    #ge-engine-final .ge-conjunto-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: .25rem;
+    }
+    #ge-engine-final .ge-conjunto-chip {
+        font-size: .72rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 8px;
+        background: #fff3cd;
+        color: #664d03;
+        border: 1px solid var(--accent);
+    }
+    #ge-engine-final .draw-balls,
+    #ge-engine-final .draw-trevos {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+    {{ ball_css|safe }}
+</style>
+
+<div id="ge-engine-final" class="ge-engine-final"
+    data-modality="{{ modality_key }}"
+    data-dezena-class="{{ ball_classes.dezena }}"
+    data-extra-type="{{ cfg.get('extra') or '' }}"
+    data-extra-class="{{ ball_classes.get('extra_class', '') }}"
+    data-trevo-class="{{ ball_classes.get('trevo', 'trevo-ball') }}"
+    data-pick-min="{{ cfg.pick_min }}"
+    data-pick-max="{{ cfg.pick_max }}"
+    data-pick-default="{{ cfg.pick_default }}"
+    data-otimizador="{{ '1' if otimizador_habilitado else '0' }}"
+    data-construtor="{{ '1' if construtor_habilitado else '0' }}">
+
+    <div class="ge-panel p-3 mb-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+            <div>
+                <h1 class="h5 mb-1"><i class="fas fa-brain"></i> Engine Final</h1>
+                <span class="text-muted small">Gerador pensante — {{ modality_nome }}</span>
+            </div>
+            <a href="{{ url_for('geradores_elite.index') }}" class="btn btn-sm btn-outline-secondary">Geradores de Elite</a>
+        </div>
+
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Modo</label>
+                <select class="form-select form-select-sm" id="geModo">
+                    <option value="convergencia" selected>Convergência</option>
+                    <option value="cobertura">Cobertura</option>
+                    {% if construtor_habilitado %}
+                    <option value="conjunto_base">Conjunto-Base</option>
+                    {% endif %}
+                </select>
+            </div>
+            {% if construtor_habilitado %}
+            <div class="col-md-4" id="geConjuntoWrap" style="display:none;">
+                <label class="form-label small mb-1">Sessão — Construtor</label>
+                <select class="form-select form-select-sm" id="geSessaoConjunto">
+                    <option value="">Carregando sessões…</option>
+                </select>
+                <div class="form-text mt-1" id="geConjuntoHint"></div>
+            </div>
+            {% endif %}
+            <div class="col-md-2">
+                <label class="form-label small mb-1">Dezenas</label>
+                <select class="form-select form-select-sm" id="geQtdDezenas"></select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1">Apostas</label>
+                <input type="number" class="form-control form-control-sm" id="geQtdApostas" min="1" max="50" value="5">
+            </div>
+            {% if cfg.get('extra') == 'mes' %}
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Mês</label>
+                <select class="form-select form-select-sm" id="geMesCriterio">
+                    <option value="atrasado">Automático — mais atrasado</option>
+                    <option value="frequente">Automático — mais frequente</option>
+                    <option value="manual">Fixo</option>
+                    <option value="comportamento">Histórico comportamental</option>
+                </select>
+                <div class="form-text d-none mt-1" id="geMesComportamentoHint"></div>
+            </div>
+            <div class="col-md-2" id="geMesManualWrap" style="display:none;">
+                <label class="form-label small mb-1">&nbsp;</label>
+                <select class="form-select form-select-sm" id="geMesManual">
+                    {% for m in range(1, 13) %}
+                    <option value="{{ m }}">{{ ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][m-1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% elif cfg.get('extra') == 'time' %}
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Time</label>
+                <select class="form-select form-select-sm" id="geExtraCriterio">
+                    <option value="atrasado">Mais atrasado</option>
+                    <option value="frequente">Mais frequente</option>
+                </select>
+            </div>
+            {% elif cfg.get('extra') == 'trevo' %}
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Trevos</label>
+                <span class="form-text d-block">2 trevos por aposta (análise integrada)</span>
+            </div>
+            {% endif %}
+            <div class="col-auto d-flex gap-2">
+                <button type="button" class="btn btn-success" id="geBtnGerar">
+                    <i class="fas fa-magic"></i> Gerar
+                </button>
+                <button type="button" class="btn btn-outline-secondary ge-btn-export" id="geBtnExportar"
+                    title="Baixar TXT" aria-label="Exportar apostas">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% if otimizador_habilitado %}
+    <ul class="nav nav-tabs ge-tabs mb-2" id="geTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="ge-tab-gerador" data-bs-toggle="tab"
+                data-bs-target="#geTabGerador" type="button" role="tab">
+                <i class="fas fa-magic me-1"></i> Gerador Elite
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ge-tab-otimizador" data-bs-toggle="tab"
+                data-bs-target="#geTabOtimizador" type="button" role="tab">
+                <i class="fas fa-compress-arrows-alt me-1"></i> Otimizador de Concentração
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="geTabContent">
+        <div class="tab-pane fade show active" id="geTabGerador" role="tabpanel">
+            <div id="geResultados" class="card shadow-sm border-0 p-2 p-md-3" style="background: var(--surface,#fff);"></div>
+        </div>
+        <div class="tab-pane fade" id="geTabOtimizador" role="tabpanel">
+            <div class="card shadow-sm border-0 p-2 p-md-3" style="background: var(--surface,#fff);">
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-3 pb-2 border-bottom">
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="geBtnReotimizar">
+                        <i class="fas fa-sync-alt"></i> Reotimizar
+                    </button>
+                    <span class="text-muted small" id="geOptStatus"></span>
+                </div>
+                <div id="geOtimizadorResultados">
+                    <p class="text-muted mb-0 text-center py-4">
+                        Gere apostas na aba <strong>Gerador Elite</strong> para ativar o otimizador.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div id="geResultados" class="card shadow-sm border-0 p-2 p-md-3" style="background: var(--surface,#fff);"></div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('geradores_elite.static', filename='engine_final.js') }}"></script>
+{% endblock %}

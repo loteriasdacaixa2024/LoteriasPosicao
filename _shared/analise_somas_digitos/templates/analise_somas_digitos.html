@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    #asd-root .asd-kpi {
+        background: var(--surface, #fff);
+        border: 1px solid rgba(192,139,0,.22);
+        border-radius: 10px;
+        padding: .65rem .85rem;
+        height: 100%;
+    }
+    #asd-root .asd-kpi .lbl {
+        font-size: .7rem; font-weight: 700; color: #6c757d; text-transform: uppercase;
+    }
+    #asd-root .asd-kpi .val {
+        font-size: 1.15rem; font-weight: 800; color: var(--primary-xdark);
+    }
+    #asd-root .asd-table {
+        font-size: .85rem;
+    }
+    #asd-root .asd-table thead th {
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    #asd-root .asd-table td {
+        text-align: center;
+        vertical-align: middle;
+    }
+    #asd-root .asd-table tbody tr.asd-top {
+        background: rgba(25, 135, 84, .12);
+        font-weight: 700;
+    }
+    #asd-root .asd-table tbody tr.asd-top td:first-child::before {
+        content: "★ ";
+        color: #198754;
+    }
+    #asd-root .asd-badge-rec {
+        display: inline-block;
+        font-size: .72rem;
+        font-weight: 800;
+        padding: .2rem .55rem;
+        border-radius: 6px;
+        background: #198754;
+        color: #fff;
+    }
+    #asd-root .janela-btn.active,
+    #asd-root .base-tab-btn.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+        font-weight: 700;
+    }
+    #asd-root .nav-tabs .nav-link.active {
+        font-weight: 800;
+        color: var(--primary-xdark);
+        border-bottom-color: var(--primary);
+    }
+    #asd-root .asd-hint {
+        font-size: .8rem;
+        color: #6c757d;
+        border-left: 3px solid var(--accent, #ffd54f);
+        padding: .35rem .65rem;
+        background: var(--accent-light);
+    }
+</style>
+
+<div class="container-fluid py-3" id="asd-root"
+     data-api="{{ api_base }}"
+     data-construtor="{{ '1' if construtor_habilitado else '0' }}">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1"><i class="fas fa-calculator text-primary"></i> {{ page_title }}</h1>
+            <p class="text-muted small mb-0">{{ page_subtitle }} — {{ modality_nome }}</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="badge bg-secondary" id="asdLblBase">Geral</span>
+            <span class="badge bg-light text-dark border" id="asdLblJanela">Janela</span>
+            <span class="badge bg-light text-dark border" id="asdLblUltimo">—</span>
+            {% if construtor_habilitado %}
+            <a class="btn btn-sm btn-outline-success" href="{{ construtor_url }}">
+                <i class="fas fa-layer-group"></i> Construtor
+            </a>
+            {% endif %}
+            <a class="btn btn-sm btn-outline-primary" href="{{ gerador_elite_url }}">
+                <i class="fas fa-brain"></i> Geradores Elite
+            </a>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        <span class="small fw-bold text-muted me-1">Base:</span>
+        <div class="btn-group btn-group-sm" id="asdTabsBase">
+            <button type="button" class="btn btn-outline-secondary base-tab-btn active" data-base="geral">Geral</button>
+            <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="vencedores">Vencedores</button>
+            <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="acumulados">Acumulados</button>
+        </div>
+        <span class="small fw-bold text-muted ms-2 me-1">Janela:</span>
+        <div class="btn-group btn-group-sm" id="asdGrpJanela">
+            {% for j in estudos_ui.janelas %}
+            <button type="button" class="btn btn-outline-secondary janela-btn{% if j == estudos_ui.janela_default %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <p class="asd-hint mb-3">
+        Referência histórica = sorteios oficiais ({{ estudos_ui.sorteadas }} dezenas).
+        Use estas tabelas como guia ao montar o conjunto-base no Construtor.
+    </p>
+
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="asdTabSomas" data-bs-toggle="tab" data-bs-target="#asdPaneSomas" type="button" role="tab">
+                <i class="fas fa-plus-circle me-1"></i> Análise de Somas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="asdTabDigitos" data-bs-toggle="tab" data-bs-target="#asdPaneDigitos" type="button" role="tab">
+                <i class="fas fa-hashtag me-1"></i> Análise de Dígitos
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="asdPaneSomas" role="tabpanel">
+            <div class="row g-2 mb-3" id="asdKpisSomas"></div>
+            <div id="asdCorpoSomas"><p class="text-muted small">Carregando…</p></div>
+        </div>
+        <div class="tab-pane fade" id="asdPaneDigitos" role="tabpanel">
+            <div class="row g-2 mb-3" id="asdKpisDigitos"></div>
+            <div id="asdCorpoDigitos"><p class="text-muted small">Carregando…</p></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.__ASD_UI__ = {{ estudos_ui | tojson }};
+    window.__ASD_API__ = {{ api_base | tojson }};
+</script>
+<script src="/analise/somas-digitos/static/analise_somas_digitos.js"></script>
+{% endblock %}
