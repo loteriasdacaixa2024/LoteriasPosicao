@@ -339,6 +339,7 @@
                 <ol class="tb-howto-ol">
                   <li>O volante da <strong>esquerda</strong> é o resultado oficial (só referência — sem conferência de acertos).</li>
                   <li>No volante da <strong>direita</strong>, clique para marcar as dezenas da aposta do próximo concurso. Roxo = repetida do resultado.</li>
+                  <li>O <strong>select</strong> escolhe o concurso. <strong>▶ Auto</strong> percorre os resultados sozinho (~3 s), do concurso atual até o mais recente. <strong>⏸ Parar</strong> deixa o que estiver na tela.</li>
                   <li>As abas <strong>1 2 3…</strong> são os volantes. Use <strong>+1 / +5 / +10</strong> para incluir mais.</li>
                   <li><strong>Exportar</strong> baixa o TXT das apostas marcadas{% if extra_mes %} (com escolha do Mês da Sorte){% endif %}.</li>
                   <li>Apostas da Seção 10, se enviadas, aparecem <strong>abaixo</strong> — um volante por aposta, todos iguais na estrutura. Os volantes 1–10 de cima não mudam.</li>
@@ -371,10 +372,14 @@
               <div class="tb-cmp-ticket tb-cmp-ticket-oficial">
                 <div class="tb-cmp-head">
                   <div class="tb-cmp-col-title">Resultado</div>
-                  <label class="visually-hidden" for="tbCmpConcSelect">Concurso</label>
-                  <select class="form-select form-select-sm tb-cmp-conc-select" id="tbCmpConcSelect">
-                    <option value="">— carregando —</option>
-                  </select>
+                  <div class="tb-cmp-conc-row">
+                    <label class="visually-hidden" for="tbCmpConcSelect">Concurso</label>
+                    <select class="form-select form-select-sm tb-cmp-conc-select" id="tbCmpConcSelect">
+                      <option value="">— carregando —</option>
+                    </select>
+                    <button type="button" class="tb-cmp-play" id="tbCmpPlay" aria-pressed="false"
+                            title="Percorrer os resultados automaticamente (≈ 3 s)">▶ Auto</button>
+                  </div>
                   <div class="tb-cmp-conc-lbl" id="tbCmpConcLbl">CONCURSO —</div>
                 </div>
                 <div id="tbCmpOficialVolante"></div>

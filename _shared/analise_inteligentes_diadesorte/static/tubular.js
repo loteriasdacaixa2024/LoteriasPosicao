@@ -302,6 +302,8 @@
     this._cmpUid = 0;
     this.cmpVolantes = [];
     this.cmpOficialContest = null;
+    this.cmpPlaying = false;
+    this._cmpPlayTimer = null;
     this.cmpActiveId = null;
     this.s10VolPreview = null;
     this._bind();
@@ -641,10 +643,12 @@
     });
     r.querySelector('#tbCmpExport')?.addEventListener('click', () => this.exportComparador());
     r.querySelector('#tbCmpConcSelect')?.addEventListener('change', () => {
+      this.stopCmpPlay();
       const v = r.querySelector('#tbCmpConcSelect')?.value;
       this.cmpOficialContest = v ? parseInt(v, 10) : null;
       this.renderComparador();
     });
+    r.querySelector('#tbCmpPlay')?.addEventListener('click', () => this.toggleCmpPlay());
     r.querySelector('#tbSecao12')?.addEventListener('click', (ev) => this._onCmpVolanteClick(ev));
     r.querySelector('#tbCmpMesCancel')?.addEventListener('click', () => this._closeCmpMesModal());
     r.querySelector('#tbCmpMesOk')?.addEventListener('click', () => this._confirmCmpExport());
@@ -716,6 +720,7 @@
       this._fillConferir11Select();
       this.renderManual(11);
     }
+    if (key !== 's12') this.stopCmpPlay();
     if (key === 's12') this.renderComparador();
   };
 
@@ -2952,7 +2957,9 @@
     const last = chrono.length ? String(chrono[0].contest) : '';
     const prev = sel.value || (this.cmpOficialContest != null ? String(this.cmpOficialContest) : '');
     const opts = chrono.map((c) => {
-      const extra = this._cmpExtraLabel(c);
+      const extra = (this.extraMes && c.monthName)
+        ? this._mesAbrev(c.monthName)
+        : this._cmpExtraLabel(c);
       const label = `#${c.contest}${c.date ? ' — ' + c.date : ''}${extra ? ' · ' + extra : ''}`;
       return `<option value="${esc(String(c.contest))}">${esc(label)}</option>`;
     });
@@ -2961,6 +2968,89 @@
     else if (last) sel.value = last;
     const v = parseInt(sel.value, 10);
     this.cmpOficialContest = Number.isFinite(v) ? v : null;
+  };
+
+  TubularApp.prototype._mesAbrev = function (name) {
+    const idx = MESES.indexOf(name);
+    if (idx >= 0) return MESES_ABREV[idx];
+    const s = String(name || '').trim();
+    return s ? s.slice(0, 3).toUpperCase() : '';
+  };
+
+  TubularApp.prototype._cmpMesBadgeHtml = function (name) {
+    if (!this.extraMes || !name) return '';
+    const abrev = this._mesAbrev(name);
+    if (!abrev) return '';
+    return `<span class="mes-cor tb-cmp-mes ${esc(this.mesClass(name))}" style="${this.mesStyle(name)}" title="${esc(name)}">${esc(abrev)}</span>`;
+  };
+
+  TubularApp.prototype._cmpSelectValues = function () {
+    const sel = this.root.querySelector('#tbCmpConcSelect');
+    if (!sel) return [];
+    return [...sel.options].map(o => o.value).filter(v => v !== '');
+  };
+
+  TubularApp.prototype._cmpPlaySeq = function () {
+    return this._cmpSelectValues().slice().sort((a, b) => Number(a) - Number(b));
+  };
+
+  TubularApp.prototype._showCmpContest = function (value) {
+    const sel = this.root.querySelector('#tbCmpConcSelect');
+    const s = String(value);
+    if (sel && [...sel.options].some(o => o.value === s)) sel.value = s;
+    const n = parseInt(s, 10);
+    this.cmpOficialContest = Number.isFinite(n) ? n : null;
+    this.renderComparador(true);
+  };
+
+  TubularApp.prototype.toggleCmpPlay = function () {
+    if (this.cmpPlaying) this.stopCmpPlay();
+    else this.startCmpPlay();
+  };
+
+  TubularApp.prototype.startCmpPlay = function () {
+    if (!this.root.querySelector('#tbCmpConcSelect')) return;
+    if (!this.root.querySelector('#tbCmpConcSelect').options.length) this._fillCmpConcSelect();
+    const seq = this._cmpPlaySeq();
+    if (seq.length < 2) return;
+    const cur = String(this.cmpOficialContest || '');
+    let i = seq.indexOf(cur);
+    if (i < 0 || i >= seq.length - 1) this._showCmpContest(seq[0]);
+    this.cmpPlaying = true;
+    this._syncCmpPlayBtn();
+    if (this._cmpPlayTimer) clearInterval(this._cmpPlayTimer);
+    this._cmpPlayTimer = setInterval(() => {
+      if (!this.cmpPlaying) return;
+      const seq2 = this._cmpPlaySeq();
+      const j = seq2.indexOf(String(this.cmpOficialContest || ''));
+      if (j < 0 || j >= seq2.length - 1) {
+        this.stopCmpPlay();
+        return;
+      }
+      this._showCmpContest(seq2[j + 1]);
+    }, 3000);
+  };
+
+  TubularApp.prototype.stopCmpPlay = function () {
+    if (this._cmpPlayTimer) {
+      clearInterval(this._cmpPlayTimer);
+      this._cmpPlayTimer = null;
+    }
+    this.cmpPlaying = false;
+    this._syncCmpPlayBtn();
+  };
+
+  TubularApp.prototype._syncCmpPlayBtn = function () {
+    const btn = this.root.querySelector('#tbCmpPlay');
+    const on = !!this.cmpPlaying;
+    this.root.querySelector('#tbCmpPair')?.classList.toggle('tb-cmp-playing', on);
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.classList.toggle('is-playing', on);
+    btn.textContent = on ? '⏸ Parar' : '▶ Auto';
+    btn.title = on
+      ? 'Parar a reprodução automática'
+      : 'Percorrer os resultados automaticamente (≈ 3 s)';
   };
 
   TubularApp.prototype._cmpVolanteHtml = function (selectedArr, opts) {
@@ -3022,14 +3112,21 @@
     const L = limitsFrom(this.root);
     const pick = this._cmpPickMax();
     const extraLbl = this._cmpExtraLabel(ofc);
+    const mesBadge = ofc ? this._cmpMesBadgeHtml(ofc.monthName) : '';
     const lbl = this.root.querySelector('#tbCmpConcLbl');
     const numsEl = this.root.querySelector('#tbCmpOficialNums');
     const volEl = this.root.querySelector('#tbCmpOficialVolante');
-    if (lbl) lbl.textContent = ofc ? `CONCURSO ${ofc.contest}` : 'CONCURSO —';
+    if (lbl) {
+      if (!ofc) lbl.textContent = 'CONCURSO —';
+      else lbl.innerHTML = `CONCURSO ${esc(String(ofc.contest))}${mesBadge ? ' · ' + mesBadge : ''}`;
+    }
     if (numsEl) {
-      numsEl.textContent = ofc
-        ? ofc.nums.map(fmt2).join(' ') + (extraLbl ? ' · ' + extraLbl : '')
-        : 'Sem resultado.';
+      if (!ofc) numsEl.textContent = 'Sem resultado.';
+      else {
+        const numsTxt = ofc.nums.map(fmt2).join(' ');
+        if (mesBadge) numsEl.innerHTML = numsTxt + ' · ' + mesBadge;
+        else numsEl.textContent = numsTxt + (extraLbl ? ' · ' + extraLbl : '');
+      }
     }
     if (volEl) volEl.innerHTML = this._cmpVolanteHtml(ofc ? ofc.nums : [], { oficialSet: ofcSet, interactive: false });
 
@@ -3064,6 +3161,7 @@
       }).join('');
     }
     this.renderS10VolPreview();
+    this._syncCmpPlayBtn();
   };
 
   TubularApp.prototype._onCmpVolanteClick = function (ev) {
@@ -3476,7 +3574,7 @@
     const dirtyN = prev.items.filter(it => this._s10VolDirty(it)).length;
     const tickets = prev.items.map((it, i) => {
       const n = (it.nums || []).slice().sort((a, b) => a - b);
-      const extra = (this.extraMes && it.monthName) ? ` · ${it.monthName}` : '';
+      const extra = (this.extraMes && it.monthName) ? ' · ' + this._cmpMesBadgeHtml(it.monthName) : '';
       const dirty = this._s10VolDirty(it);
       const volHtml = this._cmpVolanteHtml(n, {
         oficialSet: ofcSet,

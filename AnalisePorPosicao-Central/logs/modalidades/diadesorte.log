@@ -23262,3 +23262,74 @@ Press CTRL+C to quit
 127.0.0.1 - - [02/Sep/2026 18:38:23] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
 127.0.0.1 - - [02/Sep/2026 18:38:24] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
 127.0.0.1 - - [02/Sep/2026 18:38:26] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+
+--- iniciando 2026-09-02 18:59:24 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [02/Sep/2026 18:59:32] "GET / HTTP/1.1" 200 -
+D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'servicebus2.caixa.gov.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+D:\Loterias\LoteriasPosicao\VenvLoterias\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'servicebus2.caixa.gov.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+127.0.0.1 - - [02/Sep/2026 18:59:54] "GET /geradores-elite/escolha-tubular-apostas/?aba=comparador HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 18:59:54] "GET /analise/api/inteligentes/assets/tubular.js?v=20260902v16 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 18:59:54] "GET /analise/api/inteligentes/assets/tubular.css?v=20260902v16 HTTP/1.1" 200 -
+
+--- iniciando 2026-09-02 19:09:43 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [02/Sep/2026 19:09:54] "GET /geradores-elite/ciclo-apostas/?modo=recorrencia&n=6 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:09:54] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:09:55] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:09:57] "GET /geradores-elite/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:11:40] "GET /geradores-elite/escolha-tubular-apostas/?aba=comparador HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:11:41] "GET /analise/api/inteligentes/assets/tubular.js?v=20260902v16 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:11:41] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:11:41] "GET /analise/api/inteligentes/assets/tubular.css?v=20260902v16 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:11:41] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 304 -
+127.0.0.1 - - [02/Sep/2026 19:11:42] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:11:42] "GET /geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:11:42] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [02/Sep/2026 19:11:43] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -

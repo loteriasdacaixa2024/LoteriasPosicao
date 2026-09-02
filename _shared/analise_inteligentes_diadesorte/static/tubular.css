@@ -856,6 +856,49 @@
   min-height: 1.7rem;
   height: 1.7rem;
 }
+#ai-tubular-root .tb-cmp-conc-row {
+  display: flex;
+  align-items: center;
+  gap: .28rem;
+}
+#ai-tubular-root .tb-cmp-conc-row .tb-cmp-conc-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+#ai-tubular-root .tb-cmp-play {
+  flex: 0 0 auto;
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  padding: .12rem .4rem;
+  min-height: 1.7rem;
+  line-height: 1;
+  border: 1px solid rgba(192, 139, 0, .32);
+  background: #fffdf6;
+  color: #6b4f00;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#ai-tubular-root .tb-cmp-play:hover {
+  background: #fff3cd;
+  border-color: rgba(192, 139, 0, .5);
+}
+#ai-tubular-root .tb-cmp-play.is-playing {
+  background: #664a00;
+  color: #fffdf6;
+  border-color: #664a00;
+}
+#ai-tubular-root .tb-cmp-pair.tb-cmp-playing .tb-cmp-ticket-oficial {
+  box-shadow: 0 0 0 1px rgba(192, 139, 0, .28);
+}
+#ai-tubular-root .tb-cmp-mes {
+  min-width: 2.35rem;
+  padding: .04rem .28rem;
+  font-size: .62rem;
+  letter-spacing: .04em;
+  vertical-align: middle;
+}
 #ai-tubular-root .tb-cmp-conc-lbl {
   color: var(--primary, #6b4f00);
   font-size: .78rem;
@@ -863,7 +906,7 @@
   text-align: center;
   margin: .2rem 0 0;
   min-height: 1.15rem;
-  line-height: 1.15rem;
+  line-height: 1.35rem;
 }
 #ai-tubular-root .tb-cmp-head-spacer {
   visibility: hidden;
