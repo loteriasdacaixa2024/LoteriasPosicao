@@ -343,6 +343,7 @@
                   <li>As abas <strong>1 2 3…</strong> são os volantes. Use <strong>+1 / +5 / +10</strong> para incluir mais.</li>
                   <li><strong>Exportar</strong> baixa o TXT das apostas marcadas{% if extra_mes %} (com escolha do Mês da Sorte){% endif %}.</li>
                   <li>Apostas da Seção 10, se enviadas, aparecem <strong>abaixo</strong> — um volante por aposta, todos iguais na estrutura. Os volantes 1–10 de cima não mudam.</li>
+                  <li>Abaixo dos volantes: diagonais <strong>deste concurso</strong> e o Top 1–3 das duplas que mais saíram. A seta abre a tabela completa.</li>
                 </ol>
               </div>
             </details>
@@ -405,6 +406,33 @@
             <div class="tb-cmp-tabs-wrap">
               <div class="tb-cmp-tabs-lbl">Volantes</div>
               <div class="tb-cmp-tabs" id="tbCmpVolantes"></div>
+            </div>
+            <div class="tb-cmp-diag" id="tbCmpDiag">
+              <div class="tb-cmp-diag-now" id="tbCmpDiagNow"></div>
+              <div class="tb-cmp-diag-tops" id="tbCmpDiagTops"></div>
+              <p class="small text-muted tb-cmp-diag-cadence mb-2" id="tbCmpDiagCadence"></p>
+              <details class="tb-howto mb-0">
+                <summary>Mostrar análise das diagonais</summary>
+                <div class="tb-howto-body">
+                  <div class="table-responsive">
+                    <table class="tb-table tb-cmp-diag-table">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Segmento</th>
+                          <th>Dir.</th>
+                          <th>Tipo</th>
+                          <th>Vezes</th>
+                          <th>%</th>
+                          <th>Atraso</th>
+                          <th>Última</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tbCmpDiagBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </details>
             </div>
           </div>
           <div id="tbS10VolPreview" class="d-none" hidden></div>

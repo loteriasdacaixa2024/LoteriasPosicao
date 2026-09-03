@@ -1002,6 +1002,76 @@
   background: #9b59b6;
   border-color: #7d3c98;
 }
+#ai-tubular-root .tb-cmp-diag {
+  margin-top: .85rem;
+  padding-top: .75rem;
+  border-top: 1px dashed rgba(192, 139, 0, .35);
+  text-align: center;
+}
+#ai-tubular-root .tb-cmp-diag-now {
+  font-size: .78rem;
+  color: #4b5563;
+  margin-bottom: .45rem;
+}
+#ai-tubular-root .tb-cmp-diag-run {
+  font-family: ui-monospace, Consolas, monospace;
+  font-weight: 700;
+  color: #664a00;
+}
+#ai-tubular-root .tb-cmp-diag-tops {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .4rem .55rem;
+  margin-bottom: .35rem;
+}
+#ai-tubular-root .tb-cmp-diag-top {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 7.6rem;
+  padding: .28rem .55rem .32rem;
+  border: 1px solid rgba(192, 139, 0, .28);
+  border-radius: 6px;
+  background: #fffdf6;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #4a3b00;
+}
+#ai-tubular-root .tb-cmp-diag-top.is-now {
+  box-shadow: 0 0 0 1px rgba(192, 139, 0, .45);
+  background: #fff3cd;
+}
+#ai-tubular-root .tb-cmp-diag-top-n {
+  font-size: .58rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #9a7b00;
+  font-weight: 800;
+}
+#ai-tubular-root .tb-cmp-diag-top-seg {
+  font-family: ui-monospace, Consolas, monospace;
+}
+#ai-tubular-root .tb-cmp-diag-top-meta {
+  font-size: .62rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+#ai-tubular-root .tb-cmp-diag-cadence {
+  font-size: .72rem;
+  max-width: 52rem;
+  margin: .15rem auto .45rem;
+  line-height: 1.4;
+}
+#ai-tubular-root .tb-cmp-diag-table {
+  font-size: .72rem;
+  margin: 0 auto;
+  width: auto;
+  min-width: 28rem;
+}
+#ai-tubular-root .tb-cmp-diag-on td {
+  background: #fff3cd !important;
+}
 #ai-tubular-root .tb-howto > summary {
   cursor: pointer;
   list-style: none;

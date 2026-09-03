@@ -304,6 +304,7 @@
     this.cmpOficialContest = null;
     this.cmpPlaying = false;
     this._cmpPlayTimer = null;
+    this._diagStats = null;
     this.cmpActiveId = null;
     this.s10VolPreview = null;
     this._bind();
@@ -814,6 +815,7 @@
       });
       this._histMap = null;
       this._histMapN = -1;
+      this._diagStats = null;
       this._goLastPage();
       this.renderKpis();
       this.renderCondStats();
@@ -3053,6 +3055,19 @@
       : 'Percorrer os resultados automaticamente (≈ 3 s)';
   };
 
+  TubularApp.prototype._cmpVolanteRows = function () {
+    const L = limitsFrom(this.root);
+    const cols = L.volanteCols || 10;
+    if (L.dezenaMin === 1 && L.dezenaMax === 31) {
+      return [[1, 10], [11, 20], [21, 30], [31, 31]];
+    }
+    const out = [];
+    for (let d = L.dezenaMin; d <= L.dezenaMax; d += cols) {
+      out.push([d, Math.min(L.dezenaMax, d + cols - 1)]);
+    }
+    return out;
+  };
+
   TubularApp.prototype._cmpVolanteHtml = function (selectedArr, opts) {
     opts = opts || {};
     const L = limitsFrom(this.root);
@@ -3061,15 +3076,7 @@
     const interactive = !!opts.interactive;
     const vid = opts.vid;
     const cols = L.volanteCols || 10;
-    const rows = (L.dezenaMin === 1 && L.dezenaMax === 31)
-      ? [[1, 10], [11, 20], [21, 30], [31, 31]]
-      : (function () {
-          const out = [];
-          for (let d = L.dezenaMin; d <= L.dezenaMax; d += cols) {
-            out.push([d, Math.min(L.dezenaMax, d + cols - 1)]);
-          }
-          return out;
-        })();
+    const rows = this._cmpVolanteRows();
     let html = '<div class="tb-cmp-volante" role="' + (interactive ? 'group' : 'img') + '">';
     rows.forEach(([a, b]) => {
       const count = b - a + 1;
@@ -3162,6 +3169,231 @@
     }
     this.renderS10VolPreview();
     this._syncCmpPlayBtn();
+    this.renderCmpDiagonais();
+  };
+
+  TubularApp.prototype._diagDirSym = function (dir) {
+    return dir === 'down' ? '↘' : '↗';
+  };
+
+  TubularApp.prototype._diagDirTitle = function (dir) {
+    return dir === 'down' ? 'Descendente (menor → maior)' : 'Ascendente (vice-versa)';
+  };
+
+  TubularApp.prototype._diagLines = function () {
+    const rows = this._cmpVolanteRows();
+    const down = new Map();
+    const up = new Map();
+    rows.forEach(([a, b], r) => {
+      for (let d = a; d <= b; d++) {
+        const c = d - a;
+        const kd = c - r;
+        const ku = c + r;
+        if (!down.has(kd)) down.set(kd, []);
+        if (!up.has(ku)) up.set(ku, []);
+        down.get(kd).push({ n: d, r, c });
+        up.get(ku).push({ n: d, r, c });
+      }
+    });
+    const lines = [];
+    const flushMap = (map, dir) => {
+      map.forEach((arr) => {
+        arr.sort((x, y) => x.r - y.r);
+        let run = [];
+        arr.forEach((cell) => {
+          if (!run.length || cell.r === run[run.length - 1].r + 1) run.push(cell);
+          else {
+            if (run.length >= 2) lines.push({ dir, nums: run.map(x => x.n) });
+            run = [cell];
+          }
+        });
+        if (run.length >= 2) lines.push({ dir, nums: run.map(x => x.n) });
+      });
+    };
+    flushMap(down, 'down');
+    flushMap(up, 'up');
+    return lines;
+  };
+
+  TubularApp.prototype._diagSegmentsFromLines = function (lines) {
+    const segs = [];
+    (lines || []).forEach((line) => {
+      const ns = line.nums || [];
+      for (let len = 2; len <= 3; len++) {
+        for (let i = 0; i + len <= ns.length; i++) {
+          const slice = ns.slice(i, i + len);
+          segs.push({
+            key: line.dir + ':' + slice.join('-'),
+            dir: line.dir,
+            nums: slice,
+            tipo: len === 2 ? 'dupla' : 'diag3',
+          });
+        }
+      }
+    });
+    return segs;
+  };
+
+  TubularApp.prototype._diagRunsInDraw = function (set, lines) {
+    const runs = [];
+    (lines || []).forEach((line) => {
+      let cur = [];
+      (line.nums || []).forEach((n) => {
+        if (set.has(n)) cur.push(n);
+        else {
+          if (cur.length >= 2) runs.push({ dir: line.dir, nums: cur.slice() });
+          cur = [];
+        }
+      });
+      if (cur.length >= 2) runs.push({ dir: line.dir, nums: cur.slice() });
+    });
+    runs.sort((a, b) => b.nums.length - a.nums.length || a.dir.localeCompare(b.dir));
+    return runs;
+  };
+
+  TubularApp.prototype._ensureDiagStats = function () {
+    const lines = this._diagLines();
+    const chrono = (this.data || []).slice().sort((a, b) => (+a.contest || 0) - (+b.contest || 0));
+    const sig = String(chrono.length) + ':' + lines.map(l => l.dir + l.nums.join(',')).join('|');
+    if (this._diagStats && this._diagStats.sig === sig) return this._diagStats;
+    const segs = this._diagSegmentsFromLines(lines);
+    const byKey = {};
+    segs.forEach((s) => {
+      byKey[s.key] = { key: s.key, dir: s.dir, nums: s.nums, tipo: s.tipo, vezes: 0, last: null, lastIdx: -1 };
+    });
+    let nDupla = 0;
+    let nDiag3 = 0;
+    let nX = 0;
+    const idx3 = [];
+    chrono.forEach((c, i) => {
+      const nums = (c.numbersAscending || c.numbersDrawOrder || []).map(Number).filter(Number.isFinite);
+      const set = new Set(nums);
+      const runs = this._diagRunsInDraw(set, lines);
+      if (runs.some(r => r.nums.length >= 2)) nDupla += 1;
+      if (runs.some(r => r.nums.length >= 3)) {
+        nDiag3 += 1;
+        idx3.push(i);
+      }
+      if (runs.some(r => r.dir === 'down') && runs.some(r => r.dir === 'up')) nX += 1;
+      segs.forEach((s) => {
+        if (s.nums.every(x => set.has(x))) {
+          const st = byKey[s.key];
+          st.vezes += 1;
+          st.last = c.contest;
+          st.lastIdx = i;
+        }
+      });
+    });
+    const total = chrono.length;
+    const ranking = Object.keys(byKey).map((k) => {
+      const st = byKey[k];
+      return {
+        ...st,
+        pct: total ? (100 * st.vezes / total) : 0,
+        atraso: st.lastIdx < 0 ? total : (total - 1 - st.lastIdx),
+      };
+    }).sort((a, b) => b.vezes - a.vezes || a.atraso - b.atraso || a.key.localeCompare(b.key));
+    let cadence = 0;
+    if (idx3.length >= 2) {
+      let sum = 0;
+      for (let i = 1; i < idx3.length; i++) sum += idx3[i] - idx3[i - 1];
+      cadence = sum / (idx3.length - 1);
+    }
+    this._diagStats = {
+      sig,
+      lines,
+      ranking,
+      duplas: ranking.filter(x => x.tipo === 'dupla'),
+      n: total,
+      nDupla,
+      nDiag3,
+      nX,
+      cadence,
+      last3: idx3.length ? (total - 1 - idx3[idx3.length - 1]) : total,
+    };
+    return this._diagStats;
+  };
+
+  TubularApp.prototype._diagFmtPct = function (n) {
+    return (Math.round(n * 10) / 10).toFixed(1).replace('.', ',');
+  };
+
+  TubularApp.prototype.renderCmpDiagonais = function () {
+    const box = this.root.querySelector('#tbCmpDiag');
+    if (!box) return;
+    const stats = this._ensureDiagStats();
+    const ofc = this._cmpOficialEntry();
+    const set = ofc ? new Set(ofc.nums || []) : new Set();
+    const runs = ofc ? this._diagRunsInDraw(set, stats.lines) : [];
+    const now = this.root.querySelector('#tbCmpDiagNow');
+    if (now) {
+      if (!ofc) now.innerHTML = '<span class="text-muted">Este concurso: —</span>';
+      else if (!runs.length) now.innerHTML = '<span class="text-muted">Este concurso: sem diagonal 2+</span>';
+      else {
+        const bits = runs.slice(0, 8).map((r) => {
+          const sym = this._diagDirSym(r.dir);
+          return `<span class="tb-cmp-diag-run" title="${esc(this._diagDirTitle(r.dir))}">${sym} ${r.nums.map(fmt2).join('-')}</span>`;
+        });
+        now.innerHTML = 'Este concurso: ' + bits.join(' · ');
+      }
+    }
+    const tops = this.root.querySelector('#tbCmpDiagTops');
+    if (tops) {
+      const top3 = (stats.duplas || []).slice(0, 3);
+      tops.innerHTML = top3.length
+        ? top3.map((s, i) => {
+            const on = s.nums.every(x => set.has(x));
+            const sym = this._diagDirSym(s.dir);
+            return `<span class="tb-cmp-diag-top${on ? ' is-now' : ''}" title="${esc(this._diagDirTitle(s.dir))}">
+              <span class="tb-cmp-diag-top-n">Top ${i + 1}</span>
+              <span class="tb-cmp-diag-top-seg">${sym} ${s.nums.map(fmt2).join('-')}</span>
+              <span class="tb-cmp-diag-top-meta">${s.vezes}× · atraso ${s.atraso}</span>
+            </span>`;
+          }).join('')
+        : '<span class="text-muted">Sem duplas diagonais no histórico.</span>';
+    }
+    const cad = this.root.querySelector('#tbCmpDiagCadence');
+    if (cad) {
+      const n = stats.n || 0;
+      if (!n) cad.textContent = '';
+      else {
+        const cada2 = stats.nDupla ? n / stats.nDupla : 0;
+        const cada3 = stats.nDiag3 ? n / stats.nDiag3 : 0;
+        const bits = [
+          `Em ${n} concursos: dupla ${stats.nDupla}×` + (stats.nDupla ? ` (a cada ~${this._diagFmtPct(cada2)})` : ''),
+          `diagonal de 3: ${stats.nDiag3}×` + (stats.nDiag3 ? ` (a cada ~${this._diagFmtPct(cada3)}` + (stats.cadence ? `, intervalo médio ${this._diagFmtPct(stats.cadence)}` : '') + ')' : ''),
+          `X (as duas direções): ${stats.nX}×`,
+        ];
+        if (stats.nDiag3) bits.push(`última diag. 3 há ${stats.last3} concurso(s)`);
+        cad.textContent = bits.join('. ') + '.';
+      }
+    }
+    const body = this.root.querySelector('#tbCmpDiagBody');
+    if (body) {
+      if (body.getAttribute('data-diag-sig') !== stats.sig) {
+        body.innerHTML = (stats.ranking || []).map((s, i) => {
+          const sym = this._diagDirSym(s.dir);
+          const tipo = s.tipo === 'dupla' ? 'Dupla' : 'Diagonal 3';
+          const on = s.nums.every(x => set.has(x));
+          return `<tr data-diag-nums="${s.nums.join(',')}" class="${on ? 'tb-cmp-diag-on' : ''}">
+            <td>${i + 1}</td>
+            <td class="tb-align-mono">${sym} ${s.nums.map(fmt2).join('-')}</td>
+            <td>${s.dir === 'down' ? '↘' : '↗'}</td>
+            <td>${tipo}</td>
+            <td>${s.vezes}</td>
+            <td>${this._diagFmtPct(s.pct)}%</td>
+            <td>${s.vezes ? s.atraso : '—'}</td>
+            <td>${s.last != null ? '#' + s.last : '—'}</td>
+          </tr>`;
+        }).join('');
+        body.setAttribute('data-diag-sig', stats.sig);
+      } else {
+        body.querySelectorAll('tr[data-diag-nums]').forEach((tr) => {
+          const ns = String(tr.getAttribute('data-diag-nums') || '').split(',').map(Number).filter(Number.isFinite);
+          tr.classList.toggle('tb-cmp-diag-on', ns.length > 0 && ns.every(x => set.has(x)));
+        });
+      }
+    }
   };
 
   TubularApp.prototype._onCmpVolanteClick = function (ev) {
