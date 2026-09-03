@@ -112,12 +112,65 @@
   border: 1px solid rgba(0,0,0,.08); border-radius: 999px;
   padding: .35rem .9rem; margin: 0 .15rem .35rem 0;
   background: #fff;
+  display: inline-flex; align-items: center; gap: .4rem;
 }
 #get-hub .get-hub-tabs .nav-link.active {
   background: var(--primary); color: #fff; border-color: var(--primary);
 }
 #get-hub .get-hub-tabs .nav-link:hover:not(.active) {
   border-color: var(--primary); color: var(--primary);
+}
+#get-hub .get-hub-tag {
+  display: inline-block;
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: .22rem .38rem;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+/* Dia de Sorte #D4B31A — Gerar = ouro cheio; Análise = ouro claro */
+#get-hub .get-hub-tag-gerar {
+  background: #d4b31a; /* 47% principal */
+  color: #171303;      /* 5% */
+  border: 1px solid #b69816; /* 40% */
+}
+#get-hub .get-hub-tag-analise {
+  background: #fcf9e8; /* 95% */
+  color: #887211;      /* 30% */
+  border: 1px solid #eed877; /* 70% */
+}
+#get-hub .get-hub-tabs .nav-link.active .get-hub-tag-gerar {
+  background: #f9f2d2; /* 90% */
+  color: #2d2606;      /* 10% */
+  border-color: #f4e5a4; /* 80% */
+}
+#get-hub .get-hub-tabs .nav-link.active .get-hub-tag-analise {
+  background: #5b4c0b; /* 20% */
+  color: #f9f2d2;      /* 90% */
+  border-color: #887211; /* 30% */
+}
+#get-hub .get-hub-legenda {
+  font-size: .72rem;
+  color: #715f0e; /* 25% */
+  text-align: center;
+  margin: -.35rem 0 .85rem;
+}
+/* Atalhos na cor da modalidade (não azul Bootstrap) */
+#get-hub .tb-btn-mod,
+#ai-tubular-root .tb-btn-mod {
+  background: transparent;
+  color: var(--primary, #d4b31a);
+  border: 1px solid var(--primary, #d4b31a);
+  font-weight: 700;
+}
+#get-hub .tb-btn-mod:hover,
+#ai-tubular-root .tb-btn-mod:hover {
+  background: var(--primary, #d4b31a);
+  color: #171303;
+  border-color: var(--primary-xdark, #b69816);
 }
 </style>
 
@@ -126,17 +179,44 @@
     <a class="btn btn-sm btn-outline-secondary" href="{{ escolha_url }}"><i class="fas fa-sliders-h"></i> Escolha Visual</a>
     <a class="btn btn-sm btn-outline-secondary" href="{{ sequencias_url or '/analise/analises-inteligentes/?aba=tubular' }}"><i class="fas fa-table"></i> Sequências (Análise)</a>
     <a class="btn btn-sm btn-outline-secondary" href="{{ tubular_url }}"><i class="fas fa-chart-line"></i> Análise Tubular</a>
+    <a class="btn btn-sm tb-btn-mod" href="/analise/comparar-concursos/"><i class="fas fa-columns"></i> Comparar concursos</a>
     <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-brain"></i> Elite</a>
   </div>
 
-  <ul class="nav get-hub-tabs mb-3 flex-wrap justify-content-center" role="tablist">
-    <li class="nav-item"><button type="button" class="nav-link{% if (aba_inicial or 'escolha') == 'escolha' %} active{% endif %}" data-get-hub="escolha">Escolha/Tubular</button></li>
-    <li class="nav-item"><button type="button" class="nav-link{% if aba_inicial == 'manual' %} active{% endif %}" data-get-hub="manual">Seção 10 — Manual</button></li>
-    <li class="nav-item"><button type="button" class="nav-link{% if aba_inicial == 'automatico' %} active{% endif %}" data-get-hub="automatico">Seção 11 — Automático</button></li>
-    <li class="nav-item"><button type="button" class="nav-link{% if aba_inicial == 'comparador' %} active{% endif %}" data-get-hub="comparador">Seção 12 — Volantes</button></li>
+  <ul class="nav get-hub-tabs mb-2 flex-wrap justify-content-center" role="tablist">
+    <li class="nav-item">
+      <button type="button" class="nav-link{% if (aba_inicial or 'escolha') == 'escolha' %} active{% endif %}" data-get-hub="escolha" title="Gera apostas">
+        <span class="get-hub-tag get-hub-tag-gerar">Gerar</span> Escolha/Tubular
+      </button>
+    </li>
+    <li class="nav-item">
+      <button type="button" class="nav-link{% if aba_inicial == 'manual' %} active{% endif %}" data-get-hub="manual" title="Não gera — monta/importa e analisa apostas">
+        <span class="get-hub-tag get-hub-tag-analise">Análise</span> Seção 10 — Manual
+      </button>
+    </li>
+    <li class="nav-item">
+      <button type="button" class="nav-link{% if aba_inicial == 'automatico' %} active{% endif %}" data-get-hub="automatico" title="Gera apostas">
+        <span class="get-hub-tag get-hub-tag-gerar">Gerar</span> Seção 11 — Automático
+      </button>
+    </li>
+    <li class="nav-item">
+      <button type="button" class="nav-link{% if aba_inicial == 'comparador' %} active{% endif %}" data-get-hub="comparador" title="Não gera — compara no volante e analisa diagonais">
+        <span class="get-hub-tag get-hub-tag-analise">Análise</span> Seção 12 — Volantes
+      </button>
+    </li>
+    <li class="nav-item">
+      <button type="button" class="nav-link{% if aba_inicial == 'diagonais' %} active{% endif %}" data-get-hub="diagonais" title="Gera apostas pela regra das diagonais">
+        <span class="get-hub-tag get-hub-tag-gerar">Gerar</span> Seção 13 — Diagonais
+      </button>
+    </li>
   </ul>
+  <p class="get-hub-legenda mb-3">
+    <span class="get-hub-tag get-hub-tag-gerar">Gerar</span> monta apostas
+    ·
+    <span class="get-hub-tag get-hub-tag-analise">Análise</span> não gera (só monta/conferência/estudo)
+  </p>
 
-  <div id="get-hub-escolha"{% if aba_inicial in ('manual', 'automatico', 'comparador') %} class="d-none"{% endif %}>
+  <div id="get-hub-escolha"{% if aba_inicial in ('manual', 'automatico', 'comparador', 'diagonais') %} class="d-none"{% endif %}>
 <div id="get-root" data-api="{{ api_base }}"
      data-dmin="{{ ctx.dezena_min or dezena_min or 1 }}" data-dmax="{{ ctx.dezena_max or dezena_max or 31 }}"
      data-vcols="{{ ctx.volante_cols or 10 }}">
@@ -309,7 +389,7 @@
   </div>{# /get-hub-escolha #}
 
   <div id="ai-tubular-root"
-       class="{% if aba_inicial not in ('manual', 'automatico', 'comparador') %}d-none {% endif %}"
+       class="{% if aba_inicial not in ('manual', 'automatico', 'comparador', 'diagonais') %}d-none {% endif %}"
        data-mode="elite-gen"
        data-api="{{ tubular_api_base or '/analise/api/inteligentes' }}"
        data-meses-cores='{{ (meses_cores or {})|tojson }}'
@@ -322,9 +402,10 @@
        data-pick-default="{{ ctx.pick_default or sorteadas or 7 }}"
        data-pick-max="{{ ctx.pick_max or 15 }}"
        data-volante-cols="{{ ctx.volante_cols or 10 }}"
-       data-initial-sub="{{ 's11' if aba_inicial == 'automatico' else ('s12' if aba_inicial == 'comparador' else 's10') }}">
-    {% set show_s10_first = aba_inicial not in ('automatico', 'comparador') %}
+       data-initial-sub="{{ 's11' if aba_inicial == 'automatico' else ('s13' if aba_inicial == 'diagonais' else ('s12' if aba_inicial == 'comparador' else 's10')) }}">
+    {% set show_s10_first = aba_inicial not in ('automatico', 'comparador', 'diagonais') %}
     {% set show_s12_first = aba_inicial == 'comparador' %}
+    {% set show_s13_first = aba_inicial == 'diagonais' %}
     {% set show_comparador_volante = true %}
     {% set sorteadas = sorteadas or ctx.sorteadas or 7 %}
     {% set extra_mes = extra_mes or (ctx.extra_mes if ctx is defined else false) %}
@@ -334,7 +415,7 @@
   </div>
 </div>{# /get-hub #}
 
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260902v17">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v21">
 <style>
   :root {
     --cor-sequencia-1: #86efac;
@@ -352,7 +433,7 @@
   {% endfor %}
   {% endif %}
 </style>
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260902v17"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260903v20"></script>
 <script>
 (function () {
   const hub = document.getElementById('get-hub');
@@ -367,8 +448,20 @@
     if (!isEscolha && window.AiTubular) {
       const sub = key === 'automatico' ? 's11'
         : key === 'comparador' ? 's12'
+        : key === 'diagonais' ? 's13'
         : 's10';
       window.AiTubular.showSub(sub);
+    } else if (!isEscolha) {
+      // tubular.js pode ainda não ter feito boot — reaplica assim que AiTubular existir
+      const sub = key === 'automatico' ? 's11'
+        : key === 'comparador' ? 's12'
+        : key === 'diagonais' ? 's13'
+        : 's10';
+      const tryShow = () => {
+        if (window.AiTubular) window.AiTubular.showSub(sub);
+        else setTimeout(tryShow, 40);
+      };
+      setTimeout(tryShow, 0);
     }
     if (pushUrl !== false) {
       try {
@@ -387,6 +480,7 @@
     const key = (q === 'manual' || q === 's10') ? 'manual'
       : (q === 'automatico' || q === 'auto' || q === 's11') ? 'automatico'
       : (q === 'comparador' || q === 's12' || q === 'volante' || q === 'volantes') ? 'comparador'
+      : (q === 'diagonais' || q === 'diagonal' || q === 's13') ? 'diagonais'
       : 'escolha';
     setHub(key, false);
   } catch (_) {}

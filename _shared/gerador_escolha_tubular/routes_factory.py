@@ -53,6 +53,8 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
             aba_inicial = "automatico"
         elif aba_raw in ("comparador", "s12", "secao12", "seção12", "secao-12", "volante", "volantes"):
             aba_inicial = "comparador"
+        elif aba_raw in ("diagonais", "diagonal", "s13", "secao13", "seção13", "secao-13"):
+            aba_inicial = "diagonais"
         else:
             aba_inicial = "escolha"
         return render_template(
@@ -60,7 +62,7 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
             modality_key=modality_key,
             modality_nome=modality_nome,
             page_title="Escolha/Tubular → Apostas",
-            page_subtitle="Escolha Visual · Seção 10 Manual · Seção 11 Automático",
+            page_subtitle="Escolha Visual · Seção 10 Manual · Seção 11 Automático · Seção 12 Volantes · Seção 13 Diagonais",
             api_base="/geradores-elite/api/escolha-tubular",
             tubular_api_base="/analise/api/inteligentes",
             ctx=ctx,

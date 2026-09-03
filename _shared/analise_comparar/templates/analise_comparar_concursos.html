@@ -483,11 +483,43 @@
     }
     .cv-hide:hover { color: var(--primary); }
     .cv-sublbl { font-size: .68rem; font-weight: 800; color: #888; min-width: 1.6rem; }
+    .tb-btn-mod {
+        background: transparent;
+        color: var(--primary, #d4b31a);
+        border: 1px solid var(--primary, #d4b31a);
+        font-weight: 700;
+    }
+    .tb-btn-mod:hover {
+        background: var(--primary, #d4b31a);
+        color: #171303;
+        border-color: var(--primary-xdark, #b69816);
+    }
+    .comp-crosslink {
+        background: #fcf9e8;
+        border: 1px solid #eed877;
+        border-radius: 10px;
+        padding: .65rem .9rem;
+        margin-bottom: 1rem;
+        display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem;
+    }
+    .comp-crosslink .small { color: #715f0e; }
 </style>
 
 <div class="page-hdr">
     <h2 class="h4 mb-1"><i class="fas fa-columns me-2"></i>Comparar concursos — {{ cfg.nome }}</h2>
     <p class="mb-0 small opacity-90">{{ cfg.subtitle }} · só sorteios reais</p>
+</div>
+
+<div class="comp-crosslink">
+    <span class="small">
+        <i class="fas fa-ticket-alt me-1"></i>
+        Para marcar apostas no volante e analisar diagonais, use
+    </span>
+    <a class="btn btn-sm tb-btn-mod"
+       href="/geradores-elite/escolha-tubular-apostas/?aba=comparador"
+       title="Abrir Seção 12 — Comparador de apostas no volante">
+        <i class="fas fa-th me-1"></i>Escolha Tubular — Volantes
+    </a>
 </div>
 
 <ul class="nav nav-tabs mb-3" id="compAbas" role="tablist">

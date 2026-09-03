@@ -3,10 +3,11 @@
 {% set extra_mes = extra_mes if extra_mes is defined else (ctx.get('extra_mes', false) if ctx is defined else false) %}
 {% set show_s10_first = show_s10_first if show_s10_first is defined else true %}
 {% set show_s12_first = show_s12_first if show_s12_first is defined else false %}
+{% set show_s13_first = show_s13_first if show_s13_first is defined else false %}
 {% set show_comparador_volante = show_comparador_volante if show_comparador_volante is defined else false %}
 {% set sorteadas = sorteadas|int %}
         <!-- Seção 10 — MANUAL -->
-        <div data-tb-panel="s10" class="{{ '' if show_s10_first and not show_s12_first else 'd-none' }}">
+        <div data-tb-panel="s10" class="{{ '' if show_s10_first and not show_s12_first and not show_s13_first else 'd-none' }}">
           <div class="tb-card">
             <h2 class="h5 fw-bold">📝 SEÇÃO 10 — MANUAL <span class="badge bg-secondary ms-1">ordem crescente</span></h2>
             <details class="tb-howto mb-2">
@@ -113,7 +114,7 @@
         </div>
 
         <!-- Seção 11 — AUTOMÁTICO -->
-        <div data-tb-panel="s11" class="{{ 'd-none' if (show_s10_first or show_s12_first) else '' }}">
+        <div data-tb-panel="s11" class="{{ 'd-none' if (show_s10_first or show_s12_first or show_s13_first) else '' }}">
           <div class="tb-card">
             <h2 class="h5 fw-bold">⚡ SEÇÃO 11 — AUTOMÁTICO
               <span class="badge bg-primary ms-1" id="tbAuto11Badge">janela 10</span>
@@ -332,7 +333,14 @@
         <!-- Seção 12 — Comparador de Apostas no Volante (independente das Seções 10 e 11) -->
         <div data-tb-panel="s12" id="tbSecao12" class="{{ '' if show_s12_first else 'd-none' }}">
           <div class="tb-card tb-cmp-card">
-            <h2 class="h5 fw-bold">🎯 SEÇÃO 12 — COMPARADOR DE APOSTAS NO VOLANTE</h2>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+              <h2 class="h5 fw-bold mb-0">🎯 SEÇÃO 12 — COMPARADOR DE APOSTAS NO VOLANTE</h2>
+              <a class="btn btn-sm tb-btn-mod"
+                 href="/analise/comparar-concursos/"
+                 title="Abrir Comparar concursos (análise de dois sorteios lado a lado)">
+                <i class="fas fa-columns me-1"></i>Comparar concursos
+              </a>
+            </div>
             <details class="tb-howto mb-2">
               <summary>Como usar</summary>
               <div class="tb-howto-body">
@@ -343,7 +351,7 @@
                   <li>As abas <strong>1 2 3…</strong> são os volantes. Use <strong>+1 / +5 / +10</strong> para incluir mais.</li>
                   <li><strong>Exportar</strong> baixa o TXT das apostas marcadas{% if extra_mes %} (com escolha do Mês da Sorte){% endif %}.</li>
                   <li>Apostas da Seção 10, se enviadas, aparecem <strong>abaixo</strong> — um volante por aposta, todos iguais na estrutura. Os volantes 1–10 de cima não mudam.</li>
-                  <li>Abaixo dos volantes: diagonais <strong>deste concurso</strong> e o Top 1–3 das duplas que mais saíram. A seta abre a tabela completa.</li>
+                  <li>Abaixo dos volantes: diagonais <strong>deste concurso</strong>, Top 1–3, insight e a seta abre o ranking + log do 1º ao atual (uma linha por diagonal).</li>
                 </ol>
               </div>
             </details>
@@ -411,31 +419,174 @@
               <div class="tb-cmp-diag-now" id="tbCmpDiagNow"></div>
               <div class="tb-cmp-diag-tops" id="tbCmpDiagTops"></div>
               <p class="small text-muted tb-cmp-diag-cadence mb-2" id="tbCmpDiagCadence"></p>
-              <details class="tb-howto mb-0">
+              <details class="tb-howto mb-0 tb-cmp-diag-details">
                 <summary>Mostrar análise das diagonais</summary>
-                <div class="tb-howto-body">
-                  <div class="table-responsive">
-                    <table class="tb-table tb-cmp-diag-table">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Segmento</th>
-                          <th>Dir.</th>
-                          <th>Tipo</th>
-                          <th>Vezes</th>
-                          <th>%</th>
-                          <th>Atraso</th>
-                          <th>Última</th>
-                        </tr>
-                      </thead>
-                      <tbody id="tbCmpDiagBody"></tbody>
-                    </table>
+                <div class="tb-howto-body tb-cmp-diag-panel">
+                  <div class="tb-cmp-diag-insights" id="tbCmpDiagInsights"></div>
+                  <div class="tb-cmp-diag-block">
+                    <h3 class="tb-cmp-diag-h">Ranking TOP — segmentos mais frequentes</h3>
+                    <p class="small text-muted tb-cmp-diag-hint mb-1">Frequência no histórico. Clique numa linha para ir à última ocorrência e destacar no volante.</p>
+                    <div class="tb-cmp-diag-scroll tb-cmp-diag-scroll-rank">
+                      <table class="tb-table tb-cmp-diag-table tb-cmp-diag-table-wide">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Segmento</th>
+                            <th>Direção</th>
+                            <th>Tipo</th>
+                            <th>Vezes</th>
+                            <th>%</th>
+                            <th>Atraso</th>
+                            <th>Última</th>
+                          </tr>
+                        </thead>
+                        <tbody id="tbCmpDiagBody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="tb-cmp-diag-block">
+                    <h3 class="tb-cmp-diag-h">Diagonais por concurso (1º → atual)</h3>
+                    <p class="small text-muted tb-cmp-diag-hint mb-1" id="tbCmpDiagLogMeta"></p>
+                    <p class="small text-muted tb-cmp-diag-hint mb-1">Cada diagonal em sua linha (várias por concurso). Direção pela geometria do volante. Clique para selecionar o concurso e destacar o segmento.</p>
+                    <div class="tb-cmp-diag-scroll tb-cmp-diag-scroll-log">
+                      <table class="tb-table tb-cmp-diag-table tb-cmp-diag-table-wide">
+                        <thead>
+                          <tr>
+                            <th>Concurso</th>
+                            <th>Segmento</th>
+                            <th>Direção</th>
+                            <th>Tipo</th>
+                            <th>Vezes</th>
+                            <th>%</th>
+                            <th>Atraso</th>
+                          </tr>
+                        </thead>
+                        <tbody id="tbCmpDiagLogBody"></tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </details>
             </div>
           </div>
           <div id="tbS10VolPreview" class="d-none" hidden></div>
+        </div>
+        <div data-tb-panel="s13" id="tbSecao13" class="{{ '' if show_s13_first else 'd-none' }}">
+          <div class="tb-card tb-diag13-card">
+            <h2 class="h5 fw-bold">📐 SEÇÃO 13 — DIAGONAIS
+              <span class="badge bg-secondary ms-1">só esta regra</span>
+            </h2>
+            <details class="tb-howto mb-2">
+              <summary>Como usar</summary>
+              <div class="tb-howto-body">
+                <ol class="tb-howto-ol">
+                  <li>Esta aba <strong>gera apostas só com a análise de diagonais</strong> da Seção 12 (segmento, direção no volante, tipo, vezes, %, atraso).</li>
+                  <li><strong>Não usa</strong> soma, padrão, sequência, repetidas do concurso anterior nem os demais itens do menu Análise.</li>
+                  <li>Escolha tipo, direção e fonte (Top ou atraso). <strong>GERAR</strong> monta os jogos com esses segmentos e completa as dezenas restantes no volante.</li>
+                </ol>
+              </div>
+            </details>
+            <p class="small text-muted mb-2" id="tbDiag13Resumo"></p>
+            <div class="border rounded p-2 mb-3 tb-diag13-opts">
+              <div class="fw-bold small text-uppercase text-muted mb-2">Regras da diagonal</div>
+              <div class="fw-semibold small mb-1">Tipo</div>
+              <div class="d-flex flex-wrap gap-3 mb-2" id="tbDiag13Tipo">
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="dupla" checked>
+                  <span class="form-check-label small">Dupla</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="trinca">
+                  <span class="form-check-label small">Trinca</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="quadra">
+                  <span class="form-check-label small">Quadra+</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="qualquer">
+                  <span class="form-check-label small">Qualquer tipo</span>
+                </label>
+              </div>
+              <div class="fw-semibold small mb-1">Direção no volante</div>
+              <div class="d-flex flex-wrap gap-3 mb-2" id="tbDiag13Dir">
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Dir" value="qualquer" checked>
+                  <span class="form-check-label small">Qualquer</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Dir" value="down">
+                  <span class="form-check-label small">↘</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Dir" value="up">
+                  <span class="form-check-label small">↗</span>
+                </label>
+              </div>
+              <div class="fw-semibold small mb-1">Fonte</div>
+              <div class="d-flex flex-wrap gap-3 mb-2" id="tbDiag13Fonte">
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="top" checked>
+                  <span class="form-check-label small">Ranking TOP (mais vezes)</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="atraso">
+                  <span class="form-check-label small">Maior atraso</span>
+                </label>
+                <label class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="mix">
+                  <span class="form-check-label small">Mix (vezes × atraso)</span>
+                </label>
+              </div>
+              <div class="d-flex flex-wrap gap-3 align-items-center">
+                <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbDiag13Seeds">
+                  Diagonais por aposta:
+                  <select class="form-select form-select-sm" id="tbDiag13Seeds" style="width:4.5rem;">
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
+              <button type="button" class="btn btn-sm btn-success" id="tbGerar13">
+                <i class="fas fa-magic me-1"></i>GERAR 10 APOSTAS
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-success" id="tbGerarMais13">
+                <i class="fas fa-plus me-1"></i>GERAR MAIS
+              </button>
+              <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbGerar13Qtd">
+                Qtd:
+                <input type="number" class="form-control form-control-sm" id="tbGerar13Qtd"
+                       value="10" min="1" max="200" step="1" style="width:4.5rem;">
+              </label>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="tbExport13">
+                <i class="fas fa-file-export me-1"></i>Exportar
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear13">Limpar</button>
+              <span class="small text-muted" id="tbGerar13Info"></span>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered tb-table tb-diag13-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Dezenas</th>
+                    <th>Segmento</th>
+                    <th>Direção</th>
+                    <th>Tipo</th>
+                    <th>Vezes</th>
+                    <th>%</th>
+                    <th>Atraso</th>
+                    {% if extra_mes %}<th>Mês</th>{% endif %}
+                  </tr>
+                </thead>
+                <tbody id="tbDiag13Body">
+                  <tr><td colspan="{{ 8 + (1 if extra_mes else 0) }}" class="text-muted">Gere apostas com as regras acima.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
         <div id="tbCmpMesOverlay" class="tb-cmp-overlay d-none" role="dialog" aria-modal="true" aria-labelledby="tbCmpMesTitulo">
           <div class="tb-cmp-modal">
