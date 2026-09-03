@@ -13,10 +13,10 @@
 }
 #get-root .get-ball {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 50%;
+  width: 1.45rem; height: 1.45rem; border-radius: 50%;
   background: var(--accent); color: var(--on-accent, #1a0a00);
-  font-weight: 800; font-size: .78rem; margin: 2px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.15);
+  font-weight: 800; font-size: .65rem; margin: 1px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
 }
 #get-root .get-ball.rep { box-shadow: 0 0 0 3px #198754; }
 #get-root .base-tab-btn.active {
@@ -29,8 +29,8 @@
   margin: 2px;
 }
 #get-root .aposta-card {
-  border: 1px solid #e5e7eb; border-radius: 10px; padding: .75rem 1rem;
-  margin-bottom: .65rem; background: #fff;
+  border: 1px solid #e5e7eb; border-radius: 10px; padding: .45rem .55rem .55rem;
+  margin-bottom: 0; background: #fff; min-width: 0; overflow: hidden;
   border-left: 3px solid var(--primary);
 }
 #get-root .ok-pill {
@@ -49,15 +49,14 @@
 }
 #get-root .lista-apostas-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: .75rem 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .55rem .65rem;
 }
-#get-root .lista-apostas-grid.lista-apostas-hibrido {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (max-width: 1280px) {
+  #get-root .lista-apostas-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
-@media (max-width: 1100px) {
+@media (max-width: 900px) {
   #get-root .lista-apostas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  #get-root .lista-apostas-grid.lista-apostas-hibrido { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) {
   #get-root .lista-apostas-grid { grid-template-columns: 1fr; }
@@ -70,15 +69,20 @@
   background: var(--primary); color: #fff; border-color: var(--primary);
 }
 #get-root .volante-oficial-wrap {
-  background: #fff9e6; border: 2px solid #e8d48a; border-radius: 10px;
-  padding: .45rem; margin-top: .35rem;
+  width: 100%; max-width: min(100%, 12.75rem);
+  box-sizing: border-box; overflow: hidden;
+  background: #fff9e6; border: 2px solid #e8d48a; border-radius: 8px;
+  padding: .3rem; margin-top: .25rem;
 }
 #get-root .volante-oficial-grid {
-  display: grid; grid-template-columns: repeat(var(--get-vcols, 10), 1fr); gap: 3px;
+  display: grid; grid-template-columns: repeat(var(--get-vcols, 10), minmax(0, 1fr)); gap: 2px;
 }
 #get-root .volante-cell {
-  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-  font-size: .68rem; font-weight: 700; border-radius: 4px;
+  aspect-ratio: 1; min-width: 0; width: 100%; box-sizing: border-box;
+  display: grid; place-items: center; place-content: center;
+  padding: 0; margin: 0;
+  font-size: .58rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  border-radius: 3px; line-height: 1; text-align: center;
   background: #fff; border: 1px solid #ccc; color: #666;
 }
 #get-root .volante-cell.na-aposta {
@@ -415,7 +419,7 @@
   </div>
 </div>{# /get-hub #}
 
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v21">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v36">
 <style>
   :root {
     --cor-sequencia-1: #86efac;
@@ -433,7 +437,7 @@
   {% endfor %}
   {% endif %}
 </style>
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260903v20"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260903v36"></script>
 <script>
 (function () {
   const hub = document.getElementById('get-hub');

@@ -1256,15 +1256,316 @@
   #ai-tubular-root .tb-cmp-diag-table,
   #ai-tubular-root .tb-cmp-diag-table-wide { min-width: 30rem; font-size: .68rem; }
 }
+#ai-tubular-root .tb-diag13-toolbar {
+  row-gap: .4rem;
+  column-gap: .55rem;
+  align-items: center !important;
+}
+#ai-tubular-root .tb-diag13-toolbar > * {
+  flex-shrink: 0;
+}
+#ai-tubular-root .tb-diag13-toolbar #tbDiag13ExibLegenda,
+#ai-tubular-root .tb-diag13-toolbar .tb-diag13-info {
+  flex-shrink: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
+#ai-tubular-root .tb-diag13-toolbar .form-control-sm {
+  height: 1.9rem;
+  min-height: 1.9rem;
+  padding-top: .2rem;
+  padding-bottom: .2rem;
+  line-height: 1.2;
+}
+#ai-tubular-root .tb-diag13-toolbar .btn-sm {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+}
+#ai-tubular-root .tb-diag13-toolbar label.small {
+  line-height: 1.2;
+}
+#ai-tubular-root .tb-diag13-toolbar-sep {
+  width: 1px;
+  align-self: center;
+  height: 1.35rem;
+  min-height: 0;
+  background: rgba(182, 152, 22, .4);
+  margin: 0 .2rem;
+}
+#ai-tubular-root .tb-diag13-toolbar .tb-diag13-legend {
+  margin-left: .1rem;
+  white-space: nowrap;
+}
+#ai-tubular-root .tb-diag13-toolbar .tb-diag13-legend .tb-diag13-swatch {
+  margin-right: .2rem;
+}
+#ai-tubular-root .tb-diag13-analise-bar {
+  margin-bottom: .55rem;
+}
+#ai-tubular-root .tb-diag13-analise-fold > summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #887211;
+  padding: .15rem 0;
+}
+#ai-tubular-root .tb-diag13-analise-fold > summary::-webkit-details-marker { display: none; }
+#ai-tubular-root .tb-diag13-analise-fold > summary::before {
+  content: '▸';
+  font-size: .75rem;
+  color: #b69816;
+}
+#ai-tubular-root .tb-diag13-analise-fold[open] > summary::before { content: '▾'; }
+#ai-tubular-root .tb-diag13-analise-body {
+  margin-top: .4rem;
+  padding: .55rem .65rem;
+  border: 1px solid #eed877;
+  border-radius: 8px;
+  background: #fcf9e8;
+}
+#ai-tubular-root .tb-diag13-analise-topline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .45rem .75rem;
+  margin-bottom: .4rem;
+}
+#ai-tubular-root .tb-diag13-ajuda-grid {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  color: #715f0e;
+}
+#ai-tubular-root .tb-diag13-ajuda-grid strong {
+  color: #887211;
+}
 #ai-tubular-root .tb-diag13-opts {
   background: var(--bg, #fffdf5);
   border-color: rgba(192, 139, 0, .22) !important;
+}
+#ai-tubular-root .tb-diag13-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .65rem .9rem;
+  align-items: start;
+}
+#ai-tubular-root .tb-diag13-col {
+  min-width: 0;
+}
+#ai-tubular-root .tb-diag13-col .form-check-inline {
+  margin-right: .55rem;
+}
+#ai-tubular-root .tb-diag13-seeds-row {
+  border-top: 1px dashed rgba(192, 139, 0, .25);
 }
 #ai-tubular-root .tb-diag13-table td {
   vertical-align: middle;
 }
 #ai-tubular-root .tb-diag13-table .tb-cmp-diag-arrow {
   margin: .08rem 0;
+}
+@media (max-width: 900px) {
+  #ai-tubular-root .tb-diag13-grid {
+    grid-template-columns: 1fr;
+  }
+}
+#ai-tubular-root .tb-diag13-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .55rem .65rem;
+}
+@media (max-width: 1280px) {
+  #ai-tubular-root .tb-diag13-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  #ai-tubular-root .tb-diag13-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  #ai-tubular-root .tb-diag13-cards { grid-template-columns: 1fr; }
+}
+#ai-tubular-root .tb-diag13-card {
+  border: 1px solid rgba(212, 179, 26, .35);
+  border-radius: 8px;
+  background: #fff;
+  padding: .45rem .5rem .5rem;
+  min-width: 0;
+  overflow: hidden;
+}
+#ai-tubular-root .tb-diag13-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .35rem;
+  margin-bottom: .4rem;
+  color: var(--primary, #d4b31a);
+}
+#ai-tubular-root .tb-diag13-card-hibrido {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  min-width: 0;
+}
+#ai-tubular-root .tb-diag13-balls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: .28rem;
+  width: 100%;
+}
+#ai-tubular-root .tb-diag13-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  min-width: 1.55rem;
+  padding: 0;
+  border-radius: 999px;
+  font-size: .65rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: center;
+  background: var(--accent, #ffd54f);
+  color: #1a0a00;
+  border: 1px solid var(--primary, #d4b31a);
+  box-sizing: border-box;
+}
+#ai-tubular-root .tb-diag13-ball.is-diag {
+  box-shadow: 0 0 0 2px #b69816;
+}
+/* Volante preenche a largura do card */
+#ai-tubular-root .tb-std-vol {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: #fff9e6;
+  border: 2px solid #e8d48a;
+  border-radius: 8px;
+  padding: .3rem;
+  display: grid;
+  grid-template-columns: repeat(var(--tb-std-cols, 10), minmax(0, 1fr));
+  gap: 2px;
+  overflow: hidden;
+}
+#ai-tubular-root .tb-std-vol-cell {
+  aspect-ratio: 1;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  place-content: center;
+  padding: 0;
+  margin: 0;
+  font-size: clamp(.48rem, 2.1vw, .62rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border-radius: 3px;
+  background: #fff;
+  border: 1px solid #ccc;
+  color: #666;
+  line-height: 1;
+  text-align: center;
+}
+#ai-tubular-root .tb-std-vol-cell.na-aposta {
+  background: var(--accent, #ffd54f);
+  border-color: var(--primary, #d4b31a);
+  color: #1a0a00;
+}
+#ai-tubular-root .tb-std-vol-cell.na-aposta.diag-hl {
+  box-shadow: inset 0 0 0 2px #887211;
+  background: #e6c533;
+  border-color: #b69816;
+}
+#ai-tubular-root .tb-diag13-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #ccc;
+  vertical-align: middle;
+  margin-right: .25rem;
+  border-radius: 2px;
+}
+#ai-tubular-root .tb-diag13-swatch-aposta {
+  background: var(--accent, #ffd54f);
+  border-color: var(--primary, #d4b31a);
+}
+#ai-tubular-root .tb-diag13-swatch-diag {
+  background: #e6c533;
+  border-color: #b69816;
+  box-shadow: inset 0 0 0 1px #887211;
+}
+#ai-tubular-root .tb-diag13-swatch-fora {
+  background: #fff;
+}
+#ai-tubular-root #tbDiag13Exib .tb-diag13-exib-btn.active {
+  background: var(--primary, #d4b31a);
+  border-color: var(--primary, #d4b31a);
+  color: #171303;
+  font-weight: 700;
+}
+#ai-tubular-root .tb-diag13-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-top: .35rem;
+}
+#ai-tubular-root .tb-diag13-meta-fold {
+  margin-top: .25rem;
+}
+#ai-tubular-root .tb-diag13-meta-fold > summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .68rem;
+  font-weight: 600;
+  color: #887211;
+  padding: .1rem 0;
+}
+#ai-tubular-root .tb-diag13-meta-fold > summary::-webkit-details-marker { display: none; }
+#ai-tubular-root .tb-diag13-meta-fold > summary::before {
+  content: '▸';
+  font-size: .72rem;
+  line-height: 1;
+  color: #b69816;
+}
+#ai-tubular-root .tb-diag13-meta-fold[open] > summary::before { content: '▾'; }
+#ai-tubular-root .tb-diag13-meta-fold .tb-diag13-card-meta {
+  margin-top: .35rem;
+}
+#ai-tubular-root .tb-diag13-chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .25rem .35rem;
+  padding: .2rem .4rem;
+  border-radius: 6px;
+  background: #fcf9e8;
+  border: 1px solid #eed877;
+  font-size: .68rem;
+  font-weight: 700;
+  color: #715f0e;
+}
+#ai-tubular-root .tb-diag13-chip.is-seed {
+  border-color: #b69816;
+  box-shadow: inset 0 0 0 1px #eed877;
+}
+#ai-tubular-root .tb-diag13-chip-seed {
+  color: #b69816;
+  font-size: .62rem;
 }
 #ai-tubular-root .tb-howto > summary {
   cursor: pointer;

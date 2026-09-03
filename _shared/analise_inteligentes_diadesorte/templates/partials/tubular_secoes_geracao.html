@@ -486,69 +486,81 @@
                 </ol>
               </div>
             </details>
-            <p class="small text-muted mb-2" id="tbDiag13Resumo"></p>
+            <div class="tb-diag13-analise-bar mb-2">
+              <details class="tb-diag13-analise-fold">
+                <summary>Resumo da análise</summary>
+                <div class="tb-diag13-analise-body">
+                  <div class="tb-diag13-analise-topline">
+                    <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbDiag13Seeds">
+                      Diagonais por aposta:
+                      <select class="form-select form-select-sm" id="tbDiag13Seeds" style="width:4.5rem;">
+                        <option value="1" selected>1</option>
+                      </select>
+                    </label>
+                    <span class="small text-muted" id="tbDiag13SeedsHint"></span>
+                  </div>
+                  <p class="small mb-1" id="tbDiag13Resumo"></p>
+                  <div class="small tb-diag13-ajuda" id="tbDiag13AjudaFiltro"></div>
+                </div>
+              </details>
+            </div>
             <div class="border rounded p-2 mb-3 tb-diag13-opts">
               <div class="fw-bold small text-uppercase text-muted mb-2">Regras da diagonal</div>
-              <div class="fw-semibold small mb-1">Tipo</div>
-              <div class="d-flex flex-wrap gap-3 mb-2" id="tbDiag13Tipo">
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="dupla" checked>
-                  <span class="form-check-label small">Dupla</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="trinca">
-                  <span class="form-check-label small">Trinca</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="quadra">
-                  <span class="form-check-label small">Quadra+</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="qualquer">
-                  <span class="form-check-label small">Qualquer tipo</span>
-                </label>
-              </div>
-              <div class="fw-semibold small mb-1">Direção no volante</div>
-              <div class="d-flex flex-wrap gap-3 mb-2" id="tbDiag13Dir">
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Dir" value="qualquer" checked>
-                  <span class="form-check-label small">Qualquer</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Dir" value="down">
-                  <span class="form-check-label small">↘</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Dir" value="up">
-                  <span class="form-check-label small">↗</span>
-                </label>
-              </div>
-              <div class="fw-semibold small mb-1">Fonte</div>
-              <div class="d-flex flex-wrap gap-3 mb-2" id="tbDiag13Fonte">
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="top" checked>
-                  <span class="form-check-label small">Ranking TOP (mais vezes)</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="atraso">
-                  <span class="form-check-label small">Maior atraso</span>
-                </label>
-                <label class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="mix">
-                  <span class="form-check-label small">Mix (vezes × atraso)</span>
-                </label>
-              </div>
-              <div class="d-flex flex-wrap gap-3 align-items-center">
-                <label class="small mb-0 d-inline-flex align-items-center gap-1" for="tbDiag13Seeds">
-                  Diagonais por aposta:
-                  <select class="form-select form-select-sm" id="tbDiag13Seeds" style="width:4.5rem;">
-                    <option value="1" selected>1</option>
-                    <option value="2">2</option>
-                  </select>
-                </label>
+              <div class="tb-diag13-grid">
+                <div class="tb-diag13-col">
+                  <div class="fw-semibold small mb-1">Tipo</div>
+                  <div class="d-flex flex-wrap gap-2" id="tbDiag13Tipo">
+                    <label class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="dupla" checked>
+                      <span class="form-check-label small">Dupla</span>
+                    </label>
+                    <label class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="trinca">
+                      <span class="form-check-label small">Trinca</span>
+                    </label>
+                    <label class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="tbDiag13Tipo" value="qualquer">
+                      <span class="form-check-label small">Qualquer</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="tb-diag13-col">
+                  <div class="fw-semibold small mb-1">Direção no volante</div>
+                  <div class="d-flex flex-wrap gap-2" id="tbDiag13Dir">
+                    <label class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="tbDiag13Dir" value="qualquer" checked>
+                      <span class="form-check-label small">Qualquer</span>
+                    </label>
+                    <label class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="tbDiag13Dir" value="down">
+                      <span class="form-check-label small">↘</span>
+                    </label>
+                    <label class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="tbDiag13Dir" value="up">
+                      <span class="form-check-label small">↗</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="tb-diag13-col">
+                  <div class="fw-semibold small mb-1">Fonte</div>
+                  <div class="d-flex flex-wrap gap-2" id="tbDiag13Fonte">
+                    <label class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="top" checked>
+                      <span class="form-check-label small">Ranking TOP</span>
+                    </label>
+                    <label class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="atraso">
+                      <span class="form-check-label small">Maior atraso</span>
+                    </label>
+                    <label class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="mix">
+                      <span class="form-check-label small">Mix</span>
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
+            <div class="tb-diag13-toolbar d-flex flex-wrap align-items-center gap-2 gap-md-3 mb-2">
               <button type="button" class="btn btn-sm btn-success" id="tbGerar13">
                 <i class="fas fa-magic me-1"></i>GERAR 10 APOSTAS
               </button>
@@ -564,28 +576,49 @@
                 <i class="fas fa-file-export me-1"></i>Exportar
               </button>
               <button type="button" class="btn btn-sm btn-outline-danger" id="tbClear13">Limpar</button>
-              <span class="small text-muted" id="tbGerar13Info"></span>
+              <span class="small text-muted tb-diag13-info" id="tbGerar13Info"></span>
+              <span class="tb-diag13-toolbar-sep d-none d-md-inline-block" aria-hidden="true"></span>
+              <span class="fw-bold small text-uppercase text-muted mb-0">Exibição</span>
+              <div class="btn-group flex-shrink-0" role="group" id="tbDiag13Exib">
+                <button type="button" class="btn btn-outline-secondary btn-sm tb-diag13-exib-btn" data-exib="numeros">Números</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm tb-diag13-exib-btn" data-exib="volante">Volante</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm tb-diag13-exib-btn active" data-exib="hibrido">Híbrido</button>
+              </div>
+              <span class="small text-muted mb-0" id="tbDiag13ExibLegenda">Lista em bolinhas e grade do volante juntas.</span>
+              <span class="small d-inline-flex flex-wrap gap-2 gap-md-3 align-items-center mb-0 tb-diag13-legend">
+                <span><span class="tb-diag13-swatch tb-diag13-swatch-aposta"></span> Aposta</span>
+                <span><span class="tb-diag13-swatch tb-diag13-swatch-diag"></span> Diagonal</span>
+                <span><span class="tb-diag13-swatch tb-diag13-swatch-fora"></span> Fora</span>
+              </span>
             </div>
-            <div class="table-responsive">
-              <table class="table table-sm table-bordered tb-table tb-diag13-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Dezenas</th>
-                    <th>Segmento</th>
-                    <th>Direção</th>
-                    <th>Tipo</th>
-                    <th>Vezes</th>
-                    <th>%</th>
-                    <th>Atraso</th>
-                    {% if extra_mes %}<th>Mês</th>{% endif %}
-                  </tr>
-                </thead>
-                <tbody id="tbDiag13Body">
-                  <tr><td colspan="{{ 8 + (1 if extra_mes else 0) }}" class="text-muted">Gere apostas com as regras acima.</td></tr>
-                </tbody>
-              </table>
+            <div class="tb-diag13-cards" id="tbDiag13Cards">
+              <p class="small text-muted mb-0">Gere apostas com as regras acima.</p>
             </div>
+            <details class="tb-howto mt-3 mb-0">
+              <summary>Tabela resumo (segmento / direção / estatística)</summary>
+              <div class="tb-howto-body">
+                <div class="table-responsive">
+                  <table class="table table-sm table-bordered tb-table tb-diag13-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Dezenas</th>
+                        <th>Segmento</th>
+                        <th>Direção</th>
+                        <th>Tipo</th>
+                        <th>Vezes</th>
+                        <th>%</th>
+                        <th>Atraso</th>
+                        {% if extra_mes %}<th>Mês</th>{% endif %}
+                      </tr>
+                    </thead>
+                    <tbody id="tbDiag13Body">
+                      <tr><td colspan="{{ 8 + (1 if extra_mes else 0) }}" class="text-muted">Gere apostas com as regras acima.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
         <div id="tbCmpMesOverlay" class="tb-cmp-overlay d-none" role="dialog" aria-modal="true" aria-labelledby="tbCmpMesTitulo">

@@ -307,6 +307,7 @@
     this._diagStats = null;
     this.cmpDiagFocus = null; // { contest, nums, key } — destaque no volante via tabela
     this.manual13 = [];
+    this.diag13Exib = 'hibrido';
     this.cmpActiveId = null;
     this.s10VolPreview = null;
     this._bind();
@@ -671,6 +672,23 @@
     r.querySelector('#tbExport13')?.addEventListener('click', () => this.exportDiag13());
     r.querySelector('#tbClear13')?.addEventListener('click', () => {
       this.manual13 = [];
+      this.renderDiag13();
+    });
+    r.querySelector('#tbDiag13Exib')?.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('[data-exib]');
+      if (!btn) return;
+      this.diag13Exib = btn.getAttribute('data-exib') || 'hibrido';
+      r.querySelectorAll('#tbDiag13Exib .tb-diag13-exib-btn').forEach((b) => {
+        b.classList.toggle('active', b === btn);
+      });
+      const leg = r.querySelector('#tbDiag13ExibLegenda');
+      if (leg) {
+        leg.textContent = this.diag13Exib === 'numeros'
+          ? 'Só lista em bolinhas.'
+          : (this.diag13Exib === 'volante'
+            ? 'Só grade do volante.'
+            : 'Lista em bolinhas e grade do volante juntas.');
+      }
       this.renderDiag13();
     });
     r.querySelector('#tbDiag13Tipo')?.addEventListener('change', () => this._syncDiag13Resumo());
@@ -3397,6 +3415,8 @@
     let nDiag3 = 0;
     let nX = 0;
     let nComDiag = 0;
+    let maxDiagPorConcurso = 0;
+    const histDiagPorConc = {};
     const idx3 = [];
     const recentHas = [];
     const log = [];
@@ -3404,6 +3424,9 @@
       const nums = (c.numbersAscending || c.numbersDrawOrder || []).map(Number).filter(Number.isFinite);
       const set = new Set(nums);
       const runs = this._diagRunsInDraw(set, lines);
+      const nRuns = runs.length;
+      if (nRuns > maxDiagPorConcurso) maxDiagPorConcurso = nRuns;
+      if (nRuns > 0) histDiagPorConc[nRuns] = (histDiagPorConc[nRuns] || 0) + 1;
       const has2 = runs.some(r => r.nums.length >= 2);
       const has3 = runs.some(r => r.nums.length >= 3);
       if (has2) {
@@ -3478,6 +3501,8 @@
       nDiag3,
       nX,
       nComDiag,
+      maxDiagPorConcurso: Math.max(1, maxDiagPorConcurso || 1),
+      histDiagPorConc,
       cadence,
       last3: idx3.length ? (total - 1 - idx3[idx3.length - 1]) : total,
       last10: sliceCount(10),
@@ -3719,7 +3744,7 @@
     let list = (stats.ranking || []).filter((s) => s.vezes > 0 && (s.nums || []).length >= 2);
     if (tipo === 'dupla') list = list.filter((s) => (s.len || s.nums.length) === 2);
     else if (tipo === 'trinca') list = list.filter((s) => (s.len || s.nums.length) === 3);
-    else if (tipo === 'quadra') list = list.filter((s) => (s.len || s.nums.length) >= 4);
+    // Quadra+ removido das regras da Seção 13
     if (dir === 'down' || dir === 'up') list = list.filter((s) => s.dir === dir);
     const weight = (s) => {
       if (fonte === 'atraso') return Math.max(1, Number(s.atraso) || 1);
@@ -3730,18 +3755,70 @@
     return { list, stats, tipo, dir, fonte, weight };
   };
 
+  TubularApp.prototype._fillDiag13SeedsSelect = function () {
+    const sel = this.root.querySelector('#tbDiag13Seeds');
+    if (!sel) return;
+    const stats = this._ensureDiagStats();
+    const maxN = Math.max(1, Number(stats.maxDiagPorConcurso) || 1);
+    const prev = parseInt(sel.value, 10) || 1;
+    const opts = [];
+    for (let i = 1; i <= maxN; i++) {
+      opts.push(`<option value="${i}">${i}</option>`);
+    }
+    sel.innerHTML = opts.join('');
+    sel.value = String(Math.min(Math.max(1, prev), maxN));
+    const hint = this.root.querySelector('#tbDiag13SeedsHint');
+    if (hint) {
+      const bits = [];
+      for (let i = 1; i <= maxN; i++) {
+        const q = (stats.histDiagPorConc && stats.histDiagPorConc[i]) || 0;
+        if (q) bits.push(`${i}× em ${q} concurso${q === 1 ? '' : 's'}`);
+      }
+      hint.textContent = maxN
+        ? `Máx. histórico: ${maxN} ${maxN === 1 ? 'diagonal' : 'diagonais'} no mesmo concurso` + (bits.length ? ` (${bits.join(' · ')})` : '') + '.'
+        : '';
+    }
+  };
+
   TubularApp.prototype._syncDiag13Resumo = function () {
     const el = this.root.querySelector('#tbDiag13Resumo');
-    if (!el) return;
+    const ajuda = this.root.querySelector('#tbDiag13AjudaFiltro');
     if (!this.data.length) {
-      el.textContent = 'Carregue o histórico (a Seção 12 alimenta esta regra).';
+      if (el) el.textContent = 'Carregue o histórico (a Seção 12 alimenta esta regra).';
+      if (ajuda) ajuda.innerHTML = '';
+      const hint = this.root.querySelector('#tbDiag13SeedsHint');
+      if (hint) hint.textContent = '';
       return;
     }
+    this._fillDiag13SeedsSelect();
     const { list, stats, tipo, dir, fonte } = this._diag13Pool();
-    const tipoLbl = tipo === 'qualquer' ? 'qualquer tipo' : this._diagTipoLabel(tipo === 'quadra' ? 4 : (tipo === 'trinca' ? 3 : 2));
+    const tipoLbl = tipo === 'qualquer' ? 'qualquer tipo' : this._diagTipoLabel(tipo === 'trinca' ? 3 : 2);
     const dirLbl = dir === 'down' ? '↘' : (dir === 'up' ? '↗' : 'qualquer direção');
     const fonteLbl = fonte === 'atraso' ? 'maior atraso' : (fonte === 'mix' ? 'mix vezes×atraso' : 'ranking TOP');
-    el.textContent = `${stats.n || 0} concursos · ${list.length} segmentos nesta regra (${tipoLbl} · ${dirLbl} · ${fonteLbl}). Sem soma, sequência, repetidas ou demais itens de Análise.`;
+    if (el) {
+      el.textContent = `${stats.n || 0} concursos · ${list.length} segmentos nesta regra (${tipoLbl} · ${dirLbl} · ${fonteLbl}).`;
+    }
+    if (ajuda) {
+      const n = stats.n || 0;
+      const nDupla = stats.nDupla || 0;
+      const nTrinca = stats.nDiag3 || 0;
+      const rank = stats.ranking || [];
+      const nDown = rank.filter((s) => s.dir === 'down' && s.vezes > 0).length;
+      const nUp = rank.filter((s) => s.dir === 'up' && s.vezes > 0).length;
+      const pctDupla = n ? (100 * nDupla / n) : 0;
+      const pctTrinca = n ? (100 * nTrinca / n) : 0;
+      const top = list.slice(0, 3).map((s) => {
+        const seg = (s.nums || []).map(fmt2).join('-');
+        return `${this._diagDirSym(s.dir)} ${seg} (${s.vezes || 0}× · atr. ${s.vezes ? s.atraso : '—'})`;
+      });
+      ajuda.innerHTML = `
+        <div class="tb-diag13-ajuda-grid">
+          <span><strong>Tipo</strong> — Dupla em ${nDupla} concursos (${this._diagFmtPct(pctDupla)}%) · Trinca+ em ${nTrinca} (${this._diagFmtPct(pctTrinca)}%)</span>
+          <span><strong>Direção</strong> — ↘ ${nDown} segmentos · ↗ ${nUp} segmentos (com ocorrência)</span>
+          <span><strong>Fonte</strong> — TOP prioriza vezes; atraso prioriza quem está sumido; mix combina os dois</span>
+          ${top.length ? `<span><strong>Nesta regra</strong> — ${top.join(' · ')}</span>` : '<span class="text-muted">Nenhum segmento com o filtro atual.</span>'}
+        </div>`;
+    }
   };
 
   TubularApp.prototype._diag13WeightedPick = function (items, weightFn, usedKeys) {
@@ -3767,6 +3844,31 @@
     return { month: idx + 1, monthName: MESES[idx] };
   };
 
+  TubularApp.prototype._diag13DiagsFromNumbers = function (numbers, seedKeys) {
+    const nums = (numbers || []).map(Number).filter(Number.isFinite);
+    const set = new Set(nums);
+    const stats = this._ensureDiagStats();
+    const lines = this._diagLines();
+    const runs = this._diagRunsInDraw(set, lines);
+    const seeds = seedKeys instanceof Set ? seedKeys : new Set(seedKeys || []);
+    const total = stats.n || (this.data || []).length || 0;
+    return runs.map((r) => {
+      const st = stats.byKey && stats.byKey[r.key];
+      const len = (r.nums || []).length;
+      return {
+        nums: (r.nums || []).slice(),
+        dir: r.dir,
+        tipo: this._diagTipoKey(len),
+        len,
+        vezes: st ? (st.vezes || 0) : 0,
+        pct: st ? (st.pct || 0) : 0,
+        atraso: st ? st.atraso : total,
+        key: r.key,
+        seed: seeds.has(r.key),
+      };
+    });
+  };
+
   TubularApp.prototype.gerarDiag13 = async function (qtd) {
     const info = this.root.querySelector('#tbGerar13Info');
     const L = limitsFrom(this.root);
@@ -3779,7 +3881,10 @@
       alert('Não foi possível carregar o histórico. Tente novamente.');
       return;
     }
-    const seedsWanted = Math.max(1, Math.min(2, parseInt((this.root.querySelector('#tbDiag13Seeds') || {}).value, 10) || 1));
+    const seedsSel = this.root.querySelector('#tbDiag13Seeds');
+    const stats = this._ensureDiagStats();
+    const maxSeeds = Math.max(1, Number(stats.maxDiagPorConcurso) || 1);
+    const seedsWanted = Math.max(1, Math.min(maxSeeds, parseInt(seedsSel && seedsSel.value, 10) || 1));
     const { list, weight } = this._diag13Pool();
     if (!list.length) {
       alert('Nenhum segmento de diagonal combina com o tipo/direção escolhidos.');
@@ -3833,18 +3938,10 @@
       if (existing.has(key)) continue;
       existing.add(key);
       const mes = this._diag13RandomMonth();
+      const seedKeys = new Set(segs.map((s) => s.key));
       aprovadas.push({
         numbers,
-        diags: segs.map((s) => ({
-          nums: (s.nums || []).slice(),
-          dir: s.dir,
-          tipo: s.tipo,
-          len: s.len || (s.nums || []).length,
-          vezes: s.vezes,
-          pct: s.pct,
-          atraso: s.atraso,
-          key: s.key,
-        })),
+        diags: this._diag13DiagsFromNumbers(numbers, seedKeys),
         month: mes.month,
         monthName: mes.monthName,
         _uid: ++this._manualUid,
@@ -3859,13 +3956,109 @@
     }
   };
 
+  TubularApp.prototype._stdVolanteHtml = function (selectedArr, opts) {
+    opts = opts || {};
+    const L = limitsFrom(this.root);
+    const sel = new Set((selectedArr || []).map(Number));
+    const highlight = opts.highlightSet || null;
+    const cols = L.volanteCols || 10;
+    const dMin = L.dezenaMin || 1;
+    const dMax = L.dezenaMax || 31;
+    // Grade única fluida (mesmo padrão da aba Escolha) — evita overflow e célula 31 esticada
+    let cells = '';
+    for (let d = dMin; d <= dMax; d++) {
+      const on = sel.has(d);
+      const hl = !!(highlight && highlight.has(d));
+      let cls = 'tb-std-vol-cell';
+      if (on && hl) cls += ' na-aposta diag-hl';
+      else if (on) cls += ' na-aposta';
+      cells += `<span class="${cls}">${fmt2(d)}</span>`;
+    }
+    return `<div class="tb-std-vol" style="--tb-std-cols:${cols}" role="img">${cells}</div>`;
+  };
+
+  TubularApp.prototype._syncDiag13VolLayout = function (wrap) {
+    if (!wrap) return;
+    const L = limitsFrom(this.root);
+    const cols = L.volanteCols || 10;
+    wrap.style.setProperty('--tb-std-cols', String(cols));
+  };
+
   TubularApp.prototype.renderDiag13 = function () {
     const body = this.root.querySelector('#tbDiag13Body');
-    if (!body) return;
+    const cards = this.root.querySelector('#tbDiag13Cards');
     this._syncDiag13Resumo();
     const list = this.manual13 || [];
     const extra = this.extraMes;
     const colspan = 8 + (extra ? 1 : 0);
+    const exib = this.diag13Exib || 'hibrido';
+    const showVol = exib === 'volante' || exib === 'hibrido';
+    const showLin = exib === 'numeros' || exib === 'hibrido';
+
+    if (cards) {
+      this._syncDiag13VolLayout(cards);
+      cards.classList.toggle('is-hibrido', exib === 'hibrido');
+      cards.classList.toggle('is-volante', exib === 'volante');
+      cards.classList.toggle('is-numeros', exib === 'numeros');
+      if (!list.length) {
+        cards.innerHTML = '<p class="small text-muted mb-0">Gere apostas com as regras acima.</p>';
+      } else {
+        cards.innerHTML = list.map((g, i) => {
+          const nums = (g.numbers || []).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+          // Reescaneia o jogo: sinaliza TODAS as diagonais presentes (não só a semente do filtro)
+          const seedKeys = new Set((g.diags || []).filter((d) => d.seed || d._seed).map((d) => d.key).filter(Boolean));
+          if (!seedKeys.size && (g.diags || []).length) {
+            (g.diags || []).forEach((d) => { if (d.key) seedKeys.add(d.key); });
+          }
+          const diags = this._diag13DiagsFromNumbers(nums, seedKeys);
+          g.diags = diags;
+          const diagSet = new Set(diags.flatMap((d) => (d.nums || []).map(Number)));
+          const balls = showLin
+            ? `<div class="tb-diag13-balls">${nums.map((n) => {
+                const onDiag = diagSet.has(n);
+                return `<span class="tb-diag13-ball${onDiag ? ' is-diag' : ''}">${fmt2(n)}</span>`;
+              }).join('')}</div>`
+            : '';
+          const vol = showVol
+            ? this._stdVolanteHtml(nums, { highlightSet: diagSet.size ? diagSet : null })
+            : '';
+          const meta = diags.map((d) => {
+            const k = d.tipo || this._diagTipoKey(d.len || 2);
+            const seedMark = d.seed ? ' <span class="tb-diag13-chip-seed" title="Semente da regra">★</span>' : '';
+            return `<span class="tb-diag13-chip${d.seed ? ' is-seed' : ''}" title="${esc(this._diagDirTitle(d.dir))}">
+              <span class="tb-cmp-diag-arrow">${this._diagDirSym(d.dir)}</span>
+              <span class="tb-align-mono">${(d.nums || []).map(fmt2).join('-')}</span>
+              <span class="tb-cmp-diag-tipo tb-cmp-diag-tipo-${k}">${this._diagTipoLabel(d.len || k)}</span>${seedMark}
+              <span class="tb-diag13-chip-meta">${d.vezes || 0}× · ${this._diagFmtPct(d.pct || 0)}% · atr. ${d.vezes ? d.atraso : '—'}</span>
+            </span>`;
+          }).join('');
+          const mes = extra && g.monthName
+            ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc(this._mesAbrev(g.monthName))}</span>`
+            : '';
+          const metaBlock = meta
+            ? `<details class="tb-diag13-meta-fold">
+                <summary>Detalhes</summary>
+                <div class="tb-diag13-card-meta">${meta}</div>
+              </details>`
+            : `<details class="tb-diag13-meta-fold">
+                <summary>Detalhes</summary>
+                <div class="tb-diag13-card-meta"><span class="small text-muted">Sem segmento registrado</span></div>
+              </details>`;
+          return `<div class="tb-diag13-card">
+            <div class="tb-diag13-card-head">
+              <strong>Aposta ${String(i + 1).padStart(2, '0')}</strong>
+              ${mes}
+            </div>
+            <div class="tb-diag13-card-hibrido">
+              ${balls}${vol}
+            </div>
+            ${metaBlock}
+          </div>`;
+        }).join('');
+      }
+    }
+
+    if (!body) return;
     if (!list.length) {
       body.innerHTML = `<tr><td colspan="${colspan}" class="text-muted">Gere apostas com as regras acima.</td></tr>`;
       return;
@@ -3898,16 +4091,47 @@
     }).join('');
   };
 
-  TubularApp.prototype.exportDiag13 = function () {
+  TubularApp.prototype.exportDiag13 = async function () {
     const L = limitsFrom(this.root);
+    const list = (this.manual13 || []).filter((g) => {
+      const nums = (g.numbers || []).map(Number).filter(Number.isFinite);
+      return nums.length === L.sorteadas;
+    });
+    if (!list.length) {
+      alert('Nenhuma aposta completa para exportar.');
+      return;
+    }
+    if (this._cmpExtraKind() && this.root.querySelector('#tbCmpMesOverlay')) {
+      this._exportMesSource = 'diag13';
+      await this._openCmpMesModal();
+      return;
+    }
+    this._doExportDiag13(null);
+  };
+
+  TubularApp.prototype._doExportDiag13 = function (extraLote) {
+    const L = limitsFrom(this.root);
+    const kind = this._cmpExtraKind();
     const lines = [];
+    let mi = 0;
     (this.manual13 || []).forEach((g) => {
       const nums = (g.numbers || []).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
       if (nums.length !== L.sorteadas) return;
       let line = nums.map(fmt2).join(' ');
-      if (this.extraMes) {
-        const ab = this._mesAbrevExport(g);
-        if (ab) line += ` ${ab}`;
+      if (kind === 'mes') {
+        let pretty = '';
+        if (extraLote && extraLote[mi] != null) {
+          const mn = Number(extraLote[mi]);
+          if (mn >= 1 && mn <= 12) {
+            const ab = MESES_ABREV[mn - 1] || '';
+            pretty = ab ? (ab.charAt(0) + ab.slice(1).toLowerCase()) : '';
+            g.month = mn;
+            g.monthName = MESES[mn - 1] || '';
+          }
+        }
+        if (!pretty) pretty = this._mesAbrevExport(g);
+        if (pretty) line += ` ${pretty}`;
+        mi += 1;
       }
       lines.push(line);
     });
@@ -3916,6 +4140,7 @@
       return;
     }
     downloadBlob(lines.join('\n') + '\n', 'secao13_diagonais.txt', 'text/plain');
+    this.renderDiag13();
   };
 
   TubularApp.prototype._onCmpVolanteClick = function (ev) {
@@ -4188,9 +4413,33 @@
 
   TubularApp.prototype._confirmCmpExport = function () {
     const sel = this.root.querySelector('#tbCmpMesSelect');
+    const source = this._exportMesSource || 'cmp';
+    this._exportMesSource = null;
+    const kind = this._cmpExtraKind();
+
+    if (source === 'diag13') {
+      const list = (this.manual13 || []).filter((g) => {
+        const L = limitsFrom(this.root);
+        const nums = (g.numbers || []).map(Number).filter(Number.isFinite);
+        return nums.length === L.sorteadas;
+      });
+      const n = list.length;
+      let extraLote = null;
+      if (kind === 'mes' && sel) {
+        if (window.MesSorteSelect) {
+          extraLote = MesSorteSelect.resolveLote(sel.value, n, MesSorteSelect.cached);
+        } else {
+          const mn = parseInt(sel.value, 10);
+          extraLote = Number.isFinite(mn) ? Array(n).fill(mn) : null;
+        }
+      }
+      this._closeCmpMesModal();
+      this._doExportDiag13(extraLote);
+      return;
+    }
+
     const filled = (this.cmpVolantes || []).filter(v => (v.nums || []).length);
     const n = filled.length;
-    const kind = this._cmpExtraKind();
     let extraLote = null;
     if (kind === 'mes' && sel) {
       if (window.MesSorteSelect) {
@@ -4220,6 +4469,7 @@
       return;
     }
     if (this._cmpExtraKind() && this.root.querySelector('#tbCmpMesOverlay')) {
+      this._exportMesSource = 'cmp';
       await this._openCmpMesModal();
       return;
     }
