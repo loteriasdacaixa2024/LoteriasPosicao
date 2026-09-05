@@ -308,6 +308,8 @@
     this.cmpDiagFocus = null; // { contest, nums, key } — destaque no volante via tabela
     this.manual13 = [];
     this.diag13Exib = 'hibrido';
+    this.diag13Dna = true;
+    this.diag13PadroesAlvo = [];
     this.cmpActiveId = null;
     this.s10VolPreview = null;
     this._bind();
@@ -695,6 +697,10 @@
     r.querySelector('#tbDiag13Dir')?.addEventListener('change', () => this._syncDiag13Resumo());
     r.querySelector('#tbDiag13Fonte')?.addEventListener('change', () => this._syncDiag13Resumo());
     r.querySelector('#tbDiag13Seeds')?.addEventListener('change', () => this._syncDiag13Resumo());
+    r.querySelector('#tbDiag13Dna')?.addEventListener('change', (ev) => {
+      this.diag13Dna = !!(ev.target && ev.target.checked);
+      this._syncDiag13Resumo();
+    });
   };
 
   TubularApp.prototype.consumeManualImport = function () {
@@ -3736,11 +3742,14 @@
     return (el && el.value) || fallback;
   };
 
-  TubularApp.prototype._diag13Pool = function () {
+  TubularApp.prototype._diag13Pool = function (fonteOverride) {
     const stats = this._ensureDiagStats();
     const tipo = this._diag13Radio('tbDiag13Tipo', 'dupla');
     const dir = this._diag13Radio('tbDiag13Dir', 'qualquer');
-    const fonte = this._diag13Radio('tbDiag13Fonte', 'top');
+    const fonteRaw = this._diag13Radio('tbDiag13Fonte', 'mix');
+    const fonte = (fonteOverride === 'top' || fonteOverride === 'atraso' || fonteOverride === 'mix')
+      ? fonteOverride
+      : fonteRaw;
     let list = (stats.ranking || []).filter((s) => s.vezes > 0 && (s.nums || []).length >= 2);
     if (tipo === 'dupla') list = list.filter((s) => (s.len || s.nums.length) === 2);
     else if (tipo === 'trinca') list = list.filter((s) => (s.len || s.nums.length) === 3);
@@ -3781,6 +3790,7 @@
   };
 
   TubularApp.prototype._syncDiag13Resumo = function () {
+    this._syncDiag13PadBar();
     const el = this.root.querySelector('#tbDiag13Resumo');
     const ajuda = this.root.querySelector('#tbDiag13AjudaFiltro');
     if (!this.data.length) {
@@ -3795,8 +3805,10 @@
     const tipoLbl = tipo === 'qualquer' ? 'qualquer tipo' : this._diagTipoLabel(tipo === 'trinca' ? 3 : 2);
     const dirLbl = dir === 'down' ? '↘' : (dir === 'up' ? '↗' : 'qualquer direção');
     const fonteLbl = fonte === 'atraso' ? 'maior atraso' : (fonte === 'mix' ? 'mix vezes×atraso' : 'ranking TOP');
+    const dnaOn = this._diag13DnaOn();
     if (el) {
-      el.textContent = `${stats.n || 0} concursos · ${list.length} segmentos nesta regra (${tipoLbl} · ${dirLbl} · ${fonteLbl}).`;
+      el.textContent = `${stats.n || 0} concursos · ${list.length} segmentos nesta regra (${tipoLbl} · ${dirLbl} · ${fonteLbl})`
+        + (dnaOn ? ' · DNA ligado (completa sem apostas feias).' : ' · DNA desligado (completa no acaso).');
     }
     if (ajuda) {
       const n = stats.n || 0;
@@ -3817,6 +3829,7 @@
           <span><strong>Direção</strong> — ↘ ${nDown} segmentos · ↗ ${nUp} segmentos (com ocorrência)</span>
           <span><strong>Fonte</strong> — TOP prioriza vezes; atraso prioriza quem está sumido; mix combina os dois</span>
           ${top.length ? `<span><strong>Nesta regra</strong> — ${top.join(' · ')}</span>` : '<span class="text-muted">Nenhum segmento com o filtro atual.</span>'}
+          ${dnaOn ? '<span><strong>DNA</strong> — carteira mistura TOP/atraso/padrão/ciclo; bloqueia SEQ 3+ (trinca/quadra), soma fora da faixa e 0 ou 4+ repetidas</span>' : ''}
         </div>`;
     }
   };
@@ -3869,31 +3882,443 @@
     });
   };
 
-  TubularApp.prototype.gerarDiag13 = async function (qtd) {
-    const info = this.root.querySelector('#tbGerar13Info');
+  TubularApp.prototype._diag13DnaOn = function () {
+    const el = this.root.querySelector('#tbDiag13Dna');
+    if (el) this.diag13Dna = !!el.checked;
+    return this.diag13Dna !== false;
+  };
+
+  TubularApp.prototype._diag13ParsePadrao = function (p) {
+    return String(p || '').replace(/[-,]/g, ' ').trim().split(/\s+/).map(Number).filter(Number.isFinite);
+  };
+
+  TubularApp.prototype._diag13NormPad = function (p) {
+    return this._diag13ParsePadrao(p).join(' ');
+  };
+
+  TubularApp.prototype._diag13PadraoDe = function (nums) {
+    return [...(nums || [])].map(Number).filter(Number.isFinite).sort((a, b) => a - b)
+      .map((n) => Math.floor(n / 10)).join(' ');
+  };
+
+  TubularApp.prototype._diag13PadFitsSeed = function (padrao, locked) {
+    const digits = this._diag13ParsePadrao(padrao);
+    if (!digits.length) return true;
+    const need = {};
+    digits.forEach((d) => { need[d] = (need[d] || 0) + 1; });
+    const have = {};
+    [...(locked || [])].forEach((n) => {
+      const c = Math.floor(Number(n) / 10);
+      have[c] = (have[c] || 0) + 1;
+    });
+    return Object.keys(have).every((c) => (have[c] || 0) <= (need[Number(c)] || 0));
+  };
+
+  TubularApp.prototype._diag13ReadPadroesUrl = function () {
+    try {
+      const raw = new URL(window.location.href).searchParams.get('padroes') || '';
+      this.diag13PadroesAlvo = raw.split('|')
+        .map((s) => this._diag13NormPad(s))
+        .filter(Boolean);
+    } catch (_) {
+      this.diag13PadroesAlvo = this.diag13PadroesAlvo || [];
+    }
+    this._syncDiag13PadBar();
+  };
+
+  TubularApp.prototype._syncDiag13PadBar = function () {
+    const el = this.root.querySelector('#tbDiag13PadBar');
+    if (!el) return;
+    const pads = this.diag13PadroesAlvo || [];
+    if (!pads.length) {
+      el.classList.add('d-none');
+      el.innerHTML = '';
+      return;
+    }
+    el.classList.remove('d-none');
+    el.innerHTML = `Padrões II · ${pads.length} padrão${pads.length === 1 ? '' : 's'} na carteira: `
+      + pads.map((p) => `<code>${esc(p)}</code>`).join(' · ')
+      + ' <span class="text-muted fw-normal">(diagonal + este padrão)</span>';
+  };
+
+  TubularApp.prototype._diag13SeqGroups = function (nums) {
+    const a = [...new Set((nums || []).map(Number).filter(Number.isFinite))].sort((x, y) => x - y);
+    const out = [];
+    let i = 0;
+    while (i < a.length) {
+      let j = i;
+      while (j + 1 < a.length && a[j + 1] === a[j] + 1) j += 1;
+      if (j > i) out.push(a.slice(i, j + 1));
+      i = j + 1;
+    }
+    return out;
+  };
+
+  TubularApp.prototype._diag13MaxRun = function (nums) {
+    let m = 1;
+    this._diag13SeqGroups(nums).forEach((g) => { if (g.length > m) m = g.length; });
+    return m;
+  };
+
+  TubularApp.prototype._diag13WouldMakeRun = function (picked, n, maxRun) {
+    let len = 1;
+    let x = n - 1;
+    while (picked.has(x)) { len += 1; x -= 1; }
+    x = n + 1;
+    while (picked.has(x)) { len += 1; x += 1; }
+    return len > maxRun;
+  };
+
+  TubularApp.prototype._diag13Faixas = function (L) {
+    if ((L.dezenaMin || 1) === 1 && (L.dezenaMax || 31) === 31) {
+      return [
+        { c: 'B', lo: 1, hi: 10 },
+        { c: 'M', lo: 11, hi: 20 },
+        { c: 'A', lo: 21, hi: 31 },
+      ];
+    }
+    const span = (L.dezenaMax - L.dezenaMin + 1);
+    const t = Math.max(1, Math.floor(span / 3));
+    const bHi = L.dezenaMin + t - 1;
+    const mHi = L.dezenaMin + 2 * t - 1;
+    return [
+      { c: 'B', lo: L.dezenaMin, hi: bHi },
+      { c: 'M', lo: bHi + 1, hi: mHi },
+      { c: 'A', lo: mHi + 1, hi: L.dezenaMax },
+    ];
+  };
+
+  TubularApp.prototype._diag13Bma = function (nums, L) {
+    const faixas = this._diag13Faixas(L);
+    const counts = faixas.map(() => 0);
+    (nums || []).forEach((n) => {
+      const i = faixas.findIndex((f) => n >= f.lo && n <= f.hi);
+      if (i >= 0) counts[i] += 1;
+    });
+    return counts;
+  };
+
+  TubularApp.prototype._diag13DnaPack = function () {
     const L = limitsFrom(this.root);
-    const alvo = Math.max(1, Math.min(200, Number(qtd) || 10));
-    if (!this.data.length) {
-      if (info) info.textContent = 'Carregando histórico…';
-      try { await this.load(); } catch (_) { /* ignore */ }
+    const chrono = this._chronoAsc();
+    const k = L.sorteadas;
+    const somas = [];
+    const piCount = {};
+    const padCount = {};
+    const freq = {};
+    const lastSeen = {};
+    let temSeq = 0;
+    const reptCounts = [];
+    let nOk = 0;
+    for (let i = 0; i < chrono.length; i++) {
+      const nums = (chrono[i].numbersAscending || chrono[i].numbersDrawOrder || [])
+        .map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+      if (nums.length !== k) continue;
+      nOk += 1;
+      somas.push(nums.reduce((a, b) => a + b, 0));
+      const pares = nums.filter((n) => n % 2 === 0).length;
+      piCount[pares] = (piCount[pares] || 0) + 1;
+      const pad = nums.map((n) => Math.floor(n / 10)).join('-');
+      padCount[pad] = (padCount[pad] || 0) + 1;
+      nums.forEach((n) => {
+        freq[n] = (freq[n] || 0) + 1;
+        lastSeen[n] = nOk;
+      });
+      if (this._diag13SeqGroups(nums).length) temSeq += 1;
+      if (i > 0) {
+        const prev = new Set((chrono[i - 1].numbersAscending || []).map(Number));
+        reptCounts.push(nums.filter((n) => prev.has(n)).length);
+      }
     }
-    if (!this.data.length) {
-      alert('Não foi possível carregar o histórico. Tente novamente.');
-      return;
+    somas.sort((a, b) => a - b);
+    const pctAt = (p) => {
+      if (!somas.length) return 0;
+      const idx = Math.max(0, Math.min(somas.length - 1, Math.floor((p / 100) * (somas.length - 1))));
+      return somas[idx];
+    };
+    const ultimo = chrono.length
+      ? (chrono[chrono.length - 1].numbersAscending || []).map(Number).filter(Number.isFinite).sort((a, b) => a - b)
+      : [];
+    const piPerfis = Object.keys(piCount).map(Number)
+      .sort((a, b) => (piCount[b] - piCount[a]) || a - b)
+      .map((p) => ({
+        pares: p,
+        impares: k - p,
+        qtd: piCount[p],
+        pct: nOk ? (100 * piCount[p] / nOk) : 0,
+        dist: `${p}P / ${k - p}I`,
+      }));
+    const padroesHist = Object.keys(padCount).sort((a, b) => padCount[b] - padCount[a]).slice(0, 5);
+    const alvo = (this.diag13PadroesAlvo || []).map((p) => this._diag13ParsePadrao(p).join('-')).filter(Boolean);
+    const padroes = [...new Set(alvo.concat(padroesHist))];
+    const reptModa = reptCounts.length
+      ? Number(Object.entries(reptCounts.reduce((m, v) => { m[v] = (m[v] || 0) + 1; return m; }, {}))
+        .sort((a, b) => b[1] - a[1] || Number(a[0]) - Number(b[0]))[0][0])
+      : 1;
+    const pctRep12 = reptCounts.length
+      ? (100 * reptCounts.filter((v) => v === 1 || v === 2).length / reptCounts.length)
+      : 60;
+    const pesos = {};
+    const pend = this.faltantesCiclo || new Set();
+    const lastSet = new Set(ultimo);
+    for (let d = L.dezenaMin; d <= L.dezenaMax; d++) {
+      const qtd = freq[d] || 1;
+      const atraso = lastSeen[d] != null ? (nOk - lastSeen[d]) : nOk;
+      let w = (qtd + 1) * (1 + Math.min(atraso, 18) * 0.07);
+      if (lastSet.has(d)) w *= 1.4;
+      if (pend.has(d)) w *= 1.28;
+      pesos[d] = w ** 1.55;
     }
-    const seedsSel = this.root.querySelector('#tbDiag13Seeds');
-    const stats = this._ensureDiagStats();
-    const maxSeeds = Math.max(1, Number(stats.maxDiagPorConcurso) || 1);
-    const seedsWanted = Math.max(1, Math.min(maxSeeds, parseInt(seedsSel && seedsSel.value, 10) || 1));
-    const { list, weight } = this._diag13Pool();
-    if (!list.length) {
-      alert('Nenhum segmento de diagonal combina com o tipo/direção escolhidos.');
-      this._syncDiag13Resumo();
-      return;
+    const ordem = Object.keys(pesos).map(Number).sort((a, b) => pesos[b] - pesos[a]);
+    const nUni = ordem.length;
+    const fortes = ordem.slice(0, Math.max(6, Math.floor(nUni / 4)));
+    const somaMedia = somas.length ? (somas.reduce((a, b) => a + b, 0) / somas.length) : 0;
+    return {
+      k,
+      p10: pctAt(10),
+      p20: pctAt(20),
+      p80: pctAt(80),
+      p90: pctAt(90),
+      somaMedia,
+      piPerfis,
+      padroes,
+      ultimo,
+      pendentes: [...pend],
+      pesos,
+      fortes,
+      exigeSeq: nOk ? ((100 * temSeq / nOk) >= 55) : true,
+      pctRep12,
+      reptModa,
+      n: nOk,
+    };
+  };
+
+  TubularApp.prototype._diag13WalletProfiles = function (n, userFonte, offset) {
+    const templates = [
+      { id: 'top_soma_pi', label: 'TOP + soma + P/I', fonte: 'top', soma: 'core', rept: 1, piIdx: 0, ciclo: false, padrao: false, ousada: false },
+      { id: 'top_soma_pi', label: 'TOP + soma + P/I', fonte: 'top', soma: 'core', rept: 2, piIdx: 0, ciclo: false, padrao: false, ousada: false },
+      { id: 'top_soma_pi', label: 'TOP + soma + P/I', fonte: 'top', soma: 'core', rept: 1, piIdx: 1, ciclo: false, padrao: false, ousada: false },
+      { id: 'atraso_rept', label: 'Atraso + rept', fonte: 'atraso', soma: 'core', rept: 2, piIdx: 0, ciclo: false, padrao: false, ousada: false },
+      { id: 'atraso_rept', label: 'Atraso + rept', fonte: 'atraso', soma: 'core', rept: 1, piIdx: 0, ciclo: false, padrao: false, ousada: false },
+      { id: 'padrao', label: 'Padrão', fonte: 'top', soma: 'core', rept: 1, piIdx: 0, ciclo: false, padrao: true, ousada: false },
+      { id: 'padrao', label: 'Padrão', fonte: 'mix', soma: 'core', rept: 1, piIdx: 1, ciclo: false, padrao: true, ousada: false },
+      { id: 'ciclo', label: 'Ciclo', fonte: 'mix', soma: 'core', rept: 1, piIdx: 0, ciclo: true, padrao: false, ousada: false },
+      { id: 'ciclo', label: 'Ciclo', fonte: 'top', soma: 'core', rept: 2, piIdx: 0, ciclo: true, padrao: false, ousada: false },
+      { id: 'ousada', label: 'Mix ousada', fonte: 'atraso', soma: 'wide', rept: 0, piIdx: 1, ciclo: true, padrao: false, ousada: true },
+    ];
+    const lockFonte = (userFonte === 'top' || userFonte === 'atraso') ? userFonte : null;
+    const off = Math.max(0, Number(offset) || 0);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const p = Object.assign({}, templates[(off + i) % templates.length]);
+      if (lockFonte) p.fonte = lockFonte;
+      out.push(p);
     }
-    const existing = new Set(
-      (this.manual13 || []).map((g) => (g.numbers || []).slice().sort((a, b) => a - b).join('-'))
-    );
+    return out;
+  };
+
+  TubularApp.prototype._diag13PickSeeds = function (list, weight, seedsWanted, L, avoidKeys) {
+    const usedKeys = new Set();
+    const picked = new Set();
+    const segs = [];
+    const avoid = avoidKeys instanceof Set ? avoidKeys : new Set();
+    for (let s = 0; s < seedsWanted; s++) {
+      const fit = list.filter((seg) => {
+        if (usedKeys.has(seg.key)) return false;
+        const ns = seg.nums || [];
+        const extra = ns.filter((n) => !picked.has(n)).length;
+        return picked.size + extra <= L.sorteadas;
+      });
+      const fresh = fit.filter((seg) => !avoid.has(seg.key));
+      const bag = fresh.length ? fresh : fit;
+      const seg = this._diag13WeightedPick(bag.length ? bag : list, weight, usedKeys);
+      if (!seg) break;
+      const ns = (seg.nums || []).map(Number);
+      const extra = ns.filter((n) => !picked.has(n));
+      if (picked.size + extra.length > L.sorteadas) continue;
+      extra.forEach((n) => picked.add(n));
+      usedKeys.add(seg.key);
+      segs.push(seg);
+    }
+    return { picked, segs, seedKeys: new Set(segs.map((s) => s.key)) };
+  };
+
+  TubularApp.prototype._diag13Complete = function (lockedSet, L, dna, profile, padraoAlvo) {
+    const k = L.sorteadas;
+    const picked = new Set(lockedSet);
+    if (picked.size > k) return null;
+    const ultimo = dna.ultimo || [];
+    const lastSet = new Set(ultimo);
+    const wantRept = Math.max(0, Math.min(profile.ousada ? 3 : 2, Number(profile.rept) || 0));
+    const piRow = (dna.piPerfis || [])[Math.min(profile.piIdx || 0, Math.max(0, (dna.piPerfis || []).length - 1))]
+      || { pares: Math.floor(k / 2) };
+    const wantPares = Number(piRow.pares);
+    const seedRun = this._diag13MaxRun([...picked]);
+    const maxRun = Math.max(profile.ousada ? 3 : 2, seedRun);
+    const somaLo = profile.soma === 'wide' ? dna.p10 : dna.p20;
+    const somaHi = profile.soma === 'wide' ? dna.p90 : dna.p80;
+    const somaMid = (Number(somaLo) + Number(somaHi)) / 2 || dna.somaMedia || 0;
+    const pend = dna.pendentes || [];
+    const padNeed = {};
+    const padStr = padraoAlvo
+      || ((profile.padrao && dna.padroes && dna.padroes[0]) ? String(dna.padroes[0]) : '');
+    const padDigits = this._diag13ParsePadrao(padStr);
+    if (padDigits.length) {
+      padDigits.forEach((v) => { padNeed[v] = (padNeed[v] || 0) + 1; });
+      [...picked].forEach((n) => {
+        const c = Math.floor(n / 10);
+        if (padNeed[c]) padNeed[c] -= 1;
+      });
+    }
+
+    const tryAdd = (n) => {
+      if (!Number.isFinite(n) || picked.has(n) || picked.size >= k) return false;
+      if (n < L.dezenaMin || n > L.dezenaMax) return false;
+      if (this._diag13WouldMakeRun(picked, n, maxRun)) return false;
+      picked.add(n);
+      const cls = Math.floor(n / 10);
+      if (padNeed[cls] > 0) padNeed[cls] -= 1;
+      return true;
+    };
+
+    let haveRept = [...picked].filter((n) => lastSet.has(n)).length;
+    if (wantRept > haveRept) {
+      const cand = ultimo.filter((n) => !picked.has(n));
+      for (let i = cand.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = cand[i]; cand[i] = cand[j]; cand[j] = t;
+      }
+      for (let i = 0; i < cand.length && haveRept < wantRept && picked.size < k; i++) {
+        if (tryAdd(cand[i])) haveRept += 1;
+      }
+    }
+
+    if (profile.ciclo && pend.length && picked.size < k) {
+      const nCiclo = profile.ousada ? 2 : 1;
+      const rot = pend.slice();
+      for (let i = rot.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = rot[i]; rot[i] = rot[j]; rot[j] = t;
+      }
+      let added = 0;
+      for (let i = 0; i < rot.length && added < nCiclo && picked.size < k; i++) {
+        if (tryAdd(rot[i])) added += 1;
+      }
+    }
+
+    const poolAll = [];
+    for (let n = L.dezenaMin; n <= L.dezenaMax; n++) poolAll.push(n);
+
+    let guard = 0;
+    while (picked.size < k && guard < 80) {
+      guard += 1;
+      const remain = k - picked.size;
+      const curPares = [...picked].filter((n) => n % 2 === 0).length;
+      const curImp = picked.size - curPares;
+      const needPares = wantPares - curPares;
+      const needImp = (k - wantPares) - curImp;
+      const curSum = [...picked].reduce((a, b) => a + b, 0);
+      const curRept = [...picked].filter((n) => lastSet.has(n)).length;
+      let cands = poolAll.filter((n) => !picked.has(n));
+      if (needPares <= 0) cands = cands.filter((n) => n % 2 === 1);
+      else if (needImp <= 0) cands = cands.filter((n) => n % 2 === 0);
+      else if (remain === 1) {
+        cands = cands.filter((n) => (needPares > 0 ? n % 2 === 0 : n % 2 === 1));
+      }
+      const noLong = cands.filter((n) => !this._diag13WouldMakeRun(picked, n, maxRun));
+      if (noLong.length) cands = noLong;
+      if (curRept >= wantRept && wantRept >= 0) {
+        const notLast = cands.filter((n) => !lastSet.has(n));
+        if (notLast.length) cands = notLast;
+      } else if (remain <= (wantRept - curRept)) {
+        const onlyLast = cands.filter((n) => lastSet.has(n));
+        if (onlyLast.length) cands = onlyLast;
+      }
+      if (profile.padrao) {
+        const needCls = Object.keys(padNeed).filter((c) => padNeed[c] > 0).map(Number);
+        if (needCls.length) {
+          const match = cands.filter((n) => needCls.includes(Math.floor(n / 10)));
+          if (match.length) cands = match;
+        }
+      }
+      if (!cands.length) cands = poolAll.filter((n) => !picked.has(n));
+      if (!cands.length) break;
+      const weights = cands.map((n) => {
+        let w = dna.pesos[n] || 1;
+        if (remain && somaMid) {
+          const predicted = curSum + n + ((somaMid - curSum - n) / Math.max(1, remain - 1)) * Math.max(0, remain - 1);
+          w *= 1 / (1 + Math.abs(predicted - somaMid) / 18);
+        }
+        if (profile.ciclo && pend.includes(n)) w *= 1.45;
+        if (dna.fortes && dna.fortes.includes(n)) w *= 1.15;
+        return Math.max(0.01, w);
+      });
+      const choice = this._pickWeighted(cands, weights);
+      if (!tryAdd(choice)) {
+        const ix = poolAll.indexOf(choice);
+        if (ix >= 0) poolAll.splice(ix, 1);
+      }
+    }
+    if (picked.size !== k) return null;
+    return [...picked].sort((a, b) => a - b);
+  };
+
+  TubularApp.prototype._diag13Feia = function (nums, dna, profile, locked, L) {
+    const sorted = [...(nums || [])].map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    if (sorted.length !== L.sorteadas) return 'tamanho';
+    const maxRun = this._diag13MaxRun(sorted);
+    const seedRun = this._diag13MaxRun(locked || []);
+    const allowRun = Math.max(profile.ousada ? 3 : 2, seedRun);
+    if (maxRun >= 4) return 'seq_quadra';
+    if (maxRun > allowRun) return 'seq_longa';
+    const sm = sorted.reduce((a, b) => a + b, 0);
+    const lo = profile.soma === 'wide' ? dna.p10 : dna.p20;
+    const hi = profile.soma === 'wide' ? dna.p90 : dna.p80;
+    if (lo && hi && (sm < lo || sm > hi)) return 'soma';
+    const pares = sorted.filter((n) => n % 2 === 0).length;
+    if (pares === 0 || pares === sorted.length) return 'pi_extremo';
+    const allowedPi = new Set((dna.piPerfis || []).slice(0, profile.ousada ? 4 : 2).map((p) => p.pares));
+    if (L.sorteadas === 7) { allowedPi.add(3); allowedPi.add(4); }
+    if (!profile.ousada && allowedPi.size && !allowedPi.has(pares)) return 'pi';
+    const nRep = sorted.filter((n) => (dna.ultimo || []).includes(n)).length;
+    if (!profile.ousada && (nRep === 0 || nRep >= 4)) return 'rept';
+    if (nRep >= 4) return 'rept';
+    const bma = this._diag13Bma(sorted, L);
+    const zeros = bma.filter((c) => c === 0).length;
+    if (zeros >= 2 || bma.some((c) => c >= L.sorteadas)) return 'faixas';
+    return null;
+  };
+
+  TubularApp.prototype._diag13Diversa = function (cand, others, k) {
+    const cs = new Set(cand);
+    for (let i = 0; i < others.length; i++) {
+      const os = others[i];
+      let ov = 0;
+      for (let j = 0; j < os.length; j++) if (cs.has(os[j])) ov += 1;
+      if (ov >= k - 1) return false;
+      if (ov >= k - 2 && k >= 7) return false;
+    }
+    return true;
+  };
+
+  TubularApp.prototype._diag13DnaMeta = function (nums, dna, profile, L) {
+    const sorted = [...(nums || [])].map(Number).sort((a, b) => a - b);
+    const sm = sorted.reduce((a, b) => a + b, 0);
+    const pares = sorted.filter((n) => n % 2 === 0).length;
+    const seqs = this._diag13SeqGroups(sorted);
+    const nRep = sorted.filter((n) => (dna.ultimo || []).includes(n)).length;
+    const maxRun = seqs.reduce((m, g) => Math.max(m, g.length), 1);
+    return {
+      label: profile.label || profile.id,
+      soma: sm,
+      pi: `${pares}P/${sorted.length - pares}I`,
+      rept: nRep,
+      seq: maxRun > 1 ? maxRun : 0,
+      faixa: `${dna.p20}–${dna.p80}`,
+    };
+  };
+
+  TubularApp.prototype._gerarDiag13Aleatorio = function (alvo, list, weight, seedsWanted, L, existing) {
     const poolAll = [];
     for (let n = L.dezenaMin; n <= L.dezenaMax; n++) poolAll.push(n);
     const aprovadas = [];
@@ -3901,26 +4326,7 @@
     const maxTent = alvo * 80;
     while (aprovadas.length < alvo && tentativas < maxTent) {
       tentativas += 1;
-      const usedKeys = new Set();
-      const picked = new Set();
-      const segs = [];
-      for (let s = 0; s < seedsWanted; s++) {
-        const fit = list.filter((seg) => {
-          if (usedKeys.has(seg.key)) return false;
-          const ns = seg.nums || [];
-          const extra = ns.filter((n) => !picked.has(n)).length;
-          return picked.size + extra <= L.sorteadas;
-        });
-        const seg = this._diag13WeightedPick(fit.length ? fit : list, weight, usedKeys);
-        if (!seg) break;
-        const ns = (seg.nums || []).map(Number);
-        if (ns.some((n) => picked.has(n) && ns.filter((x) => !picked.has(x)).length + picked.size > L.sorteadas)) continue;
-        const extra = ns.filter((n) => !picked.has(n));
-        if (picked.size + extra.length > L.sorteadas) continue;
-        extra.forEach((n) => picked.add(n));
-        usedKeys.add(seg.key);
-        segs.push(seg);
-      }
+      const { picked, segs, seedKeys } = this._diag13PickSeeds(list, weight, seedsWanted, L);
       if (!segs.length) continue;
       const rest = poolAll.filter((n) => !picked.has(n));
       for (let i = rest.length - 1; i > 0; i--) {
@@ -3938,7 +4344,6 @@
       if (existing.has(key)) continue;
       existing.add(key);
       const mes = this._diag13RandomMonth();
-      const seedKeys = new Set(segs.map((s) => s.key));
       aprovadas.push({
         numbers,
         diags: this._diag13DiagsFromNumbers(numbers, seedKeys),
@@ -3947,12 +4352,139 @@
         _uid: ++this._manualUid,
       });
     }
+    return aprovadas;
+  };
+
+  TubularApp.prototype._gerarDiag13Dna = function (alvo, seedsWanted, L, existing, userFonte) {
+    const dna = this._diag13DnaPack();
+    const histMap = this._histComboMap();
+    const profiles = this._diag13WalletProfiles(alvo, userFonte, (this.manual13 || []).length);
+    const aprovadas = [];
+    const batchSegs = new Set();
+    const others = (this.manual13 || []).map((g) => (g.numbers || []).slice());
+    let tentativas = 0;
+    const maxTent = Math.max(alvo * 500, 4000);
+    let pIdx = 0;
+    let failStreak = 0;
+    while (aprovadas.length < alvo && tentativas < maxTent) {
+      tentativas += 1;
+      const profile = profiles[pIdx % profiles.length];
+      const { list, weight } = this._diag13Pool(profile.fonte);
+      if (!list.length) {
+        pIdx += 1;
+        failStreak = 0;
+        continue;
+      }
+      const pads = this.diag13PadroesAlvo || [];
+      const padAlvo = pads.length ? pads[aprovadas.length % pads.length] : null;
+      let listUse = list;
+      if (padAlvo) {
+        const fitPad = list.filter((seg) => this._diag13PadFitsSeed(padAlvo, new Set(seg.nums || [])));
+        if (fitPad.length) listUse = fitPad;
+      }
+      const { picked, segs, seedKeys } = this._diag13PickSeeds(listUse, weight, seedsWanted, L, batchSegs);
+      if (!segs.length) {
+        failStreak += 1;
+        if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
+        continue;
+      }
+      if (padAlvo && !this._diag13PadFitsSeed(padAlvo, picked)) {
+        failStreak += 1;
+        if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
+        continue;
+      }
+      const profileUse = padAlvo ? Object.assign({}, profile, { padrao: true }) : profile;
+      const numbers = this._diag13Complete(picked, L, dna, profileUse, padAlvo);
+      if (!numbers) {
+        failStreak += 1;
+        if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
+        continue;
+      }
+      if (padAlvo && this._diag13PadraoDe(numbers) !== this._diag13NormPad(padAlvo)) {
+        failStreak += 1;
+        if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
+        continue;
+      }
+      const key = numbers.join('-');
+      if (existing.has(key)) {
+        failStreak += 1;
+        if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
+        continue;
+      }
+      if (histMap && histMap.has(this._comboKey(numbers))) {
+        failStreak += 1;
+        if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
+        continue;
+      }
+      if (this._diag13Feia(numbers, dna, profile, [...picked], L)) {
+        failStreak += 1;
+        if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
+        continue;
+      }
+      if (!this._diag13Diversa(numbers, others.concat(aprovadas.map((a) => a.numbers)), L.sorteadas)) {
+        failStreak += 1;
+        if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
+        continue;
+      }
+      existing.add(key);
+      segs.forEach((s) => { if (s.key) batchSegs.add(s.key); });
+      if (batchSegs.size >= Math.min(list.length, Math.max(8, alvo))) batchSegs.clear();
+      const mes = this._diag13RandomMonth();
+      others.push(numbers);
+      aprovadas.push({
+        numbers,
+        diags: this._diag13DiagsFromNumbers(numbers, seedKeys),
+        dnaMeta: this._diag13DnaMeta(numbers, dna, padAlvo
+          ? Object.assign({}, profile, { label: (profile.label || profile.id) + ' · ' + this._diag13NormPad(padAlvo) })
+          : profile, L),
+        month: mes.month,
+        monthName: mes.monthName,
+        _uid: ++this._manualUid,
+      });
+      pIdx += 1;
+      failStreak = 0;
+    }
+    return aprovadas;
+  };
+
+  TubularApp.prototype.gerarDiag13 = async function (qtd) {
+    const info = this.root.querySelector('#tbGerar13Info');
+    const L = limitsFrom(this.root);
+    const alvo = Math.max(1, Math.min(200, Number(qtd) || 10));
+    if (!this.data.length) {
+      if (info) info.textContent = 'Carregando histórico…';
+      try { await this.load(); } catch (_) { /* ignore */ }
+    }
+    if (!this.data.length) {
+      alert('Não foi possível carregar o histórico. Tente novamente.');
+      return;
+    }
+    const seedsSel = this.root.querySelector('#tbDiag13Seeds');
+    const stats = this._ensureDiagStats();
+    const maxSeeds = Math.max(1, Number(stats.maxDiagPorConcurso) || 1);
+    const seedsWanted = Math.max(1, Math.min(maxSeeds, parseInt(seedsSel && seedsSel.value, 10) || 1));
+    const { list, fonte } = this._diag13Pool();
+    if (!list.length) {
+      alert('Nenhum segmento de diagonal combina com o tipo/direção escolhidos.');
+      this._syncDiag13Resumo();
+      return;
+    }
+    const existing = new Set(
+      (this.manual13 || []).map((g) => (g.numbers || []).slice().sort((a, b) => a - b).join('-'))
+    );
+    const dnaOn = this._diag13DnaOn();
+    const aprovadas = dnaOn
+      ? this._gerarDiag13Dna(alvo, seedsWanted, L, existing, fonte)
+      : this._gerarDiag13Aleatorio(alvo, list, this._diag13Pool().weight, seedsWanted, L, existing);
     this.manual13 = (this.manual13 || []).concat(aprovadas);
     this.renderDiag13();
     if (info) {
+      const tag = dnaOn ? 'DNA' : 'acaso';
       info.textContent = aprovadas.length
-        ? `+${aprovadas.length} · total ${this.manual13.length}`
-        : 'Não gerou jogos novos com essa regra. Tente outro tipo/direção.';
+        ? `+${aprovadas.length} · total ${this.manual13.length} · ${tag}`
+        : (dnaOn
+          ? 'Não gerou jogos limpos com essa regra. Afrouxe tipo/direção ou tente de novo.'
+          : 'Não gerou jogos novos com essa regra. Tente outro tipo/direção.');
     }
   };
 
@@ -4001,7 +4533,7 @@
       cards.classList.toggle('is-volante', exib === 'volante');
       cards.classList.toggle('is-numeros', exib === 'numeros');
       if (!list.length) {
-        cards.innerHTML = '<p class="small text-muted mb-0">Gere apostas com as regras acima.</p>';
+        cards.innerHTML = '<p class="small text-muted mb-0">Gere apostas com diagonal + DNA (carteira diversificada, sem jogos feios).</p>';
       } else {
         cards.innerHTML = list.map((g, i) => {
           const nums = (g.numbers || []).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
@@ -4035,6 +4567,10 @@
           const mes = extra && g.monthName
             ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc(this._mesAbrev(g.monthName))}</span>`
             : '';
+          const dm = g.dnaMeta;
+          const dnaLine = dm
+            ? `<div class="tb-diag13-dna" title="Perfil da carteira · faixa soma ${esc(dm.faixa || '')}">${esc(dm.label)} · soma ${dm.soma} · ${esc(dm.pi)} · ${dm.rept} rept${dm.seq ? ` · SEQ ${dm.seq}` : ''}</div>`
+            : '';
           const metaBlock = meta
             ? `<details class="tb-diag13-meta-fold">
                 <summary>Detalhes</summary>
@@ -4049,6 +4585,7 @@
               <strong>Aposta ${String(i + 1).padStart(2, '0')}</strong>
               ${mes}
             </div>
+            ${dnaLine}
             <div class="tb-diag13-card-hibrido">
               ${balls}${vol}
             </div>
@@ -4060,7 +4597,7 @@
 
     if (!body) return;
     if (!list.length) {
-      body.innerHTML = `<tr><td colspan="${colspan}" class="text-muted">Gere apostas com as regras acima.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="${colspan}" class="text-muted">Gere apostas com diagonal + DNA.</td></tr>`;
       return;
     }
     body.innerHTML = list.map((g, i) => {
@@ -4732,6 +5269,7 @@
           else if (q === 'diagonais' || q === 'diagonal' || q === 's13') sub = 's13';
           else if (q === 'manual' || q === 's10') sub = 's10';
         } catch (_) { /* keep initialSub */ }
+        app._diag13ReadPadroesUrl();
         app.showSub(sub);
         if (!app.consumeManualImport()) {
           // retry curto se o hub/aba ainda estiver montando

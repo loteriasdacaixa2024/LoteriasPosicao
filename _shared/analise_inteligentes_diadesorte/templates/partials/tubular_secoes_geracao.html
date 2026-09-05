@@ -474,15 +474,16 @@
         <div data-tb-panel="s13" id="tbSecao13" class="{{ '' if show_s13_first else 'd-none' }}">
           <div class="tb-card tb-diag13-card">
             <h2 class="h5 fw-bold">📐 SEÇÃO 13 — DIAGONAIS
-              <span class="badge bg-secondary ms-1">só esta regra</span>
+              <span class="badge bg-success ms-1">diagonal + DNA</span>
             </h2>
             <details class="tb-howto mb-2">
               <summary>Como usar</summary>
               <div class="tb-howto-body">
                 <ol class="tb-howto-ol">
-                  <li>Esta aba <strong>gera apostas só com a análise de diagonais</strong> da Seção 12 (segmento, direção no volante, tipo, vezes, %, atraso).</li>
-                  <li><strong>Não usa</strong> soma, padrão, sequência, repetidas do concurso anterior nem os demais itens do menu Análise.</li>
-                  <li>Escolha tipo, direção e fonte (Top ou atraso). <strong>GERAR</strong> monta os jogos com esses segmentos e completa as dezenas restantes no volante.</li>
+                  <li>Toda aposta <strong>começa na diagonal</strong> (segmento ↘↗ da Seção 12: tipo, direção, Top/atraso).</li>
+                  <li>O restante é preenchido com o <strong>DNA do histórico</strong>: soma na faixa comum, par/ímpar da moda, 1–2 repetidas do último, ciclo/pendentes e padrão — <strong>sem sequências longas</strong> (trinca/quadra tipo 26-27-28).</li>
+                  <li>A carteira <strong>distribui critérios</strong> (TOP + soma, atraso + rept, padrão, ciclo, uma ousada). Nenhuma linha precisa passar em tudo.</li>
+                  <li>Desmarque <strong>DNA</strong> só se quiser o modo antigo (plantar a diagonal e completar no acaso).</li>
                 </ol>
               </div>
             </details>
@@ -545,7 +546,7 @@
                   <div class="fw-semibold small mb-1">Fonte</div>
                   <div class="d-flex flex-wrap gap-2" id="tbDiag13Fonte">
                     <label class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="top" checked>
+                      <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="top">
                       <span class="form-check-label small">Ranking TOP</span>
                     </label>
                     <label class="form-check form-check-inline mb-0">
@@ -553,12 +554,17 @@
                       <span class="form-check-label small">Maior atraso</span>
                     </label>
                     <label class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="mix">
+                      <input class="form-check-input" type="radio" name="tbDiag13Fonte" value="mix" checked>
                       <span class="form-check-label small">Mix</span>
                     </label>
                   </div>
                 </div>
               </div>
+              <label class="form-check mt-2 mb-0" title="Completa as dezenas com soma, par/ímpar, repetidas e bloqueia jogos feios">
+                <input class="form-check-input" type="checkbox" id="tbDiag13Dna" checked>
+                <span class="form-check-label small">DNA · carteira diversificada · sem apostas feias</span>
+              </label>
+              <div id="tbDiag13PadBar" class="tb-diag13-padbar d-none small mt-2 mb-0"></div>
             </div>
             <div class="tb-diag13-toolbar d-flex flex-wrap align-items-center gap-2 gap-md-3 mb-2">
               <button type="button" class="btn btn-sm btn-success" id="tbGerar13">
@@ -592,7 +598,7 @@
               </span>
             </div>
             <div class="tb-diag13-cards" id="tbDiag13Cards">
-              <p class="small text-muted mb-0">Gere apostas com as regras acima.</p>
+              <p class="small text-muted mb-0">Gere apostas com diagonal + DNA (carteira diversificada, sem jogos feios).</p>
             </div>
             <details class="tb-howto mt-3 mb-0">
               <summary>Tabela resumo (segmento / direção / estatística)</summary>
@@ -613,7 +619,7 @@
                       </tr>
                     </thead>
                     <tbody id="tbDiag13Body">
-                      <tr><td colspan="{{ 8 + (1 if extra_mes else 0) }}" class="text-muted">Gere apostas com as regras acima.</td></tr>
+                      <tr><td colspan="{{ 8 + (1 if extra_mes else 0) }}" class="text-muted">Gere apostas com diagonal + DNA.</td></tr>
                     </tbody>
                   </table>
                 </div>

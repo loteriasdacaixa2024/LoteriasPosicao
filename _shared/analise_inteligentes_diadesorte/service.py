@@ -12,6 +12,7 @@ from itertools import combinations, product
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
 
 from analise_estudos.service_factory import make_estudos_base
+from analise_inteligentes_diadesorte.diagonais_volante import cruzar_linhas
 from analise_inteligentes_diadesorte.soma_media import (
     calcular_faixa_soma,
     classificar_soma,
@@ -968,6 +969,14 @@ class AnaliseInteligentesService:
                 "soma_faixa": faixa,
             })
 
+        cruz = cruzar_linhas(linhas, dmin=dmin, dmax=dmax, cols=10, top_n=3)
+        por_diag = cruz.get("por_padrao") or {}
+        for r in catalogo:
+            info = por_diag.get(r["padrao"]) or {}
+            r["n_com_diagonal"] = int(info.get("n_com_diagonal") or 0)
+            r["pct_com_diagonal"] = float(info.get("pct_com_diagonal") or 0)
+            r["top_diagonais"] = list(info.get("top_diagonais") or [])
+
         # Ordenação padrão: frequência desc, depois jogos
         catalogo.sort(key=lambda r: (-int(r["frequencia"]), -int(r["jogos_possiveis"]), r["padrao"]))
 
@@ -987,6 +996,27 @@ class AnaliseInteligentesService:
         faltantes = sum(1 for r in catalogo if r["status"] == "faltante")
         total_jogos = sum(int(r["jogos_possiveis"]) for r in catalogo)
 
+        com_freq = [r for r in catalogo if int(r["frequencia"] or 0) > 0]
+        cruz_mais_saem = sorted(
+            com_freq, key=lambda r: (-int(r["frequencia"]), -int(r.get("n_com_diagonal") or 0))
+        )[:5]
+        cruz_ja_diag = sorted(
+            [r for r in com_freq if int(r.get("n_com_diagonal") or 0) > 0],
+            key=lambda r: (-int(r.get("n_com_diagonal") or 0), -int(r["frequencia"])),
+        )[:5]
+
+        def _cruz_card(r: Dict[str, Any]) -> Dict[str, Any]:
+            return {
+                "padrao": r["padrao"],
+                "descricao": r["descricao"],
+                "frequencia": r["frequencia"],
+                "percentual_concursos": r["percentual_concursos"],
+                "n_com_diagonal": r.get("n_com_diagonal") or 0,
+                "pct_com_diagonal": r.get("pct_com_diagonal") or 0,
+                "top_diagonais": r.get("top_diagonais") or [],
+                "eh_padrao_ultimo_concurso": r.get("eh_padrao_ultimo_concurso"),
+            }
+
         return {
             "sucesso": True,
             "base": base,
@@ -1000,6 +1030,14 @@ class AnaliseInteligentesService:
             "total_jogos_possiveis": total_jogos,
             "ultimo_resultado": ultimo_resultado,
             "top_frequencia": top_frequencia,
+            "cruzamento_diagonais": {
+                "n_concursos": cruz.get("n_concursos") or 0,
+                "n_com_diagonal": cruz.get("n_com_diagonal") or 0,
+                "pct_com_diagonal": cruz.get("pct_com_diagonal") or 0,
+                "ranking_diagonais": cruz.get("ranking_diagonais") or [],
+                "mais_saem": [_cruz_card(r) for r in cruz_mais_saem],
+                "ja_sairam_com_diagonal": [_cruz_card(r) for r in cruz_ja_diag],
+            },
             "padroes": catalogo,
             "api": "/analise/api/inteligentes/catalogo-padroes",
             "consumo": {

@@ -112,11 +112,12 @@
   border-top: 1px dashed #e5e7eb;
 }
 #get-hub .get-hub-tabs .nav-link {
-  font-weight: 600; color: #495057;
+  font-weight: 700; color: #495057;
   border: 1px solid rgba(0,0,0,.08); border-radius: 999px;
-  padding: .35rem .9rem; margin: 0 .15rem .35rem 0;
+  padding: .35rem .85rem; margin: 0 .15rem .35rem 0;
   background: #fff;
-  display: inline-flex; align-items: center; gap: .4rem;
+  display: inline-flex; align-items: center; gap: .32rem;
+  font-size: .92rem;
 }
 #get-hub .get-hub-tabs .nav-link.active {
   background: var(--primary); color: #fff; border-color: var(--primary);
@@ -124,43 +125,57 @@
 #get-hub .get-hub-tabs .nav-link:hover:not(.active) {
   border-color: var(--primary); color: var(--primary);
 }
+/* G / A: marca sutil — o nome da seção é o que importa */
 #get-hub .get-hub-tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
   font-size: .58rem;
-  font-weight: 800;
-  letter-spacing: .04em;
+  font-weight: 700;
+  letter-spacing: 0;
   text-transform: uppercase;
   line-height: 1;
-  padding: .22rem .38rem;
-  border-radius: 999px;
-  vertical-align: middle;
+  padding: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: .78;
 }
-/* Dia de Sorte #D4B31A — Gerar = ouro cheio; Análise = ouro claro */
+/* Dia de Sorte #D4B31A — G = ouro cheio; A = ouro claro */
 #get-hub .get-hub-tag-gerar {
-  background: #d4b31a; /* 47% principal */
-  color: #171303;      /* 5% */
-  border: 1px solid #b69816; /* 40% */
+  background: #d4b31a;
+  color: #171303;
+  border: 1px solid #b69816;
 }
 #get-hub .get-hub-tag-analise {
-  background: #fcf9e8; /* 95% */
-  color: #887211;      /* 30% */
-  border: 1px solid #eed877; /* 70% */
+  background: #fcf9e8;
+  color: #887211;
+  border: 1px solid #eed877;
+}
+#get-hub .get-hub-tabs .nav-link.active .get-hub-tag {
+  opacity: .9;
 }
 #get-hub .get-hub-tabs .nav-link.active .get-hub-tag-gerar {
-  background: #f9f2d2; /* 90% */
-  color: #2d2606;      /* 10% */
-  border-color: #f4e5a4; /* 80% */
+  background: #f9f2d2;
+  color: #2d2606;
+  border-color: #f4e5a4;
 }
 #get-hub .get-hub-tabs .nav-link.active .get-hub-tag-analise {
-  background: #5b4c0b; /* 20% */
-  color: #f9f2d2;      /* 90% */
-  border-color: #887211; /* 30% */
+  background: #5b4c0b;
+  color: #f9f2d2;
+  border-color: #887211;
 }
 #get-hub .get-hub-legenda {
   font-size: .72rem;
-  color: #715f0e; /* 25% */
+  color: #715f0e;
   text-align: center;
   margin: -.35rem 0 .85rem;
+}
+#get-hub .get-hub-legenda .get-hub-tag {
+  opacity: 1;
+  vertical-align: middle;
+  margin: 0 .15rem 0 .05rem;
 }
 /* Atalhos na cor da modalidade (não azul Bootstrap) */
 #get-hub .tb-btn-mod,
@@ -190,34 +205,34 @@
   <ul class="nav get-hub-tabs mb-2 flex-wrap justify-content-center" role="tablist">
     <li class="nav-item">
       <button type="button" class="nav-link{% if (aba_inicial or 'escolha') == 'escolha' %} active{% endif %}" data-get-hub="escolha" title="Gera apostas">
-        <span class="get-hub-tag get-hub-tag-gerar">Gerar</span> Escolha/Tubular
+        <span class="get-hub-tag get-hub-tag-gerar" title="Gera apostas" aria-hidden="true">G</span> Escolha/Tubular
       </button>
     </li>
     <li class="nav-item">
       <button type="button" class="nav-link{% if aba_inicial == 'manual' %} active{% endif %}" data-get-hub="manual" title="Não gera — monta/importa e analisa apostas">
-        <span class="get-hub-tag get-hub-tag-analise">Análise</span> Seção 10 — Manual
+        <span class="get-hub-tag get-hub-tag-analise" title="Análise — não gera" aria-hidden="true">A</span> Seção 10 — Manual
       </button>
     </li>
     <li class="nav-item">
       <button type="button" class="nav-link{% if aba_inicial == 'automatico' %} active{% endif %}" data-get-hub="automatico" title="Gera apostas">
-        <span class="get-hub-tag get-hub-tag-gerar">Gerar</span> Seção 11 — Automático
+        <span class="get-hub-tag get-hub-tag-gerar" title="Gera apostas" aria-hidden="true">G</span> Seção 11 — Automático
       </button>
     </li>
     <li class="nav-item">
       <button type="button" class="nav-link{% if aba_inicial == 'comparador' %} active{% endif %}" data-get-hub="comparador" title="Não gera — compara no volante e analisa diagonais">
-        <span class="get-hub-tag get-hub-tag-analise">Análise</span> Seção 12 — Volantes
+        <span class="get-hub-tag get-hub-tag-analise" title="Análise — não gera" aria-hidden="true">A</span> Seção 12 — Volantes
       </button>
     </li>
     <li class="nav-item">
-      <button type="button" class="nav-link{% if aba_inicial == 'diagonais' %} active{% endif %}" data-get-hub="diagonais" title="Gera apostas pela regra das diagonais">
-        <span class="get-hub-tag get-hub-tag-gerar">Gerar</span> Seção 13 — Diagonais
+      <button type="button" class="nav-link{% if aba_inicial == 'diagonais' %} active{% endif %}" data-get-hub="diagonais" title="Gera apostas com diagonal + DNA (carteira diversificada)">
+        <span class="get-hub-tag get-hub-tag-gerar" title="Gera apostas" aria-hidden="true">G</span> Seção 13 — Diagonais
       </button>
     </li>
   </ul>
   <p class="get-hub-legenda mb-3">
-    <span class="get-hub-tag get-hub-tag-gerar">Gerar</span> monta apostas
+    <span class="get-hub-tag get-hub-tag-gerar" aria-hidden="true">G</span> monta apostas
     ·
-    <span class="get-hub-tag get-hub-tag-analise">Análise</span> não gera (só monta/conferência/estudo)
+    <span class="get-hub-tag get-hub-tag-analise" aria-hidden="true">A</span> não gera (só monta/conferência/estudo)
   </p>
 
   <div id="get-hub-escolha"{% if aba_inicial in ('manual', 'automatico', 'comparador', 'diagonais') %} class="d-none"{% endif %}>
@@ -419,7 +434,7 @@
   </div>
 </div>{# /get-hub #}
 
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v36">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v38">
 <style>
   :root {
     --cor-sequencia-1: #86efac;
@@ -437,7 +452,7 @@
   {% endfor %}
   {% endif %}
 </style>
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260903v36"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260903v38"></script>
 <script>
 (function () {
   const hub = document.getElementById('get-hub');
