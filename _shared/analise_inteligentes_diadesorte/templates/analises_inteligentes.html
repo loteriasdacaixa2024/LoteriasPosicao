@@ -714,8 +714,27 @@
   #ai-root .ai-pan-frase {
     text-align: center;
     font-size: .92rem;
-    margin: .2rem 0 .85rem;
+    margin: .2rem 0 .55rem;
     max-width: 44rem;
+  }
+  #ai-root .ai-pan-faltantes {
+    max-width: 44rem;
+    margin: 0 0 .85rem;
+    text-align: left;
+  }
+  #ai-root .ai-pan-faltantes .ai-pan-falt-title {
+    font-size: .78rem;
+    font-weight: 800;
+    color: #6c757d;
+    margin-bottom: .35rem;
+  }
+  #ai-root .ai-pan-faltantes .ai-table {
+    margin-bottom: 0;
+  }
+  #ai-root .ai-pan-faltantes td.td-padrao {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .03em;
+    white-space: nowrap;
   }
 
 </style>
@@ -1314,6 +1333,7 @@
       </div>
       <div id="aiPanHistResumo" class="ai-pan-resumo"></div>
       <p class="ai-pan-frase text-muted" id="aiPanHistFrase">—</p>
+      <div id="aiPanHistFaltantes" class="ai-pan-faltantes" hidden></div>
       <div class="ai-pan-table-wrap">
         <table class="table table-sm table-bordered ai-table" id="aiTabelaPanoramaHist">
           <thead>
@@ -1794,6 +1814,56 @@
     return rows;
   }
 
+  function listarPadroesFaltantes() {
+    const ja = new Set(
+      agregarPadroesJaSairam(PAN_HIST.all).map(r => normalizarPadrao(r.padrao_inicial))
+    );
+    const cat = Array.isArray(CAT_PAD_II) ? CAT_PAD_II : [];
+    const falt = [];
+    cat.forEach(p => {
+      const pad = normalizarPadrao(p && (p.padrao || p.padrao_inicial));
+      if (!pad || ja.has(pad)) return;
+      falt.push({
+        padrao: pad,
+        descricao: p.descricao || p.descricao_bma || '',
+      });
+    });
+    falt.sort((a, b) => a.padrao.localeCompare(b.padrao, 'pt-BR'));
+    return falt;
+  }
+
+  function renderPadroesFaltantes(faltamLista) {
+    const box = document.getElementById('aiPanHistFaltantes');
+    if (!box) return;
+    const lista = faltamLista || [];
+    if (!lista.length) {
+      box.hidden = true;
+      box.innerHTML = '';
+      return;
+    }
+    box.hidden = false;
+    box.innerHTML = `
+      <div class="ai-pan-falt-title">Padrões que faltam sair (${fmtVol(lista.length)})</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered ai-table mb-0">
+          <thead>
+            <tr>
+              <th class="col-pan-num">Nº</th>
+              <th>Padrão</th>
+              <th>B+M+A</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${lista.map((p, i) => `<tr>
+              <td class="td-pan-num">${i + 1}</td>
+              <td class="td-padrao">${esc(p.padrao)}</td>
+              <td>${esc(p.descricao || '—')}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
   function renderPanoramaHist() {
     const tb = document.querySelector('#aiTabelaPanoramaHist tbody');
     const info = document.getElementById('aiPanHistInfo');
@@ -1812,7 +1882,10 @@
     const totConc = PAN_HIST.all.length;
     const jaSairam = agregarPadroesJaSairam(PAN_HIST.all).length;
     const teorico = Number(PAN_HIST.totalTeorico) || 0;
-    const faltam = teorico > 0 ? Math.max(0, teorico - jaSairam) : 0;
+    const faltamLista = listarPadroesFaltantes();
+    const faltam = teorico > 0
+      ? Math.max(0, teorico - jaSairam)
+      : faltamLista.length;
     if (info) {
       const n = itens.length;
       info.textContent = n === jaSairam
@@ -1834,6 +1907,7 @@
         ? `São um total de <strong>${fmtVol(t)}</strong> combinações. Já saíram <strong>${fmtVol(jaSairam)}</strong>. Faltam <strong>${fmtVol(faltam)}</strong>. De um total de <strong>${fmtVol(totConc)}</strong> sorteios.`
         : '—';
     }
+    renderPadroesFaltantes(faltamLista);
   }
 
   async function garantirTotalPadroesTeoricos() {

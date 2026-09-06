@@ -8999,3 +8999,90 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://127.0.0.1:5155
 Press CTRL+C to quit
 127.0.0.1 - - [04/Sep/2026 16:38:34] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-05 10:44:21 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+[API Caixa] Quina 7110/7110...127.0.0.1 - - [05/Sep/2026 10:44:52] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:50:53] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:50:55] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:50:56] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:51:08] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:51:09] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:51:21] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [05/Sep/2026 10:51:28] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:52:41] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:52:53] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:52:55] "GET /geradores-elite/escolha-tubular-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:52:57] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:52:58] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:52:58] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:53:03] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:53:05] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:53:10] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:54:07] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 10:54:19] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [05/Sep/2026 11:37:07] "GET /geradores-elite/escolha-tubular-apostas/?aba=comparador HTTP/1.1" 200 -
+
+--- iniciando 2026-09-05 11:58:51 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [05/Sep/2026 11:59:03] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-05 16:31:39 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://192.168.15.2:5155
+Press CTRL+C to quit
+127.0.0.1 - - [05/Sep/2026 16:31:53] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-05 20:46:58 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [05/Sep/2026 20:47:12] "GET / HTTP/1.1" 200 -
