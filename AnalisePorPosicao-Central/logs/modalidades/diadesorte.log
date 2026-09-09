@@ -27043,3 +27043,193 @@ Press CTRL+C to quit
 127.0.0.1 - - [09/Sep/2026 15:19:19] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
 127.0.0.1 - - [09/Sep/2026 15:24:17] "GET /analise/api/inteligentes/jogos-padrao?padrao=0%200%201%201%202%202%202 HTTP/1.1" 200 -
 127.0.0.1 - - [09/Sep/2026 15:25:58] "GET /analise/api/inteligentes/jogos-padrao?padrao=0%200%200%201%201%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:05] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:06] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:06] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:40:07] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:40:09] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:15] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-09-09 15:40:21 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [09/Sep/2026 15:40:27] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:27] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:27] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:27] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:27] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:28] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:30] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:39] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:53] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:53] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:53] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:40:53] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:40:54] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:40:56] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:41:02] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:41:04] "GET /analise/api/inteligentes/jogos-padrao?padrao=0%200%200%201%201%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:41:26] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:41:26] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:41:26] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:41:26] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:41:27] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:41:29] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:41:38] "GET /analise/api/inteligentes/jogos-padrao?padrao=0%200%200%201%201%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:41:45] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:14] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:14] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:15] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:17] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:17] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:18] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:20] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:20] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:20] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:42:20] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:42:20] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:23] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:42:30] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:48:28] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:48:29] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:48:29] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:48:29] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:48:31] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:48:34] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:48:55] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-09-09 15:56:45 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [09/Sep/2026 15:56:52] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:56:53] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:56:53] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:56:54] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:56:54] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 15:56:56] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:56:58] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:57:16] "GET /analise/api/inteligentes/jogos-padrao?padrao=0%200%201%201%202%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 15:57:19] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:05:30] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:05:30] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 16:05:31] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:05:31] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 16:05:33] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:05:36] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:05:52] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:12:01] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:12:01] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:12:02] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:12:02] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:12:03] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:12:03] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [09/Sep/2026 16:15:13] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:15:13] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 16:15:14] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:15:14] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 16:15:17] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:17:11] "GET /analise/api/inteligentes/estatisticas-historico?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:17:11] "GET /analise/api/inteligentes/catalogo?n=7 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:18:12] "GET /analise/api/inteligentes/jogos-padrao?padrao=0%200%201%201%202%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:22:03] "GET /analise/analises-inteligentes/?aba=padroes-ii HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:22:28] "GET /analise/analises-inteligentes/?aba=padroes-ii HTTP/1.1" 200 -
+
+--- iniciando 2026-09-09 16:32:49 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [09/Sep/2026 16:32:57] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:33:00] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:33:00] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:33:01] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 16:33:01] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:33:02] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:33:04] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 16:33:13] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-09-09 16:45:05 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit

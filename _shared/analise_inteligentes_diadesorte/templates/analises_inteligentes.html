@@ -239,7 +239,7 @@
   #ai-root #aiTabelaJogosPadrao td.td-padrao code {
     display: inline-block;
     min-width: 7.6rem;
-    text-align: left;
+    text-align: right;
     font-variant-numeric: tabular-nums;
     letter-spacing: .04em;
   }
@@ -283,15 +283,52 @@
     text-align: center !important;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
-    background: #fffdf5 !important;
     min-width: 3.6rem;
+  }
+  #ai-root #aiTabelaPadroesII td.td-condiag,
+  #ai-root #aiTabelaPadroesII td.td-dif,
+  #ai-root #aiTabelaPadroesII td.td-diag,
+  #ai-root #aiTabelaJogosPadrao td.td-condiag,
+  #ai-root #aiTabelaJogosPadrao td.td-dif,
+  #ai-root #aiTabelaJogosPadrao td.td-diag {
+    background: #fff8e1 !important;
   }
   #ai-root #aiTabelaPadroesII th.col-diag,
   #ai-root #aiTabelaPadroesII td.td-diag,
   #ai-root #aiTabelaJogosPadrao th.col-diag,
   #ai-root #aiTabelaJogosPadrao td.td-diag {
-    min-width: 9.5rem;
-    white-space: normal;
+    min-width: 16.4rem;
+    white-space: nowrap;
+    text-align: center !important;
+  }
+  /* Diag: 3 faixas da direita p/ esquerda; o bloco inteiro fica no centro da célula */
+  #ai-root #aiTabelaPadroesII td.td-diag .ai-col-alinha,
+  #ai-root #aiTabelaJogosPadrao td.td-diag .ai-col-alinha {
+    display: inline-grid;
+    grid-template-columns: 6.2rem 0.5rem 6.2rem 0.5rem 6.2rem;
+    justify-items: center;
+    align-items: center;
+    column-gap: .1rem;
+    min-width: 0;
+    text-align: center;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    font-size: .78rem;
+  }
+  #ai-root td.td-diag .ai-diag-sep {
+    color: #6c757d;
+    font-weight: 600;
+  }
+  #ai-root td.td-diag .ai-diag-slot {
+    white-space: nowrap;
+    min-height: 1em;
+  }
+  #ai-root td.td-diag .ai-diag-dir {
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+    font-weight: 800;
   }
   #ai-root #aiTabelaPadroesII tr.tr-padrao-ultimo > td.td-condiag,
   #ai-root #aiTabelaPadroesII tr.tr-padrao-ultimo > td.td-dif,
@@ -307,13 +344,13 @@
   #ai-root .ai-cruz-diag {
     border: 1px solid rgba(192,139,0,.28);
     border-radius: 10px;
-    background: #fffdf5;
+    background: #fff8e1;
     padding: .7rem .85rem .85rem;
   }
   #ai-root .ai-cruz-diag-card {
-    border: 1px solid rgba(192,139,0,.22);
+    border: 1px solid rgba(192,139,0,.28);
     border-radius: 8px;
-    background: #fff;
+    background: #fff8e1;
     padding: .5rem .6rem;
     height: 100%;
   }
@@ -342,13 +379,21 @@
 
   #ai-root #aiTabelaPadroesII .ai-col-alinha {
     display: inline-block;
-    text-align: left;
+    text-align: right;
     font-variant-numeric: tabular-nums;
   }
   #ai-root #aiTabelaPadroesII td.td-dist .ai-col-alinha { min-width: 7.4rem; }
   #ai-root #aiTabelaPadroesII td.td-jogos .ai-col-alinha { min-width: 4.8rem; }
   #ai-root #aiTabelaPadroesII td.td-freq .ai-col-alinha { min-width: 6.2rem; }
+  #ai-root #aiTabelaPadroesII td.td-condiag .ai-col-alinha { min-width: 2.4rem; }
+  #ai-root #aiTabelaPadroesII td.td-dif .ai-col-alinha { min-width: 2.2rem; }
   #ai-root #aiTabelaPadroesII td.td-atraso .ai-col-alinha { min-width: 2.6rem; }
+  #ai-root #aiTabelaPadroesII td.td-apostar .ai-col-alinha { min-width: 4.2rem; }
+  #ai-root #aiTabelaPadroesII td.td-ja-saiu .ai-col-alinha { min-width: 2.4rem; }
+  #ai-root #aiTabelaPadroesII td.td-diag .ai-col-alinha {
+    display: inline-grid;
+    text-align: center;
+  }
   #ai-root #aiTabelaJogosPadrao th.col-conc-jogo,
   #ai-root #aiTabelaJogosPadrao td.td-conc-jogo {
     text-align: center !important;
@@ -356,11 +401,17 @@
     font-variant-numeric: tabular-nums;
     width: 5.5rem;
   }
+  #ai-root #aiTabelaJogosPadrao td.td-condiag .ai-col-alinha,
+  #ai-root #aiTabelaJogosPadrao td.td-dif .ai-col-alinha,
   #ai-root #aiTabelaJogosPadrao td.td-conc-jogo .ai-col-alinha {
     display: inline-block;
-    min-width: 3.2rem;
-    text-align: left;
+    text-align: right;
     font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaJogosPadrao td.td-condiag .ai-col-alinha { min-width: 2.4rem; }
+  #ai-root #aiTabelaJogosPadrao td.td-dif .ai-col-alinha { min-width: 2.2rem; }
+  #ai-root #aiTabelaJogosPadrao td.td-conc-jogo .ai-col-alinha {
+    min-width: 3.2rem;
   }
   #ai-root #aiTabelaResultados tr.tr-concurso-foco > td {
     background-color: rgba(25,135,84,.12);
@@ -1051,7 +1102,7 @@
               <th class="ai-sort col-dist" data-sort="descricao" data-table="p2">Distribuição <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-jogos" data-sort="jogos_possiveis" data-table="p2">Jogos <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-freq" data-sort="frequencia" data-table="p2">Freq. <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="p2" title="Concursos deste padrão que saíram com diagonal / frequência">Con/Diag <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="p2" title="Concursos deste padrão que saíram com diagonal (Dif = Freq − Con/Diag)">Con/Diag <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dif" data-sort="dif_diagonal" data-table="p2" title="Frequência − concursos com diagonal">Dif <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-diag" data-sort="diag_top" data-table="p2" title="Diagonais ↘↗ que mais acompanharam este padrão">Diag <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-atraso" data-sort="atraso" data-table="p2">Atraso <span class="ai-sort-ind">⇅</span></th>
@@ -1206,7 +1257,7 @@
               <th class="ai-sort" data-sort="padrao_inicial" data-table="jogos">Padrão <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dezenas-centro" data-sort="dezenas_fmt" data-table="jogos">Aposta <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="soma" data-table="jogos">Soma <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="jogos" title="Concursos do padrão com diagonal / frequência">Con/Diag <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="jogos" title="Concursos do padrão com diagonal (Dif = Freq − Con/Diag)">Con/Diag <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dif" data-sort="dif_diagonal" data-table="jogos" title="Frequência − concursos com diagonal">Dif <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-diag" data-sort="qtd_diag" data-table="jogos" title="Diagonais ↘↗ presentes nesta aposta">Diag <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="status_media" data-table="jogos">Status <span class="ai-sort-ind">⇅</span></th>
@@ -2414,7 +2465,20 @@
   function htmlDiagTexto(list) {
     const arr = (list || []).slice(0, 3);
     if (!arr.length) return '<span class="text-muted">—</span>';
-    return arr.map((d) => `${esc(d.dir_sym || '')} ${esc(d.nums_fmt || '')}`).join(' <span class="text-muted">|</span> ');
+    const slots = ['', '', ''];
+    arr.forEach((d, i) => {
+      const nums = String((d && d.nums_fmt) || '').trim();
+      const dir = String((d && d.dir_sym) || '').trim();
+      slots[3 - arr.length + i] = nums
+        ? `${dir ? `<span class="ai-diag-dir">${esc(dir)}</span>` : ''}${esc(nums)}`
+        : '';
+    });
+    return slots.map((s, i) => {
+      const sep = (i > 0)
+        ? `<span class="ai-diag-sep">${(slots[i - 1] && s) ? '|' : ''}</span>`
+        : '';
+      return `${sep}<span class="ai-diag-slot">${s || '&nbsp;'}</span>`;
+    }).join('');
   }
 
   function metaPadraoDiag(padrao) {
@@ -2641,7 +2705,7 @@
       p.dif_diagonal = dif;
       const condiagCell = !Number.isFinite(nDiag)
         ? '<span class="text-muted">—</span>'
-        : `<span class="ai-col-alinha" title="${esc(p.pct_com_diagonal || 0)}% dos concursos deste padrão tiveram diagonal">${fmtVol(nDiag)}/${fmtVol(freq)}</span>`;
+        : `<span class="ai-col-alinha" title="${fmtVol(nDiag)} de ${fmtVol(freq)} concursos deste padrão tiveram diagonal (${esc(p.pct_com_diagonal || 0)}%)">${fmtVol(nDiag)}</span>`;
       const difCell = !Number.isFinite(nDiag)
         ? '<span class="text-muted">—</span>'
         : `<span class="ai-col-alinha">${fmtVol(dif)}</span>`;
@@ -2660,8 +2724,8 @@
         <td class="td-dif">${difCell}</td>
         <td class="td-diag">${diagCell}</td>
         <td class="td-atraso"><span class="ai-col-alinha">${esc(atraso)}</span></td>
-        <td class="td-apostar">${p.para_apostar == null ? '—' : fmtVol(p.para_apostar)}</td>
-        <td class="td-ja-saiu">${p.ja_sairam_dentro == null ? '—' : fmtVol(p.ja_sairam_dentro)}</td>
+        <td class="td-apostar">${p.para_apostar == null ? '—' : `<span class="ai-col-alinha">${fmtVol(p.para_apostar)}</span>`}</td>
+        <td class="td-ja-saiu">${p.ja_sairam_dentro == null ? '—' : `<span class="ai-col-alinha">${fmtVol(p.ja_sairam_dentro)}</span>`}</td>
         <td>${statusBadge(p.status)}</td>
       </tr>`;
     }).join('') || '<tr><td colspan="13" class="text-muted">Nenhum padrão com os filtros.</td></tr>';
@@ -3125,10 +3189,10 @@
     const meta = metaPadraoDiag(JOGOS_PAD.padrao);
     const condiag = (meta.n_com_diagonal == null)
       ? '<span class="text-muted">—</span>'
-      : `<span title="${esc(meta.pct_com_diagonal || 0)}% dos concursos deste padrão tiveram diagonal">${fmtVol(meta.n_com_diagonal)}/${fmtVol(meta.frequencia)}</span>`;
+      : `<span class="ai-col-alinha" title="${fmtVol(meta.n_com_diagonal)} de ${fmtVol(meta.frequencia)} concursos deste padrão tiveram diagonal (${esc(meta.pct_com_diagonal || 0)}%)">${fmtVol(meta.n_com_diagonal)}</span>`;
     const dif = (meta.n_com_diagonal == null)
       ? '<span class="text-muted">—</span>'
-      : fmtVol(meta.dif_diagonal);
+      : `<span class="ai-col-alinha">${fmtVol(meta.dif_diagonal)}</span>`;
     const baseNum = Number(JOGOS_PAD.offset) || 0;
     tbody.innerHTML = rows.map((j, i) => {
       const key = j.dezenas_fmt;
@@ -3150,7 +3214,7 @@
         ? `<span class="ai-col-alinha"><a href="#" class="fw-bold text-decoration-underline" data-act="ir-concurso" data-concurso="${esc(conc)}" title="Abrir concurso ${esc(conc)} na aba Resultados">${esc(conc)}</a><span class="badge-ja-saiu">já saiu</span></span>`
         : '<span class="text-muted small">—</span>';
       const diagHtml = diags.length
-        ? `<span title="${diags.length} diagonal(is) nesta aposta">${htmlDiagTexto(diags)}</span>`
+        ? `<span class="ai-col-alinha" title="${diags.length} diagonal(is) nesta aposta">${htmlDiagTexto(diags)}</span>`
         : '<span class="text-muted">—</span>';
       return `<tr class="${trCls}"${isWin ? ' data-vencedor="1"' : ''}${jaSaiu ? ' data-ja-saiu="1"' : ''}${concTit}>
         <td><input type="checkbox" class="form-check-input ai-aposta-chk" data-dez="${esc(key)}" ${checked}></td>
