@@ -233,8 +233,132 @@ def expandir_jogos_padrao(
     }
 
 
+def iter_jogos_padrao_brutos(
+    padrao: str,
+    *,
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+):
+    """Gera (índice catálogo 1-based, dezenas_fmt, soma) na mesma ordem de expandir_jogos_padrao."""
+    digs = [int(x) for x in str(padrao).replace(",", " ").split() if x.strip().isdigit()]
+    if not digs:
+        return
+    need = Counter(digs)
+    pools = pool_por_digito_universo(min_dezena, max_dezena)
+    for dig, qtd in need.items():
+        if len(pools.get(dig) or []) < qtd:
+            return
+    digitos_ord = sorted(need.keys())
+    partes = [list(combinations(pools[d], need[d])) for d in digitos_ord]
+    idx = 0
+    for combo_parts in product(*partes):
+        idx += 1
+        dezenas = sorted(int(x) for part in combo_parts for x in part)
+        yield idx, " ".join(f"{d:02d}" for d in dezenas), sum(dezenas)
+
+
+def _numeros_aposta_lista_aba5(
+    padrao: str,
+    chaves: Sequence[str],
+    *,
+    faixa: Optional[Dict[str, Any]],
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+) -> Dict[str, int]:
+    """
+    Nº da aposta na aba 5 com filtro "Todos do padrão" e ordem padrão (distância, soma).
+    É o mesmo número que aparece ao clicar em Mostrar vencedor.
+    """
+    want = {str(k).strip() for k in chaves if str(k).strip()}
+    if not want:
+        return {}
+    media = None
+    if faixa and faixa.get("media") is not None:
+        try:
+            media = int(faixa["media"])
+        except (TypeError, ValueError):
+            media = None
+    recs: List[tuple] = []
+    somas_teo: List[int] = []
+    for idx, fmt, soma in iter_jogos_padrao_brutos(
+        padrao, min_dezena=min_dezena, max_dezena=max_dezena
+    ):
+        recs.append((soma, idx, fmt if fmt in want else None))
+        if media is None:
+            somas_teo.append(soma)
+    if media is None:
+        faixa = calcular_faixa_soma(somas_teo, fonte="teorico")
+        try:
+            media = int((faixa or {}).get("media") or 0)
+        except (TypeError, ValueError):
+            media = 0
+    recs.sort(key=lambda t: (abs(int(t[0]) - int(media)), int(t[0]), int(t[1])))
+    found: Dict[str, int] = {}
+    for n, (_soma, _idx, fmt) in enumerate(recs, 1):
+        if fmt:
+            found[fmt] = n
+            if len(found) >= len(want):
+                break
+    return found
+
+
+_N_APOSTA_CACHE: Dict[str, Dict[str, int]] = {}
+
+
 def _chave_dezenas(dezenas: Sequence[int]) -> str:
     return " ".join(f"{int(d):02d}" for d in sorted(int(x) for x in dezenas))
+
+
+def _dezenas_lista(dezenas: Any) -> List[int]:
+    if dezenas is None:
+        return []
+    if isinstance(dezenas, (list, tuple)):
+        return [int(x) for x in dezenas if str(x).strip() != ""]
+    return [int(x) for x in str(dezenas).replace(",", " ").split() if x.strip().isdigit()]
+
+
+def id_aposta_do_jogo(
+    padrao: str,
+    dezenas: Any,
+    *,
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+) -> Optional[int]:
+    """Nº da aposta no catálogo do padrão (mesma ordem de expandir_jogos_padrao)."""
+    digs = [int(x) for x in str(padrao).replace(",", " ").split() if x.strip().isdigit()]
+    dez = sorted(_dezenas_lista(dezenas))
+    if not digs or len(dez) != len(digs):
+        return None
+    need = Counter(digs)
+    by_dig: Dict[int, List[int]] = defaultdict(list)
+    for n in dez:
+        by_dig[int(n) // 10].append(int(n))
+    if any(len(by_dig.get(d, [])) != qtd for d, qtd in need.items()):
+        return None
+    pools = pool_por_digito_universo(min_dezena, max_dezena)
+    digitos_ord = sorted(need.keys())
+    partes = []
+    chosen = []
+    for d in digitos_ord:
+        pool = pools.get(d) or []
+        qtd = need[d]
+        if len(pool) < qtd:
+            return None
+        opts = list(combinations(pool, qtd))
+        ch = tuple(sorted(by_dig.get(d) or []))
+        try:
+            pos = opts.index(ch)
+        except ValueError:
+            return None
+        partes.append(len(opts))
+        chosen.append(pos)
+    idx = 0
+    for i, pos in enumerate(chosen):
+        rest = 1
+        for later in partes[i + 1 :]:
+            rest *= later
+        idx += pos * rest
+    return idx + 1
 
 
 def contar_operacional_padrao(
@@ -1097,6 +1221,39 @@ class AnaliseInteligentesService:
         except Exception:
             out["modality_nome"] = cls.modality_key
         return out
+
+    @classmethod
+    def numeros_aposta_aba5(
+        cls,
+        padrao: str,
+        chaves: Sequence[str],
+        *,
+        base: str = "geral",
+    ) -> Dict[str, int]:
+        """Nºs da aba 5 (Todos do padrão, ordem distância) para as cartelas informadas."""
+        pad = " ".join(
+            str(x) for x in str(padrao or "").replace(",", " ").split() if str(x).strip().isdigit()
+        )
+        want = {str(k).strip() for k in (chaves or []) if str(k).strip()}
+        if not pad or not want:
+            return {}
+        cached = _N_APOSTA_CACHE.get(pad) or {}
+        if want <= set(cached.keys()):
+            return {k: cached[k] for k in want}
+        lim = cls._limites()
+        dados = cls.listar_resultados(janela=0, base=base)
+        hist = somas_historicas_do_padrao(dados.get("linhas") or [], pad)
+        faixa = calcular_faixa_soma(hist, fonte="historico")
+        got = _numeros_aposta_lista_aba5(
+            pad,
+            want,
+            faixa=faixa,
+            min_dezena=lim["min_dezena"],
+            max_dezena=lim["max_dezena"],
+        )
+        cached.update(got)
+        _N_APOSTA_CACHE[pad] = cached
+        return {k: cached[k] for k in want if k in cached}
 
     @classmethod
     def exportar_jogos_padrao_xlsx(

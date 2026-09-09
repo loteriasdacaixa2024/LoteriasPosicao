@@ -1257,11 +1257,15 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 data = request.get_json(silent=True) or {}
                 pool = data.get("pool") or []
                 k = data.get("dezenas_por_aposta")
+                exigir = data.get("exigir_qtd_digitos")
             else:
                 raw = request.args.get("pool", "")
                 pool = [int(x) for x in raw.replace(";", ",").split(",") if x.strip().isdigit()]
                 k = request.args.get("dezenas_por_aposta", type=int)
-            return jsonify(ConstrutorDigitosService.avaliar_pool(modality_key, pool, k))
+                exigir = request.args.get("exigir_qtd_digitos")
+            return jsonify(ConstrutorDigitosService.avaliar_pool(
+                modality_key, pool, k, exigir_qtd_digitos=exigir,
+            ))
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
@@ -1364,12 +1368,36 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         data = request.get_json(silent=True) or {}
         try:
             from geradores_elite.construtor.universes.digitos_service import ConstrutorDigitosService
+            exigir = data.get("exigir_qtd_digitos")
             return jsonify(ConstrutorDigitosService.listar_combinacoes(
                 modality_key,
                 data.get("pool") or [],
                 data.get("dezenas_por_aposta"),
                 incluir_apostas=bool(data.get("incluir_apostas", True)),
                 limite=data.get("limite"),
+                exigir_qtd_digitos=exigir,
+            ))
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @bp.route("/api/construtor-construcoes/digitos/refinar", methods=["POST"])
+    def api_construtor_digitos_refinar():
+        if not _construtor_ok():
+            return jsonify({"sucesso": False, "erro": "Indisponível."}), 404
+        data = request.get_json(silent=True) or {}
+        try:
+            from geradores_elite.construtor.universes.digitos_service import ConstrutorDigitosService
+            exigir = data.get("exigir_qtd_digitos")
+            return jsonify(ConstrutorDigitosService.refinar_lote(
+                modality_key,
+                data.get("pool") or [],
+                data.get("apostas") or [],
+                dezenas_por_aposta=data.get("dezenas_por_aposta"),
+                exigir_qtd_digitos=exigir,
+                modo=data.get("modo") or "inteligente",
+                intensidade=data.get("intensidade") or "leve",
+                variacoes=int(data.get("variacoes") or 1),
+                distancia=data.get("distancia") or "media",
             ))
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
@@ -1392,6 +1420,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 dezenas_por_aposta=data.get("dezenas_por_aposta"),
                 apostas=data.get("apostas"),
                 mes_num=mes,
+                exigir_qtd_digitos=data.get("exigir_qtd_digitos"),
             ))
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500

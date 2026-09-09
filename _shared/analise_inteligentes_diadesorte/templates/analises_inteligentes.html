@@ -229,19 +229,60 @@
   }
   #ai-root .ai-legenda-dot.verde { background: #198754; }
   #ai-root .ai-badge-vencedor { font-size: .65rem; font-weight: 700; vertical-align: middle; }
+  #ai-root #aiTabelaPadroesII {
+    table-layout: fixed;
+    width: 100%;
+  }
+  #ai-root #aiTabelaPadroesII th,
+  #ai-root #aiTabelaPadroesII td {
+    padding-left: .32rem;
+    padding-right: .32rem;
+  }
+  #ai-root #aiTabelaPadroesII .ai-chk-th,
+  #ai-root #aiTabelaPadroesII td:first-child { width: 3%; }
+  #ai-root #aiTabelaPadroesII th.col-num,
+  #ai-root #aiTabelaPadroesII td.td-num { width: 4%; }
+  #ai-root #aiTabelaPadroesII th.col-padrao,
+  #ai-root #aiTabelaPadroesII td.td-padrao { width: 8.5%; }
+  #ai-root #aiTabelaPadroesII th.col-dist,
+  #ai-root #aiTabelaPadroesII td.td-dist { width: 8.5%; }
+  #ai-root #aiTabelaPadroesII th.col-jogos,
+  #ai-root #aiTabelaPadroesII td.td-jogos { width: 8%; }
+  #ai-root #aiTabelaPadroesII th.col-freq,
+  #ai-root #aiTabelaPadroesII td.td-freq { width: 7%; }
+  #ai-root #aiTabelaPadroesII th.col-condiag,
+  #ai-root #aiTabelaPadroesII td.td-condiag { width: 8%; }
+  #ai-root #aiTabelaPadroesII th.col-dif,
+  #ai-root #aiTabelaPadroesII td.td-dif { width: 6%; }
+  #ai-root #aiTabelaPadroesII th.col-diag,
+  #ai-root #aiTabelaPadroesII td.td-diag { width: 14%; }
+  #ai-root #aiTabelaPadroesII th.col-atraso,
+  #ai-root #aiTabelaPadroesII td.td-atraso { width: 7%; }
+  #ai-root #aiTabelaPadroesII th.col-apostar,
+  #ai-root #aiTabelaPadroesII td.td-apostar { width: 9.5%; }
+  #ai-root #aiTabelaPadroesII th.col-ja-saiu,
+  #ai-root #aiTabelaPadroesII td.td-ja-saiu { width: 8.5%; }
+  #ai-root #aiTabelaPadroesII th.col-status,
+  #ai-root #aiTabelaPadroesII td.td-status { width: 8%; }
   #ai-root #aiTabelaPadroesII td.td-padrao,
   #ai-root #aiTabelaJogosPadrao td.td-padrao {
     text-align: center !important;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
-  #ai-root #aiTabelaPadroesII td.td-padrao code,
   #ai-root #aiTabelaJogosPadrao td.td-padrao code {
     display: inline-block;
     min-width: 7.6rem;
     text-align: left;
     font-variant-numeric: tabular-nums;
     letter-spacing: .04em;
+  }
+  #ai-root #aiTabelaPadroesII td.td-padrao code {
+    display: inline-block;
+    min-width: 0;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .02em;
   }
   #ai-root #aiTabelaPadroesII th.col-dist,
   #ai-root #aiTabelaPadroesII td.td-dist,
@@ -268,12 +309,30 @@
     text-align: center;
     background: #fde8e8;
   }
+  #ai-root #aiTabelaPadroesII th.col-condiag,
+  #ai-root #aiTabelaPadroesII td.td-condiag,
+  #ai-root #aiTabelaPadroesII th.col-dif,
+  #ai-root #aiTabelaPadroesII td.td-dif,
   #ai-root #aiTabelaPadroesII th.col-diag,
   #ai-root #aiTabelaPadroesII td.td-diag {
     text-align: center !important;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
-    min-width: 7.2rem;
+  }
+  #ai-root #aiTabelaPadroesII th.col-condiag,
+  #ai-root #aiTabelaPadroesII th.col-dif,
+  #ai-root #aiTabelaPadroesII th.col-diag {
+    background: #b07d00;
+  }
+  #ai-root #aiTabelaPadroesII td.td-condiag,
+  #ai-root #aiTabelaPadroesII td.td-dif,
+  #ai-root #aiTabelaPadroesII td.td-diag {
+    background-color: #fcf9e8;
+  }
+  #ai-root #aiTabelaPadroesII tr.tr-padrao-ultimo > td.td-condiag,
+  #ai-root #aiTabelaPadroesII tr.tr-padrao-ultimo > td.td-dif,
+  #ai-root #aiTabelaPadroesII tr.tr-padrao-ultimo > td.td-diag {
+    background-color: rgba(25,135,84,.12);
   }
   #ai-root .ai-cruz-diag {
     border: 1px solid rgba(192,139,0,.28);
@@ -284,7 +343,7 @@
   #ai-root .ai-cruz-diag-card {
     border: 1px solid rgba(192,139,0,.22);
     border-radius: 8px;
-    background: #fff;
+    background: #fcf9e8;
     padding: .5rem .6rem;
     height: 100%;
   }
@@ -313,10 +372,13 @@
     text-align: left;
     font-variant-numeric: tabular-nums;
   }
-  #ai-root #aiTabelaPadroesII td.td-dist .ai-col-alinha { min-width: 7.4rem; }
-  #ai-root #aiTabelaPadroesII td.td-jogos .ai-col-alinha { min-width: 4.8rem; }
-  #ai-root #aiTabelaPadroesII td.td-freq .ai-col-alinha { min-width: 6.2rem; }
-  #ai-root #aiTabelaPadroesII td.td-atraso .ai-col-alinha { min-width: 2.6rem; }
+  #ai-root #aiTabelaPadroesII td.td-dist .ai-col-alinha { min-width: 0; }
+  #ai-root #aiTabelaPadroesII td.td-jogos .ai-col-alinha { min-width: 0; }
+  #ai-root #aiTabelaPadroesII td.td-freq .ai-col-alinha { min-width: 0; }
+  #ai-root #aiTabelaPadroesII td.td-atraso .ai-col-alinha { min-width: 0; }
+  #ai-root #aiTabelaPadroesII td.td-condiag .ai-col-alinha,
+  #ai-root #aiTabelaPadroesII td.td-dif .ai-col-alinha { min-width: 0; }
+  #ai-root #aiTabelaPadroesII td.td-diag .ai-diag-list { white-space: nowrap; }
   #ai-root #aiTabelaJogosPadrao th.col-conc-jogo,
   #ai-root #aiTabelaJogosPadrao td.td-conc-jogo {
     text-align: center !important;
@@ -340,6 +402,17 @@
     letter-spacing: .02em;
   }
   #ai-root #aiTabelaJogosPadrao th.col-dezenas-centro { text-align: center !important; }
+  #ai-root #aiTabelaJogosPadrao th.col-n-aposta,
+  #ai-root #aiTabelaJogosPadrao td.td-n-aposta {
+    text-align: center !important;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaJogosPadrao td.td-n-aposta .ai-col-alinha {
+    display: inline-block;
+    min-width: 5.4rem;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
   #ai-root #aiTabelaJogosPadrao .ai-dez-hit {
     background: #ffe082;
     color: #4a3b00;
@@ -664,7 +737,7 @@
   }
   #aiBtnResetPadII i { font-size: .78rem; }
 
-  /* Aba 7 — panorama centralizado, sem scroll interno */
+  /* Aba 7 — panorama: duas tabelas lado a lado */
   #ai-root #tab-panorama .ai-pan-wrap {
     display: flex;
     flex-direction: column;
@@ -674,33 +747,156 @@
     justify-content: center;
     width: 100%;
   }
-  #ai-root #tab-panorama .ai-pan-table-wrap { overflow: visible; width: auto; }
-  #ai-root #aiTabelaPanoramaHist {
-    width: auto;
-    min-width: 22rem;
-    margin: 0 auto;
+  #ai-root #tab-panorama .ai-pan-cols {
+    display: grid;
+    grid-template-columns: minmax(22rem, 1fr) minmax(20rem, 1fr);
+    gap: 1rem 1.25rem;
+    align-items: start;
+    width: 100%;
+    max-width: 72rem;
+    margin-bottom: .85rem;
+  }
+  @media (max-width: 900px) {
+    #ai-root #tab-panorama .ai-pan-cols {
+      grid-template-columns: 1fr;
+    }
+  }
+  #ai-root #tab-panorama .ai-pan-col {
+    min-width: 0;
+  }
+  #ai-root #tab-panorama .ai-pan-col-title {
+    font-size: .78rem;
+    font-weight: 800;
+    color: #6c757d;
+    margin-bottom: .35rem;
+    text-align: left;
+  }
+  #ai-root #tab-panorama .ai-pan-table-wrap {
+    overflow: auto;
+    max-height: 70vh;
+    width: 100%;
+  }
+  #ai-root #aiTabelaPanoramaHist,
+  #ai-root #aiTabelaPanoramaFalt {
+    width: 100%;
+    margin: 0;
   }
   #ai-root #aiTabelaPanoramaHist th,
-  #ai-root #aiTabelaPanoramaHist td {
+  #ai-root #aiTabelaPanoramaHist td,
+  #ai-root #aiTabelaPanoramaFalt th,
+  #ai-root #aiTabelaPanoramaFalt td {
     text-align: center !important;
     vertical-align: middle;
     white-space: nowrap;
   }
-  #ai-root #aiTabelaPanoramaHist td.td-padrao {
+  #ai-root #aiTabelaPanoramaHist td.td-padrao,
+  #ai-root #aiTabelaPanoramaFalt td.td-padrao {
     font-variant-numeric: tabular-nums;
-    letter-spacing: .03em;
+    letter-spacing: 0;
+    white-space: nowrap;
   }
   #ai-root #aiTabelaPanoramaHist th.col-pan-num,
-  #ai-root #aiTabelaPanoramaHist td.td-pan-num {
+  #ai-root #aiTabelaPanoramaHist td.td-pan-num,
+  #ai-root #aiTabelaPanoramaFalt th.col-pan-num,
+  #ai-root #aiTabelaPanoramaFalt td.td-pan-num {
     font-variant-numeric: tabular-nums;
     color: #6c757d;
     width: 2.4rem;
   }
-  #ai-root #aiTabelaPanoramaHist td.td-pan-vezes .ai-col-alinha {
+  #ai-root #aiTabelaPanoramaHist td.td-pan-vezes .ai-col-alinha,
+  #ai-root #aiTabelaPanoramaHist td.td-pan-jogos .ai-col-alinha,
+  #ai-root #aiTabelaPanoramaFalt td.td-pan-vezes .ai-col-alinha,
+  #ai-root #aiTabelaPanoramaFalt td.td-pan-jogos .ai-col-alinha {
     display: inline-block;
     text-align: right;
     font-variant-numeric: tabular-nums;
     min-width: 2.6rem;
+  }
+  #ai-root #aiTabelaPanoramaHist td.td-pan-jogos .ai-col-alinha,
+  #ai-root #aiTabelaPanoramaFalt td.td-pan-jogos .ai-col-alinha {
+    min-width: 4.2rem;
+  }
+  #ai-root #aiTabelaPanoramaHist td.td-padrao,
+  #ai-root #aiTabelaPanoramaFalt td.td-padrao {
+    white-space: nowrap;
+  }
+  #ai-root .ai-pan-pad-stack,
+  #aiPanVencedoresModal .ai-pan-pad-stack {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .08rem;
+    line-height: 1.15;
+  }
+  #ai-root .ai-pan-slots,
+  #aiPanVencedoresModal .ai-pan-slots {
+    display: inline-flex;
+    font-family: ui-monospace, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root .ai-pan-slot,
+  #aiPanVencedoresModal .ai-pan-slot {
+    display: inline-block;
+    width: 1.85rem;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  #ai-root .ai-pan-cartela,
+  #aiPanVencedoresModal .ai-pan-cartela {
+    font-size: .72rem;
+    font-weight: 700;
+    color: #495057;
+  }
+  #ai-root .ai-pan-link-pad .ai-pan-slots {
+    font-weight: 700;
+  }
+  #aiPanVencedoresTabela th,
+  #aiPanVencedoresTabela td {
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  #aiPanVencedoresTabela th.ai-sort { cursor: pointer; user-select: none; }
+  #aiPanVencedoresTabela th.ai-sort:hover { filter: brightness(.95); }
+  #aiPanVencedoresTabela th.ai-sort .ai-sort-ind { font-size: .65rem; margin-left: .2rem; opacity: .55; }
+  #aiPanVencedoresTabela th.ai-sort.ai-sort-asc .ai-sort-ind,
+  #aiPanVencedoresTabela th.ai-sort.ai-sort-desc .ai-sort-ind { opacity: 1; }
+  #aiPanVencedoresTabela td.td-n-aposta .ai-col-alinha {
+    display: inline-block;
+    min-width: 5.4rem;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-family: ui-monospace, Consolas, monospace;
+  }
+  #aiPanVencedoresTabela .td-pan-dez {
+    font-family: ui-monospace, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+  #aiPanVencedoresTabela tr.tr-padrao-ultimo td {
+    background: rgba(25,135,84,.12);
+  }
+  #ai-root #aiTabelaPanoramaHist tr.tr-padrao-ultimo td {
+    background: rgba(25,135,84,.12);
+  }
+  #ai-root .ai-pan-aposta-btn {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: inherit;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary-xdark, #0d6efd);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  #ai-root .ai-pan-aposta-btn:hover { color: var(--primary, #0a58ca); }
+  #ai-root .ai-pan-aposta-n {
+    font-size: .68rem;
+    font-weight: 700;
+    color: #6c757d;
+    margin-left: .2rem;
   }
   #ai-root .ai-pan-resumo {
     display: flex;
@@ -714,27 +910,19 @@
   #ai-root .ai-pan-frase {
     text-align: center;
     font-size: .92rem;
-    margin: .2rem 0 .55rem;
+    margin: .2rem 0 .75rem;
     max-width: 44rem;
   }
-  #ai-root .ai-pan-faltantes {
-    max-width: 44rem;
-    margin: 0 0 .85rem;
-    text-align: left;
+  #ai-root #aiTabelaPanoramaHist a.ai-pan-link-pad,
+  #ai-root #aiTabelaPanoramaFalt a.ai-pan-link-pad {
+    font-weight: 700;
+    text-decoration: underline;
+    color: var(--primary-xdark, #0d6efd);
+    cursor: pointer;
   }
-  #ai-root .ai-pan-faltantes .ai-pan-falt-title {
-    font-size: .78rem;
-    font-weight: 800;
-    color: #6c757d;
-    margin-bottom: .35rem;
-  }
-  #ai-root .ai-pan-faltantes .ai-table {
-    margin-bottom: 0;
-  }
-  #ai-root .ai-pan-faltantes td.td-padrao {
-    font-variant-numeric: tabular-nums;
-    letter-spacing: .03em;
-    white-space: nowrap;
+  #ai-root #aiTabelaPanoramaHist a.ai-pan-link-pad:hover,
+  #ai-root #aiTabelaPanoramaFalt a.ai-pan-link-pad:hover {
+    color: var(--primary, #0a58ca);
   }
 
 </style>
@@ -983,16 +1171,18 @@
               <th class="ai-chk-th" title="Selecionar / desmarcar todos visíveis">
                 <input type="checkbox" class="form-check-input" id="aiPadIIChkTodos">
               </th>
-              <th class="text-center" title="Numeração sequencial (ordem atual)">Nº</th>
-              <th class="ai-sort text-center" data-sort="padrao" data-table="p2">Padrão <span class="ai-sort-ind">⇅</span></th>
+              <th class="text-center col-num" title="Numeração sequencial (ordem atual)">Nº</th>
+              <th class="ai-sort text-center col-padrao" data-sort="padrao" data-table="p2">Padrão <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dist" data-sort="descricao" data-table="p2">Distribuição <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-jogos" data-sort="jogos_possiveis" data-table="p2">Jogos <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-freq" data-sort="frequencia" data-table="p2">Freq. <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-diag" data-sort="n_com_diagonal" data-table="p2" title="Vezes em que este padrão saiu com pelo menos uma diagonal no volante">Diag. <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="p2" title="Concursos com Diagonal">Con/Diag <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dif" data-sort="dif_diag" data-table="p2" title="Diferença (frequência − concursos com diagonal)">Dif <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-diag" data-sort="diag_txt" data-table="p2" title="Diagonais que acompanharam o padrão">Diag <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-atraso" data-sort="atraso" data-table="p2">Atraso <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-apostar" data-sort="para_apostar" data-table="p2" title="Dentro da média e ainda não saíram">Para apostar <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-ja-saiu" data-sort="ja_sairam_dentro" data-table="p2" title="Dentro da média e já saíram no histórico">Já saíram <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort" data-sort="status" data-table="p2">Status <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-status" data-sort="status" data-table="p2">Status <span class="ai-sort-ind">⇅</span></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -1120,7 +1310,7 @@
               <th class="ai-chk-th" title="Marcar / desmarcar página">
                 <input type="checkbox" class="form-check-input" id="aiJogosPadChkPagina" disabled>
               </th>
-              <th class="text-center" title="Numeração sequencial (ordem atual)">Nº</th>
+              <th class="text-center col-n-aposta" title="Nº da aposta (Todos do padrão, mesma ordem da aba 5)">Nº</th>
               <th class="ai-sort" data-sort="padrao_inicial" data-table="jogos">Padrão <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dezenas-centro" data-sort="dezenas_fmt" data-table="jogos">Aposta <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="soma" data-table="jogos">Soma <span class="ai-sort-ind">⇅</span></th>
@@ -1327,31 +1517,81 @@
       </div>
       <div id="aiPanHistPainelInfo" class="d-none mb-2" style="max-width:44rem">
         <div class="ai-hint mb-0">
-          Padrões que <strong>já saíram</strong> no histórico, sem repetição: o padrão, quantas vezes
-          e a distribuição B+M+A. Clique no título da coluna para ordenar.
+          Padrões que <strong>já saíram</strong> no histórico, sem repetição: o padrão, quantas vezes,
+          a distribuição B+M+A e o <strong>nº da aposta</strong> da aba 5 (o mesmo de Mostrar vencedor).
+          Clique no <strong>padrão</strong> para abrir na aba 4. Clique na <strong>aposta</strong> para
+          ver todos os ganhadores daquele padrão (nº da aposta da aba 5 + dezenas).
         </div>
       </div>
       <div id="aiPanHistResumo" class="ai-pan-resumo"></div>
       <p class="ai-pan-frase text-muted" id="aiPanHistFrase">—</p>
-      <div id="aiPanHistFaltantes" class="ai-pan-faltantes" hidden></div>
-      <div class="ai-pan-table-wrap">
-        <table class="table table-sm table-bordered ai-table" id="aiTabelaPanoramaHist">
-          <thead>
-            <tr>
-              <th class="col-pan-num" title="Posição na lista">Nº</th>
-              <th class="ai-sort" data-sort="padrao_inicial" data-table="pan" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-pan-vezes" data-sort="vezes_padrao" data-table="pan" title="Quantas vezes este padrão já saiu">Vezes <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort" data-sort="descricao_bma" data-table="pan" title="Clique para ordenar">B+M+A <span class="ai-sort-ind">⇅</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td colspan="4" class="text-muted">Carregue o Panorama Histórico…</td></tr>
-          </tbody>
-        </table>
+      <div class="ai-pan-cols">
+        <div class="ai-pan-col ai-pan-col-ja">
+          <div class="ai-pan-col-title" id="aiPanHistTituloJa">Padrões que já saíram</div>
+          <div class="ai-pan-table-wrap">
+            <table class="table table-sm table-bordered ai-table" id="aiTabelaPanoramaHist">
+              <thead>
+                <tr>
+                  <th class="col-pan-num" title="Posição na lista">Nº</th>
+                  <th class="ai-sort" data-sort="padrao_inicial" data-table="pan" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort col-pan-vezes" data-sort="vezes_padrao" data-table="pan" title="Quantas vezes este padrão já saiu">Vezes <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort col-pan-jogos" data-sort="jogos_possiveis" data-table="pan" title="Quantidade de jogos possíveis deste padrão">Jogos <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="descricao_bma" data-table="pan" title="Clique para ordenar">B+M+A <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort col-pan-aposta" data-sort="n_aposta" data-table="pan" title="Nº da aposta na aba 5 (Mostrar vencedor)">Aposta <span class="ai-sort-ind">⇅</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="6" class="text-muted">Carregue o Panorama Histórico…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="ai-pan-col ai-pan-col-falt">
+          <div class="ai-pan-col-title" id="aiPanHistTituloFalt">Padrões que faltam sair</div>
+          <div class="ai-pan-table-wrap" id="aiPanHistFaltantes">
+            <table class="table table-sm table-bordered ai-table mb-0" id="aiTabelaPanoramaFalt">
+              <thead>
+                <tr>
+                  <th class="col-pan-num">Nº</th>
+                  <th class="ai-sort" data-sort="padrao" data-table="panFalt" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort col-pan-vezes" data-sort="vezes_padrao" data-table="panFalt" title="Quantas vezes este padrão já saiu">Vezes <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort col-pan-jogos" data-sort="jogos_possiveis" data-table="panFalt" title="Quantidade de jogos possíveis deste padrão — clique para ordenar">Jogos <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="descricao" data-table="panFalt" title="Clique para ordenar">B+M+A <span class="ai-sort-ind">⇅</span></th>
+                  <th class="col-pan-aposta" title="Nº da aposta na aba 5 (quando houver)">Aposta</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="6" class="text-muted">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
       </div>
     </div>
   </div>
+<div class="modal fade" id="aiPanVencedoresModal" tabindex="-1" aria-labelledby="aiPanVencedoresTitulo" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h5 class="modal-title" id="aiPanVencedoresTitulo">Apostas vencedoras</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body p-0">
+        <table class="table table-sm table-bordered mb-0 ai-table" id="aiPanVencedoresTabela">
+          <thead>
+            <tr>
+              <th class="ai-sort" data-sort="concurso" data-table="panVenc" title="Clique para ordenar">Concurso <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-n-aposta" data-sort="n_aposta" data-table="panVenc" title="Clique para ordenar — mesmo nº da aba 5">Nº da aposta <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="dezenas_fmt" data-table="panVenc" title="Clique para ordenar">Dezenas <span class="ai-sort-ind">⇅</span></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 <link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v38">
 <style>
@@ -1414,9 +1654,12 @@
     jogos: { key: 'distancia', dir: 'asc' },
     resumo: { key: 'para_apostar', dir: 'desc' },
     pan: { key: 'vezes_padrao', dir: 'desc' },
+    panFalt: { key: 'padrao', dir: 'asc' },
+    panVenc: { key: 'concurso', dir: 'desc' },
   };
   let PAGE = { res: 1, pad: 1 };
-  let PAN_HIST = { all: [], filtrados: [], carregado: false, totalTeorico: 0 };
+  let PAN_HIST = { all: [], filtrados: [], faltantes: [], carregado: false, totalTeorico: 0, nApostasPendentes: false };
+  let PAN_VENC = { padrao: '', lista: [], concUlt: 0 };
 
   function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1759,20 +2002,178 @@
     btn.click();
   }
 
+  function mapaJogosPossiveisPadrao() {
+    const m = new Map();
+    (CAT_PAD_II || []).forEach(p => {
+      const pad = normalizarPadrao(p && (p.padrao || p.padrao_inicial));
+      if (!pad) return;
+      m.set(pad, Number(p.jogos_possiveis) || 0);
+    });
+    return m;
+  }
+
+  function htmlLinkPadrao(padrao) {
+    return `<a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(padrao)}" title="Abrir na aba 4 · Padrões II">${esc(padrao)}</a>`;
+  }
+
+  function htmlCelulaAposta(padrao, nAposta, vezes) {
+    const n = Number(vezes) || 0;
+    if (n <= 0) return '—';
+    const label = (nAposta != null && nAposta !== '') ? fmtVol(nAposta) : 'ver nºs';
+    const extra = n > 1 ? `<span class="ai-pan-aposta-n" title="${fmtVol(n)} apostas vencedoras neste padrão">+${fmtVol(n - 1)}</span>` : '';
+    return `<button type="button" class="ai-pan-aposta-btn" data-act="ver-vencedores" data-padrao="${esc(padrao)}" title="Ver os nºs da aba 5 (Mostrar vencedor) deste padrão">${label}</button>${extra}`;
+  }
+
+  async function anexarNApostasAba5(itens, padraoFiltro) {
+    const byPad = new Map();
+    (itens || []).forEach(it => {
+      const p = normalizarPadrao(it && it.padrao_inicial);
+      const dez = String((it && it.dezenas_fmt) || '').trim();
+      if (!p || !dez) return;
+      if (padraoFiltro && p !== padraoFiltro) return;
+      if (it.n_aposta != null && it.n_aposta !== '') return;
+      if (!byPad.has(p)) byPad.set(p, new Set());
+      byPad.get(p).add(dez);
+    });
+    const pads = [...byPad.keys()];
+    if (!pads.length) return;
+    PAN_HIST.nApostasPendentes = true;
+    let cursor = 0;
+    const worker = async () => {
+      while (cursor < pads.length) {
+        const pad = pads[cursor++];
+        const dezs = [...byPad.get(pad)];
+        try {
+          const r = await fetch(`${API}/n-apostas`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ padrao: pad, dezenas_fmt: dezs }),
+          });
+          const d = await r.json();
+          const mapa = (d && d.mapa) || {};
+          (itens || []).forEach(it => {
+            if (normalizarPadrao(it.padrao_inicial) !== pad) return;
+            const n = mapa[String(it.dezenas_fmt || '').trim()];
+            if (n != null && n !== '') it.n_aposta = Number(n);
+          });
+        } catch (_) { /* deixa sem número */ }
+      }
+    };
+    await Promise.all([worker(), worker(), worker()]);
+    PAN_HIST.nApostasPendentes = false;
+  }
+
+  function renderPopupVencedores() {
+    const titulo = document.getElementById('aiPanVencedoresTitulo');
+    const tb = document.querySelector('#aiPanVencedoresTabela tbody');
+    const pad = PAN_VENC.padrao;
+    const lista = PAN_VENC.lista || [];
+    const concUlt = Number(PAN_VENC.concUlt) || 0;
+    const { key, dir } = SORT.panVenc || { key: 'concurso', dir: 'desc' };
+    const mul = dir === 'asc' ? 1 : -1;
+    const ordered = [...lista].sort((a, b) => {
+      if (key === 'n_aposta' || key === 'concurso') {
+        const va = Number(a[key]) || 0;
+        const vb = Number(b[key]) || 0;
+        if (va !== vb) return (va < vb ? -1 : 1) * mul;
+        return (Number(b.concurso) || 0) - (Number(a.concurso) || 0);
+      }
+      return String(a.dezenas_fmt || '').localeCompare(String(b.dezenas_fmt || ''), 'pt-BR') * mul;
+    });
+    if (titulo) {
+      titulo.innerHTML = ordered.length
+        ? `Nºs das apostas vencedoras — <code>${esc(pad)}</code> (${ordered.length})`
+        : `Nºs das apostas vencedoras — <code>${esc(pad)}</code>`;
+    }
+    if (tb) {
+      tb.innerHTML = ordered.length
+        ? ordered.map(v => {
+            const isUlt = concUlt && Number(v.concurso) === concUlt;
+            const nHtml = v.n_aposta != null && v.n_aposta !== ''
+              ? `<span class="ai-col-alinha">${fmtVol(v.n_aposta)}</span>`
+              : '—';
+            return `<tr${isUlt ? ' class="tr-padrao-ultimo"' : ''}>
+            <td>${esc(v.concurso || '—')}</td>
+            <td class="td-n-aposta">${nHtml}</td>
+            <td class="td-pan-dez">${esc(v.dezenas_fmt || '—')}</td>
+          </tr>`;
+          }).join('')
+        : '<tr><td colspan="3" class="text-muted">Nenhuma aposta vencedora neste padrão.</td></tr>';
+    }
+    document.querySelectorAll('#aiPanVencedoresTabela th.ai-sort').forEach(th => {
+      const sk = SORT.panVenc;
+      const on = th.dataset.sort === sk.key;
+      th.classList.toggle('ai-sort-asc', on && sk.dir === 'asc');
+      th.classList.toggle('ai-sort-desc', on && sk.dir === 'desc');
+      const ind = th.querySelector('.ai-sort-ind');
+      if (ind) ind.textContent = on ? (sk.dir === 'asc' ? '▲' : '▼') : '⇅';
+    });
+  }
+
+  async function abrirPopupVencedores(padrao) {
+    const pad = normalizarPadrao(padrao);
+    if (!pad) return;
+    const el = document.getElementById('aiPanVencedoresModal');
+    const titulo = document.getElementById('aiPanVencedoresTitulo');
+    const tb = document.querySelector('#aiPanVencedoresTabela tbody');
+    PAN_VENC = { padrao: pad, lista: [], concUlt: 0 };
+    SORT.panVenc = { key: 'concurso', dir: 'desc' };
+    if (titulo) titulo.innerHTML = `Nºs das apostas vencedoras — <code>${esc(pad)}</code>`;
+    if (tb) tb.innerHTML = '<tr><td colspan="3" class="text-muted">Carregando nºs da aba 5…</td></tr>';
+    if (el) {
+      try {
+        if (window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(el).show();
+        else { el.classList.add('show'); el.style.display = 'block'; }
+      } catch (_) { /* segue */ }
+    }
+    await anexarNApostasAba5(PAN_HIST.all, pad);
+    const row = agregarPadroesJaSairam(PAN_HIST.all).find(r => normalizarPadrao(r.padrao_inicial) === pad);
+    const lista = (row && row.vencedores ? [...row.vencedores] : []);
+    const ult = ultimoDoPanorama();
+    PAN_VENC = { padrao: pad, lista, concUlt: ult ? Number(ult.concurso) : 0 };
+    renderPopupVencedores();
+    renderPanoramaHist();
+  }
+
+  function ultimoDoPanorama() {
+    const u = ULTIMO_RESULTADO;
+    if (u && (u.concurso != null || u.padrao || u.dezenas_fmt)) return u;
+    return (PAN_HIST.all || [])[0] || null;
+  }
+
   function agregarPadroesJaSairam(itens) {
+    const jogosMap = mapaJogosPossiveisPadrao();
     const map = new Map();
     (itens || []).forEach(it => {
       const p = normalizarPadrao(it && it.padrao_inicial);
       if (!p) return;
+      const conc = Number(it.concurso) || 0;
+      const nAposta = it.n_aposta != null && it.n_aposta !== '' ? Number(it.n_aposta) : null;
+      const vencedor = {
+        concurso: conc,
+        n_aposta: nAposta,
+        dezenas_fmt: it.dezenas_fmt || '',
+      };
       const prev = map.get(p);
       if (prev) {
         prev.vezes_padrao += 1;
+        prev.vencedores.push(vencedor);
+        if (conc >= (Number(prev.concurso) || 0)) {
+          prev.concurso = conc;
+          prev.n_aposta = nAposta;
+          prev.dezenas_fmt = vencedor.dezenas_fmt;
+        }
         return;
       }
       map.set(p, {
         padrao_inicial: p,
         descricao_bma: it.descricao_bma || '',
         vezes_padrao: 1,
+        jogos_possiveis: jogosMap.get(p) || 0,
+        vencedores: [vencedor],
+        concurso: conc,
+        n_aposta: nAposta,
+        dezenas_fmt: vencedor.dezenas_fmt,
       });
     });
     return [...map.values()];
@@ -1799,9 +2200,9 @@
     const { key, dir } = SORT.pan;
     const mul = dir === 'asc' ? 1 : -1;
     rows.sort((a, b) => {
-      if (key === 'vezes_padrao') {
-        const va = Number(a.vezes_padrao) || 0;
-        const vb = Number(b.vezes_padrao) || 0;
+      if (key === 'vezes_padrao' || key === 'jogos_possiveis' || key === 'n_aposta') {
+        const va = Number(a[key]) || 0;
+        const vb = Number(b[key]) || 0;
         if (va !== vb) return (va < vb ? -1 : 1) * mul;
         return String(a.padrao_inicial).localeCompare(String(b.padrao_inicial), 'pt-BR');
       }
@@ -1826,42 +2227,47 @@
       falt.push({
         padrao: pad,
         descricao: p.descricao || p.descricao_bma || '',
+        jogos_possiveis: Number(p.jogos_possiveis) || 0,
+        vezes_padrao: 0,
+        n_aposta: null,
       });
     });
-    falt.sort((a, b) => a.padrao.localeCompare(b.padrao, 'pt-BR'));
+    const { key, dir } = SORT.panFalt || { key: 'padrao', dir: 'asc' };
+    const mul = dir === 'asc' ? 1 : -1;
+    falt.sort((a, b) => {
+      if (key === 'jogos_possiveis' || key === 'vezes_padrao') {
+        const va = Number(a[key]) || 0;
+        const vb = Number(b[key]) || 0;
+        if (va !== vb) return (va < vb ? -1 : 1) * mul;
+        return String(a.padrao).localeCompare(String(b.padrao), 'pt-BR');
+      }
+      const va = String(a[key] ?? '');
+      const vb = String(b[key] ?? '');
+      if (va !== vb) return (va < vb ? -1 : 1) * mul;
+      return String(a.padrao).localeCompare(String(b.padrao), 'pt-BR');
+    });
+    PAN_HIST.faltantes = falt;
     return falt;
   }
 
   function renderPadroesFaltantes(faltamLista) {
-    const box = document.getElementById('aiPanHistFaltantes');
-    if (!box) return;
+    const tb = document.querySelector('#aiTabelaPanoramaFalt tbody');
+    const titulo = document.getElementById('aiPanHistTituloFalt');
     const lista = faltamLista || [];
+    if (titulo) titulo.textContent = `Padrões que faltam sair (${fmtVol(lista.length)})`;
+    if (!tb) return;
     if (!lista.length) {
-      box.hidden = true;
-      box.innerHTML = '';
+      tb.innerHTML = `<tr><td colspan="6" class="text-muted">Nenhum padrão faltando.</td></tr>`;
       return;
     }
-    box.hidden = false;
-    box.innerHTML = `
-      <div class="ai-pan-falt-title">Padrões que faltam sair (${fmtVol(lista.length)})</div>
-      <div class="table-responsive">
-        <table class="table table-sm table-bordered ai-table mb-0">
-          <thead>
-            <tr>
-              <th class="col-pan-num">Nº</th>
-              <th>Padrão</th>
-              <th>B+M+A</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${lista.map((p, i) => `<tr>
-              <td class="td-pan-num">${i + 1}</td>
-              <td class="td-padrao">${esc(p.padrao)}</td>
-              <td>${esc(p.descricao || '—')}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>`;
+    tb.innerHTML = lista.map((p, i) => `<tr>
+      <td class="td-pan-num">${i + 1}</td>
+      <td class="td-padrao">${htmlLinkPadrao(p.padrao)}</td>
+      <td class="td-pan-vezes"><span class="ai-col-alinha">${fmtVol(p.vezes_padrao || 0)}</span></td>
+      <td class="td-pan-jogos"><span class="ai-col-alinha">${fmtVol(p.jogos_possiveis)}</span></td>
+      <td>${esc(p.descricao || '—')}</td>
+      <td class="td-pan-aposta">—</td>
+    </tr>`).join('');
   }
 
   function renderPanoramaHist() {
@@ -1870,14 +2276,21 @@
     if (!tb) return;
     const itens = filtrarPanoramaHist();
     if (!itens.length) {
-      tb.innerHTML = `<tr><td colspan="4" class="text-muted">Nenhum padrão no histórico.</td></tr>`;
+      tb.innerHTML = `<tr><td colspan="6" class="text-muted">Nenhum padrão no histórico.</td></tr>`;
     } else {
-      tb.innerHTML = itens.map((it, i) => `<tr>
+      const ult = ultimoDoPanorama() || {};
+      const padUlt = normalizarPadrao(ult.padrao || ult.padrao_inicial);
+      tb.innerHTML = itens.map((it, i) => {
+        const isUlt = padUlt && normalizarPadrao(it.padrao_inicial) === padUlt;
+        return `<tr${isUlt ? ' class="tr-padrao-ultimo"' : ''}>
         <td class="td-pan-num">${i + 1}</td>
-        <td class="td-padrao">${esc(it.padrao_inicial)}</td>
+        <td class="td-padrao">${htmlLinkPadrao(it.padrao_inicial)}</td>
         <td class="td-pan-vezes"><span class="ai-col-alinha">${fmtVol(it.vezes_padrao)}</span></td>
+        <td class="td-pan-jogos"><span class="ai-col-alinha">${fmtVol(it.jogos_possiveis)}</span></td>
         <td class="td-bma">${esc(it.descricao_bma)}</td>
-      </tr>`).join('');
+        <td class="td-pan-aposta">${htmlCelulaAposta(it.padrao_inicial, it.n_aposta, it.vezes_padrao)}</td>
+      </tr>`;
+      }).join('');
     }
     const totConc = PAN_HIST.all.length;
     const jaSairam = agregarPadroesJaSairam(PAN_HIST.all).length;
@@ -1886,6 +2299,8 @@
     const faltam = teorico > 0
       ? Math.max(0, teorico - jaSairam)
       : faltamLista.length;
+    const tituloJa = document.getElementById('aiPanHistTituloJa');
+    if (tituloJa) tituloJa.textContent = `Padrões que já saíram (${fmtVol(jaSairam)})`;
     if (info) {
       const n = itens.length;
       info.textContent = n === jaSairam
@@ -1936,14 +2351,14 @@
       PAN_HIST.carregado = true;
       if (j && j.sucesso === false && j.erro) {
         const tb = document.querySelector('#aiTabelaPanoramaHist tbody');
-        if (tb) tb.innerHTML = `<tr><td colspan="4" class="text-danger">${esc(j.erro)}</td></tr>`;
+        if (tb) tb.innerHTML = `<tr><td colspan="6" class="text-danger">${esc(j.erro)}</td></tr>`;
         return j;
       }
       renderPanoramaHist();
       return j;
     } catch (e) {
       const tb = document.querySelector('#aiTabelaPanoramaHist tbody');
-      if (tb) tb.innerHTML = `<tr><td colspan="4" class="text-danger">${esc(String(e))}</td></tr>`;
+      if (tb) tb.innerHTML = `<tr><td colspan="6" class="text-danger">${esc(String(e))}</td></tr>`;
       return null;
     }
   }
@@ -2279,6 +2694,13 @@
     }
   }
 
+  function txtDiagonaisPad(p) {
+    return (p && p.top_diagonais || []).map((d) => {
+      const bit = `${d.dir_sym || ''} ${d.nums_fmt || ''}`.trim();
+      return bit;
+    }).filter(Boolean).join(' | ');
+  }
+
   function htmlDiagChips(list) {
     return (list || []).map((d) => {
       const title = `${d.tipo || ''} · ${d.vezes || 0}×`;
@@ -2364,6 +2786,14 @@
     const sk = SORT.p2 || { key: 'frequencia', dir: 'desc' };
     const dir = sk.dir === 'asc' ? 1 : -1;
     rows = [...rows].sort((a, b) => {
+      if (sk.key === 'dif_diag') {
+        const da = (Number(a.frequencia) || 0) - (Number(a.n_com_diagonal) || 0);
+        const db = (Number(b.frequencia) || 0) - (Number(b.n_com_diagonal) || 0);
+        return dir * (da - db);
+      }
+      if (sk.key === 'diag_txt') {
+        return dir * txtDiagonaisPad(a).localeCompare(txtDiagonaisPad(b), 'pt-BR');
+      }
       const ka = a[sk.key], kb = b[sk.key];
       if (sk.key === 'padrao' || sk.key === 'descricao' || sk.key === 'status') {
         return dir * String(ka || '').localeCompare(String(kb || ''), 'pt-BR');
@@ -2386,24 +2816,35 @@
       const atraso = p.atraso == null ? '—' : String(p.atraso);
       const jogosLink = `<a href="#" class="fw-bold text-decoration-underline" data-act="ver-jogos-padrao" data-padrao="${esc(p.padrao)}" title="Ver as ${fmtVol(p.jogos_possiveis)} apostas possíveis (só dentro da média)">${fmtVol(p.jogos_possiveis)}</a>`;
       const nDiag = p.n_com_diagonal;
-      const topD = (p.top_diagonais || [])[0];
-      const diagCell = (nDiag == null)
+      const freqN = Number(p.frequencia) || 0;
+      const nDiagN = Number(nDiag) || 0;
+      const diagDiff = freqN - nDiagN;
+      const conDiagCell = (nDiag == null)
         ? '<span class="text-muted">—</span>'
-        : `<span class="ai-col-alinha" title="${esc(p.pct_com_diagonal || 0)}% dos concursos deste padrão tiveram diagonal">${fmtVol(nDiag)}/${fmtVol(p.frequencia)}${topD ? ` · ${esc(topD.dir_sym || '')} ${esc(topD.nums_fmt || '')}` : ''}</span>`;
+        : `<span class="ai-col-alinha" title="${esc(p.pct_com_diagonal || 0)}% dos concursos deste padrão tiveram diagonal">${fmtVol(nDiagN)}</span>`;
+      const difCell = (nDiag == null)
+        ? '<span class="text-muted">—</span>'
+        : `<span class="ai-col-alinha" title="Frequência ${fmtVol(freqN)} − concursos com diagonal ${fmtVol(nDiagN)}">${fmtVol(diagDiff)}</span>`;
+      const diagList = txtDiagonaisPad(p);
+      const diagCell = diagList
+        ? `<span class="ai-diag-list" title="${esc(diagList)}">${esc(diagList)}</span>`
+        : '<span class="text-muted">—</span>';
       return `<tr class="${cls}" data-padrao="${esc(p.padrao)}"${p.eh_padrao_ultimo_concurso ? ' title="Padrão do último resultado (vencedor)"' : ''}>
         <td><input type="checkbox" class="form-check-input ai-pad-ii-chk" data-padrao="${esc(p.padrao)}" ${checked}></td>
-        <td class="text-center text-muted">${i + 1}</td>
+        <td class="text-center text-muted td-num">${i + 1}</td>
         <td class="td-padrao"><code>${esc(p.padrao)}</code></td>
         <td class="td-dist"><span class="ai-col-alinha">${esc(p.descricao)}</span></td>
         <td class="td-jogos"><span class="ai-col-alinha">${jogosLink}</span></td>
         <td class="td-freq"><span class="ai-col-alinha">${esc(p.frequencia)}</span></td>
+        <td class="td-condiag">${conDiagCell}</td>
+        <td class="td-dif">${difCell}</td>
         <td class="td-diag">${diagCell}</td>
         <td class="td-atraso"><span class="ai-col-alinha">${esc(atraso)}</span></td>
         <td class="td-apostar">${p.para_apostar == null ? '—' : fmtVol(p.para_apostar)}</td>
         <td class="td-ja-saiu">${p.ja_sairam_dentro == null ? '—' : fmtVol(p.ja_sairam_dentro)}</td>
-        <td>${statusBadge(p.status)}</td>
+        <td class="td-status">${statusBadge(p.status)}</td>
       </tr>`;
-    }).join('') || '<tr><td colspan="11" class="text-muted">Nenhum padrão com os filtros.</td></tr>';
+    }).join('') || '<tr><td colspan="13" class="text-muted">Nenhum padrão com os filtros.</td></tr>';
     if (info) info.textContent = `Exibindo ${rows.length} de ${CAT_PAD_II.length} padrões`;
     atualizarSelPadII();
   }
@@ -2799,7 +3240,7 @@
         : '<span class="text-muted small">—</span>';
       return `<tr class="${trCls}"${isWin ? ' data-vencedor="1"' : ''}${jaSaiu ? ' data-ja-saiu="1"' : ''}${concTit}>
         <td><input type="checkbox" class="form-check-input ai-aposta-chk" data-dez="${esc(key)}" ${checked}></td>
-        <td class="text-center text-muted">${baseNum + i + 1}</td>
+        <td class="td-n-aposta text-muted"><span class="ai-col-alinha">${fmtVol(baseNum + i + 1)}</span></td>
         <td class="td-padrao"><code>${esc(j.padrao_inicial || JOGOS_PAD.padrao)}</code></td>
         <td class="td-dezenas-centro font-monospace">${htmlDezenasComDestaque(j.dezenas_fmt, JOGOS_PAD.buscaDezenas)}</td>
         <td class="td-soma-destaque">${esc(j.soma)}</td>
@@ -2884,6 +3325,38 @@
     } catch (e) {
       if (aviso) aviso.classList.remove('d-none');
       if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-danger">${esc(e.message || e)}</td></tr>`;
+    }
+  }
+
+  function abrirPadraoNaAba4(padrao) {
+    const pad = normalizarPadrao(padrao);
+    if (!pad) return;
+    const input = document.getElementById('aiBuscaPadII');
+    if (input) input.value = pad;
+    const filtro = document.getElementById('aiFiltroStatusPadII');
+    if (filtro) filtro.value = '';
+    const soDiag = document.getElementById('aiPadIISoDiag');
+    if (soDiag) soDiag.checked = false;
+    goAba('padroes-ii');
+    const focar = () => {
+      PAD_II_BUSCA = pad;
+      setBuscaPadIIMsg('');
+      renderPadroesII();
+      if (RESUMO_PAD.length) renderResumoOperacionalPadroes();
+      requestAnimationFrame(() => {
+        const tr = [...document.querySelectorAll('#aiTabelaPadroesII tbody tr[data-padrao]')].find(
+          el => normalizarPadrao(el.dataset.padrao) === pad
+        );
+        if (tr) {
+          tr.classList.add('tr-padrao-ultimo');
+          tr.scrollIntoView({ block: 'center' });
+        }
+      });
+    };
+    if (!CAT_PAD_II.length) {
+      Promise.resolve(carregarPadroesII()).then(focar);
+    } else {
+      focar();
     }
   }
 
@@ -3205,7 +3678,7 @@
         SORT[table].key = key;
         const DESC_FIRST = new Set(['concurso', 'data', 'frequencia', 'jogos_possiveis', 'soma',
           'para_apostar', 'ja_sairam_dentro', 'dentro', 'proxima', 'fora', 'soma_media', 'pct',
-          'atraso_padrao', 'vezes_padrao']);
+          'atraso_padrao', 'vezes_padrao', 'n_com_diagonal', 'dif_diag', 'n_aposta']);
         SORT[table].dir = key === 'distancia' ? 'asc' : (DESC_FIRST.has(key) ? 'desc' : 'asc');
       }
       if (table === 'p2') {
@@ -3223,6 +3696,14 @@
       }
       if (table === 'pan') {
         renderPanoramaHist();
+        return;
+      }
+      if (table === 'panFalt') {
+        renderPadroesFaltantes(listarPadroesFaltantes());
+        return;
+      }
+      if (table === 'panVenc') {
+        renderPopupVencedores();
         return;
       }
       PAGE[table] = 1;
@@ -3262,6 +3743,17 @@
       if (pad) abrirJogosPadrao(pad, { filtroMedia: 'dentro_novos' });
       return;
     }
+    if (act === 'ir-padrao-ii') {
+      ev.preventDefault();
+      const pad = btn.dataset.padrao || '';
+      if (pad) abrirPadraoNaAba4(pad);
+      return;
+    }
+    if (act === 'ver-vencedores') {
+      ev.preventDefault();
+      abrirPopupVencedores(btn.dataset.padrao || '');
+      return;
+    }
     if (act === 'ir-vencedor') {
       ev.preventDefault();
       const u = ULTIMO_RESULTADO;
@@ -3295,6 +3787,19 @@
   // deep-link
   const aba0 = (root.dataset.aba || 'resultados').toLowerCase();
   const n0 = +(root.dataset.n || 0);
+  document.getElementById('aiPanVencedoresModal')?.addEventListener('click', (ev) => {
+    const th = ev.target.closest('th.ai-sort');
+    if (!th || th.dataset.table !== 'panVenc') return;
+    ev.stopPropagation();
+    const key = th.dataset.sort;
+    if (!key) return;
+    if (SORT.panVenc.key === key) SORT.panVenc.dir = SORT.panVenc.dir === 'asc' ? 'desc' : 'asc';
+    else {
+      SORT.panVenc.key = key;
+      SORT.panVenc.dir = key === 'dezenas_fmt' ? 'asc' : 'desc';
+    }
+    renderPopupVencedores();
+  });
   document.getElementById('aiPanHistCarregar')?.addEventListener('click', () => carregarHistoricoCompleto());
   let _panBuscaT = null;
   document.getElementById('aiPanHistBusca')?.addEventListener('input', () => {
@@ -3324,7 +3829,13 @@
     if (aba0 === 'combinacoes') {
       iniciarAbaCombinacoes(n0 || null);
     }
-    if (aba0 === 'padroes-ii') carregarPadroesII();
+    if (aba0 === 'padroes-ii') {
+      const qs = new URLSearchParams(window.location.search);
+      const pad = (qs.get('padrao') || '').trim();
+      carregarPadroesII().then(() => {
+        if (pad) abrirPadraoNaAba4(pad);
+      });
+    }
     if (aba0 === 'jogos-padrao') {
       const qs = new URLSearchParams(window.location.search);
       const pad = (qs.get('padrao') || root.dataset.padrao || '').trim();

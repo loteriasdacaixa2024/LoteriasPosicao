@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, Iterable, List, Optional, Set
+from itertools import combinations
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Set
 
 
-POOL_MIN_RECOMENDADO = 4
+POOL_MIN_RECOMENDADO = 3
 # Universo canônico do Gerador por Dígitos — idêntico em todas as modalidades.
 DIGITOS_UNIVERSO = tuple(range(10))  # 0..9
 
@@ -72,6 +73,71 @@ def qtd_digitos_distintos_aposta(apostas_dezenas: Iterable[int], pad_width: int 
     return len(digs)
 
 
+def parse_exigir_qtd_digitos(raw: Any) -> Optional[int]:
+    """'' / 0 / None → não filtrar. 1–9 → exigir exatamente essa qtd de dígitos únicos."""
+    if raw is None or raw is False:
+        return None
+    s = str(raw).strip()
+    if not s or s.lower() in ("none", "null", "nao", "não"):
+        return None
+    try:
+        n = int(s)
+    except (TypeError, ValueError):
+        return None
+    if n <= 0:
+        return None
+    return n
+
+
+def iter_apostas_do_pool(
+    elegiveis: Iterable[int],
+    k: int,
+    pad_width: int = 2,
+    exigir_qtd_digitos: Optional[int] = None,
+) -> Iterator[List[int]]:
+    exigir = parse_exigir_qtd_digitos(exigir_qtd_digitos)
+    nums = list(elegiveis)
+    kk = int(k)
+    for combo in combinations(nums, kk):
+        if exigir is not None and qtd_digitos_distintos_aposta(combo, pad_width) != exigir:
+            continue
+        yield list(combo)
+
+
+def contar_apostas_do_pool(
+    elegiveis: Iterable[int],
+    k: int,
+    pad_width: int = 2,
+    exigir_qtd_digitos: Optional[int] = None,
+    max_enum: int = 200_000,
+) -> Dict[str, Any]:
+    """Conta C(n,k) ou, com filtro, quantas apostas têm exatamente N dígitos únicos."""
+    nums = list(elegiveis)
+    brute = combinacoes_possiveis(len(nums), int(k))
+    exigir = parse_exigir_qtd_digitos(exigir_qtd_digitos)
+    if exigir is None:
+        return {
+            "total": brute,
+            "total_bruto": brute,
+            "enumerado": True,
+            "exigir_qtd_digitos": None,
+        }
+    if brute > int(max_enum):
+        return {
+            "total": None,
+            "total_bruto": brute,
+            "enumerado": False,
+            "exigir_qtd_digitos": exigir,
+        }
+    total = sum(1 for _ in iter_apostas_do_pool(nums, k, pad_width, exigir))
+    return {
+        "total": total,
+        "total_bruto": brute,
+        "enumerado": True,
+        "exigir_qtd_digitos": exigir,
+    }
+
+
 def max_digitos_teorico(pool_size: int, k: int, pad_width: int = 2) -> int:
     """Teto absoluto de dígitos distintos numa aposta restrita ao pool."""
     return max(0, min(10, int(pool_size), int(k) * max(1, int(pad_width))))
@@ -86,14 +152,12 @@ def diagnosticar_filtros_digitos(
     *,
     exigir_qtd_digitos: Optional[int] = None,
     qtd_apostas: int = 1,
-    max_enum: int = 5000,
+    max_enum: int = 100_000,
 ) -> Dict[str, Any]:
     """
     Detecta conflitos entre pool / tamanho da aposta / exigir qtd de dígitos
     antes (ou após) a geração. Retorna motivos e sugestões acionáveis.
     """
-    from itertools import combinations
-
     pool_n = normalizar_pool_digitos(pool)
     k = int(k)
     aval = resumo_pool(pool_n, dezena_min, dezena_max, k, pad_width)

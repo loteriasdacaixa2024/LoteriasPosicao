@@ -40,34 +40,56 @@
 }
 #ge-digitos-intel .cc-volante { display: grid; gap: 6px; }
 
-/* Apostas geradas — colunas alinhadas em todas as modalidades */
+/* Apostas geradas — tabela comparativa (dezenas + métricas ao lado) */
 #ge-digitos-intel #ciResultado {
     overflow-x: auto;
 }
-#ge-digitos-intel .ci-apostas-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+#ge-digitos-intel .ci-table-wrap {
     min-width: min-content;
 }
-#ge-digitos-intel .ci-aposta-row {
-    display: grid;
-    grid-template-columns: 2.5rem repeat(var(--ci-cols, 15), 2rem);
+#ge-digitos-intel .ci-cmp-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8rem;
+}
+#ge-digitos-intel .ci-cmp-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f8f9fa;
+    border-bottom: 2px solid rgba(0,0,0,.08);
+    padding: 0.35rem 0.45rem;
+    font-weight: 700;
+    color: #6c757d;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+#ge-digitos-intel .ci-cmp-table thead th.ci-th-dez {
+    text-align: left;
+}
+#ge-digitos-intel .ci-cmp-table tbody td {
+    padding: 0.4rem 0.45rem;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    vertical-align: middle;
+    white-space: nowrap;
+    text-align: center;
+}
+#ge-digitos-intel .ci-cmp-table tbody tr:hover td {
+    background: rgba(0,0,0,.025);
+}
+#ge-digitos-intel .ci-cmp-table .ci-td-dez {
+    text-align: left;
+}
+#ge-digitos-intel .ci-dez-row {
+    display: inline-grid;
+    grid-template-columns: repeat(var(--ci-cols, 7), 2rem);
     gap: 4px;
     align-items: center;
-    font-variant-numeric: tabular-nums;
-}
-#ge-digitos-intel .ci-aposta-num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.35rem;
-    height: 1.55rem;
-    border-radius: 0.35rem;
-    background: #6c757d;
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 700;
 }
 #ge-digitos-intel .ci-dez {
     display: inline-flex;
@@ -81,6 +103,34 @@
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.02em;
+}
+#ge-digitos-intel .ci-dez.ci-rept {
+    outline: 2px solid #0d6efd;
+    outline-offset: 1px;
+}
+#ge-digitos-intel .ci-pad-link {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 700;
+    color: #6f42c1;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(111, 66, 193, .45);
+}
+#ge-digitos-intel .ci-pad-link:hover {
+    color: #5a32a3;
+    border-bottom-style: solid;
+}
+#ge-digitos-intel .ci-num {
+    font-weight: 700;
+    color: #212529;
+}
+#ge-digitos-intel .ci-muted {
+    color: #6c757d;
+    font-weight: 600;
+}
+#ge-digitos-intel .ci-lote-resumo {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
 }
 @supports not (background: color-mix(in srgb, white, black)) {
     #ge-digitos-intel .cc-step-2 {
@@ -110,7 +160,7 @@
     </div>
 
     <div class="row g-3">
-        <div class="col-lg-5">
+        <div class="col-xl-4 col-lg-5">
             <div class="cc-panel cc-step-card cc-step-1 p-3">
                 <h2 class="h6 cc-step-title"><span class="cc-step-badge">1</span> Pool para gerar</h2>
                 <p class="cc-step-hint mb-2">
@@ -122,7 +172,10 @@
                     {% else %}
                     Os <strong>10 dígitos únicos (0–9)</strong> formam as dezenas
                     (ex.: <strong>09</strong>, <strong>22</strong>, <strong>34</strong>).
-                    Padrão: todos marcados. Você pode desmarcar para restringir o pool.
+                    Só entram dezenas cujos dígitos estejam no pool.
+                    Ex.: <strong>1 2 3</strong> → 11 12 13 21 22 23 31 (gera 1 aposta de 7);
+                    <strong>0 2 3</strong> → só 6 dezenas (aí não fecha 7 sem baixar o tamanho).
+                    Padrão ao abrir: <strong>Todos (0–9)</strong> marcados.
                     {% endif %}
                 </p>
                 <div class="cc-volante mb-2" id="ciVolante" style="grid-template-columns:repeat(5,1fr);max-width:280px;margin:0 auto;"></div>
@@ -148,7 +201,7 @@
                     </div>
                     <div class="col-6">
                         <label class="form-label small mb-0">Qtd. apostas</label>
-                        <input type="number" class="form-control form-control-sm" id="ciQtdApostas" min="1" max="20" value="10">
+                        <input type="number" class="form-control form-control-sm" id="ciQtdApostas" min="1" max="50" value="10">
                     </div>
                     <div class="col-6">
                         <label class="form-label small mb-0">Priorizar</label>
@@ -161,7 +214,7 @@
                         <label class="form-label small mb-0">Exigir qtd dígitos na aposta</label>
                         <select class="form-select form-select-sm" id="ciExigirQtd" title="Quantos dígitos distintos (0–9) a aposta deve ter">
                             <option value="">Não exigir</option>
-                            {% for q in range(0, 10) %}
+                            {% for q in range(1, 10) %}
                             <option value="{{ q }}">{{ q }}</option>
                             {% endfor %}
                         </select>
@@ -180,14 +233,14 @@
                 <div class="mt-2 small" id="ciStatus"></div>
             </div>
         </div>
-        <div class="col-lg-7">
+        <div class="col-xl-8 col-lg-7">
             <div class="cc-panel p-3 mb-3">
                 <h2 class="h6 mb-2"><i class="fas fa-lightbulb" style="color:var(--primary);"></i> Insights (todos os sorteios)</h2>
                 <div id="ciInsights" class="small text-muted">Carregando…</div>
             </div>
             <div class="cc-panel p-3">
                 <h2 class="h6 mb-2"><i class="fas fa-ticket-alt text-success"></i> Apostas geradas</h2>
-                <div class="d-flex flex-wrap gap-2 mb-2">
+                <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
                     <button type="button" class="btn btn-sm btn-success" id="ciBtnExportLote" disabled>
                         <i class="fas fa-file-export"></i> Exportar lote .TXT
                     </button>
@@ -197,6 +250,14 @@
                     <button type="button" class="btn btn-sm btn-outline-primary" id="ciBtnListarTodas">
                         <i class="fas fa-th-list"></i> Ver todas as combinações
                     </button>
+                    <label class="small text-muted mb-0 ms-auto" for="ciOrdenarLote">Ordenar</label>
+                    <select class="form-select form-select-sm" id="ciOrdenarLote" style="width:auto;min-width:8rem;" disabled>
+                        <option value="geracao">Geração</option>
+                        <option value="soma_asc">Soma ↑</option>
+                        <option value="soma_desc">Soma ↓</option>
+                        <option value="seq_desc">Seq ↓</option>
+                        <option value="rept_desc">Rept ↓</option>
+                    </select>
                 </div>
                 {% if ui_config.has_mes %}
                 <div class="mb-2" style="max-width:260px;">
@@ -206,7 +267,14 @@
                     </select>
                 </div>
                 {% endif %}
+                <div id="ciLoteResumo" class="ci-lote-resumo d-none"></div>
                 <div id="ciResultado" class="small text-muted">Nenhuma geração ainda.</div>
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-link text-decoration-none px-0" id="ciBtnEnviarManual" disabled
+                            title="Abre Escolha Tubular · Manual com estes jogos">
+                        <i class="fas fa-share-square"></i> Enviar ao Manual (processar jogos)
+                    </button>
+                </div>
                 <hr class="my-2">
                 <div class="small text-muted mb-1" id="ciCombosMeta"></div>
                 <div id="ciCombosLista" class="small" style="max-height:240px;overflow:auto;"></div>
@@ -227,5 +295,5 @@ window.__CC_DIGITOS_PAGE__ = 'intel';
 {% if ui_config.has_mes %}
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
-<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=12"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=24"></script>
 {% endblock %}
