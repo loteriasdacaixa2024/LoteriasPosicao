@@ -12,8 +12,8 @@
     const PICK_MIN = UI.pick_min || 7;
     const PICK_MAX = UI.pick_max || 15;
     const PICK_DEFAULT = UI.pick_default || 7;
-    const MIN_REC = UI.positional ? 1 : 3;
-    const LS_POOL_KEY = 'cc_digitos_pool_v3';
+    const MIN_REC = UI.positional ? 1 : 4;
+    const LS_POOL_KEY = 'cc_digitos_pool_v2';
     /** Universo fixo: 10 dígitos únicos (0–9). Em Super Sete = candidatos das colunas. */
     const DIGITOS_TODOS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     const QTD_DIGITOS_UNIVERSO = DIGITOS_TODOS.length; // 10
@@ -37,7 +37,6 @@
     let sessaoDigitos = null;
     let ultimoLote = [];
     let ultimaAvalIntel = null;
-    let ultimoLoteAba2 = [];
     /** Dezenas do último concurso (para Rept). */
     let ultimoSorteioDz = [];
     /** 0 = próximo clique calcula total · 1 = próximo clique mostra apostas */
@@ -163,76 +162,6 @@
         return arr.sort(cmp);
     }
 
-    function htmlTabelaLote(apostas, sortModo) {
-        const lista = apostas || [];
-        if (!lista.length) {
-            return { tableHtml: '', resumoHtml: '' };
-        }
-        const ordered = ordenarLote(lista, sortModo || 'geracao');
-        const metas = ordered.map((ap) => ap._m);
-        const somaMed = Math.round(metas.reduce((s, m) => s + m.soma, 0) / metas.length);
-        const somaMin = Math.min(...metas.map((m) => m.soma));
-        const somaMax = Math.max(...metas.map((m) => m.soma));
-        const ultFmt = (guiaCache && guiaCache.ultimo_dezenas_fmt) || '';
-        const ultC = (guiaCache && guiaCache.ultimo_concurso) || '—';
-        const resumoHtml =
-            `<strong>${lista.length}</strong> aposta(s) · soma média <strong>${somaMed}</strong> ` +
-            `(${somaMin}–${somaMax})` +
-            (ultFmt
-                ? ` · Rept vs c.<strong>${ultC}</strong> [${ultFmt}]`
-                : '') +
-            ` · <a href="${PADROES_II_URL}" target="_blank" rel="noopener">Aba 4 · Padrões II</a>`;
-        const cols = Math.max(...ordered.map((ap) => (ap.dezenas || []).length), 1);
-        const temOrigem = ordered.some((ap) => ap.origem != null);
-        const rows = ordered.map((ap) => {
-            const m = ap._m;
-            const reptSet = new Set((m.reptList || []).map(Number));
-            const dezHtml = (m.dezenas || []).map((n) => {
-                const cls = reptSet.has(n) ? 'ci-dez ci-rept' : 'ci-dez';
-                return `<span class="${cls}" title="${reptSet.has(n) ? 'Repete do último' : ''}">${fmtDez(n)}</span>`;
-            }).join('');
-            const padUrl = urlPadraoII(m.padrao);
-            const origTd = temOrigem
-                ? `<td class="ci-muted" title="Aposta de origem">${ap.origem != null ? '#' + ap.origem : '—'}` +
-                  (ap.trocadas != null ? ` · ${ap.trocadas}t` : '') +
-                  `</td>`
-                : '';
-            return (
-                `<tr>` +
-                origTd +
-                `<td class="ci-td-dez"><div class="ci-dez-row" style="--ci-cols:${cols}">${dezHtml}</div></td>` +
-                `<td title="Padrão inicial — abrir na aba 4"><a class="ci-pad-link" href="${padUrl}" target="_blank" rel="noopener">${escHtml(m.padrao || '—')}</a></td>` +
-                `<td class="ci-num" title="Soma das dezenas">${m.soma}</td>` +
-                `<td class="ci-num" title="${escHtml(m.reptTitle)}">${m.rept}</td>` +
-                `<td class="ci-num" title="${escHtml(m.seqQuais)}">${m.seq}</td>` +
-                `<td class="ci-muted" title="Pares / Ímpares">${m.pares}P/${m.impares}I</td>` +
-                `<td class="ci-muted" title="Qtd. dígitos distintos (0–9)">${m.qtdDigitos}</td>` +
-                `<td class="ci-muted" title="Padrão final (últimos dígitos)">${escHtml(m.padraoFinal || '—')}</td>` +
-                `</tr>`
-            );
-        }).join('');
-        const origTh = temOrigem
-            ? `<th title="Variação a partir de qual aposta">Orig</th>`
-            : '';
-        const tableHtml =
-            `<div class="ci-table-wrap">` +
-            `<table class="ci-cmp-table">` +
-            `<thead><tr>` +
-            origTh +
-            `<th class="ci-th-dez">Dezenas</th>` +
-            `<th title="Padrão inicial (1º dígito de cada dezena)">Padrão</th>` +
-            `<th title="Soma das dezenas">Soma</th>` +
-            `<th title="Repetições vs último concurso">Rept</th>` +
-            `<th title="Sequências consecutivas">Seq</th>` +
-            `<th title="Pares / Ímpares">P/I</th>` +
-            `<th title="Dígitos distintos na aposta">Dig</th>` +
-            `<th title="Padrão final">Final</th>` +
-            `</tr></thead>` +
-            `<tbody>${rows}</tbody>` +
-            `</table></div>`;
-        return { tableHtml, resumoHtml };
-    }
-
     function renderLoteIntel(apostas) {
         const out = $('ciResultado');
         const resumo = $('ciLoteResumo');
@@ -254,13 +183,61 @@
             return;
         }
         const modo = (selOrd && selOrd.value) || 'geracao';
-        const built = htmlTabelaLote(lista, modo);
+        const ordered = ordenarLote(lista, modo);
+        const metas = ordered.map((ap) => ap._m);
+        const somaMed = Math.round(metas.reduce((s, m) => s + m.soma, 0) / metas.length);
+        const somaMin = Math.min(...metas.map((m) => m.soma));
+        const somaMax = Math.max(...metas.map((m) => m.soma));
         if (resumo) {
             resumo.classList.remove('d-none');
-            resumo.innerHTML = built.resumoHtml;
+            const ultFmt = (guiaCache && guiaCache.ultimo_dezenas_fmt) || '';
+            const ultC = (guiaCache && guiaCache.ultimo_concurso) || '—';
+            resumo.innerHTML =
+                `<strong>${lista.length}</strong> aposta(s) · soma média <strong>${somaMed}</strong> ` +
+                `(${somaMin}–${somaMax})` +
+                (ultFmt
+                    ? ` · Rept vs c.<strong>${ultC}</strong> [${ultFmt}]`
+                    : '') +
+                ` · <a href="${PADROES_II_URL}" target="_blank" rel="noopener">Aba 4 · Padrões II</a>`;
         }
+        const cols = Math.max(...ordered.map((ap) => (ap.dezenas || []).length), 1);
         out.className = 'small';
-        out.innerHTML = built.tableHtml;
+        const rows = ordered.map((ap) => {
+            const m = ap._m;
+            const reptSet = new Set((m.reptList || []).map(Number));
+            const dezHtml = (m.dezenas || []).map((n) => {
+                const cls = reptSet.has(n) ? 'ci-dez ci-rept' : 'ci-dez';
+                return `<span class="${cls}" title="${reptSet.has(n) ? 'Repete do último' : ''}">${fmtDez(n)}</span>`;
+            }).join('');
+            const padUrl = urlPadraoII(m.padrao);
+            return (
+                `<tr>` +
+                `<td class="ci-td-dez"><div class="ci-dez-row" style="--ci-cols:${cols}">${dezHtml}</div></td>` +
+                `<td title="Padrão inicial — abrir na aba 4"><a class="ci-pad-link" href="${padUrl}" target="_blank" rel="noopener">${escHtml(m.padrao || '—')}</a></td>` +
+                `<td class="ci-num" title="Soma das dezenas">${m.soma}</td>` +
+                `<td class="ci-num" title="${escHtml(m.reptTitle)}">${m.rept}</td>` +
+                `<td class="ci-num" title="${escHtml(m.seqQuais)}">${m.seq}</td>` +
+                `<td class="ci-muted" title="Pares / Ímpares">${m.pares}P/${m.impares}I</td>` +
+                `<td class="ci-muted" title="Qtd. dígitos distintos (0–9)">${m.qtdDigitos}</td>` +
+                `<td class="ci-muted" title="Padrão final (últimos dígitos)">${escHtml(m.padraoFinal || '—')}</td>` +
+                `</tr>`
+            );
+        }).join('');
+        out.innerHTML =
+            `<div class="ci-table-wrap">` +
+            `<table class="ci-cmp-table">` +
+            `<thead><tr>` +
+            `<th class="ci-th-dez">Dezenas</th>` +
+            `<th title="Padrão inicial (1º dígito de cada dezena)">Padrão</th>` +
+            `<th title="Soma das dezenas">Soma</th>` +
+            `<th title="Repetições vs último concurso">Rept</th>` +
+            `<th title="Sequências consecutivas">Seq</th>` +
+            `<th title="Pares / Ímpares">P/I</th>` +
+            `<th title="Dígitos distintos na aposta">Dig</th>` +
+            `<th title="Padrão final">Final</th>` +
+            `</tr></thead>` +
+            `<tbody>${rows}</tbody>` +
+            `</table></div>`;
     }
 
     function enviarLoteParaManual() {
@@ -398,7 +375,6 @@
             pool: poolArr,
             dezenas_por_aposta: k,
             incluir_apostas: true,
-            exigir_qtd_digitos: exigirQtdAtual(),
         });
         if (!data.sucesso) {
             alert(data.erro || 'Erro ao listar');
@@ -423,8 +399,6 @@
             dezenas_por_aposta: k,
             apostas: apostas || undefined,
         };
-        const exigir = exigirQtdAtual();
-        if (exigir) body.exigir_qtd_digitos = exigir;
         if (mesEl && mesEl.value) body.mes_num = mesEl.value;
         const data = await apiPost('/digitos/export-txt', body);
         if (!data.sucesso) {
@@ -437,24 +411,6 @@
     function aplicarPoolCompleto(targetSet) {
         targetSet.clear();
         DIGITOS_TODOS.forEach((d) => targetSet.add(d));
-    }
-
-    function aplicarPoolSalvo(targetSet) {
-        const stored = loadPoolFromStorage();
-        if (!stored || !Array.isArray(stored.pool) || !stored.pool.length) return null;
-        const uniq = [];
-        const seen = new Set();
-        stored.pool.forEach((x) => {
-            const d = Number(x);
-            if (!Number.isInteger(d) || d < 0 || d > 9 || seen.has(d)) return;
-            seen.add(d);
-            uniq.push(d);
-        });
-        // 10 dígitos = universo inteiro: não restaura (é o estado que invertia o clique).
-        if (!uniq.length || uniq.length === QTD_DIGITOS_UNIVERSO) return null;
-        targetSet.clear();
-        uniq.forEach((d) => targetSet.add(d));
-        return stored;
     }
 
     function fillPickSelect(selId, minK, maxK) {
@@ -514,10 +470,6 @@
             btn.className = 'cc-ball' + (poolSet.has(d) ? ' selected' : '');
             btn.textContent = String(d);
             btn.dataset.d = d;
-            btn.setAttribute('aria-pressed', poolSet.has(d) ? 'true' : 'false');
-            btn.title = poolSet.has(d)
-                ? 'Em uso — clique para tirar'
-                : 'Clique para USAR este dígito';
             btn.addEventListener('click', () => onToggle(d));
             vol.appendChild(btn);
         });
@@ -540,9 +492,9 @@
         if (resumo) {
             if (!aval || !aval.qtd_pool) {
                 resumo.innerHTML =
-                    `Selecione dígitos. Para aposta de <strong>${PICK_DEFAULT}</strong> ${UNIDADE}, ` +
-                    `o pool precisa liberar ≥ <strong>${PICK_DEFAULT}</strong> elegíveis ` +
-                    `(ex.: <strong>0 1 2</strong> ou <strong>1 2 3</strong>).`;
+                    `Selecione dígitos. <strong>Mínimo para aposta oficial (${PICK_DEFAULT} ${UNIDADE}):</strong> ` +
+                    `precisa ter ≥ <strong>${PICK_DEFAULT}</strong> ${UNIDADE} elegíveis ` +
+                    `(ex.: dígitos <strong>0 1 2</strong>).`;
             } else {
                 const combos = aval.combinacoes_possiveis != null
                     ? aval.combinacoes_possiveis.toLocaleString('pt-BR')
@@ -550,22 +502,16 @@
                 const k = aval.dezenas_por_aposta;
                 const n = aval.qtd_elegiveis || 0;
                 let extra = '';
-                if (!IS_COLUNAS && n > 0 && n < k) {
+                if (!IS_COLUNAS && n > 0 && n < PICK_DEFAULT) {
                     extra =
-                        ` <span class="text-danger">· insuficiente: pediu ${k} ${UNIDADE}/aposta, ` +
-                        `mas só há ${n} elegível(is) — baixe para ≤ ${n} ou amplie o pool</span>`;
+                        ` <span class="text-warning">· máx. agora: <strong>${n}</strong> ${UNIDADE}/aposta. ` +
+                        `Para oficial (${PICK_DEFAULT}), escolha mais dígitos até ter ≥ ${PICK_DEFAULT} elegíveis.</span>`;
+                } else if (!IS_COLUNAS && n > 0 && n < k) {
+                    extra = ` <span class="text-danger">· impossível montar aposta de ${k} com só ${n} — use no máximo ${n}</span>`;
                 } else if (aval.pode_gerar || IS_COLUNAS) {
                     extra = ' <span class="text-success">· pode gerar</span>';
                 } else {
                     extra = ' <span class="text-danger">· insuficiente para gerar</span>';
-                }
-                const exigir = aval.exigir_qtd_digitos;
-                if (!IS_COLUNAS && exigir && aval.combinacoes_enumeradas) {
-                    extra +=
-                        ` · <strong>${Number(aval.combinacoes_com_exigir || 0).toLocaleString('pt-BR')}</strong>` +
-                        ` com exatamente ${exigir} dígito(s) único(s)`;
-                } else if (!IS_COLUNAS && exigir && aval.combinacoes_enumeradas === false) {
-                    extra += ` · filtro «exatamente ${exigir} dígitos» será aplicado ao calcular/exportar`;
                 }
                 resumo.innerHTML =
                     `<strong>${aval.qtd_pool}</strong> dígito(s) · ` +
@@ -584,57 +530,54 @@
             ).join(' ') || '<span class="text-muted">Nenhuma dezena do universo usa só esses dígitos.</span>';
         }
         const aviso = $(prefix === 'cd' ? 'cdAvisoRec' : 'ciAviso');
-        if (!aviso) return;
-
-        const n = (aval && aval.qtd_elegiveis) || 0;
-        const k = (aval && aval.dezenas_por_aposta) || PICK_DEFAULT;
-        const pode = !!(aval && aval.pode_gerar);
-
-        if (!aval || !aval.qtd_pool) {
-            aviso.className = 'small text-muted';
-            aviso.textContent = 'Clique para MARCAR os dígitos que entram (cinza = fora, laranja = usa). Ex.: 0 1 2 3 4 6.';
-        } else if (!IS_COLUNAS && !pode) {
-            aviso.className = 'small text-danger';
-            aviso.innerHTML =
-                `<strong>Insuficiente:</strong> ${n} elegível(is) para aposta de ${k}. ` +
-                `Ex.: <strong>1 2 3</strong> → 11 12 13 21 22 23 31 (7) · ` +
-                `<strong>0 2 3</strong> → só 6 (aí falta dígito ou baixe dezenas/aposta).`;
-        } else if (!IS_COLUNAS && pode && n >= k) {
-            aviso.className = 'small text-success';
-            aviso.innerHTML =
-                `<strong>OK para gerar</strong> · ${n} elegíveis · C(${n},${k})=` +
-                `${(aval.combinacoes_possiveis || 0).toLocaleString('pt-BR')}` +
-                (aval.abaixo_recomendado
-                    ? ` <span class="text-muted">(dica: pools com ≥ ${MIN_REC} dígitos costumam ter mais opções)</span>`
-                    : '');
-        } else if (IS_COLUNAS && pode) {
-            aviso.className = 'small text-success';
-            aviso.textContent = 'OK para gerar (Super Sete posicional).';
-        } else {
-            aviso.className = 'small text-muted';
-            aviso.textContent = '';
+        if (aviso && prefix === 'cd') {
+            const n = (aval && aval.qtd_elegiveis) || 0;
+            if (!aval || !aval.qtd_pool) {
+                aviso.className = 'small text-muted';
+                aviso.innerHTML =
+                    `<strong>Mínimo:</strong> 1 dígito para listar elegíveis; ` +
+                    `para aposta de <strong>${PICK_DEFAULT}</strong> dezenas, ≥ <strong>${PICK_DEFAULT}</strong> elegíveis ` +
+                    `(costuma exigir ≥ 3 dígitos, ex. 0 1 2).`;
+            } else if (!IS_COLUNAS && n > 0 && n < PICK_DEFAULT) {
+                aviso.className = 'small text-warning';
+                aviso.innerHTML =
+                    `<strong>Mínimo agora:</strong> use até <strong>${n}</strong> dezena(s) por aposta. ` +
+                    `Faltam <strong>${PICK_DEFAULT - n}</strong> elegível(is) para a aposta oficial de ${PICK_DEFAULT}. ` +
+                    `Ex. com 0 2 3 só entram 02 03 20 22 23 30.`;
+            } else if (aval && aval.abaixo_recomendado) {
+                aviso.className = 'small text-warning';
+                aviso.textContent = aval.aviso || `Abaixo do mínimo recomendado (${MIN_REC}).`;
+            } else if (!IS_COLUNAS && n >= PICK_DEFAULT) {
+                aviso.className = 'small text-success';
+                aviso.innerHTML =
+                    `OK para aposta oficial: <strong>${n}</strong> elegíveis ≥ ${PICK_DEFAULT}. ` +
+                    `Dezenas por aposta: 1 até ${n}.`;
+            } else {
+                aviso.textContent = '';
+            }
+        } else if (aviso) {
+            if (aval && aval.abaixo_recomendado) {
+                aviso.className = 'small text-warning';
+                aviso.textContent = aval.aviso || `Abaixo do mínimo recomendado (${MIN_REC}).`;
+            } else {
+                aviso.textContent = '';
+            }
         }
-
         if (prefix === 'cd' && aval && aval.qtd_elegiveis != null) {
-            const cur = kApostaAba2() || PICK_DEFAULT;
-            const nEleg = Number(aval.qtd_elegiveis) || 0;
-            // Não reduz k enquanto o pool está sendo montado (0 → 3 elegíveis
-            // não pode derrubar 7 dezenas para 3). Só amplia a faixa do select.
-            fillPickSelectDigitosGerar(Math.max(nEleg, cur, PICK_DEFAULT));
+            const cur = kApostaAba2();
+            fillPickSelectDigitosGerar(aval.qtd_elegiveis);
+            const hi = Math.max(1, aval.qtd_elegiveis || 1);
+            // Se pediu 7 e só há 6 elegíveis, cai automaticamente para 6
+            const next = Math.min(Math.max(1, cur || PICK_DEFAULT), hi);
+            if ($('cdDezenasApostaGerar')) $('cdDezenasApostaGerar').value = String(next);
         }
     }
 
-    let avalSeq = 0;
-
     async function avaliar(poolArr, k, prefix) {
-        const seq = ++avalSeq;
-        const exigir = exigirQtdAtual();
         const data = await apiPost('/digitos/avaliar', {
             pool: poolArr,
             dezenas_por_aposta: k,
-            exigir_qtd_digitos: exigir,
         });
-        if (seq !== avalSeq) return data;
         if (data.sucesso) {
             renderElegiveis(data, prefix);
             if (prefix === 'ci') ultimaAvalIntel = data;
@@ -722,31 +665,18 @@
                 aval = await avaliar(arr, k, 'cd');
             }
             cdUltimaAval = aval;
-            const exigir = exigirQtdAtual();
-            const bruto = Number(aval.combinacoes_possiveis) || 0;
-            const filtrado = (exigir && aval.combinacoes_enumeradas)
-                ? Number(aval.combinacoes_com_exigir || 0)
-                : bruto;
-            const total = filtrado;
+            const total = Number(aval.combinacoes_possiveis) || 0;
             if (msg) {
                 msg.classList.remove('d-none', 'alert-warning', 'alert-success');
                 msg.classList.add(total > 0 ? 'alert-success' : 'alert-warning');
-                let html =
+                msg.innerHTML =
                     `Dígitos <strong>[${arr.join(', ')}]</strong> → dezenas elegíveis: ` +
                     `<strong>${elegFmt}</strong> (${eleg}). ` +
                     `Com <strong>${k}</strong> ${UNIDADE} por aposta: ` +
-                    `<strong>${bruto.toLocaleString('pt-BR')}</strong> combinação(ões) C(${eleg},${k}).`;
-                if (exigir && aval.combinacoes_enumeradas) {
-                    html +=
-                        ` Destas, <strong>${filtrado.toLocaleString('pt-BR')}</strong> usam ` +
-                        `exatamente <strong>${exigir}</strong> dígito(s) único(s).`;
-                } else if (exigir) {
-                    html += ` Filtro «exatamente ${exigir} dígitos» será aplicado ao mostrar/exportar.`;
-                }
-                html += total > 0
-                    ? ` Clique de novo para mostrar até <strong>${qtd}</strong> aposta(s).`
-                    : ` Aumente o pool, mude a exigência ou reduza as dezenas por aposta.`;
-                msg.innerHTML = html;
+                    `<strong>${total.toLocaleString('pt-BR')}</strong> combinação(ões) C(${eleg},${k}). ` +
+                    (total > 0
+                        ? `Clique de novo para mostrar até <strong>${qtd}</strong> aposta(s).`
+                        : `Aumente o pool de dígitos ou reduza as dezenas por aposta.`);
             }
             if (btn && total > 0) {
                 btn.innerHTML = `<i class="fas fa-th-list"></i> Mostrar ${qtd} aposta(s)`;
@@ -769,7 +699,6 @@
             dezenas_por_aposta: k,
             incluir_apostas: true,
             limite: qtd,
-            exigir_qtd_digitos: exigirQtdAtual(),
         });
         if (!data.sucesso) {
             alert(data.erro || 'Erro ao listar apostas.');
@@ -790,11 +719,8 @@
             msg.classList.add('alert-success');
             msg.innerHTML =
                 `Mostrando <strong>${mostradas.toLocaleString('pt-BR')}</strong> de ` +
-                `<strong>${total.toLocaleString('pt-BR')}</strong> combinação(ões) ` +
-                (exigirQtdAtual()
-                    ? `com exatamente ${exigirQtdAtual()} dígito(s) único(s) `
-                    : '') +
-                `(dezenas só com os dígitos [${arr.join(', ')}]).`;
+                `<strong>${total.toLocaleString('pt-BR')}</strong> combinação(ões) possível(is) ` +
+                `(só dezenas com os dígitos [${arr.join(', ')}]).`;
         }
         if (btn) {
             btn.innerHTML = '<i class="fas fa-calculator"></i> Calcular combinações';
@@ -802,110 +728,6 @@
             btn.classList.add('btn-primary');
         }
         cdComboFase = 0;
-    }
-
-    function renderLoteAba2(apostas) {
-        const el = $('cdLoteLista');
-        const resumo = $('cdLoteResumo');
-        const selOrd = $('cdOrdenarLote');
-        const has = !!(apostas && apostas.length);
-        if ($('cdBtnVariar')) $('cdBtnVariar').disabled = !has;
-        if ($('cdBtnExportLote')) $('cdBtnExportLote').disabled = !has;
-        if (selOrd) selOrd.disabled = !has;
-        if (!el) return;
-        if (!has) {
-            el.innerHTML = '';
-            if (resumo) {
-                resumo.classList.add('d-none');
-                resumo.innerHTML = '';
-            }
-            return;
-        }
-        const modo = (selOrd && selOrd.value) || 'geracao';
-        const built = htmlTabelaLote(apostas, modo);
-        if (resumo) {
-            resumo.classList.remove('d-none');
-            resumo.innerHTML = built.resumoHtml;
-        }
-        el.innerHTML = built.tableHtml;
-    }
-
-    async function gerarLoteAba2() {
-        const arr = [...poolAba2].sort((a, b) => a - b);
-        const st = $('cdLoteStatus');
-        if (!arr.length) {
-            alert('Selecione o pool de dígitos.');
-            return;
-        }
-        const k = kApostaAba2();
-        const qtd = Math.min(20, qtdApostasDesejada());
-        if (st) {
-            st.className = 'small text-muted mb-1';
-            st.textContent = 'Gerando apostas…';
-        }
-        const data = await apiPost('/digitos/gerar', {
-            pool: arr,
-            dezenas_por_aposta: k,
-            qtd_apostas: qtd,
-            modo: 'frequencia',
-            exigir_qtd_digitos: exigirQtdAtual(),
-            salvar_sessao: false,
-        });
-        if (!data || !data.sucesso) {
-            if (st) {
-                st.className = 'small text-danger mb-1';
-                st.textContent = formatErroGeracao(data || { erro: 'Falha ao gerar.' });
-            }
-            ultimoLoteAba2 = [];
-            renderLoteAba2([]);
-            return;
-        }
-        ultimoLoteAba2 = data.apostas || [];
-        if (st) {
-            st.className = 'small text-success mb-1';
-            st.textContent =
-                `${ultimoLoteAba2.length} aposta(s) só com os dígitos [${arr.join(', ')}]` +
-                (exigirQtdAtual() ? ` · exatamente ${exigirQtdAtual()} dígitos únicos` : '') +
-                (data.aviso ? ` · ${data.aviso}` : '');
-        }
-        renderLoteAba2(ultimoLoteAba2);
-    }
-
-    async function variarLoteAba2() {
-        const arr = [...poolAba2].sort((a, b) => a - b);
-        const st = $('cdLoteStatus');
-        if (!ultimoLoteAba2.length) {
-            alert('Gere as apostas antes das variações.');
-            return;
-        }
-        if (st) {
-            st.className = 'small text-muted mb-1';
-            st.textContent = 'Gerando variações…';
-        }
-        const data = await apiPost('/digitos/refinar', {
-            pool: arr,
-            dezenas_por_aposta: kApostaAba2(),
-            apostas: ultimoLoteAba2,
-            exigir_qtd_digitos: exigirQtdAtual(),
-            modo: 'inteligente',
-            intensidade: ($('cdVarIntensidade') || {}).value || 'leve',
-            variacoes: parseInt(($('cdVarQtd') || {}).value || '1', 10),
-            distancia: 'media',
-        });
-        if (!data || !data.sucesso) {
-            if (st) {
-                st.className = 'small text-danger mb-1';
-                st.textContent = (data && data.erro) || 'Falha ao variar.';
-            }
-            return;
-        }
-        ultimoLoteAba2 = data.apostas || [];
-        if (st) {
-            st.className = 'small text-success mb-1';
-            st.textContent =
-                `${ultimoLoteAba2.length} variação(ões) · ainda só com os dígitos [${arr.join(', ')}]`;
-        }
-        renderLoteAba2(ultimoLoteAba2);
     }
 
     function syncAba2() {
@@ -924,15 +746,7 @@
                 : 'Nenhum dígito selecionado';
         }
         savePoolToStorage(arr);
-        atualizarOpcoesExigir(arr.length);
         resetCdComboFase();
-        ultimoLoteAba2 = [];
-        const stLote = $('cdLoteStatus');
-        if (stLote) {
-            stLote.className = 'small mb-1';
-            stLote.textContent = '';
-        }
-        renderLoteAba2([], 'apostas');
         const k = kApostaAba2();
         avaliar(arr, k, 'cd');
     }
@@ -1057,19 +871,8 @@
         return msg;
     }
 
-    function selExigir() {
-        return PAGE === 'intel' ? $('ciExigirQtd') : $('cdExigirQtd');
-    }
-
-    function exigirQtdAtual() {
-        const raw = (selExigir() || {}).value || '';
-        if (!raw || raw === '0') return null;
-        const n = parseInt(raw, 10);
-        return Number.isFinite(n) && n >= EXIGIR_QTD_MIN ? n : null;
-    }
-
     function atualizarOpcoesExigir(poolSize) {
-        const sel = selExigir();
+        const sel = $('ciExigirQtd');
         if (!sel) return null;
         const prev = sel.value;
         const keep = prev && parseInt(prev, 10) >= EXIGIR_QTD_MIN && parseInt(prev, 10) <= EXIGIR_QTD_MAX
@@ -1106,9 +909,7 @@
             const acimaPool = pSize > 0 && n > pSize;
             opt.title = acimaPool
                 ? `Impossível com só ${pSize} dígito(s) marcados — marque mais dígitos (universo 0–9)`
-                : (n === pSize
-                    ? 'Exatamente os dígitos marcados no pool (todos aparecem)'
-                    : '');
+                : '';
             opt.style.color = acimaPool ? '#adb5bd' : '';
         });
 
@@ -1289,21 +1090,6 @@
             syncKSelects('cdDezenasApostaGerar');
             syncAba2();
         });
-        $('cdExigirQtd')?.addEventListener('change', () => { syncAba2(); });
-        $('cdBtnExatoPool')?.addEventListener('click', () => {
-            const n = poolAba2.size;
-            if (n < 1) {
-                alert('Selecione o pool de dígitos.');
-                return;
-            }
-            if (n > EXIGIR_QTD_MAX) {
-                alert('O filtro aceita no máximo 9 dígitos distintos por aposta.');
-                return;
-            }
-            atualizarOpcoesExigir(n);
-            if ($('cdExigirQtd')) $('cdExigirQtd').value = String(n);
-            syncAba2();
-        });
         $('cdQtdApostas')?.addEventListener('change', () => {
             if (cdComboFase === 1) {
                 const qtd = qtdApostasDesejada();
@@ -1324,20 +1110,6 @@
         $('cdBtnSalvar')?.addEventListener('click', salvarAba2);
 
         $('cdBtnCalcularMostrar')?.addEventListener('click', calcularOuMostrarCombos);
-        $('cdBtnGerarLote')?.addEventListener('click', gerarLoteAba2);
-        $('cdBtnVariar')?.addEventListener('click', variarLoteAba2);
-        $('cdBtnExportLote')?.addEventListener('click', () => {
-            const arr = [...poolAba2].sort((a, b) => a - b);
-            const k = kApostaAba2();
-            if (!ultimoLoteAba2.length) {
-                alert('Gere as apostas antes de exportar o lote.');
-                return;
-            }
-            exportar('lote', arr, k, ultimoLoteAba2);
-        });
-        $('cdOrdenarLote')?.addEventListener('change', () => {
-            if (ultimoLoteAba2.length) renderLoteAba2(ultimoLoteAba2);
-        });
         $('cdBtnExportTodas')?.addEventListener('click', () => {
             const arr = [...poolAba2].sort((a, b) => a - b);
             const k = kApostaAba2();
@@ -1384,15 +1156,19 @@
         });
 
         carregarGuia();
-        // Começa vazio: clique MARCA o dígito. Não inicia com 0–9 ligados
-        // (isso fazia o clique parecer «ao contrário»). Restaura só pool parcial.
-        const storedCd = aplicarPoolSalvo(poolAba2);
-        if (storedCd && storedCd.dezenas_por_aposta) {
-            const kv = String(storedCd.dezenas_por_aposta);
-            if ($('cdDezenasAposta')) $('cdDezenasAposta').value = kv;
-            if ($('cdDezenasApostaGerar')) $('cdDezenasApostaGerar').value = kv;
+        // Padrão em todas as modalidades: pool completo 0–9 (10 dígitos).
+        // Ignora cache antigo parcial (v1) — nova chave LS v2.
+        const storedCd = loadPoolFromStorage();
+        if (storedCd && Array.isArray(storedCd.pool) && storedCd.pool.length === QTD_DIGITOS_UNIVERSO) {
+            storedCd.pool.forEach((d) => poolAba2.add(Number(d)));
+            if (storedCd.dezenas_por_aposta) {
+                const kv = String(storedCd.dezenas_por_aposta);
+                if ($('cdDezenasAposta')) $('cdDezenasAposta').value = kv;
+                if ($('cdDezenasApostaGerar')) $('cdDezenasApostaGerar').value = kv;
+            }
+        } else {
+            aplicarPoolCompleto(poolAba2);
         }
-        try { localStorage.removeItem('cc_digitos_pool_v2'); } catch (_) { /* ignore */ }
         syncAba2();
         carregarSessoesDigitos();
     }
@@ -1436,15 +1212,18 @@
             listarTodas(arr, k, 'ciCombosMeta', 'ciCombosLista');
         });
 
-        // Mesma regra do Construtor: vazio até o usuário marcar (ou restaurar pool parcial).
-        const stored = aplicarPoolSalvo(poolIntel);
-        if (stored && $('ciDezenasAposta') && stored.dezenas_por_aposta) {
-            $('ciDezenasAposta').value = String(stored.dezenas_por_aposta);
+        // Padrão: sempre inicia com os 10 dígitos (0–9).
+        // Só restaura storage se for pool completo; cache antigo com 6 dígitos é descartado.
+        const stored = loadPoolFromStorage();
+        if (stored && Array.isArray(stored.pool) && stored.pool.length === QTD_DIGITOS_UNIVERSO) {
+            stored.pool.forEach((d) => poolIntel.add(Number(d)));
+            if ($('ciDezenasAposta') && stored.dezenas_por_aposta) {
+                $('ciDezenasAposta').value = String(stored.dezenas_por_aposta);
+            }
+        } else {
+            aplicarPoolCompleto(poolIntel);
+            try { localStorage.removeItem('cc_digitos_pool_v1'); } catch (_) { /* ignore */ }
         }
-        try {
-            localStorage.removeItem('cc_digitos_pool_v1');
-            localStorage.removeItem('cc_digitos_pool_v2');
-        } catch (_) { /* ignore */ }
 
         carregarGuia();
         syncIntel();

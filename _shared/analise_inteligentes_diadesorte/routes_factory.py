@@ -216,22 +216,6 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
-    @analise_bp.route("/api/inteligentes/n-apostas", methods=["POST"])
-    def api_inteligentes_n_apostas():
-        """Nº da aposta na aba 5 (Todos do padrão / Mostrar vencedor) para cartelas já saídas."""
-        try:
-            data = request.get_json(silent=True) or {}
-            padrao = (data.get("padrao") or "").strip()
-            dezs = data.get("dezenas_fmt") or data.get("dezenas") or []
-            if not padrao:
-                return jsonify({"sucesso": False, "erro": "Informe padrao"}), 400
-            if not isinstance(dezs, list):
-                dezs = [dezs]
-            mapa = Svc.numeros_aposta_aba5(padrao, dezs)
-            return jsonify({"sucesso": True, "padrao": padrao, "mapa": mapa})
-        except Exception as e:
-            return jsonify({"sucesso": False, "erro": str(e)}), 500
-
     @analise_bp.route("/api/inteligentes/jogos-padrao/export", methods=["POST"])
     def api_inteligentes_jogos_padrao_export():
         """Exporta CSV/XLSX das apostas (escopo: todas, marcadas ou página)."""

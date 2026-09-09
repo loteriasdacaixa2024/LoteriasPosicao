@@ -13,14 +13,11 @@ from geradores_elite.construtor.models import ConstrutorAposta, ConstrutorConstr
 from geradores_elite.construtor.schema_ensure import ensure_construtor_schema
 from geradores_elite.construtor.universes import (
     POOL_MIN_RECOMENDADO,
-    contar_apostas_do_pool,
     dezena_compativel,
     digitos_da_dezena,
     diagnosticar_filtros_digitos,
-    iter_apostas_do_pool,
+    expandir_elegiveis,
     normalizar_pool_digitos,
-    parse_exigir_qtd_digitos,
-    qtd_digitos_distintos_aposta,
     resumo_pool,
 )
 from geradores_elite.engine_final_core import formatar_export_txt
@@ -30,12 +27,9 @@ from models.shared import db
 TIPO_DIGITOS = "digitos"
 TIPO_DEZENAS = "dezenas"
 
-# Limite de segurança para enumerar/exportar TODAS as combinações.
-# 100k cobre C(19,7)=50.388 (pool 0,1,2,3,4,6 no Dia de Sorte) e o recorte
-# com exatamente 6 dígitos únicos (25.832).
+# Limite de segurança para enumerar/exportar TODAS as combinações
 MAX_COMBOS_LISTAR = 2000
-MAX_COMBOS_EXPORTAR = 100_000
-MAX_ENUM_CONTAR = 200_000
+MAX_COMBOS_EXPORTAR = 5000
 
 
 
@@ -172,25 +166,12 @@ class ConstrutorDigitosService:
         modality_key: str,
         pool: List[int],
         dezenas_por_aposta: Optional[int] = None,
-        exigir_qtd_digitos: Optional[int] = None,
     ) -> Dict[str, Any]:
         sp = cls._spec(modality_key)
         k = dezenas_por_aposta if dezenas_por_aposta is not None else sp.pick_default
         # Pool de dígitos: permite 1..pick_max (ex.: 0,2,3 → só 6 dezenas → C(6,5) ok)
         k = max(1, min(int(k), sp.pick_max))
         res = resumo_pool(pool, sp.dezena_min, sp.universo, k, sp.dezena_fmt_width)
-        exigir = parse_exigir_qtd_digitos(exigir_qtd_digitos)
-        res["exigir_qtd_digitos"] = exigir
-        res["combinacoes_brutas"] = res["combinacoes_possiveis"]
-        if exigir is not None:
-            cnt = contar_apostas_do_pool(
-                res["elegiveis"], k, sp.dezena_fmt_width, exigir, MAX_ENUM_CONTAR,
-            )
-            res["combinacoes_enumeradas"] = cnt["enumerado"]
-            if cnt["enumerado"]:
-                res["combinacoes_com_exigir"] = cnt["total"]
-            else:
-                res["combinacoes_com_exigir"] = None
         return {"sucesso": True, **res}
 
     @classmethod
@@ -778,13 +759,10 @@ class ConstrutorDigitosService:
         *,
         incluir_apostas: bool = True,
         limite: Optional[int] = None,
-        exigir_qtd_digitos: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
-        Lista dezenas elegíveis + apostas C(n,k).
-        Se exigir_qtd_digitos estiver definido, conta/lista só apostas com
-        exatamente essa quantidade de dígitos únicos (ex.: pool 0,1,2,3,4,6
-        + exigir 6 + 7 dezenas no Dia de Sorte → 25.832).
+        Lista dezenas elegíveis + todas as apostas C(n,k) quando couber no limite.
+        Híbrido: sempre devolve contagem; apostas só se total <= limite.
         """
         sp = cls._spec(modality_key)
         pool_n = normalizar_pool_digitos(pool)
@@ -792,202 +770,41 @@ class ConstrutorDigitosService:
         # Listagem do pool de dígitos: 1..pick_max (não força pick_min do jogo oficial)
         k = max(1, min(int(k), sp.pick_max))
         aval = resumo_pool(pool_n, sp.dezena_min, sp.universo, k, sp.dezena_fmt_width)
-        exigir = parse_exigir_qtd_digitos(exigir_qtd_digitos)
-        aval["exigir_qtd_digitos"] = exigir
-        aval["combinacoes_brutas"] = aval["combinacoes_possiveis"]
         lim = int(limite) if limite is not None else MAX_COMBOS_LISTAR
         lim = max(1, min(lim, MAX_COMBOS_EXPORTAR))
-        brute = aval["combinacoes_possiveis"]
-        pad_w = sp.dezena_fmt_width
-
-        apostas: List[Dict[str, Any]] = []
-        enumerado = True
-        total: Optional[int]
-        if exigir is None:
-            total = brute
-            if incluir_apostas and brute > 0:
-                for i, combo in enumerate(
-                    iter_apostas_do_pool(aval["elegiveis"], k, pad_w, None),
-                    start=1,
-                ):
-                    if i > lim:
-                        break
-                    apostas.append({"linha": i, "dezenas": combo})
-        elif brute <= MAX_ENUM_CONTAR:
-            total = 0
-            for combo in iter_apostas_do_pool(aval["elegiveis"], k, pad_w, exigir):
-                total += 1
-                if incluir_apostas and len(apostas) < lim:
-                    apostas.append({"linha": len(apostas) + 1, "dezenas": combo})
-        else:
-            enumerado = False
-            total = brute
-            if incluir_apostas:
-                for combo in iter_apostas_do_pool(aval["elegiveis"], k, pad_w, exigir):
-                    apostas.append({"linha": len(apostas) + 1, "dezenas": combo})
-                    if len(apostas) >= lim:
-                        break
-
-        aval["combinacoes_enumeradas"] = enumerado
-        aval["combinacoes_com_exigir"] = total if (exigir is not None and enumerado) else None
-
+        total = aval["combinacoes_possiveis"]
         out: Dict[str, Any] = {
             "sucesso": True,
             "avaliacao": aval,
-            "exigir_qtd_digitos": exigir,
-            "total_bruto": brute,
-            "total_combinacoes": total if total is not None else brute,
-            "contagem_exata": enumerado,
+            "total_combinacoes": total,
             "limite_listagem": lim,
             "limite_exportacao": MAX_COMBOS_EXPORTAR,
+            "pode_listar_todas": total > 0 and total <= lim,
+            "pode_exportar_todas": total > 0 and total <= MAX_COMBOS_EXPORTAR,
             "elegiveis": aval["elegiveis"],
-            "apostas": apostas if incluir_apostas else [],
+            "apostas": [],
             "truncado": False,
         }
-        total_eff = out["total_combinacoes"]
-        out["qtd_listadas"] = len(out["apostas"])
-        out["pode_listar_todas"] = bool(total_eff) and enumerado and total_eff <= lim
-        out["pode_exportar_todas"] = bool(total_eff) and enumerado and total_eff <= MAX_COMBOS_EXPORTAR
+        if not incluir_apostas or total <= 0:
+            return out
 
-        if enumerado and exigir is not None and total_eff == 0:
-            out["aviso"] = (
-                f"Nenhuma aposta de {k} dezena(s) usa exatamente {exigir} "
-                f"dígito(s) único(s) neste pool."
+        from itertools import islice
+        apostas = [
+            {"linha": i, "dezenas": list(combo)}
+            for i, combo in enumerate(
+                islice(combinations(aval["elegiveis"], k), lim),
+                start=1,
             )
-            return out
-
-        if not incluir_apostas:
-            return out
-
-        if not enumerado:
+        ]
+        out["apostas"] = apostas
+        out["qtd_listadas"] = len(apostas)
+        if total > lim:
             out["truncado"] = True
             out["aviso"] = (
-                f"Há {brute:,} combinações brutas C({aval['qtd_elegiveis']},{k})"
-                + (f" — filtro «exatamente {exigir} dígitos» aplicado na listagem." if exigir else ".")
-                + f" Exibindo até {len(apostas):,}. Exportação de todas até {MAX_COMBOS_EXPORTAR:,}."
-            ).replace(",", ".")
-        elif total_eff > lim:
-            out["truncado"] = True
-            out["aviso"] = (
-                f"Há {total_eff:,} combinações"
-                + (f" com exatamente {exigir} dígito(s) único(s)" if exigir else "")
-                + f" — exibindo as primeiras {len(apostas):,}. "
+                f"Há {total:,} combinações — exibindo as primeiras {len(apostas):,}. "
                 f"Exportação de todas liberada até {MAX_COMBOS_EXPORTAR:,}."
             ).replace(",", ".")
         return out
-
-    @classmethod
-    def refinar_lote(
-        cls,
-        modality_key: str,
-        pool: List[int],
-        apostas: List[Any],
-        *,
-        dezenas_por_aposta: Optional[int] = None,
-        exigir_qtd_digitos: Optional[int] = None,
-        modo: str = "inteligente",
-        intensidade: str = "leve",
-        variacoes: int = 1,
-        distancia: str = "media",
-    ) -> Dict[str, Any]:
-        """
-        Variações das apostas geradas — só dezenas formadas com o pool de dígitos.
-        """
-        from geradores_elite.construtor.refinamento import refinar_apostas
-
-        if modality_key == "supersete":
-            return {"sucesso": False, "erro": "Variações por dígitos no Super Sete ainda não estão nesta aba."}
-
-        sp = cls._spec(modality_key)
-        pool_n = normalizar_pool_digitos(pool)
-        if not pool_n:
-            return {"sucesso": False, "erro": "Informe o pool de dígitos."}
-        k = dezenas_por_aposta if dezenas_por_aposta is not None else sp.pick_default
-        k = max(1, min(int(k), sp.pick_max))
-        aval = resumo_pool(pool_n, sp.dezena_min, sp.universo, k, sp.dezena_fmt_width)
-        elegiveis = aval.get("elegiveis") or []
-        if len(elegiveis) < k:
-            return {
-                "sucesso": False,
-                "erro": (
-                    f"Há só {len(elegiveis)} dezena(s) elegível(is) para variar "
-                    f"apostas de {k}."
-                ),
-                "avaliacao": aval,
-            }
-
-        originais: List[List[int]] = []
-        pad_w = sp.dezena_fmt_width
-        for i, ap in enumerate(apostas or [], start=1):
-            if isinstance(ap, dict):
-                dz = ap.get("dezenas") or ap.get("refinada") or []
-            else:
-                dz = ap
-            dz = sorted(int(x) for x in dz)
-            if len(dz) != k:
-                return {"sucesso": False, "erro": f"Aposta {i}: esperado {k} dezenas."}
-            if not all(dezena_compativel(n, pool_n, pad_w) for n in dz):
-                return {
-                    "sucesso": False,
-                    "erro": f"Aposta {i}: dezena fora do pool de dígitos [{aval.get('pool_fmt')}].",
-                }
-            originais.append(dz)
-        if not originais:
-            return {"sucesso": False, "erro": "Gere as apostas antes de pedir variações."}
-
-        exigir = parse_exigir_qtd_digitos(exigir_qtd_digitos)
-        base = cls._base_svc(modality_key)
-        sorteios = [row["dezenas"] for row in base.listar_concursos(80) if row.get("dezenas")]
-        resultado = refinar_apostas(
-            originais,
-            elegiveis,
-            modality_key=modality_key,
-            modo=modo,
-            intensidade=intensidade,
-            qtd_apostas="todas",
-            variacoes=variacoes,
-            distancia=distancia,
-            faltantes_ciclo=base._faltantes_ciclo(),
-            sorteios=sorteios,
-        )
-        if not resultado.get("ok"):
-            return {"sucesso": False, "erro": resultado.get("erro") or "Falha ao variar."}
-
-        pares_ok: List[Dict[str, Any]] = []
-        for p in resultado.get("apostas") or []:
-            cand = [int(x) for x in (p.get("refinada") or [])]
-            if not all(dezena_compativel(n, pool_n, pad_w) for n in cand):
-                continue
-            if exigir is not None and qtd_digitos_distintos_aposta(cand, pad_w) != exigir:
-                continue
-            pares_ok.append(p)
-
-        if not pares_ok:
-            return {
-                "sucesso": False,
-                "erro": (
-                    "Nenhuma variação ficou só com os dígitos do pool"
-                    + (f" e exatamente {exigir} dígitos únicos" if exigir else "")
-                    + ". Tente intensidade leve ou mais dezenas no pool."
-                ),
-                "avaliacao": aval,
-            }
-
-        linhas = [
-            {"linha": i, "dezenas": p["refinada"], "origem": p.get("linha_origem"),
-             "trocadas": p.get("n_trocadas")}
-            for i, p in enumerate(pares_ok, start=1)
-        ]
-        return {
-            "sucesso": True,
-            "avaliacao": aval,
-            "exigir_qtd_digitos": exigir,
-            "originais": [{"linha": i, "dezenas": a} for i, a in enumerate(originais, start=1)],
-            "apostas": linhas,
-            "detalhe": pares_ok,
-            "qtd_geradas": len(linhas),
-            "config": resultado.get("config"),
-        }
 
     @classmethod
     def exportar_txt(
@@ -999,12 +816,10 @@ class ConstrutorDigitosService:
         dezenas_por_aposta: Optional[int] = None,
         apostas: Optional[List[Any]] = None,
         mes_num: Optional[int] = None,
-        exigir_qtd_digitos: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         modo=lote  → usa lista `apostas` já gerada
-        modo=todas → enumera C(n,k) do pool (até MAX_COMBOS_EXPORTAR),
-                     com filtro opcional de qtd de dígitos únicos
+        modo=todas → enumera C(n,k) do pool (até MAX_COMBOS_EXPORTAR)
         modo=elegiveis → uma linha com todas as dezenas elegíveis (matéria-prima)
         """
         sp = cls._spec(modality_key)
@@ -1061,7 +876,6 @@ class ConstrutorDigitosService:
             listed = cls.listar_combinacoes(
                 modality_key, pool_n, dezenas_por_aposta,
                 incluir_apostas=True, limite=MAX_COMBOS_EXPORTAR,
-                exigir_qtd_digitos=exigir_qtd_digitos,
             )
             if not listed.get("pode_exportar_todas"):
                 return {
@@ -1074,9 +888,7 @@ class ConstrutorDigitosService:
                     "avaliacao": listed.get("avaliacao"),
                 }
             linhas_apostas = listed["apostas"]
-            exigir = listed.get("exigir_qtd_digitos")
-            tag_ex = f"_ex{exigir}" if exigir else ""
-            sufixo = f"todas_{listed['total_combinacoes']}{tag_ex}"
+            sufixo = f"todas_{listed['total_combinacoes']}"
         else:
             # lote
             raw = apostas or []

@@ -858,53 +858,6 @@
             justify-content: flex-start;
         }
     }
-    #ge-construtor .ci-table-wrap { min-width: min-content; }
-    #ge-construtor .ci-cmp-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        font-variant-numeric: tabular-nums;
-        font-size: .8rem;
-    }
-    #ge-construtor .ci-cmp-table thead th {
-        position: sticky; top: 0; z-index: 1;
-        background: #f8f9fa;
-        border-bottom: 2px solid rgba(0,0,0,.08);
-        padding: .35rem .45rem;
-        font-weight: 700; color: #6c757d;
-        white-space: nowrap; text-align: center;
-        font-size: .72rem; text-transform: uppercase; letter-spacing: .02em;
-    }
-    #ge-construtor .ci-cmp-table thead th.ci-th-dez { text-align: left; }
-    #ge-construtor .ci-cmp-table tbody td {
-        padding: .4rem .45rem;
-        border-bottom: 1px solid rgba(0,0,0,.06);
-        vertical-align: middle; white-space: nowrap; text-align: center;
-    }
-    #ge-construtor .ci-cmp-table tbody tr:hover td { background: rgba(0,0,0,.025); }
-    #ge-construtor .ci-cmp-table .ci-td-dez { text-align: left; }
-    #ge-construtor .ci-dez-row {
-        display: inline-grid;
-        grid-template-columns: repeat(var(--ci-cols, 7), 2rem);
-        gap: 4px; align-items: center;
-    }
-    #ge-construtor .ci-dez {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 2rem; height: 1.55rem; border-radius: .35rem;
-        background: var(--accent); color: var(--on-accent, #fff);
-        font-size: .75rem; font-weight: 700; letter-spacing: .02em;
-    }
-    #ge-construtor .ci-dez.ci-rept { outline: 2px solid #0d6efd; outline-offset: 1px; }
-    #ge-construtor .ci-pad-link {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        font-weight: 700; color: #6f42c1; text-decoration: none;
-        border-bottom: 1px dashed rgba(111, 66, 193, .45);
-    }
-    #ge-construtor .ci-pad-link:hover { color: #5a32a3; border-bottom-style: solid; }
-    #ge-construtor .ci-num { font-weight: 700; color: #212529; }
-    #ge-construtor .ci-muted { color: #6c757d; font-weight: 600; }
-    #ge-construtor .ci-lote-resumo { font-size: .8rem; color: #6c757d; margin-bottom: .5rem; }
-    #ge-construtor #cdLoteLista { max-height: 420px; overflow: auto; }
 </style>
 
 <div id="ge-construtor" class="ge-construtor"
@@ -1502,26 +1455,19 @@
                             <span class="ms-auto small"><span class="cc-contador" id="cdContador">0/10</span></span>
                         </h2>
                         <p class="cc-step-hint mb-2">
-                            <strong>Clique para marcar o que entra.</strong>
-                            Cinza = fora · laranja = usa. Começa vazio — não o contrário.
-                            As apostas usam <em>somente</em> dezenas formadas com os dígitos marcados.
-                            Ex.: <strong>0 1 2 3 4 6</strong> → dezenas como
-                            <strong>01 10 13 14 20 23 24 26</strong>.
-                            <br>
-                            Para apostas com <strong>exatamente</strong> os dígitos marcados
-                            (todos aparecem, nenhum outro), clique em
-                            <em>Exatamente estes dígitos</em>
-                            (ex.: esses 6 + 7 dezenas → 25.832 apostas).
+                            Escolha dígitos (0–9). As apostas usam <em>somente</em> dezenas formadas
+                            com esses dígitos.
+                            Ex.: <strong>0 2 3</strong> → <strong>02 03 20 22 23 30</strong> (6 dezenas).
                             <br>
                             <strong>Mínimo:</strong> para aposta oficial de
                             <strong>{{ ui_config.pick_default }}</strong> dezenas,
                             o pool precisa gerar <strong>pelo menos essa quantidade</strong> de dezenas elegíveis
-                            (em geral ≥ 3 dígitos, e precisa incluir 0, 1 ou 2 para o Dia de Sorte 01–31).
-                            «Todos (0–9)» marca o universo inteiro.
+                            (em geral ≥ 3 dígitos bem escolhidos, ex. <strong>0 1 2</strong>).
+                            Com menos elegíveis, baixe “Dezenas por aposta” até o máximo permitido.
                         </p>
                         <div class="cc-volante mb-2" id="cdVolante" style="grid-template-columns:repeat(5,1fr);max-width:280px;margin:0 auto;"></div>
                         <div class="d-flex flex-wrap gap-2 mb-2 justify-content-center">
-                            <button type="button" class="btn btn-sm btn-success" id="cdBtnTodos" title="Marca os 10 dígitos 0–9 (universo inteiro)">Todos (0–9)</button>
+                            <button type="button" class="btn btn-sm btn-success" id="cdBtnTodos" title="Marca os 10 dígitos únicos 0–9">Todos (0–9)</button>
                             <button type="button" class="btn btn-sm btn-outline-info" id="cdBtnFreq">Top frequência</button>
                             <button type="button" class="btn btn-sm btn-outline-info" id="cdBtnAtraso">Mais atrasados</button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="cdBtnPares">Pares</button>
@@ -1574,20 +1520,6 @@
                                 <select class="form-select form-select-sm" id="cdDezenasApostaGerar" style="width:auto;min-width:7rem;"></select>
                             </div>
                             <div class="col-auto">
-                                <label class="form-label small mb-0" for="cdExigirQtd">Exigir qtd dígitos na aposta</label>
-                                <select class="form-select form-select-sm" id="cdExigirQtd"
-                                        title="Quantos dígitos distintos (0–9) cada aposta deve ter. Igual ao pool = exatamente estes dígitos."
-                                        style="width:auto;min-width:9rem;">
-                                    <option value="">Não exigir</option>
-                                </select>
-                            </div>
-                            <div class="col-auto">
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="cdBtnExatoPool"
-                                        title="Define «Exigir» = quantidade de dígitos marcados (todos aparecem na aposta)">
-                                    Exatamente estes dígitos
-                                </button>
-                            </div>
-                            <div class="col-auto">
                                 <label class="form-label small mb-0" for="cdQtdApostas">Qtd. de apostas</label>
                                 <input type="number" class="form-control form-control-sm" id="cdQtdApostas"
                                        min="1" max="2000" value="10" style="width:5.5rem;">
@@ -1610,53 +1542,6 @@
                         </div>
                         <div class="small text-muted mb-1" id="cdCombosMeta"></div>
                         <div id="cdCombosLista" class="small" style="max-height:280px;overflow:auto;"></div>
-                        <div class="mt-3 pt-2 border-top">
-                            <h3 class="h6 mb-1">Apostas e variações</h3>
-                            <p class="small text-muted mb-2">
-                                Gera um lote com os dígitos marcados e, em seguida, variações
-                                (troca dezenas só dentro deste pool).
-                            </p>
-                            <div class="d-flex flex-wrap gap-2 align-items-end mb-2">
-                                <button type="button" class="btn btn-sm btn-success" id="cdBtnGerarLote"
-                                        title="Gera o lote (padrão: 10 apostas) só com dezenas destes dígitos">
-                                    <i class="fas fa-bolt"></i> Gerar apostas
-                                </button>
-                                <div>
-                                    <label class="form-label small mb-0" for="cdVarIntensidade">Intensidade</label>
-                                    <select class="form-select form-select-sm" id="cdVarIntensidade" style="width:auto;">
-                                        <option value="leve" selected>Leve</option>
-                                        <option value="media">Média</option>
-                                        <option value="forte">Forte</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="form-label small mb-0" for="cdVarQtd">Variações / aposta</label>
-                                    <select class="form-select form-select-sm" id="cdVarQtd" style="width:auto;">
-                                        <option value="1" selected>1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                    </select>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="cdBtnVariar" disabled
-                                        title="Cria variações do lote, ainda só com estes dígitos">
-                                    <i class="fas fa-recycle"></i> Gerar variações
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-success" id="cdBtnExportLote" disabled>
-                                    <i class="fas fa-file-export"></i> Exportar lote .TXT
-                                </button>
-                                <label class="small text-muted mb-0 ms-auto" for="cdOrdenarLote">Ordenar</label>
-                                <select class="form-select form-select-sm" id="cdOrdenarLote" style="width:auto;min-width:8rem;" disabled>
-                                    <option value="geracao">Geração</option>
-                                    <option value="soma_asc">Soma ↑</option>
-                                    <option value="soma_desc">Soma ↓</option>
-                                    <option value="seq_desc">Seq ↓</option>
-                                    <option value="rept_desc">Rept ↓</option>
-                                </select>
-                            </div>
-                            <div class="small mb-1" id="cdLoteStatus"></div>
-                            <div id="cdLoteResumo" class="ci-lote-resumo d-none"></div>
-                            <div id="cdLoteLista" class="small"></div>
-                        </div>
                         <div class="mt-3 pt-2 border-top">
                             <a class="btn btn-sm btn-outline-primary" href="/geradores-elite/gerador-digitos-inteligente/" id="cdBtnIrGerador">
                                 <i class="fas fa-brain"></i> Abrir Gerador Inteligente por Dígitos
@@ -1834,7 +1719,7 @@ window.__CC_DIGITOS_PAGE__ = 'construtor';
 {% endif %}
 <script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}?v=14"></script>
 {% if digitos_habilitado %}
-<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=24"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=16"></script>
 <script src="{{ url_for('geradores_elite.static', filename='construtor_dezenas_especial.js') }}?v=1"></script>
 {% endif %}
 {% endif %}

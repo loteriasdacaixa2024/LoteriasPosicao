@@ -206,22 +206,13 @@ def backfill_historico(
 
 
 def _row_to_dict(r, *, ultimo_concurso: Optional[int] = None) -> Dict[str, Any]:
-    from analise_inteligentes_diadesorte.service import id_aposta_do_jogo
-
     conc = int(r.concurso)
-    pad = r.padrao_inicial or ""
-    dez_fmt = r.dezenas_fmt or ""
-    id_aposta = None
-    try:
-        id_aposta = id_aposta_do_jogo(pad, dez_fmt)
-    except Exception:
-        id_aposta = None
     return {
         "concurso": conc,
         "data": r.data or "",
-        "dezenas_fmt": dez_fmt,
+        "dezenas_fmt": r.dezenas_fmt or "",
         "dezenas_ordem_caixa_fmt": r.dezenas_ordem_caixa_fmt or "",
-        "padrao_inicial": pad,
+        "padrao_inicial": r.padrao_inicial or "",
         "padrao_final": r.padrao_final or "",
         "descricao_bma": r.descricao_bma or "",
         "soma": int(r.soma or 0),
@@ -234,7 +225,6 @@ def _row_to_dict(r, *, ultimo_concurso: Optional[int] = None) -> Dict[str, Any]:
         "mes_num": r.mes_num,
         "mes_nome": r.mes_nome or "",
         "mes_abrev": r.mes_abrev or "",
-        "id_aposta": id_aposta,
     }
 
 
