@@ -10024,3 +10024,145 @@ Press CTRL+C to quit
 127.0.0.1 - - [09/Sep/2026 16:46:01] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [09/Sep/2026 16:46:01] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [09/Sep/2026 16:46:01] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-09 18:17:25 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.0.10:5152
+Press CTRL+C to quit
+127.0.0.1 - - [09/Sep/2026 18:17:47] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-09 19:02:45 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.0.10:5152
+Press CTRL+C to quit
+127.0.0.1 - - [09/Sep/2026 19:03:02] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:33] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:33] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:34] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:34] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [09/Sep/2026 19:05:37] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:37] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:38] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:45] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:49] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:49] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:49] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:05:55] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:06:10] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:07:02] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:07:56] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:07:57] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:07:57] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:07:58] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:07:59] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:07:59] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:08:12] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:08:14] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:11:17] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:11:17] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:11:17] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v38 HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:11:18] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:11:22] "GET /analise/api/inteligentes/estatisticas-historico?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:11:22] "GET /analise/api/inteligentes/catalogo?n=9 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:11:31] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:11:46] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:11:51] "GET /analise/api/inteligentes/jogos-padrao?padrao=0%200%200%200%200%201%201%201%201%201%201%201%202%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:14:14] "GET /analise/atrasos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:14:15] "GET /analise/api/atrasos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:14:20] "GET /analise/api/aposta-sniper-atraso HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:14:31] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:14:31] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:14:31] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=3778&concurso_b=3779 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:16:03] "GET /analise/repeticao-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:16:04] "GET /analise/repeticao-concursos/api/analise?modo=volante HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:16:19] "GET /analise/atrasos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:16:20] "GET /analise/api/atrasos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:16:22] "POST /analise/api/download-24-apostas HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:17:30] "GET /analise/atrasos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:17:30] "GET /analise/api/atrasos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:20:23] "GET /analise/atrasos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:20:23] "GET /analise/api/atrasos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:20:41] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:20:41] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:20:41] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:20:42] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:20:42] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:20:43] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:20:53] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:20:54] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:26:05] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:26:05] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:26:06] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:26:06] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:26:07] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:26:07] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:26:16] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:26:17] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+
+--- iniciando 2026-09-10 07:36:53 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.1.218:5152
+Press CTRL+C to quit
+127.0.0.1 - - [10/Sep/2026 07:37:08] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-10 13:54:47 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.1.218:5152
+Press CTRL+C to quit
+127.0.0.1 - - [10/Sep/2026 13:55:04] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-10 16:32:07 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.0.10:5152
+Press CTRL+C to quit
+127.0.0.1 - - [10/Sep/2026 16:32:25] "GET / HTTP/1.1" 200 -

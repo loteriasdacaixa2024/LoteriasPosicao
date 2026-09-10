@@ -10572,3 +10572,206 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5156
 Press CTRL+C to quit
 127.0.0.1 - - [09/Sep/2026 16:46:06] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-09 18:17:31 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [09/Sep/2026 18:17:48] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-09 19:02:53 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [09/Sep/2026 19:03:03] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:04:19] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:04:20] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:04:20] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:07:46] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:07:47] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:07:47] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:07:47] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [09/Sep/2026 19:07:48] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:07:48] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:07:49] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:08:01] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:08:02] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:11] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:11] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:15:11] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 304 -
+127.0.0.1 - - [09/Sep/2026 19:15:12] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:13] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:13] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:16] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:16] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:21] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:21] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:21] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:21] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=3054&concurso_b=3055 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2480 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2560 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2640 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2720 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2800 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2880 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2960 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:15:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:18:18] "GET /analise/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:18:18] "GET /static/js/analise-estrutura.js HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:18:18] "GET /static/js/analise-repeticao-consecutiva.js HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:18:19] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:18:19] "GET /analise/api/avancada HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:18:19] "GET /analise/api/geometria-estrutural HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:18:20] "GET /analise/api/repeticao-consecutiva HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:19:19] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:20:19] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:21:19] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:22:19] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:23:19] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:24:19] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:25:19] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:26:20] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:27:21] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:28:22] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:29:23] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:30:24] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:31:25] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:32:26] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:33:27] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:34:28] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:35:29] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:36:30] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:37:31] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:38:32] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:39:33] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:40:34] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:41:35] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:42:36] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [09/Sep/2026 19:43:37] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:48:59] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:49:43] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:50:44] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:51:45] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:52:47] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:53:47] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:54:49] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:55:49] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:56:50] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:57:51] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:58:52] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 05:59:53] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 06:00:55] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 06:01:55] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 06:02:56] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 06:03:57] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 06:05:31] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+127.0.0.1 - - [10/Sep/2026 06:06:31] "GET /analise/api/coluna-final-vivo HTTP/1.1" 200 -
+
+--- iniciando 2026-09-10 07:37:01 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.1.218:5156
+Press CTRL+C to quit
+127.0.0.1 - - [10/Sep/2026 07:37:21] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-10 13:54:53 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.1.218:5156
+Press CTRL+C to quit
+127.0.0.1 - - [10/Sep/2026 13:55:05] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-10 16:32:14 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [10/Sep/2026 16:32:27] "GET / HTTP/1.1" 200 -
