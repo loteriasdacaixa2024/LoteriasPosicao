@@ -1,3 +1,7 @@
+<script>
+    window.__MESES_CORES__ = {{ meses_cores | default({}) | tojson }};
+    window.__CONV_HAS_MES__ = {{ (cc_cfg.has_mes | default(false)) | tojson }};
+</script>
 <script src="{{ url_for('cc_static.static', filename='js/conversor-apostas.js') }}"></script>
 <script src="{{ url_for('cc_static.static', filename='js/conferencia-resultados-ui.js') }}"></script>
 <script src="{{ url_for('cc_static.static', filename='js/concursos-disponiveis.js') }}"></script>

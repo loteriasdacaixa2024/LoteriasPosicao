@@ -23,8 +23,11 @@
             </div>
             <div class="conv-card">
                 <h3 class="conv-section-title"><i class="fas fa-paste me-2"></i>Colar Texto</h3>
-                <p class="small text-muted">Exemplo: {{ cc_cfg.exemplo_txt }}</p>
-                <textarea class="form-control mt-2 font-monospace" id="convTextoApostas" rows="8" placeholder="Uma aposta por linha..."></textarea>
+                <p class="small text-muted conv-exemplo-txt" id="convExemploTxt" data-exemplo="{{ cc_cfg.exemplo_txt }}">Exemplo: {{ cc_cfg.exemplo_txt }}</p>
+                <div class="conv-texto-wrap mt-2" id="convTextoWrap">
+                    <pre class="conv-texto-hl font-monospace" id="convTextoHighlight" hidden></pre>
+                    <textarea class="form-control font-monospace conv-texto-input" id="convTextoApostas" rows="8" placeholder="Uma aposta por linha..."></textarea>
+                </div>
                 <div class="mt-3 d-flex flex-wrap gap-2">
                     <button type="button" class="btn btn-success fw-bold" onclick="convConverterTexto()">Converter para JSON</button>
                     <button type="button" class="btn btn-secondary" onclick="convLimparTexto()">Limpar</button>

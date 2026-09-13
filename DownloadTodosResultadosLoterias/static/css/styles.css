@@ -1,0 +1,28 @@
+body {
+  font-family: "Raleway", sans-serif;
+}
+
+body, html {
+  background-image: url('https://i.postimg.cc/Xq7f1773/fundo.jpg');
+  background-repeat: repeat;
+  height: 100%;
+}
+
+.bgimg {
+  background-repeat: repeat;
+  min-height: 100%;
+  background-position: center;
+  background-size: cover;
+}
+
+/* Style for disabled links */
+a.disabled {
+  background: #ccc;
+  pointer-events: none;
+  cursor: default;
+  color: #666; /* Optional: Adjust text color for better contrast */
+}
+
+h1, p {
+  text-align: center;
+}

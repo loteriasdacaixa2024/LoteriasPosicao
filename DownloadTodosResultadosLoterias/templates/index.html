@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Loterias</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+  
+  <!--ALTERAR O CAMINHO ABSOLUTO OU VER AQUELE JEITO DE COMPARTILHAR O ARQUIVO-->
+  <link rel="stylesheet" href="/static/css/styles.css">
+
+</head>
+<body>
+
+
+  <h1>Gerador de números SEM IA</h1>
+  <p>Você poderá gerar números escolhendo quais quiser ou de forma aleatória. Observe apenas se estará liberado a modalidade de loteria que você quiser</p>
+  <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
+    <div class="w3-display-middle">
+      <ul>
+        <li><a href="https://jogodadiadesorte.netlify.app/" target="_blank" class="w3-button w3-black">Dia de Sorte</a></li>
+        <li><a href="https://jogodaduplasena.netlify.app/" target="_blank" class="w3-button w3-black disabled">Dupla Sena</a></li>
+        <li><a href="https://jogodafederal.netlify.app/" target="_blank" class="w3-button w3-black disabled">Federal</a></li>
+        <li><a href="https://jogodaloteca.netlify.app/" target="_blank" class="w3-button w3-black disabled">Loteca</a></li>
+        <li><a href="https://jogodalotofacil.netlify.app/" target="_blank" class="w3-button w3-black disabled">Lotofácil</a></li>
+        <li><a href="https://jogodalotomania.netlify.app/" target="_blank" class="w3-button w3-black disabled">Lotomania</a></li>
+        <li><a href="https://jogodasupersete.netlify.app/" target="_blank" class="w3-button w3-black disabled">Super Sete</a></li>
+        <li><a href="https://jogodatimemania.netlify.app/" target="_blank" class="w3-button w3-black">Timemania</a></li>
+        <li><a href="https://jogodamaismilionaria.netlify.app/" target="_blank" class="w3-button w3-black"> + Milionária</a></li>
+        <li><a href="https://jogodamegasena.netlify.app/" target="_blank" class="w3-button w3-black">Mega Sena</a></li>
+        <li><a href="https://jogodaquina.netlify.app/" target="_blank" class="w3-button w3-black">Quina</a></li>
+        <!-- other links -->
+      </ul>
+    </div>
+  </div>
+
+
+
+  <h1>Gerador de números COM IA</h1>
+  <p>Você poderá gerar números escolhendo quais quiser ou de forma aleatória. Observe apenas se estará liberado a modalidade de loteria que você quiser. Mas aqui tem uma diferenca usamos a inteligencia artificial.</p>
+  <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
+    <div class="w3-display-middle">
+      <ul>
+        <li><a href="https://jogodadiadesorteia.netlify.app/" target="_blank" class="w3-button w3-black">Dia de Sorte - IA</a></li>
+        <li><a href="https://jogodaduplasenaia.netlify.app/" target="_blank" class="w3-button w3-black">Dupla Sena - IA</a></li>
+        <li><a href="https://jogodafederalia.netlify.app/" target="_blank" class="w3-button w3-black">Federal - IA</a></li>
+        <li><a href="https://jogodalotecaia.netlify.app/" target="_blank" class="w3-button w3-black">Loteca - IA</a></li>
+        <li><a href="https://jogodalotofacilia.netlify.app/" target="_blank" class="w3-button w3-black">Lotofácil - IA</a></li>
+        <li><a href="https://jogodalotomaniaia.netlify.app" target="_blank" class="w3-button w3-black">Lotomania - IA</a></li>
+        <li><a href="https://jogodasuperseteia.netlify.app/" target="_blank" class="w3-button w3-black">Super Sete - IA</a></li>
+        <li><a href="https://jogodatimemaniaia.netlify.app/" target="_blank" class="w3-button w3-black">Timemania - IA</a></li>
+        <li><a href="https://jogodamaismilionariaia.netlify.app/" target="_blank" class="w3-button w3-black"> + Milionária - IA</a></li>
+        <li><a href="https://jogodamegasenaia.netlify.app" target="_blank" class="w3-button w3-black">Mega Sena - IA</a></li>
+        <li><a href="https://jogodaquinaia.netlify.app/" target="_blank" class="w3-button w3-black">Quina - IA</a></li>
+
+        <!-- other links -->
+      </ul>
+    </div>
+  </div>
+  <button id="download-button" class="w3-button w3-black">Baixar Todos os Resultados</button>
+
+
+<!--COLOCAR ESTE CÓDIGO NO ARQUIVO SCRIPT.JS-->
+  <script>
+    document.getElementById('download-button').addEventListener('click', function() {
+      fetch('/download', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => alert(data.message))
+        .catch(error => alert('Erro ao fazer o download: ' + error.message));
+    });
+  </script>
+
+
+
+
+    <div class="w3-display-bottomleft w3-padding-large">
+      <footer>Feito por: <i>Márcio Fernando Maia</i></footer>
+    </div>
+
+    <!--ALTERAR O CAMINHO ABSOLUTO OU VER AQUELE JEITO DE COMPARTILHAR O ARQUIVO-->
+    <script defer src="/static/js/script.js"></script>
+  </body>
+</html>

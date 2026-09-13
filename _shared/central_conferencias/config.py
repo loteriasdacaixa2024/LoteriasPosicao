@@ -150,10 +150,11 @@ CONF = {
         "combo_size": 7,
         "sorteio_model": ("models.sorteio_diadesorte", "SorteioDiaDeSorte"),
         "dezenas_method": "dezenas_lista",
+        "has_mes": True,
         "menu_hist_desc": "Confere apostas vs. sorteios — 7 dez + mês",
-        "menu_conv_desc": "TXT ↔ JSON (7 a 15 dezenas)",
+        "menu_conv_desc": "TXT ↔ JSON (7 a 15 dezenas + mês)",
         "faixas": [(7, "7 acertos"), (6, "6 acertos"), (5, "5 acertos"), (4, "4 acertos")],
-        "exemplo_txt": "03 08 15 22 28 33 45",
+        "exemplo_txt": "01 15 17 19 20 27 31 Out",
     },
 }
 
