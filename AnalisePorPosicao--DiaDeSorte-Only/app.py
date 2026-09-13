@@ -21,6 +21,7 @@ from central_conferencias.app_integration import extend_app as cc_extend_app, re
 from auto_sync import start_auto_sync_once
 from analise_comparar.routes_factory import register_comparar
 from analise_repeticao.routes_factory import register_repeticao
+from filtros_posicao.app_integration import register_filtros_posicao
 from menu.app_integration import extend_nav_app
 from posicao_analise.app_integration import extend_posicao_app
 from concentracao_acertos.app_integration import extend_concentracao_app
@@ -111,6 +112,7 @@ def create_app():
 
     register_comparar(app, 'diadesorte')
     register_repeticao(app, 'diadesorte')
+    register_filtros_posicao(app, 'diadesorte')
 
     return app
 
@@ -124,6 +126,7 @@ if __name__ == '__main__':
     print(f"[URL] Resumo Geral: http://localhost:{porta}/analise/resumo-geral/")
     print(f"[URL] Análise Comp: http://localhost:{porta}/analise/comportamento/")
     print(f"[URL] Análise Pos.: http://localhost:{porta}/analise/por-posicao/")
+    print(f"[URL] Filtros pos.: http://localhost:{porta}/dados/filtros-posicao/")
     print(f"[URL] Ciclo Cob.:  http://localhost:{porta}/analise/ciclo-cobertura/")
     print(f"[URL] Gaps/Ciclo:  http://localhost:{porta}/analise/gaps-ciclo/")
     print(f"[URL] Ciclo->Apostas: http://localhost:{porta}/geradores-elite/ciclo-apostas/")

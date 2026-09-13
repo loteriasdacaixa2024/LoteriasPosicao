@@ -19,7 +19,7 @@ _SHARED = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "_
 if _SHARED not in sys.path:
     sys.path.insert(0, _SHARED)
 
-from caixa_excel.config import DOWNLOADS_DIR, excel_filename, json_filename
+from caixa_excel.config import DOWNLOADS_DIR, json_filename, resolve_excel_path
 from caixa_excel.download import baixar_excel
 from caixa_excel.normalize import fmt_reais
 from caixa_excel.parse_diadesorte import parse_planilha_diadesorte
@@ -137,7 +137,7 @@ def gravar_json(registros: List[Dict[str, Any]]) -> str:
 
 def importar_arquivo(path: Path | None = None) -> Dict[str, Any]:
     """Insere só concursos ainda sem premiação. Não sobrescreve o banco nem sorteio_*."""
-    arquivo = Path(path) if path else DOWNLOADS_DIR / excel_filename("diadesorte")
+    arquivo = Path(path) if path else resolve_excel_path("diadesorte")
     rows = ler_xlsx_dicts(arquivo)
     parsed = parse_planilha_diadesorte(rows)
     stamp = _agora()

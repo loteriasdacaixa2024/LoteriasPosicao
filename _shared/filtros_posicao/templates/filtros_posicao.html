@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    #fp-root { --fp-card: #fff; --fp-border: #ead9a8; }
+    #fp-root .fp-hero {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark, #1a1a1a));
+        color: #fff; border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+        box-shadow: 0 4px 22px rgba(0,0,0,.16);
+    }
+    #fp-root .fp-hero h1 { font-size: 1.35rem; margin: 0 0 .35rem; font-weight: 800; }
+    #fp-root .fp-hero p { margin: 0; opacity: .9; font-size: .92rem; }
+    #fp-root .fp-toolbar {
+        display: flex; flex-wrap: wrap; gap: .65rem; align-items: center;
+        background: var(--fp-card); border: 1px solid var(--fp-border); border-radius: 12px;
+        padding: .75rem 1rem; margin-bottom: 1rem;
+    }
+    #fp-root .fp-toggle { display: flex; background: #f4f1e8; border-radius: 999px; padding: 3px; }
+    #fp-root .fp-toggle button {
+        border: 0; background: transparent; border-radius: 999px; padding: .4rem .9rem;
+        font-weight: 700; font-size: .82rem; color: #5a4a2a; cursor: pointer;
+    }
+    #fp-root .fp-toggle button.active { background: var(--primary); color: #fff; }
+    #fp-root .fp-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .7rem; margin-bottom: 1rem; }
+    #fp-root .fp-kpi {
+        background: var(--fp-card); border: 1px solid var(--fp-border); border-radius: 12px; padding: .75rem .9rem;
+    }
+    #fp-root .fp-kpi .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #7a6a4a; font-weight: 700; }
+    #fp-root .fp-kpi .val { font-size: 1.15rem; font-weight: 800; color: var(--primary); }
+    #fp-root .fp-ancora {
+        background: #fff8e1; border: 1px solid #f0d56a; border-radius: 14px; padding: 1rem 1.1rem; margin-bottom: 1rem;
+    }
+    #fp-root .fp-ancora h2 { font-size: 1rem; margin: 0 0 .55rem; }
+    #fp-root .fp-bolas { display: flex; flex-wrap: wrap; gap: .45rem; }
+    #fp-root .fp-bola {
+        min-width: 2.4rem; height: 2.4rem; border-radius: 50%; display: grid; place-items: center;
+        background: var(--primary); color: #fff; font-weight: 800; font-size: .95rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    }
+    #fp-root .fp-bola small { display: none; }
+    #fp-root .fp-pos-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: .7rem; margin-bottom: 1rem;
+    }
+    #fp-root .fp-pos {
+        background: var(--fp-card); border: 2px solid var(--fp-border); border-radius: 12px;
+        padding: .7rem .8rem; cursor: pointer; text-align: left; width: 100%;
+        transition: border-color .15s, box-shadow .15s, transform .12s;
+    }
+    #fp-root .fp-pos:hover { border-color: var(--accent, #c9a227); transform: translateY(-1px); }
+    #fp-root .fp-pos.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
+    #fp-root .fp-pos .tag { font-size: .72rem; font-weight: 800; color: #7a6a4a; }
+    #fp-root .fp-pos .champ { font-size: 1.7rem; font-weight: 900; line-height: 1.1; color: var(--primary); }
+    #fp-root .fp-pos .meta { font-size: .78rem; color: #555; margin-top: .2rem; }
+    #fp-root .fp-detail {
+        display: grid; grid-template-columns: minmax(260px, 1fr) minmax(280px, 1.1fr); gap: 1rem; margin-bottom: 1rem;
+    }
+    @media (max-width: 900px) { #fp-root .fp-detail { grid-template-columns: 1fr; } }
+    #fp-root .fp-card {
+        background: var(--fp-card); border: 1px solid var(--fp-border); border-radius: 12px; padding: 1rem;
+    }
+    #fp-root .fp-card h3 { font-size: .95rem; margin: 0 0 .7rem; }
+    #fp-root table.fp-freq { width: 100%; font-size: .82rem; }
+    #fp-root table.fp-freq th { text-align: left; border-bottom: 1px solid #eee; padding: .3rem; color: #7a6a4a; }
+    #fp-root table.fp-freq td { padding: .28rem .3rem; border-bottom: 1px solid #f6f3ea; }
+    #fp-root table.fp-freq tr.top td { background: #fff8e1; font-weight: 700; }
+    #fp-root .fp-bar { height: 7px; background: #efe8d4; border-radius: 99px; overflow: hidden; }
+    #fp-root .fp-bar > span { display: block; height: 100%; background: var(--primary); }
+    #fp-root .fp-insights { display: grid; gap: .55rem; margin-bottom: 1rem; }
+    #fp-root .fp-ins {
+        border-radius: 10px; padding: .7rem .85rem; border: 1px solid #eee; background: #fff;
+    }
+    #fp-root .fp-ins.aposta { background: #e8f7ee; border-color: #b7e0c4; }
+    #fp-root .fp-ins.alerta { background: #fff4e5; border-color: #f0d09a; }
+    #fp-root .fp-ins.info { background: #eef4ff; border-color: #c9d8f5; }
+    #fp-root .fp-ins b { display: block; margin-bottom: .15rem; }
+    #fp-root .fp-err { background: #fdecea; border: 1px solid #f5c2c0; color: #8a1f14; padding: .8rem 1rem; border-radius: 10px; }
+    #fp-root .fp-loading { padding: 2rem; text-align: center; color: #7a6a4a; }
+</style>
+
+<div id="fp-root"
+     data-api="{{ url_for('filtros_posicao.api') }}"
+     data-key="{{ modality_key }}"
+     data-dupla="{{ 1 if pos_cfg.duplasena else 0 }}"
+     data-ss="{{ 1 if modality_key == 'supersete' else 0 }}">
+
+    <div class="fp-hero">
+        <h1>Filtros por posição — {{ modality_nome }}</h1>
+        <p>Qual dezena mais saiu em cada posição, em todos os concursos do Excel. Use isso para montar apostas reais.</p>
+    </div>
+
+    <div class="fp-toolbar">
+        <div class="fp-toggle" id="fpModo">
+            <button type="button" data-modo="crescente" class="active">Ordem crescente (filtro Excel)</button>
+            <button type="button" data-modo="sorteio">Ordem de sorteio (globo)</button>
+        </div>
+        {% if pos_cfg.duplasena %}
+        <div class="fp-toggle" id="fpSorteio">
+            <button type="button" data-sorteio="1" class="active">1º sorteio</button>
+            <button type="button" data-sorteio="2">2º sorteio</button>
+        </div>
+        {% endif %}
+        <span class="small text-muted" id="fpFonte"></span>
+    </div>
+
+    <div id="fpBody" class="fp-loading">Carregando todos os concursos…</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const root = document.getElementById('fp-root');
+    const api = root.dataset.api;
+    const isDupla = root.dataset.dupla === '1';
+    const isSS = root.dataset.ss === '1';
+    let modo = isSS ? 'crescente' : 'crescente';
+    let sorteio = 1;
+    let data = null;
+    let chart = null;
+    let posAtiva = 1;
+
+    document.querySelectorAll('#fpModo button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#fpModo button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            modo = btn.dataset.modo;
+            carregar();
+        });
+    });
+    document.querySelectorAll('#fpSorteio button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#fpSorteio button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            sorteio = parseInt(btn.dataset.sorteio, 10) || 1;
+            carregar();
+        });
+    });
+
+    function esc(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    async function carregar() {
+        const body = document.getElementById('fpBody');
+        body.className = 'fp-loading';
+        body.textContent = 'Carregando todos os concursos…';
+        const qs = new URLSearchParams({ modo, sorteio: String(sorteio) });
+        const r = await fetch(api + '?' + qs.toString());
+        data = await r.json();
+        render();
+    }
+
+    function render() {
+        const body = document.getElementById('fpBody');
+        const fonteEl = document.getElementById('fpFonte');
+        if (!data || !data.sucesso) {
+            body.className = '';
+            body.innerHTML = `<div class="fp-err">${esc((data && data.erro) || 'Não foi possível montar a análise.')}</div>`;
+            fonteEl.textContent = '';
+            return;
+        }
+        const u = data.universo || {};
+        const f = data.fonte || {};
+        fonteEl.textContent = data.origem === 'excel'
+            ? `Fonte: ${f.excel && f.excel.filename ? f.excel.filename : 'Excel'} · ${u.total} concursos`
+            : `Fonte: banco (ordem de sorteio) · ${u.total} concursos`;
+
+        const kpis = `
+            <div class="fp-kpis">
+                <div class="fp-kpi"><div class="lbl">Concursos</div><div class="val">${u.total}</div></div>
+                <div class="fp-kpi"><div class="lbl">Primeiro</div><div class="val">${esc(u.primeiro || '—')}</div><div class="small text-muted">${esc(u.primeiro_data || '')}</div></div>
+                <div class="fp-kpi"><div class="lbl">Último</div><div class="val">${esc(u.ultimo || '—')}</div><div class="small text-muted">${esc(u.ultimo_data || '')}</div></div>
+                <div class="fp-kpi"><div class="lbl">Visão</div><div class="val" style="font-size:1rem">${data.modo === 'sorteio' ? 'Sorteio' : 'Crescente'}</div></div>
+            </div>`;
+
+        const ap = data.aposta_sugerida || {};
+        const bolas = (ap.dezenas_fmt || []).map((lab, i) => {
+            const d = (ap.detalhe || [])[i] || {};
+            return `<span class="fp-bola" title="${esc(d.pos || '')}: ${lab} · ${d.freq || 0}×">${esc(lab)}</span>`;
+        }).join('');
+        const ancora = `
+            <div class="fp-ancora">
+                <h2>O que você precisa saber para apostar</h2>
+                <p class="small mb-2">Número que <b>mais saiu</b> em cada posição (com ajuste quando a mesma dezena vence duas posições).</p>
+                <div class="fp-bolas">${bolas || '—'}</div>
+            </div>`;
+
+        const cards = (data.posicoes || []).map(p => {
+            const c = p.campeao || {};
+            return `<button type="button" class="fp-pos${p.pos === posAtiva ? ' active' : ''}" data-pos="${p.pos}">
+                <div class="tag">${esc(p.label)} · filtro ${esc(p.min_fmt)}–${esc(p.max_fmt)}</div>
+                <div class="champ">${esc(c.label || '—')}</div>
+                <div class="meta">${c.freq || 0} vezes · ${c.pct || 0}%</div>
+            </button>`;
+        }).join('');
+
+        const insights = (data.insights || []).filter(x => x.tipo !== 'posicao').map(ins =>
+            `<div class="fp-ins ${esc(ins.tipo)}"><b>${esc(ins.titulo)}</b><span>${esc(ins.texto)}</span></div>`
+        ).join('');
+
+        const extra = data.extra ? `
+            <div class="fp-card">
+                <h3>${esc(data.extra.titulo)}</h3>
+                <table class="fp-freq">
+                    <thead><tr><th>Valor</th><th>Vezes</th><th>%</th></tr></thead>
+                    <tbody>${(data.extra.itens || []).slice(0, 12).map(it =>
+                        `<tr><td>${esc(it.label)}</td><td>${it.freq}</td><td>${it.pct}%</td></tr>`
+                    ).join('')}</tbody>
+                </table>
+            </div>` : '';
+
+        body.className = '';
+        body.innerHTML = `
+            ${kpis}
+            ${ancora}
+            <div class="fp-pos-grid">${cards}</div>
+            <div class="fp-detail">
+                <div class="fp-card">
+                    <h3 id="fpChartTitle">Frequência</h3>
+                    <canvas id="fpChart" height="220"></canvas>
+                </div>
+                <div class="fp-card">
+                    <h3 id="fpTableTitle">Todas as dezenas desta posição</h3>
+                    <div style="max-height:360px;overflow:auto">
+                        <table class="fp-freq" id="fpTable"></table>
+                    </div>
+                </div>
+            </div>
+            <div class="fp-insights">${insights}</div>
+            ${extra}
+        `;
+        body.querySelectorAll('.fp-pos').forEach(btn => {
+            btn.addEventListener('click', () => {
+                posAtiva = parseInt(btn.dataset.pos, 10);
+                body.querySelectorAll('.fp-pos').forEach(b => b.classList.toggle('active', parseInt(b.dataset.pos, 10) === posAtiva));
+                pintarPosicao();
+            });
+        });
+        if (!(data.posicoes || []).some(p => p.pos === posAtiva)) posAtiva = 1;
+        pintarPosicao();
+    }
+
+    function pintarPosicao() {
+        const p = (data.posicoes || []).find(x => x.pos === posAtiva) || (data.posicoes || [])[0];
+        if (!p) return;
+        const camp = p.campeao || {};
+        document.getElementById('fpChartTitle').textContent =
+            `${p.label}: mais saiu ${camp.label || '—'} (${camp.freq || 0}×) · filtro ${p.min_fmt}–${p.max_fmt}`;
+        document.getElementById('fpTableTitle').textContent =
+            `${p.label} — ${p.qtd_distintos} dezenas já saíram nesta posição`;
+
+        const freqs = p.frequencias || [];
+        const maxF = Math.max(1, ...freqs.map(x => x.freq));
+        const rows = freqs.map((x, i) => `
+            <tr class="${i === 0 ? 'top' : ''}">
+                <td><b>${esc(x.label)}</b></td>
+                <td>${x.freq}</td>
+                <td>${x.pct}%</td>
+                <td style="width:40%"><div class="fp-bar"><span style="width:${(100 * x.freq / maxF).toFixed(1)}%"></span></div></td>
+            </tr>`).join('');
+        document.getElementById('fpTable').innerHTML =
+            `<thead><tr><th>Dezena</th><th>Vezes</th><th>%</th><th></th></tr></thead><tbody>${rows}</tbody>`;
+
+        const ctx = document.getElementById('fpChart');
+        if (chart) chart.destroy();
+        const top = freqs.slice(0, 16);
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: top.map(x => x.label),
+                datasets: [{
+                    label: 'Vezes nesta posição',
+                    data: top.map(x => x.freq),
+                    backgroundColor: top.map((_, i) => i === 0 ? 'rgba(25,111,61,.9)' : 'rgba(25,111,61,.45)')
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    }
+
+    carregar();
+})();
+</script>
+{% endblock %}

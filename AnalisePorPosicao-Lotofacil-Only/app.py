@@ -23,6 +23,7 @@ from routes.config_routes import config_bp
 from configuracoes.app_integration import extend_config_app
 from auto_sync import start_auto_sync_once
 from menu.app_integration import extend_nav_app
+from filtros_posicao.app_integration import register_filtros_posicao
 from posicao_analise.app_integration import extend_posicao_app
 from concentracao_acertos.app_integration import extend_concentracao_app
 from analise_estudos.app_integration import extend_analise_estudos_app
@@ -103,6 +104,7 @@ def create_app():
         DesdobramentoLotofacilService,
         analise_service_class=AnaliseLotofacilService,
     )
+    register_filtros_posicao(app, 'lotofacil')
 
     return app
 

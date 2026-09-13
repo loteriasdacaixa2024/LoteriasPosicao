@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from sqlalchemy import text
 
-from .config import DOWNLOADS_DIR, excel_filename
+from .config import resolve_excel_path
 from .download import baixar_excel
 from .normalize import fmt_reais
 from .parse_modalidades import parse_planilha
@@ -68,7 +68,7 @@ def importar_excel_complemento(
     info: Dict[str, Any] = {"fonte": "excel", "tabela_sorteio_alterada": False}
     if baixar:
         info["download"] = baixar_excel(modality_key)
-    arquivo = Path(path) if path else DOWNLOADS_DIR / excel_filename(modality_key)
+    arquivo = Path(path) if path else resolve_excel_path(modality_key)
     rows = ler_xlsx_dicts(arquivo)
     parsed = parse_planilha(modality_key, rows)
     no_sorteio = _sorteio_concursos(db, sorteio_model)

@@ -736,7 +736,22 @@ def get_nav_config(modality_key: str) -> dict:
         cfg["sniper"]["title"] = sniper_menu_title(modality_key)
     _inject_posicao_nav(cfg, modality_key)
     _inject_analises_novas_nav(cfg, modality_key)
+    _inject_filtros_posicao_nav(cfg)
     return cfg
+
+
+def _inject_filtros_posicao_nav(cfg: dict) -> None:
+    item = {
+        "title": "Filtros por posição",
+        "desc": "Min/máx + frequência · ordem crescente e sorteio",
+        "href": "/dados/filtros-posicao/",
+        "icon": "fas fa-filter",
+        "icon_bg": "#e3f2fd",
+        "icon_color": "#1565c0",
+    }
+    extras = cfg.setdefault("dados_extras", [])
+    if not any(x.get("href") == item["href"] for x in extras):
+        extras.insert(0, item)
 
 
 def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:

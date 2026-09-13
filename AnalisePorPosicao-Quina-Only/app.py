@@ -26,6 +26,7 @@ from configuracoes.app_integration import extend_config_app
 from auto_sync import start_auto_sync_once
 from analise_comparar.routes_factory import register_comparar
 from analise_repeticao.routes_factory import register_repeticao
+from filtros_posicao.app_integration import register_filtros_posicao
 from menu.app_integration import extend_nav_app
 from posicao_analise.app_integration import extend_posicao_app
 from analise_repeticao_consecutiva.app_integration import extend_repconsec_app
@@ -101,6 +102,7 @@ def create_app():
     )
     register_comparar(app, 'quina')
     register_repeticao(app, 'quina')
+    register_filtros_posicao(app, 'quina')
     return app
 
 if __name__ == '__main__':

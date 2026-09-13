@@ -1,4 +1,4 @@
-"""Download do Excel oficial CAIXA para a pasta Downloads."""
+"""Download do Excel oficial CAIXA para DownloadTodosResultadosLoterias/downloads."""
 from __future__ import annotations
 
 from pathlib import Path

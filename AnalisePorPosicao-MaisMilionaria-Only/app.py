@@ -20,6 +20,7 @@ from configuracoes.app_integration import extend_config_app
 from auto_sync import start_auto_sync_once
 from analise_comparar.routes_factory import register_comparar
 from analise_repeticao.routes_factory import register_repeticao
+from filtros_posicao.app_integration import register_filtros_posicao
 from analise_estudos.app_integration import extend_analise_estudos_app
 from analise_gaps_ciclo.app_integration import extend_analise_gaps_ciclo_app
 from linhas_universo.app_integration import extend_camadas_linhas_dd_du_app
@@ -77,6 +78,7 @@ def create_app():
     )
     register_comparar(app, 'maismilionaria')
     register_repeticao(app, 'maismilionaria')
+    register_filtros_posicao(app, 'maismilionaria')
     return app
 
 if __name__ == '__main__':

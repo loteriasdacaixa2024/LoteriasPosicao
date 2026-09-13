@@ -44,6 +44,7 @@ REQUIRED_ROUTES = [
     "register_repeticao",
     "extend_nav_app",
     "cc_extend_app",
+    "register_filtros_posicao",
 ]
 
 

@@ -1,11 +1,13 @@
-"""URLs oficiais de download Excel CAIXA e pasta Downloads do monólito."""
+"""URLs oficiais de download Excel CAIXA e pasta única de resultados."""
 from __future__ import annotations
 
 from pathlib import Path
 
 _SHARED = Path(__file__).resolve().parent.parent
 REPO_ROOT = _SHARED.parent
-DOWNLOADS_DIR = REPO_ROOT / "Downloads"
+# Fonte oficial: uma pasta só (evita duplicar em LoteriasPosicao/Downloads).
+DOWNLOADS_DIR = REPO_ROOT / "DownloadTodosResultadosLoterias" / "downloads"
+LEGACY_DOWNLOADS_DIR = REPO_ROOT / "Downloads"
 
 EXCEL_DOWNLOAD_BASE = (
     "https://servicebus2.caixa.gov.br/portaldeloterias/api/resultados/download"
@@ -48,6 +50,18 @@ def excel_download_url(key: str) -> str:
 
 def excel_filename(key: str) -> str:
     return EXCEL_FILENAME.get(key) or f"{key.upper()}.xlsx"
+
+
+def resolve_excel_path(key: str) -> Path:
+    """Prefere a pasta única; só cai no Downloads legado se o arquivo não existir."""
+    name = excel_filename(key)
+    preferred = DOWNLOADS_DIR / name
+    if preferred.is_file():
+        return preferred
+    legacy = LEGACY_DOWNLOADS_DIR / name
+    if legacy.is_file():
+        return legacy
+    return preferred
 
 
 def json_filename(key: str) -> str:
