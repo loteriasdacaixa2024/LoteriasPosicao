@@ -10361,3 +10361,59 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5152
 Press CTRL+C to quit
 127.0.0.1 - - [13/Sep/2026 16:25:55] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-13 17:28:48 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.0.10:5152
+Press CTRL+C to quit
+127.0.0.1 - - [13/Sep/2026 17:29:03] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-13 17:35:24 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.0.10:5152
+Press CTRL+C to quit
+127.0.0.1 - - [13/Sep/2026 17:35:35] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-13 17:49:48 ---
+===========================================================
+[OK] Servidor Lotofácil rodando em DESENVOLVIMENTO na porta 5152
+[URL] Acesse: http://localhost:5152
+[URL] Sniper: http://localhost:5152/analise/
+[URL] Conferência: http://localhost:5152/conferencia/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5152
+ * Running on http://10.0.0.10:5152
+Press CTRL+C to quit
+127.0.0.1 - - [13/Sep/2026 17:49:59] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Sep/2026 17:50:42] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Sep/2026 17:50:43] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [13/Sep/2026 17:50:43] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [13/Sep/2026 17:50:45] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [13/Sep/2026 17:50:46] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [13/Sep/2026 17:50:46] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [13/Sep/2026 17:50:47] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [13/Sep/2026 17:50:59] "GET /dados/filtros-posicao/ HTTP/1.1" 200 -

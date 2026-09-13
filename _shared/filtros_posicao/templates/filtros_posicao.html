@@ -27,28 +27,65 @@
     #fp-root .fp-kpi .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #7a6a4a; font-weight: 700; }
     #fp-root .fp-kpi .val { font-size: 1.15rem; font-weight: 800; color: var(--primary); }
     #fp-root .fp-ancora {
-        background: #fff8e1; border: 1px solid #f0d56a; border-radius: 14px; padding: 1rem 1.1rem; margin-bottom: 1rem;
+        background: #fff8e1; border: 1px solid #f0d56a; border-radius: 14px; padding: 1rem 1.1rem;
+        margin-bottom: 1rem; text-align: center;
     }
-    #fp-root .fp-ancora h2 { font-size: 1rem; margin: 0 0 .55rem; }
-    #fp-root .fp-bolas { display: flex; flex-wrap: wrap; gap: .45rem; }
+    #fp-root .fp-ancora h2 { font-size: 1rem; margin: 0 0 .35rem; }
+    #fp-root .fp-ancora p { margin: 0 auto .7rem; max-width: 36rem; }
+    #fp-root .fp-bolas { display: flex; flex-wrap: wrap; gap: .45rem; justify-content: center; }
     #fp-root .fp-bola {
         min-width: 2.4rem; height: 2.4rem; border-radius: 50%; display: grid; place-items: center;
         background: var(--primary); color: #fff; font-weight: 800; font-size: .95rem;
         box-shadow: 0 2px 8px rgba(0,0,0,.12);
     }
     #fp-root .fp-bola small { display: none; }
+    #fp-root .fp-minmax {
+        background: var(--fp-card); border: 2px solid var(--primary); border-radius: 14px;
+        padding: .85rem 1.1rem; margin-bottom: 1rem;
+    }
+    #fp-root .fp-minmax-toggle {
+        width: 100%; border: 0; background: transparent; display: flex; align-items: center;
+        justify-content: center; gap: .45rem; padding: .15rem 0; cursor: pointer; color: inherit;
+    }
+    #fp-root .fp-minmax-toggle h2 { font-size: 1.05rem; margin: 0; width: auto; font-weight: 800; }
+    #fp-root .fp-minmax-toggle .fp-seta {
+        display: inline-block; font-size: .7rem; color: #9a8a6a; transition: transform .18s ease;
+        line-height: 1;
+    }
+    #fp-root .fp-minmax.fechada .fp-seta { transform: rotate(-90deg); }
+    #fp-root .fp-minmax.fechada .fp-minmax-body { display: none; }
+    #fp-root .fp-minmax-body { text-align: center; }
+    #fp-root .fp-minmax-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    #fp-root .fp-minmax-table th {
+        text-align: center; padding: .45rem .4rem; color: #7a6a4a; font-size: .75rem;
+        text-transform: uppercase; letter-spacing: .04em; border-bottom: 2px solid #ead9a8;
+    }
+    #fp-root .fp-minmax-table td {
+        text-align: center; padding: .55rem .4rem; border-bottom: 1px solid #f3edd8; font-weight: 700;
+    }
+    #fp-root .fp-minmax-table td.pos { color: var(--primary); font-size: 1.05rem; }
+    #fp-root .fp-minmax-table td.min { color: #1565c0; font-size: 1.35rem; font-weight: 900; }
+    #fp-root .fp-minmax-table td.max { color: #b71c1c; font-size: 1.35rem; font-weight: 900; }
+    #fp-root .fp-minmax-table tr:hover td { background: #fff8e1; }
     #fp-root .fp-pos-grid {
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: .7rem; margin-bottom: 1rem;
+        display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; margin-bottom: 1rem;
     }
     #fp-root .fp-pos {
         background: var(--fp-card); border: 2px solid var(--fp-border); border-radius: 12px;
-        padding: .7rem .8rem; cursor: pointer; text-align: left; width: 100%;
+        padding: .7rem .8rem; cursor: pointer; text-align: center; width: 168px;
         transition: border-color .15s, box-shadow .15s, transform .12s;
     }
     #fp-root .fp-pos:hover { border-color: var(--accent, #c9a227); transform: translateY(-1px); }
     #fp-root .fp-pos.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
     #fp-root .fp-pos .tag { font-size: .72rem; font-weight: 800; color: #7a6a4a; }
-    #fp-root .fp-pos .champ { font-size: 1.7rem; font-weight: 900; line-height: 1.1; color: var(--primary); }
+    #fp-root .fp-pos .range {
+        display: flex; align-items: baseline; justify-content: center; gap: .35rem;
+        margin: .25rem 0 .35rem; font-weight: 900;
+    }
+    #fp-root .fp-pos .range .min { color: #1565c0; font-size: 1.35rem; }
+    #fp-root .fp-pos .range .sep { color: #9a8a6a; font-size: .9rem; }
+    #fp-root .fp-pos .range .max { color: #b71c1c; font-size: 1.35rem; }
+    #fp-root .fp-pos .champ { font-size: 1.15rem; font-weight: 800; line-height: 1.2; color: var(--primary); }
     #fp-root .fp-pos .meta { font-size: .78rem; color: #555; margin-top: .2rem; }
     #fp-root .fp-detail {
         display: grid; grid-template-columns: minmax(260px, 1fr) minmax(280px, 1.1fr); gap: 1rem; margin-bottom: 1rem;
@@ -116,6 +153,7 @@
     let data = null;
     let chart = null;
     let posAtiva = 1;
+    let tabelaAberta = false;
 
     document.querySelectorAll('#fpModo button').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -183,11 +221,43 @@
                 <div class="fp-bolas">${bolas || '—'}</div>
             </div>`;
 
+        const linhasMinMax = (data.posicoes || []).map(p => `
+            <tr>
+                <td class="pos">${esc(p.label)}</td>
+                <td class="min">${esc(p.min_fmt || '—')}</td>
+                <td class="max">${esc(p.max_fmt || '—')}</td>
+                <td>${esc((p.campeao && p.campeao.label) || '—')} <span class="small text-muted">(${(p.campeao && p.campeao.freq) || 0}×)</span></td>
+            </tr>`).join('');
+        const tabelaMinMax = `
+            <div class="fp-minmax${tabelaAberta ? '' : ' fechada'}">
+                <button type="button" class="fp-minmax-toggle" id="fpMinMaxToggle" aria-expanded="${tabelaAberta ? 'true' : 'false'}">
+                    <h2>Mínimo e máximo por posição (filtro real do Excel)</h2>
+                    <span class="fp-seta" aria-hidden="true">▾</span>
+                </button>
+                <div class="fp-minmax-body">
+                    <p class="small text-muted mb-2">Menor e maior dezena que já saíram naquela posição, em todos os concursos.</p>
+                    <div style="overflow:auto">
+                        <table class="fp-minmax-table">
+                            <thead>
+                                <tr>
+                                    <th>Posição</th>
+                                    <th>Mínimo</th>
+                                    <th>Máximo</th>
+                                    <th>Mais saiu</th>
+                                </tr>
+                            </thead>
+                            <tbody>${linhasMinMax}</tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>`;
+
         const cards = (data.posicoes || []).map(p => {
             const c = p.campeao || {};
             return `<button type="button" class="fp-pos${p.pos === posAtiva ? ' active' : ''}" data-pos="${p.pos}">
-                <div class="tag">${esc(p.label)} · filtro ${esc(p.min_fmt)}–${esc(p.max_fmt)}</div>
-                <div class="champ">${esc(c.label || '—')}</div>
+                <div class="tag">${esc(p.label)}</div>
+                <div class="range"><span class="min">${esc(p.min_fmt || '—')}</span><span class="sep">até</span><span class="max">${esc(p.max_fmt || '—')}</span></div>
+                <div class="champ">mais saiu ${esc(c.label || '—')}</div>
                 <div class="meta">${c.freq || 0} vezes · ${c.pct || 0}%</div>
             </button>`;
         }).join('');
@@ -210,6 +280,7 @@
         body.className = '';
         body.innerHTML = `
             ${kpis}
+            ${tabelaMinMax}
             ${ancora}
             <div class="fp-pos-grid">${cards}</div>
             <div class="fp-detail">
@@ -227,6 +298,15 @@
             <div class="fp-insights">${insights}</div>
             ${extra}
         `;
+        const toggle = body.querySelector('#fpMinMaxToggle');
+        if (toggle) {
+            toggle.addEventListener('click', () => {
+                tabelaAberta = !tabelaAberta;
+                const box = toggle.closest('.fp-minmax');
+                box.classList.toggle('fechada', !tabelaAberta);
+                toggle.setAttribute('aria-expanded', tabelaAberta ? 'true' : 'false');
+            });
+        }
         body.querySelectorAll('.fp-pos').forEach(btn => {
             btn.addEventListener('click', () => {
                 posAtiva = parseInt(btn.dataset.pos, 10);
