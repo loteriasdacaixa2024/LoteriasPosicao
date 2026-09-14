@@ -94,11 +94,13 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
             aba = "tubular"
         elif aba in ("panorama", "historico", "historico-completo", "panorama-historico"):
             aba = "panorama"
+        elif aba in ("checagem-seq", "checagem", "checagem-sequencias", "sequencias"):
+            aba = "checagem-seq"
         elif aba in ("combinacoes", "combinações"):
             aba = "combinacoes"
         elif aba not in (
             "resultados", "combinacoes", "padroes", "padroes-ii",
-            "jogos-padrao", "tubular", "panorama",
+            "jogos-padrao", "tubular", "panorama", "checagem-seq",
         ):
             aba = "resultados"
 
@@ -316,6 +318,24 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
                 mimetype="text/csv; charset=utf-8",
                 headers={"Content-Disposition": f'attachment; filename="{fname}"'},
             )
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @analise_bp.route("/api/inteligentes/checagem-sequencias", methods=["POST"])
+    def api_inteligentes_checagem_sequencias():
+        """Checa apostas coladas: padrão + prefixo no universo da aba 5."""
+        try:
+            data = request.get_json(silent=True) or {}
+            texto = data.get("texto") or data.get("apostas") or ""
+            if isinstance(texto, list):
+                texto = "\n".join(str(x) for x in texto)
+            prefixo = data.get("prefixo") or data.get("prefixo_n") or 5
+            filtro = (data.get("filtro") or "dentro_novos").strip()
+            base = data.get("base") or "geral"
+            out = Svc.checar_sequencias(
+                str(texto), prefixo=int(prefixo or 5), filtro=filtro, base=base,
+            )
+            return jsonify(out), (200 if out.get("sucesso") else 400)
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 

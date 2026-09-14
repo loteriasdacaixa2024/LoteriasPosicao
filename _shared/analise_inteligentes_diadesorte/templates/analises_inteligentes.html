@@ -690,6 +690,34 @@
   #ai-root .ai-checagem .ai-checagem-totais strong {
     color: #1b5e20;
   }
+  #ai-root .ai-cheq-drop {
+    border: 1.5px dashed rgba(46,125,50,.45);
+    border-radius: 10px;
+    padding: .7rem 1rem;
+    text-align: center;
+    color: #4a6350;
+    background: #f4faf4;
+    font-size: .85rem;
+    cursor: pointer;
+  }
+  #ai-root .ai-cheq-drop.is-over {
+    background: #e8f5e9;
+    border-color: #2e7d32;
+  }
+  #ai-root #aiCheqTexto {
+    font-size: .85rem;
+    letter-spacing: .02em;
+  }
+  #ai-root .ai-cheq-resumo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem .65rem;
+    font-size: .82rem;
+  }
+  #ai-root #aiTabelaCheq td.td-left { text-align: left !important; }
+  #ai-root #aiTabelaCheq .ai-cheq-ok { color: #1b5e20; font-weight: 800; }
+  #ai-root #aiTabelaCheq .ai-cheq-no { color: #842029; font-weight: 800; }
+  #ai-root #aiTabelaCheq .ai-cheq-ult { font-variant-numeric: tabular-nums; white-space: nowrap; }
   #ai-root .ai-aposta-pager {
     display: flex;
     flex-wrap: wrap;
@@ -886,7 +914,7 @@
   </div>
 
   <div class="ai-hint mb-3">
-    Esta rota é <strong>análise</strong> (7 abas). Em <strong>Padrões II</strong>, a coluna
+    Esta rota é <strong>análise</strong> (8 abas). Em <strong>Padrões II</strong>, a coluna
     <em>Jogos</em> abre <strong>Padrões II (Apostas)</strong> (selecione, copie ou exporte para apostar).
     Os padrões selecionados alimentam o
     <a href="{{ construtor_url }}">Construtor de Construções</a> e os Geradores Elite.
@@ -900,6 +928,7 @@
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-jogos-padrao" type="button" data-aba="jogos-padrao">5 · Apostas por Padrão</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tubular" type="button" data-aba="tubular">6 · Visualização Tubular</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-panorama" type="button" data-aba="panorama">7 · Panorama Histórico</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-checagem-seq" type="button" data-aba="checagem-seq">8 · Checagem de Sequências</button></li>
   </ul>
 
   <div class="tab-content">
@@ -1514,6 +1543,71 @@
       </div>
       </div>
     </div>
+
+    <!-- ABA 8 — Checagem de Sequências -->
+    <div class="tab-pane fade" id="tab-checagem-seq">
+      <p class="small text-muted mb-2">
+        Cole ou arraste as apostas (ex.: <code>02 05 07 08 21 22 24 Dez</code>).
+        O sistema identifica o <strong>padrão</strong>, confere as <strong>primeiras N dezenas</strong>
+        no universo <em>dentro da média · ainda não saíram</em> e aponta se a sequência existe —
+        ou sugere a mais próxima. O mês colado só reconhece a linha; na exportação vale o seletor padrão.
+      </p>
+      <div class="ai-cheq-drop mb-2" id="aiCheqDrop" tabindex="0">
+        Arraste TXT/CSV aqui · ou cole no campo abaixo
+      </div>
+      <textarea id="aiCheqTexto" class="form-control font-monospace mb-2" rows="8"
+                placeholder="02 05 07 08 21 22 24 Dez&#10;02 05 07 08 21 22 25 Dez" spellcheck="false"></textarea>
+      <div class="d-flex flex-wrap align-items-end gap-2 mb-2">
+        <label class="small text-muted mb-0">
+          Checar as primeiras
+          <select id="aiCheqPrefixo" class="form-select form-select-sm d-inline-block" style="width:auto">
+            <option value="2">2 dezenas</option>
+            <option value="3">3 dezenas</option>
+            <option value="4">4 dezenas</option>
+            <option value="5" selected>5 dezenas</option>
+            <option value="6">6 dezenas</option>
+            <option value="7">7 dezenas (exata)</option>
+          </select>
+        </label>
+        {% if extra_mes %}
+        <label class="small text-muted mb-0">
+          Mês da Sorte (exportar)
+          <select id="aiCheqMes" class="form-select form-select-sm d-inline-block" style="width:auto">
+            <option value="atrasado">+ Atrasado</option>
+          </select>
+        </label>
+        {% endif %}
+        <button type="button" class="btn btn-sm btn-primary" id="aiCheqBtn">
+          <i class="fas fa-search"></i> Checar
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="aiCheqLimpar">Limpar</button>
+        <button type="button" class="btn btn-sm btn-outline-success" id="aiCheqExport" disabled>
+          <i class="fas fa-file-export"></i> Exportar TXT
+        </button>
+        <span class="small text-muted" id="aiCheqInfo">Universo: dentro da média · ainda não saíram</span>
+      </div>
+      <div id="aiCheqResumo" class="ai-cheq-resumo mb-2" hidden></div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaCheq">
+          <thead>
+            <tr>
+              <th class="ai-chk-th"><input type="checkbox" class="form-check-input" id="aiCheqChkTodos" disabled></th>
+              <th>Nº</th>
+              <th>Aposta</th>
+              <th>Padrão</th>
+              <th>Prefixo</th>
+              <th>Existe?</th>
+              <th>Últimas</th>
+              <th>Sugestão / mais próxima</th>
+              <th>Abrir</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="9" class="text-muted">Cole as apostas e clique em Checar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 <link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v38">
@@ -1527,6 +1621,9 @@
 {% endblock %}
 
 {% block scripts %}
+{% if extra_mes %}
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
+{% endif %}
 <script src="/analise/api/inteligentes/assets/tubular.js?v=20260903v38"></script>
 <script>
 (function () {
@@ -3351,8 +3448,197 @@
     setFiltroMedia(o.filtroMedia != null ? o.filtroMedia : 'dentro_novos');
     JOGOS_PAD.offset = 0;
     if (o.irVencedor) JOGOS_PAD._irVencedor = true;
+    if (o.buscaDez != null) {
+      const el = document.getElementById('aiJogosPadBuscaDez');
+      if (el) el.value = o.buscaDez;
+      syncBuscaDezenas({ apply: false });
+    }
     goAba('jogos-padrao');
     carregarJogosPadrao(padrao, 0);
+  }
+
+  const CHEQ = { rows: [], sel: new Set() };
+  const MESES_ABREV_EXP = {
+    1: 'Jan', 2: 'Fev', 3: 'Mar', 4: 'Abr', 5: 'Mai', 6: 'Jun',
+    7: 'Jul', 8: 'Ago', 9: 'Set', 10: 'Out', 11: 'Nov', 12: 'Dez',
+  };
+
+  function iniciarAbaChecagem() {
+    const sel = document.getElementById('aiCheqMes');
+    if (sel && EXTRA_MES && window.MesSorteSelect) {
+      MesSorteSelect.fillFromApi(sel, '/geradores-elite/api/escolha-tubular', { defaultPrefer: 'atrasado' }).catch(() => {});
+    }
+  }
+
+  function chaveCheq(r) {
+    return String((r && r.linha) || '') + '|' + String((r && r.dezenas_fmt) || '');
+  }
+
+  function linhaExportCheq(r) {
+    if (r && r.existe_exata) return r.dezenas_fmt;
+    if (r && r.sugestao && r.sugestao.dezenas_fmt) return r.sugestao.dezenas_fmt;
+    return r && r.dezenas_fmt;
+  }
+
+  function renderChecagem(data) {
+    const tbody = document.querySelector('#aiTabelaCheq tbody');
+    const resumo = document.getElementById('aiCheqResumo');
+    const info = document.getElementById('aiCheqInfo');
+    const btnExp = document.getElementById('aiCheqExport');
+    const chkTodos = document.getElementById('aiCheqChkTodos');
+    CHEQ.rows = (data && data.resultados) || [];
+    CHEQ.sel = new Set();
+    CHEQ.rows.forEach((r) => {
+      if (r.ok && r.existe_exata) CHEQ.sel.add(chaveCheq(r));
+    });
+    if (resumo) {
+      resumo.hidden = false;
+      resumo.innerHTML = `
+        <span class="badge bg-light text-dark border">${data.validas || 0} válidas</span>
+        <span class="badge bg-success-subtle text-success border">${data.existem || 0} existem</span>
+        <span class="badge bg-warning text-dark border">${data.sugeridas || 0} com sugestão</span>
+        <span class="badge bg-danger-subtle text-danger border">${data.sem_prefixo || 0} sem prefixo</span>
+        <span class="small text-muted">prefixo ${data.prefixo} · ${esc(data.filtro || 'dentro_novos')}</span>`;
+    }
+    if (info) info.textContent = 'Universo: dentro da média · ainda não saíram';
+    if (!tbody) return;
+    if (!CHEQ.rows.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Nenhuma aposta reconhecida.</td></tr>';
+      if (btnExp) btnExp.disabled = true;
+      if (chkTodos) chkTodos.disabled = true;
+      return;
+    }
+    tbody.innerHTML = CHEQ.rows.map((r) => {
+      if (!r.ok) {
+        return `<tr>
+          <td></td><td>${esc(r.linha || '—')}</td>
+          <td class="td-left text-danger" colspan="7">${esc(r.erro || 'Inválida')} ${r.texto ? `<code>${esc(r.texto)}</code>` : ''}</td>
+        </tr>`;
+      }
+      const k = chaveCheq(r);
+      const ult = (r.ultimas || []).map((u) => {
+        const cls = u.existe ? 'ai-cheq-ok' : 'ai-cheq-no';
+        return `<span class="${cls}">${esc(u.dezena_fmt)} ${u.existe ? 'tem' : 'não'}</span>`;
+      }).join(' · ') || '—';
+      const padLink = `<a href="#" data-act="ir-padrao-ii" data-padrao="${esc(r.padrao)}">${esc(r.padrao)}</a>`;
+      const existe = r.existe_exata
+        ? `<span class="ai-cheq-ok">Sim</span>`
+        : `<span class="ai-cheq-no">Não</span>`;
+      let sugHtml = '—';
+      if (r.existe_exata) {
+        sugHtml = '<span class="text-muted">é a da lista</span>';
+      } else if (r.sugestao && r.sugestao.dezenas_fmt) {
+        sugHtml = `<a href="#" class="font-monospace" data-act="ir-checagem-jogo" data-padrao="${esc(r.padrao)}" data-busca="${esc(r.sugestao.dezenas_fmt)}" title="${esc(r.sugestao.motivo || '')}">${esc(r.sugestao.dezenas_fmt)}</a>`;
+      } else if (!r.qtd_prefixo) {
+        sugHtml = '<span class="text-muted">sem jogo com este prefixo</span>';
+      }
+      const abrir = `<a href="#" data-act="ir-checagem-jogo" data-padrao="${esc(r.padrao)}" data-busca="${esc(r.prefixo_fmt || r.dezenas_fmt)}">Aba 5</a>`;
+      return `<tr>
+        <td><input type="checkbox" class="form-check-input ai-cheq-chk" data-key="${esc(k)}" ${CHEQ.sel.has(k) ? 'checked' : ''}></td>
+        <td>${esc(r.linha)}</td>
+        <td class="font-monospace">${esc(r.dezenas_fmt)}${r.mes_colado ? ` <span class="text-muted">${esc(r.mes_colado)}</span>` : ''}</td>
+        <td>${padLink}</td>
+        <td class="font-monospace">${esc(r.prefixo_fmt)} <span class="text-muted">(${r.qtd_prefixo || 0})</span></td>
+        <td>${existe}</td>
+        <td class="ai-cheq-ult">${ult}</td>
+        <td class="font-monospace td-left">${sugHtml}</td>
+        <td>${abrir}</td>
+      </tr>`;
+    }).join('');
+    if (btnExp) btnExp.disabled = CHEQ.sel.size === 0;
+    if (chkTodos) {
+      const okRows = CHEQ.rows.filter((r) => r.ok);
+      chkTodos.disabled = !okRows.length;
+      chkTodos.checked = okRows.length > 0 && okRows.every((r) => CHEQ.sel.has(chaveCheq(r)));
+    }
+  }
+
+  async function checarSequencias() {
+    const ta = document.getElementById('aiCheqTexto');
+    const pref = document.getElementById('aiCheqPrefixo');
+    const tbody = document.querySelector('#aiTabelaCheq tbody');
+    const texto = String((ta && ta.value) || '').trim();
+    if (!texto) {
+      alert('Cole ou arraste as apostas.');
+      return;
+    }
+    if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Checando…</td></tr>';
+    try {
+      const r = await fetch(`${API}/checagem-sequencias`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          texto,
+          prefixo: +(pref && pref.value) || 5,
+          filtro: 'dentro_novos',
+        }),
+      });
+      const d = await r.json();
+      if (!d.sucesso && !(d.resultados || []).length) throw new Error(d.erro || 'Falha na checagem');
+      renderChecagem(d);
+    } catch (e) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="text-danger">${esc(e.message || e)}</td></tr>`;
+    }
+  }
+
+  function exportCheqTxt() {
+    const rows = CHEQ.rows.filter((r) => r.ok && CHEQ.sel.has(chaveCheq(r)));
+    if (!rows.length) {
+      alert('Marque ao menos uma linha para exportar.');
+      return;
+    }
+    const sel = document.getElementById('aiCheqMes');
+    let meses = [];
+    if (EXTRA_MES && sel && window.MesSorteSelect) {
+      meses = MesSorteSelect.resolveLote(sel.value, rows.length, MesSorteSelect.cached) || [];
+    }
+    const lines = rows.map((r, i) => {
+      const dez = linhaExportCheq(r);
+      const mn = meses[i];
+      const ab = mn ? (MESES_ABREV_EXP[mn] || '') : '';
+      return ab ? `${dez} ${ab}` : dez;
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines.join('\n') + '\n'], { type: 'text/plain; charset=utf-8' }));
+    a.download = 'checagem_sequencias.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function bindCheqDrop() {
+    const drop = document.getElementById('aiCheqDrop');
+    const ta = document.getElementById('aiCheqTexto');
+    if (!drop || !ta) return;
+    const applyText = (txt) => {
+      ta.value = String(txt || '').replace(/^\uFEFF/, '');
+    };
+    drop.addEventListener('click', () => ta.focus());
+    ['dragenter', 'dragover'].forEach((ev) => {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.add('is-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach((ev) => {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.remove('is-over');
+      });
+    });
+    drop.addEventListener('drop', (e) => {
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => applyText(reader.result);
+        reader.readAsText(file);
+        return;
+      }
+      const txt = e.dataTransfer && e.dataTransfer.getData('text');
+      if (txt) applyText(txt);
+    });
+    ta.addEventListener('paste', () => {
+      /* valor atualiza sozinho; o Checar usa o textarea */
+    });
   }
 
   function irParaPaginaJogos(page) {
@@ -3532,6 +3818,9 @@
         } else if (!COMB_INICIADO) {
           iniciarAbaCombinacoes();
         }
+      }
+      if (aba === 'checagem-seq') {
+        iniciarAbaChecagem();
       }
       if (aba === 'panorama') {
         if (!PAN_HIST.carregado) carregarHistoricoCompleto();
@@ -3724,6 +4013,13 @@
       if (pad) abrirJogosPadrao(pad, { filtroMedia: 'dentro_novos' });
       return;
     }
+    if (act === 'ir-checagem-jogo') {
+      ev.preventDefault();
+      const pad = btn.dataset.padrao || '';
+      const busca = btn.dataset.busca || '';
+      if (pad) abrirJogosPadrao(pad, { filtroMedia: 'dentro_novos', buscaDez: busca });
+      return;
+    }
     if (act === 'ir-padrao-ii') {
       ev.preventDefault();
       const pad = btn.dataset.padrao || '';
@@ -3807,6 +4103,40 @@
     }
     if (aba0 === 'tubular' && window.AiTubular) window.AiTubular.load();
     if (aba0 === 'panorama') carregarHistoricoCompleto();
+    if (aba0 === 'checagem-seq') iniciarAbaChecagem();
+  });
+  bindCheqDrop();
+  document.getElementById('aiCheqBtn')?.addEventListener('click', checarSequencias);
+  document.getElementById('aiCheqLimpar')?.addEventListener('click', () => {
+    const ta = document.getElementById('aiCheqTexto');
+    if (ta) ta.value = '';
+    CHEQ.rows = [];
+    CHEQ.sel = new Set();
+    const resumo = document.getElementById('aiCheqResumo');
+    if (resumo) { resumo.hidden = true; resumo.innerHTML = ''; }
+    const tbody = document.querySelector('#aiTabelaCheq tbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Cole as apostas e clique em Checar.</td></tr>';
+    const btnExp = document.getElementById('aiCheqExport');
+    if (btnExp) btnExp.disabled = true;
+  });
+  document.getElementById('aiCheqExport')?.addEventListener('click', exportCheqTxt);
+  document.getElementById('aiCheqChkTodos')?.addEventListener('change', (ev) => {
+    const on = !!ev.target.checked;
+    CHEQ.sel = new Set();
+    if (on) CHEQ.rows.filter((r) => r.ok).forEach((r) => CHEQ.sel.add(chaveCheq(r)));
+    document.querySelectorAll('#aiTabelaCheq .ai-cheq-chk').forEach((chk) => { chk.checked = on; });
+    const btnExp = document.getElementById('aiCheqExport');
+    if (btnExp) btnExp.disabled = CHEQ.sel.size === 0;
+  });
+  document.getElementById('aiTabelaCheq')?.addEventListener('change', (ev) => {
+    const chk = ev.target.closest('.ai-cheq-chk');
+    if (!chk) return;
+    const k = chk.dataset.key;
+    if (!k) return;
+    if (chk.checked) CHEQ.sel.add(k);
+    else CHEQ.sel.delete(k);
+    const btnExp = document.getElementById('aiCheqExport');
+    if (btnExp) btnExp.disabled = CHEQ.sel.size === 0;
   });
 })();
 </script>

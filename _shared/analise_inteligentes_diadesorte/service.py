@@ -1144,6 +1144,103 @@ class AnaliseInteligentesService:
         }
 
     @classmethod
+    def checar_sequencias(
+        cls,
+        texto: str,
+        *,
+        prefixo: int = 5,
+        filtro: str = "dentro_novos",
+        base: str = "geral",
+    ) -> Dict[str, Any]:
+        """Checa apostas coladas contra o universo da aba 5 (padrão + prefixo)."""
+        from analise_inteligentes_diadesorte.checagem_sequencias import (
+            chave_dezenas,
+            expandir_jogos_contendo,
+            montar_resultado_linha,
+            parse_lote_apostas,
+        )
+
+        lim = cls._limites()
+        dmin = int(lim["min_dezena"])
+        dmax = int(lim["max_dezena"])
+        k = int(lim["tamanho_jogo"])
+        n_pref = max(2, min(int(prefixo or 5), k))
+        filtro_n = (filtro or "dentro_novos").strip().lower()
+
+        parsed = parse_lote_apostas(
+            texto, sorteadas=k, min_dezena=dmin, max_dezena=dmax,
+        )
+        apostas = list(parsed.get("apostas") or [])
+        if not apostas:
+            return {
+                "sucesso": False,
+                "erro": parsed.get("erro") or "Nenhuma aposta reconhecida.",
+                "prefixo": n_pref,
+                "filtro": filtro_n,
+                "resultados": [],
+            }
+
+        dados = cls.listar_resultados(janela=0, base=base)
+        linhas = list(dados.get("linhas") or [])
+        hist_keys = {
+            chave_dezenas(l.get("dezenas") or l.get("dezenas_fmt"))
+            for l in linhas
+        }
+        hist_keys.discard("")
+
+        cache_faixa: Dict[str, Any] = {}
+        cache_jogos: Dict[str, List[Dict[str, Any]]] = {}
+        resultados: List[Dict[str, Any]] = []
+
+        for ap in apostas:
+            if not ap.get("ok"):
+                resultados.append(montar_resultado_linha(
+                    ap, prefixo_n=n_pref, filtro=filtro_n,
+                    jogos_enriquecidos=[], historico_keys=hist_keys,
+                ))
+                continue
+            pad = str(ap.get("padrao") or padrao_inicial(ap["dezenas"]))
+            prefixo_dez = list(ap["dezenas"][:n_pref])
+            cache_key = f"{pad}|{chave_dezenas(prefixo_dez)}"
+            if cache_key not in cache_jogos:
+                if pad not in cache_faixa:
+                    hist = somas_historicas_do_padrao(linhas, pad)
+                    faixa = calcular_faixa_soma(hist, fonte="historico")
+                    if not faixa:
+                        full = expandir_jogos_padrao(
+                            pad, min_dezena=dmin, max_dezena=dmax,
+                        )
+                        somas_teo = [int(j.get("soma") or 0) for j in (full.get("jogos") or [])]
+                        faixa = calcular_faixa_soma(somas_teo, fonte="teorico")
+                    cache_faixa[pad] = faixa
+                brutos = expandir_jogos_contendo(
+                    pad, prefixo_dez,
+                    min_dezena=dmin, max_dezena=dmax, tamanho_jogo=k,
+                )
+                cache_jogos[cache_key] = enriquecer_jogos_com_media(brutos, cache_faixa.get(pad))
+            resultados.append(montar_resultado_linha(
+                ap, prefixo_n=n_pref, filtro=filtro_n,
+                jogos_enriquecidos=cache_jogos[cache_key],
+                historico_keys=hist_keys,
+            ))
+
+        ok_rows = [r for r in resultados if r.get("ok")]
+        return {
+            "sucesso": True,
+            "erro": None,
+            "prefixo": n_pref,
+            "filtro": filtro_n,
+            "tamanho_jogo": k,
+            "total": len(resultados),
+            "validas": len(ok_rows),
+            "existem": sum(1 for r in ok_rows if r.get("existe_exata")),
+            "sugeridas": sum(1 for r in ok_rows if (not r.get("existe_exata")) and r.get("sugestao")),
+            "sem_prefixo": sum(1 for r in ok_rows if not r.get("qtd_prefixo")),
+            "resultados": resultados,
+            "parse_erros": parsed.get("erros") or [],
+        }
+
+    @classmethod
     def resumo_operacional_padroes(cls, base: str = "geral") -> Dict[str, Any]:
         """
         Tabela operacional (aba 4): por padrão — para apostar, já saíram, dentro/próximas/fora.
