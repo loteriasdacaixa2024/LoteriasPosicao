@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LotoCheck Premium Suite - Central de Estratégias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --gold: #d4e31a;
+            --white: #f9fbfa;
+            --lotofacil: #672666;
+            --supersete: #a9cf46;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body {
+            background: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(212, 227, 26, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(103, 38, 102, 0.05) 0%, transparent 40%);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.25rem 0.85rem 2rem;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            width: 100%;
+            max-width: 90rem;
+            padding: 0 0.5rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        header h1 {
+            font-size: clamp(1.45rem, 5.5vw, 3rem);
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, var(--gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            line-height: 1.15;
+        }
+
+        header p {
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.5rem;
+            font-size: clamp(0.7rem, 2.4vw, 1.1rem);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.9rem;
+            width: 100%;
+            max-width: 22rem;
+            animation: fadeIn 1.2s ease-out;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 1.25rem 1rem;
+            text-align: center;
+            transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 0.7rem;
+            min-height: 12rem;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .card:hover {
+                transform: scale(1.03) translateY(-6px);
+                background: rgba(255, 255, 255, 0.1);
+                border-color: var(--modality-color);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            }
+
+            .card:hover .card-icon,
+            .card:hover .card-logo {
+                transform: rotate(-8deg) scale(1.08);
+            }
+
+            .card:hover .btn {
+                background: var(--modality-color);
+                color: white;
+                border-color: transparent;
+            }
+        }
+
+        .card:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 3px;
+        }
+
+        .card-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            background: var(--modality-color);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.25rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            color: white;
+            transition: transform 0.3s;
+        }
+
+        .card-logo {
+            width: min(7.5rem, 70%);
+            height: 3.5rem;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35));
+            transition: transform 0.3s;
+        }
+
+        .card-title {
+            font-size: clamp(1.05rem, 3vw, 1.4rem);
+            font-weight: 600;
+            margin-bottom: 0.15rem;
+            color: white;
+        }
+
+        .card-port {
+            font-family: ui-monospace, monospace;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.7rem;
+            margin-bottom: 0.15rem;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            max-width: 100%;
+            line-height: 1.35;
+            padding: 0 0.25rem;
+        }
+
+        .card-url-public {
+            font-size: 0.62rem;
+            overflow-wrap: anywhere;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.7rem 1.25rem;
+            border-radius: 0.65rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            min-height: 2.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 480px) {
+            body {
+                padding: 1.75rem 1.25rem 2.5rem;
+            }
+
+            .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                max-width: 42rem;
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 2.5rem 1.5rem 3rem;
+            }
+
+            header {
+                margin-bottom: 2.5rem;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+                max-width: 64rem;
+                gap: 1.25rem;
+            }
+
+            .card {
+                padding: 2rem 1.5rem;
+            }
+
+            .card-logo {
+                width: 7.5rem;
+                height: 4.5rem;
+            }
+
+            .card-port {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .grid {
+                max-width: 75rem;
+            }
+        }
+
+        @media (min-width: 1600px) {
+            .grid {
+                max-width: 88rem;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            header {
+                margin-bottom: 0.75rem;
+            }
+
+            header h1 {
+                font-size: 1.35rem;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+                max-width: 100%;
+            }
+
+            .card {
+                min-height: 0;
+                padding: 0.9rem 0.75rem;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .lf {
+            --modality-color: var(--lotofacil);
+        }
+
+        .ss {
+            --modality-color: var(--supersete);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <p>LotoCheck Premium Suite</p>
+        <h1>CENTRAL DE ESTRATÉGIAS</h1>
+    </header>
+
+    <div class="grid">
+        {% for m in modalities %}
+        <a href="{{ m.href }}" target="_blank" class="card" style="--modality-color: {{ m.color }}">
+            {% if m.logo %}
+            <img class="card-logo" src="{{ m.logo }}" alt="{{ m.name }}">
+            {% else %}
+            <div class="card-icon">{{ m.initials }}</div>
+            {% endif %}
+            <div>
+                <div class="card-title">{{ m.name }}</div>
+                <div class="card-port">PORTA {{ m.port }}</div>
+                <div class="card-port card-url-public">{{ m.href }}</div>
+            </div>
+            <div class="btn">Acessar</div>
+        </a>
+        {% endfor %}
+    </div>
+
+</body>
+
+</html>

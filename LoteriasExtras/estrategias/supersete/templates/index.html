@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="app-root" content="{{ request.script_root }}">
+  <title>{{ app_name }}</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+
+<body>
+
+  <!-- ════ HEADER ════ -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-icon">S7</div>
+      <div class="header-text">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h1><span>{{ app_name }}</span></h1>
+          <button class="help-guide-btn" id="helpGuideBtn" title="Guia de Estratégias">
+            <i class="fa-solid fa-circle-question"></i>
+          </button>
+        </div>
+        <p>{{ app_version }} — {{ app_type }}</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ════ MAIN CONTENT ════ -->
+  <main class="main-content">
+
+    <!-- 🌐 NAVEGAÇÃO MODULAR SUPERIOR -->
+    <div class="module-switcher-container">
+      <div class="module-switcher">
+        <button class="module-btn active" data-module="modulo-estrategias">
+          <i class="fa-solid fa-chess-knight"></i> Estratégias <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <button class="module-btn" data-module="modulo-analises">
+          <i class="fa-solid fa-magnifying-glass-chart"></i> Análises <i class="fa-solid fa-chevron-down"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 🟢 MÓDULO ESTRATÉGIAS -->
+    <div id="modulo-estrategias" class="module-view active">
+      <!-- Tab Navigation Estratégias -->
+      <nav class="tabs-nav secondary-nav">
+        <button class="tab-btn active" data-tab="estrat1">
+          <i class="fa-solid fa-layer-group"></i> Estrat. 1
+        </button>
+        <button class="tab-btn" data-tab="estrat2">
+          <i class="fa-solid fa-flask"></i> Estrat. 2
+        </button>
+        <button class="tab-btn" data-tab="estrat3">
+          <i class="fa-solid fa-chart-line"></i> Estrat. 3
+        </button>
+        <button class="tab-btn" data-tab="estrat4">
+          <i class="fa-solid fa-shapes"></i> Estrat. 4
+        </button>
+        <button class="tab-btn" data-tab="rankings">
+          <i class="fa-solid fa-chart-pie"></i> Ranking Estrat.
+        </button>
+      </nav>
+
+      <div class="tabs-content">
+        <!-- ABA: ESTRATÉGIA 1 -->
+        <div class="tab-pane active" id="tab-estrat1">
+          <!-- Painel de Controle -->
+          <section class="controls-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-layer-group"></i> Estratégia 1 — Sequência Base</div>
+              <p class="panel-subtitle">Esta estratégia baseia-se na distribuição cíclica de uma sequência numérica
+                definida pelo usuário. O Modo Híbrido aplica balanceamento estrutural sobre a base gerada.</p>
+
+              <div class="operation-mode-row" style="margin-top: 20px;">
+                <span class="section-label">Modo de Operação:</span>
+                <div class="mode-toggle-group">
+                  <label class="mode-opt">
+                    <input type="radio" name="modeE1" value="Padrao" checked>
+                    <span class="mode-label">Padrão</span>
+                  </label>
+                  <label class="mode-opt">
+                    <input type="radio" name="modeE1" value="Hibrido">
+                    <span class="mode-label">Híbrido</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="panel-header-action">
+                <button class="btn btn-primary btn-lg" id="addMatrixBtn">
+                  <i class="fa-solid fa-plus"></i> Adicionar Matriz
+                </button>
+              </div>
+            </div>
+
+            <div class="sequence-section">
+              <div class="section-label">Sequência Base</div>
+              <div class="digit-buttons" id="digitButtons"></div>
+              <div class="manual-input-row">
+                <label for="seqManualInput">ou digite:</label>
+                <input type="text" class="text-input" id="seqManualInput" placeholder="ex: 345601278" maxlength="10"
+                  inputmode="numeric">
+                <button class="btn btn-secondary btn-sm" id="seqApplyBtn">
+                  <i class="fa-solid fa-check"></i> Aplicar
+                </button>
+                <button class="btn btn-secondary btn-sm" id="seqClearBtn">
+                  <i class="fa-solid fa-xmark"></i> Limpar
+                </button>
+              </div>
+              <div class="section-label sub-label">Ordem atual da sequência:</div>
+              <div class="sequence-display" id="seqDisplay"></div>
+            </div>
+
+            <div class="config-row">
+              <div class="add-matrix-area">
+                <button class="btn btn-secondary" id="syncHistoryBtn" title="Busca concursos que faltam no banco">
+                  <i class="fa-solid fa-cloud-arrow-down"></i> Sincronizar Banco
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Container de Matrizes -->
+          <div class="matrices-container" id="matricesContainer"></div>
+        </div>
+
+        <!-- ABA: ESTRATÉGIA 2 -->
+        <div class="tab-pane" id="tab-estrat2">
+          <section class="controls-panel v2-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-flask"></i> Estratégia 2 — Núcleo Estratégico</div>
+              <p class="panel-subtitle">Esta estratégia utiliza os dígitos mais frequentes da base histórica como núcleo
+                prioritário. O Modo Híbrido combina frequência histórica com balanceamento estrutural.</p>
+
+              <div class="operation-mode-row" style="margin-top: 20px;">
+                <span class="section-label">Modo de Operação:</span>
+                <div class="mode-toggle-group">
+                  <label class="mode-opt">
+                    <input type="radio" name="modeE2" value="Padrao" checked>
+                    <span class="mode-label">Padrão</span>
+                  </label>
+                  <label class="mode-opt">
+                    <input type="radio" name="modeE2" value="Hibrido">
+                    <span class="mode-label">Híbrido</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="panel-header-action">
+                <button class="btn btn-primary btn-lg" id="generateEstrat2Btn">
+                  <i class="fa-solid fa-gears"></i> Gerar Matriz Estratégica
+                </button>
+              </div>
+            </div>
+
+            <div class="ranking-section">
+              <div class="section-label">Ranking Histórico (Frequência Geral)</div>
+              <p class="section-help">Escolha 2 ou 3 dígitos para priorização estratégica.</p>
+              <div class="ranking-list" id="rankingList">
+                <div class="ranking-loading"><i class="fa-solid fa-spinner fa-spin"></i> Carregando estatísticas...
+                </div>
+              </div>
+              <div id="selectionStatus" class="selection-status">Selecione entre 2 e 3 dígitos</div>
+            </div>
+
+            <div class="intensity-section">
+              <div class="section-label">Intensidade de Distribuição</div>
+              <div class="intensity-group">
+                <label class="intensity-option"><input type="radio" name="intensityE2" value="Baixa"><span
+                    class="intensity-box">Baixa</span></label>
+                <label class="intensity-option"><input type="radio" name="intensityE2" value="Média" checked><span
+                    class="intensity-box">Média</span></label>
+                <label class="intensity-option"><input type="radio" name="intensityE2" value="Alta"><span
+                    class="intensity-box">Alta</span></label>
+              </div>
+            </div>
+          </section>
+          <div class="matrices-container" id="matricesContainerV2"></div>
+        </div>
+
+        <!-- ABA: ESTRATÉGIA 3 -->
+        <div class="tab-pane" id="tab-estrat3">
+          <section class="controls-panel v3-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-chart-line"></i> Estratégia 3 — Ranking por Coluna</div>
+              <p class="panel-subtitle">O Modo Híbrido integra ranking por coluna, ranking geral e ajustes estruturais
+                para maior equilíbrio na distribuição.</p>
+
+              <div class="operation-mode-row" style="margin-top: 20px;">
+                <span class="section-label">Modo de Operação:</span>
+                <div class="mode-toggle-group">
+                  <label class="mode-opt">
+                    <input type="radio" name="modeE3" value="Padrao" checked>
+                    <span class="mode-label">Padrão</span>
+                  </label>
+                  <label class="mode-opt">
+                    <input type="radio" name="modeE3" value="Hibrido">
+                    <span class="mode-label">Híbrido</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="panel-header-action">
+                <button class="btn btn-primary btn-lg" id="generateEstrat3Btn">
+                  <i class="fa-solid fa-gears"></i> Gerar Matriz Estratégica
+                </button>
+              </div>
+
+              <div class="strategic-tip">
+                <i class="fa-solid fa-lightbulb"></i>
+                <strong>Dica:</strong> Experimente o Modo Híbrido com intensidade Média para o melhor equilíbrio
+                histórico e estrutural.
+              </div>
+            </div>
+
+            <div class="ranking-columns-grid" id="rankingColumnsGrid">
+              <div class="ranking-loading"><i class="fa-solid fa-spinner fa-spin"></i> Analisando frequências por
+                coluna...</div>
+            </div>
+
+            <div class="intensity-section">
+              <div class="section-label">Intensidade de Distribuição</div>
+              <div class="intensity-group">
+                <label class="intensity-option"><input type="radio" name="intensityE3" value="Baixa"><span
+                    class="intensity-box">Baixa</span></label>
+                <label class="intensity-option"><input type="radio" name="intensityE3" value="Média" checked><span
+                    class="intensity-box">Média</span></label>
+                <label class="intensity-option"><input type="radio" name="intensityE3" value="Alta"><span
+                    class="intensity-box">Alta</span></label>
+              </div>
+            </div>
+          </section>
+          <div class="matrices-container" id="matricesContainerV3"></div>
+        </div>
+
+        <!-- ABA: ESTRATÉGIA 4 -->
+        <div class="tab-pane" id="tab-estrat4">
+          <section class="controls-panel v4-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-shapes"></i> Estratégia 4 — Restrição Estrutural de 5
+                Dígitos
+              </div>
+              <p class="panel-subtitle">Esta estratégia limita a geração a apenas cinco dígitos escolhidos, forçando
+                repetição estrutural nas sete colunas. Ideal para explorar cenários de concentração numérica.</p>
+
+              <div class="operation-mode-row" style="margin-top: 20px;">
+                <span class="section-label">Modo de Operação:</span>
+                <div class="mode-toggle-group">
+                  <label class="mode-opt">
+                    <input type="radio" name="modeE4" value="Padrao" checked>
+                    <span class="mode-label">Padrão</span>
+                  </label>
+                  <label class="mode-opt">
+                    <input type="radio" name="modeE4" value="Hibrido">
+                    <span class="mode-label">Híbrido</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="panel-header-action">
+                <button class="btn btn-primary btn-lg" id="generateEstrat4Btn">
+                  <i class="fa-solid fa-gears"></i> Gerar Matriz Estratégica
+                </button>
+              </div>
+            </div>
+
+            <div class="restriction-section ranking-section">
+              <div class="section-label">Selecionar 5 Dígitos para Compor a Matriz</div>
+              <div class="manual-selection-row" style="margin: 15px 0;">
+                <button class="btn btn-secondary btn-sm" id="useTop5Btn">
+                  <i class="fa-solid fa-star"></i> Usar Top 5 Histórico
+                </button>
+              </div>
+              <div class="ranking-list" id="selectionListE4">
+                <!-- Populado via JS -->
+              </div>
+              <div id="selectionStatusE4" class="selection-status">Selecione exatamente 5 dígitos</div>
+            </div>
+
+            <div class="intensity-section">
+              <div class="section-label">Intensidade de Distribuição</div>
+              <div class="intensity-group">
+                <label class="intensity-option"><input type="radio" name="intensityE4" value="Baixa"><span
+                    class="intensity-box">Baixa</span></label>
+                <label class="intensity-option"><input type="radio" name="intensityE4" value="Média" checked><span
+                    class="intensity-box">Média</span></label>
+                <label class="intensity-option"><input type="radio" name="intensityE4" value="Alta"><span
+                    class="intensity-box">Alta</span></label>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tabela de Filtro Automático (6 e 7 acertos) -->
+          <div class="history-filter-section" style="margin-top: 25px;">
+            <div class="section-header-compact"
+              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <div class="section-label" style="margin-bottom: 0;"><i class="fa-solid fa-trophy"></i> Grandes Acertos (6
+                e 7)</div>
+              <select id="filterHitsE4" class="concurso-select" style="width: auto; height: 32px; font-size: 13px;">
+                <option value="all">Todos (6 e 7)</option>
+                <option value="6">Apenas 6 Acertos</option>
+                <option value="7">Apenas 7 Acertos</option>
+              </select>
+            </div>
+            <div class="table-auto-wrapper"
+              style="margin-bottom: 30px; background: rgba(0,0,0,0.02); border-radius: 12px; padding: 10px;">
+              <table class="rateio-table" id="topHitsTableE4" style="margin-top: 0;">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Estr.</th>
+                    <th>Modo</th>
+                    <th>Conc.</th>
+                    <th>Hits</th>
+                    <th>Números</th>
+                  </tr>
+                </thead>
+                <tbody id="topHitsBodyE4">
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px; color: var(--text-tertiary);">Nenhum
+                      registro encontrado</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="matrices-container" id="matricesContainerV4"></div>
+        </div>
+
+        <!-- ABA: RANKINGS / ANÁLISE -->
+        <div class="tab-pane" id="tab-rankings">
+          <section class="controls-panel analysis-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-chart-pie"></i> Aba 5 — Análise Comparativa das Estratégias
+              </div>
+              <p class="panel-subtitle">Análise de desempenho técnico das estratégias baseada no histórico real de
+                sorteios.</p>
+            </div>
+
+            <div class="analysis-config-grid"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; padding: 0 5px;">
+              <div class="period-selection">
+                <div class="section-label">Período de Análise</div>
+                <select id="analysisPeriod" class="concurso-select">
+                  <option value="50">Últimos 50 Concursos</option>
+                  <option value="100">Últimos 100 Concursos</option>
+                  <option value="200">Últimos 200 Concursos</option>
+                  <option value="custom">Intervalo Personalizado</option>
+                </select>
+                <div id="customPeriodInputs" style="display: none; margin-top: 10px; gap: 10px;">
+                  <input type="number" id="startConcAnalysis" placeholder="De 0000" class="concurso-input">
+                  <input type="number" id="endConcAnalysis" placeholder="Até 0000" class="concurso-input">
+                </div>
+              </div>
+              <div class="strategy-selection">
+                <div class="section-label">Estratégias para Comparar</div>
+                <div class="checkbox-group" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                  <label class="mode-opt"><input type="checkbox" name="analyzeStrat" value="1" checked> <span
+                      class="mode-label">E1</span></label>
+                  <label class="mode-opt"><input type="checkbox" name="analyzeStrat" value="2" checked> <span
+                      class="mode-label">E2</span></label>
+                  <label class="mode-opt"><input type="checkbox" name="analyzeStrat" value="3" checked> <span
+                      class="mode-label">E3</span></label>
+                  <label class="mode-opt"><input type="checkbox" name="analyzeStrat" value="4" checked> <span
+                      class="mode-label">E4</span></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-header-action" style="text-align: center; margin-bottom: 20px;">
+              <button class="btn btn-primary btn-lg" id="executeAnalysisBtn">
+                <i class="fa-solid fa-magnifying-glass-chart"></i> Executar Análise
+              </button>
+            </div>
+          </section>
+
+          <div id="analysisResultsArea" style="display: none;">
+            <div id="analysisWinnerSlot"></div>
+
+            <div class="table-auto-wrapper" style="background: rgba(0,0,0,0.02); border-radius: 12px; padding: 10px;">
+              <table class="rateio-table" id="analysisTable" style="margin-top: 0;">
+                <thead>
+                  <tr>
+                    <th>Estratégia</th>
+                    <th>Média</th>
+                    <th>Melhor</th>
+                    <th>% 3+</th>
+                    <th>Tot 6/7</th>
+                    <th class="gold">Score</th>
+                  </tr>
+                </thead>
+                <tbody id="analysisBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LISTA GERAL DE MATRIZES -->
+      <div class="matrices-container" id="matricesList"></div>
+    </div>
+
+    <!-- 🔴 MÓDULO ANÁLISES -->
+    <div id="modulo-analises" class="module-view">
+      <!-- Tab Navigation Análises -->
+      <nav class="tabs-nav secondary-nav">
+        <button class="tab-btn active" data-tab="analise1"><i class="fa-solid fa-dna"></i> Composição</button>
+        <button class="tab-btn" data-tab="analise2"><i class="fa-solid fa-table-columns"></i> Colunas</button>
+        <button class="tab-btn" data-tab="analise3"><i class="fa-solid fa-qrcode"></i> Estrutural</button>
+        <button class="tab-btn" data-tab="analise4"><i class="fa-solid fa-bullseye"></i> Concentração</button>
+        <button class="tab-btn" data-tab="analise5"><i class="fa-solid fa-scale-balanced"></i> Pares/Ímpares</button>
+        <button class="tab-btn" data-tab="analise6"><i class="fa-solid fa-list-ul"></i> Repetição Detalhada</button>
+      </nav>
+
+      <div class="tabs-content">
+        <!-- ANÁLISE 1: COMPOSIÇÃO -->
+        <div class="tab-pane active" id="tab-analise1">
+          <section class="controls-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-dna"></i> Análise 1 — Estrutura de Composição</div>
+              <p class="panel-subtitle">Análise histórica da quantidade de dígitos distintos e padrões de repetição
+                interna em cada concurso.</p>
+              <div class="analysis-controls-row">
+                <select class="text-input period-selector" data-analise="composicao">
+                  <option value="50">Últimos 50 concursos</option>
+                  <option value="100">Últimos 100 concursos</option>
+                  <option value="200">Últimos 200 concursos</option>
+                  <option value="500">Últimos 500 concursos</option>
+                  <option value="0">Tudo (Histórico Completo)</option>
+                </select>
+                <button class="btn btn-primary run-analysis-btn" data-type="composicao"><i class="fa-solid fa-play"></i>
+                  Executar</button>
+                <div class="btn-group" style="display: flex; gap: 5px;">
+                  <button class="btn btn-secondary btn-sm export-analysis-btn" data-type="composicao" data-format="txt"
+                    title="Exportar TXT"><i class="fa-solid fa-file-lines"></i></button>
+                  <button class="btn btn-secondary btn-sm export-analysis-btn" data-type="composicao" data-format="html"
+                    title="Exportar HTML"><i class="fa-solid fa-code"></i></button>
+                  <button class="btn btn-secondary btn-sm export-analysis-btn" data-type="composicao" data-format="xlsx"
+                    title="Exportar Excel"><i class="fa-solid fa-file-excel"></i></button>
+                </div>
+                <button class="btn btn-secondary clear-analysis-btn"><i class="fa-solid fa-eraser"></i> Limpar</button>
+              </div>
+            </div>
+            <div class="analysis-result-view" id="res-composicao"></div>
+          </section>
+        </div>
+
+        <!-- ANÁLISE 2: FREQUÊNCIA POR COLUNA -->
+        <div class="tab-pane" id="tab-analise2">
+          <section class="controls-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-table-columns"></i> Análise 2 — Frequência por Coluna</div>
+              <p class="panel-subtitle">Mapeamento térmico da distribuição de dígitos em cada uma das 7 colunas do Super
+                7.</p>
+              <div class="analysis-controls-row">
+                <select class="text-input period-selector" data-analise="colunas">
+                  <option value="50">Últimos 50 concursos</option>
+                  <option value="100">Últimos 100 concursos</option>
+                  <option value="200">Últimos 200 concursos</option>
+                  <option value="0">Tudo</option>
+                </select>
+                <button class="btn btn-primary run-analysis-btn" data-type="colunas"><i class="fa-solid fa-play"></i>
+                  Executar</button>
+                <div class="btn-group" style="display: flex; gap: 5px;">
+                  <button class="btn btn-secondary btn-sm export-analysis-btn" data-type="colunas" data-format="txt"
+                    title="TXT"><i class="fa-solid fa-file-lines"></i></button>
+                  <button class="btn btn-secondary btn-sm export-analysis-btn" data-type="colunas" data-format="html"
+                    title="HTML"><i class="fa-solid fa-code"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="analysis-result-view" id="res-colunas"></div>
+          </section>
+        </div>
+
+        <!-- ANÁLISE 3: PADRÃO ESTRUTURAL -->
+        <div class="tab-pane" id="tab-analise3">
+          <section class="controls-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-qrcode"></i> Análise 3 — Padrão de Repetição Estrutural
+              </div>
+              <p class="panel-subtitle">Classificação histórica por categorias de repetição (Duplas, Trincas, Quadras,
+                etc).</p>
+              <div class="analysis-controls-row">
+                <select class="text-input period-selector" data-analise="estrutural">
+                  <option value="100">Últimos 100 concursos</option>
+                  <option value="200">Últimos 200 concursos</option>
+                  <option value="0">Tudo</option>
+                </select>
+                <button class="btn btn-primary run-analysis-btn" data-type="estrutural"><i class="fa-solid fa-play"></i>
+                  Executar</button>
+                <button class="btn btn-secondary btn-sm export-analysis-btn" data-type="estrutural"
+                  data-format="html"><i class="fa-solid fa-file-export"></i> Exportar</button>
+              </div>
+            </div>
+            <div class="analysis-result-view" id="res-estrutural"></div>
+          </section>
+        </div>
+
+        <!-- ANÁLISE 4: MAPA DE CONCENTRAÇÃO -->
+        <div class="tab-pane" id="tab-analise4">
+          <section class="controls-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-bullseye"></i> Análise 4 — Mapa de Concentração</div>
+              <p class="panel-subtitle">Mede a concentração estrutural do período comparado à tendência histórica
+                global.</p>
+              <div class="analysis-controls-row">
+                <select class="text-input period-selector" data-analise="concentracao">
+                  <option value="50">Últimos 50</option>
+                  <option value="100">Últimos 100</option>
+                </select>
+                <button class="btn btn-primary run-analysis-btn" data-type="concentracao"><i
+                    class="fa-solid fa-play"></i> Executar</button>
+              </div>
+            </div>
+            <div class="analysis-result-view" id="res-concentracao"></div>
+          </section>
+        </div>
+
+        <!-- ANÁLISE 5: PARES E ÍMPARES -->
+        <div class="tab-pane" id="tab-analise5">
+          <section class="controls-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-scale-balanced"></i> Análise 5 — Pares e Ímpares</div>
+              <p class="panel-subtitle">Distribuição histórica da paridade dos dígitos sorteados em cada concurso.</p>
+              <div class="analysis-controls-row">
+                <select class="text-input period-selector" data-analise="par_impar">
+                  <option value="100">Últimos 100</option>
+                  <option value="0">Tudo</option>
+                </select>
+                <button class="btn btn-primary run-analysis-btn" data-type="par_impar"><i class="fa-solid fa-play"></i>
+                  Executar</button>
+                <button class="btn btn-secondary btn-sm export-analysis-btn" data-type="par_impar" data-format="html"><i
+                    class="fa-solid fa-file-export"></i> Exportar</button>
+              </div>
+            </div>
+            <div class="analysis-result-view" id="res-par_impar"></div>
+          </section>
+        </div>
+
+        <!-- ANÁLISE 6: REPETIÇÃO DETALHADA -->
+        <div class="tab-pane" id="tab-analise6">
+          <section class="controls-panel">
+            <div class="panel-header-standard">
+              <div class="panel-title"><i class="fa-solid fa-list-ul"></i> Análise 6 — Repetição Detalhada</div>
+              <p class="panel-subtitle">Ranking detalhado de quais dígitos aparecem mais em casos de repetição interna.
+              </p>
+              <div class="analysis-controls-row">
+                <select class="text-input period-selector" data-analise="repeticao_detalhada">
+                  <option value="100">Últimos 100</option>
+                  <option value="0">Tudo</option>
+                </select>
+                <button class="btn btn-primary run-analysis-btn" data-type="repeticao_detalhada"><i
+                    class="fa-solid fa-play"></i> Executar</button>
+                <button class="btn btn-secondary btn-sm export-analysis-btn" data-type="repeticao_detalhada"
+                  data-format="html"><i class="fa-solid fa-file-export"></i> Exportar</button>
+              </div>
+            </div>
+            <div class="analysis-result-view" id="res-repeticao_detalhada"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datalist para consulta rápida de concursos -->
+    <datalist id="concursosList"></datalist>
+
+    <!-- Toast de notificações -->
+    <div class="toast" id="toast"></div>
+
+    <!--<script src="{{ url_for('static', filename='js/script.js') }}"></script>-->
+    <script src="static/js/script.js?v=1.1"></script>
+    <!--<script src="{{ url_for('static', filename='js/script.js') }}?v={{ config['VERSION'] }}"></script>-->
+</body>
+
+</html>

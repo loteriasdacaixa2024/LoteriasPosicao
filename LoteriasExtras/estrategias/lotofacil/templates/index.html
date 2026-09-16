@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="app-root" content="{{ request.script_root }}">
+    <title>{{ config.name }} — Laboratório de Estratégias</title>
+    <link rel="stylesheet" href="static/css/style.css?v={{ range(1, 9999) | random }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body
+    style="--primary: {{ config.colors.primary }}; --primary-light: {{ config.colors.secondary }}; --primary-dark: {{ config.colors.primary }}; --secondary: {{ config.colors.background }}; --accent: {{ config.colors.accent }};">
+
+    <header>
+        <div class="header-content">
+            {% if config.extra.remote_logo %}
+            <img src="{{ config.extra.remote_logo }}" alt="Logo {{ config.name }}" class="lottery-logo">
+            {% endif %}
+            <div class="header-text">
+                <h1>{{ config.icon }} {{ config.name | upper }}</h1>
+                <p>Laboratório de Estratégias<br>e Análise Estatística</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tabs main-tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'analise')">Análise</button>
+            <button class="tab-btn" onclick="openTab(event, 'estrategias')">Estratégias</button>
+        </div>
+
+        <!-- TABS: ANALISE -->
+        <div id="analise" class="tab-content active">
+            <div class="sub-tabs-container">
+                <div class="sub-tabs"
+                    style="display: flex; align-items: flex-start; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 0.5rem;">
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap; width: 100%; min-width: 0; flex: 1 1 100%;">
+                        <button class="sub-tab-btn active" onclick="openSubTab(event, 'analise', 'layer1')">Camada
+                            1</button>
+                        <button class="sub-tab-btn" onclick="openSubTab(event, 'analise', 'layer2')">Camada 2</button>
+                        <button class="sub-tab-btn" onclick="openSubTab(event, 'analise', 'layer3')">Camada 3</button>
+                        <button class="sub-tab-btn" onclick="openSubTab(event, 'analise', 'layer4')">Camada 4</button>
+                        <button class="sub-tab-btn" onclick="openSubTab(event, 'analise', 'layer5')">Camada 5</button>
+                        <button class="sub-tab-btn" onclick="openSubTab(event, 'analise', 'layer6')">Camada 6</button>
+                    </div>
+                    <button class="btn-export-minimal btn-help" onclick="toggleLayersHelp()"
+                        style="background: var(--primary-light); color: white; border-radius: 50%; width: 2.75rem; height: 2.75rem; padding: 0; line-height: 2.75rem; font-weight: 800; border: none; cursor: pointer; margin-left:10px; flex-shrink: 0;"
+                        aria-label="Ajuda das camadas">?</button>
+                </div>
+            </div>
+
+            <!-- Analysis Layers Help Box -->
+            <div id="layers-help" class="reminder-box"
+                style="display: none; font-size: 0.9rem; margin-top: 1rem; border-left-color: var(--primary); background: #fdf2ff;">
+                <h4 style="margin-top: 0; color: var(--primary);">🧪 Guia das Camadas de Análise:</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li>📊 <b>Camada 1 (Frequência):</b> Dezenas que mais e menos saíram no histórico.</li>
+                    <li>🏢 <b>Camada 2 (Estrutura):</b> Distribuição por linhas, colunas e padrões de grid.</li>
+                    <li>⚖️ <b>Camada 3 (Composição):</b> Equilíbrio de Pares/Ímpares, Primos e Faixa de Soma.</li>
+                    <li>🔁 <b>Camada 4 (Repetição):</b> Análise de números que repetem do concurso anterior.</li>
+                    <li>🧩 <b>Camada 5 (Padrões):</b> Sequências, vizinhos e dígitos finais repetidos.</li>
+                    <li>⏳ <b>Camada 6 (Temporal):</b> Gestão de atrasos e progresso do ciclo atual.</li>
+                </ul>
+            </div>
+
+            <!-- ALL LAYERS MUST BE HERE -->
+            <div id="layer1" class="sub-tab-content active">
+                <div class="card premium-card">
+                    <div class="card-header">
+                        <h3>Frequência</h3>
+                        <span class="badge-vibrant">Estatística Real</span>
+                    </div>
+                    <div class="description">Esta camada mostra os números que aparecem com maior frequência nos
+                        sorteios históricos. Números "quentes" podem indicar recorrência estatística.</div>
+
+                    <div class="analysis-box">
+                        <p class="section-title">🏆 Top 5 Dezenas:</p>
+                        <div id="freq-top" class="badges-row">Carregando...</div>
+
+                        <div class="chart-container">
+                            <p class="section-title">📊 Frequência Geral (Top 10):</p>
+                            <div id="freq-chart"></div>
+                        </div>
+                    </div>
+                    <div class="analysis-insight" id="insight-layer1"
+                        style="margin-top: 1.5rem; background: #f0f7ff; border-left: 4px solid #007bff; padding: 0.8rem; border-radius: 4px; font-size: 0.9rem;">
+                        <!-- JS Insight -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="layer2" class="sub-tab-content">
+                <div class="card premium-card">
+                    <h3>Estrutura e Posição</h3>
+                    <div class="description">Esta camada analisa a distribuição nos eixos horizontais e verticais do
+                        volante.</div>
+                    <div class="analysis-box centered"
+                        style="display: flex; flex-direction: row; gap: 40px; justify-content: center; flex-wrap: wrap; background: transparent; border: none; padding: 0;">
+                        <div>
+                            <p class="section-title">Distribuição por Linhas:</p>
+                            <div class="volante" id="volante-lines">
+                                <!-- Gerado via JS -->
+                            </div>
+                        </div>
+                        <div>
+                            <p class="section-title">Distribuição por Colunas:</p>
+                            <div class="volante" id="volante-cols">
+                                <!-- Gerado via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="line-stats-container"
+                        style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+                        <p class="section-title">📊 Detalhes por Linha (Frequência & Médias):</p>
+                        <p class="small-note" style="margin-bottom: 10px;">Aqui você vê qual número é o "líder" (mais
+                            sai) e qual está "frio" (menos sai) em cada faixa de 5 números do volante.</p>
+                        <div id="line-details-grid"
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 10px;">
+                            <!-- JS -->
+                        </div>
+                    </div>
+
+                    <div class="patterns-container"
+                        style="margin-top: 2rem; background: var(--secondary); padding: 1.2rem; border-radius: 12px; border: 1px solid var(--primary-light);">
+                        <p class="section-title" style="margin-top: 0; color: var(--primary);">🏆 Padrões Predominantes
+                            (Distribuição):</p>
+                        <p class="small-note" style="margin-bottom: 10px; color: #666;">Os padrões mostram como as
+                            dezenas se espalham pelas 5 linhas. O 1º é o que mais ocorreu na história da Lotofácil.</p>
+                        <div id="line-patterns-list"
+                            style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px;">
+                            <!-- JS -->
+                        </div>
+                        <p class="small-note" style="color: var(--primary-dark); font-weight: 600;">* Formato: [Linha1,
+                            Linha2, Linha3, Linha4, Linha5]</p>
+                    </div>
+
+                    <p class="small-note" style="text-align: center; margin-top: 1.5rem;">* Intensidade baseada nos
+                        números sorteados no último concurso.</p>
+                    <div class="analysis-insight" id="insight-layer2"
+                        style="margin-top: 1.5rem; background: #f0f7ff; border-left: 4px solid #007bff; padding: 0.8rem; border-radius: 4px; font-size: 0.9rem;">
+                        <!-- JS Insight -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="layer3" class="sub-tab-content">
+                <div class="card premium-card">
+                    <h3>Composição</h3>
+                    <div class="description">Esta camada descreve a composição estrutural do último sorteio, incluindo o
+                        equilíbrio de paridade e a distribuição entre números baixos e altos.</div>
+                    <div id="comp-stats" class="stats-grid">
+                        <!-- Par/Impar, Baixo/Alto -->
+                    </div>
+
+                    <div class="parity-pattern-container"
+                        style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+                        <p class="section-title">⚖️ Predomínio e Equilíbrio (Par/Ímpar):</p>
+                        <p class="small-note" style="margin-bottom: 15px;">A maior parte dos jogos vencedores mantém um
+                            equilíbrio (ex: 7P/8I ou 8P/7I). Evite padrões com poucos pontos históricos.</p>
+                        <div id="parity-winner-box"
+                            style="background: var(--primary); color: white; padding: 1.2rem; border-radius: 12px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-size: 0.8rem; text-transform: uppercase; opacity: 0.9;">Padrão
+                                    Vencedor Histórico:</span>
+                                <h2 id="winning-parity-ratio" style="margin: 0; font-size: 2rem;">--</h2>
+                            </div>
+                            <div style="text-align: right;">
+                                <span id="winning-parity-desc"
+                                    style="font-weight: 700; font-size: 1.1rem; display: block;">Misto
+                                    Equilibrado</span>
+                                <span id="winning-parity-freq" style="font-size: 0.8rem; opacity: 0.8;">32% de
+                                    ocorrência</span>
+                            </div>
+                        </div>
+
+                        <!-- NEW: Primes and Sums -->
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 1.5rem;">
+                            <div
+                                style="background: #fdf2ff; padding: 1rem; border-radius: 10px; border: 1px solid var(--primary-light);">
+                                <p class="section-title" style="margin: 0; font-size: 0.85rem;">🧬 Números Primos:</p>
+                                <div id="primes-winner-list"
+                                    style="margin-top: 8px; font-weight: 700; font-size: 1.1rem; color: var(--primary);">
+                                    <!-- JS -->
+                                </div>
+                            </div>
+                            <div
+                                style="background: #fdf2ff; padding: 1rem; border-radius: 10px; border: 1px solid var(--primary-light);">
+                                <p class="section-title" style="margin: 0; font-size: 0.85rem;">📊 Faixa de Soma Comum:
+                                </p>
+                                <div id="sum-winner-list"
+                                    style="margin-top: 8px; font-weight: 700; font-size: 1.1rem; color: var(--primary);">
+                                    <!-- JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            <p class="section-title" style="font-size: 0.9rem;">📊 Top Relações de Paridade:</p>
+                            <div id="parity-dist-list"
+                                style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                                <!-- JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="analysis-insight" id="insight-layer3"
+                        style="margin-top: 1.5rem; background: #f0f7ff; border-left: 4px solid #007bff; padding: 0.8rem; border-radius: 4px; font-size: 0.9rem;">
+                        <!-- JS Insight -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="layer4" class="sub-tab-content">
+                <div class="card premium-card">
+                    <h3>Repetição</h3>
+                    <div class="description">A Lotofácil historicamente repete cerca de 9–10 números do sorteio
+                        anterior.</div>
+                    <div class="analysis-box centered">
+                        <div id="rep-stats" class="giant-number">
+                            <!-- Repetição do anterior -->
+                        </div>
+                        <p class="section-title">Números repetidos do anterior</p>
+                        <p class="small-note">Média histórica: 9 números</p>
+                    </div>
+                    <div class="analysis-insight" id="insight-layer4"
+                        style="margin-top: 1.5rem; background: #f0f7ff; border-left: 4px solid #007bff; padding: 0.8rem; border-radius: 4px; font-size: 0.9rem;">
+                        <!-- JS Insight -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="layer5" class="sub-tab-content">
+                <div class="card premium-card">
+                    <div class="card-header">
+                        <div>
+                            <h3 style="margin: 0;">Análise Visual de Padrões</h3>
+                            <span class="badge-vibrant">Mapa de Deslocamento Horizontal</span>
+                        </div>
+                    </div>
+
+                    <div class="description">Analise visualmente a ocorrência de dezenas e identifique padrões de
+                        deslocamento, sequências e espelhamento.</div>
+
+                    <!-- Simulator (Multiple Grids) -->
+                    <div class="simulator-section-multi"
+                        style="margin-bottom: 2rem; background: #fff; padding: 1rem; border-radius: 12px; border: 1px solid var(--primary-light);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <p class="section-title" style="margin: 0; font-size: 1rem; color: var(--primary);">🧪
+                                Simulador Visual (Linhas)</p>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <select id="visual-limit" onchange="loadVisualData()"
+                                    style="padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #ddd; background: #fff; cursor: pointer;">
+                                    <option value="10">Últimos 10</option>
+                                    <option value="20">Últimos 20</option>
+                                    <option value="50">Últimos 50</option>
+                                    <option value="5000">Exibir Todos</option>
+                                </select>
+                                <button class="btn-export-minimal" onclick="addSimulatorGrid()"
+                                    style="background: var(--primary); color: white; border-radius: 6px; padding: 5px 12px;">+
+                                    Nova Aposta</button>
+                                <button class="btn-export-minimal" onclick="downloadManualBets()"
+                                    style="background: #27ae60; color: white; border-radius: 6px; padding: 5px 12px; font-weight: bold;">💾
+                                    .TXT</button>
+                                <button class="btn-export-minimal"
+                                    onclick="simulatorGrids[0].clear(); renderMultiSimulator();"
+                                    style="background: #f0f0f0; color: #666; border-radius: 6px; padding: 5px 12px;">Limpar</button>
+                            </div>
+                        </div>
+                        <div class="visual-controls"
+                            style="display: flex; gap: 15px; margin-bottom: 1.5rem; flex-wrap: wrap; background: #fdf2ff; padding: 12px; border-radius: 10px; border: 1px solid #e0d0f0; align-items: center; justify-content: center;">
+                            <label
+                                style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--primary);"><input
+                                    type="checkbox" id="toggle-hibrido" onchange="renderMultiSimulator()"> 🔬 Suporte
+                                Estatístico (Híbrido)</label>
+                            <div style="width: 1px; height: 20px; background: #ddd; margin: 0 5px;"></div>
+                            <label
+                                style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.8rem; font-weight: 600;"><input
+                                    type="checkbox" id="toggle-pares" onchange="refreshVisualGrids()"> 🟢 Pares</label>
+                            <label
+                                style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.8rem; font-weight: 600;"><input
+                                    type="checkbox" id="toggle-impares" onchange="refreshVisualGrids()"> 🔵
+                                Ímpares</label>
+                            <label
+                                style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.8rem; font-weight: 600;"><input
+                                    type="checkbox" id="toggle-repetidos" onchange="refreshVisualGrids()" checked> 🟡
+                                Repetidos</label>
+                            <label
+                                style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.8rem; font-weight: 600;"><input
+                                    type="checkbox" id="toggle-sequencias" onchange="refreshVisualGrids()"> ⬛
+                                Sequências</label>
+                            <label
+                                style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.8rem; font-weight: 600;"><input
+                                    type="checkbox" id="toggle-finais" onchange="refreshVisualGrids()"> 🧬 Finais
+                                Iguais</label>
+                        </div>
+
+                        <div id="simulator-container"
+                            style="display: flex; flex-direction: column; gap: 5px; align-items: center;">
+                            <!-- Grids dinâmicos em formato de linha -->
+                        </div>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 1.5rem 0;">
+
+                    <!-- Historical List -->
+                    <div class="historical-visual-list">
+                        <div id="visual-historical-grids"
+                            style="display: flex; flex-direction: column; gap: 5px; background: #fafafa; border-radius: 8px; align-items: center;">
+                            <!-- JS injected rows -->
+                        </div>
+                    </div>
+
+                    <div class="analysis-insight" id="insight-layer5"
+                        style="margin-top: 1.5rem; background: #f0f7ff; border-left: 4px solid #007bff; padding: 0.8rem; border-radius: 4px; font-size: 0.9rem;">
+                        <!-- JS Insight -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="layer6" class="sub-tab-content">
+                <div class="card premium-card">
+                    <h3>Ciclo e Atrasos</h3>
+                    <div class="description">Acompanhe as dezenas ausentes e o progresso do ciclo atual.</div>
+                    <div id="temporal-stats" class="analysis-box">
+                        <!-- Atrasos Principais -->
+                    </div>
+
+                    <div class="cycle-box"
+                        style="margin-top: 1.5rem; background: rgba(103, 38, 102, 0.05); padding: 1rem; border-radius: 10px; border: 1px solid var(--primary-light);">
+                        <p class="section-title">🔄 Ciclo de Fechamento: <span id="cycle-progress">0%</span></p>
+                        <div class="description">Dezenas que ainda não saíram no ciclo atual (esperadas para vir em
+                            breve):</div>
+                        <div id="cycle-numbers" class="badges-row">
+                            <!-- JS -->
+                        </div>
+                    </div>
+                    <div class="analysis-insight" id="insight-layer6"
+                        style="margin-top: 1.5rem; background: #f0f7ff; border-left: 4px solid #007bff; padding: 0.8rem; border-radius: 4px; font-size: 0.9rem;">
+                        <!-- JS Insight -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- TABS: ESTRATEGIAS -->
+        <div id="estrategias" class="tab-content">
+
+            <div class="strategy-tabs" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; gap: 5px; flex-wrap: wrap; flex-grow: 1; justify-content: center;">
+                    <div class="strat-tab active" data-id="1" onclick="selectStrategy(1)">Estratégia 1</div>
+                    <div class="strat-tab" data-id="2" onclick="selectStrategy(2)">Estratégia 2</div>
+                    <div class="strat-tab" data-id="3" onclick="selectStrategy(3)">Estratégia 3</div>
+                    <div class="strat-tab" data-id="4" onclick="selectStrategy(4)">Estratégia 4</div>
+                    <div class="strat-tab" data-id="5" onclick="selectStrategy(5)">Estratégia 5</div>
+                    <div class="strat-tab" data-id="6" onclick="selectStrategy(6)">Estratégia 6</div>
+                    <div class="strat-tab" data-id="7" onclick="selectStrategy(7)">Estratégia 7</div>
+                    <div class="strat-tab" data-id="8" onclick="selectStrategy(8)">Estratégia 8</div>
+                    <div class="strat-tab" data-id="9" onclick="selectStrategy(9)">Estratégia 9</div>
+                    <div class="strat-tab" data-id="10" onclick="selectStrategy(10)">Estratégia 10</div>
+                    <div class="strat-tab" data-id="11" onclick="selectStrategy(11)">Estratégia 11</div>
+                </div>
+                <button class="btn-export-minimal" onclick="toggleStrategiesHelp()"
+                    style="background: var(--primary-light); color: white; border-radius: 50%; width: 28px; height: 28px; padding: 0; line-height: 28px; font-weight: 800; border: none; cursor: pointer; margin-left:10px;">?</button>
+            </div>
+
+            <!-- Strategies Help Box -->
+            <div id="strategies-help" class="reminder-box"
+                style="display: none; font-size: 0.9rem; margin-top: 1rem; border-left-color: var(--primary); background: #fdf2ff;">
+                <h4 style="margin-top: 0; color: var(--primary);">📚 Guia Rápido das Estratégias:</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li>🎯 <b>Estratégia 1 (Equilíbrio):</b> Para quem segue a média histórica e proporções ideais.</li>
+                    <li>🔥 <b>Estratégia 2 (Frequência):</b> Para quem segue as dezenas "quentes" e recorrentes.</li>
+                    <li>⏳ <b>Estratégia 3 (Atrasos):</b> Para quem aposta na quebra de ciclos de dezenas ausentes.</li>
+                    <li>🧬 <b>Estratégia 4 (Híbrida):</b> O melhor de todos os mundos (Equilíbrio + Peso).</li>
+                    <li>💎 <b>Estratégia 5 (Redução):</b> Onde você (ou a IA) escolhe um grupo de elite reduzido.</li>
+                    <li>📐 <b>Estratégia 6 (Fechamento):</b> Garantia matemática de premiação mínima (Wheeling).</li>
+                    <li>📌 <b>Estratégia 7 (Fixas):</b> Para manter seus números favoritos com complementos de IA.</li>
+                    <li>🔮 <b>Estratégia 8 (Prospectiva):</b> Análise de tendência futura e quebra de ciclo iminente.
+                    </li>
+                    <li>📐 <b>Estratégia 9 (Topologia):</b> Para quem foca no equilíbrio geométrico entre Moldura e
+                        Centro.</li>
+                    <li>🤝 <b>Estratégia 10 (Afinidade):</b> Algoritmo de cruzamento que joga com as dezenas que mais
+                        saem juntas.</li>
+                    <li>🦓 <b>Estratégia 11 (Inversão):</b> Ideal para gerar jogos 'quebra-padrão' fugindo de tendências
+                        viciadas (Zebras).</li>
+                </ul>
+            </div>
+
+            <div id="strategy-info" class="strategy-description-box">
+                <!-- Dinâmico via JS -->
+                <h4>Equilíbrio Estatístico</h4>
+                <p>Esta estratégia gera jogos que seguem os padrões estatísticos mais comuns da Lotofácil.</p>
+                <ul>
+                    <li>Proporção par/ímpar equilibrada</li>
+                    <li>Equilíbrio entre números baixos/altos</li>
+                    <li>Faixa de soma típica</li>
+                    <li>Distribuição equilibrada no volante</li>
+                </ul>
+            </div>
+
+            <!-- Strategy 4 Interface (Base Inteligente - Janela Deslizante) -->
+            <div id="strategy-4-interface" style="display: none; margin-bottom: 2rem;">
+                <div class="card premium-card">
+                    <div class="card-header">
+                        <h3>Base Inteligente (Deslizante)</h3>
+                        <span class="badge-vibrant">Novo</span>
+                    </div>
+                    <div class="description">
+                        Geração fixa de 11 jogos por janelas deslizantes a partir de uma permutação única (1 a 25)
+                        ponderada pelo histórico recente (frequência e atrasos, sem filtros adicionais).
+                    </div>
+
+                    <div class="controls-reduction"
+                        style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem; background: var(--secondary); padding: 1rem; border-radius: 8px;">
+                        <button class="sub-strategy-btn" onclick="generateIntelligentBase()"
+                            style="background: var(--accent); white-space: nowrap; font-size: 1.1rem; padding: 10px 20px;">
+                            🎲 Gerar Base Inteligente
+                        </button>
+                        <div style="font-size: 0.85rem; color: #666;">Rotação Dinâmica: <b
+                                id="dyn-rotation-status">Aguardando...</b></div>
+                    </div>
+
+                    <div id="intelligent-base-box"
+                        style="display:none; background: #fff; border: 1px solid #ddd; padding: 1rem; border-radius: 8px;">
+                        <p class="section-title">Base Gerada (1 a 25):</p>
+                        <div id="intelligent-base-grid"
+                            style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 1.5rem;"></div>
+
+                        <p class="section-title">Selecione o Jogo (1 a 11):</p>
+                        <select id="intelligent-game-selector" onchange="renderIntelligentGame()"
+                            style="width: 250px; font-size: 1rem; padding: 5px; cursor: pointer;">
+                            <option value="0">Jogo 1 (Posições 1 a 15)</option>
+                            <option value="1">Jogo 2 (Posições 2 a 16)</option>
+                            <option value="2">Jogo 3 (Posições 3 a 17)</option>
+                            <option value="3">Jogo 4 (Posições 4 a 18)</option>
+                            <option value="4">Jogo 5 (Posições 5 a 19)</option>
+                            <option value="5">Jogo 6 (Posições 6 a 20)</option>
+                            <option value="6">Jogo 7 (Posições 7 a 21)</option>
+                            <option value="7">Jogo 8 (Posições 8 a 22)</option>
+                            <option value="8">Jogo 9 (Posições 9 a 23)</option>
+                            <option value="9">Jogo 10 (Posições 10 a 24)</option>
+                            <option value="10">Jogo 11 (Posições 11 a 25)</option>
+                        </select>
+                        <div id="intelligent-game-view"
+                            style="margin-top: 15px; background: #fdf2ff; padding: 15px; border-radius: 8px; border: 1px dashed var(--primary); font-family: monospace; font-size: 1.2rem; font-weight: bold; color: var(--primary); text-align: center;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategy 5 Interface -->
+            <div id="strategy-5-interface" style="display: none; margin-bottom: 2rem;">
+                <div class="card premium-card">
+                    <div class="card-header">
+                        <h3>Configuração de Redução de Universo</h3>
+                        <span class="badge-vibrant">Avançado</span>
+                    </div>
+                    <div class="description">
+                        Selecione um subconjunto de números (universo reduzido). O sistema gerará jogos de 15 números
+                        utilizando <b>apenas</b> as dezenas escolhidas abaixo.
+                    </div>
+
+                    <div class="controls-reduction"
+                        style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem; background: var(--secondary); padding: 1rem; border-radius: 8px;">
+                        <div>
+                            <label
+                                style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600;">Tamanho
+                                do Universo:</label>
+                            <select id="universe-size" onchange="updateUniverseLimit()" style="width: 160px;">
+                                <option value="10">10 números</option>
+                                <option value="12">12 números</option>
+                                <option value="15">15 números</option>
+                                <option value="18">18 números</option>
+                                <option value="20" selected>20 números</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; height: 45px;">
+                            <input type="checkbox" id="hybrid-mode" style="width: 20px; height: 20px; cursor: pointer;">
+                            <label for="hybrid-mode" style="font-weight: 600; cursor: pointer;">Modo Híbrido</label>
+                        </div>
+                        <button onclick="suggestUniverse()" style="background: var(--accent); white-space: nowrap;">✨
+                            Sugerir Números</button>
+                    </div>
+
+                    <div class="universe-selection-box" style="text-align: center;">
+                        <p class="section-title">Grid de Seleção: <span id="selection-status"
+                                style="color: var(--primary);">0 / 20</span> selecionados</p>
+                        <div class="volante" id="universe-grid" style="max-width: 400px; margin: 1rem auto; gap: 10px;">
+                            <!-- Gerado via JS -->
+                        </div>
+                        <p class="small-note">* Clique nos números para compor seu universo reduzido.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategy 6 Interface -->
+            <div id="strategy-6-interface" style="display: none; margin-bottom: 2rem;">
+                <div class="card premium-card">
+                    <div class="card-header">
+                        <h3>Fechamento Matemático (Wheeling)</h3>
+                        <span class="badge-vibrant">Matemática Pura</span>
+                    </div>
+                    <div class="description">
+                        O fechamento distribui seus números em jogos otimizados para garantir uma pontuação mínima.
+                    </div>
+
+                    <div class="controls-reduction"
+                        style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem; background: var(--secondary); padding: 1rem; border-radius: 8px;">
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: 600;">Tipo
+                                de Fechamento:</label>
+                            <select id="wheeling-type" style="width: 250px;">
+                                <option value="18_14_15">18 Números (Garante 14 se 15)</option>
+                                <option value="19_14_15">19 Números (Garante 14 se 15)</option>
+                                <option value="20_13_15">20 Números (Garante 13 se 15)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="universe-selection-box" style="text-align: center;">
+                        <p class="section-title">Selecione as dezenas do fechamento: <span id="wheeling-status"
+                                style="color: var(--primary);">0 / 18</span></p>
+                        <div class="volante" id="wheeling-grid" style="max-width: 400px; margin: 1rem auto; gap: 10px;">
+                            <!-- Gerado via JS -->
+                        </div>
+                        <p class="small-note">* A quantidade de números deve bater com o tipo selecionado.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategy 7 Interface -->
+            <div id="strategy-7-interface" style="display: none; margin-bottom: 2rem;">
+                <div class="card premium-card">
+                    <div class="card-header">
+                        <h3>Dezenas Fixas + Variáveis</h3>
+                        <span class="badge-vibrant">Personalizado</span>
+                    </div>
+                    <div class="description">
+                        Defina dezenas que estarão presentes em <b>todos</b> os seus jogos. O sistema completará as
+                        dezenas restantes usando análise de camadas.
+                    </div>
+
+                    <div class="fixed-selection-box"
+                        style="background: var(--secondary); padding: 1.5rem; border-radius: 12px; border: 1px dashed var(--primary); text-align: center;">
+                        <p class="section-title">Selecione entre 5 e 12 dezenas fixas: <span id="fixed-status"
+                                style="color: var(--primary); font-weight: 800;">0</span>/12</p>
+                        <div class="volante" id="fixed-grid" style="max-width: 400px; margin: 1rem auto; gap: 10px;">
+                            <!-- Gerado via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategy 8 Interface -->
+            <div id="strategy-8-interface" style="display: none; margin-bottom: 2rem;">
+                <div class="card premium-card">
+                    <div class="card-header">
+                        <h3>Filtro Prospectivo — Tendência de Ciclo</h3>
+                        <span class="badge-vibrant">Estatístico</span>
+                    </div>
+                    <div class="description">
+                        Geração baseada na probabilidade de retorno de dezenas atrasadas que estão cruzando seu período
+                        médio de ausência. Foca na quebra de ciclos.
+                    </div>
+
+                    <div id="trend-analysis-box" class="analysis-box centered">
+                        <p class="section-title">🔍 Identificando dezenas em tendência:</p>
+                        <div id="trend-numbers" class="badges-row">Analisando...</div>
+                        <p class="small-note">O sistema priorizará estas dezenas para os próximos jogos.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <input type="hidden" id="strategy-id" value="1">
+                <div>
+                    <label>Quantidade:</label><br>
+                    <select id="count-select" onchange="toggleCustomCount()">
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="300">300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="custom">Outro valor</option>
+                    </select>
+                    <input type="text" id="custom-count" placeholder="Ex: 30.000" style="display:none; width: 120px;">
+                </div>
+                <div style="flex-grow: 1;">
+                    <label>Amostra p/ Ranking:</label><br>
+                    <select id="ranking-sample" style="width: 130px;">
+                        <option value="100">100 Jogos</option>
+                        <option value="500" selected>500 Jogos</option>
+                        <option value="1000">1000 Jogos</option>
+                        <option value="2000">2000 Jogos</option>
+                    </select>
+                </div>
+                <div style="flex-grow: 1;">
+                    <label>Ranking por:</label><br>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <label><input type="radio" name="rank-crit" value="high_prizes"> Prêmios Altos</label>
+                        <label><input type="radio" name="rank-crit" value="avg_hits" checked> Média Acertos</label>
+                        <label><input type="radio" name="rank-crit" value="financial_return"> Lucro</label>
+                    </div>
+                </div>
+                <button onclick="generateGames()">🚀 Gerar Estratégia</button>
+            </div>
+
+            <div id="warning-large" class="reminder-box"
+                style="display:none; background: #ffebee; border-color: #f44336; color: #b71c1c; font-style: normal;">
+                <strong>Aviso:</strong> Quantidade muito grande para exibição na tela. Use a opção de download.
+                <div style="margin-top: 10px;">
+                    <button class="btn-download" onclick="downloadGames('txt')">Baixar TXT</button>
+                    <button class="btn-download" onclick="downloadGames('csv')">Baixar CSV</button>
+                </div>
+            </div>
+
+            <div class="grid-analysis" style="margin-top: 2rem;">
+                <div class="card" style="grid-column: span 1.5;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0; padding: 0; border: none;">Ranking das Estratégias</h3>
+                        <button class="btn-export-minimal" onclick="toggleRankingHelp()"
+                            style="background: var(--primary-light); color: white; border-radius: 50%; width: 25px; height: 25px; padding: 0; line-height: 25px;">?</button>
+                    </div>
+
+                    <!-- Ranking Help Box (Hidden by default) -->
+                    <div id="ranking-help" class="reminder-box"
+                        style="display: none; font-size: 0.85rem; margin-bottom: 1rem; border-left-color: var(--accent);">
+                        <strong>Como funciona o Ranking?</strong><br>
+                        O sistema gera automaticamente <b>100 jogos de teste</b> para cada uma das 8 estratégias e os
+                        compara com os <b>últimos 50 concursos reais</b>.
+                        O score reflete qual modelo teria tido o melhor desempenho (mais acertos ou maior lucro) naquele
+                        período específico.
+                    </div>
+
+                    <table class="ranking-table">
+                        <thead>
+                            <tr>
+                                <th>Estratégia</th>
+                                <th>Desempenho</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ranking-body">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <h3 style="border:none; padding:0;">Jogos Gerados <span id="active-strat-tag"
+                                style="font-size: 0.7rem; background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px; margin-left:10px; display:none;"></span>
+                        </h3>
+                        <button class="btn-export-minimal" onclick="downloadGames('txt')">⬇ txt</button>
+                    </div>
+                    <div id="games-display"
+                        style="max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 1.05rem; line-height: 1.8; position: relative;">
+                        Clique em gerar para ver os jogos...
+                    </div>
+                </div>
+            </div>
+
+            <div class="reminder-box">
+                💡 <strong>Incentivo:</strong> Sinta-se à vontade para criar novas estratégias para otimizar seus
+                resultados! Atualmente, nosso laboratório possui <span id="dynamic-strategy-count"
+                    style="font-size: 1.1rem; font-weight: 900; color: var(--primary);">11</span> modelos geradores
+                prontas para uso.
+                <div id="dynamic-strategy-summary"
+                    style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--primary-light);"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.LOTTERY = {
+            slug: {{ (config.slug or 'lotofacil')|tojson }},
+            name: {{ config.name|tojson }},
+            total: {{ config.total_numbers or 25 }},
+            draw: {{ config.draw_numbers or 15 }},
+            min: {{ config.number_min if config.number_min is defined else 1 }},
+            grid_cols: {{ config.grid.columns if config.grid else 10 }},
+            grid_rows: {{ config.grid.rows if config.grid else 3 }}
+        };
+    </script>
+    <script src="static/js/main.js?v={{ range(1, 9999) | random }}"></script>
+</body>
+
+</html>

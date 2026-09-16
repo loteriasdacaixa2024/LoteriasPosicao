@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+<head>
+<meta charset='UTF-8'>
+<title>Matriz 1 — SuperSet Estratégia 1</title>
+<meta name='mode' content='Padrão'>
+<meta name='intensity' content='Média'>
+<style>
+body{font-family:'Segoe UI',sans-serif;padding:32px;max-width:700px;margin:0 auto;color:#1a1f36;background:#f8fafc}
+h1{font-size:22px;margin-bottom:4px;color:#0d3b2e}
+h2{font-size:14px;color:#666;margin-bottom:24px;font-weight:400}
+table{width:100%;border-collapse:collapse;margin:20px 0;box-shadow:0 1px 3px rgba(0,0,0,0.1);border-radius:8px;overflow:hidden}
+th{background:#1e293b;color:#fff;padding:10px 8px;text-align:center;font-size:13px;font-weight:600}
+td{text-align:center;padding:10px 8px;border-bottom:1px solid #e2e8f0;font-family:'Consolas',monospace;font-size:17px;position:relative}
+tr:nth-child(even) td{background:#f1f5f9}
+.line-num{font-size:10px;color:#94a3b8;width:25px;text-align:right;padding-right:12px;font-family:'Outfit',sans-serif;font-weight:700;border:none !important;background:none !important;opacity:0.8}
+.hit-val{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:#000;color:#fff;border-radius:50%}
+.hit-val.hit{background:#f59e0b}
+.hits-circle{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:#000;color:#fff;border-radius:50%;font-weight:700}
+.hits-circle.hit-low{background:#f59e0b}
+.hits-circle.hit-high{background:#a9cf46;color:#000}
+.best-row td{background:rgba(169,207,70,0.1) !important}
+.info{background:#fff;padding:14px 18px;border-radius:10px;margin:10px 0;font-size:14px;border:1px solid #e2e8f0}
+.info strong{color:#0d3b2e}
+.footer{margin-top:30px;font-size:11px;color:#999;text-align:center;border-top:1px solid #e2e8f0;padding-top:16px}
+</style>
+</head>
+<body>
+<h1>Matriz 1</h1>
+<h2>SuperSet Estratégia 1 — Modo Padrão — Média</h2>
+<div class="info"><strong>Sequência:</strong> 2 → 4 → 8 → 9 → 6 → 5 → 3 → 1 → 0 → 7</div>
+<div class="info"><strong>Coluna Inicial:</strong> 4</div>
+<div class="info"><strong>Concurso:</strong> 456</div>
+<div class="info"><strong>Resultado:</strong> 2 | 0 | 8 | 7 | 7 | 0 | 7</div>
+<table>
+<thead><tr><th></th><th>C1</th><th>C2</th><th>C3</th><th>C4</th><th>C5</th><th>C6</th><th>C7</th><th>Acertos</th></tr></thead>
+<tbody>
+<tr><td class="line-num">1</td><td><span class="hit-val">6</span></td><td><span class="hit-val">5</span></td><td><span class="hit-val">3</span></td><td><span class="hit-val">2</span></td><td><span class="hit-val">4</span></td><td><span class="hit-val">8</span></td><td><span class="hit-val">9</span></td><td><span class="hits-circle">0</span></td></tr>
+<tr><td class="line-num">2</td><td><span class="hit-val">5</span></td><td><span class="hit-val">3</span></td><td><span class="hit-val">1</span></td><td><span class="hit-val">4</span></td><td><span class="hit-val">8</span></td><td><span class="hit-val">9</span></td><td><span class="hit-val">6</span></td><td><span class="hits-circle">0</span></td></tr>
+<tr><td class="line-num">3</td><td><span class="hit-val">3</span></td><td><span class="hit-val">1</span></td><td><span class="hit-val">0</span></td><td><span class="hit-val">8</span></td><td><span class="hit-val">9</span></td><td><span class="hit-val">6</span></td><td><span class="hit-val">5</span></td><td><span class="hits-circle">0</span></td></tr>
+<tr><td class="line-num">4</td><td><span class="hit-val">1</span></td><td><span class="hit-val hit">0</span></td><td><span class="hit-val">7</span></td><td><span class="hit-val">9</span></td><td><span class="hit-val">6</span></td><td><span class="hit-val">5</span></td><td><span class="hit-val">3</span></td><td><span class="hits-circle hit-low">1</span></td></tr>
+<tr><td class="line-num">5</td><td><span class="hit-val">0</span></td><td><span class="hit-val">7</span></td><td><span class="hit-val">2</span></td><td><span class="hit-val">6</span></td><td><span class="hit-val">5</span></td><td><span class="hit-val">3</span></td><td><span class="hit-val">1</span></td><td><span class="hits-circle">0</span></td></tr>
+<tr><td class="line-num">6</td><td><span class="hit-val">7</span></td><td><span class="hit-val">2</span></td><td><span class="hit-val">4</span></td><td><span class="hit-val">5</span></td><td><span class="hit-val">3</span></td><td><span class="hit-val">1</span></td><td><span class="hit-val">0</span></td><td><span class="hits-circle">0</span></td></tr>
+<tr class='best-row'><td class="line-num">7</td><td><span class="hit-val hit">2</span></td><td><span class="hit-val">4</span></td><td><span class="hit-val hit">8</span></td><td><span class="hit-val">3</span></td><td><span class="hit-val">1</span></td><td><span class="hit-val hit">0</span></td><td><span class="hit-val hit">7</span></td><td><span class="hits-circle hit-high">4</span></td></tr>
+<tr><td class="line-num">8</td><td><span class="hit-val">4</span></td><td><span class="hit-val">8</span></td><td><span class="hit-val">9</span></td><td><span class="hit-val">1</span></td><td><span class="hit-val">0</span></td><td><span class="hit-val">7</span></td><td><span class="hit-val">2</span></td><td><span class="hits-circle">0</span></td></tr>
+<tr><td class="line-num">9</td><td><span class="hit-val">8</span></td><td><span class="hit-val">9</span></td><td><span class="hit-val">6</span></td><td><span class="hit-val">0</span></td><td><span class="hit-val hit">7</span></td><td><span class="hit-val">2</span></td><td><span class="hit-val">4</span></td><td><span class="hits-circle hit-low">1</span></td></tr>
+<tr><td class="line-num">10</td><td><span class="hit-val">9</span></td><td><span class="hit-val">6</span></td><td><span class="hit-val">5</span></td><td><span class="hit-val hit">7</span></td><td><span class="hit-val">2</span></td><td><span class="hit-val">4</span></td><td><span class="hit-val">8</span></td><td><span class="hits-circle hit-low">1</span></td></tr>
+</tbody>
+</table>
+<div class="info"><strong>Melhor Resultado:</strong> Linha 7 (4 acertos — R$ 61,40) <small style="display:block;color:#999;margin-top:2px">Valor Real</small></div>
+<div class="footer">Gerado em: 05/03/2026 10:15:59 | SuperSet Estratégia 1 v1.0.0</div>
+</body>
+</html>
