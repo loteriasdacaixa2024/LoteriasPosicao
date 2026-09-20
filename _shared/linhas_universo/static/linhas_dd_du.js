@@ -58,6 +58,55 @@
         return { dezenas: nums, dd, du };
     }
 
+    function linhaNum(lid) {
+        const n = parseInt(String(lid).slice(1), 10);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function linhasDoMapa() {
+        const mapa = cache.linhas && cache.linhas.mapa && cache.linhas.mapa.linhas;
+        if (Array.isArray(mapa) && mapa.length) {
+            return mapa.map((L) => L.id);
+        }
+        return [];
+    }
+
+    function linhasPresentesOrd(row) {
+        const presentes = [...(row.linhas_presentes || [])];
+        return presentes.sort((a, b) => linhaNum(a) - linhaNum(b));
+    }
+
+    function qtdNaLinha(row, lid) {
+        const lista = row.por_linha && row.por_linha[lid];
+        if (Array.isArray(lista)) return lista.length;
+        return 0;
+    }
+
+    function fmtLinhasQtdTxt(row) {
+        return linhasPresentesOrd(row).map((lid) => {
+            const qtd = qtdNaLinha(row, lid);
+            return `${lid}-${String(qtd).padStart(2, '0')}`;
+        }).join(' ');
+    }
+
+    function fmtLinhasQtdChips(row) {
+        const ids = linhasDoMapa();
+        const slots = ids.length ? ids : linhasPresentesOrd(row);
+        const presentes = new Set(row.linhas_presentes || []);
+        return slots.map((lid) => {
+            if (!presentes.has(lid)) {
+                return `<span class="ldd-chip ldd-chip-slot" aria-hidden="true">&nbsp;</span>`;
+            }
+            const qtd = qtdNaLinha(row, lid);
+            const txt = `${lid}-${String(qtd).padStart(2, '0')}`;
+            const nums = (row.por_linha && row.por_linha[lid]) || [];
+            const tip = nums.length
+                ? `${lid}: ${qtd} dezena(s) — ${fmtDezenas(nums)}`
+                : `${lid}: ${qtd} dezena(s)`;
+            return `<span class="ldd-chip" title="${esc(tip)}">${esc(txt)}</span>`;
+        }).join('');
+    }
+
     function padDez(n) {
         const pad = Number(UI.pad_width) > 0 ? Number(UI.pad_width) : 2;
         const v = Number(n);
@@ -98,9 +147,10 @@
         return state.dir === 'asc' ? '↑' : '↓';
     }
 
-    function thSort(state, key, label, tip) {
+    function thSort(state, key, label, tip, extraClass) {
         const active = state.key === key ? ' ldd-sort-active' : '';
-        return `<th class="ldd-sort${active}" data-sort="${esc(key)}" title="${esc(tip || 'Clique para ordenar')}">${esc(label)} <span class="ldd-sort-ind">${sortInd(state, key)}</span></th>`;
+        const extra = extraClass ? ` ${esc(extraClass)}` : '';
+        return `<th class="ldd-sort${active}${extra}" data-sort="${esc(key)}" title="${esc(tip || 'Clique para ordenar')}">${esc(label)} <span class="ldd-sort-ind">${sortInd(state, key)}</span></th>`;
     }
 
     function cmpVal(a, b, key) {
@@ -110,8 +160,8 @@
             va = fmtDezenas(a.dezenas || []);
             vb = fmtDezenas(b.dezenas || []);
         } else if (key === 'linhas_txt') {
-            va = (a.linhas_presentes || []).join(',');
-            vb = (b.linhas_presentes || []).join(',');
+            va = fmtLinhasQtdTxt(a);
+            vb = fmtLinhasQtdTxt(b);
         } else if (key === 'dd_txt') {
             va = ddDuOrdenados(a.dezenas).dd.join(',');
             vb = ddDuOrdenados(b.dezenas).dd.join(',');
@@ -224,8 +274,8 @@
             <tr>
                 <td>${row.concurso}</td>
                 <td class="ldd-col-dezenas font-mono small">${fmtDezenas(row.dezenas)}</td>
-                <td>${(row.linhas_presentes || []).map((x) => `<span class="ldd-chip" title="Linha ${esc(x)}">${esc(x)}</span>`).join('')}</td>
-                <td class="fw-bold">${row.qtd_linhas}</td>
+                <td class="ldd-col-linhas"><div class="ldd-linhas-seq">${fmtLinhasQtdChips(row)}</div></td>
+                <td class="ldd-col-qtd fw-bold">${row.qtd_linhas}</td>
             </tr>`).join('');
 
         wrap.innerHTML = `
@@ -239,8 +289,8 @@
                     <thead><tr>
                         ${thSort(st, 'concurso', 'Concurso', 'Ordenar por número do concurso')}
                         ${thSort(st, 'dezenas', 'Dezenas', 'Ordenar pelo texto das dezenas')}
-                        ${thSort(st, 'linhas_txt', 'Linhas', 'Ordenar pelas linhas presentes')}
-                        ${thSort(st, 'qtd_linhas', 'Qtd', 'Ordenar pela quantidade de linhas')}
+                        ${thSort(st, 'linhas_txt', 'Linhas', 'Ordenar pelas linhas e quantidade de dezenas em cada uma (L1→L10)', 'ldd-col-linhas')}
+                        ${thSort(st, 'qtd_linhas', 'Qtd', 'Ordenar pela quantidade de linhas', 'ldd-col-qtd')}
                     </tr></thead>
                     <tbody>${body || '<tr><td colspan="4" class="text-muted">Sem dados</td></tr>'}</tbody>
                 </table>

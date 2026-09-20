@@ -30977,3 +30977,202 @@ Press CTRL+C to quit
 127.0.0.1 - - [20/Sep/2026 10:50:39] "GET /api/status-banco HTTP/1.1" 200 -
 127.0.0.1 - - [20/Sep/2026 10:50:43] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
 127.0.0.1 - - [20/Sep/2026 10:52:33] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+
+--- iniciando 2026-09-20 11:09:59 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [20/Sep/2026 11:10:02] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:11:38] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:19:15] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:01] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:03] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [20/Sep/2026 11:20:04] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:05] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:05] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:06] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:09] "POST /api/sincronizar HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:10] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:11] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:20:12] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:07] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:07] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:08] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:09] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:10] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:10] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:13] "GET /dados/filtros-posicao/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:14] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:15] "GET /dados/filtros-posicao/api?modo=crescente&sorteio=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:21:33] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:26:57] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-20 11:29:38 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [20/Sep/2026 11:29:43] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:31] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:46] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:46] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:47] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:49] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:49] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:50] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:54] "GET /dados/filtros-posicao/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:54] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:30:56] "GET /dados/filtros-posicao/api?modo=crescente&sorteio=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:53] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:53] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:54] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:55] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:56] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:56] "GET /analise/linhas-dd-du/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:56] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:57] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:57] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260809f HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:44:57] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:54:51] "GET /analise/linhas-dd-du/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:00] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:02] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920a HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:05] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:35] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:36] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:42] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:44] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:46] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:50] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:55:57] "POST /api/sincronizar HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:56:02] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:56:10] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:56:16] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:58:29] "GET /analise/linhas-dd-du/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:58:29] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:58:29] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920a HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 11:58:30] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:07:48] "GET /analise/linhas-dd-du/?v=20260920b HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:07:48] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:07:48] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920b HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:07:49] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+
+--- iniciando 2026-09-20 12:09:23 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [20/Sep/2026 12:09:27] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:09:41] "GET /analise/linhas-dd-du/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:09:41] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:09:41] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920b HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:09:42] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:12:48] "GET /analise/linhas-dd-du/?v=20260920c HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:12:48] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:12:48] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920c HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:12:48] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:13:20] "GET /analise/linhas-dd-du/?v=20260920d HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:13:20] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920c HTTP/1.1" 304 -
+127.0.0.1 - - [20/Sep/2026 12:13:20] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:13:20] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:13:36] "GET /analise/linhas-dd-du/?v=20260920e HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:13:36] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:13:36] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920c HTTP/1.1" 304 -
+127.0.0.1 - - [20/Sep/2026 12:13:36] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:14:04] "GET /analise/linhas-dd-du/?v=20260920f HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:14:04] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:14:04] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920c HTTP/1.1" 304 -
+127.0.0.1 - - [20/Sep/2026 12:14:04] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+
+--- iniciando 2026-09-20 12:15:40 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [20/Sep/2026 12:15:47] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:16:10] "GET /analise/linhas-dd-du/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:16:10] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:16:10] "GET /analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920c HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 12:16:11] "GET /analise/api/linhas-universo/analise?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [20/Sep/2026 13:42:06] "POST /modelos/api/backtesting HTTP/1.1" 200 -

@@ -73,6 +73,44 @@
   #ldd-root .ldd-table td.ldd-col-dezenas {
     text-align: center !important;
   }
+  #ldd-root #lddHistLinhasTable th:first-child,
+  #ldd-root #lddHistLinhasTable td:first-child,
+  #ldd-root #lddHistLinhasTable th.ldd-col-qtd,
+  #ldd-root #lddHistLinhasTable td.ldd-col-qtd,
+  #ldd-root #lddHistLinhasTable th.ldd-col-linhas,
+  #ldd-root #lddHistLinhasTable td.ldd-col-linhas {
+    width: 1%;
+    white-space: nowrap;
+  }
+  #ldd-root #lddHistLinhasTable th.ldd-col-linhas,
+  #ldd-root #lddHistLinhasTable td.ldd-col-linhas {
+    text-align: left !important;
+    padding-left: .45rem;
+    padding-right: .45rem;
+  }
+  #ldd-root .ldd-linhas-seq {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 4.1rem;
+    justify-content: start;
+    align-items: center;
+    gap: .18rem;
+    width: max-content;
+  }
+  #ldd-root .ldd-col-linhas .ldd-chip {
+    display: block;
+    width: 4.1rem;
+    min-width: 4.1rem;
+    margin: 0;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, Consolas, monospace;
+  }
+  #ldd-root .ldd-chip-slot {
+    visibility: hidden;
+    border: none;
+    background: transparent;
+  }
   #ldd-root .ldd-rank-card {
     border-radius: 12px;
     border: 1px solid #e9ecef;
@@ -181,5 +219,5 @@
 <script>
   window.__LDD_UI__ = {{ estudos_ui | tojson }};
 </script>
-<script src="/analise/linhas-dd-du/static/linhas_dd_du.js?v=20260809f"></script>
+<script src="/analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920c"></script>
 {% endblock %}
