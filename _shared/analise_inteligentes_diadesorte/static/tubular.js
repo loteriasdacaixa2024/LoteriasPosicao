@@ -310,6 +310,7 @@
     this.diag13Exib = 'hibrido';
     this.diag13Dna = true;
     this.diag13PadroesAlvo = [];
+    this.diag13PadroesIgnorados = [];
     this.cmpActiveId = null;
     this.s10VolPreview = null;
     this._bind();
@@ -631,6 +632,9 @@
           hint.classList.remove('d-none');
         }
       }
+      if (ev.detail && ev.detail.abrir_volantes) {
+        this.sendS10ToVolantes();
+      }
     });
     this._syncStats11Collapse();
     this._updateAuto11Hints();
@@ -664,12 +668,28 @@
     });
     r.querySelector('#tbS10ToVolantes')?.addEventListener('click', () => this.sendS10ToVolantes());
     r.querySelector('#tbS10VolPreview')?.addEventListener('click', (ev) => this._onS10VolPreviewClick(ev));
-    r.querySelector('#tbGerar13')?.addEventListener('click', () => this.gerarDiag13(10));
+    r.querySelector('#tbGerar13')?.addEventListener('click', () => {
+      const inp = r.querySelector('#tbGerar13Qtd');
+      let q = parseInt(inp && inp.value, 10);
+      if (!Number.isFinite(q) || q < 1) q = 10;
+      this.gerarDiag13(Math.min(200, q));
+    });
     r.querySelector('#tbGerarMais13')?.addEventListener('click', () => {
       const inp = r.querySelector('#tbGerar13Qtd');
       let q = parseInt(inp && inp.value, 10);
       if (!Number.isFinite(q) || q < 1) q = 10;
       this.gerarDiag13(Math.min(200, q));
+    });
+    r.querySelector('#tbDiag13PadBar')?.addEventListener('click', (ev) => {
+      if (!ev.target.closest('[data-diag13-clear-pad]')) return;
+      this.diag13PadroesAlvo = [];
+      this.diag13PadroesIgnorados = [];
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('padroes');
+        history.replaceState(null, '', url.toString());
+      } catch (_) { /* ignore */ }
+      this._syncDiag13PadBar();
     });
     r.querySelector('#tbExport13')?.addEventListener('click', () => this.exportDiag13());
     r.querySelector('#tbClear13')?.addEventListener('click', () => {
@@ -719,6 +739,7 @@
         jogos,
         replace: !!(payload && payload.replace),
         aviso: (payload && payload.aviso) || `Importado (${jogos.length} apostas).`,
+        abrir_volantes: !!(payload && payload.abrir_volantes),
       },
     }));
     return true;
@@ -3889,11 +3910,23 @@
   };
 
   TubularApp.prototype._diag13ParsePadrao = function (p) {
-    return String(p || '').replace(/[-,]/g, ' ').trim().split(/\s+/).map(Number).filter(Number.isFinite);
+    return String(p || '').replace(/[-,+/]/g, ' ').trim().split(/\s+/)
+      .map(Number).filter((n) => Number.isFinite(n) && n >= 0 && n <= 9);
   };
 
   TubularApp.prototype._diag13NormPad = function (p) {
     return this._diag13ParsePadrao(p).join(' ');
+  };
+
+  TubularApp.prototype._diag13PadIsFull = function (p, k) {
+    const d = this._diag13ParsePadrao(p);
+    const kk = k || (limitsFrom(this.root).sorteadas || 7);
+    return d.length === kk;
+  };
+
+  TubularApp.prototype._diag13PadsAtivos = function (k) {
+    const kk = k || (limitsFrom(this.root).sorteadas || 7);
+    return (this.diag13PadroesAlvo || []).map((p) => this._diag13NormPad(p)).filter((p) => this._diag13PadIsFull(p, kk));
   };
 
   TubularApp.prototype._diag13PadraoDe = function (nums) {
@@ -3915,30 +3948,49 @@
   };
 
   TubularApp.prototype._diag13ReadPadroesUrl = function () {
+    const k = (limitsFrom(this.root).sorteadas || 7);
+    let rawParts = [];
     try {
       const raw = new URL(window.location.href).searchParams.get('padroes') || '';
-      this.diag13PadroesAlvo = raw.split('|')
-        .map((s) => this._diag13NormPad(s))
-        .filter(Boolean);
+      rawParts = raw.split('|').map((s) => String(s || '').trim()).filter(Boolean);
     } catch (_) {
-      this.diag13PadroesAlvo = this.diag13PadroesAlvo || [];
+      rawParts = [];
     }
+    const valid = [];
+    const invalid = [];
+    rawParts.forEach((s) => {
+      const norm = this._diag13NormPad(s);
+      if (this._diag13PadIsFull(norm, k)) valid.push(norm);
+      else invalid.push(s);
+    });
+    this.diag13PadroesAlvo = valid;
+    this.diag13PadroesIgnorados = invalid;
     this._syncDiag13PadBar();
   };
 
   TubularApp.prototype._syncDiag13PadBar = function () {
     const el = this.root.querySelector('#tbDiag13PadBar');
     if (!el) return;
-    const pads = this.diag13PadroesAlvo || [];
-    if (!pads.length) {
+    const pads = this._diag13PadsAtivos();
+    const ignored = this.diag13PadroesIgnorados || [];
+    if (!pads.length && !ignored.length) {
       el.classList.add('d-none');
       el.innerHTML = '';
       return;
     }
     el.classList.remove('d-none');
+    const clearBtn = ' <button type="button" class="btn btn-link btn-sm p-0 align-baseline" data-diag13-clear-pad>retirar</button>';
+    if (!pads.length) {
+      el.innerHTML = `Padrão da URL ignorado (precisa de ${(limitsFrom(this.root).sorteadas || 7)} dígitos iniciais, ex. <code>0 0 1 1 2 2 2</code>).`
+        + ` Recebido: ${ignored.map((p) => `<code>${esc(p)}</code>`).join(' · ')}.`
+        + ' Geração segue só com diagonal + DNA.'
+        + clearBtn;
+      return;
+    }
     el.innerHTML = `Padrões II · ${pads.length} padrão${pads.length === 1 ? '' : 's'} na carteira: `
       + pads.map((p) => `<code>${esc(p)}</code>`).join(' · ')
-      + ' <span class="text-muted fw-normal">(diagonal + este padrão)</span>';
+      + ' <span class="text-muted fw-normal">(diagonal + este padrão)</span>'
+      + clearBtn;
   };
 
   TubularApp.prototype._diag13SeqGroups = function (nums) {
@@ -4163,20 +4215,25 @@
     const padStr = padraoAlvo
       || ((profile.padrao && dna.padroes && dna.padroes[0]) ? String(dna.padroes[0]) : '');
     const padDigits = this._diag13ParsePadrao(padStr);
+    const padLocked = padDigits.length === k;
     if (padDigits.length) {
       padDigits.forEach((v) => { padNeed[v] = (padNeed[v] || 0) + 1; });
+      let overflow = false;
       [...picked].forEach((n) => {
         const c = Math.floor(n / 10);
-        if (padNeed[c]) padNeed[c] -= 1;
+        if (padNeed[c] > 0) padNeed[c] -= 1;
+        else if (padLocked) overflow = true;
       });
+      if (overflow) return null;
     }
 
     const tryAdd = (n) => {
       if (!Number.isFinite(n) || picked.has(n) || picked.size >= k) return false;
       if (n < L.dezenaMin || n > L.dezenaMax) return false;
+      const cls = Math.floor(n / 10);
+      if (padLocked && !(padNeed[cls] > 0)) return false;
       if (this._diag13WouldMakeRun(picked, n, maxRun)) return false;
       picked.add(n);
-      const cls = Math.floor(n / 10);
       if (padNeed[cls] > 0) padNeed[cls] -= 1;
       return true;
     };
@@ -4234,14 +4291,15 @@
         const onlyLast = cands.filter((n) => lastSet.has(n));
         if (onlyLast.length) cands = onlyLast;
       }
-      if (profile.padrao) {
+      if (padLocked || profile.padrao) {
         const needCls = Object.keys(padNeed).filter((c) => padNeed[c] > 0).map(Number);
         if (needCls.length) {
           const match = cands.filter((n) => needCls.includes(Math.floor(n / 10)));
           if (match.length) cands = match;
+          else if (padLocked) cands = [];
         }
       }
-      if (!cands.length) cands = poolAll.filter((n) => !picked.has(n));
+      if (!cands.length && !padLocked) cands = poolAll.filter((n) => !picked.has(n));
       if (!cands.length) break;
       const weights = cands.map((n) => {
         let w = dna.pesos[n] || 1;
@@ -4260,10 +4318,12 @@
       }
     }
     if (picked.size !== k) return null;
-    return [...picked].sort((a, b) => a - b);
+    const out = [...picked].sort((a, b) => a - b);
+    if (padLocked && this._diag13PadraoDe(out) !== this._diag13NormPad(padStr)) return null;
+    return out;
   };
 
-  TubularApp.prototype._diag13Feia = function (nums, dna, profile, locked, L) {
+  TubularApp.prototype._diag13Feia = function (nums, dna, profile, locked, L, padLocked) {
     const sorted = [...(nums || [])].map(Number).filter(Number.isFinite).sort((a, b) => a - b);
     if (sorted.length !== L.sorteadas) return 'tamanho';
     const maxRun = this._diag13MaxRun(sorted);
@@ -4281,11 +4341,13 @@
     if (L.sorteadas === 7) { allowedPi.add(3); allowedPi.add(4); }
     if (!profile.ousada && allowedPi.size && !allowedPi.has(pares)) return 'pi';
     const nRep = sorted.filter((n) => (dna.ultimo || []).includes(n)).length;
-    if (!profile.ousada && (nRep === 0 || nRep >= 4)) return 'rept';
+    if (!padLocked && !profile.ousada && (nRep === 0 || nRep >= 4)) return 'rept';
     if (nRep >= 4) return 'rept';
-    const bma = this._diag13Bma(sorted, L);
-    const zeros = bma.filter((c) => c === 0).length;
-    if (zeros >= 2 || bma.some((c) => c >= L.sorteadas)) return 'faixas';
+    if (!padLocked) {
+      const bma = this._diag13Bma(sorted, L);
+      const zeros = bma.filter((c) => c === 0).length;
+      if (zeros >= 2 || bma.some((c) => c >= L.sorteadas)) return 'faixas';
+    }
     return null;
   };
 
@@ -4362,8 +4424,11 @@
     const aprovadas = [];
     const batchSegs = new Set();
     const others = (this.manual13 || []).map((g) => (g.numbers || []).slice());
+    const pads = this._diag13PadsAtivos(L.sorteadas);
+    const reasons = {};
+    const bump = (k) => { reasons[k] = (reasons[k] || 0) + 1; };
     let tentativas = 0;
-    const maxTent = Math.max(alvo * 500, 4000);
+    const maxTent = Math.max(alvo * (pads.length ? 800 : 500), pads.length ? 8000 : 4000);
     let pIdx = 0;
     let failStreak = 0;
     while (aprovadas.length < alvo && tentativas < maxTent) {
@@ -4371,57 +4436,73 @@
       const profile = profiles[pIdx % profiles.length];
       const { list, weight } = this._diag13Pool(profile.fonte);
       if (!list.length) {
+        bump('pool');
         pIdx += 1;
         failStreak = 0;
         continue;
       }
-      const pads = this.diag13PadroesAlvo || [];
       const padAlvo = pads.length ? pads[aprovadas.length % pads.length] : null;
+      const padFull = !!(padAlvo && this._diag13PadIsFull(padAlvo, L.sorteadas));
       let listUse = list;
-      if (padAlvo) {
+      if (padFull) {
         const fitPad = list.filter((seg) => this._diag13PadFitsSeed(padAlvo, new Set(seg.nums || [])));
-        if (fitPad.length) listUse = fitPad;
+        if (!fitPad.length) {
+          bump('semente');
+          pIdx += 1;
+          failStreak = 0;
+          continue;
+        }
+        listUse = fitPad;
       }
       const { picked, segs, seedKeys } = this._diag13PickSeeds(listUse, weight, seedsWanted, L, batchSegs);
       if (!segs.length) {
+        bump('semente');
         failStreak += 1;
         if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
         continue;
       }
-      if (padAlvo && !this._diag13PadFitsSeed(padAlvo, picked)) {
+      if (padFull && !this._diag13PadFitsSeed(padAlvo, picked)) {
+        bump('semente');
         failStreak += 1;
         if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
         continue;
       }
-      const profileUse = padAlvo ? Object.assign({}, profile, { padrao: true }) : profile;
-      const numbers = this._diag13Complete(picked, L, dna, profileUse, padAlvo);
+      const profileUse = padFull ? Object.assign({}, profile, { padrao: true }) : profile;
+      const numbers = this._diag13Complete(picked, L, dna, profileUse, padFull ? padAlvo : '');
       if (!numbers) {
+        bump('completa');
         failStreak += 1;
         if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
         continue;
       }
-      if (padAlvo && this._diag13PadraoDe(numbers) !== this._diag13NormPad(padAlvo)) {
+      if (padFull && this._diag13PadraoDe(numbers) !== this._diag13NormPad(padAlvo)) {
+        bump('padrao');
         failStreak += 1;
         if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
         continue;
       }
       const key = numbers.join('-');
       if (existing.has(key)) {
+        bump('duplicata');
         failStreak += 1;
         if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
         continue;
       }
       if (histMap && histMap.has(this._comboKey(numbers))) {
+        bump('ja_saiu');
         failStreak += 1;
         if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
         continue;
       }
-      if (this._diag13Feia(numbers, dna, profile, [...picked], L)) {
+      const feia = this._diag13Feia(numbers, dna, profile, [...picked], L, padFull);
+      if (feia) {
+        bump(feia);
         failStreak += 1;
         if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
         continue;
       }
       if (!this._diag13Diversa(numbers, others.concat(aprovadas.map((a) => a.numbers)), L.sorteadas)) {
+        bump('parecida');
         failStreak += 1;
         if (failStreak >= 40) { pIdx += 1; failStreak = 0; }
         continue;
@@ -4434,7 +4515,7 @@
       aprovadas.push({
         numbers,
         diags: this._diag13DiagsFromNumbers(numbers, seedKeys),
-        dnaMeta: this._diag13DnaMeta(numbers, dna, padAlvo
+        dnaMeta: this._diag13DnaMeta(numbers, dna, padFull
           ? Object.assign({}, profile, { label: (profile.label || profile.id) + ' · ' + this._diag13NormPad(padAlvo) })
           : profile, L),
         month: mes.month,
@@ -4444,6 +4525,7 @@
       pIdx += 1;
       failStreak = 0;
     }
+    this._diag13LastFail = reasons;
     return aprovadas;
   };
 
@@ -4480,11 +4562,23 @@
     this.renderDiag13();
     if (info) {
       const tag = dnaOn ? 'DNA' : 'acaso';
-      info.textContent = aprovadas.length
-        ? `+${aprovadas.length} · total ${this.manual13.length} · ${tag}`
-        : (dnaOn
-          ? 'Não gerou jogos limpos com essa regra. Afrouxe tipo/direção ou tente de novo.'
-          : 'Não gerou jogos novos com essa regra. Tente outro tipo/direção.');
+      if (aprovadas.length) {
+        info.textContent = `+${aprovadas.length} · total ${this.manual13.length} · ${tag}`;
+      } else if (dnaOn) {
+        const r = this._diag13LastFail || {};
+        const top = Object.keys(r).sort((a, b) => r[b] - r[a])[0];
+        const hints = {
+          semente: 'Nenhuma diagonal cabe nesse padrão. Afrouxe tipo/direção ou retire o padrão.',
+          padrao: 'Não fechou o padrão de 7 dígitos com a diagonal. Tente outro padrão ou retire-o.',
+          completa: 'Não completou 7 dezenas limpas. Afrouxe tipo/direção ou tente de novo.',
+          soma: 'A soma ficou fora da faixa do DNA. Tente de novo ou desligue o DNA.',
+          rept: 'Não encaixou repetidas do último. Tente de novo.',
+          faixas: 'A distribuição B/M/A ficou extrema. Tente de novo.',
+        };
+        info.textContent = hints[top] || 'Não gerou jogos limpos com essa regra. Afrouxe tipo/direção ou tente de novo.';
+      } else {
+        info.textContent = 'Não gerou jogos novos com essa regra. Tente outro tipo/direção.';
+      }
     }
   };
 

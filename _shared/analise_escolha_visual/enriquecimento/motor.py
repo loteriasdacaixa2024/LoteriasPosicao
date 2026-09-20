@@ -207,6 +207,19 @@ def analisar_janela(
     if foco is None:
         foco = detalhes[0]
 
+    def _linha_basica(d: Dict[str, Any]) -> Dict[str, Any]:
+        b = d["basicos"]
+        return {
+            "concurso": d["concurso"],
+            "data": d["data"],
+            "numeros": d["numeros"],
+            "pares": b["pares"],
+            "impares": b["impares"],
+            "repetidos": b["repetidos"],
+            "sequencias": b["sequencias"],
+            "finais": b["finais"],
+        }
+
     return {
         "sucesso": True,
         "ordem": ordem,
@@ -214,6 +227,7 @@ def analisar_janela(
         "heatmap": {"labels": labels, "matrix": matrix},
         "concurso_foco": foco,
         "concursos": [{"concurso": d["concurso"], "data": d["data"]} for d in detalhes],
+        "linhas_basicas": [_linha_basica(d) for d in detalhes],
         # série para gráficos: qtd por grupo ao longo da lista (ordem da tela)
         "series": {
             g: [d["basicos"][g]["quantidade"] for d in detalhes]

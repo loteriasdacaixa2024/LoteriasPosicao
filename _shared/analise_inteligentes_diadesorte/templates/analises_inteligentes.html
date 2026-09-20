@@ -882,6 +882,72 @@
   #ai-root #aiTabelaPanoramaFalt a.ai-pan-link-pad:hover {
     color: var(--primary, #0a58ca);
   }
+  #ai-root .ai-evo-wrap {
+    margin-top: 1.35rem;
+    padding-top: 1rem;
+    border-top: 2px solid rgba(192,139,0,.28);
+  }
+  #ai-root .ai-evo-title {
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: var(--primary-xdark, #664a00);
+    margin: 0;
+  }
+  #ai-root .ai-evo-kpis { margin-bottom: .65rem; }
+  #ai-root .ai-evo-seq {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .28rem .2rem;
+    align-items: center;
+    max-height: 9.5rem;
+    overflow: auto;
+    padding: .4rem .45rem;
+    background: #fffdf6;
+    border: 1px solid rgba(192,139,0,.22);
+    border-radius: 8px;
+    margin-bottom: .7rem;
+  }
+  #ai-root .ai-evo-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .2rem;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 999px;
+    padding: .08rem .45rem;
+    font-size: .72rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  #ai-root .ai-evo-chip.is-mudou {
+    background: #fff7ed;
+    border-color: #fdba74;
+    font-weight: 700;
+  }
+  #ai-root .ai-evo-chip .n { color: #6c757d; }
+  #ai-root .ai-evo-filtros .form-control,
+  #ai-root .ai-evo-filtros .form-select { min-width: 6.2rem; }
+  #ai-root .ai-evo-nao {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+  }
+  #ai-root .ai-evo-nao .ai-evo-falt {
+    cursor: pointer;
+    border: 1px dashed #adb5bd;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: .28rem .5rem;
+    font-size: .78rem;
+  }
+  #ai-root .ai-evo-nao .ai-evo-falt:hover {
+    border-color: var(--primary, #c08b00);
+    background: #fff8e1;
+  }
+  #ai-root tr.tr-evo-mudou > td { background: rgba(253, 126, 20, .08); }
+  #ai-root .ai-evo-sit-mudou { color: #c2410c; font-weight: 700; white-space: nowrap; }
+  #ai-root .ai-evo-sit-ok { color: #6c757d; white-space: nowrap; }
+  #ai-root .badge-ainda_nao_saiu { background: #6c757d; color: #fff; }
 
 </style>
 
@@ -1158,6 +1224,125 @@
           As colunas <strong>Para apostar</strong> e <strong>Já saíram</strong> entram na tabela acima ao carregar.
         </div>
         <div id="aiPadIIChecagem" class="ai-checagem d-none" role="status"></div>
+      </div>
+
+      <div class="ai-evo-wrap" id="aiEvoWrap">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <h2 class="ai-evo-title">Evolução dos Padrões</h2>
+          <button type="button" class="ai-collapse-toggle is-open" id="aiEvoToggleInfo"
+                  aria-expanded="true" aria-controls="aiEvoPainelInfo" title="Mostrar ou ocultar detalhes">
+            <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+            <span>O que é este histórico</span>
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="aiEvoAtualizar">
+            <i class="fas fa-sync"></i> Atualizar
+          </button>
+          <span class="small text-muted" id="aiEvoInfo">—</span>
+        </div>
+        <div id="aiEvoPainelInfo" class="mb-2">
+          <p class="small text-muted mb-2">
+            Histórico automático de <strong>todos os concursos</strong>: padrão usado, quantidade de apostas
+            possíveis e o <strong>nº da aposta correspondente</strong> ao resultado (o mesmo da aba Apostas /
+            “Mostrar vencedor”). O Nº do padrão é estável (1–85, ordem teórica) e não muda com a ordenação
+            da tabela acima. Clique no padrão, nos jogos ou na aposta para abrir as combinações.
+          </p>
+        </div>
+        <div class="row g-2 ai-evo-kpis" id="aiEvoKpis"></div>
+        <div class="d-flex flex-wrap gap-2 align-items-end mb-2 ai-evo-filtros">
+          <label class="small text-muted mb-0">Concurso inicial
+            <input type="number" min="1" class="form-control form-control-sm" id="aiEvoConcIni" placeholder="1">
+          </label>
+          <label class="small text-muted mb-0">Concurso final
+            <input type="number" min="1" class="form-control form-control-sm" id="aiEvoConcFim" placeholder="último">
+          </label>
+          <label class="small text-muted mb-0">Padrão (nº ou dígitos)
+            <input type="text" class="form-control form-control-sm" id="aiEvoPadrao" placeholder="30 ou 0 0 2…" autocomplete="off">
+          </label>
+          <label class="small text-muted mb-0">Freq. mín.
+            <input type="number" min="0" class="form-control form-control-sm" id="aiEvoFreqMin" placeholder="0">
+          </label>
+          <label class="small text-muted mb-0">Atraso mín.
+            <input type="number" min="0" class="form-control form-control-sm" id="aiEvoAtrasoMin" placeholder="0">
+          </label>
+          <label class="small text-muted mb-0">Período (data)
+            <input type="text" class="form-control form-control-sm" id="aiEvoPeriodo" placeholder="2024" autocomplete="off">
+          </label>
+          <select id="aiEvoUso" class="form-select form-select-sm" style="width:auto" title="Filtro da visão consolidada">
+            <option value="">Todos os 85</option>
+            <option value="utilizados">Já utilizados</option>
+            <option value="nao">Ainda não utilizados</option>
+          </select>
+          <label class="form-check mb-0 small d-inline-flex align-items-center gap-1">
+            <input class="form-check-input" type="checkbox" id="aiEvoSoMudancas">
+            Somente mudanças de padrão
+          </label>
+          <select id="aiEvoPageSize" class="form-select form-select-sm" style="width:auto">
+            <option value="50" selected>50 / pág.</option>
+            <option value="100">100 / pág.</option>
+            <option value="250">250 / pág.</option>
+            <option value="0">Todos</option>
+          </select>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiEvoLimparFiltros">Limpar filtros</button>
+        </div>
+        <div class="small text-muted mb-1">Sequência (concurso → padrão). Destaque laranja = troca de padrão.</div>
+        <div class="ai-evo-seq" id="aiEvoSeq" aria-label="Sequência histórica dos padrões"></div>
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+          <strong class="small mb-0">Histórico cronológico</strong>
+          <span class="small text-muted" id="aiEvoHistMeta"></span>
+          <div class="ms-auto d-flex flex-wrap gap-1">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="aiEvoPrev" disabled>‹</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="aiEvoNext" disabled>›</button>
+          </div>
+        </div>
+        <div class="table-responsive mb-3">
+          <table class="table table-sm table-bordered ai-table" id="aiTabelaEvoHist">
+            <thead>
+              <tr>
+                <th class="ai-sort" data-sort="concurso" data-table="evo">Concurso <span class="ai-sort-ind">⇅</span></th>
+                <th>Data</th>
+                <th class="ai-sort" data-sort="n_padrao" data-table="evo">Padrão <span class="ai-sort-ind">⇅</span></th>
+                <th>Distribuição</th>
+                <th class="ai-sort" data-sort="jogos_possiveis" data-table="evo">Apostas possíveis <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="aposta_n" data-table="evo">Aposta vencedora <span class="ai-sort-ind">⇅</span></th>
+                <th>Dezenas</th>
+                <th class="ai-sort" data-sort="soma" data-table="evo">Soma <span class="ai-sort-ind">⇅</span></th>
+                <th>Diagonal</th>
+                <th>Situação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="10" class="text-muted">Carregando histórico dos padrões…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+          <strong class="small mb-0">Os 85 padrões — frequência e atraso</strong>
+          <span class="small text-muted" id="aiEvoConsMeta"></span>
+        </div>
+        <div class="table-responsive mb-3">
+          <table class="table table-sm table-bordered ai-table" id="aiTabelaEvoCons">
+            <thead>
+              <tr>
+                <th class="ai-sort" data-sort="n_padrao" data-table="evoCons">Nº <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="padrao" data-table="evoCons">Padrão <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="ocorrencias" data-table="evoCons">Ocorrências <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="percentual" data-table="evoCons">% <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="primeiro_concurso" data-table="evoCons">Primeiro <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="ultimo_concurso" data-table="evoCons">Último <span class="ai-sort-ind">⇅</span></th>
+                <th>Anterior</th>
+                <th class="ai-sort" data-sort="atraso" data-table="evoCons">Atraso <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="maior_intervalo" data-table="evoCons">Maior intervalo <span class="ai-sort-ind">⇅</span></th>
+                <th>Jogos</th>
+                <th class="ai-sort" data-sort="status" data-table="evoCons">Status <span class="ai-sort-ind">⇅</span></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="mb-1"><strong class="small">Padrões ainda não utilizados</strong>
+          <span class="small text-muted" id="aiEvoNaoMeta"></span>
+        </div>
+        <div class="ai-evo-nao mb-2" id="aiEvoNaoUtilizados"></div>
       </div>
     </div>
 
@@ -1594,6 +1779,8 @@
               <th class="ai-chk-th"><input type="checkbox" class="form-check-input" id="aiCheqChkTodos" disabled></th>
               <th>Nº</th>
               <th>Aposta</th>
+              <th>Soma</th>
+              <th>Diagonais</th>
               <th>Padrão</th>
               <th>Prefixo</th>
               <th>Existe?</th>
@@ -1603,14 +1790,14 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td colspan="9" class="text-muted">Cole as apostas e clique em Checar.</td></tr>
+            <tr><td colspan="11" class="text-muted">Cole as apostas e clique em Checar.</td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v38">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v39">
 <style>
   {% if extra_mes %}
   {% for nome, cor in (meses_cores or {}).items() %}
@@ -1624,7 +1811,7 @@
 {% if extra_mes %}
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260903v38"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260903v40"></script>
 <script>
 (function () {
   const root = document.getElementById('ai-root');
@@ -1675,9 +1862,12 @@
     resumo: { key: 'para_apostar', dir: 'desc' },
     pan: { key: 'vezes_padrao', dir: 'desc' },
     panFalt: { key: 'padrao', dir: 'asc' },
+    evo: { key: 'concurso', dir: 'desc' },
+    evoCons: { key: 'n_padrao', dir: 'asc' },
   };
   let PAGE = { res: 1, pad: 1 };
   let PAN_HIST = { all: [], filtrados: [], faltantes: [], carregado: false, totalTeorico: 0 };
+  let EVO = { linhas: [], padroes: [], nao: [], meta: null, carregado: false, page: 1, carregando: false };
 
   function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2974,8 +3164,266 @@
       renderPadroesII();
       // Resumo operacional (para apostar × já saíram) — carrega em seguida
       carregarResumoOperacionalPadroes();
+      carregarEvolucaoPadroes();
     } catch (e) {
       if (kpis) kpis.innerHTML = `<div class="col-12 text-danger small">${esc(e.message || e)}</div>`;
+    }
+  }
+
+  function evoFiltros() {
+    const num = (id) => {
+      const v = document.getElementById(id)?.value;
+      const n = parseInt(String(v || '').trim(), 10);
+      return Number.isFinite(n) ? n : null;
+    };
+    return {
+      ini: num('aiEvoConcIni'),
+      fim: num('aiEvoConcFim'),
+      pad: String(document.getElementById('aiEvoPadrao')?.value || '').trim(),
+      freqMin: num('aiEvoFreqMin'),
+      atrasoMin: num('aiEvoAtrasoMin'),
+      periodo: String(document.getElementById('aiEvoPeriodo')?.value || '').trim().toLowerCase(),
+      uso: String(document.getElementById('aiEvoUso')?.value || ''),
+      soMudancas: !!(document.getElementById('aiEvoSoMudancas')?.checked),
+    };
+  }
+  function evoPadraoBate(row, q) {
+    if (!q) return true;
+    const raw = String(q).trim().toLowerCase();
+    const nq = parseInt(raw, 10);
+    if (/^\d+$/.test(raw) && Number.isFinite(nq) && (Number(row.n_padrao) === nq)) return true;
+    const pad = String(row.padrao || '').toLowerCase();
+    const desc = String(row.descricao || '').toLowerCase();
+    const compact = pad.replace(/\s+/g, '');
+    const qcomp = raw.replace(/\s+/g, '');
+    return pad.includes(raw) || compact.includes(qcomp) || desc.includes(raw);
+  }
+  function filtrarEvoLinhas() {
+    const f = evoFiltros();
+    return (EVO.linhas || []).filter((r) => {
+      const c = Number(r.concurso) || 0;
+      if (f.ini != null && c < f.ini) return false;
+      if (f.fim != null && c > f.fim) return false;
+      if (f.periodo && !String(r.data || '').toLowerCase().includes(f.periodo)) return false;
+      if (!evoPadraoBate(r, f.pad)) return false;
+      if (f.soMudancas && !r.mudou && r.situacao !== 'Início') return false;
+      if (f.uso === 'utilizados' && !(Number(r.n_padrao) > 0)) return false;
+      if (f.uso === 'nao') return false;
+      const p = (EVO.padroes || []).find(x => String(x.padrao) === String(r.padrao));
+      if (f.freqMin != null && Number(p && p.frequencia || 0) < f.freqMin) return false;
+      if (f.atrasoMin != null) {
+        const at = p && p.atraso != null ? Number(p.atraso) : -1;
+        if (at < f.atrasoMin) return false;
+      }
+      return true;
+    });
+  }
+  function filtrarEvoPadroes() {
+    const f = evoFiltros();
+    return (EVO.padroes || []).filter((p) => {
+      if (f.uso === 'utilizados' && !p.utilizado) return false;
+      if (f.uso === 'nao' && p.utilizado) return false;
+      if (!evoPadraoBate(p, f.pad)) return false;
+      if (f.freqMin != null && Number(p.frequencia || 0) < f.freqMin) return false;
+      if (f.atrasoMin != null) {
+        const at = p.atraso == null ? (p.utilizado ? -1 : 10 ** 9) : Number(p.atraso);
+        if (at < f.atrasoMin) return false;
+      }
+      if (f.ini != null || f.fim != null) {
+        const occ = (p.concursos || []).filter((c) => {
+          if (f.ini != null && c < f.ini) return false;
+          if (f.fim != null && c > f.fim) return false;
+          return true;
+        });
+        if (p.utilizado && !occ.length) return false;
+      }
+      return true;
+    });
+  }
+  function evoPageSize() {
+    const n = parseInt(String(document.getElementById('aiEvoPageSize')?.value || '50'), 10);
+    if (!n) return 0;
+    return Number.isFinite(n) && n > 0 ? n : 50;
+  }
+  function evoStatusBadge(st) {
+    if (st === 'ainda_nao_saiu' || st === 'faltante') {
+      return '<span class="badge badge-faltante">Ainda não saiu</span>';
+    }
+    return statusBadge(st);
+  }
+  function renderEvolucaoPadroes() {
+    const meta = EVO.meta || {};
+    const kpis = document.getElementById('aiEvoKpis');
+    if (kpis) {
+      const u = meta.ultimo || {};
+      kpis.innerHTML = [
+        ['Padrões', meta.total_padroes],
+        ['Já utilizados', meta.padroes_utilizados],
+        ['Ainda não', meta.padroes_nao_utilizados],
+        ['Concursos', meta.total_concursos],
+        ['Trocas', meta.trocas_padrao],
+        ['Último', u.concurso != null ? `${u.concurso} · P${u.n_padrao || '—'}` : '—'],
+      ].map(([lab, val]) => `
+        <div class="col-6 col-md-2"><div class="ai-kpi"><div class="lbl">${esc(lab)}</div>
+        <div class="val" style="font-size:.95rem">${esc(val)}</div></div></div>`).join('');
+    }
+    const linhas = filtrarEvoLinhas();
+    const sk = SORT.evo || { key: 'concurso', dir: 'desc' };
+    const dir = sk.dir === 'asc' ? 1 : -1;
+    const sorted = [...linhas].sort((a, b) => {
+      const ka = a[sk.key], kb = b[sk.key];
+      const na = ka == null ? -1 : +ka;
+      const nb = kb == null ? -1 : +kb;
+      if (Number.isFinite(na) && Number.isFinite(nb) && sk.key !== 'padrao') {
+        return dir * (na - nb);
+      }
+      return dir * String(ka || '').localeCompare(String(kb || ''), 'pt-BR');
+    });
+    document.querySelectorAll('#aiTabelaEvoHist th.ai-sort').forEach(th => {
+      th.classList.toggle('ai-sort-asc', th.dataset.sort === sk.key && sk.dir === 'asc');
+      th.classList.toggle('ai-sort-desc', th.dataset.sort === sk.key && sk.dir === 'desc');
+    });
+    const size = evoPageSize();
+    const pages = size ? Math.max(1, Math.ceil(sorted.length / size) || 1) : 1;
+    if (EVO.page > pages) EVO.page = pages;
+    if (EVO.page < 1) EVO.page = 1;
+    const pageRows = size ? sorted.slice((EVO.page - 1) * size, EVO.page * size) : sorted;
+    const tbody = document.querySelector('#aiTabelaEvoHist tbody');
+    if (tbody) {
+      tbody.innerHTML = pageRows.map((r) => {
+        const nPad = r.n_padrao != null ? r.n_padrao : '—';
+        const sit = r.mudou
+          ? '<span class="ai-evo-sit-mudou">🔄 Mudou</span>'
+          : `<span class="ai-evo-sit-ok">${esc(r.situacao || 'Mantido')}</span>`;
+        const jogos = r.jogos_possiveis
+          ? `<a href="#" class="fw-bold text-decoration-underline" data-act="ver-jogos-padrao" data-padrao="${esc(r.padrao)}">${fmtVol(r.jogos_possiveis)}</a>`
+          : '—';
+        const aposta = r.aposta_n
+          ? `<a href="#" class="fw-bold text-decoration-underline" data-act="ir-aposta-hist" data-padrao="${esc(r.padrao)}" data-dezenas="${esc(r.dezenas_fmt)}" title="Abrir esta aposta na aba Apostas">${fmtVol(r.aposta_n)}</a>`
+          : '—';
+        return `<tr class="${r.mudou ? 'tr-evo-mudou' : ''}" data-padrao="${esc(r.padrao)}" data-concurso="${esc(r.concurso)}">
+          <td><a href="#" data-act="ir-concurso" data-concurso="${esc(r.concurso)}">${esc(r.concurso)}</a></td>
+          <td>${esc(r.data || '—')}</td>
+          <td><a href="#" data-act="ir-padrao-ii" data-padrao="${esc(r.padrao)}" title="${esc(r.padrao)}"><strong>P${esc(nPad)}</strong></a><div class="small font-monospace text-muted">${esc(r.padrao)}</div></td>
+          <td>${esc(r.descricao || '—')}</td>
+          <td>${jogos}</td>
+          <td>${aposta}</td>
+          <td class="font-monospace">${esc(r.dezenas_fmt || '—')}</td>
+          <td>${esc(r.soma != null ? r.soma : '—')}</td>
+          <td>${esc(r.diagonal_fmt || 'Nenhuma')}</td>
+          <td>${sit}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="10" class="text-muted">Nenhum concurso com os filtros.</td></tr>';
+    }
+    const histMeta = document.getElementById('aiEvoHistMeta');
+    if (histMeta) {
+      histMeta.textContent = size
+        ? `Exibindo ${pageRows.length} de ${sorted.length} · pág. ${EVO.page}/${pages}`
+        : `Exibindo ${sorted.length} concursos`;
+    }
+    const prev = document.getElementById('aiEvoPrev');
+    const next = document.getElementById('aiEvoNext');
+    if (prev) prev.disabled = !size || EVO.page <= 1;
+    if (next) next.disabled = !size || EVO.page >= pages;
+
+    const seqEl = document.getElementById('aiEvoSeq');
+    if (seqEl) {
+      const seqSrc = [...sorted].sort((a, b) => (Number(a.concurso) || 0) - (Number(b.concurso) || 0));
+      seqEl.innerHTML = seqSrc.map((r) => {
+        const nPad = r.n_padrao != null ? r.n_padrao : '—';
+        return `<span class="ai-evo-chip${r.mudou ? ' is-mudou' : ''}" title="${esc(r.dezenas_fmt || '')} · aposta ${esc(r.aposta_n || '—')}">
+          <span class="n">${esc(r.concurso)}</span>→<strong>P${esc(nPad)}</strong>
+        </span>`;
+      }).join('') || '<span class="small text-muted">Sem sequência para os filtros.</span>';
+    }
+
+    const pads = filtrarEvoPadroes();
+    const skc = SORT.evoCons || { key: 'n_padrao', dir: 'asc' };
+    const dirc = skc.dir === 'asc' ? 1 : -1;
+    const padsSorted = [...pads].sort((a, b) => {
+      const key = skc.key === 'ocorrencias' ? 'frequencia' : skc.key;
+      const ka = a[key], kb = b[key];
+      if (key === 'padrao' || key === 'status') {
+        return dirc * String(ka || '').localeCompare(String(kb || ''), 'pt-BR');
+      }
+      const na = ka == null ? -1 : +ka;
+      const nb = kb == null ? -1 : +kb;
+      return dirc * (na - nb);
+    });
+    document.querySelectorAll('#aiTabelaEvoCons th.ai-sort').forEach(th => {
+      th.classList.toggle('ai-sort-asc', th.dataset.sort === skc.key && skc.dir === 'asc');
+      th.classList.toggle('ai-sort-desc', th.dataset.sort === skc.key && skc.dir === 'desc');
+    });
+    const tcons = document.querySelector('#aiTabelaEvoCons tbody');
+    if (tcons) {
+      tcons.innerHTML = padsSorted.map((p) => {
+        const jogos = `<a href="#" class="fw-bold text-decoration-underline" data-act="ver-jogos-padrao" data-padrao="${esc(p.padrao)}">${fmtVol(p.jogos_possiveis)}</a>`;
+        const n = p.n_padrao != null ? p.n_padrao : '—';
+        const occTitle = (p.concursos || []).join(', ');
+        return `<tr data-padrao="${esc(p.padrao)}" class="${p.utilizado ? '' : 'text-muted'}">
+          <td>${esc(n)}</td>
+          <td class="td-padrao"><a href="#" data-act="ir-padrao-ii" data-padrao="${esc(p.padrao)}"><code>${esc(p.padrao)}</code></a></td>
+          <td title="${esc(occTitle)}">${fmtVol(p.frequencia)}</td>
+          <td>${esc(p.percentual)}%</td>
+          <td>${p.primeiro_concurso != null ? esc(p.primeiro_concurso) : '—'}</td>
+          <td>${p.ultimo_concurso != null ? esc(p.ultimo_concurso) : '—'}</td>
+          <td>${p.concurso_anterior != null ? esc(p.concurso_anterior) : '—'}</td>
+          <td>${p.atraso == null ? '—' : esc(p.atraso)}</td>
+          <td>${p.maior_intervalo == null ? '—' : esc(p.maior_intervalo)}</td>
+          <td>${jogos}</td>
+          <td>${evoStatusBadge(p.status)}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="11" class="text-muted">Nenhum padrão com os filtros.</td></tr>';
+    }
+    const consMeta = document.getElementById('aiEvoConsMeta');
+    if (consMeta) consMeta.textContent = `Exibindo ${padsSorted.length} de ${EVO.padroes.length}`;
+
+    const nao = (EVO.nao || []).filter((p) => evoPadraoBate(p, evoFiltros().pad));
+    const naoEl = document.getElementById('aiEvoNaoUtilizados');
+    const naoMeta = document.getElementById('aiEvoNaoMeta');
+    if (naoMeta) naoMeta.textContent = `(${nao.length}) — clique para ver as apostas possíveis`;
+    if (naoEl) {
+      naoEl.innerHTML = nao.map((p) => `
+        <button type="button" class="ai-evo-falt" data-act="ver-jogos-padrao" data-padrao="${esc(p.padrao)}"
+                title="${esc(p.descricao)} · ${fmtVol(p.jogos_possiveis)} apostas">
+          <strong>P${esc(p.n_padrao)}</strong>
+          <code>${esc(p.padrao)}</code>
+          <span class="text-muted">${fmtVol(p.jogos_possiveis)} jogos</span>
+        </button>`).join('') || '<span class="small text-muted">Nenhum padrão pendente com os filtros.</span>';
+    }
+    const info = document.getElementById('aiEvoInfo');
+    if (info) {
+      const ms = meta.elapsed_ms != null ? ` · ${meta.elapsed_ms} ms` : '';
+      const cache = meta.cache_hit ? ' (cache)' : '';
+      info.textContent = `${meta.total_concursos || 0} concursos · ${meta.padroes_utilizados || 0}/${meta.total_padroes || 0} padrões${ms}${cache}`;
+    }
+  }
+  async function carregarEvolucaoPadroes(force) {
+    const info = document.getElementById('aiEvoInfo');
+    if (EVO.carregando) return;
+    if (EVO.carregado && !force) {
+      renderEvolucaoPadroes();
+      return;
+    }
+    EVO.carregando = true;
+    if (info) info.textContent = 'Calculando histórico…';
+    try {
+      const r = await fetch(`${API}/evolucao-padroes`);
+      const d = await r.json();
+      if (!d.sucesso) throw new Error(d.erro || 'Falha ao carregar evolução');
+      EVO.linhas = d.linhas || [];
+      EVO.padroes = d.padroes || [];
+      EVO.nao = d.nao_utilizados || [];
+      EVO.meta = d;
+      EVO.carregado = true;
+      EVO.page = 1;
+      renderEvolucaoPadroes();
+    } catch (e) {
+      if (info) info.textContent = e.message || String(e);
+      const tbody = document.querySelector('#aiTabelaEvoHist tbody');
+      if (tbody) tbody.innerHTML = `<tr><td colspan="10" class="text-danger">${esc(e.message || e)}</td></tr>`;
+    } finally {
+      EVO.carregando = false;
     }
   }
 
@@ -3503,7 +3951,7 @@
     if (info) info.textContent = 'Universo: dentro da média · ainda não saíram';
     if (!tbody) return;
     if (!CHEQ.rows.length) {
-      tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Nenhuma aposta reconhecida.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="11" class="text-muted">Nenhuma aposta reconhecida.</td></tr>';
       if (btnExp) btnExp.disabled = true;
       if (chkTodos) chkTodos.disabled = true;
       return;
@@ -3512,7 +3960,7 @@
       if (!r.ok) {
         return `<tr>
           <td></td><td>${esc(r.linha || '—')}</td>
-          <td class="td-left text-danger" colspan="7">${esc(r.erro || 'Inválida')} ${r.texto ? `<code>${esc(r.texto)}</code>` : ''}</td>
+          <td class="td-left text-danger" colspan="9">${esc(r.erro || 'Inválida')} ${r.texto ? `<code>${esc(r.texto)}</code>` : ''}</td>
         </tr>`;
       }
       const k = chaveCheq(r);
@@ -3533,10 +3981,19 @@
         sugHtml = '<span class="text-muted">sem jogo com este prefixo</span>';
       }
       const abrir = `<a href="#" data-act="ir-checagem-jogo" data-padrao="${esc(r.padrao)}" data-busca="${esc(r.prefixo_fmt || r.dezenas_fmt)}">Aba 5</a>`;
+      const somaHtml = (r.soma == null)
+        ? '—'
+        : `<span class="ai-col-alinha">${esc(r.soma)}</span> ${statusPill(r.status_media, r.status_media_label)}`;
+      const nDiag = Number(r.n_diagonais) || ((r.diagonais || []).length);
+      const diagHtml = nDiag
+        ? `<span class="ai-col-alinha" title="${nDiag} diagonal(is) nesta sequência"><strong>${nDiag}</strong> · ${htmlDiagTexto(r.diagonais)}</span>`
+        : '<span class="text-muted">0 —</span>';
       return `<tr>
         <td><input type="checkbox" class="form-check-input ai-cheq-chk" data-key="${esc(k)}" ${CHEQ.sel.has(k) ? 'checked' : ''}></td>
         <td>${esc(r.linha)}</td>
         <td class="font-monospace">${esc(r.dezenas_fmt)}${r.mes_colado ? ` <span class="text-muted">${esc(r.mes_colado)}</span>` : ''}</td>
+        <td class="td-soma">${somaHtml}</td>
+        <td class="td-diag td-left">${diagHtml}</td>
         <td>${padLink}</td>
         <td class="font-monospace">${esc(r.prefixo_fmt)} <span class="text-muted">(${r.qtd_prefixo || 0})</span></td>
         <td>${existe}</td>
@@ -3562,7 +4019,7 @@
       alert('Cole ou arraste as apostas.');
       return;
     }
-    if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Checando…</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="text-muted">Checando…</td></tr>';
     try {
       const r = await fetch(`${API}/checagem-sequencias`, {
         method: 'POST',
@@ -3577,7 +4034,7 @@
       if (!d.sucesso && !(d.resultados || []).length) throw new Error(d.erro || 'Falha na checagem');
       renderChecagem(d);
     } catch (e) {
-      if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="text-danger">${esc(e.message || e)}</td></tr>`;
+      if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="text-danger">${esc(e.message || e)}</td></tr>`;
     }
   }
 
@@ -3757,6 +4214,34 @@
   const filtroP2 = document.getElementById('aiFiltroStatusPadII');
   if (filtroP2) filtroP2.addEventListener('change', renderPadroesII);
   document.getElementById('aiPadIISoDiag')?.addEventListener('change', renderPadroesII);
+  function evoRefiltrar() { EVO.page = 1; renderEvolucaoPadroes(); }
+  ['aiEvoConcIni','aiEvoConcFim','aiEvoPadrao','aiEvoFreqMin','aiEvoAtrasoMin','aiEvoPeriodo'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', evoRefiltrar);
+    document.getElementById(id)?.addEventListener('change', evoRefiltrar);
+  });
+  document.getElementById('aiEvoUso')?.addEventListener('change', evoRefiltrar);
+  document.getElementById('aiEvoSoMudancas')?.addEventListener('change', evoRefiltrar);
+  document.getElementById('aiEvoPageSize')?.addEventListener('change', evoRefiltrar);
+  document.getElementById('aiEvoAtualizar')?.addEventListener('click', () => carregarEvolucaoPadroes(true));
+  document.getElementById('aiEvoLimparFiltros')?.addEventListener('click', () => {
+    ['aiEvoConcIni','aiEvoConcFim','aiEvoPadrao','aiEvoFreqMin','aiEvoAtrasoMin','aiEvoPeriodo'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    const uso = document.getElementById('aiEvoUso');
+    if (uso) uso.value = '';
+    const mud = document.getElementById('aiEvoSoMudancas');
+    if (mud) mud.checked = false;
+    evoRefiltrar();
+  });
+  document.getElementById('aiEvoPrev')?.addEventListener('click', () => {
+    EVO.page = Math.max(1, (EVO.page || 1) - 1);
+    renderEvolucaoPadroes();
+  });
+  document.getElementById('aiEvoNext')?.addEventListener('click', () => {
+    EVO.page = (EVO.page || 1) + 1;
+    renderEvolucaoPadroes();
+  });
   document.getElementById('aiPadIICruzModo')?.addEventListener('click', (ev) => {
     const btn = ev.target.closest('[data-cruz]');
     if (!btn) return;
@@ -3792,6 +4277,7 @@
   });
   bindCollapseToggle('aiJogosPadToggleInfo', 'aiJogosPadPainelInfo');
   bindCollapseToggle('aiPanHistToggleInfo', 'aiPanHistPainelInfo');
+  bindCollapseToggle('aiEvoToggleInfo', 'aiEvoPainelInfo');
   document.getElementById('tbToggleInfo')?.addEventListener('click', () => {
     const btn = document.getElementById('tbToggleInfo');
     const painel = document.getElementById('tbPainelInfo');
@@ -3807,6 +4293,7 @@
       const aba = btn.dataset.aba;
       if (aba === 'padroes-ii') {
         if (!CAT_PAD_II.length) carregarPadroesII();
+        else if (!EVO.carregado) carregarEvolucaoPadroes();
       }
       if (aba === 'jogos-padrao') {
         if (!ULTIMO_RESULTADO) carregarPadroesII();
@@ -3976,6 +4463,11 @@
         renderPadroesFaltantes(listarPadroesFaltantes());
         return;
       }
+      if (table === 'evo' || table === 'evoCons') {
+        if (table === 'evo') EVO.page = 1;
+        renderEvolucaoPadroes();
+        return;
+      }
       PAGE[table] = 1;
       renderResultados(CACHE, { keepCache: true });
       return;
@@ -4050,6 +4542,13 @@
       abrirJogosPadrao(padUlt, { filtroMedia: 'all', irVencedor: true });
       return;
     }
+    if (act === 'ir-aposta-hist') {
+      ev.preventDefault();
+      const pad = btn.dataset.padrao || '';
+      const dez = btn.dataset.dezenas || '';
+      if (pad) abrirJogosPadrao(pad, { filtroMedia: 'all', buscaDez: dez });
+      return;
+    }
     if (act === 'ir-concurso') {
       ev.preventDefault();
       irParaConcurso(btn.dataset.concurso);
@@ -4115,7 +4614,7 @@
     const resumo = document.getElementById('aiCheqResumo');
     if (resumo) { resumo.hidden = true; resumo.innerHTML = ''; }
     const tbody = document.querySelector('#aiTabelaCheq tbody');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Cole as apostas e clique em Checar.</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="text-muted">Cole as apostas e clique em Checar.</td></tr>';
     const btnExp = document.getElementById('aiCheqExport');
     if (btnExp) btnExp.disabled = true;
   });

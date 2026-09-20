@@ -18,6 +18,8 @@ from analise_inteligentes_diadesorte.checagem_sequencias import (  # noqa: E402
     parse_lote_apostas,
     sugerir_proxima,
 )
+from analise_inteligentes_diadesorte.diagonais_volante import diagonais_na_aposta  # noqa: E402
+from analise_inteligentes_diadesorte.soma_media import classificar_soma  # noqa: E402
 
 
 class TestParseAposta(unittest.TestCase):
@@ -119,6 +121,29 @@ class TestPrefixoESugestao(unittest.TestCase):
         ult = {u["dezena"]: u["existe"] for u in out["ultimas"]}
         self.assertTrue(ult[22])
         self.assertFalse(ult[23])
+
+    def test_soma_e_diagonais_na_linha(self):
+        aposta = parse_linha_aposta("01 04 12 15 23 26 31")
+        aposta["linha"] = 1
+        faixa = {"media": 112, "tol_dentro": 4, "tol_proxima": 8}
+        out = montar_resultado_linha(
+            aposta, prefixo_n=5, filtro="dentro_novos",
+            jogos_enriquecidos=[], historico_keys=set(), faixa=faixa,
+        )
+        self.assertEqual(out["soma"], 112)
+        self.assertEqual(out["status_media"], "dentro")
+        self.assertGreaterEqual(out["n_diagonais"], 2)
+        fmts = {d["nums_fmt"] for d in out["diagonais"]}
+        self.assertTrue({"01-12-23", "04-15-26"} <= fmts)
+
+    def test_diagonais_duas_no_volante(self):
+        diags = diagonais_na_aposta([1, 4, 12, 15, 23, 26, 31])
+        fmts = {d["nums_fmt"] for d in diags}
+        self.assertGreaterEqual(len(diags), 2)
+        self.assertIn("01-12-23", fmts)
+        self.assertIn("04-15-26", fmts)
+        cls = classificar_soma(112, {"media": 112, "tol_dentro": 4, "tol_proxima": 8})
+        self.assertEqual(cls["status_media"], "dentro")
 
 
 if __name__ == "__main__":

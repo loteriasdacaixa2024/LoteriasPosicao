@@ -115,6 +115,28 @@ def diag_runs_in_draw(
     return runs
 
 
+def diagonais_na_aposta(
+    dezenas: Sequence[int],
+    *,
+    dmin: int = 1,
+    dmax: int = 31,
+    cols: int = 10,
+) -> List[Dict[str, Any]]:
+    """Diagonais de 2+ dezenas presentes nesta aposta (mesma geometria da Seção 12/13)."""
+    dez = [int(x) for x in dezenas if str(x).strip() != ""]
+    if len(dez) < 2:
+        return []
+    rows = volante_rows(dmin, dmax, cols)
+    lines = diag_lines(rows)
+    pmap = pos_map(rows)
+    runs = [
+        r for r in diag_runs_in_draw(set(dez), lines, pmap)
+        if int(r.get("len") or 0) >= 2
+    ]
+    runs.sort(key=lambda r: (-int(r.get("len") or 0), r.get("key") or ""))
+    return [_pack_seg(r["key"], 1, r) for r in runs]
+
+
 def padrao_de(nums: Sequence[int]) -> str:
     return " ".join(str(int(n) // 10) for n in sorted(int(x) for x in nums))
 

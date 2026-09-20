@@ -333,6 +333,27 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
         "geradores_elite": {
             "items": [
                 {
+                    "href": "/geradores-elite/estatisticas-ciclo/",
+                    "title": "Estatísticas e Ciclo",
+                    "desc": "Estatísticas Básicas · dezenas pendentes do ciclo",
+                    "icon": "fas fa-chart-pie",
+                    "highlight": 1,
+                },
+                {
+                    "href": "/geradores-elite/comportamento-apostas/",
+                    "title": "Comportamento → Apostas",
+                    "desc": "Padrões PA/PR/RT/MO/MS · inteligente",
+                    "icon": "fas fa-chart-line",
+                    "highlight": 2,
+                },
+                {
+                    "href": "/geradores-elite/construtor-construcoes/",
+                    "title": "Construtor de Construções",
+                    "desc": "Pool dezenas · pool dígitos · múltiplas engenharias",
+                    "icon": "fas fa-layer-group",
+                    "highlight": 3,
+                },
+                {
                     "href": "/geradores-elite/engine-final/",
                     "title": "Engine Final",
                     "desc": "Gerador pensante com análises integradas",
@@ -387,22 +408,10 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                     "icon": "fas fa-crosshairs",
                 },
                 {
-                    "href": "/geradores-elite/comportamento-apostas/",
-                    "title": "Comportamento → Apostas",
-                    "desc": "Padrões PA/PR/RT/MO/MS · inteligente",
-                    "icon": "fas fa-chart-line",
-                },
-                {
                     "href": "/geradores-elite/escolha-tubular-apostas/",
                     "title": "Escolha/Tubular → Apostas",
                     "desc": "Escolha Visual · Seção 10 Manual · Seção 11 Automático",
                     "icon": "fas fa-dice",
-                },
-                {
-                    "href": "/geradores-elite/construtor-construcoes/",
-                    "title": "Construtor de Construções",
-                    "desc": "Pool dezenas · pool dígitos · múltiplas engenharias",
-                    "icon": "fas fa-layer-group",
                 },
                 {
                     "href": "/geradores-elite/gerador-digitos-inteligente/",

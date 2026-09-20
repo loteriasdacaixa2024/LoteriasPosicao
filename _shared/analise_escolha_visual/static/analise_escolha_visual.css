@@ -197,6 +197,106 @@
   height: 100%;
 }
 
+#ev-root .ev-stat-2a {
+  margin-top: .85rem;
+}
+#ev-root .ev-stat-fold-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary-xdark, #664a00);
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+#ev-root .ev-stat-fold-btn:hover {
+  color: var(--primary);
+}
+#ev-root .ev-stat-fold-btn:focus-visible {
+  outline: 2px solid var(--accent, #c08b00);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+#ev-root .ev-stat-fold-ico {
+  font-size: .62rem;
+  opacity: .55;
+  width: .7rem;
+  transition: transform .15s ease;
+}
+#ev-root .ev-stat-fold-btn[aria-expanded="true"] .ev-stat-fold-ico {
+  transform: rotate(90deg);
+  opacity: .85;
+}
+#ev-root .ev-stat-fold-body {
+  margin-top: .5rem;
+}
+#ev-root .ev-stat-fold-body[hidden] {
+  display: none !important;
+}
+#ev-root .ev-stat-fold-n {
+  font-weight: 600;
+  font-size: .75rem;
+  color: #6c757d;
+}
+#ev-root .ev-basic-table-wrap {
+  max-height: 65vh;
+  overflow: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+}
+#ev-root .ev-basic-table {
+  background: #fff;
+  font-size: .78rem;
+  margin-bottom: 0;
+}
+#ev-root .ev-basic-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8f6f0;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 #e9ecef;
+}
+#ev-root .ev-basic-table td {
+  vertical-align: middle;
+  white-space: nowrap;
+  padding: .22rem .4rem;
+  line-height: 1.2;
+}
+#ev-root .ev-basic-table .ev-basic-conc {
+  font-weight: 800;
+  white-space: nowrap;
+}
+#ev-root .ev-basic-table .ev-basic-data {
+  white-space: nowrap;
+  font-size: .72rem;
+  color: #6c757d;
+}
+#ev-root .ev-basic-table .ev-basic-nums {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+#ev-root .ev-basic-table tr.is-foco {
+  background: #fff8e6;
+}
+#ev-root .ev-basic-dot {
+  display: inline-block;
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  margin-right: .4rem;
+  vertical-align: middle;
+}
+
 #ev-root .ev-chip {
   display: inline-flex;
   align-items: center;

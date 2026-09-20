@@ -1717,6 +1717,9 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
     from gerador_escolha_tubular.routes_factory import register_gerador_escolha_tubular
     register_gerador_escolha_tubular(bp, modality_key, cfg["nome"])
 
+    from geradores_elite.estatisticas_ciclo.routes_factory import register_gerador_estatisticas_ciclo
+    register_gerador_estatisticas_ciclo(bp, modality_key, cfg["nome"])
+
     from analise_gaps_ciclo.routes_factory import register_gerador_gaps_ciclo
     register_gerador_gaps_ciclo(bp, modality_key, cfg["nome"])
 

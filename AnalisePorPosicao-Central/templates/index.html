@@ -431,6 +431,56 @@
             margin-right: 4px;
         }
 
+        .oraculo-extra {
+            margin-top: 0.85rem;
+            padding-top: 0.7rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .oraculo-analise-link {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            color: #6c757d;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(108, 117, 125, 0.4);
+        }
+
+        .oraculo-analise-link:hover {
+            color: #0d6efd;
+            border-bottom-color: #0d6efd;
+        }
+
+        .oraculo-sep {
+            color: #ced4da;
+            font-size: 0.7rem;
+            margin: 0 0.25rem;
+        }
+
+        .oraculo-nota {
+            margin-top: 0.45rem;
+            font-size: 0.68rem;
+            line-height: 1.4;
+            color: #8a8f96;
+        }
+
+        .oraculo-rodape {
+            margin-top: 1.15rem;
+            padding-top: 0.85rem;
+            border-top: 1px dashed rgba(0, 0, 0, 0.08);
+            font-size: 0.72rem;
+            line-height: 1.45;
+            color: #8a8f96;
+        }
+
+        .comparativo-links {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
         /* —— Mobile First: casca do dashboard Central —— */
         html {
             overflow-x: clip;
@@ -464,6 +514,32 @@
             white-space: normal;
             text-align: center;
         }
+
+        .sat-status {
+            margin-top: 0.9rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            max-width: 52rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .sat-chip {
+            font-size: 0.78rem;
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 9999px;
+            padding: 0.35rem 0.75rem;
+            max-width: 100%;
+        }
+
+        .sat-chip.ok { border-color: rgba(34, 197, 94, 0.55); color: #86efac; }
+        .sat-chip.erro { border-color: rgba(239, 68, 68, 0.55); color: #fca5a5; }
+        .sat-chip.rodando { border-color: rgba(250, 204, 21, 0.55); color: #fde047; }
+        .sat-chip.idle { color: var(--text-muted); }
 
         .grid-container {
             grid-template-columns: 1fr;
@@ -592,7 +668,14 @@
             <a href="/analises-gerais/" class="btn btn-success btn-sm" title="Comparativo estatístico das 9 modalidades">
                 <i class="fas fa-chart-line me-1"></i> Análises Gerais
             </a>
+            <a href="http://localhost:8081/" target="_blank" rel="noopener noreferrer" id="btn-conferencias" class="btn btn-info btn-sm" title="Abre a Central de Conferências em http://localhost:8081">
+                <i class="fas fa-clipboard-check me-1"></i> Conferências
+            </a>
+            <button type="button" id="btn-resultados" class="btn btn-outline-warning btn-sm" title="Atualiza os Excel oficiais da Caixa">
+                <i class="fas fa-file-excel me-1"></i> Resultados / Atualização dos Resultados
+            </button>
         </div>
+        <div id="sat-status" class="sat-status" aria-live="polite"></div>
     </header>
 
     <div class="grid-container">
@@ -663,10 +746,129 @@
         const MODALITY_URLS = {{ modality_urls | tojson }};
         const CENTRAL_PORT = {{ central_port | tojson }};
 
+        function satChipClass(estado) {
+            if (estado === 'rodando' || estado === 'em_andamento') return 'rodando';
+            if (estado === 'ok') return 'ok';
+            if (estado === 'erro') return 'erro';
+            return 'idle';
+        }
+
+        function renderSatStatus(data) {
+            const box = document.getElementById('sat-status');
+            if (!box || !data) return;
+            const dl = data.download || {};
+            const cf = data.conferencias || {};
+            const dlEstado = dl.em_andamento ? 'rodando' : (dl.estado || 'idle');
+            const dlTxt = dl.mensagem || 'Excel: sem status';
+            const cfTxt = cf.online
+                ? ('Conferências online na porta ' + (cf.porta || 8081))
+                : 'Conferências desligadas (sob demanda)';
+            box.innerHTML = `
+                <span class="sat-chip ${satChipClass(dlEstado)}"><i class="fas fa-file-excel me-1"></i>${dlTxt}</span>
+                <span class="sat-chip ${satChipClass(cf.online ? 'ok' : 'idle')}"><i class="fas fa-clipboard-check me-1"></i>${cfTxt}</span>
+            `;
+        }
+
+        async function refreshSatStatus() {
+            try {
+                const res = await fetch('/api/componentes/status');
+                const data = await res.json();
+                renderSatStatus(data);
+                return data;
+            } catch (e) {
+                renderSatStatus({
+                    download: { estado: 'erro', mensagem: 'Não foi possível ler o status dos componentes.' },
+                    conferencias: { online: false }
+                });
+            }
+        }
+
+        function abrirConferencias() {
+            fetch('/api/componentes/conferencias/abrir', { method: 'POST' })
+                .then(() => refreshSatStatus())
+                .catch(() => {});
+        }
+
+        async function atualizarResultados() {
+            const btn = document.getElementById('btn-resultados');
+            const original = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Atualizando Excel…';
+            }
+            try {
+                const res = await fetch('/api/componentes/download/atualizar', { method: 'POST' });
+                const data = await res.json();
+                await refreshSatStatus();
+                if (data.ok) {
+                    const n = (data.arquivos || []).length;
+                    alert('Resultados atualizados: ' + n + ' arquivo(s).');
+                } else if (data.duplicado || data.em_andamento) {
+                    alert(data.mensagem || 'Download já em andamento.');
+                } else {
+                    alert(data.mensagem || 'Falha ao atualizar os resultados.');
+                }
+            } catch (e) {
+                alert('Erro ao atualizar resultados: ' + e.message);
+                await refreshSatStatus();
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const bConf = document.getElementById('btn-conferencias');
+            const bRes = document.getElementById('btn-resultados');
+            if (bConf) bConf.addEventListener('click', abrirConferencias);
+            if (bRes) bRes.addEventListener('click', atualizarResultados);
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.btn-baixar-oraculo');
+                if (!btn) return;
+                baixarModeloDireto(e, btn.dataset.mod, btn.dataset.mid, btn.dataset.nome);
+            });
+        });
+        window.addEventListener('load', refreshSatStatus);
+
         function modalityPublicUrl(mod_id, path) {
             const base = (MODALITY_URLS && MODALITY_URLS[mod_id]) || ('http://localhost:' + (PORTS[mod_id] || ''));
             const p = path || '/';
             return base.replace(/\/$/, '') + (p.startsWith('/') ? p : '/' + p);
+        }
+
+        function moneyBr(valor) {
+            return Number(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function oraculoExtraHtml(obj) {
+            const fin = DADOS_FINANCEIROS[obj.mod_id] || { vol: 0, preco: 0 };
+            const nSorteios = obj.total_sorteios || 0;
+            const custo = fin.vol * fin.preco;
+            const hist = nSorteios ? custo * nSorteios : 0;
+            const analiseUrl = modalityPublicUrl(obj.mod_id, '/analise/');
+            const modelosUrl = modalityPublicUrl(obj.mod_id, '/modelos/');
+            return `
+                <div class="oraculo-extra">
+                    <a class="oraculo-analise-link" href="${analiseUrl}" target="_blank" rel="noopener noreferrer" title="Abrir a análise por posição desta modalidade">
+                        <i class="fas fa-crosshairs me-1"></i>Análise real
+                    </a>
+                    <span class="oraculo-sep">·</span>
+                    <a class="oraculo-analise-link" href="${modelosUrl}" target="_blank" rel="noopener noreferrer" title="Abrir a Central de Modelos desta modalidade">
+                        Modelos
+                    </a>
+                    <span class="oraculo-sep">·</span>
+                    <a class="oraculo-analise-link" href="#comparativo-${obj.mod_id}" title="Ver o comparativo desta modalidade nesta página">
+                        Detalhe aqui
+                    </a>
+                    <p class="oraculo-nota mb-0">
+                        ${obj.score.toLocaleString()} pts = estas ${fin.vol} apostas atuais nos ${nSorteios.toLocaleString()} sorteios.
+                        Vitórias = eventos aposta×concurso, não sorteios únicos.
+                        R$ ${moneyBr(custo)} é o custo de um concurso${hist ? ` (histórico seria R$ ${moneyBr(hist)})` : ''}.
+                    </p>
+                </div>
+            `;
         }
 
         async function baixarModeloDireto(e, mod_id, modelo_id, modelo_nome) {
@@ -782,6 +984,7 @@
                                 emj: m.modelo_emoji,
                                 score: m.score || 0,
                                 premios: m.total_premios || 0,
+                                total_sorteios: data.total_sorteios || 0,
                                 corM: CORES_M[m.modelo_id] || '#333'
                             });
                         });
@@ -826,10 +1029,15 @@
                             `;
                         }).join('');
 
+                        div.id = 'comparativo-' + mod_id;
                         div.innerHTML = `
                             <div class="comparativo-header-box">
                                 <h3><i class="fas fa-table me-2"></i> Comparativo Detalhado - ${data.modalidade_nome}</h3>
-                                <div class="badge bg-secondary">Total Avaliado: ${(data.total_sorteios * DADOS_FINANCEIROS[mod_id].vol * rank.length).toLocaleString()} Apostas</div>
+                                <div class="comparativo-links">
+                                    <a class="oraculo-analise-link" href="${modalityPublicUrl(mod_id, '/analise/')}" target="_blank" rel="noopener noreferrer">Análise real</a>
+                                    <a class="oraculo-analise-link" href="${modalityPublicUrl(mod_id, '/modelos/')}" target="_blank" rel="noopener noreferrer">Modelos</a>
+                                    <div class="badge bg-secondary">Total Avaliado: ${(data.total_sorteios * DADOS_FINANCEIROS[mod_id].vol * rank.length).toLocaleString()} Apostas</div>
+                                </div>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-hover mb-0 text-center align-middle bg-white">
@@ -848,6 +1056,7 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <p class="oraculo-nota px-3 py-2 mb-0">Score retrospectivo: as apostas atuais de cada modelo contra os ${(data.total_sorteios || 0).toLocaleString()} sorteios. Não é previsão do próximo concurso.</p>
                         `;
                     } else {
                         div.innerHTML = `
@@ -905,7 +1114,7 @@
                             </div>
                         </div>
                         <div class="p-4 bg-white" style="font-size:0.95rem;">
-                            <p class="mb-4 text-muted"><strong>Analisamos os ${globalStats.length} cruzamentos de IA simultaneamente.</strong> Se você tiver que concentrar seu aporte (dinheiro) hoje baseando-se restritamente na maior probabilidade de eficiência destas 8 modalidades, este é o <strong>Top 3 Definitivo (Independente da Loteria)</strong> que você deve escolher:</p>
+                            <p class="mb-4 text-muted"><strong>Analisamos os ${globalStats.length} cruzamentos de IA simultaneamente.</strong> Se você tiver que concentrar seu aporte (dinheiro) hoje baseando-se restritamente no maior score retrospectivo destas 9 modalidades, este é o <strong>Top 3 Definitivo (Independente da Loteria)</strong> que você deve escolher:</p>
                             
                             <div class="row g-4 text-center">
                                 <div class="col-md-4">
@@ -914,7 +1123,7 @@
                                         <h4 class="mt-2 text-dark" style="font-weight:800;">${obj1.mod_emoji} ${obj1.mod_nome}</h4>
                                         <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
                                             <div class="badge mb-0 px-3 py-2" style="background:${obj1.corM};font-size:0.85rem;">${obj1.emj} M${obj1.modelo_id} - ${obj1.modelo_nome}</div>
-                                            <button onclick="baixarModeloDireto(event, `${obj1.mod_id}`, `${obj1.modelo_id}`, `${obj1.modelo_nome}`)" class="btn btn-sm btn-dark" title="Baixar Apostas Modelo" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            <button type="button" class="btn-baixar-oraculo btn btn-sm btn-dark" data-mod="${obj1.mod_id}" data-mid="${obj1.modelo_id}" data-nome=${JSON.stringify(String(obj1.modelo_nome || ''))} title="Baixar Apostas Modelo" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                                 <i class="fas fa-download"></i>
                                             </button>
                                         </div>
@@ -928,6 +1137,7 @@
                                                 <strong>R$ ${(DADOS_FINANCEIROS[obj1.mod_id].vol * DADOS_FINANCEIROS[obj1.mod_id].preco).toFixed(2).replace('.', ',')}</strong>
                                             </span>
                                         </div>
+                                        ${oraculoExtraHtml(obj1)}
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -936,7 +1146,7 @@
                                         <h4 class="mt-2 text-dark" style="font-weight:800;">${obj2.mod_emoji} ${obj2.mod_nome}</h4>
                                         <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
                                             <div class="badge mb-0 px-3 py-2" style="background:${obj2.corM};font-size:0.85rem;">${obj2.emj} M${obj2.modelo_id} - ${obj2.modelo_nome}</div>
-                                            <button onclick="baixarModeloDireto(event, `${obj2.mod_id}`, `${obj2.modelo_id}`, `${obj2.modelo_nome}`)" class="btn btn-sm btn-dark" title="Baixar Apostas Modelo" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            <button type="button" class="btn-baixar-oraculo btn btn-sm btn-dark" data-mod="${obj2.mod_id}" data-mid="${obj2.modelo_id}" data-nome=${JSON.stringify(String(obj2.modelo_nome || ''))} title="Baixar Apostas Modelo" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                                 <i class="fas fa-download"></i>
                                             </button>
                                         </div>
@@ -958,7 +1168,7 @@
                                         <h4 class="mt-2 text-dark" style="font-weight:800;">${obj3.mod_emoji} ${obj3.mod_nome}</h4>
                                         <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
                                             <div class="badge mb-0 px-3 py-2" style="background:${obj3.corM};font-size:0.85rem;">${obj3.emj} M${obj3.modelo_id} - ${obj3.modelo_nome}</div>
-                                            <button onclick="baixarModeloDireto(event, `${obj3.mod_id}`, `${obj3.modelo_id}`, `${obj3.modelo_nome}`)" class="btn btn-sm btn-dark" title="Baixar Apostas Modelo" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            <button type="button" class="btn-baixar-oraculo btn btn-sm btn-dark" data-mod="${obj3.mod_id}" data-mid="${obj3.modelo_id}" data-nome=${JSON.stringify(String(obj3.modelo_nome || ''))} title="Baixar Apostas Modelo" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                                 <i class="fas fa-download"></i>
                                             </button>
                                         </div>

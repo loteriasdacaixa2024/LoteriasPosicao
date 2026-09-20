@@ -1,6 +1,7 @@
         <div class="mobile-group-title">{{ nav_cfg.geradores_elite.title }}</div>
         {% for item in nav_cfg.geradores_elite['items'] %}
-        <a class="mobile-link" href="{{ item.href }}" onclick="closeMobileNav()">
+        <a class="mobile-link{% if item.highlight %} dd-ge-destaque dd-ge-destaque-{{ item.highlight }}{% endif %}" href="{{ item.href }}" onclick="closeMobileNav()">
+            {% if item.highlight %}<span class="dd-ge-rank">{{ item.highlight }}</span>{% endif %}
             <i class="{{ item.icon }}"></i> {{ item.title }}
         </a>
         {% endfor %}

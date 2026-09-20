@@ -2,7 +2,7 @@
 {% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css?v=pool6">
+<link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css?v=stat2e">
 <div class="container-fluid py-3" id="ev-root"
      data-api="{{ api_base }}"
      data-pad-width="{{ escolha_ui.pad_width }}"
@@ -221,6 +221,34 @@
                 <section class="mb-4">
                     <h6 class="ev-stat-section-title"><i class="fas fa-list"></i> 2. Estatísticas Básicas — concurso <span id="evStatConcTitulo">—</span></h6>
                     <div class="row g-2" id="evStatBasicos"></div>
+                    <div class="ev-stat-2a mt-3">
+                        <button type="button" class="ev-stat-fold-btn" id="evStatBasicosFold"
+                                aria-expanded="false" aria-controls="evStatBasicosTabelaBox">
+                            <i class="fas fa-chevron-right ev-stat-fold-ico" aria-hidden="true"></i>
+                            <span>2a. Estatísticas Básicas</span>
+                            <span class="ev-stat-fold-n" id="evStatBasicosN"></span>
+                        </button>
+                        <div id="evStatBasicosTabelaBox" class="ev-stat-fold-body" hidden>
+                            <p class="small text-muted mb-2">Todos os sorteios da janela — não depende do concurso selecionado acima.</p>
+                            <div class="table-responsive ev-basic-table-wrap">
+                                <table class="table table-sm table-bordered ev-basic-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Conc.</th>
+                                            <th>Data</th>
+                                            <th>Sorteio</th>
+                                            <th>Pares</th>
+                                            <th>Ímpares</th>
+                                            <th>Repetidos</th>
+                                            <th>Sequências</th>
+                                            <th>Finais Iguais</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="evStatBasicosTabela"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
                 <section class="mb-4">
@@ -310,6 +338,6 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visual.js"></script>
-<script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js"></script>
+<script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=stat2e"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visualizacao.js?v=pool6"></script>
 {% endblock %}

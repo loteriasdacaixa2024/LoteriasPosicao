@@ -9,7 +9,7 @@ import math
 import random
 from collections import Counter, defaultdict
 from itertools import combinations, product
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from analise_estudos.service_factory import make_estudos_base
 from analise_inteligentes_diadesorte.diagonais_volante import cruzar_linhas
@@ -231,6 +231,67 @@ def expandir_jogos_padrao(
         "max_dezena": max_dezena,
         "tamanho_jogo": len(digs),
     }
+
+
+_COMBOS_RANK_CACHE: Dict[Tuple[Tuple[int, ...], int], List[Tuple[int, ...]]] = {}
+
+
+def _combinacoes_ordenadas(pool: Sequence[int], k: int) -> List[Tuple[int, ...]]:
+    """Mesma ordem de itertools.combinations usada em expandir_jogos_padrao."""
+    key = (tuple(int(x) for x in pool), int(k))
+    cached = _COMBOS_RANK_CACHE.get(key)
+    if cached is None:
+        cached = list(combinations(key[0], key[1]))
+        _COMBOS_RANK_CACHE[key] = cached
+    return cached
+
+
+def indice_aposta_no_padrao(
+    dezenas: Sequence[int],
+    padrao: str = "",
+    *,
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+) -> Optional[int]:
+    """
+    Número 1-based da aposta na mesma ordem de expandir_jogos_padrao,
+    sem materializar a lista completa (product de C(pool, k) por dígito).
+    """
+    dez = sorted(int(x) for x in dezenas if str(x).strip() != "")
+    if not dez:
+        return None
+    digs_pad = [
+        int(x) for x in str(padrao).replace(",", " ").split() if x.strip().isdigit()
+    ]
+    padrao_norm = " ".join(str(d) for d in digs_pad) if digs_pad else padrao_inicial(dez)
+    if padrao_inicial(dez) != padrao_norm:
+        return None
+    digs = [int(x) for x in padrao_norm.split()]
+    need = Counter(digs)
+    pools = pool_por_digito_universo(min_dezena, max_dezena)
+    grupos: Dict[int, List[int]] = defaultdict(list)
+    for n in dez:
+        grupos[int(n) // 10].append(int(n))
+    digitos_ord = sorted(need.keys())
+    ranks: List[int] = []
+    sizes: List[int] = []
+    for d in digitos_ord:
+        k = int(need[d])
+        pool = pools.get(d) or []
+        combo = tuple(grupos.get(d) or [])
+        combos = _combinacoes_ordenadas(pool, k)
+        try:
+            ranks.append(combos.index(combo))
+        except ValueError:
+            return None
+        sizes.append(len(combos))
+    idx = 0
+    for i, r in enumerate(ranks):
+        mul = 1
+        for s in sizes[i + 1:]:
+            mul *= s
+        idx += r * mul
+    return idx + 1
 
 
 def _chave_dezenas(dezenas: Sequence[int]) -> str:
@@ -1222,6 +1283,9 @@ class AnaliseInteligentesService:
                 ap, prefixo_n=n_pref, filtro=filtro_n,
                 jogos_enriquecidos=cache_jogos[cache_key],
                 historico_keys=hist_keys,
+                faixa=cache_faixa.get(pad),
+                min_dezena=dmin,
+                max_dezena=dmax,
             ))
 
         ok_rows = [r for r in resultados if r.get("ok")]
@@ -1409,6 +1473,12 @@ class AnaliseInteligentesService:
             "checagem": checagem,
             "api": "/analise/api/inteligentes/resumo-operacional-padroes",
         }
+
+    @classmethod
+    def evolucao_padroes(cls, base: str = "geral") -> Dict[str, Any]:
+        """Histórico concurso → padrão → aposta vencedora (aba Padrões II)."""
+        from analise_inteligentes_diadesorte.evolucao_padroes import montar_evolucao
+        return montar_evolucao(cls, base=base)
 
 
 def make_inteligentes_service(modality_key: str):

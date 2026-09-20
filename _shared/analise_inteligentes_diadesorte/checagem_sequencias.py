@@ -7,6 +7,9 @@ from collections import Counter, defaultdict
 from itertools import combinations, product
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
+from analise_inteligentes_diadesorte.diagonais_volante import diagonais_na_aposta
+from analise_inteligentes_diadesorte.soma_media import classificar_soma
+
 
 def padrao_inicial(dezenas: Sequence[int]) -> str:
     return " ".join(str(int(d) // 10) for d in dezenas)
@@ -392,6 +395,9 @@ def montar_resultado_linha(
     jogos_enriquecidos: Sequence[Dict[str, Any]],
     historico_keys: Set[str],
     limite_matches: int = 12,
+    faixa: Optional[Dict[str, Any]] = None,
+    min_dezena: int = 1,
+    max_dezena: int = 31,
 ) -> Dict[str, Any]:
     if not aposta.get("ok"):
         return {
@@ -408,6 +414,9 @@ def montar_resultado_linha(
     prefixo = dezenas[:n]
     padrao = aposta.get("padrao") or padrao_inicial(dezenas)
     chave = chave_dezenas(dezenas)
+    soma = sum(int(x) for x in dezenas)
+    cls_soma = classificar_soma(soma, faixa)
+    diags = diagonais_na_aposta(dezenas, dmin=min_dezena, dmax=max_dezena)
 
     universo = [j for j in jogos_enriquecidos if jogo_no_filtro(j, filtro, historico_keys)]
     matches = [
@@ -439,7 +448,14 @@ def montar_resultado_linha(
         "existe_exata": bool(exata),
         "status_exata": (exata or {}).get("status_media"),
         "status_exata_label": (exata or {}).get("status_media_label"),
-        "soma_exata": (exata or {}).get("soma") if exata else sum(dezenas),
+        "soma": soma,
+        "status_media": cls_soma.get("status_media"),
+        "status_media_label": cls_soma.get("status_media_label"),
+        "soma_media": cls_soma.get("media"),
+        "distancia": cls_soma.get("distancia"),
+        "diagonais": diags,
+        "n_diagonais": len(diags),
+        "soma_exata": (exata or {}).get("soma") if exata else soma,
         "ja_saiu": chave in historico_keys,
         "ultimas": ultimas,
         "qtd_prefixo": len(matches),

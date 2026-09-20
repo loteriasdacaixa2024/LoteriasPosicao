@@ -437,3 +437,13 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
             return jsonify(out), (200 if out.get("sucesso") else 500)
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @analise_bp.route("/api/inteligentes/evolucao-padroes")
+    def api_inteligentes_evolucao_padroes():
+        """Histórico concurso → padrão → aposta vencedora (ABA 4)."""
+        try:
+            base = request.args.get("base", "geral")
+            out = Svc.evolucao_padroes(base=base)
+            return jsonify(out), (200 if out.get("sucesso") else 500)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500

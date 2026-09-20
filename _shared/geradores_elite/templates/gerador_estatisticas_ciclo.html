@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+
+{% block content %}
+<style>
+#gec-root .page-links a {
+  border-color: var(--primary); color: var(--primary);
+}
+#gec-root .page-links a:hover {
+  background: var(--primary); color: #fff;
+}
+#gec-root .gec-fonte {
+  font-size: .78rem; color: #715f0e;
+}
+#gec-root .gec-fonte a { color: var(--primary-xdark, #887211); font-weight: 600; }
+#gec-root .gec-regra {
+  font-size: .82rem;
+  line-height: 1.45;
+  color: #3f3610;
+  background: #fcf9e8;
+  border: 1px solid #ead98a;
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  padding: .55rem .75rem;
+  margin: .75rem 0 0;
+}
+#gec-root .gec-ball {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: .75rem; font-weight: 700; margin: 1px;
+}
+#gec-root .gec-ball.pend { background: #d4b31a; color: #171303; }
+#gec-root .gec-ball.comp { background: #e2e8f0; color: #0f172a; }
+#gec-root .gec-ball.saida { background: #198754; color: #fff; }
+#gec-root .gec-card {
+  border: 1px solid #e5e7eb; border-radius: 10px; padding: .55rem .7rem;
+  border-left: 3px solid var(--primary); background: #fff;
+}
+#gec-root .lista-apostas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+}
+@media (max-width: 768px) {
+  #gec-root .lista-apostas-grid { grid-template-columns: 1fr; }
+}
+#gec-root .mes-badge {
+  display: inline-flex; align-items: center;
+  padding: .15rem .5rem; border-radius: 6px;
+  font-size: .6875rem; font-weight: 700; background: #6c757d; color: #fff;
+}
+{% if meses_cores %}
+{% for nome, cor in meses_cores.items() %}
+#gec-root .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+{% endfor %}
+{% endif %}
+#gec-root .gec-chip {
+  display: inline-flex; font-size: .68rem; font-weight: 600;
+  padding: .12rem .4rem; border-radius: 6px; background: #f8fafc; border: 1px solid #e5e7eb;
+}
+#gec-root .gec-chip-diag { background: #eef6ff; border-color: #bfd7f2; color: #1e4b7b; }
+#gec-root .gec-chip-warn { background: #fff1f2; border-color: #fecdd3; color: #9f1239; }
+#gec-root .gec-chip-inedito { background: #d4b31a; border-color: #b89a18; color: #171303; }
+#gec-root .gec-card.gec-ja-saiu { border-color: #fecdd3; border-left-color: #e11d48; background: #fff7f8; }
+#gec-root .gec-card.gec-inedito { border-left-color: #d4b31a; }
+</style>
+
+<div class="container-fluid py-3" id="gec-root"
+     data-api="{{ api_base }}"
+     data-manual="/geradores-elite/escolha-tubular-apostas/?aba=manual"
+     data-volantes="/geradores-elite/escolha-tubular-apostas/?aba=volantes">
+  <div class="d-flex flex-wrap gap-2 mb-3 page-links">
+    <a class="btn btn-sm btn-outline-secondary" href="{{ escolha_url }}"><i class="fas fa-sliders-h"></i> Estatísticas Básicas</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ ciclo_url }}"><i class="fas fa-sync-alt"></i> Progresso do Ciclo</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ padroes_url }}"><i class="fas fa-th-list"></i> 4 · Padrões II</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}"><i class="fas fa-history"></i> 7 · Panorama Histórico</a>
+    <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-bolt"></i> Elite</a>
+  </div>
+
+  <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1"><i class="fas fa-chart-pie" style="color:var(--primary)"></i> {{ page_title }}</h1>
+      <p class="text-muted small mb-0">{{ page_subtitle }}</p>
+      <p class="gec-fonte mb-0 mt-1">
+        <i class="fas fa-info-circle me-1"></i>
+        <strong>Base de geração:</strong> Estatísticas Básicas e Progresso do Ciclo.
+        <a href="{{ escolha_url }}">Estatísticas Básicas</a>
+        ·
+        <a href="{{ ciclo_url }}">Progresso do Ciclo</a>
+        ·
+        <a href="{{ padroes_url }}">aba 4 · Padrões II</a>
+        ·
+        <a href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}">aba 7 · Panorama (já saíram / faltam sair)</a>
+      </p>
+      <p class="gec-regra mb-0">
+        <strong>Como o gerador decide:</strong>
+        o ciclo não manda no formato da aposta. Ele só diz quais dezenas ainda não saíram;
+        a análise diz como o jogo deve ficar.
+        Cada aposta usa um <strong>padrão inicial diferente</strong> (85 da aba 4).
+        Pelo menos uma usa um padrão que <strong>ainda não saiu</strong> (lista da aba 7).
+        Não há volantes iguais no lote.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-5">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-bold small" style="background:var(--accent-light,#fcf9e8);">
+          <i class="fas fa-gauge-high me-1"></i> Estatísticas Básicas (janela)
+        </div>
+        <div class="card-body" id="gecStats">
+          <p class="text-muted small mb-0">Carregando…</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-bold small" style="background:var(--accent-light,#fcf9e8);">
+          <i class="fas fa-sync-alt me-1"></i> Progresso do ciclo
+        </div>
+        <div class="card-body" id="gecCiclo">
+          <p class="text-muted small mb-0">Carregando…</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header fw-bold small" style="background:var(--accent-light,#fcf9e8);">
+          <i class="fas fa-slash me-1"></i> Diagonais do volante
+        </div>
+        <div class="card-body" id="gecDiags">
+          <p class="text-muted small mb-0">Carregando…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-header fw-bold small" style="background:var(--accent-light,#fcf9e8);">
+      <i class="fas fa-th-list me-1"></i> Padrões iniciais — abas 4 e 7
+    </div>
+    <div class="card-body py-2" id="gecPadroes">
+      <p class="text-muted small mb-0">Carregando…</p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
+    <div class="card-header fw-bold" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-xdark,#887211) 100%);color:#fff;">
+      <i class="fas fa-dice me-2"></i>Gerar apostas
+    </div>
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-2">
+          <label class="form-label small mb-0">Apostas</label>
+          <input type="number" class="form-control form-control-sm" id="gecQtd" value="10" min="1" max="200">
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label small mb-0">Mês da Sorte</label>
+          <select class="form-select form-select-sm" id="gecMes"></select>
+        </div>
+        <div class="col-12 d-flex flex-wrap gap-2 align-items-center mt-1">
+          <button type="button" class="btn fw-bold" id="gecBtnGerar"
+                  style="background:var(--primary);border-color:var(--primary);color:#fff;">
+            <i class="fas fa-bolt"></i> Gerar
+          </button>
+          <button type="button" class="btn btn-outline-secondary" id="gecBtnCopiar" disabled>
+            <i class="fas fa-copy"></i> Copiar
+          </button>
+          <button type="button" class="btn btn-outline-secondary" id="gecBtnExport" disabled>
+            <i class="fas fa-download"></i> Exportar TXT
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-success" id="gecBtnManual" disabled
+                  title="Envia as apostas para a Seção 10 Manual">
+            Enviar para Manual
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="gecBtnVolantes" disabled
+                  title="Pré-visualizar estas apostas nos volantes da Seção 12">
+            Visualizar nos Volantes
+          </button>
+          <button type="button" class="btn btn-sm btn-warning" id="gecBtnJaSaiu" disabled
+                  title="Compara cada aposta com todos os resultados oficiais, do concurso 1 até o atual">
+            <i class="fas fa-history me-1"></i>Já saiu?
+          </button>
+          <span class="badge" id="gecBadge" style="background:var(--accent);color:#171303;">Aguardando</span>
+        </div>
+      </div>
+      <div class="small text-muted mt-2">
+        <span class="gec-ball pend" style="width:18px;height:18px;font-size:.55rem;">P</span> pendente do ciclo
+        &nbsp;
+        <span class="gec-ball comp" style="width:18px;height:18px;font-size:.55rem;">C</span> complemento estatístico
+        <span class="ms-2">Verifica se alguma aposta já foi o resultado oficial (concurso 1 até o atual)</span>
+      </div>
+      <div id="gecAlert" class="mt-2"></div>
+      <div id="gecResultados" class="mt-3 lista-apostas-grid">
+        <p class="text-muted small mb-0" style="grid-column:1/-1;">
+          Clique em <strong>Gerar</strong> para montar as apostas com o perfil da janela e as dezenas que ainda faltam no ciclo.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
+<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=5"></script>
+{% endblock %}

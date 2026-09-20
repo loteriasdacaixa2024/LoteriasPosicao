@@ -31,6 +31,15 @@ from _shared.modality_launcher import (
     status_modalities,
     stop_all_modalities,
 )
+from _shared.componentes_launcher import (
+    boot_satelites_depois_da_central,
+    ensure_conferencias,
+    run_download_job,
+    status_componentes,
+    status_conferencias,
+    status_download,
+    stop_conferencias_if_started_by_us,
+)
 from modality_proxy import proxy_modality_request
 
 app = Flask(__name__)
@@ -46,7 +55,13 @@ app.jinja_loader = ChoiceLoader(_loaders)
 
 app.register_blueprint(analises_gerais_bp, url_prefix="/analises-gerais")
 
-atexit.register(stop_all_modalities)
+
+def _shutdown_orquestracao():
+    stop_conferencias_if_started_by_us()
+    stop_all_modalities()
+
+
+atexit.register(_shutdown_orquestracao)
 
 MODALIDADES = {
     key: (int(meta["porta"]), meta.get("nome", key))
@@ -230,8 +245,52 @@ def api_modalidades_iniciar():
     return jsonify({"status": "success", **st})
 
 
+@app.route("/api/componentes/status", methods=["GET"])
+def api_componentes_status():
+    return jsonify({"status": "success", **status_componentes()})
+
+
+@app.route("/api/componentes/download/status", methods=["GET"])
+def api_download_status():
+    return jsonify({"status": "success", **status_download()})
+
+
+@app.route("/api/componentes/download/atualizar", methods=["POST"])
+def api_download_atualizar():
+    st = run_download_job()
+    okish = bool(st.get("ok") or st.get("duplicado") or st.get("em_andamento"))
+    http = 200 if okish else 500
+    return jsonify({"status": "success" if st.get("ok") else "error", **st}), http
+
+
+@app.route("/api/componentes/conferencias/status", methods=["GET"])
+def api_conferencias_status():
+    return jsonify({"status": "success", **status_conferencias()})
+
+
+@app.route("/api/componentes/conferencias/abrir", methods=["POST"])
+def api_conferencias_abrir():
+    st = ensure_conferencias()
+    http = 200 if st.get("ok") else 503
+    return jsonify({"status": "success" if st.get("ok") else "error", **st}), http
+
+
 if __name__ == "__main__":
-    if _should_boot_modalities():
-        print("[Central] Subindo apps das modalidades (5152–5160) para links e APIs…")
-        start_all_modalities(wait_online=True)
-    app.run(host="0.0.0.0", port=CENTRAL_PORT, debug=False)
+    try:
+        if _should_boot_modalities():
+            print("[Central] Subindo apps das modalidades (5152–5160) para links e APIs…")
+            start_all_modalities(wait_online=True)
+        boot_satelites_depois_da_central(CENTRAL_PORT)
+        print(f"[Central] Interface: http://127.0.0.1:{CENTRAL_PORT}")
+        app.run(
+            host="0.0.0.0",
+            port=CENTRAL_PORT,
+            debug=False,
+            threaded=True,
+            use_reloader=False,
+        )
+    except KeyboardInterrupt:
+        print("\n[Central] Encerrando.")
+    except OSError as e:
+        print(f"[Central] Porta {CENTRAL_PORT} indisponível: {e}")
+        sys.exit(1)
