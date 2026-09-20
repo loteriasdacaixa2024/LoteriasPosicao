@@ -168,6 +168,51 @@ def _rank_freq(counter: Counter, total: int, spec) -> List[Dict[str, Any]]:
     return ranked
 
 
+def _rotulo_posicao(idx: int, spec) -> str:
+    return f"{idx}ª {spec.pos_label.lower()}"
+
+
+def _montar_matriz(posicoes: List[Dict[str, Any]], spec) -> Dict[str, Any]:
+    """Matriz completa: todas as dezenas do universo × todas as posições (zeros inclusos)."""
+    n = spec.num_posicoes
+    colunas = []
+    for i in range(n):
+        colunas.append({
+            "pos": i + 1,
+            "label": _rotulo_posicao(i + 1, spec),
+            "label_curto": (
+                posicoes[i].get("label")
+                if i < len(posicoes)
+                else f"{spec.pos_prefix}{i + 1}"
+            ),
+        })
+
+    freq_maps = []
+    for p in posicoes:
+        freq_maps.append({
+            int(x["valor"]): int(x["freq"])
+            for x in (p.get("frequencias") or [])
+        })
+
+    linhas = []
+    for dez in range(spec.valor_min, spec.valor_max + 1):
+        contagens = [m.get(dez, 0) for m in freq_maps]
+        linhas.append({
+            "dezena": dez,
+            "label": _fmt(spec, dez),
+            "contagens": contagens,
+            "total": sum(contagens),
+        })
+
+    return {
+        "colunas": colunas,
+        "linhas": linhas,
+        "valor_min": spec.valor_min,
+        "valor_max": spec.valor_max,
+        "num_posicoes": n,
+    }
+
+
 def _analisar_posicoes(concursos: List[Dict[str, Any]], spec, *, ordenar: bool) -> List[Dict[str, Any]]:
     n = spec.num_posicoes
     counters = [Counter() for _ in range(n)]
@@ -441,6 +486,7 @@ def analisar(key: str, modo: str = "crescente", sorteio: int = 1) -> Dict[str, A
             "ultimo_data": (ultimo or {}).get("data") or "",
         },
         "posicoes": posicoes,
+        "matriz": _montar_matriz(posicoes, spec),
         "aposta_sugerida": aposta,
         "insights": _insights(key, modo, posicoes, spec, excel),
         "extra": _extras_freq(concursos, spec),

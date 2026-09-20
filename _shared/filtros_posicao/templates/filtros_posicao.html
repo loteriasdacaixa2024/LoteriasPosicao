@@ -6,9 +6,17 @@
         background: linear-gradient(135deg, var(--primary), var(--primary-xdark, #1a1a1a));
         color: #fff; border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
         box-shadow: 0 4px 22px rgba(0,0,0,.16);
+        display: flex; flex-wrap: wrap; gap: .85rem 1.25rem; align-items: center;
+        justify-content: space-between;
     }
     #fp-root .fp-hero h1 { font-size: 1.35rem; margin: 0 0 .35rem; font-weight: 800; }
     #fp-root .fp-hero p { margin: 0; opacity: .9; font-size: .92rem; }
+    #fp-root .fp-hero-link {
+        display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap;
+        background: #fff; color: var(--primary); font-weight: 800; font-size: .82rem;
+        border-radius: 999px; padding: .45rem .95rem; text-decoration: none;
+    }
+    #fp-root .fp-hero-link:hover { color: var(--primary); filter: brightness(.96); }
     #fp-root .fp-toolbar {
         display: flex; flex-wrap: wrap; gap: .65rem; align-items: center;
         background: var(--fp-card); border: 1px solid var(--fp-border); border-radius: 12px;
@@ -111,6 +119,55 @@
     #fp-root .fp-ins b { display: block; margin-bottom: .15rem; }
     #fp-root .fp-err { background: #fdecea; border: 1px solid #f5c2c0; color: #8a1f14; padding: .8rem 1rem; border-radius: 10px; }
     #fp-root .fp-loading { padding: 2rem; text-align: center; color: #7a6a4a; }
+    #fp-root .fp-tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 1rem; }
+    #fp-root .fp-tab {
+        border: 1px solid #ead9a8; background: #fff; border-radius: 999px;
+        padding: .4rem .95rem; font-weight: 700; font-size: .82rem; color: #5a4a2a; cursor: pointer;
+    }
+    #fp-root .fp-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    #fp-root .fp-print-btn {
+        margin-left: auto; border: 1px solid #ead9a8; background: #fff; border-radius: 999px;
+        padding: .4rem .85rem; font-weight: 700; font-size: .82rem; color: #5a4a2a; cursor: pointer;
+    }
+    #fp-root .fp-print-btn:hover { border-color: var(--primary); color: var(--primary); }
+    #fp-root .fp-matriz-wrap {
+        background: var(--fp-card); border: 1px solid var(--fp-border); border-radius: 12px;
+        padding: 1rem; overflow: auto;
+    }
+    #fp-root .fp-matriz-head { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: baseline; margin-bottom: .75rem; }
+    #fp-root .fp-matriz-head h2 { font-size: 1.05rem; margin: 0; font-weight: 800; }
+    #fp-root table.fp-matriz { width: 100%; border-collapse: collapse; font-size: .78rem; min-width: 640px; }
+    #fp-root table.fp-matriz th, #fp-root table.fp-matriz td {
+        padding: .32rem .4rem; border-bottom: 1px solid #f3edd8; text-align: right; white-space: nowrap;
+    }
+    #fp-root table.fp-matriz th {
+        text-align: center; color: #7a6a4a; font-size: .68rem; text-transform: uppercase;
+        letter-spacing: .03em; border-bottom: 2px solid #ead9a8; position: sticky; top: 0; background: #fffdf5;
+    }
+    #fp-root table.fp-matriz th.dez, #fp-root table.fp-matriz td.dez {
+        text-align: left; font-weight: 800; color: var(--primary); position: sticky; left: 0; background: #fff;
+    }
+    #fp-root table.fp-matriz th.dez { background: #fffdf5; }
+    #fp-root table.fp-matriz td.max { font-weight: 800; color: #196f3d; background: #e8f7ee; }
+    #fp-root table.fp-matriz tfoot td { font-weight: 800; border-top: 2px solid #ead9a8; }
+    #fp-print-meta { display: none; }
+    @media print {
+        body * { visibility: hidden !important; }
+        #fp-print-area, #fp-print-area * { visibility: visible !important; }
+        #fp-print-area {
+            position: absolute; left: 0; top: 0; width: 100%;
+            background: #fff; padding: 0;
+        }
+        #fp-print-meta { display: block !important; margin-bottom: 12px; }
+        #fp-print-meta h1 { font-size: 16pt; margin: 0 0 4px; }
+        #fp-print-meta p { margin: 0 0 3px; font-size: 10pt; }
+        #fp-root .fp-toolbar, #fp-root .fp-tabs, #fp-root .fp-print-btn,
+        #fp-root .fp-hero, #fpPaneFiltros { display: none !important; }
+        #fp-root table.fp-matriz { font-size: 8.5pt; min-width: 0; }
+        #fp-root table.fp-matriz th { position: static; background: #f4f1e8 !important; }
+        #fp-root table.fp-matriz td.dez, #fp-root table.fp-matriz th.dez { position: static; }
+        #fp-root .fp-matriz-wrap { border: 0; padding: 0; overflow: visible; }
+    }
 </style>
 
 <div id="fp-root"
@@ -120,8 +177,14 @@
      data-ss="{{ 1 if modality_key == 'supersete' else 0 }}">
 
     <div class="fp-hero">
-        <h1>Filtros por posição — {{ modality_nome }}</h1>
-        <p>Qual dezena mais saiu em cada posição, em todos os concursos do Excel. Use isso para montar apostas reais.</p>
+        <div>
+            <h1>Filtros por posição — {{ modality_nome }}</h1>
+            <p>Consulta: faixas, ranking e frequência 31 × 7. Esta tela não gera apostas.</p>
+        </div>
+        <a class="fp-hero-link" href="/geradores-elite/gerador-por-posicao/"
+           title="Abre o gerador que usa ordem de sorteio + atraso, repetição, Sniper e comportamento">
+            <i class="fas fa-arrow-right"></i> Gerar apostas por posição
+        </a>
     </div>
 
     <div class="fp-toolbar">
@@ -136,9 +199,29 @@
         </div>
         {% endif %}
         <span class="small text-muted" id="fpFonte"></span>
+        <button type="button" class="fp-print-btn" id="fpBtnPrint" title="Imprimir a frequência por posição">
+            <i class="fas fa-print"></i> Imprimir
+        </button>
     </div>
 
-    <div id="fpBody" class="fp-loading">Carregando todos os concursos…</div>
+    <div class="fp-tabs" role="tablist">
+        <button type="button" class="fp-tab" data-aba="filtros" role="tab">Filtros e ranking</button>
+        <button type="button" class="fp-tab active" data-aba="matriz" role="tab">Frequência por posição</button>
+    </div>
+
+    <div id="fp-print-area">
+        <div id="fp-print-meta">
+            <h1>Frequência por posição — {{ modality_nome }}</h1>
+            <p id="fpPrintCriterio">Critério: Ordem crescente</p>
+            <p id="fpPrintUniverso"></p>
+        </div>
+        <div id="fpPaneFiltros" style="display:none">
+            <div id="fpBody" class="fp-loading">Carregando todos os concursos…</div>
+        </div>
+        <div id="fpPaneMatriz">
+            <div id="fpMatrizBody" class="fp-loading">Carregando todos os concursos…</div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -154,6 +237,7 @@
     let chart = null;
     let posAtiva = 1;
     let tabelaAberta = false;
+    let abaAtiva = 'matriz';
 
     document.querySelectorAll('#fpModo button').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -171,6 +255,28 @@
             carregar();
         });
     });
+    document.querySelectorAll('#fp-root .fp-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            abaAtiva = btn.dataset.aba === 'filtros' ? 'filtros' : 'matriz';
+            aplicarAba();
+            if (abaAtiva === 'filtros' && data && data.sucesso) pintarPosicao();
+        });
+    });
+    document.getElementById('fpBtnPrint').addEventListener('click', () => {
+        abaAtiva = 'matriz';
+        aplicarAba();
+        window.print();
+    });
+
+    function aplicarAba() {
+        document.querySelectorAll('#fp-root .fp-tab').forEach(b => {
+            b.classList.toggle('active', b.dataset.aba === abaAtiva);
+        });
+        const filtros = document.getElementById('fpPaneFiltros');
+        const matriz = document.getElementById('fpPaneMatriz');
+        if (filtros) filtros.style.display = abaAtiva === 'filtros' ? '' : 'none';
+        if (matriz) matriz.style.display = abaAtiva === 'matriz' ? '' : 'none';
+    }
 
     function esc(s) {
         return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -178,17 +284,114 @@
 
     async function carregar() {
         const body = document.getElementById('fpBody');
+        const matrizBody = document.getElementById('fpMatrizBody');
         body.className = 'fp-loading';
         body.textContent = 'Carregando todos os concursos…';
+        if (matrizBody) {
+            matrizBody.className = 'fp-loading';
+            matrizBody.textContent = 'Carregando todos os concursos…';
+        }
         const qs = new URLSearchParams({ modo, sorteio: String(sorteio) });
         const r = await fetch(api + '?' + qs.toString());
         data = await r.json();
         render();
     }
 
+    function atualizarPrintMeta() {
+        const criterio = document.getElementById('fpPrintCriterio');
+        const universo = document.getElementById('fpPrintUniverso');
+        if (!criterio || !universo) return;
+        const u = (data && data.universo) || {};
+        const modoTxt = data && data.modo === 'sorteio' ? 'Ordem de sorteio' : 'Ordem crescente';
+        criterio.textContent = `Critério: ${modoTxt}`;
+        const faixa = (u.primeiro && u.ultimo)
+            ? `Concursos ${u.primeiro} a ${u.ultimo}`
+            : '';
+        universo.textContent = [faixa, u.total ? `${u.total} concursos` : ''].filter(Boolean).join(' · ');
+    }
+
+    function montarMatrizLocal() {
+        const spec = (data && data.modalidade) || {};
+        const vmin = Number(spec.valor_min);
+        const vmax = Number(spec.valor_max);
+        const n = Number(spec.num_posicoes) || ((data.posicoes || []).length);
+        const pad = Number(spec.pad_width) || 2;
+        const posLabel = (spec.pos_label || 'Posição').toLowerCase();
+        const prefix = spec.pos_prefix || 'P';
+        const fmt = (v) => pad <= 1 ? String(v) : String(v).padStart(pad, '0');
+        const posicoes = data.posicoes || [];
+        const colunas = [];
+        for (let i = 0; i < n; i++) {
+            colunas.push({
+                pos: i + 1,
+                label: `${i + 1}ª ${posLabel}`,
+                label_curto: (posicoes[i] && posicoes[i].label) || `${prefix}${i + 1}`,
+            });
+        }
+        const maps = posicoes.map(p => {
+            const m = {};
+            (p.frequencias || []).forEach(x => { m[Number(x.valor)] = Number(x.freq) || 0; });
+            return m;
+        });
+        const linhas = [];
+        if (Number.isFinite(vmin) && Number.isFinite(vmax) && vmax >= vmin) {
+            for (let dez = vmin; dez <= vmax; dez++) {
+                const contagens = maps.map(m => m[dez] || 0);
+                while (contagens.length < n) contagens.push(0);
+                linhas.push({ dezena: dez, label: fmt(dez), contagens });
+            }
+        }
+        return { colunas, linhas };
+    }
+
+    function renderMatriz() {
+        const box = document.getElementById('fpMatrizBody');
+        if (!box) return;
+        if (!data || !data.sucesso) {
+            box.className = '';
+            box.innerHTML = `<div class="fp-err">${esc((data && data.erro) || 'Não foi possível montar a análise.')}</div>`;
+            return;
+        }
+        const matrizApi = data.matriz || {};
+        const matriz = (matrizApi.linhas && matrizApi.linhas.length) ? matrizApi : montarMatrizLocal();
+        const colunas = matriz.colunas || [];
+        const linhas = matriz.linhas || [];
+        const maxPorCol = colunas.map((_, i) => Math.max(0, ...linhas.map(l => (l.contagens || [])[i] || 0)));
+        const totaisCol = colunas.map((_, i) => linhas.reduce((acc, l) => acc + ((l.contagens || [])[i] || 0), 0));
+        const modoTxt = data.modo === 'sorteio' ? 'Ordem de sorteio' : 'Ordem crescente';
+        const u = data.universo || {};
+        const thead = `<tr><th class="dez">Dezena</th>${colunas.map(c =>
+            `<th title="${esc(c.label)}">${esc(c.label)}</th>`
+        ).join('')}</tr>`;
+        const tbody = linhas.map(l => {
+            const cells = (l.contagens || []).map((n, i) => {
+                const cls = n && n === maxPorCol[i] ? ' class="max"' : '';
+                return `<td${cls}>${n}</td>`;
+            }).join('');
+            return `<tr><td class="dez">${esc(l.label)}</td>${cells}</tr>`;
+        }).join('');
+        const tfoot = `<tr><td class="dez">Total</td>${totaisCol.map(n => `<td>${n}</td>`).join('')}</tr>`;
+        box.className = '';
+        box.innerHTML = `
+            <div class="fp-matriz-wrap">
+                <div class="fp-matriz-head">
+                    <h2>Frequência das dezenas por posição</h2>
+                    <span class="small text-muted">${esc(modoTxt)} · ${u.total || 0} concursos · todas as dezenas do universo</span>
+                </div>
+                <table class="fp-matriz">
+                    <thead>${thead}</thead>
+                    <tbody>${tbody}</tbody>
+                    <tfoot>${tfoot}</tfoot>
+                </table>
+            </div>`;
+    }
+
     function render() {
         const body = document.getElementById('fpBody');
         const fonteEl = document.getElementById('fpFonte');
+        atualizarPrintMeta();
+        renderMatriz();
+        aplicarAba();
         if (!data || !data.sucesso) {
             body.className = '';
             body.innerHTML = `<div class="fp-err">${esc((data && data.erro) || 'Não foi possível montar a análise.')}</div>`;
@@ -315,16 +518,22 @@
             });
         });
         if (!(data.posicoes || []).some(p => p.pos === posAtiva)) posAtiva = 1;
-        pintarPosicao();
+        if (abaAtiva === 'filtros') pintarPosicao();
     }
 
     function pintarPosicao() {
+        if (abaAtiva !== 'filtros') return;
         const p = (data.posicoes || []).find(x => x.pos === posAtiva) || (data.posicoes || [])[0];
         if (!p) return;
+        const title = document.getElementById('fpChartTitle');
+        const tableTitle = document.getElementById('fpTableTitle');
+        const table = document.getElementById('fpTable');
+        const ctx = document.getElementById('fpChart');
+        if (!title || !tableTitle || !table || !ctx) return;
         const camp = p.campeao || {};
-        document.getElementById('fpChartTitle').textContent =
+        title.textContent =
             `${p.label}: mais saiu ${camp.label || '—'} (${camp.freq || 0}×) · filtro ${p.min_fmt}–${p.max_fmt}`;
-        document.getElementById('fpTableTitle').textContent =
+        tableTitle.textContent =
             `${p.label} — ${p.qtd_distintos} dezenas já saíram nesta posição`;
 
         const freqs = p.frequencias || [];
@@ -336,10 +545,9 @@
                 <td>${x.pct}%</td>
                 <td style="width:40%"><div class="fp-bar"><span style="width:${(100 * x.freq / maxF).toFixed(1)}%"></span></div></td>
             </tr>`).join('');
-        document.getElementById('fpTable').innerHTML =
+        table.innerHTML =
             `<thead><tr><th>Dezena</th><th>Vezes</th><th>%</th><th></th></tr></thead><tbody>${rows}</tbody>`;
 
-        const ctx = document.getElementById('fpChart');
         if (chart) chart.destroy();
         const top = freqs.slice(0, 16);
         chart = new Chart(ctx, {

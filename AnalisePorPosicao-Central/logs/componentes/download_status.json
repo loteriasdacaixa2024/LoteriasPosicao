@@ -1,18 +1,51 @@
 {
   "estado": "ok",
   "ok": true,
-  "mensagem": "1 arquivo(s) atualizado(s).",
-  "iniciado_em": "19/09/2026 14:22:39",
-  "terminado_em": "19/09/2026 14:22:55",
+  "mensagem": "Excel já atualizado hoje (20/09/2026). Download pulado.",
+  "iniciado_em": null,
+  "terminado_em": "20/09/2026 10:49:22",
   "arquivos": [
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx",
+      "arquivo": "LOTOFACIL.xlsx",
       "bytes": 366812
+    },
+    {
+      "arquivo": "DIA_DE_SORTE.xlsx",
+      "bytes": 93031
+    },
+    {
+      "arquivo": "LOTOMANIA.xlsx",
+      "bytes": 358019
+    },
+    {
+      "arquivo": "QUINA.xlsx",
+      "bytes": 503597
+    },
+    {
+      "arquivo": "MEGA_SENA.xlsx",
+      "bytes": 222003
+    },
+    {
+      "arquivo": "MAIS_MILIONARIA.xlsx",
+      "bytes": 48755
+    },
+    {
+      "arquivo": "DUPLA_SENA.xlsx",
+      "bytes": 282003
+    },
+    {
+      "arquivo": "TIMEMANIA.xlsx",
+      "bytes": 211367
+    },
+    {
+      "arquivo": "SUPER_SETE.xlsx",
+      "bytes": 70737
     }
   ],
   "erros": [],
-  "pid": 146416,
+  "pid": null,
   "python": "D:\\loterias\\LoteriasPosicao\\VenvLoterias\\Scripts\\python.exe",
   "script": "D:\\loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\DownloadResultadosLoteriasCaixa.py",
-  "returncode": 1
+  "pulado": true,
+  "motivo": "mesmo_dia"
 }

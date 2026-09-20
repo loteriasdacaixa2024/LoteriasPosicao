@@ -473,6 +473,91 @@
             color: #8a8f96;
         }
 
+        .mapa-menu-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.35rem 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            border-left: 5px solid #ca8a04;
+            margin-top: 1.5rem;
+        }
+        .mapa-menu-box h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #856404;
+            margin: 0 0 0.4rem;
+        }
+        .mapa-menu-lead {
+            font-size: 0.82rem;
+            color: #64748b;
+            margin: 0 0 1rem;
+            line-height: 1.45;
+        }
+        .mapa-menu-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        .mapa-menu-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: #fffcf0;
+            color: #856404;
+            font-weight: 700;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 2px solid #f1e4b8;
+        }
+        .mapa-menu-table td {
+            padding: 11px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+            color: #334155;
+        }
+        .mapa-menu-table tr:last-child td { border-bottom: none; }
+        .mapa-menu-table tr:hover td { background: #fffbeb; }
+        .mapa-menu-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            color: #334155;
+            font-weight: 800;
+            font-size: 0.78rem;
+        }
+        .mapa-menu-num.is-destaque {
+            background: #ca8a04;
+            color: #fff;
+        }
+        .mapa-menu-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            align-items: center;
+        }
+        .mapa-menu-links a {
+            color: #1d4ed8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .mapa-menu-links a:hover { text-decoration: underline; }
+        .mapa-menu-note {
+            display: block;
+            font-size: 0.72rem;
+            color: #94a3b8;
+            font-weight: 500;
+            margin-top: 3px;
+        }
+        @media (max-width: 768px) {
+            .mapa-menu-box { padding: 1rem 0.85rem; }
+            .mapa-menu-table th:nth-child(1),
+            .mapa-menu-table td:nth-child(1) { padding-left: 6px; padding-right: 6px; }
+        }
+
         .comparativo-links {
             display: flex;
             align-items: center;
@@ -734,6 +819,220 @@
 
     <!-- SESSÃO DE TABELAS COMPARATIVAS POR MODALIDADE (FORA DOS CARDS) -->
     <div class="tables-container" id="all-comparatives"></div>
+
+    {% set dds = (modality_urls.get('diadesorte') or 'http://127.0.0.1:5153').rstrip('/') %}
+    <div class="tables-container">
+        <div class="mapa-menu-box">
+            <h3>Mapa Análise ↔ Gerador</h3>
+            <p class="mapa-menu-lead">
+                Ida e volta do menu do <strong>Dia de Sorte</strong> (o mais completo do sistema).
+                Os números <strong>1, 2 e 3</strong> são os mesmos destaques do menu Geradores de Elite.
+                Nas outras modalidades vale o mesmo padrão só para os itens que o menu oferece.
+            </p>
+            <table class="mapa-menu-table">
+                <thead>
+                    <tr>
+                        <th style="width:44px;">#</th>
+                        <th>Análise</th>
+                        <th>Gerador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="mapa-menu-num is-destaque">1</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/escolha-visual/" target="_blank" rel="noopener">← Escolha Visual</a>
+                                <a href="{{ dds }}/analise/ciclo-cobertura/" target="_blank" rel="noopener">← Análise de Ciclos</a>
+                            </div>
+                            <span class="mapa-menu-note">Estatísticas Básicas · dezenas pendentes do ciclo</span>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/estatisticas-ciclo/" target="_blank" rel="noopener">Estatísticas e Ciclo →</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num is-destaque">2</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/comportamento/" target="_blank" rel="noopener">← Análise Comportamental</a>
+                            </div>
+                            <span class="mapa-menu-note">Padrões PA/PR/RT/MO/MS · inteligente</span>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/comportamento-apostas/" target="_blank" rel="noopener">Comportamento → Apostas</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num is-destaque">3</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/analises-inteligentes/" target="_blank" rel="noopener">← Resultados &amp; Padrões</a>
+                                <a href="{{ dds }}/analise/somas-digitos/" target="_blank" rel="noopener">← Análise de Somas e Dígitos</a>
+                            </div>
+                            <span class="mapa-menu-note">Pool dezenas · pool dígitos · múltiplas engenharias</span>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/construtor-construcoes/" target="_blank" rel="noopener">Construtor de Construções →</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">4</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/resumo-geral/" target="_blank" rel="noopener">← Resumo Geral da Modalidade</a>
+                                <a href="{{ dds }}/analise/analises-inteligentes/" target="_blank" rel="noopener">← Resultados &amp; Padrões</a>
+                            </div>
+                            <span class="mapa-menu-note">Não tem par exclusivo — integra várias análises do menu</span>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/engine-final/" target="_blank" rel="noopener">Engine Final →</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">5</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/analises-inteligentes/" target="_blank" rel="noopener">← Resultados &amp; Padrões</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/gerador-gc/" target="_blank" rel="noopener">Gerador Pro / GC →</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">6</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/analises-inteligentes/" target="_blank" rel="noopener">← Resultados &amp; Padrões</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/gerador-elite/" target="_blank" rel="noopener">Gerador Elite →</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">7</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/repeticao-concursos/" target="_blank" rel="noopener">← Repetição entre concursos</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/repeticao-apostas/" target="_blank" rel="noopener">Repetição → Apostas</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">8</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/ciclo-cobertura/" target="_blank" rel="noopener">← Análise de Ciclos</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/ciclo-apostas/" target="_blank" rel="noopener">Ciclo — Apostas →</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">9</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/gaps-ciclo/" target="_blank" rel="noopener">← Análise por Gaps e Ciclo</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/gaps-ciclo-apostas/" target="_blank" rel="noopener">Gaps e Ciclo → Apostas</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">10</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/por-posicao/" target="_blank" rel="noopener">← Análise por Posição</a>
+                                <a href="{{ dds }}/dados/filtros-posicao/" target="_blank" rel="noopener">← Filtros por posição</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/gerador-por-posicao/" target="_blank" rel="noopener">Análise por Posição → Apostas</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">11</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/concentracao-acertos/" target="_blank" rel="noopener">← Concentração de Acertos</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/gerador-concentracao/" target="_blank" rel="noopener">Gerador por Concentração →</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">12</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/" target="_blank" rel="noopener">← Análise Estatística / Sniper</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/apostas-inteligentes/" target="_blank" rel="noopener">Sniper → Apostas</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">13</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/escolha-visual/" target="_blank" rel="noopener">← Escolha Visual</a>
+                                <a href="{{ dds }}/analise/analise-tubular/" target="_blank" rel="noopener">← Análise Tubular</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/escolha-tubular-apostas/" target="_blank" rel="noopener">Escolha/Tubular → Apostas</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="mapa-menu-num">14</span></td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/analise/somas-digitos/" target="_blank" rel="noopener">← Análise de Somas e Dígitos</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="mapa-menu-links">
+                                <a href="{{ dds }}/geradores-elite/gerador-digitos-inteligente/" target="_blank" rel="noopener">Gerador Inteligente por Dígitos →</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <footer>
         &copy; 2026 Analise por Posição Premium Suite. Todos os direitos reservados.<br>
