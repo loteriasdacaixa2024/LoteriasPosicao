@@ -178,9 +178,19 @@
         return baseAtual === 'linhas';
     }
 
+    function isModoAliadas() {
+        return baseAtual === 'aliadas';
+    }
+
+    function isModoFaixas() {
+        return baseAtual === 'faixas';
+    }
+
     function chaveApostasAtual() {
         if (isModoPanorama()) return `panorama_${basePanorama}`;
         if (isModoLinhas()) return 'linhas';
+        if (isModoAliadas()) return 'aliadas';
+        if (isModoFaixas()) return 'faixas';
         return baseAtual;
     }
 
@@ -190,6 +200,12 @@
         }
         if (isModoLinhas()) {
             return `Linhas L1–L10 — ${BASE_LABELS[baseLinhas] || baseLinhas}`;
+        }
+        if (isModoAliadas()) {
+            return 'Linhas + Ciclo + Somas';
+        }
+        if (isModoFaixas()) {
+            return 'Posição crescente (Excel)';
         }
         return BASE_LABELS[baseAtual] || baseAtual;
     }
@@ -522,9 +538,14 @@
         const painelBase = document.getElementById('painelModoBase');
         const painelPan = document.getElementById('painelModoPanorama');
         const painelLinhas = document.getElementById('painelModoLinhas');
-        if (painelBase) painelBase.classList.toggle('d-none', isModoPanorama() || isModoLinhas());
+        const painelAliadas = document.getElementById('painelModoAliadas');
+        const painelFaixas = document.getElementById('painelModoFaixas');
+        const especial = isModoPanorama() || isModoLinhas() || isModoAliadas() || isModoFaixas();
+        if (painelBase) painelBase.classList.toggle('d-none', especial);
         if (painelPan) painelPan.classList.toggle('d-none', !isModoPanorama());
         if (painelLinhas) painelLinhas.classList.toggle('d-none', !isModoLinhas());
+        if (painelAliadas) painelAliadas.classList.toggle('d-none', !isModoAliadas());
+        if (painelFaixas) painelFaixas.classList.toggle('d-none', !isModoFaixas());
     }
 
     function trocarBase(novaBase) {
@@ -537,6 +558,11 @@
             syncJanelaLinhasUI();
             carregarRankingLinhas();
             atualizarCriteriosLinhasTxt();
+        } else if (isModoAliadas()) {
+            window.ComportamentoBasesResumo?.render(metaBases, baseLinhas);
+        } else if (isModoFaixas()) {
+            carregarFaixasCrescente();
+            atualizarCriteriosFaixasTxt();
         } else if (!isModoPanorama()) {
             atualizarLblBase();
             filtrosAtivos = {};
@@ -859,7 +885,7 @@
         const pad = (n) => (window.__repPadDezena ? window.__repPadDezena(n, CFG) : String(n).padStart(2, '0'));
         const timeHtml = (a) => (CFG.extra_time && a.time_num) ? `<span class="badge bg-success ms-1">T${a.time_num}</span>` : '';
         const trevoHtml = (a) => (CFG.extra_trevos && a.trevos) ? `<span class="badge bg-purple ms-1">${a.trevos.join('-')}</span>` : '';
-        const labelLista = (isModoPanorama() || isModoLinhas()) ? labelApostasAtual() : '';
+        const labelLista = (isModoPanorama() || isModoLinhas() || isModoAliadas() || isModoFaixas()) ? labelApostasAtual() : '';
         el.innerHTML = avisoHtml + ultimasApostas.map(a => {
             const linhaTxt = fmtLinhaDezenasMes(a);
             const headLista = labelLista
@@ -871,6 +897,7 @@
                 <div class="aposta-card-inner ${exibicaoApostas === 'hibrido' ? 'modo-hibrido' : ''}">
                     ${showLinear ? `<div class="aposta-linear ${showVolante ? '' : 'w-100'}">
                         <div class="my-1 aposta-dezenas-linha">${a.dezenas.map(n => `<span class="dez-ball">${pad(n)}</span>`).join('')}${mesHtmlAposta(a)}${timeHtml(a)}${trevoHtml(a)}</div>
+                        ${window.__htmlDiagLinha ? window.__htmlDiagLinha(a.dezenas, CFG) : ''}
                     </div>` : ''}
                     ${showVolante ? htmlVolante(a.dezenas, a.numero) : ''}
                 </div>
@@ -892,113 +919,13 @@
         renderPanoramaConjunto(ultimasApostas);
     }
 
-    function _pcPad(n) {
-        return String(n).padStart(2, '0');
-    }
-
-    function _pcSequencias(nums) {
-        const o = [...nums].map(Number).sort((a, b) => a - b);
-        const seqs = [];
-        let i = 0;
-        while (i < o.length) {
-            let j = i;
-            while (j + 1 < o.length && o[j + 1] - o[j] === 1) j += 1;
-            if (j > i) seqs.push(o.slice(i, j + 1));
-            i = j + 1;
-        }
-        return seqs;
-    }
-
-    function _pcBma(nums) {
-        let b = 0, m = 0, a = 0;
-        nums.forEach(n => {
-            const d = Number(n);
-            if (d >= 1 && d <= 10) b += 1;
-            else if (d >= 11 && d <= 20) m += 1;
-            else a += 1;
-        });
-        return { b, m, a, txt: `${b}B + ${m}M + ${a}A` };
-    }
-
     function renderPanoramaConjunto(apostas) {
-        const box = document.getElementById('painelPanoramaConjunto');
-        if (!box) return;
-        const lista = apostas || [];
-        if (!lista.length) {
-            box.classList.add('d-none');
-            return;
-        }
-        const pad = _pcPad;
-        const ultimo = concursosLista && concursosLista[0];
-        const ultDez = new Set((ultimo?.dezenas || []).map(Number));
-        const nUlt = ultimo?.concurso || '—';
-        const ehDs = (CFG.key === 'diadesorte' || UNIVERSO_MAX === 31);
-        const thead = document.getElementById('theadPanoramaConjunto');
-        const tbody = document.getElementById('tbodyPanoramaConjunto');
-        const leg = document.getElementById('panoramaConjuntoLegenda');
-        const rodape = document.getElementById('panoramaConjuntoRodape');
-        if (thead) {
-            thead.innerHTML = `<tr>
-                <th>#</th><th>Aposta</th><th>Soma</th><th>P/I</th><th>Seq</th>
-                <th>Rep. ${nUlt}</th><th>Finais</th>${ehDs ? '<th>B/M/A</th>' : ''}
-            </tr>`;
-        }
-        const freq = {};
-        const rows = lista.map((a, i) => {
-            const dz = (a.dezenas || []).map(Number).sort((x, y) => x - y);
-            dz.forEach(d => { freq[d] = (freq[d] || 0) + 1; });
-            const soma = dz.reduce((s, n) => s + n, 0);
-            const pares = dz.filter(n => n % 2 === 0).length;
-            const seqs = _pcSequencias(dz);
-            const seqTxt = seqs.length
-                ? seqs.map(g => g.map(pad).join('–')).join(', ')
-                : 'nenhuma';
-            const reps = dz.filter(n => ultDez.has(n));
-            const fins = {};
-            dz.forEach(n => { const f = n % 10; fins[f] = (fins[f] || 0) + 1; });
-            const finGrupos = Object.keys(fins).filter(f => fins[f] >= 2).sort();
-            const finTxt = finGrupos.length
-                ? finGrupos.map(f => {
-                    const nums = dz.filter(n => n % 10 === Number(f)).map(pad).join(', ');
-                    return `${f}: ${nums}`;
-                }).join('; ')
-                : 'distintos';
-            const bma = ehDs ? _pcBma(dz) : null;
-            const somaOk = soma >= 93 && soma <= 130;
-            const seqOk = seqs.length >= 1 && seqs.length <= 2;
-            const seqAt = seqs.length === 0 || seqs.length >= 3;
-            const repOk = reps.length === 1 || reps.length === 2;
-            const finOk = finGrupos.length >= 1;
-            const bmaOk = bma && bma.b >= 2 && bma.b <= 3 && bma.m >= 2 && bma.m <= 3 && bma.a >= 2 && bma.a <= 3;
-            return `<tr>
-                <td>${a.numero || (i + 1)}</td>
-                <td class="fw-bold">${dz.map(pad).join(' ')}</td>
-                <td class="${ehDs ? (somaOk ? 'pan-conj-ok' : 'pan-conj-at') : ''}">${soma}</td>
-                <td>${pares}P / ${dz.length - pares}I</td>
-                <td class="${seqAt ? 'pan-conj-at' : (seqOk ? 'pan-conj-ok' : '')}">${seqTxt}</td>
-                <td class="${repOk ? 'pan-conj-ok' : 'pan-conj-at'}">${reps.length}${reps.length ? ' · ' + reps.map(pad).join(', ') : ''}</td>
-                <td class="${finOk ? 'pan-conj-ok' : 'pan-conj-at'}">${finTxt}</td>
-                ${ehDs ? `<td class="${bmaOk ? 'pan-conj-ok' : 'pan-conj-at'}">${bma.txt}</td>` : ''}
-            </tr>`;
-        }).join('');
-        if (tbody) tbody.innerHTML = rows;
-        if (leg) {
-            leg.textContent = ultimo
-                ? `Conjunto de ${lista.length} apostas · repetidas em relação ao concurso #${ultimo.concurso} (${(ultimo.dezenas || []).map(pad).join(' ')}). Verde = alinhado ao DNA usual; âmbar = atenção.`
-                : `Conjunto de ${lista.length} apostas.`;
-        }
-        const conc = Object.entries(freq)
-            .sort((a, b) => b[1] - a[1] || a[0] - b[0])
-            .filter(([, q]) => q >= 3)
-            .slice(0, 8)
-            .map(([d, q]) => `${pad(d)} em ${q}/${lista.length}`)
-            .join(' · ');
-        if (rodape) {
-            rodape.innerHTML = conc
-                ? `<strong>Concentração:</strong> ${conc}`
-                : 'Nenhuma dezena se repetiu em 3 ou mais apostas.';
-        }
-        box.classList.remove('d-none');
+        if (!window.__renderPanoramaConjunto) return;
+        window.__renderPanoramaConjunto(apostas, {
+            key: CFG.key,
+            layout: CFG.layout,
+            ultimo: (concursosLista && concursosLista[0]) || null,
+        });
     }
 
     async function carregarConcursos() {
@@ -1058,6 +985,247 @@
         renderApostas(data.apostas, aviso);
     }
 
+    function aplicarResultadoAliadas(data) {
+        const el = document.getElementById('aliadasCriteriosTxt');
+        if (el) el.textContent = (data.criterios_modo_auto || []).join(' · ') || 'Linhas + Ciclo + Somas';
+        let aviso = data.aviso;
+        if (data.descartadas_historico > 0) {
+            aviso = (aviso ? aviso + ' ' : '') +
+                `(${data.descartadas_historico} descartada(s) por já existirem no histórico.)`;
+        }
+        renderApostas(data.apostas, aviso);
+    }
+
+    async function gerarAliadasViaLinhas(body) {
+        const qtd = body.quantidade;
+        const r = await fetch(apiPath('/gerar-linhas'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...body, quantidade: Math.max(qtd * 4, qtd) }),
+        });
+        const data = await r.json();
+        if (!data.sucesso) {
+            alert(data.erro || data.validacao?.motivo || 'Erro ao gerar');
+            return;
+        }
+
+        let pendentes = [];
+        let somaLo = null;
+        let somaHi = null;
+        let somaMedia = null;
+        if (body.usar_ciclo) {
+            try {
+                const c = await (await fetch('/analise/api/ciclo-cobertura/ciclo-atual')).json();
+                pendentes = (c.dados && c.dados.dezenas_pendentes) || c.dezenas_pendentes || [];
+            } catch (e) { /* ciclo opcional */ }
+        }
+        if (body.usar_soma) {
+            try {
+                const s = await (await fetch(
+                    `/analise/api/somas-digitos/somas?janela=${body.janela}&base=${encodeURIComponent(body.base || 'geral')}`
+                )).json();
+                const media = Number((s.resumo || {}).soma_media);
+                if (media > 0) {
+                    somaLo = Math.round(media * 0.88);
+                    somaHi = Math.round(media * 1.12);
+                    somaMedia = media;
+                }
+            } catch (e) { /* soma opcional */ }
+        }
+
+        const pendSet = new Set((pendentes || []).map(Number));
+        const scored = (data.apostas || []).map((ap) => {
+            const dz = (ap.dezenas || []).map(Number);
+            const soma = dz.reduce((a, b) => a + b, 0);
+            const nCiclo = pendSet.size ? dz.filter((d) => pendSet.has(d)).length : 0;
+            let somaOk = true;
+            if (somaLo != null && somaHi != null) somaOk = soma >= somaLo && soma <= somaHi;
+            let score = 0;
+            if (body.usar_ciclo) score += nCiclo * 10;
+            if (body.usar_soma && somaOk) score += 8;
+            else if (body.usar_soma) score -= 4;
+            const extra = [...(ap.criterios || [])];
+            if (body.usar_ciclo) extra.push(`Ciclo: ${nCiclo} pendente(s)`);
+            if (body.usar_soma && somaLo != null) {
+                extra.push(`Soma ${soma} (${somaOk ? 'ok' : 'fora'} ${somaLo}–${somaHi})`);
+            }
+            return {
+                score,
+                ap: {
+                    ...ap,
+                    criterios: extra,
+                    ciclo_pendentes_na_aposta: nCiclo,
+                    soma,
+                    soma_ok: somaOk,
+                    modo_motor_aposta: 'linhas_aliadas',
+                },
+            };
+        });
+        scored.sort((a, b) => b.score - a.score || (a.ap.numero || 0) - (b.ap.numero || 0));
+        const escolhidas = scored.slice(0, qtd).map((x, i) => ({ ...x.ap, numero: i + 1 }));
+        const criterios = [
+            data.modo_motor_label || 'Linhas L1–L10',
+            `Peso: ${data.modo_peso || body.modo_peso}`,
+        ];
+        if (body.usar_ciclo) criterios.push(`Ciclo: ${pendentes.length} pendente(s)`);
+        if (body.usar_soma && somaLo != null) {
+            criterios.push(`Soma: ${somaLo}–${somaHi} (média ${Math.round(somaMedia)})`);
+        }
+        aplicarResultadoAliadas({
+            ...data,
+            apostas: escolhidas,
+            criterios_modo_auto: criterios,
+        });
+    }
+
+    async function gerarAliadas() {
+        const body = {
+            quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+            dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || DEZ_DEFAULT,
+            janela: janelaLinhas,
+            base: baseLinhas,
+            base_estatistica: baseLinhas,
+            top_n: topNLinhas,
+            modo_peso: modoPesoLinhas,
+            usar_ciclo: !!document.getElementById('chkAliadaCiclo')?.checked,
+            usar_soma: !!document.getElementById('chkAliadaSoma')?.checked,
+        };
+        const r = await fetch(apiPath('/gerar-linhas-aliadas'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        if (r.status === 404) {
+            return gerarAliadasViaLinhas(body);
+        }
+        let data;
+        try {
+            data = await r.json();
+        } catch (e) {
+            return gerarAliadasViaLinhas(body);
+        }
+        if (!data.sucesso) {
+            alert(data.erro || data.validacao?.motivo || 'Erro ao gerar');
+            return;
+        }
+        aplicarResultadoAliadas(data);
+    }
+
+    let faixasDataGer = null;
+
+    function atualizarCriteriosFaixasTxt() {
+        const el = document.getElementById('fxCriteriosTxt');
+        if (!el) return;
+        const bits = ['Veto crescente (Excel)'];
+        const chips = [
+            ['chkFxCiclo', 'Ciclo'],
+            ['chkFxSoma', 'Soma'],
+            ['chkFxRep', 'Repetidas'],
+            ['chkFxFinais', 'Finais'],
+            ['chkFxPadrao', 'Padrão'],
+            ['chkFxGap', 'Gaps'],
+            ['chkFxPares', 'Pares'],
+            ['chkFxImpares', 'Ímpares'],
+            ['chkFxPrimos', 'Primos'],
+            ['chkFxMoldura', 'Moldura'],
+            ['chkFxSeq', 'Sequências'],
+            ['chkFxM3', 'M3'],
+            ['chkFxFb', 'Fibonacci'],
+        ];
+        chips.forEach(([id, nome]) => {
+            if (document.getElementById(id)?.checked) bits.push(nome);
+        });
+        el.textContent = bits.join(' · ');
+    }
+
+    function renderFaixasMinMax(data) {
+        const body = document.getElementById('fxMinMaxBody');
+        const lbl = document.getElementById('fxUnivLbl');
+        const u = data.universo || {};
+        if (lbl) {
+            lbl.textContent = u.total
+                ? `${u.total} concursos · Excel`
+                : 'Excel';
+        }
+        const rows = data.minmax || [];
+        if (!body) return;
+        if (!rows.length) {
+            body.innerHTML = `<p class="text-danger small text-center mb-0">${data.erro || 'Faixas indisponíveis.'}</p>`;
+            return;
+        }
+        const pad = (n) => String(n == null ? '—' : n).padStart(2, '0');
+        const bolas = (arr, cls) => (arr || []).map((n) => `<span class="fx-bola ${cls}">${pad(n)}</span>`).join('')
+            || '<span class="text-muted small">—</span>';
+        const qtd = (n, arr) => (n != null ? n : (arr || []).length);
+        body.innerHTML = `<div class="table-responsive"><table class="fx-pos-table">
+            <thead><tr>
+                <th>Posição</th><th>Mínimo</th><th>Máximo</th>
+                <th>Pode</th><th class="qtd"></th>
+                <th>Não pode</th><th class="qtd"></th>
+            </tr></thead>
+            <tbody>${rows.map((p) => `
+                <tr>
+                    <td class="pos">${p.label || (p.pos + 'ª')}</td>
+                    <td class="min">${pad(p.min)}</td>
+                    <td class="max">${pad(p.max)}</td>
+                    <td class="bolas">${bolas(p.permitidas, 'ok')}</td>
+                    <td class="qtd">${qtd(p.n_permitidas, p.permitidas)}</td>
+                    <td class="bolas">${bolas(p.vetadas, 'no')}</td>
+                    <td class="qtd">${qtd(p.n_vetadas, p.vetadas)}</td>
+                </tr>`).join('')}</tbody>
+        </table></div>`;
+    }
+
+    async function carregarFaixasCrescente() {
+        const body = document.getElementById('fxMinMaxBody');
+        if (body && !faixasDataGer) {
+            body.innerHTML = '<p class="text-muted small text-center mb-0">Carregando faixas do Excel…</p>';
+        }
+        try {
+            const r = await fetch(apiPath('/faixas-crescente'));
+            const data = await r.json();
+            faixasDataGer = data;
+            renderFaixasMinMax(data);
+        } catch (e) {
+            renderFaixasMinMax({ sucesso: false, erro: e.message || 'Falha ao carregar faixas.' });
+        }
+    }
+
+    async function gerarFaixasCrescente() {
+        const body = {
+            quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+            dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || DEZ_DEFAULT,
+            usar_ciclo: !!document.getElementById('chkFxCiclo')?.checked,
+            usar_soma: !!document.getElementById('chkFxSoma')?.checked,
+            usar_repeticao: !!document.getElementById('chkFxRep')?.checked,
+            usar_padrao: !!document.getElementById('chkFxPadrao')?.checked,
+            usar_gap: !!document.getElementById('chkFxGap')?.checked,
+            usar_pares: !!document.getElementById('chkFxPares')?.checked,
+            usar_impares: !!document.getElementById('chkFxImpares')?.checked,
+            usar_primos: !!document.getElementById('chkFxPrimos')?.checked,
+            usar_moldura: !!document.getElementById('chkFxMoldura')?.checked,
+            usar_seq: !!document.getElementById('chkFxSeq')?.checked,
+            usar_m3: !!document.getElementById('chkFxM3')?.checked,
+            usar_fb: !!document.getElementById('chkFxFb')?.checked,
+            usar_finais: !!document.getElementById('chkFxFinais')?.checked,
+        };
+        const r = await fetch(apiPath('/gerar-faixas-crescente'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!data.sucesso) {
+            alert(data.erro || data.validacao?.motivo || 'Erro ao gerar');
+            return;
+        }
+        const el = document.getElementById('fxCriteriosTxt');
+        if (el && data.criterios_modo_auto?.length) {
+            el.textContent = data.criterios_modo_auto.join(' · ');
+        }
+        renderApostas(data.apostas, data.aviso);
+    }
+
     async function gerarPanorama() {
         const extras = window.PanoramaModos?.getGerarExtras?.() || {};
         if (extras.erro) {
@@ -1105,6 +1273,12 @@
         }
         if (isModoLinhas()) {
             return gerarLinhas();
+        }
+        if (isModoAliadas()) {
+            return gerarAliadas();
+        }
+        if (isModoFaixas()) {
+            return gerarFaixasCrescente();
         }
         const body = {
             quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
@@ -1332,6 +1506,9 @@
         if (chkPerm) chkPerm.style.display = 'none';
         if (chkPI) chkPI.style.display = 'none';
 
+        document.querySelectorAll('#fxChipsPref input[type="checkbox"]').forEach((el) => {
+            el.addEventListener('change', atualizarCriteriosFaixasTxt);
+        });
         document.getElementById('btnGerar')?.addEventListener('click', gerar);
         document.getElementById('btnExport')?.addEventListener('click', exportarTxt);
         document.getElementById('selConcursoConf')?.addEventListener('change', (e) => {
@@ -1363,12 +1540,12 @@
         if (window.__bindConferirTxtHistorico) window.__bindConferirTxtHistorico();
 
         const tabParam = new URLSearchParams(window.location.search).get('tab');
-        if (tabParam === 'linhas') {
-            const btnLinhas = document.querySelector('#tabsBaseGerador .base-tab-btn[data-base="linhas"]');
-            if (btnLinhas) {
+        if (tabParam === 'linhas' || tabParam === 'aliadas' || tabParam === 'faixas') {
+            const btnTab = document.querySelector(`#tabsBaseGerador .base-tab-btn[data-base="${tabParam}"]`);
+            if (btnTab) {
                 document.querySelectorAll('#tabsBaseGerador .base-tab-btn').forEach(x => x.classList.remove('active'));
-                btnLinhas.classList.add('active');
-                trocarBase('linhas');
+                btnTab.classList.add('active');
+                trocarBase(tabParam);
             }
         }
     }

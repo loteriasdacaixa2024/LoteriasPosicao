@@ -46,6 +46,18 @@
     const MANUAL_S10_URL = '/geradores-elite/escolha-tubular-apostas/?aba=manual';
     const MANUAL_S10_KEY = 'tb_manual10_import';
     const PADROES_II_URL = '/analise/analises-inteligentes/?aba=padroes-ii';
+    const DIAG_CFG = IS_COLUNAS
+        ? { layout: 'colunas', key: 'supersete' }
+        : {
+            dezena_min: UI.dezena_min != null ? UI.dezena_min : 1,
+            dezena_max: UI.total_dezenas || UI.dezena_max || 31,
+            key: UI.modality_key,
+        };
+
+    function htmlDiag(dezenas) {
+        if (IS_COLUNAS || !window.__htmlDiagLinha) return '';
+        return window.__htmlDiagLinha(dezenas, DIAG_CFG);
+    }
 
     window.__CC_POOL_DIGITOS_ABA2__ = () => [...poolAba2].sort((a, b) => a - b);
 
@@ -180,6 +192,9 @@
                 resumo.classList.add('d-none');
                 resumo.innerHTML = '';
             }
+            if (window.__renderPanoramaConjunto) {
+                window.__renderPanoramaConjunto([], { key: UI.modality_key });
+            }
             return;
         }
         const modo = (selOrd && selOrd.value) || 'geracao';
@@ -212,7 +227,7 @@
             const padUrl = urlPadraoII(m.padrao);
             return (
                 `<tr>` +
-                `<td class="ci-td-dez"><div class="ci-dez-row" style="--ci-cols:${cols}">${dezHtml}</div></td>` +
+                `<td class="ci-td-dez"><div class="ci-dez-row" style="--ci-cols:${cols}">${dezHtml}</div>${htmlDiag(m.dezenas)}</td>` +
                 `<td title="Padrão inicial — abrir na aba 4"><a class="ci-pad-link" href="${padUrl}" target="_blank" rel="noopener">${escHtml(m.padrao || '—')}</a></td>` +
                 `<td class="ci-num" title="Soma das dezenas">${m.soma}</td>` +
                 `<td class="ci-num" title="${escHtml(m.reptTitle)}">${m.rept}</td>` +
@@ -238,6 +253,15 @@
             `</tr></thead>` +
             `<tbody>${rows}</tbody>` +
             `</table></div>`;
+        if (window.__renderPanoramaConjunto) {
+            window.__renderPanoramaConjunto(lista, {
+                key: UI.modality_key,
+                layout: IS_COLUNAS ? 'colunas' : '',
+                ultimo: guiaCache
+                    ? { concurso: guiaCache.ultimo_concurso, dezenas: ultimoSorteioDz }
+                    : null,
+            });
+        }
     }
 
     function enviarLoteParaManual() {
@@ -364,7 +388,7 @@
         const maxShow = 300;
         const slice = apostas.slice(0, maxShow);
         el.innerHTML = slice.map((ap) =>
-            `<div><span class="text-muted">#${ap.linha}</span> ${fmtLinhaAposta(ap.dezenas)}</div>`
+            `<div><span class="text-muted">#${ap.linha}</span> ${fmtLinhaAposta(ap.dezenas)}${htmlDiag(ap.dezenas)}</div>`
         ).join('') + (apostas.length > maxShow
             ? `<div class="text-muted mt-1">… +${apostas.length - maxShow} na lista completa deste lote</div>`
             : '');

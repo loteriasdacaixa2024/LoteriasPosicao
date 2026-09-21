@@ -10,7 +10,7 @@
 #ge-gc .ai-table thead th {
   background: var(--primary); color:#fff; font-weight:700; text-align:center;
 }
-#ge-gc .ai-table td { text-align:center; vertical-align:middle; }
+#ge-gc .ai-table td { text-align:center; vertical-align:top; }
 #ge-gc .perfil-box {
   border:1px solid rgba(192,139,0,.28); border-radius:10px; padding:.75rem 1rem;
   background:linear-gradient(145deg,#fffaf0,#fff); margin-bottom:1rem;
@@ -33,6 +33,7 @@
       <a class="btn btn-sm btn-outline-primary" href="/analise/analises-inteligentes/"><i class="fas fa-arrow-left"></i> Resultados &amp; Padrões</a>
     </div>
   </div>
+  {% include '_diagonais_aposta.html' %}
 
   <div id="geGcPerfil" class="perfil-box d-none"></div>
 
@@ -64,6 +65,7 @@
       <tbody></tbody>
     </table>
   </div>
+  {% include '_panorama_conjunto.html' %}
 </div>
 {% endblock %}
 
@@ -73,10 +75,22 @@
   const root = document.getElementById('ge-gc');
   if (!root) return;
   const API = root.dataset.api;
+  const DIAG_CFG = {
+    key: {{ modality_key | tojson }},
+    dezena_min: {{ (cfg.dezena_min if cfg else 1) | tojson }},
+    dezena_max: {{ (cfg.dezena_max if cfg else 31) | tojson }},
+  };
   let JOGOS = [];
 
   function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function numsDe(j) {
+    if (Array.isArray(j.dezenas) && j.dezenas.length) return j.dezenas.map(Number);
+    return String(j.dezenas_fmt || '').trim().split(/[\s,;·]+/).map(Number).filter(Number.isFinite);
+  }
+  function htmlDiag(j) {
+    return window.__htmlDiagLinha ? window.__htmlDiagLinha(numsDe(j), DIAG_CFG) : '';
   }
   function parseDigitos(txt) {
     return String(txt || '').split(/[,;\s]+/).map(x => x.trim()).filter(x => /^[0-9]$/.test(x));
@@ -102,11 +116,14 @@
     document.querySelector('#geTabelaGc tbody').innerHTML = (jogos||[]).map(j => `
       <tr>
         <td>${esc(j.id)}</td>
-        <td class="text-start fw-bold">${esc(j.dezenas_fmt)}</td>
+        <td class="text-start"><div class="fw-bold">${esc(j.dezenas_fmt)}</div>${htmlDiag(j)}</td>
         <td>${esc(j.soma)}</td>
         <td>${esc(j.pares)}P / ${esc(j.impares)}I</td>
         <td>${j.score_perfil != null ? esc(j.score_perfil) : '—'}</td>
       </tr>`).join('') || '<tr><td colspan="5" class="text-muted">Nenhum jogo gerado</td></tr>';
+    if (window.__renderPanoramaConjunto) {
+      window.__renderPanoramaConjunto(jogos || [], DIAG_CFG);
+    }
   }
   async function gerarGc() {
     const digitos = parseDigitos(document.getElementById('geGcDigitos').value);

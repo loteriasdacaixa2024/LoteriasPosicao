@@ -1,0 +1,167 @@
+{# Panorama do conjunto gerado — tabela única após gerar apostas. #}
+<style>
+.pan-conj-table { font-size: .8rem; }
+.pan-conj-table th { white-space: nowrap; }
+.pan-conj-ok { color: #198754; font-weight: 700; }
+.pan-conj-at { color: #b8860b; font-weight: 700; }
+.pan-conj-pad-link {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 700;
+    font-size: .78rem;
+    color: #6f42c1;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(111, 66, 193, .45);
+    white-space: nowrap;
+}
+.pan-conj-pad-link:hover {
+    color: #5a32a3;
+    border-bottom-style: solid;
+}
+</style>
+<div class="card shadow-sm mb-3 border-0 d-none" id="painelPanoramaConjunto" style="border-top:4px solid var(--accent)!important;">
+    <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
+        <i class="fas fa-table me-1"></i>Panorama do conjunto gerado
+    </div>
+    <div class="card-body py-3">
+        <p class="small text-muted mb-2" id="panoramaConjuntoLegenda">—</p>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-2 pan-conj-table" id="tblPanoramaConjunto">
+                <thead class="table-light" id="theadPanoramaConjunto"></thead>
+                <tbody id="tbodyPanoramaConjunto"></tbody>
+            </table>
+        </div>
+        <p class="small mb-0" id="panoramaConjuntoRodape"></p>
+    </div>
+</div>
+<script>
+(function () {
+    if (window.__renderPanoramaConjunto) return;
+
+    function padN(n, w) {
+        const v = Number(n);
+        if (!Number.isFinite(v)) return String(n);
+        const width = w == null ? 2 : Number(w);
+        if (width <= 1) return String(v);
+        return String(v).padStart(width, '0');
+    }
+    function numsDe(a) {
+        if (Array.isArray(a) && (!a.length || typeof a[0] !== 'object')) {
+            return a.map(Number).filter(Number.isFinite);
+        }
+        if (!a || typeof a !== 'object') return [];
+        if (Array.isArray(a.dezenas)) return a.dezenas.map(Number).filter(Number.isFinite);
+        if (Array.isArray(a.dezenas_ordem)) return a.dezenas_ordem.map(Number).filter(Number.isFinite);
+        if (a.dezenas_fmt) {
+            return String(a.dezenas_fmt).trim().split(/[\s,;·|]+/).map(Number).filter(Number.isFinite);
+        }
+        return [];
+    }
+    function sequencias(nums) {
+        const o = [...nums].sort((x, y) => x - y);
+        const seqs = [];
+        let i = 0;
+        while (i < o.length) {
+            let j = i;
+            while (j + 1 < o.length && o[j + 1] - o[j] === 1) j += 1;
+            if (j > i) seqs.push(o.slice(i, j + 1));
+            i = j + 1;
+        }
+        return seqs;
+    }
+    function padraoInicial(nums) {
+        return [...nums].sort((a, b) => a - b).map((n) => Math.floor(n / 10)).join(' ');
+    }
+
+    window.__renderPanoramaConjunto = function (apostas, cfg) {
+        const box = document.getElementById('painelPanoramaConjunto');
+        if (!box) return;
+        const c = cfg || {};
+        const key = c.key || c.modality_key || '';
+        const lista = (apostas || []).map((a, i) => ({
+            numero: (a && typeof a === 'object') ? (a.numero || a.id || a.linha || (i + 1)) : (i + 1),
+            dezenas: numsDe(a),
+        })).filter((a) => a.dezenas.length);
+        if (!lista.length) {
+            box.classList.add('d-none');
+            return;
+        }
+        const padW = c.pad != null ? c.pad : 2;
+        const pad = (n) => padN(n, padW);
+        const ultimo = c.ultimo || window.__PAN_CONJ_ULTIMO || {};
+        const ultDez = new Set((ultimo.dezenas || ultimo.numeros || []).map(Number));
+        const nUlt = ultimo.concurso || ultimo.numero || '—';
+        const ehDs = key === 'diadesorte';
+        const ehSuperSete = key === 'supersete' || c.layout === 'colunas';
+        const showPadrao = !ehSuperSete;
+        const thead = document.getElementById('theadPanoramaConjunto');
+        const tbody = document.getElementById('tbodyPanoramaConjunto');
+        const leg = document.getElementById('panoramaConjuntoLegenda');
+        const rodape = document.getElementById('panoramaConjuntoRodape');
+        if (thead) {
+            thead.innerHTML = `<tr>
+                <th>#</th><th>Aposta</th><th>Soma</th><th>P/I</th><th>Seq</th>
+                <th>Rep. ${nUlt}</th><th>Finais</th>${showPadrao ? '<th>Padrão</th>' : ''}
+            </tr>`;
+        }
+        const freq = {};
+        const rows = lista.map((a, i) => {
+            const dz = a.dezenas.slice().sort((x, y) => x - y);
+            dz.forEach((d) => { freq[d] = (freq[d] || 0) + 1; });
+            const soma = dz.reduce((s, n) => s + n, 0);
+            const pares = dz.filter((n) => n % 2 === 0).length;
+            const seqs = sequencias(dz);
+            const seqTxt = seqs.length
+                ? seqs.map((g) => g.map(pad).join('–')).join(', ')
+                : 'nenhuma';
+            const reps = dz.filter((n) => ultDez.has(n));
+            const fins = {};
+            dz.forEach((n) => { const f = n % 10; fins[f] = (fins[f] || 0) + 1; });
+            const finGrupos = Object.keys(fins).filter((f) => fins[f] >= 2).sort();
+            const finTxt = finGrupos.length
+                ? finGrupos.map((f) => {
+                    const nums = dz.filter((n) => n % 10 === Number(f)).map(pad).join(', ');
+                    return `${f}: ${nums}`;
+                }).join('; ')
+                : 'distintos';
+            const padrao = showPadrao ? padraoInicial(dz) : '';
+            const padUrl = padrao
+                ? `/analise/analises-inteligentes/?aba=padroes-ii&padrao=${encodeURIComponent(padrao)}`
+                : '/analise/analises-inteligentes/?aba=padroes-ii';
+            const somaOk = soma >= 93 && soma <= 130;
+            const seqOk = seqs.length >= 1 && seqs.length <= 2;
+            const seqAt = seqs.length === 0 || seqs.length >= 3;
+            const repOk = reps.length === 1 || reps.length === 2;
+            const finOk = finGrupos.length >= 1;
+            return `<tr>
+                <td>${a.numero || (i + 1)}</td>
+                <td class="fw-bold">${dz.map(pad).join(' ')}</td>
+                <td class="${ehDs ? (somaOk ? 'pan-conj-ok' : 'pan-conj-at') : ''}">${soma}</td>
+                <td>${pares}P / ${dz.length - pares}I</td>
+                <td class="${seqAt ? 'pan-conj-at' : (seqOk ? 'pan-conj-ok' : '')}">${seqTxt}</td>
+                <td class="${repOk ? 'pan-conj-ok' : 'pan-conj-at'}">${reps.length}${reps.length ? ' · ' + reps.map(pad).join(', ') : ''}</td>
+                <td class="${finOk ? 'pan-conj-ok' : 'pan-conj-at'}">${finTxt}</td>
+                ${showPadrao ? `<td><a class="pan-conj-pad-link" href="${padUrl}" target="_blank" rel="noopener" title="Abrir na aba 4 · Padrões II">Padrão ${padrao}</a></td>` : ''}
+            </tr>`;
+        }).join('');
+        if (tbody) tbody.innerHTML = rows;
+        if (leg) {
+            const ultFmt = (ultimo.dezenas || ultimo.numeros || []).map(pad).join(' ');
+            leg.textContent = ultimo.concurso || ultimo.numero
+                ? `Conjunto de ${lista.length} apostas · repetidas em relação ao concurso #${nUlt}${ultFmt ? ' (' + ultFmt + ')' : ''}. Verde = alinhado ao DNA usual; âmbar = atenção.`
+                : `Conjunto de ${lista.length} apostas.`;
+        }
+        const conc = Object.entries(freq)
+            .sort((a, b) => b[1] - a[1] || Number(a[0]) - Number(b[0]))
+            .filter(([, q]) => q >= 3)
+            .slice(0, 8)
+            .map(([d, q]) => `${pad(d)} em ${q}/${lista.length}`)
+            .join(' · ');
+        if (rodape) {
+            rodape.innerHTML = conc
+                ? `<strong>Concentração:</strong> ${conc}`
+                : 'Nenhuma dezena se repetiu em 3 ou mais apostas.';
+        }
+        box.classList.remove('d-none');
+    };
+})();
+</script>

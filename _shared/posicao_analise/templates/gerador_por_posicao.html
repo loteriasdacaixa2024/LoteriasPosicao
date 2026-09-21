@@ -415,6 +415,7 @@
 </style>
 
 <div id="ge-posicao-apostas">
+{% include '_diagonais_aposta.html' %}
 <div class="page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-3">
@@ -598,6 +599,7 @@
                 <div id="listaApostas">
                     <p class="text-muted small mb-0">Configure os parâmetros e clique em <strong>Gerar apostas</strong>.</p>
                 </div>
+                {% include '_panorama_conjunto.html' %}
             </div>
         </div>
     </div>
@@ -969,6 +971,7 @@
                 ${confHtml}
             </div>
             <div class="pos-ci-ordem">${htmlOrdemStrip(ap.dezenas_ordem, conf)}</div>
+            ${window.__htmlDiagLinha ? window.__htmlDiagLinha(ap.dezenas_ordem || ap.dezenas, { dezena_min: POS_CFG.valor_min, dezena_max: POS_CFG.valor_max }) : ''}
         </button>`;
     }
 
@@ -1004,6 +1007,7 @@
                 ${compScore}${confHtml}
             </div>
             <div class="pos-ci-ordem">${htmlOrdemStrip(ap.dezenas_ordem, conf)}</div>
+            ${window.__htmlDiagLinha ? window.__htmlDiagLinha(ap.dezenas_ordem || ap.dezenas, { dezena_min: POS_CFG.valor_min, dezena_max: POS_CFG.valor_max }) : ''}
         </div>`;
     }
 
@@ -1011,6 +1015,9 @@
         const el = document.getElementById('listaApostas');
         if (!ultimasApostas.length) {
             el.innerHTML = '<p class="text-muted small mb-0">Nenhuma aposta gerada.</p>';
+            if (window.__renderPanoramaConjunto) {
+                window.__renderPanoramaConjunto([], { key: POS_CFG.key || POS_CFG.modality_key });
+            }
             return;
         }
 
@@ -1036,10 +1043,20 @@
                     renderApostas();
                 });
             });
+            if (window.__renderPanoramaConjunto) {
+                window.__renderPanoramaConjunto(ultimasApostas, {
+                    key: POS_CFG.key || POS_CFG.modality_key,
+                });
+            }
             return;
         }
 
         el.innerHTML = ultimasApostas.map((a, i) => htmlAposta(a, i)).join('');
+        if (window.__renderPanoramaConjunto) {
+            window.__renderPanoramaConjunto(ultimasApostas, {
+                key: POS_CFG.key || POS_CFG.modality_key,
+            });
+        }
     }
 
     function setModoVisualizacao(modo) {

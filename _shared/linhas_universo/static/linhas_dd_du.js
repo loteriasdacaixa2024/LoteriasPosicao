@@ -11,8 +11,8 @@
     let loaded = { linhas: false, dddu: false };
     let cache = { linhas: null, dddu: null };
     let histState = {
-        linhas: { key: 'concurso', dir: 'asc', page: 1, size: 100 },
-        dddu: { key: 'concurso', dir: 'asc', page: 1, size: 100 },
+        linhas: { key: 'concurso', dir: 'desc', page: 1, size: 100 },
+        dddu: { key: 'concurso', dir: 'desc', page: 1, size: 100 },
     };
 
     const $ = (id) => document.getElementById(id);
@@ -63,14 +63,6 @@
         return Number.isFinite(n) ? n : 0;
     }
 
-    function linhasDoMapa() {
-        const mapa = cache.linhas && cache.linhas.mapa && cache.linhas.mapa.linhas;
-        if (Array.isArray(mapa) && mapa.length) {
-            return mapa.map((L) => L.id);
-        }
-        return [];
-    }
-
     function linhasPresentesOrd(row) {
         const presentes = [...(row.linhas_presentes || [])];
         return presentes.sort((a, b) => linhaNum(a) - linhaNum(b));
@@ -82,6 +74,12 @@
         return 0;
     }
 
+    function linhasDoMapa() {
+        const mapa = cache.linhas && cache.linhas.mapa && cache.linhas.mapa.linhas;
+        if (Array.isArray(mapa) && mapa.length) return mapa.map((L) => L.id);
+        return linhasPresentesOrd({ linhas_presentes: ['L1', 'L2', 'L3', 'L4'] });
+    }
+
     function fmtLinhasQtdTxt(row) {
         return linhasPresentesOrd(row).map((lid) => {
             const qtd = qtdNaLinha(row, lid);
@@ -89,21 +87,36 @@
         }).join(' ');
     }
 
+    function fmtDezenasLinha(nums) {
+        const txt = fmtDezenas(nums);
+        if (!txt || txt === '—') return '';
+        return txt.split(/\s+/).join(', ');
+    }
+
     function fmtLinhasQtdChips(row) {
-        const ids = linhasDoMapa();
-        const slots = ids.length ? ids : linhasPresentesOrd(row);
         const presentes = new Set(row.linhas_presentes || []);
-        return slots.map((lid) => {
+        return linhasDoMapa().map((lid) => {
             if (!presentes.has(lid)) {
                 return `<span class="ldd-chip ldd-chip-slot" aria-hidden="true">&nbsp;</span>`;
             }
-            const qtd = qtdNaLinha(row, lid);
-            const txt = `${lid}-${String(qtd).padStart(2, '0')}`;
+            const tag = `${lid}-${String(qtdNaLinha(row, lid)).padStart(2, '0')}`;
+            return `<span class="ldd-chip">${esc(tag)}</span>`;
+        }).join('');
+    }
+
+    function fmtDezenasPorLinhaTxt(row) {
+        return linhasPresentesOrd(row).map((lid) => {
             const nums = (row.por_linha && row.por_linha[lid]) || [];
-            const tip = nums.length
-                ? `${lid}: ${qtd} dezena(s) — ${fmtDezenas(nums)}`
-                : `${lid}: ${qtd} dezena(s)`;
-            return `<span class="ldd-chip" title="${esc(tip)}">${esc(txt)}</span>`;
+            return nums.length ? fmtDezenasLinha(nums) : '';
+        }).filter(Boolean).join(' | ');
+    }
+
+    function fmtDezenasPorLinhaHtml(row) {
+        const presentes = new Set(row.linhas_presentes || []);
+        return linhasDoMapa().map((lid) => {
+            const nums = (row.por_linha && row.por_linha[lid]) || [];
+            const txt = presentes.has(lid) && nums.length ? fmtDezenasLinha(nums) : '';
+            return `<span class="ldd-ldez-slot">${txt ? esc(txt) : '&nbsp;'}</span>`;
         }).join('');
     }
 
@@ -162,6 +175,9 @@
         } else if (key === 'linhas_txt') {
             va = fmtLinhasQtdTxt(a);
             vb = fmtLinhasQtdTxt(b);
+        } else if (key === 'linha_dezenas') {
+            va = fmtDezenasPorLinhaTxt(a);
+            vb = fmtDezenasPorLinhaTxt(b);
         } else if (key === 'dd_txt') {
             va = ddDuOrdenados(a.dezenas).dd.join(',');
             vb = ddDuOrdenados(b.dezenas).dd.join(',');
@@ -275,6 +291,7 @@
                 <td>${row.concurso}</td>
                 <td class="ldd-col-dezenas font-mono small">${fmtDezenas(row.dezenas)}</td>
                 <td class="ldd-col-linhas"><div class="ldd-linhas-seq">${fmtLinhasQtdChips(row)}</div></td>
+                <td class="ldd-col-ldez font-mono small"><div class="ldd-ldez-seq">${fmtDezenasPorLinhaHtml(row)}</div></td>
                 <td class="ldd-col-qtd fw-bold">${row.qtd_linhas}</td>
             </tr>`).join('');
 
@@ -282,17 +299,18 @@
             <h6 class="small fw-bold mb-2">Histórico completo
                 <span class="text-muted fw-normal">(do 1º ao atual na janela · ${data.total_concursos || 0} concursos)</span>
             </h6>
-            <p class="small text-muted mb-2">Clique no cabeçalho da coluna para classificar. Ao abrir: <strong>menor → maior</strong> (concurso). Dezenas sempre em ordem crescente.</p>
+            <p class="small text-muted mb-2">Clique no cabeçalho da coluna para classificar. Ao abrir: <strong>maior → menor</strong> (último concurso primeiro). Dezenas sempre em ordem crescente.</p>
             ${histToolbar('linhas', meta)}
             <div class="table-responsive">
                 <table class="table table-sm table-bordered ldd-table mb-0" id="lddHistLinhasTable">
                     <thead><tr>
                         ${thSort(st, 'concurso', 'Concurso', 'Ordenar por número do concurso')}
                         ${thSort(st, 'dezenas', 'Dezenas', 'Ordenar pelo texto das dezenas')}
-                        ${thSort(st, 'linhas_txt', 'Linhas', 'Ordenar pelas linhas e quantidade de dezenas em cada uma (L1→L10)', 'ldd-col-linhas')}
+                        ${thSort(st, 'linhas_txt', 'Linhas', 'Ordenar pelas linhas e quantidade', 'ldd-col-linhas')}
+                        ${thSort(st, 'linha_dezenas', 'Dezenas da Linha', 'Ordenar pelas dezenas de cada linha', 'ldd-col-ldez')}
                         ${thSort(st, 'qtd_linhas', 'Qtd', 'Ordenar pela quantidade de linhas', 'ldd-col-qtd')}
                     </tr></thead>
-                    <tbody>${body || '<tr><td colspan="4" class="text-muted">Sem dados</td></tr>'}</tbody>
+                    <tbody>${body || '<tr><td colspan="5" class="text-muted">Sem dados</td></tr>'}</tbody>
                 </table>
             </div>`;
         bindHistControls(wrap, 'linhas', renderLinhasHistOnly);
@@ -321,7 +339,7 @@
             <h6 class="small fw-bold mb-2 mt-3">Histórico completo
                 <span class="text-muted fw-normal">(do 1º ao atual na janela · ${data.total_concursos || 0} concursos)</span>
             </h6>
-            <p class="small text-muted mb-2">Clique no cabeçalho da coluna para classificar. Ao abrir: <strong>menor → maior</strong> (concurso). Dezenas sempre em ordem crescente.</p>
+            <p class="small text-muted mb-2">Clique no cabeçalho da coluna para classificar. Ao abrir: <strong>maior → menor</strong> (último concurso primeiro). Dezenas sempre em ordem crescente.</p>
             ${histToolbar('dddu', meta)}
             <div class="table-responsive">
                 <table class="table table-sm table-bordered ldd-table mb-0">
@@ -413,7 +431,7 @@
     function renderLinhas(data) {
         cache.linhas = data;
         histState.linhas.key = 'concurso';
-        histState.linhas.dir = 'asc';
+        histState.linhas.dir = 'desc';
         histState.linhas.page = 1;
         setLabels(data);
         const mapa = data.mapa || {};
@@ -476,7 +494,7 @@
     function renderDdDu(data) {
         cache.dddu = data;
         histState.dddu.key = 'concurso';
-        histState.dddu.dir = 'asc';
+        histState.dddu.dir = 'desc';
         histState.dddu.page = 1;
         setLabels(data);
         const freqDd = data.frequencia_dd || [];
@@ -669,9 +687,8 @@
     document.querySelector('[data-bs-target="#lddPaneDdDu"]')?.addEventListener('shown.bs.tab', () => {
         if (!loaded.dddu) loadDdDu();
         else {
-            // reabre com ordem padrão menor → maior
             histState.dddu.key = 'concurso';
-            histState.dddu.dir = 'asc';
+            histState.dddu.dir = 'desc';
             histState.dddu.page = 1;
             renderDdDuHistOnly();
         }
@@ -680,7 +697,7 @@
     document.querySelector('[data-bs-target="#lddPaneLinhas"]')?.addEventListener('shown.bs.tab', () => {
         if (loaded.linhas) {
             histState.linhas.key = 'concurso';
-            histState.linhas.dir = 'asc';
+            histState.linhas.dir = 'desc';
             histState.linhas.page = 1;
             renderLinhasHistOnly();
         }

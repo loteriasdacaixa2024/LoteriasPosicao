@@ -201,6 +201,7 @@
     <a class="btn btn-sm tb-btn-mod" href="/analise/comparar-concursos/"><i class="fas fa-columns"></i> Comparar concursos</a>
     <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-brain"></i> Elite</a>
   </div>
+  {% include '_diagonais_aposta.html' %}
 
   <ul class="nav get-hub-tabs mb-2 flex-wrap justify-content-center" role="tablist">
     <li class="nav-item">
@@ -237,6 +238,7 @@
 
   <div id="get-hub-escolha"{% if aba_inicial in ('manual', 'automatico', 'comparador', 'diagonais') %} class="d-none"{% endif %}>
 <div id="get-root" data-api="{{ api_base }}"
+     data-modality="{{ modality_key }}"
      data-dmin="{{ ctx.dezena_min or dezena_min or 1 }}" data-dmax="{{ ctx.dezena_max or dezena_max or 31 }}"
      data-vcols="{{ ctx.volante_cols or 10 }}">
 
@@ -401,6 +403,7 @@
           Monte as opções e clique em <strong>Gerar</strong> para ver as apostas.
         </p>
       </div>
+      {% include '_panorama_conjunto.html' %}
       <div id="getResumoPadroes" class="mt-3 d-none"></div>
     </div>
   </div>
@@ -512,6 +515,7 @@
   const root = document.getElementById('get-root');
   if (!root) return;
   const API = root.dataset.api || '/geradores-elite/api/escolha-tubular';
+  const MOD_KEY = root.dataset.modality || '';
   const DMIN = parseInt(root.dataset.dmin || '1', 10);
   const DMAX = parseInt(root.dataset.dmax || '31', 10);
   const VCOLS = parseInt(root.dataset.vcols || '10', 10);
@@ -734,6 +738,7 @@
       box.classList.remove('lista-apostas-grid', 'lista-apostas-hibrido');
       box.innerHTML = '<div class="alert alert-warning mb-0">Não foi possível montar apostas com todos os atributos juntos. Tente desmarcar alguma exigência.</div>';
       renderResumoPadroes([]);
+      if (window.__renderPanoramaConjunto) window.__renderPanoramaConjunto([], { key: MOD_KEY });
       return;
     }
     const showVolante = exibicaoApostas === 'volante' || exibicaoApostas === 'hibrido';
@@ -772,7 +777,7 @@
           ${a.trevos && a.trevos.length ? `<span class="padrao-chip">T ${(a.trevos||[]).map(pad).join('-')}</span>` : ''}
         </div>
         <div class="aposta-card-inner${exibicaoApostas === 'hibrido' ? ' modo-hibrido' : ''}">
-          ${balls}${vol}
+          ${balls}${window.__htmlDiagLinha ? window.__htmlDiagLinha(dez) : ''}${vol}
         </div>
         <details class="get-detalhes">
           <summary>Detalhes da geração</summary>
@@ -787,6 +792,12 @@
     }).join('');
     renderHistAlert(data.historico || data.validacao_historico);
     renderResumoPadroes(lastApostas);
+    if (window.__renderPanoramaConjunto) {
+      window.__renderPanoramaConjunto(lastApostas, {
+        key: MOD_KEY,
+        ultimo: concursoConf || null,
+      });
+    }
   }
 
   function ancoraSelecionada() {

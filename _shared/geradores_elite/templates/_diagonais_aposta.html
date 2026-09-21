@@ -1,0 +1,116 @@
+{# Chips de diagonal por aposta gerada — sem faixa do último concurso. #}
+{% if modality_key != 'supersete' %}
+<style>
+.ge-diag-chip {
+  display: inline-flex;
+  font-size: .68rem;
+  font-weight: 600;
+  padding: .08rem .35rem;
+  border-radius: 5px;
+  background: #eef6ff;
+  border: 1px solid #bfd7f2;
+  color: #1e4b7b;
+  font-variant-numeric: tabular-nums;
+}
+.aposta-diag-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .18rem;
+  margin-top: .2rem;
+}
+</style>
+<script>
+(function () {
+    if (window.__htmlDiagLinha) return;
+
+    function volanteRows(dmin, dmax) {
+        const lo = Number(dmin) || 1, hi = Number(dmax) || 31;
+        if (lo === 1 && hi === 31) return [[1, 10], [11, 20], [21, 30], [31, 31]];
+        const rows = [];
+        for (let n = lo; n <= hi; n += 10) rows.push([n, Math.min(hi, n + 9)]);
+        return rows;
+    }
+    function engine(dmin, dmax) {
+        const rows = volanteRows(dmin, dmax);
+        const pmap = {};
+        rows.forEach((ab, r) => { for (let n = ab[0]; n <= ab[1]; n++) pmap[n] = [r, n - ab[0]]; });
+        function geomDir(nums) {
+            const cells = nums.map((n) => pmap[n]).filter(Boolean).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+            if (cells.length < 2) return 'down';
+            const first = cells[0], last = cells[cells.length - 1];
+            if (last[1] > first[1]) return 'down';
+            if (last[1] < first[1]) return 'up';
+            return 'down';
+        }
+        function orderGeom(nums) {
+            return [...nums].filter((n) => pmap[n]).sort((a, b) => {
+                const pa = pmap[a], pb = pmap[b];
+                return pa[0] - pb[0] || pa[1] - pb[1] || a - b;
+            });
+        }
+        const down = {}, up = {};
+        rows.forEach((ab, r) => {
+            for (let n = ab[0]; n <= ab[1]; n++) {
+                const c = n - ab[0];
+                (down[c - r] || (down[c - r] = [])).push({ n, r, c });
+                (up[c + r] || (up[c + r] = [])).push({ n, r, c });
+            }
+        });
+        const lines = [];
+        function flush(mapa) {
+            Object.values(mapa).forEach((arr) => {
+                arr.sort((a, b) => a.r - b.r || a.c - b.c);
+                let run = [];
+                arr.forEach((cell) => {
+                    if (!run.length || cell.r === run[run.length - 1].r + 1) run.push(cell);
+                    else { if (run.length >= 2) lines.push(run.map((x) => x.n)); run = [cell]; }
+                });
+                if (run.length >= 2) lines.push(run.map((x) => x.n));
+            });
+        }
+        flush(down); flush(up);
+        return function runsInDraw(dezenas) {
+            const chosen = new Set((dezenas || []).map(Number).filter((n) => n > 0));
+            const runs = [];
+            const seen = new Set();
+            lines.forEach((line) => {
+                let cur = [];
+                const push = () => {
+                    if (cur.length < 2) return;
+                    const nums = orderGeom(cur);
+                    if (nums.length < 2) return;
+                    const dir = geomDir(nums);
+                    const key = dir + ':' + nums.join('-');
+                    if (seen.has(key)) return;
+                    seen.add(key);
+                    runs.push({
+                        dir_sym: dir === 'down' ? '↘' : '↗',
+                        nums_fmt: nums.map((x) => String(x).padStart(2, '0')).join('-'),
+                    });
+                };
+                line.forEach((n) => { if (chosen.has(n)) cur.push(n); else { push(); cur = []; } });
+                push();
+            });
+            return runs;
+        };
+    }
+
+    window.__diagsDaAposta = function (dezenas, dmin, dmax) {
+        return engine(dmin == null ? 1 : dmin, dmax == null ? 31 : dmax)(dezenas);
+    };
+    window.__htmlDiagLinha = function (dezenas, cfg) {
+        const c = cfg || {};
+        if (c.layout === 'colunas' || c.key === 'supersete') return '';
+        const dmin = c.dezena_min != null ? c.dezena_min : 1;
+        const dmax = c.dezena_max != null ? c.dezena_max : 31;
+        const dz = dezenas || [];
+        if (dz.length < 2) return '';
+        const runs = window.__diagsDaAposta(dz, dmin, dmax);
+        if (!runs.length) return '';
+        return `<div class="aposta-diag-line" title="Diagonais desta aposta">${
+            runs.map((d) => `<span class="ge-diag-chip">${d.dir_sym} ${d.nums_fmt}</span>`).join('')
+        }</div>`;
+    };
+})();
+</script>
+{% endif %}

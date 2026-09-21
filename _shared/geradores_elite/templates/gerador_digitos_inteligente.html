@@ -84,6 +84,7 @@
 }
 #ge-digitos-intel .ci-cmp-table .ci-td-dez {
     text-align: left;
+    white-space: normal;
 }
 #ge-digitos-intel .ci-dez-row {
     display: inline-grid;
@@ -160,6 +161,7 @@
             </a>
         </div>
     </div>
+    {% include '_diagonais_aposta.html' %}
 
     <div class="row g-3">
         <div class="col-xl-4 col-lg-5">
@@ -269,6 +271,7 @@
                 {% endif %}
                 <div id="ciLoteResumo" class="ci-lote-resumo d-none"></div>
                 <div id="ciResultado" class="small text-muted">Nenhuma geração ainda.</div>
+                {% include '_panorama_conjunto.html' %}
                 <div class="mt-2">
                     <button type="button" class="btn btn-sm btn-link text-decoration-none px-0" id="ciBtnEnviarManual" disabled
                             title="Abre Escolha Tubular · Manual com estes jogos">
@@ -295,5 +298,5 @@ window.__CC_DIGITOS_PAGE__ = 'intel';
 {% if ui_config.has_mes %}
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
-<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=16"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=19"></script>
 {% endblock %}

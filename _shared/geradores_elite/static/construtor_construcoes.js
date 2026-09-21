@@ -1417,9 +1417,19 @@
             const acHtml = ac != null
                 ? `<span class="cc-aposta-acertos ${clsAc}">${ac} ac.</span>`
                 : '';
+            const diag = window.__htmlDiagLinha
+                ? window.__htmlDiagLinha(a.dezenas, {
+                    dezena_min: DEZENA_MIN,
+                    dezena_max: DEZENA_MAX,
+                    key: UI.modality_key,
+                })
+                : '';
             return `<div class="cc-aposta-row">
                 <span class="cc-aposta-num">${a.linha}.</span>
-                <div class="cc-aposta-balls">${renderBalls(a.dezenas, sorteadasSet)}</div>
+                <div>
+                    <div class="cc-aposta-balls">${renderBalls(a.dezenas, sorteadasSet)}</div>
+                    ${diag}
+                </div>
                 ${acHtml}
             </div>`;
         }).join('');
@@ -1431,6 +1441,9 @@
         if (!sessao.construcoes || !sessao.construcoes.length) {
             el.innerHTML = '<p class="text-muted small mb-0">Nenhuma construção ainda.</p>';
             atualizarPainelRefinar();
+            if (window.__renderPanoramaConjunto) {
+                window.__renderPanoramaConjunto([], { key: UI.modality_key });
+            }
             return;
         }
         el.innerHTML = sessao.construcoes.map(c => {
@@ -1488,6 +1501,15 @@
             </div>`;
         }).join('');
         atualizarPainelRefinar();
+        if (window.__renderPanoramaConjunto) {
+            const last = sessao.construcoes[sessao.construcoes.length - 1];
+            window.__renderPanoramaConjunto((last && last.apostas) || [], {
+                key: UI.modality_key,
+                dezena_min: DEZENA_MIN,
+                dezena_max: DEZENA_MAX,
+                ultimo: window.__CC_ULTIMO__ || null,
+            });
+        }
     }
 
     function renderRefinadas(c) {
@@ -1496,9 +1518,19 @@
         if (!pares.length) return '';
         const rows = pares.map(p => {
             const falt = (p.faltante_ciclo || []).map(fmt).join(' ');
+            const diag = window.__htmlDiagLinha
+                ? window.__htmlDiagLinha(p.refinada || [], {
+                    dezena_min: DEZENA_MIN,
+                    dezena_max: DEZENA_MAX,
+                    key: UI.modality_key,
+                })
+                : '';
             return `<div class="cc-refinada-row">
                 <span class="cc-aposta-num">R${p.linha_origem}.</span>
-                <div class="cc-aposta-balls">${renderBalls(p.refinada || [], null)}</div>
+                <div>
+                    <div class="cc-aposta-balls">${renderBalls(p.refinada || [], null)}</div>
+                    ${diag}
+                </div>
                 <div class="cc-refinada-meta">mantém ${(p.mantidas||[]).length} · troca ${p.n_trocadas||0} · distância ${p.distancia} · ABS ${p.abs_interno}${falt ? ' · ciclo '+falt : ''}</div>
             </div>`;
         }).join('');

@@ -204,6 +204,7 @@
             </div>
             <a href="{{ url_for('geradores_elite.index') }}" class="btn btn-sm btn-outline-secondary">Geradores de Elite</a>
         </div>
+        {% include '_diagonais_aposta.html' %}
 
         <div class="row g-3 align-items-end">
             <div class="col-md-3">
@@ -316,9 +317,10 @@
     {% else %}
     <div id="geResultados" class="card shadow-sm border-0 p-2 p-md-3" style="background: var(--surface,#fff);"></div>
     {% endif %}
+    {% include '_panorama_conjunto.html' %}
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('geradores_elite.static', filename='engine_final.js') }}"></script>
+<script src="{{ url_for('geradores_elite.static', filename='engine_final.js') }}?v=pano1"></script>
 {% endblock %}

@@ -75,32 +75,46 @@
   }
   #ldd-root #lddHistLinhasTable th:first-child,
   #ldd-root #lddHistLinhasTable td:first-child,
-  #ldd-root #lddHistLinhasTable th.ldd-col-qtd,
-  #ldd-root #lddHistLinhasTable td.ldd-col-qtd,
+  #ldd-root #lddHistLinhasTable th:nth-child(2),
+  #ldd-root #lddHistLinhasTable td.ldd-col-dezenas,
   #ldd-root #lddHistLinhasTable th.ldd-col-linhas,
-  #ldd-root #lddHistLinhasTable td.ldd-col-linhas {
+  #ldd-root #lddHistLinhasTable td.ldd-col-linhas,
+  #ldd-root #lddHistLinhasTable th.ldd-col-qtd,
+  #ldd-root #lddHistLinhasTable td.ldd-col-qtd {
     width: 1%;
     white-space: nowrap;
   }
-  #ldd-root #lddHistLinhasTable th.ldd-col-linhas,
   #ldd-root #lddHistLinhasTable td.ldd-col-linhas {
     text-align: left !important;
+    padding-left: .4rem;
+    padding-right: .4rem;
+  }
+  #ldd-root #lddHistLinhasTable td.ldd-col-ldez {
+    text-align: left !important;
+    white-space: nowrap;
     padding-left: .45rem;
     padding-right: .45rem;
+    font-weight: 600;
   }
-  #ldd-root .ldd-linhas-seq {
+  #ldd-root .ldd-linhas-seq,
+  #ldd-root .ldd-ldez-seq {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 4.1rem;
     justify-content: start;
     align-items: center;
-    gap: .18rem;
     width: max-content;
+  }
+  #ldd-root .ldd-linhas-seq {
+    grid-auto-columns: 3.6rem;
+    gap: .15rem;
+  }
+  #ldd-root .ldd-ldez-seq {
+    grid-auto-columns: 10.5rem;
+    gap: .35rem;
   }
   #ldd-root .ldd-col-linhas .ldd-chip {
     display: block;
-    width: 4.1rem;
-    min-width: 4.1rem;
+    width: 3.6rem;
     margin: 0;
     text-align: center;
     font-variant-numeric: tabular-nums;
@@ -110,6 +124,12 @@
     visibility: hidden;
     border: none;
     background: transparent;
+  }
+  #ldd-root .ldd-ldez-slot {
+    display: block;
+    text-align: left;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
   #ldd-root .ldd-rank-card {
     border-radius: 12px;
@@ -163,6 +183,12 @@
       <span class="badge bg-secondary" id="lddLblBase">Geral</span>
       <span class="badge bg-light text-dark border" id="lddLblJanela">Janela</span>
       <span class="badge bg-light text-dark border" id="lddLblUltimo">—</span>
+      <a class="btn btn-sm btn-outline-primary" href="/geradores-elite/comportamento-apostas/?tab=linhas">
+        Ranking →
+      </a>
+      <a class="btn btn-sm btn-primary" href="/geradores-elite/comportamento-apostas/?tab=aliadas">
+        Linhas + Ciclo + Somas →
+      </a>
     </div>
   </div>
 
@@ -185,7 +211,7 @@
     Camada oficial de <strong>Linhas L1–L10</strong> (blocos de 10) e estatísticas <strong>DD × DU</strong>
     (Dígito da Dezena × Dígito da Unidade). Não altera as análises tradicionais.
     Use <strong>Janela → Todos</strong> para analisar do 1º concurso ao atual.
-    Nos históricos, clique no título da coluna para ordenar (abre do <em>menor → maior</em>).
+    Nos históricos, clique no título da coluna para ordenar (abre do <em>último concurso</em>).
     <a href="/geradores-elite/comportamento-apostas/?tab=linhas" class="fw-bold text-decoration-none ms-1">
       Gerar apostas pelo ranking →
     </a>
@@ -219,5 +245,5 @@
 <script>
   window.__LDD_UI__ = {{ estudos_ui | tojson }};
 </script>
-<script src="/analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920c"></script>
+<script src="/analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920n"></script>
 {% endblock %}

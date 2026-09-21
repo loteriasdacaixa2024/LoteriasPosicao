@@ -215,6 +215,7 @@
       </div>
     </div>
   </div>
+  {% include '_diagonais_aposta.html' %}
 
   <ul class="nav nav-tabs mb-3 flex-wrap" role="tablist">
     <li class="nav-item" role="presentation">
@@ -656,6 +657,7 @@
       <div id="rec-out"><div class="alert alert-light border small">Carregando recorrência…</div></div>
     </div>
   </div>
+  {% include '_panorama_conjunto.html' %}
 </div>
 {% if has_mes %}
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
@@ -663,11 +665,17 @@
 <script>
 (function(){
   const API = {{ api_base|tojson }};
+  const MOD_KEY = {{ modality_key|tojson }};
   const HAS_MES = {{ 'true' if has_mes else 'false' }};
   const MESES_ABREV = {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
   const MESES_NOME = {1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
   const pad = n => String(n).padStart(2,'0');
   const balls = (arr, cls) => (arr||[]).map(d=>`<span class="cc-ball ${cls}">${pad(d)}</span>`).join('') || '—';
+  let ultimoPanorama = null;
+  function syncPanorama(apostas) {
+    if (!window.__renderPanoramaConjunto) return;
+    window.__renderPanoramaConjunto(apostas || [], { key: MOD_KEY, ultimo: ultimoPanorama });
+  }
 
   let state21 = { apostas: [], mes: null };
   let stateRitmo = { apostas: [], mes: null };
@@ -783,6 +791,7 @@
         <div class="cc-aposta-actions">${rm}</div>
       </div>
       <div class="cc-aposta-dezenas" role="group" aria-label="Dezenas">${ballsHtml}</div>
+      ${window.__htmlDiagLinha ? window.__htmlDiagLinha(a.dezenas) : ''}
       <div class="cc-aposta-foot">${foot}<span class="cc-aposta-bt-slot"></span></div>
       ${fora}
     </article>`;
@@ -834,6 +843,12 @@
     }
     const ant = (c.concursos||[]).find(x=>x.papel==='anterior') || {};
     const ult = (c.concursos||[]).find(x=>x.papel==='ultimo') || {};
+    if (ult.concurso && (ult.dezenas || ult.numeros || ult.sorteadas)) {
+      ultimoPanorama = { concurso: ult.concurso, dezenas: ult.dezenas || ult.numeros || ult.sorteadas };
+    } else if (c.ultimo_sorteio && (c.ultimo_sorteio.dezenas || Array.isArray(c.ultimo_sorteio))) {
+      const dz = c.ultimo_sorteio.dezenas || c.ultimo_sorteio;
+      ultimoPanorama = { concurso: c.ultimo_concurso || c.concurso, dezenas: dz };
+    }
     box.innerHTML = `
       <div class="row g-2">
         <div class="col-md-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body small">
@@ -864,6 +879,7 @@
       state21.apostas = [];
       document.getElementById('cc-btn-export').disabled = true;
       document.getElementById('cc-btn-bt').disabled = true;
+      syncPanorama([]);
       return;
     }
     state21.apostas = j.apostas || [];
@@ -881,6 +897,7 @@
         return 'livre';
       }
     })).join(''));
+    syncPanorama(state21.apostas);
     out.querySelectorAll('.cc-rm').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const i = Number(btn.dataset.i);
@@ -944,6 +961,7 @@
       rmClass: 'cr-rm',
       ballClass: (d, ap) => (ap.faltantes||[]).includes(d) ? 'falt' : 'saida'
     })).join(''));
+    syncPanorama(stateRitmo.apostas);
     out.querySelectorAll('.cr-rm').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const i = Number(btn.dataset.i);
@@ -1013,6 +1031,7 @@
         return 'saida';
       }
     })).join(''));
+    syncPanorama(stateOp.apostas);
     out.querySelectorAll('.co-rm').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const i = Number(btn.dataset.i);
@@ -1079,6 +1098,7 @@
       rmClass: 'cf-rm',
       ballClass: (d, ap) => (ap.faltantes||[]).includes(d) ? 'falt' : 'saida'
     })).join(''));
+    syncPanorama(stateFech.apostas);
     out.querySelectorAll('.cf-rm').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const i = Number(btn.dataset.i);
@@ -1406,6 +1426,7 @@
         return 'saida';
       }
     })).join(''));
+    syncPanorama(stateEst.apostas);
     out.querySelectorAll('.ce-rm').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const i = Number(btn.dataset.i);

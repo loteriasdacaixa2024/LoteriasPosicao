@@ -654,6 +654,66 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
+    @bp.route("/api/comportamento/gerar-linhas-aliadas", methods=["POST"])
+    def api_comportamento_gerar_linhas_aliadas():
+        if not tem_gerador_comportamento(modality_key):
+            return jsonify({"sucesso": False, "erro": "Comportamento indisponível."}), 404
+        data = request.get_json(silent=True) or {}
+        try:
+            svc = _comportamento_svc()
+            ui = svc.ui_config()
+            dez_default = ui.get("dezenas_default", 15)
+            return jsonify(_pipeline_elite(svc.gerar_linhas_aliadas(
+                quantidade=int(data.get("quantidade", 10)),
+                dezenas_por_jogo=int(data["dezenas_por_jogo"]) if data.get("dezenas_por_jogo") is not None else dez_default,
+                janela=int(data.get("janela", 0)),
+                base_estatistica=data.get("base") or data.get("base_estatistica", "geral"),
+                top_n=int(data.get("top_n", 3)),
+                modo_peso=data.get("modo_peso") or "frequencia",
+                usar_ciclo=bool(data.get("usar_ciclo", True)),
+                usar_soma=bool(data.get("usar_soma", True)),
+            ), "comportamento_linhas_aliadas", data))
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @bp.route("/api/comportamento/faixas-crescente")
+    def api_comportamento_faixas_crescente():
+        if not tem_gerador_comportamento(modality_key) or modality_key == "supersete":
+            return jsonify({"sucesso": False, "erro": "Faixas crescente indisponível."}), 404
+        try:
+            return jsonify(_comportamento_svc().contexto_faixas_crescente())
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @bp.route("/api/comportamento/gerar-faixas-crescente", methods=["POST"])
+    def api_comportamento_gerar_faixas_crescente():
+        if not tem_gerador_comportamento(modality_key) or modality_key == "supersete":
+            return jsonify({"sucesso": False, "erro": "Faixas crescente indisponível."}), 404
+        data = request.get_json(silent=True) or {}
+        try:
+            svc = _comportamento_svc()
+            ui = svc.ui_config()
+            dez_default = ui.get("dezenas_default", 15)
+            return jsonify(_pipeline_elite(svc.gerar_faixas_crescente(
+                quantidade=int(data.get("quantidade", 10)),
+                dezenas_por_jogo=int(data["dezenas_por_jogo"]) if data.get("dezenas_por_jogo") is not None else dez_default,
+                usar_ciclo=bool(data.get("usar_ciclo", True)),
+                usar_soma=bool(data.get("usar_soma", True)),
+                usar_repeticao=bool(data.get("usar_repeticao", True)),
+                usar_padrao=bool(data.get("usar_padrao", False)),
+                usar_gap=bool(data.get("usar_gap", False)),
+                usar_pares=bool(data.get("usar_pares", True)),
+                usar_impares=bool(data.get("usar_impares", True)),
+                usar_primos=bool(data.get("usar_primos", False)),
+                usar_moldura=bool(data.get("usar_moldura", False)),
+                usar_seq=bool(data.get("usar_seq", False)),
+                usar_m3=bool(data.get("usar_m3", False)),
+                usar_fb=bool(data.get("usar_fb", False)),
+                usar_finais=bool(data.get("usar_finais", True)),
+            ), "comportamento_faixas_crescente", data))
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
     @bp.route("/api/meses-indicados")
     def api_meses_indicados():
         if modality_key != "diadesorte":

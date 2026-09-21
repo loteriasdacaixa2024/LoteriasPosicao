@@ -82,16 +82,25 @@
     if (!out) return;
     if (!list || !list.length) {
       out.innerHTML = '';
+      if (window.__renderPanoramaConjunto) {
+        window.__renderPanoramaConjunto([], { key: SPEC.modality_key || SPEC.key });
+      }
       return;
     }
     out.innerHTML = list.map((a) => `
       <div class="gcg-aposta d-flex flex-wrap align-items-center gap-2">
         <span class="num">${String(a.numero || '').padStart(2, '0')}</span>
-        <div>${balls(a.dezenas)}</div>
+        <div>${balls(a.dezenas)}${window.__htmlDiagLinha ? window.__htmlDiagLinha(a.dezenas, { dezena_min: SPEC.dezena_min, dezena_max: SPEC.dezena_max }) : ''}</div>
         <span class="badge bg-light text-dark border font-monospace">${a.padrao_gaps || (a.ciclos || []).join(' ')}</span>
         ${mesBadge(a)}
         <span class="small text-muted">${a.origem || ''}</span>
       </div>`).join('');
+    if (window.__renderPanoramaConjunto) {
+      window.__renderPanoramaConjunto(list, {
+        key: SPEC.modality_key || SPEC.key,
+        pad: padW,
+      });
+    }
   }
 
   async function gerar() {

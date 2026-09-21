@@ -517,6 +517,7 @@
             el.innerHTML = aviso
                 ? `<div class="alert alert-warning py-2 small mb-0">${aviso}</div>`
                 : '<p class="text-muted small mb-0">Nenhuma aposta gerada.</p>';
+            if (window.__renderPanoramaConjunto) window.__renderPanoramaConjunto([], { key: CFG.key, layout: CFG.layout });
             return;
         }
         const avisoHtml = aviso
@@ -546,6 +547,7 @@
                     ${showLinear ? `
                     <div class="aposta-linear ${showVolante ? '' : 'w-100'}">
                         <div class="my-1">${linearHtml(a)}</div>
+                        ${window.__htmlDiagLinha ? window.__htmlDiagLinha(a.dezenas, CFG) : ''}
                         ${htmlExtraAposta(a)}
                     </div>` : `<div class="mb-2">${htmlExtraAposta(a)}</div>`}
                     ${showVolante ? htmlVolante(a.dezenas, a.numero, a) : ''}
@@ -555,6 +557,13 @@
         `).join('');
         initTooltips(el);
         if (window.__bindApostaInfoToggle) window.__bindApostaInfoToggle(el);
+        if (window.__renderPanoramaConjunto) {
+            window.__renderPanoramaConjunto(ultimasApostas, {
+                key: CFG.key,
+                layout: CFG.layout,
+                ultimo: (concursosLista && concursosLista[0]) || null,
+            });
+        }
     }
 
     async function carregarConcursos() {

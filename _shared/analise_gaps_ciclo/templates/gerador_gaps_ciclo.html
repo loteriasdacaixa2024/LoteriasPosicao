@@ -68,6 +68,7 @@
       <i class="fas fa-arrow-left"></i> Análise por Gaps e Ciclo
     </a>
   </div>
+  {% include '_diagonais_aposta.html' %}
 
   <div class="gcg-fonte mb-3">
     <h2>Fonte das análises</h2>
@@ -149,6 +150,7 @@
 
   <p class="gcg-hint mb-2" id="gcgStatus">Escolha as sessões e gere as apostas.</p>
   <div id="gcgOut"></div>
+  {% include '_panorama_conjunto.html' %}
 </div>
 
 {% if has_mes %}
@@ -159,5 +161,5 @@
   window.__GCG_API__ = {{ api_base | tojson }};
   window.__GCG_HAS_MES__ = {{ 'true' if has_mes else 'false' }};
 </script>
-<script src="/geradores-elite/gaps-ciclo-apostas/static/gerador_gaps_ciclo.js?v=dupla1"></script>
+<script src="/geradores-elite/gaps-ciclo-apostas/static/gerador_gaps_ciclo.js?v=pano1"></script>
 {% endblock %}

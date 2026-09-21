@@ -872,6 +872,7 @@
             <div class="flex-grow-1">
                 <h1 class="h5 mb-1"><i class="fas fa-layer-group text-success"></i> Construtor de Construções</h1>
                 <span class="text-muted small">{{ modality_nome }} — mesmo conjunto-base, múltiplas engenharias</span>
+                {% include '_diagonais_aposta.html' %}
             </div>
             {% if ultimo_sorteio %}
             <div class="cc-ultimo-sorteio" id="ccUltimoSorteio" title="Referência para montar o conjunto-base">
@@ -1360,6 +1361,7 @@
                     </div>
                 </div>
                 <div id="ccConstrucoes"></div>
+                {% include '_panorama_conjunto.html' %}
             </div>
 
             <div class="cc-panel cc-step-card cc-step-5 p-3">
@@ -1717,9 +1719,9 @@ window.__CC_DIGITOS_PAGE__ = 'construtor';
 {% if ui_config.has_mes %}
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
-<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}?v=14"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_construcoes.js') }}?v=16"></script>
 {% if digitos_habilitado %}
-<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=16"></script>
+<script src="{{ url_for('geradores_elite.static', filename='construtor_digitos.js') }}?v=19"></script>
 <script src="{{ url_for('geradores_elite.static', filename='construtor_dezenas_especial.js') }}?v=1"></script>
 {% endif %}
 {% endif %}

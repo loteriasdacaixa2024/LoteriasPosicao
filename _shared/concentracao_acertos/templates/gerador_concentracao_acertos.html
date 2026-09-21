@@ -311,6 +311,7 @@
                     <span class="badge-exp-inline">Experimental</span>
                 </h1>
                 <span class="text-muted small">{{ modality_nome }} — {{ conc_cfg.subtitle_gerador }}</span>
+                {% include '_diagonais_aposta.html' %}
             </div>
             <div class="cc-ultimo-sorteio" id="concUltimoSorteio" title="Referência — mesmas dezenas destacadas no volante">
                 <div class="cc-ultimo-sorteio-label">Último sorteio</div>
@@ -493,6 +494,7 @@
         </div>
         {% endfor %}
     </div>
+    {% include '_panorama_conjunto.html' %}
 </div>
 {% endblock %}
 
@@ -526,6 +528,21 @@
     }
 
     function fmt(n) { return String(n).padStart(2, '0'); }
+
+    function numsDaAposta(a) {
+        if (Array.isArray(a)) return a.map(Number);
+        if (a && Array.isArray(a.dezenas)) return a.dezenas.map(Number);
+        return [];
+    }
+
+    function syncPanorama(estId) {
+        if (!window.__renderPanoramaConjunto) return;
+        const apostas = (estId && estado[estId]) ? (estado[estId].apostas || []) : [];
+        window.__renderPanoramaConjunto(apostas, {
+            key: CFG.key,
+            ultimo: ULTIMO,
+        });
+    }
 
     const FAIXA_LO = DEZ_MIN + Math.floor((DEZ_MAX - DEZ_MIN + 1) / 3);
     const FAIXA_MID = DEZ_MIN + Math.floor(2 * (DEZ_MAX - DEZ_MIN + 1) / 3);
@@ -692,6 +709,7 @@
         estado[estId].apostas_com_mes = [];
         document.getElementById('resultado-' + estId).style.display = 'none';
         atualizarUI(estId);
+        syncPanorama(estId);
     }
 
     function linhasExport(estId) {
@@ -832,8 +850,17 @@
                     + ' · Média máx.: ' + (m.media_max_acertos ?? '—');
                 if (j.apostas && j.apostas.length) {
                     const lista = j.apostas.map(function (a) {
-                        return a.map(function (d) { return String(d).padStart(2, '0'); }).join(' · ');
-                    }).join('<br>');
+                        const nums = numsDaAposta(a);
+                        const txt = nums.map(function (d) { return fmt(d); }).join(' · ');
+                        const diag = window.__htmlDiagLinha
+                            ? window.__htmlDiagLinha(nums, {
+                                dezena_min: DEZ_MIN,
+                                dezena_max: DEZ_MAX,
+                                key: CFG.key,
+                            })
+                            : '';
+                        return '<div class="conc-aposta-linha mb-1">' + txt + diag + '</div>';
+                    }).join('');
                     msg.innerHTML += '<div class="mt-2 small font-monospace">' + lista + '</div>';
                 }
             } else {
@@ -843,10 +870,12 @@
                 msg.innerHTML = '<strong>Falha na geração.</strong> '
                     + (j.erro || 'Motor de geração na próxima fase.');
             }
+            syncPanorama(estId);
             atualizarUI(estId);
         } catch (e) {
             estado[estId].apostas = [];
             estado[estId].apostas_com_mes = [];
+            syncPanorama(estId);
             atualizarUI(estId);
             alert('Falha: ' + e.message);
         } finally {
@@ -892,6 +921,7 @@
             if (estId) {
                 renderVolante(estId);
                 atualizarUI(estId);
+                syncPanorama(estId);
             }
         });
     });

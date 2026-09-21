@@ -76,6 +76,7 @@
     <a class="btn btn-sm btn-outline-secondary" href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}"><i class="fas fa-history"></i> 7 · Panorama Histórico</a>
     <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-bolt"></i> Elite</a>
   </div>
+  {% include '_diagonais_aposta.html' %}
 
   <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
     <div>
@@ -197,10 +198,11 @@
           Clique em <strong>Gerar</strong> para montar as apostas com o perfil da janela e as dezenas que ainda faltam no ciclo.
         </p>
       </div>
+      {% include '_panorama_conjunto.html' %}
     </div>
   </div>
 </div>
 
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
-<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=5"></script>
+<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pano1"></script>
 {% endblock %}

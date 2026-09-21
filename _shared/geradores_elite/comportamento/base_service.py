@@ -1502,3 +1502,203 @@ class ComportamentoBaseService:
             "total_concursos": analise.get("total_concursos"),
             "link_analise": "/analise/linhas-dd-du/",
         }
+
+    @classmethod
+    def _ciclo_pendentes(cls) -> List[int]:
+        try:
+            from ciclo_cobertura.analise_service import AnaliseCicloCoberturaService
+            ciclo = AnaliseCicloCoberturaService.obter_ciclo_atual(cls.SPEC.modality_key)
+            if not ciclo:
+                return []
+            return [int(x) for x in (ciclo.get("dezenas_pendentes") or [])]
+        except Exception:
+            return []
+
+    @classmethod
+    def _faixa_soma(cls, janela: int, base: str) -> Tuple[Optional[int], Optional[int], Optional[float]]:
+        try:
+            from analise_somas_digitos.service import AnaliseSomasDigitosService
+            out = AnaliseSomasDigitosService.analisar_somas(
+                cls.SPEC.modality_key, janela=janela, base_estatistica=base,
+            )
+            if not out.get("sucesso"):
+                return None, None, None
+            resumo = out.get("resumo") or {}
+            media = float(resumo.get("soma_media") or 0)
+            if media <= 0:
+                return None, None, None
+            lo = int(round(media * 0.88))
+            hi = int(round(media * 1.12))
+            return lo, hi, media
+        except Exception:
+            return None, None, None
+
+    @classmethod
+    def gerar_apostas_linhas_aliadas(
+        cls,
+        quantidade: int = 10,
+        dezenas_por_jogo: Optional[int] = None,
+        janela: int = 0,
+        base_estatistica: str = "geral",
+        top_n: int = 3,
+        modo_peso: str = "frequencia",
+        usar_ciclo: bool = True,
+        usar_soma: bool = True,
+    ) -> Dict[str, Any]:
+        """Linhas (ranking) + ciclo (pendentes) + somas (faixa da média)."""
+        qtd = max(1, min(int(quantidade), 200))
+        raw = cls.gerar_apostas_por_linhas(
+            quantidade=max(qtd * 4, qtd),
+            dezenas_por_jogo=dezenas_por_jogo,
+            janela=janela,
+            base_estatistica=base_estatistica,
+            top_n=top_n,
+            modo_peso=modo_peso,
+        )
+        if not raw.get("sucesso"):
+            return raw
+
+        pendentes = cls._ciclo_pendentes() if usar_ciclo else []
+        pend_set = set(pendentes)
+        soma_lo, soma_hi, soma_media = (None, None, None)
+        if usar_soma:
+            soma_lo, soma_hi, soma_media = cls._faixa_soma(janela, base_estatistica)
+
+        scored: List[Tuple[int, Dict[str, Any]]] = []
+        for ap in raw.get("apostas") or []:
+            dz = [int(x) for x in (ap.get("dezenas") or [])]
+            s = sum(dz)
+            n_ciclo = len(set(dz) & pend_set) if pend_set else 0
+            soma_ok = True
+            if soma_lo is not None and soma_hi is not None:
+                soma_ok = soma_lo <= s <= soma_hi
+            score = 0
+            if usar_ciclo:
+                score += n_ciclo * 10
+            if usar_soma and soma_ok:
+                score += 8
+            elif usar_soma:
+                score -= 4
+            extra = list(ap.get("criterios") or [])
+            if usar_ciclo:
+                extra.append(f"Ciclo: {n_ciclo} pendente(s)")
+            if usar_soma and soma_lo is not None:
+                extra.append(f"Soma {s} ({'ok' if soma_ok else 'fora'} {soma_lo}–{soma_hi})")
+            item = {
+                **ap,
+                "modo_motor_aposta": "linhas_aliadas",
+                "criterios": extra,
+                "ciclo_pendentes_na_aposta": n_ciclo,
+                "soma": s,
+                "soma_ok": soma_ok,
+            }
+            scored.append((score, item))
+
+        scored.sort(key=lambda x: (-x[0], x[1].get("numero") or 0))
+        escolhidas = [it for _, it in scored[:qtd]]
+        for i, ap in enumerate(escolhidas, start=1):
+            ap["numero"] = i
+
+        criterios = [
+            raw.get("modo_motor_label") or "Linhas L1–L10",
+            f"Peso: {raw.get('modo_peso')}",
+        ]
+        if usar_ciclo:
+            criterios.append(f"Ciclo: {len(pendentes)} pendente(s)")
+        if usar_soma and soma_lo is not None:
+            criterios.append(f"Soma: {soma_lo}–{soma_hi} (média {soma_media})")
+
+        return {
+            **raw,
+            "sucesso": True,
+            "apostas": escolhidas,
+            "total_geradas": len(escolhidas),
+            "solicitados": qtd,
+            "modo_geracao": "linhas_aliadas",
+            "modo_motor": "linhas_aliadas",
+            "modo_motor_label": "Linhas + Ciclo + Somas",
+            "criterios_modo_auto": criterios,
+            "ciclo_pendentes": pendentes,
+            "soma_faixa": {"min": soma_lo, "max": soma_hi, "media": soma_media},
+            "usar_ciclo": usar_ciclo,
+            "usar_soma": usar_soma,
+            "link_analise": "/analise/linhas-dd-du/",
+        }
+
+    @classmethod
+    def contexto_faixas_crescente(cls) -> Dict[str, Any]:
+        from geradores_elite.comportamento.faixas_crescente import contexto_api
+        return contexto_api(cls.SPEC.modality_key)
+
+    @classmethod
+    def _gaps_moda(cls) -> List[Optional[int]]:
+        try:
+            from analise_gaps_ciclo.service import analisar_gaps
+            from analise_gaps_ciclo.specs import tem_gaps_ciclo
+            if not tem_gaps_ciclo(cls.SPEC.modality_key):
+                return []
+            g = analisar_gaps(cls.SPEC.modality_key, janela=0, base="geral")
+            if not g.get("sucesso"):
+                return []
+            return [(x or {}).get("moda") for x in (g.get("moda_por_passo") or [])]
+        except Exception:
+            return []
+
+    @classmethod
+    def gerar_apostas_faixas_crescente(
+        cls,
+        quantidade: int = 10,
+        dezenas_por_jogo: Optional[int] = None,
+        usar_ciclo: bool = True,
+        usar_soma: bool = True,
+        usar_repeticao: bool = True,
+        usar_padrao: bool = False,
+        usar_gap: bool = False,
+        usar_pares: bool = True,
+        usar_impares: bool = True,
+        usar_primos: bool = False,
+        usar_moldura: bool = False,
+        usar_seq: bool = False,
+        usar_m3: bool = False,
+        usar_fb: bool = False,
+        usar_finais: bool = True,
+    ) -> Dict[str, Any]:
+        from geradores_elite.comportamento.faixas_crescente import gerar as gerar_faixas
+
+        k = dezenas_por_jogo if dezenas_por_jogo is not None else cls.SPEC.sorteadas
+        pendentes = cls._ciclo_pendentes() if usar_ciclo else []
+        soma_lo = soma_hi = soma_media = None
+        if usar_soma:
+            soma_lo, soma_hi, soma_media = cls._faixa_soma(0, "geral")
+        ultimo = cls.ultimo_sorteio_info() if (usar_repeticao or usar_padrao) else {}
+        sp = cls.SPEC
+        return gerar_faixas(
+            cls.SPEC.modality_key,
+            quantidade=quantidade,
+            dezenas_por_jogo=int(k),
+            usar_ciclo=usar_ciclo,
+            usar_soma=usar_soma,
+            usar_repeticao=usar_repeticao,
+            usar_padrao=usar_padrao,
+            usar_gap=usar_gap,
+            usar_pares=usar_pares,
+            usar_impares=usar_impares,
+            usar_primos=usar_primos,
+            usar_moldura=usar_moldura,
+            usar_seq=usar_seq,
+            usar_m3=usar_m3,
+            usar_fb=usar_fb,
+            usar_finais=usar_finais,
+            conjuntos={
+                "primos": set(sp.primos),
+                "moldura": set(sp.moldura),
+                "m3": set(sp.multiplos_3),
+                "fb": set(sp.fibonacci),
+            },
+            ciclo_pendentes=pendentes,
+            soma_lo=soma_lo,
+            soma_hi=soma_hi,
+            soma_media=soma_media,
+            ultimo=ultimo,
+            gaps_moda=cls._gaps_moda() if usar_gap else [],
+        )

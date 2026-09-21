@@ -126,6 +126,7 @@
 
         return `<div class="ge-row-aposta">
             <div class="draw-balls m-0">${dezHtml}</div>
+            ${window.__htmlDiagLinha ? window.__htmlDiagLinha(nums) : ''}
             ${extraHtml}
             ${acHtml}
         </div>`;
@@ -236,6 +237,9 @@
         const apostas = data.apostas || [];
         if (!apostas.length) {
             box.innerHTML = '<p class="text-muted mb-0">Nenhuma aposta gerada.</p>';
+            if (window.__renderPanoramaConjunto) {
+                window.__renderPanoramaConjunto([], { key: modality });
+            }
             return;
         }
 
@@ -257,6 +261,12 @@
             .join('');
 
         box.innerHTML = `${renderAvisosBanner(data)}${renderConfBar()}${renderSorteioHeader()}${rows}`;
+        if (window.__renderPanoramaConjunto) {
+            window.__renderPanoramaConjunto(apostas, {
+                key: modality,
+                ultimo: (concursosLista && concursosLista[0]) || null,
+            });
+        }
 
         const sel = document.getElementById('geSelConcurso');
         if (sel) {

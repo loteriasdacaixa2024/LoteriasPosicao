@@ -19,10 +19,6 @@
     body.sniper-modo-resumo #painelEvidencias,
     body.sniper-modo-resumo #painelMotorGeracao,
     body.sniper-modo-resumo #painelHistoricoComp { display: none; }
-    .pan-conj-table { font-size: .8rem; }
-    .pan-conj-table th { white-space: nowrap; }
-    .pan-conj-ok { color: #198754; font-weight: 700; }
-    .pan-conj-at { color: #b8860b; font-weight: 700; }
     .aposta-criterios { text-align: left; background: var(--accent-light); border-radius: 8px; padding: .5rem .65rem; color: var(--primary-dark); }
     .aposta-criterios .crit-line::before { content: '✓ '; color: var(--primary); font-weight: 800; }
     .janela-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
@@ -121,6 +117,59 @@
     .pan-cota-item .sigla { font-weight: 800; color: var(--primary-xdark); }
     .pan-cota-item .val { font-weight: 700; }
     .pan-val-ok { color: #198754; font-weight: 700; }
+    .fx-minmax { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .fx-minmax th { text-align: center; font-size: .7rem; text-transform: uppercase; color: #6b5a3a; border-bottom: 2px solid #ead9a8; padding: .35rem .3rem; }
+    .fx-minmax td { text-align: center; padding: .4rem .3rem; border-bottom: 1px solid #f3edd8; }
+    .fx-minmax td.min { color: #1565c0; font-weight: 800; }
+    .fx-minmax td.max { color: #b71c1c; font-weight: 800; }
+    .fx-regra { border-left: 4px solid #b71c1c; }
+    .fx-pref-hint { font-size: .72rem; color: #8a7a5a; margin: 0 0 .5rem; text-align: center; }
+    .fx-chips { display: flex; flex-wrap: wrap; gap: .32rem .38rem; align-items: center; justify-content: center; }
+    .fx-pos-lista { width: 100%; }
+    .fx-pos-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+    .fx-pos-table th {
+        text-align: center; font-size: .68rem; text-transform: uppercase; letter-spacing: .03em;
+        color: #6b5a3a; border-bottom: 2px solid #ead9a8; padding: .4rem .35rem; white-space: nowrap;
+    }
+    .fx-pos-table td {
+        vertical-align: middle; padding: .4rem .35rem; border-bottom: 1px solid #f0e6c8;
+        text-align: center;
+    }
+    .fx-pos-table td.pos { font-weight: 800; color: var(--primary-xdark); white-space: nowrap; }
+    .fx-pos-table td.min { color: #1565c0; font-weight: 800; }
+    .fx-pos-table td.max { color: #b71c1c; font-weight: 800; }
+    .fx-pos-table td.bolas { text-align: left; white-space: nowrap; padding-right: .2rem; }
+    .fx-pos-table th.qtd,
+    .fx-pos-table td.qtd {
+        text-align: right; width: 2.4rem; min-width: 2.4rem; padding-left: .2rem; padding-right: .55rem;
+        font-weight: 800; font-variant-numeric: tabular-nums; color: #7a6a4a; white-space: nowrap;
+    }
+    .fx-pos-table th.qtd { font-weight: 700; }
+    .fx-pos-table tr:hover td { background: #fff8e8; }
+    .fx-bola {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 1.45rem; height: 1.45rem; padding: 0 .22rem; margin: 1px 2px 1px 0;
+        border-radius: 999px; font-size: .66rem; font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }
+    .fx-bola.ok { background: #e8f6ee; color: #146c43; border: 1px solid #b7e0c5; }
+    .fx-bola.no { background: #fdecec; color: #9b1c1c; border: 1px solid #f0b4b4; text-decoration: line-through; }
+    .fx-chip {
+        display: inline-flex; align-items: center; gap: .28rem;
+        margin: 0; cursor: pointer; user-select: none;
+        font-size: .76rem; font-weight: 650; letter-spacing: .01em;
+        color: #6d5c3c; background: #f7f3ea;
+        border: 1px solid #ead9a8; border-radius: 999px;
+        padding: .18rem .62rem .18rem .4rem;
+        transition: background .12s, border-color .12s, color .12s;
+    }
+    .fx-chip input { margin: 0; width: .78rem; height: .78rem; accent-color: var(--primary); }
+    .fx-chip:hover { border-color: var(--primary); }
+    .fx-chip:has(input:checked) {
+        background: color-mix(in srgb, var(--accent) 32%, #fff);
+        border-color: var(--accent);
+        color: var(--primary-xdark);
+    }
     .pan-val-fail { color: #dc3545; font-weight: 700; }
     .pan-cat-chip { font-size: .72rem; padding: .2rem .5rem; border-radius: 6px; border: 1px solid #ddd; background: #fff; cursor: pointer; margin: 2px; }
     .pan-cat-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
@@ -235,6 +284,7 @@
     }
 </style>
 
+{% include '_diagonais_aposta.html' %}
 <div class="page-hdr">
     <h2 class="h4 mb-1"><i class="fas fa-chart-line me-2"></i>{{ page_title }}</h2>
     <p class="mb-0 small opacity-90">{{ page_subtitle }}</p>
@@ -244,7 +294,15 @@
         </a>
         <span class="text-muted mx-1">·</span>
         <a href="/analise/linhas-dd-du/" class="text-decoration-none">
-            <i class="fas fa-th me-1"></i>Linhas &amp; DD × DU
+            <i class="fas fa-arrow-left me-1"></i>Linhas &amp; DD × DU
+        </a>
+        <span class="text-muted mx-1">·</span>
+        <a href="/analise/ciclo-cobertura/" class="text-decoration-none">
+            <i class="fas fa-arrow-left me-1"></i>Análise de Ciclos
+        </a>
+        <span class="text-muted mx-1">·</span>
+        <a href="/analise/somas-digitos/" class="text-decoration-none">
+            <i class="fas fa-arrow-left me-1"></i>Somas e Dígitos
         </a>
         {% if modality_key == 'diadesorte' %}
         <span class="text-muted mx-1">·</span>
@@ -268,6 +326,10 @@
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="acumulados">Concursos Acumulados</button></li>
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="panorama"><i class="fas fa-layer-group me-1"></i>Panorama Top-3</button></li>
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="linhas"><i class="fas fa-bars me-1"></i>Linhas L1–L10</button></li>
+    <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="aliadas"><i class="fas fa-link me-1"></i>Linhas + Ciclo + Somas</button></li>
+    {% if modality_key != 'supersete' %}
+    <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="faixas"><i class="fas fa-ban me-1"></i>Posição crescente</button></li>
+    {% endif %}
 </ul>
 
 <div id="painelModoLinhas" class="d-none">
@@ -335,6 +397,105 @@
         <strong>Geração:</strong> <span id="linhasCriteriosTxt">—</span>
     </div>
 </div>
+
+<div id="painelModoAliadas" class="d-none">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a class="btn btn-sm btn-outline-secondary" href="/analise/linhas-dd-du/">
+            <i class="fas fa-arrow-left"></i> Linhas &amp; DD × DU
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" href="/analise/ciclo-cobertura/">
+            <i class="fas fa-arrow-left"></i> Análise de Ciclos
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" href="/analise/somas-digitos/">
+            <i class="fas fa-arrow-left"></i> Somas e Dígitos
+        </a>
+    </div>
+    <div class="alert border-0 py-2 small mb-3" style="background:var(--accent-light);color:var(--primary-xdark);">
+        Parte do ranking de <strong>Linhas</strong> e cruza com
+        <strong>pendentes do ciclo</strong> e a <strong>faixa de soma</strong> (média ±12%).
+    </div>
+    <div class="card shadow-sm mb-3 border-0">
+        <div class="card-body py-3">
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="chkAliadaCiclo" checked>
+                <label class="form-check-label" for="chkAliadaCiclo">Preferir dezenas pendentes do ciclo</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="chkAliadaSoma" checked>
+                <label class="form-check-label" for="chkAliadaSoma">Preferir soma na faixa histórica</label>
+            </div>
+        </div>
+    </div>
+    <div class="alert border-0 py-2" style="background:var(--accent-light);color:var(--primary-xdark);" id="aliadasCriteriosPreview">
+        <strong>Geração:</strong> <span id="aliadasCriteriosTxt">Linhas + Ciclo + Somas</span>
+    </div>
+</div>
+
+{% if modality_key != 'supersete' %}
+<div id="painelModoFaixas" class="d-none">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a class="btn btn-sm btn-outline-secondary" href="/dados/filtros-posicao/">
+            <i class="fas fa-arrow-left"></i> Frequência por posição
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" href="/analise/ciclo-cobertura/">
+            <i class="fas fa-arrow-left"></i> Análise de Ciclos
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" href="/analise/somas-digitos/">
+            <i class="fas fa-arrow-left"></i> Somas e Dígitos
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" href="/analise/analises-inteligentes/?aba=padroes-ii">
+            <i class="fas fa-arrow-left"></i> Padrões II
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" href="/analise/gaps-ciclo/">
+            <i class="fas fa-arrow-left"></i> Gaps do Ciclo
+        </a>
+    </div>
+    <div class="alert fx-regra py-2 small mb-3" style="background:#fff5f5;">
+        <strong>Regra dura (Ordem crescente / Excel):</strong>
+        a aposta é ordenada. A dezena da 1ª posição só pode ser uma que <em>já saiu</em> na 1ª coluna da planilha;
+        a da 2ª, só na 2ª coluna; e assim por diante.
+        <strong>Zero histórico = proibida nessa posição.</strong>
+        As outras análises abaixo são preferência — não furam esta trava.
+    </div>
+    <div class="card shadow-sm mb-3 border-0">
+        <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
+            <i class="fas fa-table me-1"></i>Faixas que o gerador obedece
+            <span class="badge bg-light text-dark border ms-1" id="fxUnivLbl">—</span>
+        </div>
+        <div class="card-body py-3">
+            <div id="fxMinMaxBody" class="fx-pos-lista">
+                <p class="text-muted small text-center mb-0">Carregando faixas do Excel…</p>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm mb-3 border-0">
+        <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
+            Preferências
+        </div>
+        <div class="card-body py-2 px-3">
+            <p class="fx-pref-hint">Toque para ligar. Nenhuma fura o veto da posição.</p>
+            <div class="fx-chips" id="fxChipsPref">
+                <label class="fx-chip" title="Dezenas pendentes do ciclo atual"><input type="checkbox" id="chkFxCiclo" checked> Ciclo</label>
+                <label class="fx-chip" title="Soma na faixa histórica (média ±12%)"><input type="checkbox" id="chkFxSoma" checked> Soma</label>
+                <label class="fx-chip" title="1 ou 2 dezenas do último concurso"><input type="checkbox" id="chkFxRep" checked> Repetidas</label>
+                <label class="fx-chip" title="Pelo menos um final repetido (ex.: 08 e 18)"><input type="checkbox" id="chkFxFinais" checked> Finais</label>
+                <label class="fx-chip" title="Padrão inicial do último concurso (aba 4)"><input type="checkbox" id="chkFxPadrao"> Padrão</label>
+                <label class="fx-chip" title="Intervalos entre dezenas na moda histórica"><input type="checkbox" id="chkFxGap"> Gaps</label>
+                <label class="fx-chip" title="Quantidade de pares na faixa usual"><input type="checkbox" id="chkFxPares" checked> Pares</label>
+                <label class="fx-chip" title="Quantidade de ímpares na faixa usual"><input type="checkbox" id="chkFxImpares" checked> Ímpares</label>
+                <label class="fx-chip" title="Quantidade típica de primos"><input type="checkbox" id="chkFxPrimos"> Primos</label>
+                <label class="fx-chip" title="Dezenas da moldura do volante"><input type="checkbox" id="chkFxMoldura"> Moldura</label>
+                <label class="fx-chip" title="1 ou 2 sequências consecutivas"><input type="checkbox" id="chkFxSeq"> Sequências</label>
+                <label class="fx-chip" title="Múltiplos de 3"><input type="checkbox" id="chkFxM3"> M3</label>
+                <label class="fx-chip" title="Dezenas de Fibonacci"><input type="checkbox" id="chkFxFb"> Fibonacci</label>
+            </div>
+        </div>
+    </div>
+    <div class="alert border-0 py-2" style="background:var(--accent-light);color:var(--primary-xdark);" id="fxCriteriosPreview">
+        <strong>Geração:</strong> <span id="fxCriteriosTxt">Veto crescente (Excel) · preferências opcionais</span>
+    </div>
+</div>
+{% endif %}
 
 <div id="painelModoPanorama" class="d-none">
     <div class="alert alert-warning d-none py-2 small mb-3" id="avisoPanoramaGerador"></div>
@@ -576,22 +737,6 @@
 </div>
 
 {% include 'repeticao_gerador_card.html' %}
-
-<div class="card shadow-sm mb-3 border-0 d-none" id="painelPanoramaConjunto" style="border-top:4px solid var(--accent)!important;">
-    <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
-        <i class="fas fa-table me-1"></i>Panorama do conjunto gerado
-    </div>
-    <div class="card-body py-3">
-        <p class="small text-muted mb-2" id="panoramaConjuntoLegenda">—</p>
-        <div class="table-responsive">
-            <table class="table table-sm table-bordered mb-2 pan-conj-table" id="tblPanoramaConjunto">
-                <thead class="table-light" id="theadPanoramaConjunto"></thead>
-                <tbody id="tbodyPanoramaConjunto"></tbody>
-            </table>
-        </div>
-        <p class="small mb-0" id="panoramaConjuntoRodape"></p>
-    </div>
-</div>
 
 <div class="card shadow-sm mb-3 border-0 comp-section-centered">
     <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">

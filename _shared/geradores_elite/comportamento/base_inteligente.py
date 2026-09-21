@@ -398,6 +398,92 @@ class ComportamentoBaseInteligente:
         return out
 
     @classmethod
+    def gerar_linhas_aliadas(
+        cls,
+        quantidade: int = 10,
+        dezenas_por_jogo: Optional[int] = None,
+        janela: int = 0,
+        base_estatistica: str = "geral",
+        top_n: int = 3,
+        modo_peso: str = "frequencia",
+        usar_ciclo: bool = True,
+        usar_soma: bool = True,
+    ) -> Dict[str, Any]:
+        raw = cls._svc().gerar_apostas_linhas_aliadas(
+            quantidade=quantidade,
+            dezenas_por_jogo=dezenas_por_jogo,
+            janela=janela,
+            base_estatistica=base_estatistica,
+            top_n=top_n,
+            modo_peso=modo_peso,
+            usar_ciclo=usar_ciclo,
+            usar_soma=usar_soma,
+        )
+        if not raw.get("sucesso"):
+            return raw
+        out = {**raw, "motor": cls.motor, "modality": cls.modality_key}
+        try:
+            from geradores_elite.validacao.validador_global import ValidadorGeradoresElite
+            out = ValidadorGeradoresElite.aplicar(
+                out, origem="comportamento_linhas_aliadas", modality_key=cls.modality_key, campo="apostas",
+            )
+        except Exception:
+            pass
+        return out
+
+    @classmethod
+    def contexto_faixas_crescente(cls) -> Dict[str, Any]:
+        return cls._svc().contexto_faixas_crescente()
+
+    @classmethod
+    def gerar_faixas_crescente(
+        cls,
+        quantidade: int = 10,
+        dezenas_por_jogo: Optional[int] = None,
+        usar_ciclo: bool = True,
+        usar_soma: bool = True,
+        usar_repeticao: bool = True,
+        usar_padrao: bool = False,
+        usar_gap: bool = False,
+        usar_pares: bool = True,
+        usar_impares: bool = True,
+        usar_primos: bool = False,
+        usar_moldura: bool = False,
+        usar_seq: bool = False,
+        usar_m3: bool = False,
+        usar_fb: bool = False,
+        usar_finais: bool = True,
+    ) -> Dict[str, Any]:
+        raw = cls._svc().gerar_apostas_faixas_crescente(
+            quantidade=quantidade,
+            dezenas_por_jogo=dezenas_por_jogo,
+            usar_ciclo=usar_ciclo,
+            usar_soma=usar_soma,
+            usar_repeticao=usar_repeticao,
+            usar_padrao=usar_padrao,
+            usar_gap=usar_gap,
+            usar_pares=usar_pares,
+            usar_impares=usar_impares,
+            usar_primos=usar_primos,
+            usar_moldura=usar_moldura,
+            usar_seq=usar_seq,
+            usar_m3=usar_m3,
+            usar_fb=usar_fb,
+            usar_finais=usar_finais,
+        )
+        if not raw.get("sucesso"):
+            return raw
+        out = {**raw, "motor": cls.motor, "modality": cls.modality_key}
+        try:
+            from geradores_elite.validacao.validador_global import ValidadorGeradoresElite
+            out = ValidadorGeradoresElite.aplicar(
+                out, origem="comportamento_faixas_crescente", modality_key=cls.modality_key, campo="apostas",
+            )
+        except Exception:
+            pass
+        return out
+
+    @classmethod
     def analise_completa_api(
         cls,
         janela: int = 10,

@@ -1777,15 +1777,15 @@
           <thead>
             <tr>
               <th class="ai-chk-th"><input type="checkbox" class="form-check-input" id="aiCheqChkTodos" disabled></th>
-              <th>Nº</th>
-              <th>Aposta</th>
-              <th>Soma</th>
-              <th>Diagonais</th>
-              <th>Padrão</th>
-              <th>Prefixo</th>
-              <th>Existe?</th>
-              <th>Últimas</th>
-              <th>Sugestão / mais próxima</th>
+              <th class="ai-sort" data-sort="linha" data-table="cheq" title="Clique para ordenar">Nº <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="dezenas_fmt" data-table="cheq" title="Clique para ordenar">Aposta <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="soma" data-table="cheq" title="Clique para ordenar">Soma <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="n_diagonais" data-table="cheq" title="Clique para ordenar">Diagonais <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="padrao" data-table="cheq" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="prefixo_fmt" data-table="cheq" title="Clique para ordenar">Prefixo <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="existe_exata" data-table="cheq" title="Clique para ordenar">Existe? <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="ultimas" data-table="cheq" title="Clique para ordenar">Últimas <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="sugestao" data-table="cheq" title="Clique para ordenar">Sugestão / mais próxima <span class="ai-sort-ind">⇅</span></th>
               <th>Abrir</th>
             </tr>
           </thead>
@@ -1864,6 +1864,7 @@
     panFalt: { key: 'padrao', dir: 'asc' },
     evo: { key: 'concurso', dir: 'desc' },
     evoCons: { key: 'n_padrao', dir: 'asc' },
+    cheq: { key: 'linha', dir: 'asc' },
   };
   let PAGE = { res: 1, pad: 1 };
   let PAN_HIST = { all: [], filtrados: [], faltantes: [], carregado: false, totalTeorico: 0 };
@@ -1946,6 +1947,20 @@
   }
 
   function sortValue(row, key) {
+    if (key === 'existe_exata') return row.existe_exata ? 1 : 0;
+    if (key === 'n_diagonais') return Number(row.n_diagonais) || ((row.diagonais || []).length) || 0;
+    if (key === 'qtd_prefixo') return Number(row.qtd_prefixo) || 0;
+    if (key === 'linha') {
+      const n = Number(row.linha);
+      return Number.isFinite(n) ? n : String(row.linha || '');
+    }
+    if (key === 'ultimas') {
+      return (row.ultimas || []).map((u) => `${u.dezena_fmt || u.dezena || ''}:${u.existe ? 1 : 0}`).join(' ');
+    }
+    if (key === 'sugestao') {
+      if (row.existe_exata) return String(row.dezenas_fmt || '');
+      return String((row.sugestao && row.sugestao.dezenas_fmt) || '');
+    }
     const v = row[key];
     if (v == null || v === '') return '';
     if (typeof v === 'number') return v;
@@ -3928,12 +3943,16 @@
     return r && r.dezenas_fmt;
   }
 
+  function linhasCheqOrdenadas() {
+    const st = SORT.cheq || { key: 'linha', dir: 'asc' };
+    const ok = CHEQ.rows.filter((r) => r.ok);
+    const bad = CHEQ.rows.filter((r) => !r.ok);
+    return ordenarLinhas(ok, st.key, st.dir).concat(bad);
+  }
+
   function renderChecagem(data) {
-    const tbody = document.querySelector('#aiTabelaCheq tbody');
     const resumo = document.getElementById('aiCheqResumo');
     const info = document.getElementById('aiCheqInfo');
-    const btnExp = document.getElementById('aiCheqExport');
-    const chkTodos = document.getElementById('aiCheqChkTodos');
     CHEQ.rows = (data && data.resultados) || [];
     CHEQ.sel = new Set();
     CHEQ.rows.forEach((r) => {
@@ -3949,14 +3968,22 @@
         <span class="small text-muted">prefixo ${data.prefixo} · ${esc(data.filtro || 'dentro_novos')}</span>`;
     }
     if (info) info.textContent = 'Universo: dentro da média · ainda não saíram';
+    pintarTabelaCheq();
+  }
+
+  function pintarTabelaCheq() {
+    const tbody = document.querySelector('#aiTabelaCheq tbody');
+    const btnExp = document.getElementById('aiCheqExport');
+    const chkTodos = document.getElementById('aiCheqChkTodos');
     if (!tbody) return;
+    atualizarIndicadoresSort();
     if (!CHEQ.rows.length) {
       tbody.innerHTML = '<tr><td colspan="11" class="text-muted">Nenhuma aposta reconhecida.</td></tr>';
       if (btnExp) btnExp.disabled = true;
       if (chkTodos) chkTodos.disabled = true;
       return;
     }
-    tbody.innerHTML = CHEQ.rows.map((r) => {
+    tbody.innerHTML = linhasCheqOrdenadas().map((r) => {
       if (!r.ok) {
         return `<tr>
           <td></td><td>${esc(r.linha || '—')}</td>
@@ -4439,8 +4466,12 @@
         SORT[table].key = key;
         const DESC_FIRST = new Set(['concurso', 'data', 'frequencia', 'jogos_possiveis', 'soma',
           'para_apostar', 'ja_sairam_dentro', 'dentro', 'proxima', 'fora', 'soma_media', 'pct',
-          'atraso_padrao', 'vezes_padrao']);
+          'atraso_padrao', 'vezes_padrao', 'n_diagonais', 'existe_exata', 'qtd_prefixo']);
         SORT[table].dir = key === 'distancia' ? 'asc' : (DESC_FIRST.has(key) ? 'desc' : 'asc');
+      }
+      if (table === 'cheq') {
+        pintarTabelaCheq();
+        return;
       }
       if (table === 'p2') {
         renderPadroesII();

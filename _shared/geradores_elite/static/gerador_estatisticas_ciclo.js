@@ -138,6 +138,7 @@
       box.innerHTML = '<p class="text-muted small mb-0" style="grid-column:1/-1;">Nenhuma aposta gerada.</p>';
       setBtns(false);
       badge.textContent = 'Sem jogos';
+      if (window.__renderPanoramaConjunto) window.__renderPanoramaConjunto([], { key: 'diadesorte' });
       return;
     }
     setBtns(true);
@@ -200,6 +201,13 @@
     }
     renderDiags(null, payload);
     renderPadroes(null, payload);
+    if (window.__renderPanoramaConjunto) {
+      const ult = ((payload.estatisticas || {}).ultimo) || {};
+      window.__renderPanoramaConjunto(apostas, {
+        key: 'diadesorte',
+        ultimo: { concurso: ult.concurso, dezenas: ult.numeros || ult.dezenas || [] },
+      });
+    }
   }
 
   async function carregar() {
