@@ -80,6 +80,10 @@
         const lista = (apostas || []).map((a, i) => ({
             numero: (a && typeof a === 'object') ? (a.numero || a.id || a.linha || (i + 1)) : (i + 1),
             dezenas: numsDe(a),
+            origem: (a && typeof a === 'object' && a.origem) ? String(a.origem) : '',
+            padrao: (a && typeof a === 'object')
+                ? String(a.padrao_gaps || (Array.isArray(a.ciclos) ? a.ciclos.join(' ') : '') || '')
+                : '',
         })).filter((a) => a.dezenas.length);
         if (!lista.length) {
             box.classList.add('d-none');
@@ -93,13 +97,19 @@
         const ehDs = key === 'diadesorte';
         const ehSuperSete = key === 'supersete' || c.layout === 'colunas';
         const showPadrao = !ehSuperSete;
+        const fontesPedidas = Array.isArray(c.fontes) ? c.fontes : [];
+        const showGaps = fontesPedidas.indexOf('gaps') >= 0 || lista.some((a) => a.origem === 'gaps');
+        const showRegua = fontesPedidas.indexOf('regua') >= 0 || lista.some((a) => a.origem === 'regua');
         const thead = document.getElementById('theadPanoramaConjunto');
         const tbody = document.getElementById('tbodyPanoramaConjunto');
         const leg = document.getElementById('panoramaConjuntoLegenda');
         const rodape = document.getElementById('panoramaConjuntoRodape');
         if (thead) {
             thead.innerHTML = `<tr>
-                <th>#</th><th>Aposta</th><th>Soma</th><th>P/I</th><th>Seq</th>
+                <th>#</th>
+                ${showGaps ? '<th>Gaps</th>' : ''}
+                ${showRegua ? '<th>Régua</th>' : ''}
+                <th>Aposta</th><th>Soma</th><th>P/I</th><th>Seq</th>
                 <th>Rep. ${nUlt}</th><th>Finais</th>${showPadrao ? '<th>Padrão</th>' : ''}
             </tr>`;
         }
@@ -123,6 +133,14 @@
                     return `${f}: ${nums}`;
                 }).join('; ')
                 : 'distintos';
+            const ehGaps = a.origem === 'gaps';
+            const ehRegua = a.origem === 'regua';
+            const colGaps = showGaps
+                ? `<td class="${ehGaps ? 'pan-conj-ok' : 'text-muted'}">${ehGaps ? ('✓' + (a.padrao ? ' ' + a.padrao : '')) : '—'}</td>`
+                : '';
+            const colRegua = showRegua
+                ? `<td class="${ehRegua ? 'pan-conj-ok' : 'text-muted'}">${ehRegua ? '✓' : '—'}</td>`
+                : '';
             const padrao = showPadrao ? padraoInicial(dz) : '';
             const padUrl = padrao
                 ? `/analise/analises-inteligentes/?aba=padroes-ii&padrao=${encodeURIComponent(padrao)}`
@@ -134,6 +152,7 @@
             const finOk = finGrupos.length >= 1;
             return `<tr>
                 <td>${a.numero || (i + 1)}</td>
+                ${colGaps}${colRegua}
                 <td class="fw-bold">${dz.map(pad).join(' ')}</td>
                 <td class="${ehDs ? (somaOk ? 'pan-conj-ok' : 'pan-conj-at') : ''}">${soma}</td>
                 <td>${pares}P / ${dz.length - pares}I</td>

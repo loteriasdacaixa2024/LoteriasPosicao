@@ -53,6 +53,74 @@
     border-left: 3px solid var(--accent, #ffd54f);
     padding: .35rem .65rem; background: var(--accent-light, #fff8e1);
   }
+  #gcg-root .gcg-exib.active {
+    background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700;
+  }
+  #gcg-root .volante-oficial-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1.65rem);
+    gap: 3px;
+  }
+  #gcg-root .volante-cell {
+    width: 1.65rem; height: 1.65rem;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid #ccc;
+    font-size: .62rem; font-weight: 700;
+    background: #fff; color: #6c757d;
+    font-variant-numeric: tabular-nums;
+  }
+  #gcg-root .volante-cell.na-aposta {
+    background: var(--accent, #ffd54f);
+    color: var(--on-accent, #1a0a00);
+    border-color: var(--primary);
+  }
+  #gcg-root .modo-hibrido {
+    display: flex; flex-wrap: wrap; gap: .65rem; align-items: center;
+  }
+  #gcg-root .gcg-insight-aviso {
+    border: 2px solid #9b1c1c;
+    border-radius: 12px;
+    background: #fff5f5;
+    overflow: hidden;
+  }
+  #gcg-root .gcg-insight-aviso-topo {
+    background: #9b1c1c;
+    color: #fff;
+    padding: .85rem 1rem 1rem;
+  }
+  #gcg-root .gcg-insight-aviso-topo strong {
+    display: block;
+    font-size: .95rem;
+    letter-spacing: .03em;
+    margin-bottom: .45rem;
+  }
+  #gcg-root .gcg-insight-aviso-topo p {
+    margin: 0 0 .35rem;
+    font-size: .9rem;
+    line-height: 1.45;
+  }
+  #gcg-root .gcg-insight-aviso-topo p:last-child { margin-bottom: 0; }
+  #gcg-root .gcg-insight-corpo {
+    padding: .9rem 1rem 1rem;
+    color: #3b1d1d;
+  }
+  #gcg-root .gcg-insight-corpo h2 {
+    font-size: 1rem;
+    font-weight: 800;
+    margin: 0 0 .35rem;
+  }
+  #gcg-root .gcg-insight-corpo .gcg-insight-origem {
+    font-size: .8rem;
+    font-weight: 700;
+    color: #9b1c1c;
+    margin-bottom: .6rem;
+  }
+  #gcg-root .gcg-insight-corpo p {
+    margin: 0 0 .55rem;
+    font-size: .9rem;
+    line-height: 1.45;
+  }
+  #gcg-root .gcg-insight-corpo p:last-child { margin-bottom: 0; }
 </style>
 
 <div class="container-fluid py-3" id="gcg-root"
@@ -68,6 +136,28 @@
       <i class="fas fa-arrow-left"></i> Análise por Gaps e Régua
     </a>
   </div>
+  {% if modality_key == 'diadesorte' %}
+  <div class="gcg-insight-aviso mb-3" role="alert">
+    <div class="gcg-insight-aviso-topo">
+      <strong>AVISO FIXO — ESTE TEXTO NÃO SAI DESTA PÁGINA E NÃO ACOMPANHA O CONCURSO DO DIA</strong>
+      <p>Este insight vem de <strong>outra análise</strong> (parecer geral do ABS). Ele foi copiado para cá. Não foi calculado pelos sorteios desta tela de Gaps e Régua.</p>
+      <p><strong>Os dados abaixo não são atualizados diariamente.</strong> Ainda não existe conferência atrelada a este insight. Essa conferência ainda precisa ser feita.</p>
+      <p>Até lá, leia o texto como um parecer parado no tempo. Ele não muda quando sai um concurso novo.</p>
+      <p>Este aviso fica aqui até você pedir para tirá-lo, ou para trocá-lo por informações dinâmicas da conferência, quando ela existir.</p>
+    </div>
+    <div class="gcg-insight-corpo">
+      <h2>Insight — como fechar as 10</h2>
+      <p class="gcg-insight-origem">Parecer estático, vindo de outra análise. Não conferido nesta página.</p>
+      <p>Parecer geral do ABS, para o próximo palpite. Vale com o orçamento atual: 10 jogos de 7 dezenas.</p>
+      <p><strong>Dez jogos diferentes.</strong> Não gaste vagas variando ±1 a cartela que ficou verde ou amarela no concurso anterior.</p>
+      <p><strong>Cubra os dois tetos.</strong> Pelo menos 3 jogos com a última dezena entre 20 e 24, e 3 com a última entre 28 e 31.</p>
+      <p><strong>Descarte salto grande.</strong> P1 acima de 8, ou alguma posição a mais de 5 do envelope 04 · 08 · 12 · 16 · 20 · 24 · 28. Um ±1 não fecha esse buraco.</p>
+      <p><strong>Leia o ABS assim.</strong> ≤ 20 só diz que o formato não ficou absurdo (em geral 1 ou 2 acertos). Quatro acertos costuma aparecer com ABS ≤ 7.</p>
+      <p><strong>Gap não substitui a régua.</strong> Gap é a distância entre vizinhos. O jogo 10 14 18 22 26 30 31 tem gaps de 4, vizinho perto de vizinho, e a posição 1 está em 10, seis acima do 04. Os buracos estão certos; o bloco inteiro subiu. A régua olha cada posição; o gap olha só o vizinho.</p>
+    </div>
+  </div>
+  {% endif %}
+
   {% include '_diagonais_aposta.html' %}
 
   <div class="gcg-fonte mb-3">
@@ -84,8 +174,8 @@
       <div class="col-md-6">
         <div class="form-check form-switch gcg-sessao" id="gcgWrapS2">
           <input class="form-check-input" type="checkbox" role="switch" id="gcgS2" checked>
-          <label class="form-check-label fw-bold" for="gcgS2">Sessão 2 — Inicial + Ciclo</label>
-          <div class="small text-muted">POS1 = inicial · demais posições = anterior + ciclo</div>
+          <label class="form-check-label fw-bold" for="gcgS2">Sessão 2 — Régua</label>
+          <div class="small text-muted">Uma dezena por posição, na referência da combinação ordenada</div>
         </div>
       </div>
       <div class="col-12" id="gcgLeituraWrap">
@@ -116,17 +206,9 @@
   </div>
 
   <div class="row g-2 align-items-end mb-3">
-    <div class="col-6 col-md-2" id="gcgIniCol">
-      <label class="form-label small mb-0" for="gcgInicial">Número inicial</label>
+    <div class="col-6 col-md-3" id="gcgIniCol">
+      <label class="form-label small mb-0" for="gcgInicial">Número inicial (Sessão 1)</label>
       <select id="gcgInicial" class="form-select form-select-sm"></select>
-    </div>
-    <div class="col-6 col-md-3" id="gcgPerfilCol">
-      <label class="form-label small mb-0" for="gcgPerfil">Perfil de ciclo (Sessão 2 só)</label>
-      <select id="gcgPerfil" class="form-select form-select-sm">
-        <option value="ultimo">Último concurso</option>
-        <option value="frequente">Padrão mais frequente</option>
-        <option value="moda_posicao">Moda por posição</option>
-      </select>
     </div>
     <div class="col-6 col-md-2">
       <label class="form-label small mb-0" for="gcgQtd">Quantidade</label>
@@ -148,6 +230,16 @@
     </div>
   </div>
 
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+    <span class="small fw-bold text-muted">Exibição:</span>
+    <div class="btn-group btn-group-sm" id="gcgExib">
+      <button type="button" class="btn btn-outline-secondary gcg-exib" data-exib="numeros">Números</button>
+      <button type="button" class="btn btn-outline-secondary gcg-exib" data-exib="volante">Volante</button>
+      <button type="button" class="btn btn-outline-secondary gcg-exib active" data-exib="hibrido">Híbrido</button>
+    </div>
+    <span class="small text-muted" id="gcgExibLegenda">Lista em bolinhas e grade do volante juntas.</span>
+  </div>
+
   <p class="gcg-hint mb-2" id="gcgStatus">Escolha as sessões e gere as apostas.</p>
   <div id="gcgOut"></div>
   {% include '_panorama_conjunto.html' %}
@@ -161,5 +253,5 @@
   window.__GCG_API__ = {{ api_base | tojson }};
   window.__GCG_HAS_MES__ = {{ 'true' if has_mes else 'false' }};
 </script>
-<script src="/geradores-elite/gaps-ciclo-apostas/static/gerador_gaps_ciclo.js?v=pano1"></script>
+<script src="/geradores-elite/gaps-ciclo-apostas/static/gerador_gaps_ciclo.js?v=regua2"></script>
 {% endblock %}

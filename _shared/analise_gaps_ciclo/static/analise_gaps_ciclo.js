@@ -14,7 +14,7 @@
   let reguaData = null;
   let refsEdit = [];
   let sortRank = { key: 'score', dir: 'desc' };
-  let sortConf = { key: 'concurso', dir: 'asc' };
+  let sortConf = { key: 'concurso', dir: 'desc' };
 
   const $ = (id) => document.getElementById(id);
 
@@ -154,7 +154,7 @@
     const confRows = (s1.confronto || s1.linhas || []).slice().sort((a, b) => cmp(a, b, sortConf.key, sortConf.dir));
     const concursosConf = confRows.map((r) => Number(r.concurso)).filter((n) => Number.isFinite(n));
     const confFaixa = concursosConf.length
-      ? ` — do ${Math.min.apply(null, concursosConf)} ao ${Math.max.apply(null, concursosConf)} (${confRows.length})`
+      ? ` — do ${Math.max.apply(null, concursosConf)} ao ${Math.min.apply(null, concursosConf)} (${confRows.length})`
       : '';
     const confronto = confRows.map((row) => {
       const eq = !!row.padroes_iguais;
@@ -289,11 +289,11 @@
       </div>`).join('');
 
     const head = (s2.referencias || []).map((r) => `<th>P${r.posicao}</th>`).join('');
-    const ordered = (s2.linhas || []).slice().sort((a, b) => Number(a.concurso) - Number(b.concurso));
-    const primeiro = ordered.length ? ordered[0].concurso : null;
-    const atual = ordered.length ? ordered[ordered.length - 1].concurso : null;
+    const ordered = (s2.linhas || []).slice().sort((a, b) => Number(b.concurso) - Number(a.concurso));
+    const atual = ordered.length ? ordered[0].concurso : null;
+    const primeiro = ordered.length ? ordered[ordered.length - 1].concurso : null;
     const faixa = (primeiro != null && atual != null)
-      ? `Do concurso ${primeiro} ao ${atual} (${ordered.length})`
+      ? `Do concurso ${atual} ao ${primeiro} (${ordered.length})`
       : 'Concursos';
     const rows = ordered.map((row) => {
       const dz = deltasDe(row.dezenas || [], refsEdit);

@@ -12,6 +12,7 @@ if _SHARED not in sys.path:
 
 from analise_gaps_ciclo.core import (
     analisar_regua_combinacoes,
+    combinacoes_regua,
     deslocamentos_regua,
     gaps_de,
     gaps_sequencia,
@@ -94,6 +95,11 @@ class TestRegua(unittest.TestCase):
         self.assertEqual(out["referencias"][0]["referencia"], 4)
         self.assertEqual(out["referencias"][0]["vezes"], 1)
 
+    def test_combinacao_regua_e_a_moda(self):
+        ref = [4, 8, 12, 16, 20, 24, 25]
+        jogo = [10, 14, 18, 22, 26, 30, 31]
+        self.assertEqual(combinacoes_regua([jogo, ref, ref], quantidade=1), [ref])
+
 
 class TestSpecInicial(unittest.TestCase):
     def test_diadesorte_exclui_27_a_31(self):
@@ -118,7 +124,12 @@ _GAPS_MOCK = {
     ],
     "ultimo": {"gaps": [4, 4, 5, 2, 1, 6]},
     "moda_por_passo": [{"passo": i + 1, "moda": 3, "vezes": 2} for i in range(6)],
+    "linhas": [
+        {"dezenas_classificado": [4, 8, 12, 16, 20, 24, 25]},
+        {"dezenas_classificado": [4, 8, 12, 16, 20, 24, 25]},
+    ],
 }
+_REGUA = [4, 8, 12, 16, 20, 24, 25]
 
 
 class TestGeradorSessoes(unittest.TestCase):
@@ -126,14 +137,15 @@ class TestGeradorSessoes(unittest.TestCase):
         out = gerar_apostas("diadesorte", sessao1=False, sessao2=False, inicial=2)
         self.assertFalse(out.get("ok"))
 
-    def test_sessao2_exige_inicial(self):
+    @unittest.mock.patch("analise_gaps_ciclo.gerador._analisar_gaps", return_value=_GAPS_MOCK)
+    def test_sessao2_nao_exige_inicial(self, _m):
         out = gerar_apostas("diadesorte", sessao1=False, sessao2=True, inicial=None)
-        self.assertFalse(out.get("ok"))
-        self.assertIn("inicial", (out.get("erro") or "").lower())
+        self.assertTrue(out.get("ok"))
+        self.assertEqual(out["apostas"][0]["dezenas"], _REGUA)
 
     def test_inicial_alta_bloqueada(self):
         out = gerar_apostas(
-            "diadesorte", sessao1=False, sessao2=True, inicial=27,
+            "diadesorte", sessao1=True, sessao2=False, inicial=27,
             padrao="1 1 1 1 1 1",
         )
         self.assertFalse(out.get("ok"))
@@ -142,7 +154,7 @@ class TestGeradorSessoes(unittest.TestCase):
     def test_somente_sessao1(self, _m):
         out = gerar_apostas("diadesorte", sessao1=True, sessao2=False, inicial=2, quantidade=3)
         self.assertTrue(out.get("ok"))
-        self.assertEqual(out["sessoes"], {"gaps": True, "ciclo": False})
+        self.assertEqual(out["sessoes"], {"gaps": True, "regua": False})
         self.assertEqual(out["apostas"][0]["dezenas"], [2, 3, 4, 5, 6, 7, 8])
         self.assertNotEqual(out["apostas"][0]["dezenas"], [2, 6, 10, 15, 17, 18, 24])
 
@@ -152,24 +164,25 @@ class TestGeradorSessoes(unittest.TestCase):
             "diadesorte", sessao1=False, sessao2=True, inicial=2, perfil="ultimo",
         )
         self.assertTrue(out.get("ok"))
-        self.assertEqual(out["sessoes"], {"gaps": False, "ciclo": True})
-        self.assertEqual(out["apostas"][0]["dezenas"], [2, 6, 10, 15, 17, 18, 24])
-        self.assertEqual(out["apostas"][0]["ciclos"], [4, 4, 5, 2, 1, 6])
+        self.assertEqual(out["sessoes"], {"gaps": False, "regua": True})
+        self.assertEqual(out["apostas"][0]["dezenas"], _REGUA)
+        self.assertEqual(out["apostas"][0]["origem"], "regua")
 
     @unittest.mock.patch("analise_gaps_ciclo.gerador._analisar_gaps", return_value=_GAPS_MOCK)
     def test_duas_sessoes(self, _m):
         out = gerar_apostas("diadesorte", sessao1=True, sessao2=True, inicial=2, quantidade=2)
         self.assertTrue(out.get("ok"))
-        self.assertEqual(out["sessoes"], {"gaps": True, "ciclo": True})
+        self.assertEqual(out["sessoes"], {"gaps": True, "regua": True})
+        self.assertEqual(out["apostas"][1]["dezenas"], _REGUA)
         self.assertEqual(out["apostas"][0]["inicial"], 2)
         self.assertEqual(out["apostas"][0]["dezenas"], [2, 3, 4, 5, 6, 7, 8])
 
     @unittest.mock.patch("analise_gaps_ciclo.gerador._analisar_gaps", return_value=_GAPS_MOCK)
     def test_troca_inicial_recalcula(self, _m):
-        a = gerar_apostas("diadesorte", sessao1=False, sessao2=True, inicial=2, perfil="ultimo")
-        b = gerar_apostas("diadesorte", sessao1=False, sessao2=True, inicial=5, perfil="ultimo")
-        self.assertEqual(a["apostas"][0]["dezenas"], [2, 6, 10, 15, 17, 18, 24])
-        self.assertEqual(b["apostas"][0]["dezenas"], [5, 9, 13, 18, 20, 21, 27])
+        a = gerar_apostas("diadesorte", sessao1=False, sessao2=True, inicial=2)
+        b = gerar_apostas("diadesorte", sessao1=False, sessao2=True, inicial=5)
+        self.assertEqual(a["apostas"][0]["dezenas"], _REGUA)
+        self.assertEqual(b["apostas"][0]["dezenas"], _REGUA)
 
     @unittest.mock.patch("analise_gaps_ciclo.gerador._analisar_gaps", return_value=_GAPS_MOCK)
     def test_sessao1_desligada_nao_usa_top_padroes(self, _m):

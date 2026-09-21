@@ -190,6 +190,64 @@ def _moda_menor(counter: Counter) -> Optional[tuple]:
     return best_n, int(best_f)
 
 
+def combinacoes_regua(
+    combinacoes: Sequence[Sequence[int]],
+    *,
+    quantidade: int = 1,
+) -> List[List[int]]:
+    """Apostas da régua: a primeira é a moda de cada posição, em ordem crescente.
+
+    As seguintes trocam uma posição pela próxima dezena mais frequente, sem repetir.
+    """
+    combos = [[int(x) for x in c] for c in combinacoes if c]
+    if not combos:
+        return []
+    k = max(len(c) for c in combos)
+    counters: List[Counter] = [Counter() for _ in range(k)]
+    for combo in combos:
+        for i, d in enumerate(combo[:k]):
+            counters[i][d] += 1
+    ranks: List[List[int]] = []
+    for cnt in counters:
+        ranks.append([n for n, _f in sorted(cnt.items(), key=lambda kv: (-kv[1], kv[0]))])
+
+    def montar(ranks_local: Sequence[Sequence[int]]) -> Optional[List[int]]:
+        escolhidas: List[int] = []
+        for i in range(k):
+            prev = escolhidas[-1] if escolhidas else None
+            pick = None
+            for n in ranks_local[i]:
+                if n in escolhidas:
+                    continue
+                if prev is not None and int(n) <= prev:
+                    continue
+                pick = int(n)
+                break
+            if pick is None:
+                return None
+            escolhidas.append(pick)
+        return escolhidas
+
+    base = montar(ranks)
+    if not base:
+        return []
+    out = [base]
+    seen = {tuple(base)}
+    qtd = max(1, int(quantidade or 1))
+    for i in range(k):
+        if len(out) >= qtd:
+            break
+        if len(ranks[i]) < 2:
+            continue
+        alt = [list(r) for r in ranks]
+        alt[i] = alt[i][1:] + alt[i][:1]
+        combo = montar(alt)
+        if combo and tuple(combo) not in seen:
+            seen.add(tuple(combo))
+            out.append(combo)
+    return out[:qtd]
+
+
 def analisar_regua_combinacoes(
     combinacoes: Sequence[Sequence[int]],
     *,

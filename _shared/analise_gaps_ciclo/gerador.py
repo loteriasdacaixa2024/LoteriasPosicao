@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
-"""Um gerador — Sessão 1 (gaps) e/ou Sessão 2 (inicial + ciclo)."""
+"""Um gerador — Sessão 1 (gaps) e/ou Sessão 2 (régua)."""
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Sequence
 
-from analise_gaps_ciclo.core import ciclos_perfil, montar_por_ciclos, norm_leitura, padrao_gaps, parse_padrao_gaps
+from analise_gaps_ciclo.core import (
+    combinacoes_regua,
+    gaps_de,
+    montar_por_ciclos,
+    norm_leitura,
+    padrao_gaps,
+    parse_padrao_gaps,
+)
 from analise_gaps_ciclo.specs import get_gaps_ciclo_spec
 
 
@@ -55,7 +62,7 @@ def gerar_apostas(
     if not s1 and not s2:
         return {
             "sucesso": False, "ok": False,
-            "erro": "Ative a Sessão 1 (Gaps), a Sessão 2 (Inicial + Ciclo) ou as duas.",
+            "erro": "Ative a Sessão 1 (Gaps), a Sessão 2 (Régua) ou as duas.",
         }
 
     permitidas = list(spec["iniciais_permitidas"])
@@ -65,7 +72,7 @@ def gerar_apostas(
             ini_user = int(inicial)
         except (TypeError, ValueError):
             return {"sucesso": False, "ok": False, "erro": "Número inicial inválido."}
-        if ini_user not in permitidas:
+        if s1 and ini_user not in permitidas:
             return {
                 "sucesso": False, "ok": False,
                 "erro": (
@@ -73,12 +80,6 @@ def gerar_apostas(
                     f"Use {_fmt(spec['inicial_min'], pad)}–{_fmt(spec['inicial_max'], pad)}."
                 ),
             }
-
-    if s2 and ini_user is None:
-        return {
-            "sucesso": False, "ok": False,
-            "erro": "Sessão 2 ligada: escolha o número inicial.",
-        }
 
     gaps_info = _analisar_gaps(modality_key, janela=janela, base=base)
     if not gaps_info.get("sucesso"):
@@ -109,25 +110,21 @@ def gerar_apostas(
             fonte_padroes = gaps_info.get("top_padroes") or []
         for t in fonte_padroes:
             _push(t.get("gaps") or parse_padrao_gaps(t.get("padrao") or ""))
-    elif s2:
-        _push(ciclos_perfil(gaps_info, perfil=perfil, padrao=padrao, leitura=lei), front=True)
+    if s1 and not ciclos_lista:
+        return {"sucesso": False, "ok": False, "erro": "Não há perfil de gaps viável na janela."}
 
-    if not ciclos_lista:
-        return {"sucesso": False, "ok": False, "erro": "Não há perfil de ciclo/gaps viável na janela."}
-
-    if s2:
-        iniciais = [ini_user]
-    elif ini_user is not None:
+    if ini_user is not None:
         iniciais = [ini_user]
     else:
         iniciais = list(permitidas)
 
-    origem = "gaps+ciclo" if (s1 and s2) else ("ciclo" if s2 else "gaps")
+    origem = "gaps+regua" if (s1 and s2) else ("regua" if s2 else "gaps")
     apostas: List[Dict[str, Any]] = []
     vistos = set()
+    limite_gaps = max(0, qtd - 1) if s2 else qtd
     for ini in iniciais:
         for ciclos in ciclos_lista:
-            if len(apostas) >= qtd:
+            if len(apostas) >= limite_gaps:
                 break
             ap = montar_por_ciclos(ini, ciclos, dezena_min=dmin, dezena_max=dmax)
             if not ap or len(ap) != k:
@@ -136,15 +133,31 @@ def gerar_apostas(
             if key in vistos:
                 continue
             vistos.add(key)
-            apostas.append(_montar_item(len(apostas) + 1, ap, origem, pad, ciclos))
-        if len(apostas) >= qtd:
+            apostas.append(_montar_item(len(apostas) + 1, ap, "gaps", pad, ciclos))
+        if len(apostas) >= limite_gaps:
             break
+
+    if s2:
+        historico = []
+        for row in (gaps_info.get("linhas") or gaps_info.get("confronto") or []):
+            dz = row.get("dezenas_classificado") or row.get("dezenas")
+            if dz:
+                historico.append(dz)
+        reguas = combinacoes_regua(historico, quantidade=qtd if not s1 else max(1, qtd - len(apostas)))
+        for combo in reguas:
+            if len(apostas) >= qtd:
+                break
+            key = tuple(combo)
+            if key in vistos:
+                continue
+            vistos.add(key)
+            apostas.append(_montar_item(len(apostas) + 1, combo, "regua", pad, gaps_de(combo)))
 
     if not apostas:
         return {
             "sucesso": False, "ok": False,
-            "erro": "Nenhuma aposta coube no universo com o inicial e os ciclos atuais.",
-            "sessoes": {"gaps": s1, "ciclo": s2},
+            "erro": "Nenhuma aposta coube no universo com os gaps e a régua atuais.",
+            "sessoes": {"gaps": s1, "regua": s2},
             "leitura": lei,
         }
 
@@ -157,10 +170,10 @@ def gerar_apostas(
         "ok": True,
         "geradas": len(apostas),
         "apostas": apostas,
-        "sessoes": {"gaps": s1, "ciclo": s2},
+        "sessoes": {"gaps": s1, "regua": s2},
         "origem": origem,
-        "inicial": ini_user,
+        "inicial": ini_user if s1 else None,
         "leitura": lei,
-        "perfil": perfil if s2 and not s1 else ("padroes_gaps" if s1 else perfil),
+        "perfil": "padroes_gaps" if s1 else "regua",
         "spec": spec,
     }

@@ -58,8 +58,8 @@ def _page_gerador(modality_key: str) -> dict:
     return {
         "modality_key": modality_key,
         "modality_nome": spec["nome"],
-        "page_title": "Gaps e Ciclo → Apostas",
-        "page_subtitle": "Fonte das análises · Sessão 1 e/ou Sessão 2",
+        "page_title": "Gaps e Régua → Apostas",
+        "page_subtitle": "Sessão 1 — Gaps e/ou Sessão 2 — Régua",
         "api_base": "/geradores-elite/api/gaps-ciclo",
         "analise_url": spec["analise_url"],
         "gc_spec": spec,

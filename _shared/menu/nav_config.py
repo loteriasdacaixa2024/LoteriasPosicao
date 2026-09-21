@@ -385,8 +385,8 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 },
                 {
                     "href": "/geradores-elite/gaps-ciclo-apostas/",
-                    "title": "Gaps e Ciclo → Apostas",
-                    "desc": "Sessão 1 Gaps e/ou Sessão 2 Inicial + Ciclo",
+                    "title": "Gaps e Régua → Apostas",
+                    "desc": "Sessão 1 — Gaps e/ou Sessão 2 — Régua",
                     "icon": "fas fa-ruler-combined",
                 },
                 {
@@ -966,8 +966,8 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
     if tem_gaps_ciclo(modality_key):
         novos_ge.append({
             "href": "/geradores-elite/gaps-ciclo-apostas/",
-            "title": "Gaps e Ciclo → Apostas",
-            "desc": "Sessão 1 Gaps e/ou Sessão 2 Inicial + Ciclo",
+            "title": "Gaps e Régua → Apostas",
+            "desc": "Sessão 1 — Gaps e/ou Sessão 2 — Régua",
             "icon": "fas fa-ruler-combined",
             "after": "/geradores-elite/ciclo-apostas/",
         })
