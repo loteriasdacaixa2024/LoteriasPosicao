@@ -98,6 +98,11 @@
     font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em;
     color: #64748b; margin-bottom: .35rem;
   }
+  #gc-root .gc-ref { width: 4.4rem; }
+  #gc-root .gc-acima { background: #ffedd5; color: #9a3412; font-weight: 700; }
+  #gc-root .gc-abaixo { background: #e0f2fe; color: #075985; font-weight: 700; }
+  #gc-root .gc-zero { background: #dcfce7; color: #166534; font-weight: 700; }
+  #gc-root .gc-delta { display: block; margin-top: 2px; font-size: .68rem; font-weight: 800; }
 </style>
 
 <div class="container-fluid py-3" id="gc-root"
@@ -134,8 +139,17 @@
   </div>
 
   <p class="gc-hint mb-3">
-    Sessão 1 mede o GAP nas duas leituras oficiais: <strong>ordem de sorteio</strong> (posições em que saíram)
-    e <strong>classificado</strong> (como a Caixa divulga). O ranking comparativo junta as duas para escolher as sequências.
+    Sessão 1 mede o <strong>GAP</strong> entre dezenas vizinhas, nas duas leituras oficiais:
+    <strong>ordem de sorteio</strong> e <strong>classificado</strong>.
+    Sessão 2 mede a <strong>Régua</strong>: o quanto cada dezena da combinação ordenada se afasta da referência da sua posição.
+    Gap e régua não se substituem.
+  </p>
+  <p class="small mb-3">
+    {% if inicial_ciclo_no_menu_ciclos %}
+    <a href="{{ inicial_ciclo_href }}">Inicial + Ciclo</a> está na Análise de Ciclos das Dezenas.
+    {% else %}
+    <a href="{{ inicial_ciclo_href }}">Inicial + Ciclo</a>
+    {% endif %}
   </p>
 
   <div class="gc-card mb-3 p-3" id="gcSessao1">
@@ -149,26 +163,14 @@
 
   <div class="gc-card p-3" id="gcSessao2">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-      <h2><span class="badge bg-success me-1">2</span> Sessão 2 — Inicial + Ciclo</h2>
-      <span class="small text-muted">POS1 = inicial · POSn = anterior + ciclo</span>
+      <h2><span class="badge bg-success me-1">2</span> Sessão 2 — Régua</h2>
+      <span class="small text-muted">Combinação ordenada · dezena − referência da posição</span>
     </div>
-    <div class="row g-2 align-items-end mb-3">
-      <div class="col-6 col-md-3">
-        <label class="form-label small mb-0" for="gcInicial">Número inicial</label>
-        <select id="gcInicial" class="form-select form-select-sm"></select>
-      </div>
-      <div class="col-6 col-md-3">
-        <label class="form-label small mb-0" for="gcPerfil">Perfil de ciclo</label>
-        <select id="gcPerfil" class="form-select form-select-sm">
-          <option value="ultimo">Último concurso</option>
-          <option value="frequente">Padrão mais frequente</option>
-          <option value="moda_posicao">Moda por posição</option>
-        </select>
-      </div>
-      <div class="col-12 col-md-6">
-        <p class="small text-muted mb-0" id="gcInicialHint"></p>
-      </div>
-    </div>
+    <p class="small text-muted mb-2">
+      A referência de cada posição é a dezena mais frequente na janela e na base selecionadas
+      (empate fica com a menor dezena). Um valor positivo indica dezena acima da referência;
+      negativo, abaixo. Alterar a referência recalcula só o deslocamento, sem mudar os gaps.
+    </p>
     <div id="gcCorpoS2"><p class="text-muted small mb-0">Carregando…</p></div>
   </div>
 </div>
@@ -177,5 +179,5 @@
   window.__GC_SPEC__ = {{ gc_spec | tojson }};
   window.__GC_API__ = {{ api_base | tojson }};
 </script>
-<script src="/analise/gaps-ciclo/static/analise_gaps_ciclo.js?v=dupla2"></script>
+<script src="/analise/gaps-ciclo/static/analise_gaps_ciclo.js?v=regua2"></script>
 {% endblock %}

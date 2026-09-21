@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Configuração por modalidade — Gaps + Inicial/Ciclo."""
+"""Configuração por modalidade — Gaps, régua e projeção inicial/ciclo."""
 from __future__ import annotations
 
 from copy import deepcopy

@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 
 from analise_estudos.service_factory import make_estudos_base
 from analise_gaps_ciclo.core import (
+    analisar_regua_combinacoes,
     ciclos_perfil,
     dezenas_ordenadas,
     dezenas_sequencia,
@@ -95,11 +96,18 @@ def _linhas(modality_key: str, janela: int, base: str) -> List[Dict[str, Any]]:
     return out
 
 
-def analisar_gaps(modality_key: str, *, janela: int = 0, base: str = "geral") -> Dict[str, Any]:
+def analisar_gaps(
+    modality_key: str,
+    *,
+    janela: int = 0,
+    base: str = "geral",
+    linhas: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
     if not tem_gaps_ciclo(modality_key):
         return {"sucesso": False, "erro": "Modalidade sem análise de gaps."}
     spec = get_gaps_ciclo_spec(modality_key)
-    linhas = _linhas(modality_key, janela, base)
+    if linhas is None:
+        linhas = _linhas(modality_key, janela, base)
     k = int(spec["sorteadas"])
     passos = max(0, k - 1)
     freq_c, pad_c, passo_c = _agregar(linhas, "gaps_classificado", "padrao_classificado", passos)
@@ -130,8 +138,8 @@ def analisar_gaps(modality_key: str, *, janela: int = 0, base: str = "geral") ->
         "moda_por_passo": _moda_passos(passo_c),
         "moda_por_passo_sorteio": _moda_passos(passo_s),
         "ranking_comparativo": ranking,
-        "confronto": linhas[:80],
-        "linhas": linhas[:80],
+        "confronto": linhas,
+        "linhas": linhas,
     }
 
 
@@ -230,6 +238,43 @@ def projetar_ciclo(
     )})
     if not principal.get("sucesso"):
         out["sucesso"] = False
+    out["padroes_disponiveis"] = [
+        {
+            "padrao": t.get("padrao"),
+            "score": t.get("score"),
+            "fonte": t.get("fonte"),
+            "freq_classificado": t.get("freq_classificado"),
+            "freq_sorteio": t.get("freq_sorteio"),
+        }
+        for t in (gaps_info.get("ranking_comparativo") or [])[:12]
+        if t.get("padrao")
+    ]
+    return out
+
+
+def analisar_regua(
+    modality_key: str,
+    *,
+    janela: int = 0,
+    base: str = "geral",
+    linhas: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """Posição de cada dezena na combinação ordenada, contra a moda da posição."""
+    if linhas is None:
+        if not tem_gaps_ciclo(modality_key):
+            return {"sucesso": False, "erro": "Modalidade sem análise de gaps."}
+        linhas = _linhas(modality_key, janela, base)
+    combos = [list(r.get("dezenas_classificado") or r.get("dezenas") or []) for r in linhas]
+    out = analisar_regua_combinacoes(combos, limite_linhas=None)
+    out["janela"] = int(janela or 0)
+    out["base"] = base or "geral"
+    if out.get("ultimo") and linhas:
+        out["ultimo"]["concurso"] = linhas[0].get("concurso")
+        out["ultimo"]["data"] = linhas[0].get("data") or ""
+    for i, row in enumerate(out.get("linhas") or []):
+        src = linhas[i] if i < len(linhas) else {}
+        row["concurso"] = src.get("concurso")
+        row["data"] = src.get("data") or ""
     return out
 
 
@@ -243,13 +288,17 @@ def contexto_analise(
     padrao: Optional[str] = None,
     leitura: str = "ambos",
 ) -> Dict[str, Any]:
+    """Sessão 1 = gaps. Sessão 2 = régua.
+
+    Inicial + Ciclo continua em `projetar_ciclo` (rota de Ciclos das Dezenas
+    e gerador de apostas). Os argumentos de projeção permanecem na assinatura
+    para os chamadores atuais e não entram na régua.
+    """
+    del inicial, perfil, padrao, leitura
     spec = get_gaps_ciclo_spec(modality_key)
-    s1 = analisar_gaps(modality_key, janela=janela, base=base)
-    ini = int(inicial) if inicial not in (None, "") else spec["inicial_min"]
-    s2 = projetar_ciclo(
-        modality_key, ini, janela=janela, base=base, perfil=perfil, padrao=padrao,
-        leitura=leitura, gaps_info=s1 if s1.get("sucesso") else None,
-    )
+    linhas = _linhas(modality_key, janela, base)
+    s1 = analisar_gaps(modality_key, janela=janela, base=base, linhas=linhas)
+    s2 = analisar_regua(modality_key, janela=janela, base=base, linhas=linhas)
     return {
         "sucesso": True,
         "spec": spec,

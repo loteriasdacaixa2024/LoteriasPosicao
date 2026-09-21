@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Inicial + Ciclo — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+  #ic-root .ic-card {
+    border: 1px solid #e5e7eb; border-radius: 12px; background: #fff;
+    box-shadow: 0 1px 2px rgba(16,24,40,.04);
+  }
+  #ic-root .ic-card h2 { font-size: 1rem; font-weight: 800; margin: 0; }
+  #ic-root .janela-btn.active, #ic-root .base-tab-btn.active {
+    background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700;
+  }
+  #ic-root .ic-ball {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent, #ffd54f); color: var(--on-accent, #1a0a00);
+    font-weight: 800; font-size: .75rem; margin: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  #ic-root .ic-col-title {
+    font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em;
+    color: #64748b; margin-bottom: .35rem;
+  }
+  #ic-root .ic-passo {
+    padding: .35rem .7rem; border-bottom: 1px solid #f1f5f9; font-size: .85rem;
+  }
+  #ic-root .ic-hint {
+    font-size: .8rem; color: #6c757d;
+    border-left: 3px solid var(--accent, #ffd54f);
+    padding: .35rem .65rem; background: var(--accent-light, #fff8e1);
+  }
+  #ic-root .ic-padrao.sel { background: var(--accent-light, #fff8e1); cursor: pointer; }
+  #ic-root tr.ic-padrao { cursor: pointer; }
+</style>
+<div class="container-fluid py-4" id="ic-root"
+     data-api="{{ api_projetar or '/analise/api/gaps-ciclo/projetar' }}">
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="mb-0">
+            <i class="fas fa-plus-circle text-primary me-2"></i>
+            Inicial + Ciclo
+          </h2>
+          <p class="text-muted mb-0 mt-2">
+            POS1 = número inicial · POSn = anterior + ciclo — {{ modality_nome }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if com_nav_ciclo %}
+  {% include '_nav_ciclo_analise.html' %}
+  {% else %}
+  <p class="small mb-3"><a href="{{ voltar_href or '/analise/gaps-ciclo/' }}"><i class="fas fa-arrow-left"></i> Voltar para Gaps e Régua</a></p>
+  {% endif %}
+
+  {% if indisponivel or not gc_spec %}
+  <div class="alert alert-warning">Esta modalidade não possui a projeção Inicial + Ciclo.</div>
+  {% else %}
+  <p class="ic-hint mb-3">
+    A mesma projeção que estava na análise de gaps: o ciclo vem do histórico
+    (último concurso, padrão mais frequente ou moda por posição) e cada posição seguinte soma esse ciclo ao número anterior.
+  </p>
+
+  <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+    <span class="small fw-bold text-muted me-1">Base:</span>
+    <div class="btn-group btn-group-sm" id="icTabsBase">
+      <button type="button" class="btn btn-outline-secondary base-tab-btn active" data-base="geral">Geral</button>
+      <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="vencedores">Vencedores</button>
+      <button type="button" class="btn btn-outline-secondary base-tab-btn" data-base="acumulados">Acumulados</button>
+    </div>
+    <span class="small fw-bold text-muted ms-2 me-1">Janela:</span>
+    <div class="btn-group btn-group-sm" id="icGrpJanela">
+      {% for j in gc_spec.janelas_ui %}
+      <button type="button" class="btn btn-outline-secondary janela-btn{% if j == gc_spec.janela_default %} active{% endif %}" data-janela="{{ j }}">{% if j == 0 %}Todos{% else %}{{ j }}{% endif %}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="ic-card p-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+      <h2>Projeção</h2>
+      <span class="small text-muted" id="icLblUltimo">—</span>
+    </div>
+    <div class="row g-2 align-items-end mb-3">
+      <div class="col-6 col-md-3">
+        <label class="form-label small mb-0" for="icInicial">Número inicial</label>
+        <select id="icInicial" class="form-select form-select-sm"></select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label small mb-0" for="icPerfil">Perfil de ciclo</label>
+        <select id="icPerfil" class="form-select form-select-sm">
+          <option value="ultimo">Último concurso</option>
+          <option value="frequente">Padrão mais frequente</option>
+          <option value="moda_posicao">Moda por posição</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <p class="small text-muted mb-0" id="icInicialHint"></p>
+      </div>
+    </div>
+    <div class="mb-3">
+      <div class="ic-col-title">Padrão de ciclo (opcional)</div>
+      <p class="small text-muted mb-1">Sem seleção, vale o perfil acima. Um padrão escolhido substitui o perfil, como o clique no ranking fazia na página de gaps.</p>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead><tr><th>Padrão</th><th>Origem</th><th>Classificado</th><th>Sorteio</th><th>Score</th></tr></thead>
+          <tbody id="icPadroes"><tr><td colspan="5" class="text-muted">Carregando…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="icCorpo"><p class="text-muted small mb-0">Carregando…</p></div>
+  </div>
+  {% endif %}
+</div>
+<script>
+  window.__IC_SPEC__ = {{ (gc_spec or {}) | tojson }};
+  window.__IC_API__ = {{ (api_projetar or '/analise/api/gaps-ciclo/projetar') | tojson }};
+</script>
+{% if gc_spec and not indisponivel %}
+<script src="/analise/gaps-ciclo/static/inicial_ciclo.js?v=ic1"></script>
+{% endif %}
+{% endblock %}

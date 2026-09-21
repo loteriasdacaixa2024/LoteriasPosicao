@@ -10,10 +10,11 @@
 
   let base = 'geral';
   let janela = SPEC.janela_default != null ? Number(SPEC.janela_default) : 0;
-  let padraoSel = '';
   let s1Data = null;
+  let reguaData = null;
+  let refsEdit = [];
   let sortRank = { key: 'score', dir: 'desc' };
-  let sortConf = { key: 'concurso', dir: 'desc' };
+  let sortConf = { key: 'concurso', dir: 'asc' };
 
   const $ = (id) => document.getElementById(id);
 
@@ -26,10 +27,6 @@
 
   function padLista(arr) {
     return (arr || []).map(pad).join(' ');
-  }
-
-  function balls(arr) {
-    return (arr || []).map((n) => `<span class="gc-ball">${pad(n)}</span>`).join('') || '—';
   }
 
   function toksDezenas(arr) {
@@ -104,33 +101,10 @@
     return dir === 'asc' ? r : -r;
   }
 
-  function fillInicial() {
-    const sel = $('gcInicial');
-    if (!sel) return;
-    const permitidas = SPEC.iniciais_permitidas || [];
-    const cur = sel.value;
-    sel.innerHTML = permitidas.map((n) =>
-      `<option value="${n}">${pad(n)}</option>`
-    ).join('');
-    const min = SPEC.inicial_min;
-    sel.value = (cur && permitidas.map(String).includes(cur)) ? cur : String(min);
-    const hint = $('gcInicialHint');
-    if (hint) {
-      hint.textContent =
-        `Permitidos: ${pad(SPEC.inicial_min)}–${pad(SPEC.inicial_max)} (configurável). ` +
-        `Dezenas acima de ${pad(SPEC.inicial_max)} não entram como inicial.`;
-    }
-  }
-
   function qs() {
     const p = new URLSearchParams();
     p.set('janela', String(janela));
     p.set('base', base);
-    const ini = $('gcInicial') && $('gcInicial').value;
-    if (ini) p.set('inicial', ini);
-    const perfil = $('gcPerfil') && $('gcPerfil').value;
-    if (perfil) p.set('perfil', perfil);
-    if (padraoSel) p.set('padrao', padraoSel);
     return p.toString();
   }
 
@@ -168,7 +142,7 @@
 
     const rankRows = (s1.ranking_comparativo || []).slice().sort((a, b) => cmp(a, b, sortRank.key, sortRank.dir));
     const ranking = rankRows.map((t) => `
-      <tr class="${t.recomendado ? 'gc-rec' : ''} gc-padrao${t.padrao === padraoSel ? ' sel' : ''}" data-padrao="${String(t.padrao).replace(/"/g, '&quot;')}">
+      <tr class="${t.recomendado ? 'gc-rec' : ''}">
         <td>${t.rank ?? ''}</td>
         <td>${padraoHtml(t.padrao, t.gaps)}</td>
         <td>${fonteLabel(t.fonte)}</td>
@@ -177,7 +151,11 @@
         <td><strong>${t.score}</strong></td>
       </tr>`).join('');
 
-    const confRows = (s1.confronto || s1.linhas || []).slice(0, 80).sort((a, b) => cmp(a, b, sortConf.key, sortConf.dir));
+    const confRows = (s1.confronto || s1.linhas || []).slice().sort((a, b) => cmp(a, b, sortConf.key, sortConf.dir));
+    const concursosConf = confRows.map((r) => Number(r.concurso)).filter((n) => Number.isFinite(n));
+    const confFaixa = concursosConf.length
+      ? ` — do ${Math.min.apply(null, concursosConf)} ao ${Math.max.apply(null, concursosConf)} (${confRows.length})`
+      : '';
     const confronto = confRows.map((row) => {
       const eq = !!row.padroes_iguais;
       return `
@@ -195,7 +173,7 @@
       corpo.innerHTML = `
         <div class="mb-3">
           <div class="gc-col-title">Ranking comparativo — escolha das sequências</div>
-          <p class="small text-muted mb-1">Score = vezes no classificado + vezes na ordem de sorteio, com bônus se o mesmo padrão aparece nas duas. Clique no título da coluna para ordenar; clique na linha para usar na Sessão 2.</p>
+          <p class="small text-muted mb-1">Score = vezes no classificado + vezes na ordem de sorteio, com bônus se o mesmo padrão aparece nas duas. Clique no título da coluna para ordenar.</p>
           <div class="table-responsive">
             <table class="table table-sm table-bordered gc-table mb-0">
               <thead><tr>
@@ -211,7 +189,7 @@
           </div>
         </div>
         <div>
-          <div class="gc-col-title">Confronto por concurso</div>
+          <div class="gc-col-title">Confronto por concurso${confFaixa}</div>
           <p class="small text-muted mb-1">Clique no título da coluna para ordenar. Dezenas unitárias aparecem com zero à esquerda (01, 02…).</p>
           <div class="table-responsive" style="max-height:420px;overflow:auto">
             <table class="table table-sm table-bordered gc-table mb-0">
@@ -230,49 +208,150 @@
           </div>
         </div>`;
       bindSort(corpo);
-      corpo.querySelectorAll('.gc-padrao').forEach((tr) => {
-        tr.addEventListener('click', () => {
-          padraoSel = tr.getAttribute('data-padrao') || '';
-          load();
-        });
-      });
     }
   }
 
-  function renderBlocoCiclo(bloco, titulo) {
-    if (!bloco) return `<div class="text-muted small">—</div>`;
-    if (!bloco.sucesso) {
-      return `<div class="alert alert-warning small mb-0">${bloco.erro || 'Sem ciclo viável nesta leitura.'}</div>`;
+  function deltaTxt(n) {
+    const v = Number(n);
+    if (!Number.isFinite(v)) return '—';
+    return v > 0 ? ('+' + v) : String(v);
+  }
+
+  function deltaCls(n) {
+    const v = Number(n);
+    if (v > 0) return 'gc-acima';
+    if (v < 0) return 'gc-abaixo';
+    return 'gc-zero';
+  }
+
+  function sentidoTxt(n) {
+    const v = Number(n);
+    if (v > 0) return 'acima';
+    if (v < 0) return 'abaixo';
+    return 'na referência';
+  }
+
+  function resumoConjunto(deltas) {
+    if (!deltas || !deltas.length) return '';
+    const uniq = Array.from(new Set(deltas.map(Number)));
+    if (uniq.length === 1) {
+      const d = uniq[0];
+      if (d === 0) return 'Todas as posições estão na referência. O conjunto não está deslocado.';
+      const lado = d > 0 ? 'acima' : 'abaixo';
+      return `Conjunto deslocado ${Math.abs(d)} unidade(s) ${lado} da régua. Os gaps entre vizinhos permanecem os mesmos.`;
     }
-    const passos = (bloco.passos || []).map((p) => `
-      <div class="gc-passo">
-        <strong>Posição ${p.posicao}</strong>
-        → ${pad(p.dezena)}
-        ${p.ciclo == null ? ' · número inicial' : ` · ciclo ${pad(p.ciclo)} (${p.origem || ''})`}
-      </div>`).join('');
+    const media = deltas.reduce((a, b) => a + Number(b), 0) / deltas.length;
+    return `Deslocamento individual por posição. Média ${media.toFixed(2)}.`;
+  }
+
+  function deltasDe(dezenas, refs) {
+    return (dezenas || []).map((d, i) => Number(d) - Number(refs[i]));
+  }
+
+  function renderRefs() {
+    const refs = (reguaData && reguaData.referencias) || [];
+    const dmin = Number(SPEC.dezena_min);
+    const dmax = Number(SPEC.dezena_max);
     return `
-      <div class="gc-col-title">${titulo}</div>
-      <div class="mb-2">${balls(bloco.aposta)}
-        <span class="badge ${bloco.viavel ? 'bg-success' : 'bg-danger'} ms-2">${bloco.viavel ? 'Viável' : 'Não cabe'}</span>
-        <span class="badge bg-light text-dark border">Ciclos ${padLista(bloco.ciclos) || bloco.padrao || '—'}</span>
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <div class="gc-col-title mb-0">Referência por posição</div>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="gcReguaRestaurar">Restaurar moda da janela</button>
       </div>
-      <div class="border rounded">${passos || '<div class="p-2 text-muted small">Sem passos.</div>'}</div>`;
+      <div class="d-flex flex-wrap gap-2 mb-3" id="gcReguaRefs">
+        ${refs.map((r, i) => `
+          <div>
+            <label class="form-label small mb-0" for="gcRef${i}">P${r.posicao}</label>
+            <input id="gcRef${i}" class="form-control form-control-sm gc-ref" type="number"
+                   min="${dmin}" max="${dmax}" step="1" value="${refsEdit[i]}" data-idx="${i}">
+            <div class="small text-muted">moda ${pad(r.referencia)} · ${r.vezes || 0}×<br>${pad(r.min)}–${pad(r.max)}</div>
+          </div>`).join('')}
+      </div>`;
   }
 
-  function renderS2(s2) {
+  function renderS2(rebuildRefs) {
     const corpo = $('gcCorpoS2');
     if (!corpo) return;
-    if (!s2) {
-      corpo.innerHTML = `<div class="alert alert-warning small mb-0">Informe um inicial válido.</div>`;
+    const s2 = reguaData;
+    if (!s2 || !s2.sucesso) {
+      corpo.innerHTML = `<div class="alert alert-warning small mb-0">${(s2 && s2.erro) || 'Sem dados da régua.'}</div>`;
       return;
     }
-    const clas = s2.classificado || (s2.leitura !== 'sorteio' ? s2 : null);
-    const sort = s2.sorteio || null;
-    corpo.innerHTML = `
-      <div class="row g-3">
-        <div class="col-lg-6">${renderBlocoCiclo(clas, 'Ciclo · classificado (divulgação Caixa)')}</div>
-        <div class="col-lg-6">${renderBlocoCiclo(sort, 'Ciclo · ordem de sorteio (posições do sorteio)')}</div>
+    const ult = s2.ultimo || {};
+    const dezenas = ult.dezenas || [];
+    const deltas = deltasDe(dezenas, refsEdit);
+    const posCards = dezenas.map((d, i) => `
+      <div class="col-6 col-md-4 col-xl-3">
+        <div class="gc-kpi">
+          <div class="lbl">Posição ${i + 1}</div>
+          <div class="val">${pad(d)} <span class="badge ${deltaCls(deltas[i])}">${deltaTxt(deltas[i])}</span></div>
+          <div class="small text-muted">ref. ${pad(refsEdit[i])} · ${sentidoTxt(deltas[i])}</div>
+        </div>
+      </div>`).join('');
+
+    const head = (s2.referencias || []).map((r) => `<th>P${r.posicao}</th>`).join('');
+    const ordered = (s2.linhas || []).slice().sort((a, b) => Number(a.concurso) - Number(b.concurso));
+    const primeiro = ordered.length ? ordered[0].concurso : null;
+    const atual = ordered.length ? ordered[ordered.length - 1].concurso : null;
+    const faixa = (primeiro != null && atual != null)
+      ? `Do concurso ${primeiro} ao ${atual} (${ordered.length})`
+      : 'Concursos';
+    const rows = ordered.map((row) => {
+      const dz = deltasDe(row.dezenas || [], refsEdit);
+      const cells = (row.dezenas || []).map((d, i) =>
+        `<td>${pad(d)}<span class="gc-delta ${deltaCls(dz[i])}">${deltaTxt(dz[i])}</span></td>`
+      ).join('');
+      return `<tr><td>${row.concurso ?? '—'}</td>${cells}</tr>`;
+    }).join('');
+
+    const refsHtml = rebuildRefs ? renderRefs() : '';
+    const corpoId = 'gcReguaDetalhe';
+    const detalhe = `
+      <div id="${corpoId}">
+        <p class="gc-hint mb-3">${resumoConjunto(deltas)} Último concurso ${ult.concurso != null ? ult.concurso : '—'} · leitura classificada (combinação ordenada).</p>
+        <div class="row g-2 mb-3">${posCards}</div>
+        <div class="gc-col-title">${faixa}</div>
+        <div class="table-responsive" style="max-height:420px;overflow:auto">
+          <table class="table table-sm table-bordered gc-table mb-0">
+            <thead><tr><th>Concurso</th>${head}</tr></thead>
+            <tbody>${rows || '<tr><td colspan="99">—</td></tr>'}</tbody>
+          </table>
+        </div>
       </div>`;
+
+    if (rebuildRefs || !corpo.querySelector('#gcReguaRefs')) {
+      corpo.innerHTML = refsHtml + detalhe;
+      bindRefs();
+    } else {
+      const det = corpo.querySelector('#' + corpoId);
+      if (det) det.outerHTML = detalhe;
+      else corpo.insertAdjacentHTML('beforeend', detalhe);
+    }
+  }
+
+  function bindRefs() {
+    const corpo = $('gcCorpoS2');
+    if (!corpo) return;
+    corpo.querySelectorAll('.gc-ref').forEach((inp) => {
+      inp.addEventListener('change', () => {
+        const i = Number(inp.getAttribute('data-idx'));
+        let v = Number(inp.value);
+        const dmin = Number(SPEC.dezena_min);
+        const dmax = Number(SPEC.dezena_max);
+        if (!Number.isFinite(v)) v = refsEdit[i];
+        v = Math.max(dmin, Math.min(dmax, v));
+        inp.value = String(v);
+        refsEdit[i] = v;
+        renderS2(false);
+      });
+    });
+    const btn = $('gcReguaRestaurar');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const refs = (reguaData && reguaData.referencias) || [];
+        refsEdit = refs.map((r) => r.referencia);
+        renderS2(true);
+      });
+    }
   }
 
   async function load() {
@@ -288,14 +367,15 @@
       const ul = $('gcLblUltimo');
       if (ul) ul.textContent = ult.concurso != null ? ('Último c.' + ult.concurso) : '—';
       renderS1(j.sessao1);
-      renderS2(j.sessao2);
+      reguaData = j.sessao2 || null;
+      const refs = (reguaData && reguaData.referencias) || [];
+      refsEdit = refs.map((r) => r.referencia);
+      renderS2(true);
     } catch (e) {
       const c1 = $('gcCorpoS1');
       if (c1) c1.innerHTML = `<div class="alert alert-danger small mb-0">${e.message}</div>`;
     }
   }
-
-  fillInicial();
 
   root.querySelectorAll('.base-tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -313,10 +393,5 @@
       load();
     });
   });
-  ['gcInicial', 'gcPerfil'].forEach((id) => {
-    const el = $(id);
-    if (el) el.addEventListener('change', load);
-  });
-
   load();
 })();

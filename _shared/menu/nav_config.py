@@ -291,15 +291,15 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
             },
             {
                 "title": "Análise de Ciclos das Dezenas",
-                "desc": "Ciclo atual · métricas · inteligência operacional",
+                "desc": "Ciclo atual · métricas · inteligência · inicial + ciclo",
                 "href": "/analise/ciclo-cobertura/",
                 "icon": "fas fa-sync-alt",
                 "icon_bg": "#e7f1ff",
                 "icon_color": "#0d6efd",
             },
             {
-                "title": "Análise por Gaps e Ciclo",
-                "desc": "Sessão 1 · Gaps  ·  Sessão 2 · Inicial + Ciclo",
+                "title": "Análise por Gaps e Régua",
+                "desc": "Sessão 1 — Gaps  ·  Sessão 2 — Régua",
                 "href": "/analise/gaps-ciclo/",
                 "icon": "fas fa-ruler-horizontal",
                 "icon_bg": "#eef2ff",
@@ -863,7 +863,7 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
     if tem_ciclo_cobertura(modality_key):
         novos_analise.append({
             "title": "Análise de Ciclos das Dezenas",
-            "desc": "Ciclo atual · métricas · inteligência operacional",
+            "desc": "Ciclo atual · métricas · inteligência · inicial + ciclo",
             "href": "/analise/ciclo-cobertura/",
             "icon": "fas fa-sync-alt",
             "icon_bg": "#e7f1ff",
@@ -875,8 +875,8 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
         tem_gaps_ciclo = lambda _k: False  # noqa: E731
     if tem_gaps_ciclo(modality_key):
         novos_analise.append({
-            "title": "Análise por Gaps e Ciclo",
-            "desc": "Sessão 1 · Gaps  ·  Sessão 2 · Inicial + Ciclo",
+            "title": "Análise por Gaps e Régua",
+            "desc": "Sessão 1 — Gaps  ·  Sessão 2 — Régua",
             "href": "/analise/gaps-ciclo/",
             "icon": "fas fa-ruler-horizontal",
             "icon_bg": "#eef2ff",

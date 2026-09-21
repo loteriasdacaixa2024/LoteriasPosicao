@@ -13,6 +13,11 @@ def _page_ctx(modality_key: str, active_tab: str) -> dict:
 
     enabled = tem_ciclo_cobertura(modality_key)
     nome = get_ciclo_spec(modality_key).nome if enabled else modality_key
+    try:
+        from analise_gaps_ciclo.specs import tem_gaps_ciclo
+        tem_inicial = bool(enabled and tem_gaps_ciclo(modality_key))
+    except Exception:
+        tem_inicial = False
     return {
         "modality_key": modality_key,
         "modality_nome": nome,
@@ -20,6 +25,7 @@ def _page_ctx(modality_key: str, active_tab: str) -> dict:
         "active_tab": active_tab,
         "api_base": "/analise/api/ciclo-cobertura",
         "elite_href": "/geradores-elite/ciclo-apostas/?modo=estrategia",
+        "tem_inicial_ciclo": tem_inicial,
     }
 
 
@@ -55,6 +61,29 @@ def extend_ciclo_cobertura_app(app, modality_key: str = "diadesorte") -> None:
             "ciclo_cobertura_inteligencia.html",
             **_page_ctx(modality_key, "inteligencia"),
         )
+
+    @bp.route("/ciclo-cobertura/inicial-ciclo/")
+    def ciclo_inicial_ciclo_page():
+        """Inicial + Ciclo reutiliza projetar_ciclo — quarta aba, sem alterar as três atuais."""
+        from analise_gaps_ciclo.specs import get_gaps_ciclo_spec, tem_gaps_ciclo
+
+        ctx = _page_ctx(modality_key, "inicial-ciclo")
+        if not ctx.get("tem_inicial_ciclo") or not tem_gaps_ciclo(modality_key):
+            return render_template(
+                "inicial_ciclo_pagina.html",
+                **ctx,
+                com_nav_ciclo=True,
+                gc_spec=None,
+                api_projetar="/analise/api/gaps-ciclo/projetar",
+                voltar_href="/analise/ciclo-cobertura/",
+                indisponivel=True,
+            )
+        ctx["gc_spec"] = get_gaps_ciclo_spec(modality_key)
+        ctx["com_nav_ciclo"] = True
+        ctx["api_projetar"] = "/analise/api/gaps-ciclo/projetar"
+        ctx["voltar_href"] = "/analise/ciclo-cobertura/"
+        ctx["indisponivel"] = False
+        return render_template("inicial_ciclo_pagina.html", **ctx)
 
     @bp.route("/api/ciclo-cobertura/ciclo-atual")
     def api_ciclo_atual():

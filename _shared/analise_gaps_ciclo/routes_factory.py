@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from flask import Blueprint, jsonify, render_template, request, send_from_directory
+from flask import Blueprint, jsonify, redirect, render_template, request, send_from_directory
 
 from analise_gaps_ciclo.gerador import gerar_apostas
 from analise_gaps_ciclo.service import contexto_analise, projetar_ciclo
@@ -24,17 +24,32 @@ def _meses_cores(spec: dict) -> dict:
         return {}
 
 
+def _tem_ciclo(modality_key: str) -> bool:
+    try:
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+        return bool(tem_ciclo_cobertura(modality_key))
+    except Exception:
+        return False
+
+
 def _page_analise(modality_key: str) -> dict:
     spec = get_gaps_ciclo_spec(modality_key)
+    spec["janela_default"] = 0
+    no_ciclos = _tem_ciclo(modality_key)
     return {
         "modality_key": modality_key,
         "modality_nome": spec["nome"],
-        "page_title": "Análise por Gaps e Ciclo",
-        "page_subtitle": "Sessão 1 · Gaps  ·  Sessão 2 · Inicial + Ciclo",
+        "page_title": "Análise por Gaps e Régua",
+        "page_subtitle": "Sessão 1 — Gaps  ·  Sessão 2 — Régua",
         "api_base": "/analise/api/gaps-ciclo",
         "gerador_url": spec["gerador_url"],
         "gc_spec": spec,
         "meses_cores": _meses_cores(spec),
+        "inicial_ciclo_href": (
+            "/analise/ciclo-cobertura/inicial-ciclo/"
+            if no_ciclos else "/analise/gaps-ciclo/inicial-ciclo/"
+        ),
+        "inicial_ciclo_no_menu_ciclos": no_ciclos,
     }
 
 
@@ -60,6 +75,22 @@ def register_analise_gaps_ciclo(analise_bp: Blueprint, modality_key: str) -> Non
     @analise_bp.route("/gaps-ciclo/")
     def gaps_ciclo_page():
         return render_template("analise_gaps_ciclo.html", **_page_analise(modality_key))
+
+    @analise_bp.route("/gaps-ciclo/inicial-ciclo/")
+    def gaps_inicial_ciclo_page():
+        """Preserva Inicial + Ciclo quando a modalidade não tem Ciclos das Dezenas."""
+        if _tem_ciclo(modality_key):
+            return redirect("/analise/ciclo-cobertura/inicial-ciclo/")
+        spec = get_gaps_ciclo_spec(modality_key)
+        return render_template(
+            "inicial_ciclo_pagina.html",
+            modality_key=modality_key,
+            modality_nome=spec["nome"],
+            com_nav_ciclo=False,
+            gc_spec=spec,
+            api_projetar="/analise/api/gaps-ciclo/projetar",
+            voltar_href="/analise/gaps-ciclo/",
+        )
 
     @analise_bp.route("/gaps-ciclo/static/<path:filename>")
     def gaps_ciclo_static(filename):

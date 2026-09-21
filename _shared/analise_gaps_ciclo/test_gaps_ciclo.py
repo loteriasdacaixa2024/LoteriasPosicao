@@ -10,7 +10,16 @@ _SHARED = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _SHARED not in sys.path:
     sys.path.insert(0, _SHARED)
 
-from analise_gaps_ciclo.core import gaps_de, gaps_sequencia, montar_por_ciclos, montar_ranking_comparativo, parse_padrao_gaps, viavel
+from analise_gaps_ciclo.core import (
+    analisar_regua_combinacoes,
+    deslocamentos_regua,
+    gaps_de,
+    gaps_sequencia,
+    montar_por_ciclos,
+    montar_ranking_comparativo,
+    parse_padrao_gaps,
+    viavel,
+)
 from analise_gaps_ciclo.gerador import gerar_apostas
 from analise_gaps_ciclo.specs import get_gaps_ciclo_spec
 
@@ -53,6 +62,37 @@ class TestCoreGaps(unittest.TestCase):
 
     def test_estouro_invalida(self):
         self.assertIsNone(montar_por_ciclos(28, [4, 4, 4, 4, 4, 4], dezena_min=1, dezena_max=31))
+
+
+class TestRegua(unittest.TestCase):
+    def test_exemplo_posicao_1_seis_acima(self):
+        jogo = [10, 14, 18, 22, 26, 30, 31]
+        self.assertEqual(gaps_de(jogo), [4, 4, 4, 4, 4, 1])
+        refs = [4, 8, 12, 16, 20, 24, 25]
+        deltas = deslocamentos_regua(jogo, refs)
+        self.assertEqual(deltas[0], 6)
+        self.assertEqual(deltas, [6, 6, 6, 6, 6, 6, 6])
+        self.assertEqual(gaps_de(jogo), gaps_de(refs))
+
+    def test_moda_e_conjunto_deslocado(self):
+        ref = [4, 8, 12, 16, 20, 24, 25]
+        jogo = [10, 14, 18, 22, 26, 30, 31]
+        out = analisar_regua_combinacoes([jogo, ref, ref])
+        self.assertEqual(out["referencias"][0]["referencia"], 4)
+        self.assertEqual(out["referencias"][0]["vezes"], 2)
+        ult = out["ultimo"]
+        self.assertEqual(ult["posicoes"][0]["deslocamento"], 6)
+        self.assertEqual(ult["posicoes"][0]["sentido"], "acima")
+        self.assertTrue(ult["conjunto_uniforme"])
+        self.assertEqual(ult["deslocamento_conjunto"], 6)
+        self.assertEqual(len(out["linhas"]), 3)
+
+    def test_empate_de_moda_escolhe_menor(self):
+        a = [7, 11, 15, 20, 22, 23, 29]
+        b = [4, 11, 15, 20, 22, 23, 29]
+        out = analisar_regua_combinacoes([a, b])
+        self.assertEqual(out["referencias"][0]["referencia"], 4)
+        self.assertEqual(out["referencias"][0]["vezes"], 1)
 
 
 class TestSpecInicial(unittest.TestCase):
