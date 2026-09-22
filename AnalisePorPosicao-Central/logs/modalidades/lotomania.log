@@ -10976,3 +10976,21 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://192.168.11.212:5154
 Press CTRL+C to quit
 127.0.0.1 - - [21/Sep/2026 20:18:32] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-21 20:31:24 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://192.168.11.212:5154
+Press CTRL+C to quit
+127.0.0.1 - - [21/Sep/2026 20:31:32] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [22/Sep/2026 05:46:53] "POST /modelos/api/backtesting HTTP/1.1" 200 -

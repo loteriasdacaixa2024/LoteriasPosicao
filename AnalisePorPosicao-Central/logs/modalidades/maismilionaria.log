@@ -11651,3 +11651,22 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://192.168.11.212:5157
 Press CTRL+C to quit
 127.0.0.1 - - [21/Sep/2026 20:18:33] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-21 20:31:27 ---
+===========================================================
+[OK] Servidor +Milionária rodando na porta 5157
+[URL] Acesse:      http://localhost:5157
+[URL] Análise:     http://localhost:5157/analise/
+[URL] Modelos:     http://localhost:5157/modelos/
+[URL] Conferência: http://localhost:5157/central-conferencias/
+[URL] Desdobramento: http://localhost:5157/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5157
+ * Running on http://192.168.11.212:5157
+Press CTRL+C to quit
+127.0.0.1 - - [21/Sep/2026 20:31:33] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [22/Sep/2026 05:46:52] "POST /modelos/api/backtesting HTTP/1.1" 200 -

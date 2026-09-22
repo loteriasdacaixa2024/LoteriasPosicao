@@ -11642,3 +11642,20 @@ Press CTRL+C to quit
 127.0.0.1 - - [21/Sep/2026 20:18:32] "GET / HTTP/1.1" 200 -
 
 --- iniciando 2026-09-21 20:31:24 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://192.168.11.212:5160
+Press CTRL+C to quit
+127.0.0.1 - - [21/Sep/2026 20:31:32] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [22/Sep/2026 05:46:37] "POST /modelos/api/backtesting HTTP/1.1" 200 -
