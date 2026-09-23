@@ -871,6 +871,31 @@
     margin: .2rem 0 .75rem;
     max-width: 44rem;
   }
+  #ai-root #tab-panorama .ai-pan-seq {
+    width: 100%;
+    max-width: 68rem;
+    margin-top: .35rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, .08);
+  }
+  #ai-root #tab-panorama .ai-pan-seq .ai-pan-table-wrap {
+    max-height: 62vh;
+  }
+  #ai-root #aiTabelaPanSeq th,
+  #ai-root #aiTabelaPanSeq td {
+    text-align: center !important;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  #ai-root #aiTabelaPanSeq a.ai-pan-link-pad {
+    font-weight: 700;
+    text-decoration: underline;
+    color: var(--primary-xdark, #0d6efd);
+    cursor: pointer;
+  }
+  #ai-root #aiTabelaJogosPadrao tr.tr-seq-foco > td {
+    background-color: rgba(25, 135, 84, .18);
+  }
   #ai-root #aiTabelaPanoramaHist a.ai-pan-link-pad,
   #ai-root #aiTabelaPanoramaFalt a.ai-pan-link-pad {
     font-weight: 700;
@@ -1683,6 +1708,8 @@
         <div class="ai-hint mb-0">
           Padrões que <strong>já saíram</strong> no histórico, sem repetição: o padrão, quantas vezes
           e a distribuição B+M+A. Clique no <strong>padrão</strong> para abrir na aba 4 · Padrões II.
+          Abaixo, a <strong>sequência sorteada</strong> de cada concurso: o mesmo Nº da aba 5
+          em «Mostrar vencedor».
         </div>
       </div>
       <div id="aiPanHistResumo" class="ai-pan-resumo"></div>
@@ -1724,6 +1751,45 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+      <div class="ai-pan-seq" id="aiPanSeqWrap">
+        <div class="ai-pan-col-title" id="aiPanSeqTitulo">Sequência sorteada em cada concurso</div>
+        <p class="small text-muted mb-2">
+          Do concurso <strong>1</strong> ao atual: o <strong>nº da sequência</strong> é o mesmo que a aba 5
+          mostra ao clicar em <strong>Mostrar vencedor</strong> — a posição da aposta sorteada dentro do padrão.
+          Clique no número para abrir essa sequência.
+        </p>
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+          <input type="search" id="aiPanSeqBusca" class="form-control form-control-sm" style="max-width:18rem"
+                 placeholder="Concurso, padrão ou dezenas" autocomplete="off">
+          <select id="aiPanSeqPageSize" class="form-select form-select-sm" style="width:auto">
+            <option value="50" selected>50 / pág.</option>
+            <option value="100">100 / pág.</option>
+            <option value="250">250 / pág.</option>
+            <option value="0">Todos</option>
+          </select>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPanSeqPrev" disabled>‹</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPanSeqNext" disabled>›</button>
+          <span class="small text-muted" id="aiPanSeqInfo">—</span>
+        </div>
+        <div class="ai-pan-table-wrap">
+          <table class="table table-sm table-bordered ai-table mb-0" id="aiTabelaPanSeq">
+            <thead>
+              <tr>
+                <th class="ai-sort" data-sort="concurso" data-table="panSeq" title="Clique para ordenar">Concurso <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="data" data-table="panSeq" title="Clique para ordenar">Data <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="padrao" data-table="panSeq" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="sequencia_n" data-table="panSeq" title="Nº da aposta na aba 5 ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="dezenas_fmt" data-table="panSeq" title="Clique para ordenar">Dezenas <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="soma" data-table="panSeq" title="Clique para ordenar">Soma <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="status_media" data-table="panSeq" title="Clique para ordenar">Status <span class="ai-sort-ind">⇅</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="7" class="text-muted">Carregando sequências sorteadas…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
       </div>
@@ -1862,12 +1928,14 @@
     resumo: { key: 'para_apostar', dir: 'desc' },
     pan: { key: 'vezes_padrao', dir: 'desc' },
     panFalt: { key: 'padrao', dir: 'asc' },
+    panSeq: { key: 'concurso', dir: 'desc' },
     evo: { key: 'concurso', dir: 'desc' },
     evoCons: { key: 'n_padrao', dir: 'asc' },
     cheq: { key: 'linha', dir: 'asc' },
   };
   let PAGE = { res: 1, pad: 1 };
   let PAN_HIST = { all: [], filtrados: [], faltantes: [], carregado: false, totalTeorico: 0 };
+  let PAN_SEQ = { all: [], carregado: false, page: 1, carregando: false };
   let EVO = { linhas: [], padroes: [], nao: [], meta: null, carregado: false, page: 1, carregando: false };
 
   function esc(s) {
@@ -2410,6 +2478,7 @@
   }
 
   async function carregarHistoricoCompleto() {
+    carregarSequenciasSorteadas();
     try {
       await garantirTotalPadroesTeoricos();
       const r = await fetch(`${API}/historico?limit=5000&offset=0&ordem=desc`);
@@ -2422,11 +2491,339 @@
         return j;
       }
       renderPanoramaHist();
+      if (PAN_SEQ._apiFalhou && !PAN_SEQ.carregado && (PAN_HIST.all || []).length) {
+        publicarSequenciasLocais(PAN_HIST.all);
+      }
       return j;
     } catch (e) {
       const tb = document.querySelector('#aiTabelaPanoramaHist tbody');
       if (tb) tb.innerHTML = `<tr><td colspan="5" class="text-danger">${esc(String(e))}</td></tr>`;
       return null;
+    }
+  }
+
+  function dataPanSeqKey(data) {
+    const m = String(data || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    return m ? `${m[3]}${m[2]}${m[1]}` : String(data || '');
+  }
+
+  function linhasPanSeq() {
+    const q = String(document.getElementById('aiPanSeqBusca')?.value || '').trim().toLowerCase();
+    let rows = PAN_SEQ.all || [];
+    if (q) {
+      const qDig = q.replace(/\D/g, '');
+      rows = rows.filter((r) => {
+        const blob = [
+          r.concurso, r.padrao, r.descricao, r.dezenas_fmt, r.sequencia_n, r.data, r.status_media_label,
+        ].join(' ').toLowerCase();
+        if (blob.includes(q)) return true;
+        if (qDig && String(r.dezenas_fmt || '').replace(/\D/g, '').includes(qDig)) return true;
+        if (qDig && String(r.padrao || '').replace(/\D/g, '').includes(qDig)) return true;
+        return false;
+      });
+    }
+    const { key, dir } = SORT.panSeq || { key: 'concurso', dir: 'desc' };
+    const mul = dir === 'asc' ? 1 : -1;
+    const stOrd = { dentro: 0, proxima: 1, fora: 2 };
+    rows = [...rows].sort((a, b) => {
+      let va;
+      let vb;
+      if (key === 'data') {
+        va = dataPanSeqKey(a.data);
+        vb = dataPanSeqKey(b.data);
+        if (va !== vb) return (va < vb ? -1 : 1) * mul;
+      } else if (key === 'status_media') {
+        va = stOrd[a.status_media] ?? 9;
+        vb = stOrd[b.status_media] ?? 9;
+        if (va !== vb) return (va - vb) * mul;
+      } else if (key === 'concurso' || key === 'sequencia_n' || key === 'soma') {
+        va = Number(a[key]);
+        vb = Number(b[key]);
+        const na = Number.isFinite(va) ? va : -1;
+        const nb = Number.isFinite(vb) ? vb : -1;
+        if (na !== nb) return (na - nb) * mul;
+      } else {
+        va = String(a[key] ?? '');
+        vb = String(b[key] ?? '');
+        if (va !== vb) return va.localeCompare(vb, 'pt-BR') * mul;
+      }
+      return (Number(b.concurso) - Number(a.concurso));
+    });
+    return rows;
+  }
+
+  function renderPanSeq() {
+    const tb = document.querySelector('#aiTabelaPanSeq tbody');
+    const info = document.getElementById('aiPanSeqInfo');
+    const titulo = document.getElementById('aiPanSeqTitulo');
+    const prev = document.getElementById('aiPanSeqPrev');
+    const next = document.getElementById('aiPanSeqNext');
+    if (!tb) return;
+    const rows = linhasPanSeq();
+    const totalHist = (PAN_SEQ.all || []).length;
+    const primeiro = PAN_SEQ.primeiro;
+    const ultimo = PAN_SEQ.ultimo;
+    if (titulo) {
+      titulo.textContent = totalHist
+        ? `Sequência sorteada em cada concurso (${fmtVol(primeiro || 1)} ao ${fmtVol(ultimo || totalHist)})`
+        : 'Sequência sorteada em cada concurso';
+    }
+    const sizeRaw = Number(document.getElementById('aiPanSeqPageSize')?.value);
+    const size = !sizeRaw || sizeRaw <= 0 ? rows.length || 1 : sizeRaw;
+    const pages = Math.max(1, Math.ceil(rows.length / size) || 1);
+    if (PAN_SEQ.page > pages) PAN_SEQ.page = pages;
+    if (PAN_SEQ.page < 1) PAN_SEQ.page = 1;
+    const ini = (PAN_SEQ.page - 1) * size;
+    const pageRows = rows.slice(ini, ini + size);
+    if (!rows.length) {
+      tb.innerHTML = `<tr><td colspan="7" class="text-muted">${totalHist ? 'Nenhum concurso neste filtro.' : 'Sem concursos.'}</td></tr>`;
+    } else {
+      tb.innerHTML = pageRows.map((r) => {
+        const seq = r.sequencia_n
+          ? `<a href="#" class="ai-pan-link-pad" data-act="ir-sequencia" data-padrao="${esc(r.padrao)}" data-dezenas="${esc(r.dezenas_fmt)}" title="Abrir esta sequência na aba 5">${fmtVol(r.sequencia_n)}</a>`
+          : '—';
+        const ult = ultimo && Number(r.concurso) === Number(ultimo) ? ' class="tr-padrao-ultimo"' : '';
+        return `<tr${ult}>
+          <td><a href="#" data-act="ir-concurso" data-concurso="${esc(r.concurso)}">${esc(r.concurso)}</a></td>
+          <td>${esc(r.data || '—')}</td>
+          <td class="td-padrao"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(r.padrao)}" title="${esc(r.descricao || '')}">${esc(r.padrao)}</a></td>
+          <td>${seq}</td>
+          <td class="font-monospace">${esc(r.dezenas_fmt || '—')}</td>
+          <td>${esc(r.soma != null ? r.soma : '—')}</td>
+          <td>${statusPill(r.status_media, r.status_media_label)}</td>
+        </tr>`;
+      }).join('');
+    }
+    if (info) {
+      info.textContent = rows.length
+        ? `Exibindo ${fmtVol(pageRows.length)} de ${fmtVol(rows.length)} · pág. ${PAN_SEQ.page}/${pages}`
+        : '—';
+    }
+    if (prev) prev.disabled = PAN_SEQ.page <= 1;
+    if (next) next.disabled = PAN_SEQ.page >= pages;
+    atualizarIndicadoresSort();
+  }
+
+  function pyRound(x) {
+    if (!Number.isFinite(x)) return 0;
+    const neg = x < 0;
+    const ax = Math.abs(x);
+    const f = Math.floor(ax);
+    const diff = ax - f;
+    let r;
+    if (Math.abs(diff - 0.5) < 1e-9) r = (f % 2 === 0) ? f : f + 1;
+    else r = diff > 0.5 ? f + 1 : f;
+    return neg ? -r : r;
+  }
+
+  function faixaSomaLocal(somas) {
+    if (!somas.length) return null;
+    const avg = somas.reduce((a, b) => a + b, 0) / somas.length;
+    const media = pyRound(avg);
+    let varsum = 0;
+    somas.forEach((s) => { const d = s - avg; varsum += d * d; });
+    const std = somas.length > 1 ? Math.sqrt(varsum / somas.length) : 0;
+    const span = somas.length > 1 ? (Math.max(...somas) - Math.min(...somas)) : 0;
+    const baseTol = std || (span / 4) || 4;
+    const tolP = Math.max(2, pyRound(baseTol));
+    const tolD = Math.max(1, pyRound(tolP / 2));
+    return { media, tol_dentro: tolD, tol_proxima: tolP };
+  }
+
+  function classificarSomaLocal(soma, faixa) {
+    if (!faixa || faixa.media == null) {
+      return { status_media: 'fora', status_media_label: 'Sem média', media: null };
+    }
+    const ad = Math.abs(soma - faixa.media);
+    let st = 'fora';
+    if (ad <= faixa.tol_dentro) st = 'dentro';
+    else if (ad <= faixa.tol_proxima) st = 'proxima';
+    const labels = { dentro: 'Dentro da média', proxima: 'Próxima da média', fora: 'Fora da faixa' };
+    return { status_media: st, status_media_label: labels[st], media: faixa.media };
+  }
+
+  function poolsDezenaLocal() {
+    const lim = limitesDezenaBusca();
+    const pools = {};
+    for (let n = lim.min; n <= lim.max; n++) {
+      const d = Math.floor(n / 10);
+      if (!pools[d]) pools[d] = [];
+      pools[d].push(n);
+    }
+    return pools;
+  }
+
+  function somasCombinacoes(pool, k) {
+    const somas = [];
+    const rec = (start, left, acc) => {
+      if (!left) { somas.push(acc); return; }
+      for (let i = start; i <= pool.length - left; i++) rec(i + 1, left - 1, acc + pool[i]);
+    };
+    rec(0, k, 0);
+    return somas;
+  }
+
+  function rankCombinacao(pool, escolhidos) {
+    const k = escolhidos.length;
+    const alvo = escolhidos.join(',');
+    let rank = 0;
+    let found = -1;
+    const rec = (start, left, acc) => {
+      if (found >= 0) return;
+      if (!left) {
+        if (acc.join(',') === alvo) found = rank;
+        rank += 1;
+        return;
+      }
+      for (let i = start; i <= pool.length - left; i++) {
+        acc.push(pool[i]);
+        rec(i + 1, left - 1, acc);
+        acc.pop();
+        if (found >= 0) return;
+      }
+    };
+    rec(0, k, []);
+    return found;
+  }
+
+  function sequenciasLocais(itens) {
+    const pools = poolsDezenaLocal();
+    const por = new Map();
+    (itens || []).forEach((it) => {
+      const pad = normalizarPadrao(it.padrao_inicial);
+      const dez = String(it.dezenas_fmt || '').trim().split(/\s+/).map(Number).filter(Number.isFinite);
+      if (!pad || dez.length !== pad.split(' ').length) return;
+      if (!por.has(pad)) por.set(pad, []);
+      por.get(pad).push({ it, dez: dez.slice().sort((a, b) => a - b), soma: Number(it.soma) || dez.reduce((a, b) => a + b, 0) });
+    });
+    const cacheSomas = new Map();
+    const somasGrupo = (dig, k) => {
+      const key = dig + ':' + k;
+      if (!cacheSomas.has(key)) cacheSomas.set(key, somasCombinacoes(pools[dig] || [], k));
+      return cacheSomas.get(key);
+    };
+    const linhas = [];
+    por.forEach((lista, pad) => {
+      const need = {};
+      pad.split(' ').forEach((d) => { need[d] = (need[d] || 0) + 1; });
+      const digs = Object.keys(need).map(Number).sort((a, b) => a - b);
+      const grupos = digs.map((d) => somasGrupo(d, need[d]));
+      if (grupos.some((g) => !g.length)) return;
+      const n = grupos.length;
+      const suffix = Array.from({ length: n + 1 }, () => new Map());
+      suffix[n].set(0, 1);
+      for (let i = n - 1; i >= 0; i--) {
+        const nxt = new Map();
+        suffix[i + 1].forEach((prevC, prevS) => {
+          grupos[i].forEach((gs) => {
+            const s = gs + prevS;
+            nxt.set(s, (nxt.get(s) || 0) + prevC);
+          });
+        });
+        suffix[i] = nxt;
+      }
+      const hist = suffix[0];
+      const faixa = faixaSomaLocal(lista.map((x) => x.soma));
+      const media = faixa ? faixa.media : null;
+      const adDe = (soma) => (media == null ? 99999 : Math.abs(soma - media));
+      const antesSoma = new Map();
+      lista.forEach((row) => {
+        const porDig = {};
+        row.dez.forEach((num) => {
+          const d = Math.floor(num / 10);
+          if (!porDig[d]) porDig[d] = [];
+          porDig[d].push(num);
+        });
+        const ranks = digs.map((d) => rankCombinacao(pools[d] || [], porDig[d] || []));
+        if (ranks.some((rk) => rk < 0)) return;
+        const soma = row.soma;
+        const ad = adDe(soma);
+        const chave = ad + ':' + soma;
+        let nAntes = antesSoma.get(chave);
+        if (nAntes == null) {
+          nAntes = 0;
+          hist.forEach((qtd, s) => {
+            const a2 = adDe(s);
+            if (a2 < ad || (a2 === ad && s < soma)) nAntes += qtd;
+          });
+          antesSoma.set(chave, nAntes);
+        }
+        let antes = 0;
+        let prefixo = 0;
+        const ultimo = n - 1;
+        for (let gi = 0; gi < n; gi++) {
+          const rank = ranks[gi];
+          for (let r = 0; r < rank; r++) {
+            const parcial = prefixo + grupos[gi][r];
+            const needSum = soma - parcial;
+            if (gi === ultimo) {
+              if (needSum === 0) antes += 1;
+            } else {
+              antes += suffix[gi + 1].get(needSum) || 0;
+            }
+          }
+          prefixo += grupos[gi][rank];
+        }
+        const cls = classificarSomaLocal(soma, faixa);
+        linhas.push({
+          concurso: Number(row.it.concurso) || 0,
+          data: row.it.data || '',
+          padrao: pad,
+          descricao: row.it.descricao_bma || '',
+          dezenas_fmt: row.dez.map((d) => String(d).padStart(2, '0')).join(' '),
+          soma,
+          media: cls.media,
+          sequencia_n: nAntes + antes + 1,
+          status_media: cls.status_media,
+          status_media_label: cls.status_media_label,
+        });
+      });
+    });
+    linhas.sort((a, b) => a.concurso - b.concurso);
+    return linhas;
+  }
+
+  function publicarSequenciasLocais(itens) {
+    const linhas = sequenciasLocais(itens);
+    const concs = linhas.map((r) => r.concurso).filter((n) => n > 0);
+    PAN_SEQ.all = linhas;
+    PAN_SEQ.primeiro = concs.length ? Math.min(...concs) : null;
+    PAN_SEQ.ultimo = concs.length ? Math.max(...concs) : null;
+    PAN_SEQ.carregado = true;
+    PAN_SEQ.page = 1;
+    renderPanSeq();
+  }
+
+  async function carregarSequenciasSorteadas(force) {
+    if (PAN_SEQ.carregando) return;
+    if (PAN_SEQ.carregado && !force) {
+      renderPanSeq();
+      return;
+    }
+    PAN_SEQ.carregando = true;
+    PAN_SEQ._apiFalhou = false;
+    const tb = document.querySelector('#aiTabelaPanSeq tbody');
+    const info = document.getElementById('aiPanSeqInfo');
+    if (tb) tb.innerHTML = '<tr><td colspan="7" class="text-muted">Calculando o nº da sequência de cada sorteio…</td></tr>';
+    if (info) info.textContent = 'Calculando…';
+    try {
+      const r = await fetch(`${API}/sequencias-sorteadas`);
+      if (!r.ok) throw new Error('api ' + r.status);
+      const j = await r.json();
+      if (!j || j.sucesso === false) throw new Error((j && j.erro) || 'Falha ao calcular as sequências');
+      PAN_SEQ.all = j.linhas || [];
+      PAN_SEQ.primeiro = j.primeiro_concurso;
+      PAN_SEQ.ultimo = j.ultimo_concurso;
+      PAN_SEQ.carregado = true;
+      PAN_SEQ.page = 1;
+      renderPanSeq();
+    } catch (e) {
+      PAN_SEQ._apiFalhou = true;
+      if ((PAN_HIST.all || []).length) {
+        publicarSequenciasLocais(PAN_HIST.all);
+      }
+    } finally {
+      PAN_SEQ.carregando = false;
     }
   }
 
@@ -2749,7 +3146,7 @@
   function scrollLinhaVencedora(tbody) {
     if (!JOGOS_PAD._scrollVencedor) return;
     JOGOS_PAD._scrollVencedor = false;
-    const tr = tbody && tbody.querySelector('tr.tr-jogo-vencedor');
+    const tr = tbody && (tbody.querySelector('tr.tr-seq-foco') || tbody.querySelector('tr.tr-jogo-vencedor'));
     if (!tr) return;
     const wrap = tbody.closest('.table-responsive');
     if (wrap) {
@@ -3654,8 +4051,22 @@
     const ordered = linhasOrdenadasJogos();
     JOGOS_PAD.total = ordered.length;
     const size = tamanhoPaginaJogos(ordered.length);
-    if (JOGOS_PAD._irVencedor) {
+    if (JOGOS_PAD._irDezenas) {
+      const alvo = JOGOS_PAD._irDezenas;
+      JOGOS_PAD._irDezenas = '';
       JOGOS_PAD._irVencedor = false;
+      const idx = ordered.findIndex(j => chaveDezenas((j.dezenas && j.dezenas.length) ? j.dezenas : j.dezenas_fmt) === alvo);
+      if (idx >= 0) {
+        JOGOS_PAD.offset = Math.floor(idx / size) * size;
+        JOGOS_PAD._scrollVencedor = true;
+        JOGOS_PAD._destaqueDezenas = alvo;
+      } else {
+        JOGOS_PAD.offset = 0;
+        JOGOS_PAD._destaqueDezenas = '';
+      }
+    } else if (JOGOS_PAD._irVencedor) {
+      JOGOS_PAD._irVencedor = false;
+      JOGOS_PAD._destaqueDezenas = '';
       const idx = ordered.findIndex(ehJogoVencedor);
       if (idx >= 0) {
         JOGOS_PAD.offset = Math.floor(idx / size) * size;
@@ -3762,6 +4173,7 @@
       const key = j.dezenas_fmt;
       const checked = JOGOS_PAD.sel.has(key) ? 'checked' : '';
       const isWin = ehJogoVencedor(j);
+      const isFoco = !!(JOGOS_PAD._destaqueDezenas && chaveDezenas((j.dezenas && j.dezenas.length) ? j.dezenas : j.dezenas_fmt) === JOGOS_PAD._destaqueDezenas);
       const conc = concursoDoJogo(j);
       const jaSaiu = !!conc;
       const st = j.status_media || 'fora';
@@ -3769,6 +4181,7 @@
       const trCls = [
         JOGOS_PAD.sel.has(key) ? 'tr-aposta-sel' : '',
         isWin ? 'tr-padrao-ultimo tr-jogo-vencedor' : '',
+        isFoco ? 'tr-seq-foco' : '',
         jaSaiu ? 'tr-ja-saiu' : '',
       ].filter(Boolean).join(' ');
       const concTit = conc
@@ -3825,8 +4238,10 @@
     if (same && offset != null) {
       const aviso = document.getElementById('aiJogosPadAvisoVazio');
       if (aviso) aviso.classList.add('d-none');
-      JOGOS_PAD.offset = Math.max(0, +offset);
-      if (+offset === 0) JOGOS_PAD._irVencedor = true;
+      if (!JOGOS_PAD._irDezenas) {
+        JOGOS_PAD.offset = Math.max(0, +offset);
+        if (+offset === 0) JOGOS_PAD._irVencedor = true;
+      }
       aplicarPaginaJogos();
       return;
     }
@@ -3865,7 +4280,7 @@
           ${fmtVol(nDentro)} dentro da média no total.`;
       }
       setFiltroMedia(JOGOS_PAD.filtroMedia || 'dentro_novos');
-      if (offset == null || +offset === 0) JOGOS_PAD._irVencedor = true;
+      if (!JOGOS_PAD._irDezenas && (offset == null || +offset === 0)) JOGOS_PAD._irVencedor = true;
       aplicarPaginaJogos();
     } catch (e) {
       if (aviso) aviso.classList.remove('d-none');
@@ -4494,6 +4909,11 @@
         renderPadroesFaltantes(listarPadroesFaltantes());
         return;
       }
+      if (table === 'panSeq') {
+        PAN_SEQ.page = 1;
+        renderPanSeq();
+        return;
+      }
       if (table === 'evo' || table === 'evoCons') {
         if (table === 'evo') EVO.page = 1;
         renderEvolucaoPadroes();
@@ -4543,6 +4963,22 @@
       if (pad) abrirJogosPadrao(pad, { filtroMedia: 'dentro_novos', buscaDez: busca });
       return;
     }
+    if (act === 'ir-sequencia') {
+      ev.preventDefault();
+      const pad = btn.dataset.padrao || '';
+      const dez = btn.dataset.dezenas || '';
+      if (!pad || !dez) return;
+      SORT.jogos = { key: 'distancia', dir: 'asc' };
+      const buscaEl = document.getElementById('aiJogosPadBuscaDez');
+      if (buscaEl) buscaEl.value = '';
+      JOGOS_PAD.buscaDezenas = [];
+      const btnLimpar = document.getElementById('aiJogosPadBuscaDezLimpar');
+      if (btnLimpar) btnLimpar.disabled = true;
+      if (typeof renderBuscaDezChips === 'function') renderBuscaDezChips();
+      JOGOS_PAD._irDezenas = chaveDezenas(dez);
+      abrirJogosPadrao(pad, { filtroMedia: 'all' });
+      return;
+    }
     if (act === 'ir-padrao-ii') {
       ev.preventDefault();
       const pad = btn.dataset.padrao || '';
@@ -4589,7 +5025,29 @@
   // deep-link
   const aba0 = (root.dataset.aba || 'resultados').toLowerCase();
   const n0 = +(root.dataset.n || 0);
-  document.getElementById('aiPanHistCarregar')?.addEventListener('click', () => carregarHistoricoCompleto());
+  document.getElementById('aiPanHistCarregar')?.addEventListener('click', () => {
+    PAN_SEQ.carregado = false;
+    carregarHistoricoCompleto();
+  });
+  document.getElementById('aiPanSeqPrev')?.addEventListener('click', () => {
+    if (PAN_SEQ.page > 1) { PAN_SEQ.page -= 1; renderPanSeq(); }
+  });
+  document.getElementById('aiPanSeqNext')?.addEventListener('click', () => {
+    PAN_SEQ.page += 1;
+    renderPanSeq();
+  });
+  document.getElementById('aiPanSeqPageSize')?.addEventListener('change', () => {
+    PAN_SEQ.page = 1;
+    renderPanSeq();
+  });
+  let _panSeqBuscaT = null;
+  document.getElementById('aiPanSeqBusca')?.addEventListener('input', () => {
+    clearTimeout(_panSeqBuscaT);
+    _panSeqBuscaT = setTimeout(() => {
+      PAN_SEQ.page = 1;
+      if (PAN_SEQ.carregado) renderPanSeq();
+    }, 220);
+  });
   let _panBuscaT = null;
   document.getElementById('aiPanHistBusca')?.addEventListener('input', () => {
     clearTimeout(_panBuscaT);

@@ -1480,6 +1480,14 @@ class AnaliseInteligentesService:
         from analise_inteligentes_diadesorte.evolucao_padroes import montar_evolucao
         return montar_evolucao(cls, base=base)
 
+    @classmethod
+    def sequencias_sorteadas(cls, base: str = "geral") -> Dict[str, Any]:
+        """Concurso → Nº da sequência sorteada no padrão (aba Panorama)."""
+        from analise_inteligentes_diadesorte.sequencias_sorteadas import (
+            montar_sequencias_sorteadas,
+        )
+        return montar_sequencias_sorteadas(cls, base=base)
+
 
 def make_inteligentes_service(modality_key: str):
     """Factory — serviço de GC/Elite parametrizado pela modalidade."""

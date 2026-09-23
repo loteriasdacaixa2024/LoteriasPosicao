@@ -447,3 +447,13 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
             return jsonify(out), (200 if out.get("sucesso") else 500)
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @analise_bp.route("/api/inteligentes/sequencias-sorteadas")
+    def api_inteligentes_sequencias_sorteadas():
+        """Concurso → Nº da sequência sorteada no padrão (aba 7)."""
+        try:
+            base = request.args.get("base", "geral")
+            out = Svc.sequencias_sorteadas(base=base)
+            return jsonify(out), (200 if out.get("sucesso") else 500)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500

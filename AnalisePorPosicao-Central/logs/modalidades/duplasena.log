@@ -11583,3 +11583,41 @@ WARNING: This is a development server. Do not use it in a production deployment.
 Press CTRL+C to quit
 127.0.0.1 - - [21/Sep/2026 20:31:33] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [22/Sep/2026 05:46:55] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-22 17:11:26 ---
+===========================================================
+[OK] Servidor Dupla Sena rodando na porta 5158
+[URL] Acesse:      http://localhost:5158
+[URL] Análise:     http://localhost:5158/analise/
+[URL] Modelos:     http://localhost:5158/modelos/
+[URL] Conferência: http://localhost:5158/central-conferencias/
+[URL] Desdobramento: http://localhost:5158/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5158
+ * Running on http://10.0.0.10:5158
+Press CTRL+C to quit
+[API Caixa] Dupla Sena 3011/3011...127.0.0.1 - - [22/Sep/2026 17:11:31] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [22/Sep/2026 17:16:17] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [23/Sep/2026 05:58:31] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-23 06:28:15 ---
+===========================================================
+[OK] Servidor Dupla Sena rodando na porta 5158
+[URL] Acesse:      http://localhost:5158
+[URL] Análise:     http://localhost:5158/analise/
+[URL] Modelos:     http://localhost:5158/modelos/
+[URL] Conferência: http://localhost:5158/central-conferencias/
+[URL] Desdobramento: http://localhost:5158/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5158
+ * Running on http://10.0.0.10:5158
+Press CTRL+C to quit
+127.0.0.1 - - [23/Sep/2026 06:28:39] "GET / HTTP/1.1" 200 -

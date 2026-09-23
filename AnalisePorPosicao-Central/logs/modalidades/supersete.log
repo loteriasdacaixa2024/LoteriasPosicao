@@ -11659,3 +11659,41 @@ WARNING: This is a development server. Do not use it in a production deployment.
 Press CTRL+C to quit
 127.0.0.1 - - [21/Sep/2026 20:31:32] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [22/Sep/2026 05:46:37] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-22 17:11:21 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+[API Caixa] SuperSete 901/901...127.0.0.1 - - [22/Sep/2026 17:11:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [22/Sep/2026 17:16:14] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [23/Sep/2026 05:58:29] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-23 06:27:47 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [23/Sep/2026 06:28:34] "GET / HTTP/1.1" 200 -
