@@ -20,7 +20,7 @@ URLS = {
     "Super-Sete": "SUPER_SETE.xlsx",
 }
 
-BASE = "https://servicebus2.caixa.gov.br/portaldeloterias/api/resultados/download"
+BASE = "https://servicebus3.caixa.gov.br/portaldeloterias/api/resultados/download"
 HEADERS = {"Accept": "*/*", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 
 

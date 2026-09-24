@@ -335,7 +335,7 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 {
                     "href": "/geradores-elite/estatisticas-ciclo/",
                     "title": "Estatísticas e Ciclo",
-                    "desc": "Estatísticas Básicas · dezenas pendentes do ciclo",
+                    "desc": "Estatísticas Básicas · ciclo no fim · Panorama (padrão · sequência · soma)",
                     "icon": "fas fa-chart-pie",
                     "highlight": 1,
                 },

@@ -1,5 +1,5 @@
 /**
- * Escolha Visual — aba Visualização (Círculos / Horizontal / Vertical / Pool).
+ * Escolha Visual — aba Visualização (Círculos / Horizontal / Vertical / Pool / Tubular).
  * Isolado desta tela; reutiliza a janela carregada na aba Escolha.
  * O modo Pool sempre lista do concurso 1 ao atual.
  */
@@ -18,6 +18,24 @@
   let selectedDezenas = new Set();
   let poolCache = null;
   let poolReq = 0;
+  const tubularRoot = document.getElementById('ai-tubular-root');
+
+  function showTubular(on) {
+    if (content) content.classList.toggle('d-none', !!on);
+    if (tubularRoot) tubularRoot.classList.toggle('d-none', !on);
+  }
+
+  function goAbaVisualizacao() {
+    const btn = document.getElementById('ev-tab-visualizacao');
+    if (!btn) return;
+    try {
+      if (window.bootstrap && bootstrap.Tab) {
+        bootstrap.Tab.getOrCreateInstance(btn).show();
+        return;
+      }
+    } catch (_) { /* fallback */ }
+    btn.click();
+  }
 
   let mesesCores = {};
   try {
@@ -348,7 +366,7 @@
   }
 
   function setMode(next) {
-    const allowed = { horizontal: 1, vertical: 1, pool: 1, circulos: 1 };
+    const allowed = { horizontal: 1, vertical: 1, pool: 1, circulos: 1, tubular: 1 };
     mode = allowed[next] ? next : 'circulos';
     content.dataset.evVizMode = mode;
     buttons.forEach((btn) => {
@@ -356,6 +374,14 @@
       btn.classList.toggle('active', active);
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
+    if (mode === 'tubular') {
+      showTubular(true);
+      if (window.AiTubular && !(window.AiTubular.data || []).length) {
+        window.AiTubular.load();
+      }
+      return;
+    }
+    showTubular(false);
     render();
   }
 
@@ -383,17 +409,41 @@
     dirty = true;
     poolCache = null;
     const pane = document.getElementById('ev-pane-visualizacao');
-    if (pane && pane.classList.contains('active')) render();
+    if (pane && pane.classList.contains('active') && mode !== 'tubular') render();
   });
 
   document.getElementById('ev-tab-visualizacao')?.addEventListener('shown.bs.tab', () => {
+    if (mode === 'tubular') {
+      showTubular(true);
+      if (window.AiTubular && !(window.AiTubular.data || []).length) window.AiTubular.load();
+      return;
+    }
     if (dirty) render();
   });
 
-  // Bootstrap 5 fallback se o evento shown.bs.tab não disparar no botão
   document.getElementById('ev-tab-visualizacao')?.addEventListener('click', () => {
-    setTimeout(() => { if (dirty) render(); }, 50);
+    setTimeout(() => {
+      if (mode === 'tubular') return;
+      if (dirty) render();
+    }, 50);
   });
+
+  function modeFromQuery(viz) {
+    if (viz === 'tubular' || viz === 'visualizacao-tubular') return 'tubular';
+    if (viz === 'volante') return 'circulos';
+    if (viz === 'horizontal' || viz === 'vertical' || viz === 'pool' || viz === 'circulos') return viz;
+    return '';
+  }
+
+  try {
+    const qs = new URLSearchParams(window.location.search);
+    const aba = String(qs.get('aba') || '').toLowerCase();
+    const viz = modeFromQuery(String(qs.get('viz') || qs.get('modo') || '').toLowerCase());
+    if (viz) mode = viz;
+    if (aba === 'visualizacao' || aba === 'vizualizacao' || aba === 'visual' || mode === 'tubular') {
+      goAbaVisualizacao();
+    }
+  } catch (_) { /* keep default */ }
 
   setMode(mode);
 })();

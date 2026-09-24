@@ -330,14 +330,28 @@
                             data-ev-viz-mode="pool" id="evVizBtnPool" aria-pressed="false">
                         <i class="fas fa-th"></i> Pool ({{ '%02d'|format(escolha_ui.dezena_min) }}-{{ '%02d'|format(escolha_ui.dezena_max) }})
                     </button>
+                    <button type="button" class="btn btn-outline-secondary ev-viz-mode"
+                            data-ev-viz-mode="tubular" id="evVizBtnTubular" aria-pressed="false">
+                        <i class="fas fa-table"></i> Tubular
+                    </button>
                 </div>
             </div>
             <div id="evVizContent" class="ev-viz-content" data-ev-viz-mode="circulos"></div>
+            {% include 'partials/visualizacao_tubular_seq.html' %}
         </div>
     </div>
 </div>
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260923v1">
+<style>
+  {% if extra_mes or (escolha_ui is defined and escolha_ui.extra_mes) %}
+  {% for nome, cor in (meses_cores or {}).items() %}
+  #ai-tubular-root .mes-cor.mes-nome-{{ nome }} { background-color: {{ cor }} !important; }
+  {% endfor %}
+  {% endif %}
+</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visual.js"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=stat2e"></script>
-<script src="/analise/escolha-visual/static/analise_escolha_visualizacao.js?v=pool6"></script>
+<script src="/analise/escolha-visual/static/analise_escolha_visualizacao.js?v=tub1"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20260923v2"></script>
 {% endblock %}

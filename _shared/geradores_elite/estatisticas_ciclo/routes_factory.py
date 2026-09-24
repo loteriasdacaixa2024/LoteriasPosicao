@@ -7,6 +7,7 @@ from flask import Blueprint, jsonify, render_template, request
 from .service import (
     contexto_estatisticas_ciclo,
     gerar_apostas_estatisticas_ciclo,
+    gerar_apostas_estatisticas_ciclo_panorama,
     tem_gerador_estatisticas_ciclo,
 )
 
@@ -29,7 +30,7 @@ def register_gerador_estatisticas_ciclo(bp: Blueprint, modality_key: str, modali
             modality_key=modality_key,
             modality_nome=modality_nome,
             page_title="Estatísticas e Ciclo",
-            page_subtitle="Estatísticas Básicas · dezenas pendentes do ciclo",
+            page_subtitle="Estatísticas Básicas · ciclo no fim · Panorama (padrão · sequência · soma)",
             api_base="/geradores-elite/api/estatisticas-ciclo",
             ctx=ctx if ctx.get("sucesso") else {},
             meses_cores=meses_cores,
@@ -49,7 +50,13 @@ def register_gerador_estatisticas_ciclo(bp: Blueprint, modality_key: str, modali
     def api_estatisticas_ciclo_gerar():
         data = request.get_json(silent=True) or {}
         try:
-            out = gerar_apostas_estatisticas_ciclo(
+            modo = str(data.get("modo") or "panorama").strip().lower()
+            fn = (
+                gerar_apostas_estatisticas_ciclo_panorama
+                if modo == "panorama"
+                else gerar_apostas_estatisticas_ciclo
+            )
+            out = fn(
                 modality_key,
                 quantidade=int(data.get("quantidade") or 10),
                 mes_valor=data.get("mes_num") if data.get("mes_num") not in (None, "", 0, "0") else None,

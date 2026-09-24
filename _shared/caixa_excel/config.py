@@ -10,7 +10,7 @@ DOWNLOADS_DIR = REPO_ROOT / "DownloadTodosResultadosLoterias" / "downloads"
 LEGACY_DOWNLOADS_DIR = REPO_ROOT / "Downloads"
 
 EXCEL_DOWNLOAD_BASE = (
-    "https://servicebus2.caixa.gov.br/portaldeloterias/api/resultados/download"
+    "https://servicebus3.caixa.gov.br/portaldeloterias/api/resultados/download"
 )
 
 # slug da query ?modalidade=  (confirmado: Dia-de-Sorte)

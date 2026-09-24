@@ -279,7 +279,7 @@
     this.page = 1;
     this.pageSize = 100;
     this.sortKey = 'contest';
-    this.sortDir = 'asc';
+    this.sortDir = 'desc';
     this.manual10 = [];
     this.manual11 = [];
     this.selected10 = new Set();
@@ -322,8 +322,13 @@
     return n;
   };
 
-  /** Última página = concursos mais recentes (ordem crescente por concurso). */
+  /** Página do concurso mais recente (desc = pág. 1; asc = última). */
   TubularApp.prototype._goLastPage = function () {
+    const newestFirst = (this.sortKey || 'contest') === 'contest' && this.sortDir === 'desc';
+    if (newestFirst) {
+      this.page = 1;
+      return;
+    }
     const size = this._effectivePageSize();
     const total = (this.data || []).length;
     this.page = Math.max(1, Math.ceil(total / size) || 1);
@@ -463,7 +468,6 @@
         this.sortDir = (key === 'contest' || key === 'date' || key === 'soma' || key === 'qtde' || key.startsWith('dez'))
           ? 'desc'
           : 'asc';
-        if (key === 'contest') this.sortDir = 'asc';
       }
       this.page = 1;
       this.renderTable();
@@ -5374,12 +5378,29 @@
       return;
     }
 
-    // auto-load when aba tubular opens or if already active
     const pane = document.getElementById('tab-tubular');
     if (pane && pane.classList.contains('active')) app.load();
     document.querySelectorAll('#aiTabs [data-aba="tubular"]').forEach(btn => {
       btn.addEventListener('shown.bs.tab', () => { if (!app.data.length) app.load(); });
       btn.addEventListener('click', () => { setTimeout(() => { if (!app.data.length) app.load(); }, 50); });
+    });
+
+    document.getElementById('tbToggleInfo')?.addEventListener('click', () => {
+      const btn = document.getElementById('tbToggleInfo');
+      const painel = document.getElementById('tbPainelInfo');
+      if (!btn || !painel) return;
+      const aberto = painel.classList.toggle('d-none') === false;
+      btn.classList.toggle('is-open', aberto);
+      btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+    });
+
+    const evTubular = !root.classList.contains('d-none')
+      && document.getElementById('ev-pane-visualizacao')?.classList.contains('active');
+    if (evTubular) app.load();
+    document.querySelectorAll('[data-ev-viz-mode="tubular"]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        setTimeout(() => { if (!app.data.length) app.load(); }, 50);
+      });
     });
   }
 

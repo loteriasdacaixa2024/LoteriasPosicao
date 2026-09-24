@@ -69,7 +69,7 @@ def register_gerador_escolha_tubular(bp: Blueprint, modality_key: str, modality_
             meses_cores=meses_cores,
             escolha_url="/analise/escolha-visual/",
             tubular_url="/analise/analise-tubular/",
-            sequencias_url="/analise/analises-inteligentes/?aba=tubular",
+            sequencias_url="/analise/escolha-visual/?aba=visualizacao&viz=tubular",
             dezena_min=int(ctx.get("dezena_min") or 1),
             dezena_max=int(ctx.get("dezena_max") or 31),
             sorteadas=int(ctx.get("sorteadas") or 7),

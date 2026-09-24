@@ -1,0 +1,170 @@
+{% set _ui = escolha_ui if escolha_ui is defined else {} %}
+{% set _sorteadas = sorteadas if sorteadas is defined else (_ui.sorteadas if _ui.sorteadas is defined else 7) %}
+{% set _dmin = dezena_min if dezena_min is defined else (_ui.dezena_min if _ui.dezena_min is defined else 1) %}
+{% set _dmax = dezena_max if dezena_max is defined else (_ui.dezena_max if _ui.dezena_max is defined else 31) %}
+{% set _extra = extra_mes if extra_mes is defined else (_ui.extra_mes if _ui.extra_mes is defined else false) %}
+<div id="ai-tubular-root"
+     class="{{ tubular_root_class if tubular_root_class is defined else ('d-none' if escolha_ui is defined else '') }}"
+     data-api="{{ tubular_api_base or '/analise/api/inteligentes' }}"
+     data-meses-cores='{{ (meses_cores or {})|tojson }}'
+     data-extra-mes="{{ '1' if _extra else '0' }}"
+     data-dezena-min="{{ _dmin }}"
+     data-dezena-max="{{ _dmax }}"
+     data-sorteadas="{{ _sorteadas }}">
+  {% if modality_key != 'supersete' %}
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <span class="small text-muted fw-semibold">Análise de sequências</span>
+    <a class="btn btn-sm btn-success ms-auto" href="{{ escolha_tubular_url or '/geradores-elite/escolha-tubular-apostas/' }}?aba=manual">
+      <i class="fas fa-arrow-right me-1"></i>Gerar apostas
+    </a>
+  </div>
+  {% else %}
+  <ul class="nav nav-pills tb-subnav mb-3 gap-1">
+    <li class="nav-item"><button type="button" class="nav-link active" data-tb-sub="seq">📊 Sequências</button></li>
+    <li class="nav-item"><button type="button" class="nav-link" data-tb-sub="s10">📝 Seção 10 — MANUAL</button></li>
+    <li class="nav-item"><button type="button" class="nav-link" data-tb-sub="s11">⚡ Seção 11 — AUTOMÁTICO</button></li>
+  </ul>
+  {% endif %}
+
+  <div data-tb-panel="seq">
+    <div class="tb-card">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <button type="button" class="ai-collapse-toggle" id="tbToggleInfo"
+                aria-expanded="false" aria-controls="tbPainelInfo" title="Mostrar ou ocultar detalhes">
+          <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+          <span>Detalhes, KPIs e legenda</span>
+        </button>
+        <span class="small text-muted fw-semibold" id="tbStatusMini">—</span>
+      </div>
+
+      <div id="tbPainelInfo" class="d-none mb-2">
+        <div class="tb-header-center mb-3">
+          <h2 class="h5 mb-1 fw-bold">📊 Visualização Tabular das Sequências (1° ao Último)</h2>
+          <div class="small text-muted fw-semibold" id="tbStatus">—</div>
+        </div>
+
+        <div class="tb-kpi-grid" id="tbKpis"></div>
+
+        <div class="tb-legend tb-legend-center">
+          <h3>📊 Cores e Significados:</h3>
+          <div class="row g-3 justify-content-center">
+            <div class="col-md-6">
+              <h4>📊 Cores Simples (1 condição):</h4>
+              <div class="d-flex flex-wrap gap-3 justify-content-center">
+                <div class="d-flex align-items-center gap-2"><div class="tb-swatch seq-2">2</div><span>Sequência de 2</span></div>
+                <div class="d-flex align-items-center gap-2"><div class="tb-swatch seq-3">3</div><span>Sequência de 3</span></div>
+                <div class="d-flex align-items-center gap-2"><div class="tb-swatch seq-4">4+</div><span>Sequência de 4+</span></div>
+                <div class="d-flex align-items-center gap-2"><div class="tb-swatch repetition">R</div><span>Repetição</span></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h4>🎨 Gradientes (múltiplas condições):</h4>
+              <div class="d-flex flex-column gap-2 align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="tb-swatch-grad" style="background:linear-gradient(135deg,var(--cor-sequencia-1) 0%,var(--cor-sequencia-1) 50%,var(--cor-repetidos) 50%,var(--cor-repetidos) 100%);color:var(--cor-sequencia-1-texto)">2+R</div>
+                  <span>Seq. 2 + Repetição</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="tb-swatch-grad" style="background:linear-gradient(135deg,var(--cor-sequencia-3) 0%,var(--cor-sequencia-3) 33%,var(--cor-sequencia-2) 33%,var(--cor-sequencia-2) 66%,var(--cor-sequencia-1) 66%,var(--cor-sequencia-1) 100%);color:var(--cor-sequencia-3-texto)">4+3+2</div>
+                  <span>Seq. 4+ + Seq. 3 + Seq. 2</span>
+                </div>
+              </div>
+              <div class="tb-legend-hint">↗️ Passe o mouse sobre os números para ver todas as condições</div>
+            </div>
+          </div>
+          <div class="tb-qtde-legend mt-3">
+            <h4>Qtde (dígitos únicos):</h4>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="tb-qtde tb-qtde-5">5</span>
+              <span class="tb-qtde tb-qtde-6">6</span>
+              <span class="tb-qtde tb-qtde-7">7</span>
+              <span class="tb-qtde tb-qtde-8">8</span>
+              <span class="tb-qtde tb-qtde-9">9</span>
+              <span class="tb-qtde tb-qtde-10">10</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap justify-content-center gap-2 align-items-center mb-3">
+        <button type="button" class="btn btn-sm btn-primary" id="tbBtnLoad"><i class="fas fa-sync"></i> Carregar Dados</button>
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-outline-secondary" id="tbViewDraw">Ordem Caixa</button>
+          <button type="button" class="btn btn-outline-secondary active" id="tbViewAsc">Crescente</button>
+        </div>
+        <button type="button" class="btn btn-sm btn-success" id="tbBtnMark">🔍 Marcar Sequências</button>
+        <button type="button" class="btn btn-sm btn-secondary" id="tbBtnReset">Resetar Marcações</button>
+        <label class="small text-muted mb-0 d-flex align-items-center gap-1">
+          Por página
+          <select id="tbPageSize" class="form-select form-select-sm" style="width:auto">
+            <option value="100" selected>100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+            <option value="0">Todos</option>
+          </select>
+        </label>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="tbExportTXT">TXT</button>
+        <button type="button" class="btn btn-sm btn-outline-success" id="tbExportXLSX">XLSX</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="tbExportHTML">HTML</button>
+        <button type="button" class="btn btn-sm btn-outline-dark" id="tbPrint" title="Imprimir a página atual">🖨 Imprimir</button>
+      </div>
+
+      <div class="tb-wrap">
+        <table class="table table-sm table-bordered tb-table" id="tbTabela">
+          <thead>
+            <tr>
+              <th class="tb-sort" data-sort="contest" title="Clique para ordenar">Concurso <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort" data-sort="date" title="Clique para ordenar">Data <span class="tb-sort-ind">⇅</span></th>
+              {% for i in range(1, _sorteadas + 1) %}
+              <th class="tb-sort tb-dez-h{% if i == 1 %} tb-dez-h-first{% endif %}{% if i == _sorteadas %} tb-dez-h-last{% endif %}"
+                  data-sort="dez{{ i - 1 }}" title="Clique para ordenar">{{ i }}º <span class="tb-sort-ind">⇅</span></th>
+              {% endfor %}
+              {% if _extra %}<th class="tb-sort" data-sort="mes" title="Clique para ordenar">Mês <span class="tb-sort-ind">⇅</span></th>{% endif %}
+              <th class="tb-sort" data-sort="seq" title="Clique para ordenar">SEQ <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort" data-sort="finais" title="Clique para ordenar">FINAIS <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort" data-sort="rept" title="Clique para ordenar">Rept <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort tb-col-soma" data-sort="soma" title="Clique para ordenar">DEZENAS<br>Soma <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort" data-sort="pares" title="Clique para ordenar">Pares <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort" data-sort="impares" title="Clique para ordenar">Ímpares <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort" data-sort="inicial" title="Clique para ordenar">Inicial <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort" data-sort="final" title="Clique para ordenar">Final <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort" data-sort="qtde" title="Clique para ordenar">Qtde <span class="tb-sort-ind">⇅</span></th>
+              <th class="tb-sort" data-sort="numeros" title="Clique para ordenar">Números <span class="tb-sort-ind">⇅</span></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-2" id="tbPager"></div>
+
+      <div class="tb-cond-stats tb-cond-stats-below" id="tbCondStats">
+        <button type="button" class="tb-cond-stats-toggle" id="tbCondStatsToggle" aria-expanded="false">
+          <span class="tb-cond-stats-arrow" aria-hidden="true">▶</span>
+          <span>Porcentagem e ocorrências das condições</span>
+          <span class="tb-cond-stats-meta" id="tbCondStatsMeta"></span>
+        </button>
+        <div class="tb-cond-stats-body d-none" id="tbCondStatsBody">
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-0 tb-cond-stats-table" id="tbCondStatsTable">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Condição</th>
+                  <th>Ocorrências</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="tb-cond-stats-hint">Base: todos os concursos carregados</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if modality_key == 'supersete' %}
+  {% set show_s10_first = false %}
+  {% include 'partials/tubular_secoes_geracao.html' with context %}
+  {% endif %}
+</div>

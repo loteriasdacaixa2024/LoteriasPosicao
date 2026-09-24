@@ -63,6 +63,20 @@
 #gec-root .gec-chip-inedito { background: #d4b31a; border-color: #b89a18; color: #171303; }
 #gec-root .gec-card.gec-ja-saiu { border-color: #fecdd3; border-left-color: #e11d48; background: #fff7f8; }
 #gec-root .gec-card.gec-inedito { border-left-color: #d4b31a; }
+#gec-root [data-gec-ult-ordem].active {
+  background: var(--primary); border-color: var(--primary); color: #fff;
+}
+#gec-root [data-gec-modo].active {
+  background: var(--primary); border-color: var(--primary); color: #fff;
+}
+#gec-root .gec-ciclo-banner {
+  font-size: .78rem; font-weight: 600; padding: .35rem .55rem;
+  border-radius: 7px; margin-bottom: .55rem;
+}
+#gec-root .gec-ciclo-banner.inicio { background: #eef6ff; color: #1e4b7b; }
+#gec-root .gec-ciclo-banner.fim { background: #fcf3c8; color: #5c4a08; }
+#gec-root .gec-ciclo-banner.fechado { background: #e8f5e9; color: #1b5e20; }
+#gec-root .gec-chip-seq { background: #fff8e1; border-color: #ead98a; color: #5c4a08; }
 </style>
 
 <div class="container-fluid py-3" id="gec-root"
@@ -73,7 +87,7 @@
     <a class="btn btn-sm btn-outline-secondary" href="{{ escolha_url }}"><i class="fas fa-arrow-left"></i> Estatísticas Básicas</a>
     <a class="btn btn-sm btn-outline-secondary" href="{{ ciclo_url }}"><i class="fas fa-arrow-left"></i> Progresso do Ciclo</a>
     <a class="btn btn-sm btn-outline-secondary" href="{{ padroes_url }}"><i class="fas fa-th-list"></i> 4 · Padrões II</a>
-    <a class="btn btn-sm btn-outline-secondary" href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}"><i class="fas fa-history"></i> 7 · Panorama Histórico</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}"><i class="fas fa-history"></i> 6 · Panorama Histórico</a>
     <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-bolt"></i> Elite</a>
   </div>
   {% include '_diagonais_aposta.html' %}
@@ -84,21 +98,30 @@
       <p class="text-muted small mb-0">{{ page_subtitle }}</p>
       <p class="gec-fonte mb-0 mt-1">
         <i class="fas fa-info-circle me-1"></i>
-        <strong>Base de geração:</strong> Estatísticas Básicas e Progresso do Ciclo.
+        <strong>Base de geração:</strong> Estatísticas Básicas, Progresso do Ciclo e tabela do Panorama.
         <a href="{{ escolha_url }}">Estatísticas Básicas</a>
         ·
         <a href="{{ ciclo_url }}">Progresso do Ciclo</a>
         ·
         <a href="{{ padroes_url }}">aba 4 · Padrões II</a>
         ·
-        <a href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}">aba 7 · Panorama (já saíram / faltam sair)</a>
+        <a href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}">aba 6 · Panorama (padrão · sequência · soma)</a>
       </p>
-      <p class="gec-regra mb-0">
-        <strong>Como o gerador decide:</strong>
+      <p class="gec-regra mb-0" id="gecRegraPanorama">
+        <strong>Como o Panorama gera:</strong>
+        sorteia um <strong>padrão</strong>, um <strong>Nº de sequência</strong> e um <strong>status de soma</strong>
+        (dentro / próxima / fora da média) na tabela da aba 6.
+        Monta apostas inéditas nesse formato.
+        <strong>Ciclo no começo</strong> (muitas pendentes) = só aleatório.
+        <strong>Ciclo no fim</strong> (poucas pendentes) = aí o ciclo entra e tenta encaixar as que faltam.
+        Ciclo fechado reabre no próximo sorteio.
+      </p>
+      <p class="gec-regra mb-0 d-none" id="gecRegraCiclo">
+        <strong>Como o modo clássico decide:</strong>
         o ciclo não manda no formato da aposta. Ele só diz quais dezenas ainda não saíram;
         a análise diz como o jogo deve ficar.
         Cada aposta usa um <strong>padrão inicial diferente</strong> (85 da aba 4).
-        Pelo menos uma usa um padrão que <strong>ainda não saiu</strong> (lista da aba 7).
+        Pelo menos uma usa um padrão que <strong>ainda não saiu</strong> (lista da aba 6).
         Não há volantes iguais no lote.
       </p>
     </div>
@@ -139,7 +162,7 @@
 
   <div class="card shadow-sm mb-3">
     <div class="card-header fw-bold small" style="background:var(--accent-light,#fcf9e8);">
-      <i class="fas fa-th-list me-1"></i> Padrões iniciais — abas 4 e 7
+      <i class="fas fa-th-list me-1"></i> Padrões iniciais — abas 4 e 6
     </div>
     <div class="card-body py-2" id="gecPadroes">
       <p class="text-muted small mb-0">Carregando…</p>
@@ -151,6 +174,18 @@
       <i class="fas fa-dice me-2"></i>Gerar apostas
     </div>
     <div class="card-body">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <span class="small fw-semibold text-muted">Modo</span>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Modo do gerador">
+          <button type="button" class="btn btn-outline-secondary active" data-gec-modo="panorama">
+            Panorama
+          </button>
+          <button type="button" class="btn btn-outline-secondary" data-gec-modo="ciclo">
+            Clássico
+          </button>
+        </div>
+        <span class="small text-muted" id="gecModoHint">padrão · sequência · soma · ciclo só no fim</span>
+      </div>
       <div class="row g-2 align-items-end">
         <div class="col-6 col-md-2">
           <label class="form-label small mb-0">Apostas</label>
@@ -195,7 +230,7 @@
       <div id="gecAlert" class="mt-2"></div>
       <div id="gecResultados" class="mt-3 lista-apostas-grid">
         <p class="text-muted small mb-0" style="grid-column:1/-1;">
-          Clique em <strong>Gerar</strong> para montar as apostas com o perfil da janela e as dezenas que ainda faltam no ciclo.
+          Clique em <strong>Gerar</strong>. No Panorama o ciclo só entra quando faltam poucas dezenas.
         </p>
       </div>
       {% include '_panorama_conjunto.html' %}
@@ -204,5 +239,5 @@
 </div>
 
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
-<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pano1"></script>
+<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pan1"></script>
 {% endblock %}

@@ -33,7 +33,14 @@ def _page_context(modality_key: str) -> dict:
         "meses_cores": meses_cores,
         "gerador_elite_url": "/geradores-elite/",
         "gerador_escolha_url": "/geradores-elite/escolha-tubular-apostas/",
+        "escolha_tubular_url": "/geradores-elite/escolha-tubular-apostas/",
         "tubular_url": "/analise/analise-tubular/",
+        "tubular_api_base": "/analise/api/inteligentes",
+        "tubular_root_class": "d-none",
+        "dezena_min": ui["dezena_min"],
+        "dezena_max": ui["dezena_max"],
+        "sorteadas": ui["sorteadas"],
+        "extra_mes": bool(ui.get("extra_mes")),
     }
 
 

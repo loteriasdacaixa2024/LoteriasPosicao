@@ -16,6 +16,25 @@
   --tb-shadow: 0 2px 12px rgba(0, 0, 0, .06);
   font-size: .82rem;
 }
+#ai-tubular-root .ai-collapse-toggle {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: .82rem;
+  font-weight: 700;
+  padding: .25rem 0;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  cursor: pointer;
+}
+#ai-tubular-root .ai-collapse-toggle:hover { text-decoration: underline; }
+#ai-tubular-root .ai-collapse-toggle .ai-chevron {
+  transition: transform .15s ease;
+  font-size: .7rem;
+  width: .85rem;
+}
+#ai-tubular-root .ai-collapse-toggle.is-open .ai-chevron { transform: rotate(90deg); }
 
 #ai-tubular-root .tb-card {
   background: var(--surface, #fff);
@@ -1755,8 +1774,10 @@
 
 @media print {
   body * { visibility: hidden !important; }
-  #tab-tubular, #tab-tubular * { visibility: visible !important; }
-  #tab-tubular {
+  #tab-tubular, #tab-tubular *,
+  #ai-tubular-root, #ai-tubular-root * { visibility: visible !important; }
+  #tab-tubular,
+  #ai-tubular-root {
     position: absolute; left: 0; top: 0; width: 100%;
   }
   #ai-tubular-root {

@@ -90,7 +90,9 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
             aba = "padroes-ii"
         elif aba in ("jogos-padrao", "jogos", "apostas-padrao"):
             aba = "jogos-padrao"
-        elif aba in ("tubular", "visualizacao", "visualizacao-tubular"):
+        elif aba in ("tubular", "visualizacao-tubular"):
+            if modality_key != "supersete":
+                return redirect("/analise/escolha-visual/?aba=visualizacao&viz=tubular")
             aba = "tubular"
         elif aba in ("panorama", "historico", "historico-completo", "panorama-historico"):
             aba = "panorama"
@@ -103,6 +105,8 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
             "jogos-padrao", "tubular", "panorama", "checagem-seq",
         ):
             aba = "resultados"
+        if aba == "tubular" and modality_key != "supersete":
+            return redirect("/analise/escolha-visual/?aba=visualizacao&viz=tubular")
 
         return render_template(
             "analises_inteligentes.html",

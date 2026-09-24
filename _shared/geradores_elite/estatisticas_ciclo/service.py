@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 from diadesorte.mes_sorte_select import MESES_ABREV, MESES_NOME, resolver_meses_para_lote
 
 from .gerador import _eh_faltante, _resumo_diagonais_janela, gerar_apostas_de_contexto
+from .gerador_panorama import gerar_apostas_panorama, resumo_ciclo_panorama
 
 
 def _resumo_diagonais_ctx(linhas, dmin, dmax):
@@ -118,6 +119,7 @@ def contexto_estatisticas_ciclo(modality_key: str = "diadesorte") -> Dict[str, A
             "fonte_aba4": "/analise/analises-inteligentes/?aba=padroes-ii",
             "fonte_aba7": "/analise/analises-inteligentes/?aba=panorama",
         },
+        "ciclo_panorama": resumo_ciclo_panorama(len(pendentes), int(ui.get("sorteadas") or 7)),
         "fontes": {
             "estatisticas_basicas": "/analise/escolha-visual/",
             "progresso_ciclo": "/analise/ciclo-cobertura/",
@@ -204,5 +206,90 @@ def gerar_apostas_estatisticas_ciclo(
         "diagonais": ctx.get("diagonais") or out.get("diagonais") or {},
         "mes_criterio": mes_valor or "atrasado",
         "pad_width": ctx["pad_width"],
+        "ciclo_panorama": ctx.get("ciclo_panorama"),
+        "modo_geracao": "ciclo",
     })
+    return out
+
+
+def _anexar_meses(out: Dict[str, Any], ctx: Dict[str, Any], mes_valor: Optional[Any]) -> Dict[str, Any]:
+    if not out.get("sucesso"):
+        return out
+    n = len(out.get("apostas") or [])
+    meses = resolver_meses_para_lote(mes_valor or "atrasado", n)
+    if n and len(meses) < n:
+        meses = (meses + [meses[-1] if meses else 6])[:n]
+        while len(meses) < n:
+            meses.append(6)
+    for i, ap in enumerate(out.get("apostas") or []):
+        mn = int(meses[i]) if i < len(meses) else 6
+        ap["mes_num"] = mn
+        ap["mes_nome"] = MESES_NOME.get(mn, f"Mês {mn}")
+        ap["mes_abrev"] = MESES_ABREV.get(mn, str(mn))
+        ap["extras"] = {
+            "tipo": "mes",
+            "num": mn,
+            "label": ap["mes_nome"],
+        }
+    est = ctx.get("estatisticas") or {}
+    out.update({
+        "ciclo": ctx.get("ciclo"),
+        "estatisticas": {
+            "total_sorteios": est.get("total_sorteios"),
+            "medias": est.get("medias") or {},
+            "pct_com": est.get("pct_com") or {},
+            "ultimo": est.get("ultimo"),
+        },
+        "fontes": ctx.get("fontes"),
+        "diagonais": ctx.get("diagonais") or out.get("diagonais") or {},
+        "mes_criterio": mes_valor or "atrasado",
+        "pad_width": ctx.get("pad_width"),
+        "ciclo_panorama": ctx.get("ciclo_panorama") or out.get("ciclo_panorama"),
+    })
+    return out
+
+
+def gerar_apostas_estatisticas_ciclo_panorama(
+    modality_key: str = "diadesorte",
+    *,
+    quantidade: int = 10,
+    mes_valor: Optional[Any] = None,
+) -> Dict[str, Any]:
+    ctx = contexto_estatisticas_ciclo(modality_key)
+    if not ctx.get("sucesso"):
+        return ctx
+
+    historico = set()
+    try:
+        from geradores_elite.validacao.pipeline import carregar_mapa_historico_detalhado
+        historico = set(carregar_mapa_historico_detalhado(modality_key).keys())
+    except Exception:
+        historico = set()
+
+    est = ctx["estatisticas"]
+    out = gerar_apostas_panorama(
+        pendentes=ctx["ciclo"]["dezenas_pendentes"],
+        linhas_basicas=ctx.get("linhas_basicas") or [],
+        medias=est.get("medias") or {},
+        quantidade=quantidade,
+        dezena_min=ctx["dezena_min"],
+        dezena_max=ctx["dezena_max"],
+        k=ctx["sorteadas"],
+        historico=historico,
+        modality_key=modality_key,
+    )
+    out = _anexar_meses(out, ctx, mes_valor)
+    if out.get("sucesso"):
+        info_pad = _carregar_padroes(modality_key)
+        out["padroes"] = {
+            "total": info_pad.get("total"),
+            "ja_sairam": info_pad.get("ja_sairam"),
+            "faltam_sair": info_pad.get("faltam_sair"),
+            "inedito": out.get("padrao_inedito"),
+            "distintos": out.get("padroes_distintos"),
+            "usados": out.get("padroes_usados"),
+            "faltantes": info_pad.get("faltantes"),
+            "fonte_aba4": info_pad.get("fonte_aba4"),
+            "fonte_aba7": info_pad.get("fonte_aba7"),
+        }
     return out

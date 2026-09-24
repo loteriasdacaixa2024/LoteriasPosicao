@@ -15,6 +15,9 @@ if os.path.dirname(_PKG) not in sys.path:
 def extend_analise_escolha_visual_app(app) -> None:
     tpl = os.path.join(_PKG, "templates")
     loaders = [FileSystemLoader(tpl)]
+    intel_tpl = os.path.join(os.path.dirname(_PKG), "analise_inteligentes_diadesorte", "templates")
+    if os.path.isdir(intel_tpl):
+        loaders.append(FileSystemLoader(intel_tpl))
     existing = app.jinja_loader
     if isinstance(existing, ChoiceLoader):
         loaders.extend(existing.loaders)

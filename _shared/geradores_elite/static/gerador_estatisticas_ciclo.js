@@ -10,6 +10,9 @@
   const MANUAL_KEY = 'tb_manual10_import';
   let lastApostas = [];
   let lastPayload = null;
+  let ultimoOrdem = 'classificado';
+  let lastUltimo = null;
+  let modoGeracao = 'panorama';
 
   function pad(n) {
     return String(n).padStart(2, '0');
@@ -28,12 +31,38 @@
     el.innerHTML = `<div class="alert alert-${tipo} py-2 small mb-0">${html}</div>`;
   }
 
+  function numsUltimo(ult) {
+    const draw = ((ult && (ult.numeros || ult.dezenas)) || []).map(Number).filter(Number.isFinite);
+    if (ultimoOrdem === 'sorteio') return draw;
+    const sorted = (ult && ult.numeros_ordenados) || [];
+    if (sorted.length) return sorted.map(Number).filter(Number.isFinite);
+    return [...draw].sort((a, b) => a - b);
+  }
+
+  function htmlUltimoBalls(ult) {
+    const nums = numsUltimo(ult);
+    return nums.length ? nums.map((n) => `<span class="gec-ball comp">${pad(n)}</span>`).join('') : '—';
+  }
+
+  function bindUltimoOrdem() {
+    document.querySelectorAll('[data-gec-ult-ordem]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        ultimoOrdem = btn.getAttribute('data-gec-ult-ordem') || 'classificado';
+        document.querySelectorAll('[data-gec-ult-ordem]').forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-gec-ult-ordem') === ultimoOrdem);
+        });
+        const box = document.getElementById('gecUltimoNums');
+        if (box) box.innerHTML = htmlUltimoBalls(lastUltimo);
+      });
+    });
+  }
+
   function renderStats(ctx) {
     const est = (ctx && ctx.estatisticas) || {};
     const m = est.medias || {};
     const pct = est.pct_com || {};
     const ult = est.ultimo || {};
-    const nums = ult.numeros || [];
+    lastUltimo = ult;
     document.getElementById('gecStats').innerHTML = `
       <div class="d-flex flex-wrap gap-2 mb-2">
         <span class="gec-chip">Janela: <strong>${est.total_sorteios || '—'}</strong></span>
@@ -43,10 +72,19 @@
         <span class="gec-chip">Seq. méd. <strong>${m.sequencias ?? '—'}</strong></span>
         <span class="gec-chip">Finais méd. <strong>${m.finais ?? '—'}</strong></span>
       </div>
-      <p class="small mb-1 text-muted">Último concurso ${ult.concurso || '—'} ${ult.data ? '· ' + ult.data : ''}</p>
-      <div>${nums.length ? nums.map((n) => `<span class="gec-ball comp">${pad(n)}</span>`).join('') : '—'}</div>
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+        <p class="small mb-0 text-muted">Último concurso ${ult.concurso || '—'} ${ult.data ? '· ' + ult.data : ''}</p>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Ordem do último concurso">
+          <button type="button" class="btn btn-outline-secondary${ultimoOrdem === 'classificado' ? ' active' : ''}"
+                  data-gec-ult-ordem="classificado">Classificado</button>
+          <button type="button" class="btn btn-outline-secondary${ultimoOrdem === 'sorteio' ? ' active' : ''}"
+                  data-gec-ult-ordem="sorteio">Ordem de sorteio</button>
+        </div>
+      </div>
+      <div id="gecUltimoNums">${htmlUltimoBalls(ult)}</div>
       <p class="small text-muted mb-0 mt-2">% com o grupo na janela — P ${pct.pares ?? '—'} · I ${pct.impares ?? '—'} · R ${pct.repetidos ?? '—'} · S ${pct.sequencias ?? '—'} · F ${pct.finais ?? '—'}</p>
     `;
+    bindUltimoOrdem();
   }
 
   function fmtDiag(d) {
@@ -93,18 +131,53 @@
       <p class="small mb-1">
         <a href="${aba4}">Aba 4 · Padrões II</a>
         ·
-        <a href="${aba7}">Aba 7 · Panorama Histórico</a>
+        <a href="${aba7}">Aba 6 · Panorama Histórico</a>
       </p>
       ${inedito ? `<p class="small mb-1"><span class="gec-chip gec-chip-inedito">Padrão inédito nesta geração: <strong>${inedito}</strong></span></p>` : ''}
-      ${falt.length ? `<p class="small text-muted mb-0">Ainda não saíram (aba 7): ${falt.slice(0, 8).map((p) => p.padrao || p).join(' · ')}${falt.length > 8 ? ' …' : ''}</p>` : ''}
+        ${falt.length ? `<p class="small text-muted mb-0">Ainda não saíram (aba 6): ${falt.slice(0, 8).map((p) => p.padrao || p).join(' · ')}${falt.length > 8 ? ' …' : ''}</p>` : ''}
     `;
+  }
+
+  function bannerCiclo(info) {
+    const modo = (info && info.modo) || '';
+    const n = (info && info.pendentes) != null ? info.pendentes : '—';
+    const limiar = (info && info.limiar) || 10;
+    if (modo === 'fim') {
+      return `<div class="gec-ciclo-banner fim">Ciclo no fim (${n} pendentes, até ${limiar}) — o ciclo entra e tenta encaixar as que faltam.</div>`;
+    }
+    if (modo === 'fechado') {
+      return `<div class="gec-ciclo-banner fechado">Ciclo fechado (0 pendentes) — o próximo sorteio reabre. Até lá, só aleatório.</div>`;
+    }
+    if (modo === 'inicio') {
+      return `<div class="gec-ciclo-banner inicio">Ciclo no começo (${n} pendentes) — só aleatório. O ciclo entra no fim.</div>`;
+    }
+    return '';
+  }
+
+  function aplicarModo(modo) {
+    modoGeracao = modo === 'ciclo' ? 'ciclo' : 'panorama';
+    document.querySelectorAll('[data-gec-modo]').forEach((b) => {
+      b.classList.toggle('active', b.getAttribute('data-gec-modo') === modoGeracao);
+    });
+    const pan = document.getElementById('gecRegraPanorama');
+    const cla = document.getElementById('gecRegraCiclo');
+    if (pan) pan.classList.toggle('d-none', modoGeracao !== 'panorama');
+    if (cla) cla.classList.toggle('d-none', modoGeracao !== 'ciclo');
+    const hint = document.getElementById('gecModoHint');
+    if (hint) {
+      hint.textContent = modoGeracao === 'panorama'
+        ? 'padrão · sequência · soma · ciclo só no fim'
+        : 'estatísticas da janela · pendentes do ciclo';
+    }
   }
 
   function renderCiclo(ctx) {
     const c = (ctx && ctx.ciclo) || {};
     const pend = c.dezenas_pendentes || [];
     const saidas = c.dezenas_saidas || [];
+    const info = (ctx && ctx.ciclo_panorama) || {};
     document.getElementById('gecCiclo').innerHTML = `
+      ${bannerCiclo(info)}
       <p class="small mb-2">
         Ciclo <strong>${c.numero_ciclo ?? '—'}</strong>
         · concursos ${c.quantidade_concursos ?? '—'}
@@ -152,8 +225,15 @@
       const ja = ap.ja_sorteada
         ? `<span class="gec-chip gec-chip-warn">Já saiu · conc. ${ap.concurso_historico || '?'}${ap.data_historico ? ' · ' + ap.data_historico : ''}</span>`
         : '';
+      const seed = ap.semente || {};
       const padChip = ap.padrao_inicial
-        ? `<span class="gec-chip${ap.padrao_inedito ? ' gec-chip-inedito' : ''}" title="${ap.padrao_inedito ? 'Padrão que ainda não saiu (aba 7)' : 'Padrão inicial (aba 4)'}">Padrão ${ap.padrao_inicial}${ap.padrao_descricao ? ' · ' + ap.padrao_descricao : ''}${ap.padrao_inedito ? ' · ainda não saiu' : ''}</span>`
+        ? `<span class="gec-chip${ap.padrao_inedito ? ' gec-chip-inedito' : ''}" title="${ap.padrao_inedito ? 'Padrão que ainda não saiu (aba 6)' : 'Padrão inicial (aba 4)'}">Padrão ${ap.padrao_inicial}${ap.padrao_descricao ? ' · ' + ap.padrao_descricao : ''}${ap.padrao_inedito ? ' · ainda não saiu' : ''}</span>`
+        : '';
+      const seqChip = seed.sequencia_n
+        ? `<span class="gec-chip gec-chip-seq" title="Nº da sequência sorteada (aba 6)">Nº ${seed.sequencia_n}${seed.concurso ? ' · conc. ' + seed.concurso : ''}</span>`
+        : '';
+      const stChip = ap.status_media_label
+        ? `<span class="gec-chip">${ap.status_media_label}${ap.soma_media != null ? ' · méd. ' + ap.soma_media : ''}</span>`
         : '';
       return `<div class="gec-card${ap.ja_sorteada ? ' gec-ja-saiu' : ''}${ap.padrao_inedito ? ' gec-inedito' : ''}">
         <div class="d-flex justify-content-between align-items-center mb-1">
@@ -163,6 +243,8 @@
         <div class="mb-1">${balls(ap.dezenas, ap.obrigatorias)}</div>
         <div class="d-flex flex-wrap gap-1">
           ${padChip}
+          ${seqChip}
+          ${stChip}
           <span class="gec-chip">${ap.pares}P/${ap.impares}I</span>
           <span class="gec-chip">Σ ${ap.soma}</span>
           <span class="gec-chip">Seq ${seq}</span>
@@ -173,9 +255,21 @@
       </div>`;
     }).join('');
 
-    let msg = payload.modo_ciclo === 'todas_em_cada'
-      ? `As ${payload.pendentes.length} dezenas pendentes entram em <strong>cada</strong> aposta.`
-      : `As ${payload.pendentes.length} dezenas pendentes entram no <strong>lote</strong> (todas aparecem pelo menos uma vez).`;
+    let msg = '';
+    if (payload.modo_geracao === 'panorama') {
+      const nPend = (payload.pendentes || []).length;
+      if (payload.ciclo_ligado || payload.modo_ciclo === 'fim') {
+        msg = `Ciclo no fim (${nPend} pendentes): o ciclo entra e tenta encaixar as que faltam no padrão.`;
+      } else if (payload.modo_ciclo === 'fechado') {
+        msg = 'Ciclo fechado — o próximo sorteio reabre. Geração aleatória (padrão · sequência · soma).';
+      } else {
+        msg = `Ciclo no começo (${nPend} pendentes): só aleatório (padrão · sequência · soma). O ciclo entra no fim.`;
+      }
+    } else {
+      msg = payload.modo_ciclo === 'todas_em_cada'
+        ? `As ${payload.pendentes.length} dezenas pendentes entram em <strong>cada</strong> aposta.`
+        : `As ${payload.pendentes.length} dezenas pendentes entram no <strong>lote</strong> (todas aparecem pelo menos uma vez).`;
+    }
     if (payload.quantidade_ajustada) {
       msg += ` Quantidade ajustada de ${payload.quantidade_solicitada} para ${payload.quantidade} para caber todas as pendentes.`;
     }
@@ -240,6 +334,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          modo: modoGeracao,
           quantidade: parseInt(document.getElementById('gecQtd').value, 10) || 10,
           mes_num: mes,
         }),
@@ -341,6 +436,10 @@
     alertBox('warning', `<strong>${hits.length} aposta(s) já saiu no histórico oficial</strong><br>${lista}`);
   }
 
+  document.querySelectorAll('[data-gec-modo]').forEach((btn) => {
+    btn.addEventListener('click', () => aplicarModo(btn.getAttribute('data-gec-modo')));
+  });
+  aplicarModo(modoGeracao);
   document.getElementById('gecBtnGerar').addEventListener('click', gerar);
   document.getElementById('gecBtnCopiar').addEventListener('click', copiar);
   document.getElementById('gecBtnExport').addEventListener('click', exportar);

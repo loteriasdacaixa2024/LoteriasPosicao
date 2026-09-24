@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Nº da sequência sorteada em cada concurso (aba 7 · Panorama).
+Nº da sequência sorteada em cada concurso (aba 6 · Panorama).
 
 É o mesmo Nº da coluna da aba 5 quando se clica em «Mostrar vencedor»:
 posição 1-based da aposta no padrão, com a lista completa ordenada por
