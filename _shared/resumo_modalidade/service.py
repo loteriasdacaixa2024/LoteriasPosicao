@@ -546,9 +546,8 @@ class ResumoModalidadeService:
                 ),
                 "neste": neste_ciclo,
                 "uso": (
-                    f"Ciclo atual nº {ciclo_atual['numero']}: {ciclo_atual['concursos']} concursos, "
-                    f"{ciclo_atual['pct']}% fechado, {ciclo_atual['pendentes_qtd']} pendentes."
-                    if ciclo_atual else "Sem ciclo em andamento."
+                    f"O ciclo costuma fechar em {round(statistics.mean(duracoes), 1)} concursos."
+                    if duracoes else "Sem ciclos completos no histórico."
                 ),
                 "tipo": "info",
             },
@@ -683,7 +682,7 @@ class ResumoModalidadeService:
                 "n": len(vals),
             })
 
-        return {
+        payload = {
             "meta": {
                 "modalidade": spec.nome,
                 "key": spec.modality_key,
@@ -842,6 +841,9 @@ class ResumoModalidadeService:
                 ],
             },
         }
+        from resumo_modalidade.painel import montar_painel
+        payload["painel"] = montar_painel(spec, sorteios, payload)
+        return payload
 
     @classmethod
     def regras_para_comportamento(cls, modality_key: str = "diadesorte") -> Dict[str, Any]:

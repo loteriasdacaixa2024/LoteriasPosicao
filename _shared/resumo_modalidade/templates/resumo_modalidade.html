@@ -59,6 +59,22 @@
         background: var(--accent);
     }
     #rg-root .rg-neste { font-weight: 700; color: var(--primary-xdark); }
+    #rg-root .uso-geracao { background: #198754; }
+    #rg-root .uso-filtro { background: #0d6efd; }
+    #rg-root .uso-disponivel { background: #b58100; color: #fff; }
+    #rg-root .uso-info { background: #6c757d; }
+    #rg-root .rg-cat {
+        border: 1px solid rgba(192,139,0,.22);
+        border-radius: 10px;
+        background: #fff;
+        height: 100%;
+    }
+    #rg-root .rg-cat h3 {
+        font-size: .92rem; font-weight: 800; margin: 0;
+        padding: .55rem .75rem; border-bottom: 1px solid rgba(0,0,0,.06);
+        color: var(--primary-xdark);
+    }
+    #rg-root .rg-fonte { font-size: .72rem; color: #6c757d; }
 </style>
 
 <div class="container-fluid py-3" id="rg-root">
@@ -95,23 +111,92 @@
         <div class="col-6 col-lg"><div class="rg-kpi"><div class="lbl">1 ou 2 repetidas</div><div class="val">{{ k.pct_rep_1ou2 }}%</div></div></div>
     </div>
 
-    <h2 class="mb-2">Checklist operacional</h2>
-    <p class="small text-muted mb-2">Olhe isto antes de fechar o jogo — histórico vs concurso {{ u.concurso }}.</p>
-    <div class="rg-kpi mb-3">
-        <div class="small text-muted mb-1">Concurso {{ u.concurso }} · {{ u.data }} · repetidas do anterior com anel</div>
-        <div class="rg-bolas mb-0">
-            {% for d in u.dezenas %}
-            <span {% if d in (u.rep_dezenas or []) %}class="rg-rep" title="Repetida do concurso anterior"{% endif %}>{{ d }}</span>
+    {% set p = data.painel %}
+    {% if p and p.categorias %}
+    <div class="rg-section" style="margin-top:0">
+        <h2>Comportamento geral da modalidade</h2>
+        <p class="small text-muted mb-2">
+            O que costuma acontecer no histórico inteiro — não é a leitura de um concurso.
+            <span class="badge uso-geracao">Geração</span> já entra em gerador.
+            <span class="badge uso-filtro">Filtro</span> já restringe jogo.
+            <span class="badge uso-disponivel">Disponível</span> existe no sistema e ainda não é filtro automático.
+            <span class="badge uso-info">Informativa</span> só contexto.
+        </p>
+        <div class="row g-2">
+            {% for cat in p.categorias %}
+            <div class="col-lg-6">
+                <div class="rg-cat">
+                    <h3>{{ cat.titulo }}</h3>
+                    <div class="table-responsive">
+                        <table class="table table-sm rg-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Critério</th>
+                                    <th>O que costuma acontecer</th>
+                                    <th>Uso</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for row in cat.itens %}
+                            <tr>
+                                <td class="fw-bold">{{ row.criterio }}<div class="rg-fonte">{{ row.fonte }}</div></td>
+                                <td>{{ row.historico }}</td>
+                                <td><span class="badge uso-{{ row.uso }}">{{ row.uso_label }}</span></td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
         </div>
     </div>
+
+    <div class="rg-section">
+        <h2>Critérios disponíveis para geração</h2>
+        <p class="small text-muted mb-2">Comportamentos gerais que um gerador, filtro ou estratégia pode usar.</p>
+        <div class="table-responsive">
+            <table class="table table-sm rg-table">
+                <thead>
+                    <tr>
+                        <th>Categoria</th>
+                        <th>Critério</th>
+                        <th>Comportamento geral</th>
+                        <th>Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in p.geracao %}
+                <tr>
+                    <td>{{ row.categoria }}</td>
+                    <td class="fw-bold">{{ row.criterio }}</td>
+                    <td>{{ row.historico }}</td>
+                    <td><span class="badge uso-{{ row.uso }}">{{ row.uso_label }}</span></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if p.ausentes %}
+        <div class="rg-hint">
+            <strong>Não incorporados</strong> — não há cálculo de resultado para estes itens:
+            {% for a in p.ausentes %}
+            <div class="mt-1"><strong>{{ a.nome }}.</strong> {{ a.nota }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <h2 class="mb-2">Checklist operacional</h2>
+    <p class="small text-muted mb-2">Costumes da modalidade no histórico inteiro.</p>
     <div class="table-responsive">
         <table class="table table-sm rg-table align-middle">
             <thead>
                 <tr>
                     <th>Critério</th>
-                    <th>Histórico</th>
-                    <th>Concurso {{ u.concurso }}</th>
+                    <th>O que costuma acontecer</th>
                 </tr>
             </thead>
             <tbody>
@@ -119,7 +204,6 @@
             <tr class="tipo-{{ row.tipo }}">
                 <td class="fw-bold" title="{{ row.uso }}">{{ row.criterio }}</td>
                 <td>{{ row.ref }}</td>
-                <td class="rg-neste">{{ row.neste }}</td>
             </tr>
             {% endfor %}
             </tbody>
@@ -303,17 +387,9 @@
             <div class="col-6 col-lg-3"><div class="rg-kpi"><div class="lbl">Moda</div><div class="val">{{ data.ciclo.moda }}</div></div></div>
             <div class="col-6 col-lg-3"><div class="rg-kpi"><div class="lbl">Ciclos fechados</div><div class="val">{{ data.ciclo.completos }}</div></div></div>
         </div>
-        {% if data.ciclo.atual %}
         <p class="rg-hint">
-            Ciclo atual nº {{ data.ciclo.atual.numero }} · início {{ data.ciclo.atual.inicio }} ·
-            {{ data.ciclo.atual.concursos }} concursos · {{ data.ciclo.atual.pct }}% fechado ·
-            {{ data.ciclo.atual.pendentes_qtd }} pendentes
-            {% if data.ciclo.atual.pendentes %}
-            ({{ data.ciclo.atual.pendentes | join(', ') }}).
-            {% endif %}
             Perto do fechamento a maioria dos sorteios <strong>não</strong> traz dezena nova.
         </p>
-        {% endif %}
         <p class="small text-muted mt-2 mb-0">
             Dezenas novas: moda {{ data.ciclo.novas.moda }} ({{ data.ciclo.novas.moda_pct }}%).
             Hipótese “1 ou 2 novas” = {{ data.ciclo.novas.pct_1_ou_2 }}% — não é maioria.
