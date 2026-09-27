@@ -399,6 +399,36 @@
         </p>
     </div>
 
+    <div class="rg-section" id="rg-perfis">
+        <h2>Gerar apostas por perfil</h2>
+        <p class="small text-muted mb-2">
+            Os números saem do comportamento geral acima. Obrigatório elimina. O restante só pontua.
+            Nenhum perfil repete uma combinação já sorteada: isso é barrado antes de pontuar, em todos eles.
+            A repetição do perfil A usa o último concurso só como âncora de quantas dezenas repetir.
+        </p>
+        <div class="row g-2 mb-2">
+            {% for p in perfis %}
+            <div class="col-md-6">
+                <label class="rg-kpi d-flex gap-2 align-items-start mb-0">
+                    <input class="form-check-input mt-1 rg-perfil" type="checkbox" value="{{ p.id }}" {% if p.id != 'historico' %}checked{% endif %}>
+                    <span>
+                        <strong>{{ p.titulo }}</strong>
+                        <span class="d-block small text-muted">{{ p.texto }}</span>
+                    </span>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+            <label class="small mb-0">Quantidade
+                <input id="rg-qtd" type="number" min="1" max="30" value="10" class="form-control form-control-sm d-inline-block" style="width:5rem">
+            </label>
+            <button type="button" class="btn btn-sm btn-primary" id="rg-gerar">Gerar apostas</button>
+            <span class="small text-muted" id="rg-gerar-status"></span>
+        </div>
+        <div id="rg-gerar-out"></div>
+    </div>
+
     <div class="rg-section">
         <h2>Comportamento temporal</h2>
         {% if data.temporal.confirmado %}
@@ -414,4 +444,40 @@
     </div>
     {% endif %}
 </div>
+<script>
+(function () {
+    const btn = document.getElementById('rg-gerar');
+    if (!btn) return;
+    const status = document.getElementById('rg-gerar-status');
+    const out = document.getElementById('rg-gerar-out');
+    btn.addEventListener('click', function () {
+        const perfis = Array.from(document.querySelectorAll('.rg-perfil:checked')).map(function (el) { return el.value; });
+        const quantidade = Number(document.getElementById('rg-qtd').value || 10);
+        status.textContent = 'Gerando…';
+        out.innerHTML = '';
+        fetch('/analise/api/resumo-geral/gerar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ perfis: perfis, quantidade: quantidade })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            if (!data.sucesso) {
+                status.textContent = '';
+                out.innerHTML = '<div class="alert alert-warning">' + (data.erro || 'Falha ao gerar.') + '</div>';
+                return;
+            }
+            status.textContent = data.examinadas + ' combinações válidas examinadas.';
+            let html = '<p class="small text-muted">' + (data.obrigatorios || []).join(' ') + '</p>';
+            html += '<table class="table table-sm rg-table"><thead><tr><th>#</th><th>Dezenas</th><th>Pontos</th><th>Por quê</th></tr></thead><tbody>';
+            (data.apostas || []).forEach(function (ap) {
+                html += '<tr><td>' + ap.ordem + '</td><td class="fw-bold">' + ap.dezenas.join(' ') + '</td><td>' + ap.pontos + '</td><td>' + (ap.notas || []).join(' · ') + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            out.innerHTML = html;
+        }).catch(function () {
+            status.textContent = '';
+            out.innerHTML = '<div class="alert alert-warning">Não foi possível gerar.</div>';
+        });
+    });
+})();
+</script>
 {% endblock %}

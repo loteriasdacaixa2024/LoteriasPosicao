@@ -35,6 +35,7 @@ from analise_tubular_inteligente.app_integration import extend_analise_tubular_i
 from configuracoes.app_integration import extend_config_app
 from ciclo_cobertura.app_integration import extend_ciclo_cobertura_app
 from resumo_modalidade.app_integration import extend_resumo_modalidade_app
+from grades_digitos.app_integration import extend_grades_digitos_app
 
 def create_app():
     app = Flask(__name__)
@@ -65,6 +66,7 @@ def create_app():
     extend_analise_tubular_inteligente_app(app)
     extend_ciclo_cobertura_app(app, 'diadesorte')
     extend_resumo_modalidade_app(app)
+    extend_grades_digitos_app(app)
     from menu.app_integration import _merge_template_dirs
     _merge_template_dirs(app, [os.path.join(_CC_ROOT, 'geradores_elite', 'templates')])
     _merge_template_dirs(app, [os.path.join(_CC_ROOT, 'ciclo_cobertura', 'templates')])

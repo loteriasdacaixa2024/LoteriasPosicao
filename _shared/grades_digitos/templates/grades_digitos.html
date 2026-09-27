@@ -1,0 +1,832 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    #gd-root .gd-card {
+        background: var(--surface, #fff);
+        border: 1px solid rgba(10, 107, 26, .16);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+    #gd-root .gd-grid {
+        border-collapse: separate;
+        border-spacing: 4px;
+    }
+    #gd-root .gd-grid th {
+        font-size: .68rem;
+        font-weight: 700;
+        color: #6c757d;
+        text-align: center;
+        padding: 0;
+    }
+    #gd-root .gd-grid td {
+        width: 46px;
+        height: 46px;
+        text-align: center;
+        vertical-align: middle;
+        font-weight: 800;
+        font-size: 1.15rem;
+        background: #fff;
+        border: 1px solid #f0e2b8;
+        border-radius: 8px;
+    }
+    #gd-root .gd-grade-wrap {
+        position: relative;
+        display: inline-block;
+    }
+    #gd-root .gd-tracados {
+        position: absolute;
+        left: 0;
+        top: 0;
+        overflow: visible;
+        pointer-events: none;
+        z-index: 3;
+    }
+    #gd-root .gd-traco {
+        fill: none;
+        stroke: #e6a800;
+        stroke-width: 2;
+    }
+    #gd-root .gd-traco-foco {
+        stroke: #8a6400;
+        stroke-width: 2;
+    }
+    #gd-root .gd-traco-fundo {
+        fill: #fff;
+        stroke: #8a6400;
+        stroke-width: 1;
+    }
+    #gd-root .gd-traco-num {
+        fill: #1a0a00;
+        font-size: 11px;
+        font-weight: 700;
+        font-family: inherit;
+    }
+    #gd-root .gd-grid td.gd-na-tabela {
+        background: #c08b00;
+        color: #1a0a00;
+        border: 2px solid #8a6400;
+    }
+    #gd-root .gd-grid td.gd-hit {
+        background: #c08b00;
+        color: #fff;
+        border: 2px solid #664a00;
+    }
+    #gd-root .gd-grid td.gd-row {
+        width: 28px;
+        background: transparent;
+        border: none;
+        color: #8a8f8c;
+        font-size: .72rem;
+        font-weight: 700;
+    }
+    #gd-root .gd-dez {
+        display: inline-block;
+        min-width: 2.1rem;
+        margin: .15rem;
+        padding: .15rem .4rem;
+        border-radius: 6px;
+        background: #fffaf0;
+        color: #996e00;
+        border: 1px solid #e6a800;
+        font-size: .78rem;
+        font-weight: 800;
+        text-align: center;
+    }
+    #gd-root .gd-presente {
+        display: inline-block;
+        min-width: 2.1rem;
+        margin: .12rem;
+        padding: .12rem .35rem;
+        border-radius: 6px;
+        border: 1px solid #e6a800;
+        background: #ffd56a;
+        color: #1a0a00;
+        font-size: .78rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+    #gd-root .gd-presente.gd-presente-on {
+        background: #c08b00;
+        border-color: #664a00;
+        color: #fff;
+        box-shadow: inset 0 0 0 2px #664a00;
+    }
+    #gd-root .gd-ausente {
+        display: inline-block;
+        min-width: 2.1rem;
+        margin: .12rem;
+        padding: .12rem .35rem;
+        border-radius: 6px;
+        border: 1px dashed #c5c5c5;
+        background: #fff;
+        color: #8a8f8c;
+        font-size: .78rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    #gd-root .gd-rank-1 {
+        background: rgba(25, 135, 84, .12);
+        font-weight: 800;
+    }
+    #gd-root .gd-tabela {
+        border: 1px solid rgba(10, 107, 26, .18);
+        border-radius: 12px;
+        background: #fff;
+        padding: 1rem;
+    }
+    #gd-root .gd-lado {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.25rem;
+    }
+    #gd-root .gd-grade-col {
+        flex: 0 0 auto;
+    }
+    #gd-root .gd-acertos {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    #gd-root .gd-concursos {
+        max-height: 560px;
+        overflow: auto;
+        border: 1px solid #e4eee6;
+        border-radius: 8px;
+    }
+    #gd-root .gd-concursos table {
+        font-size: .85rem;
+        margin-bottom: 0;
+    }
+    #gd-root .gd-concursos thead th {
+        position: sticky;
+        top: 0;
+        background: #f4fbf5;
+        z-index: 1;
+    }
+    #gd-root .gd-sort {
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+    }
+    #gd-root tr.gd-linha {
+        cursor: pointer;
+    }
+    #gd-root tr.gd-linha.gd-sel {
+        background: rgba(25, 135, 84, .14);
+        font-weight: 700;
+    }
+    #gd-root tr.gd-premio {
+        background: #fff3cd;
+        box-shadow: inset 4px 0 0 #b8860b;
+        font-weight: 800;
+    }
+    #gd-root tr.gd-premio.gd-sel {
+        background: #ffe08a;
+    }
+    #gd-root .gd-faixa {
+        display: inline-block;
+        font-weight: 800;
+        font-size: .8rem;
+        padding: .28rem .6rem;
+        border-radius: 6px;
+    }
+    #gd-root .gd-faixa-6 {
+        background: #e7f1ff;
+        color: #0d47a1;
+    }
+    #gd-root .gd-faixa-7 {
+        background: #b8860b;
+        color: #fff;
+    }
+</style>
+
+<div class="container-fluid py-3" id="gd-root" data-api="{{ api_conferir }}" data-modalidade="{{ modality_key }}">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1"><i class="fas fa-th text-primary"></i> Grades de Dígitos</h1>
+            <p class="text-muted small mb-0">
+                Tabela 4×11 · passo 2 · {{ modality_nome }} · 7 dezenas de {{ '%02d' % dezena_min }} a {{ '%02d' % dezena_max }}
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <div class="btn-group" role="group" aria-label="Modo da conferência">
+                <button type="button" class="btn btn-success" id="gdModoInd">Individual</button>
+                <button type="button" class="btn btn-outline-success" id="gdModoGeral">Geral</button>
+            </div>
+            <div class="form-check d-flex align-items-center mb-0 px-2 py-1 border rounded bg-white">
+                <input class="form-check-input mt-0 me-2" type="checkbox" id="gdVerOutros">
+                <label class="form-check-label small mb-0" for="gdVerOutros">Ver os outros acertos</label>
+            </div>
+            <button type="button" class="btn btn-outline-success" id="gdBtnComparar">
+                <i class="fas fa-list-ol me-1"></i> Comparar tabelas
+            </button>
+        </div>
+    </div>
+
+    <div class="gd-card mb-3">
+        <div class="fw-bold mb-2">Nova tabela</div>
+        <p class="text-muted small mb-3">
+            Você informa os quatro inícios. Duas tabelas com os mesmos inícios não são aceitas.
+            Colunas 1 e 3 só aceitam ímpar. Colunas 2 e 4 só aceitam par.
+            A mesma tabela confere cada concurso sozinho, do primeiro ao atual.
+            Um ponto por dezena sorteada que a grade forma. Clique no concurso para ver os números na grade.
+        </p>
+        <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold mb-1" for="gdC1">Coluna 1 · ímpar</label>
+                <select class="form-select" id="gdC1">
+                    <option value="1" selected>1</option>
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                    <option value="7">7</option>
+                    <option value="9">9</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold mb-1" for="gdC2">Coluna 2 · par</label>
+                <select class="form-select" id="gdC2">
+                    <option value="0" selected>0</option>
+                    <option value="2">2</option>
+                    <option value="4">4</option>
+                    <option value="6">6</option>
+                    <option value="8">8</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold mb-1" for="gdC3">Coluna 3 · ímpar</label>
+                <select class="form-select" id="gdC3">
+                    <option value="1">1</option>
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                    <option value="7" selected>7</option>
+                    <option value="9">9</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold mb-1" for="gdC4">Coluna 4 · par</label>
+                <select class="form-select" id="gdC4">
+                    <option value="0" selected>0</option>
+                    <option value="2">2</option>
+                    <option value="4">4</option>
+                    <option value="6">6</option>
+                    <option value="8">8</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-4">
+                <button type="button" class="btn btn-success w-100" id="gdBtnCriar">
+                    <i class="fas fa-plus me-1"></i> Criar tabela
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="gdLista" class="row g-3"></div>
+    <p class="text-muted small mt-3 mb-0" id="gdVazio">Nenhuma tabela ainda. Escolha os inícios e crie a primeira.</p>
+
+    <div class="gd-card mt-3 d-none" id="gdComparacao">
+        <div class="fw-bold mb-2">Comparação</div>
+        <p class="text-muted small mb-2" id="gdComparacaoTexto"></p>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Lugar</th>
+                        <th>Tabela</th>
+                        <th>Inícios</th>
+                        <th>Pontos</th>
+                        <th>6 acertos</th>
+                        <th>7 acertos</th>
+                    </tr>
+                </thead>
+                <tbody id="gdRank"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const root = document.getElementById('gd-root');
+    const api = root.dataset.api;
+    const storeKey = 'grades-digitos-' + root.dataset.modalidade;
+    const lista = document.getElementById('gdLista');
+    const vazio = document.getElementById('gdVazio');
+    const btnInd = document.getElementById('gdModoInd');
+    const btnGeral = document.getElementById('gdModoGeral');
+    const chkOutros = document.getElementById('gdVerOutros');
+    let tabelas = [];
+    let modo = 'individual';
+    let verOutros = false;
+
+    function coluna(inicio) {
+        const out = [];
+        for (let i = 0; i < 11; i++) out.push((inicio + 2 * i) % 10);
+        return out;
+    }
+
+    function montarGrade(inicios) {
+        const cols = inicios.map(coluna);
+        const grade = [];
+        for (let r = 0; r < 11; r++) {
+            grade.push([cols[0][r], cols[1][r], cols[2][r], cols[3][r]]);
+        }
+        return grade;
+    }
+
+    function salvar() {
+        tabelas.forEach(function (t, i) { t.numero = i + 1; });
+    }
+
+    function carregar() {
+        try { sessionStorage.removeItem(storeKey); } catch (e) {}
+        tabelas = [];
+        modo = 'individual';
+        verOutros = false;
+    }
+
+    function marcarModo() {
+        btnInd.className = 'btn ' + (modo === 'individual' ? 'btn-success' : 'btn-outline-success');
+        btnGeral.className = 'btn ' + (modo === 'geral' ? 'btn-success' : 'btn-outline-success');
+    }
+
+    function fmt(n) {
+        return String(n).padStart(2, '0');
+    }
+
+    function concursoAtivo(tabela) {
+        const listaConc = (tabela.conferencia && tabela.conferencia.por_concurso) || [];
+        if (!listaConc.length) return null;
+        return listaConc.find(function (c) { return c.concurso === tabela.concursoSelecionado; }) || listaConc[0];
+    }
+
+    function celulasDoConcurso(tabela, item) {
+        const hits = new Set();
+        if (!item) return hits;
+        const mapa = (tabela.conferencia && tabela.conferencia.mapa_celulas) || {};
+        (item.dezenas || []).forEach(function (dez) {
+            (mapa[String(dez)] || []).forEach(function (par) {
+                hits.add(par[0] + ',' + par[1]);
+            });
+        });
+        return hits;
+    }
+
+    function resumoGeral(tabela) {
+        const vezes = {};
+        ((tabela.conferencia && tabela.conferencia.por_concurso) || []).forEach(function (item) {
+            (item.dezenas || []).forEach(function (dez) {
+                vezes[dez] = (vezes[dez] || 0) + 1;
+            });
+        });
+        return Object.keys(vezes).map(Number).sort(function (a, b) { return a - b; }).map(function (dez) {
+            return { numero: dez, vezes: vezes[dez] };
+        });
+    }
+
+    function presentesNaGrade(grade) {
+        const mapa = {};
+        function varrer(passos) {
+            grade.forEach(function (linha, r) {
+                linha.forEach(function (dig, c) {
+                    passos.forEach(function (passo) {
+                        const rr = r + passo[0];
+                        const cc = c + passo[1];
+                        if (!grade[rr] || grade[rr][cc] == null) return;
+                        const a = dig;
+                        const b = grade[rr][cc];
+                        [a * 10 + b, b * 10 + a].forEach(function (dez) {
+                            if (dez < 1 || dez > 31) return;
+                            if (mapa[dez]) return;
+                            mapa[dez] = new Set([r + ',' + c, rr + ',' + cc]);
+                        });
+                    });
+                });
+            });
+        }
+        varrer([[0, 1], [1, 0]]);
+        varrer([[1, 1], [1, -1]]);
+        return mapa;
+    }
+
+    function celulasUmaVez(tabela, dezenas) {
+        const mapa = presentesNaGrade(tabela.grade);
+        const hits = new Set();
+        (dezenas || []).forEach(function (dez) {
+            const par = mapa[dez];
+            if (!par) return;
+            par.forEach(function (chave) { hits.add(chave); });
+        });
+        return hits;
+    }
+
+    function htmlGrade(tabela) {
+        const dezenasAcerto = modo === 'geral'
+            ? resumoGeral(tabela).map(function (d) { return d.numero; })
+            : ((concursoAtivo(tabela) || {}).dezenas || []);
+        const hits = celulasUmaVez(tabela, dezenasAcerto);
+        const mapa = presentesNaGrade(tabela.grade);
+        const naTabela = new Set();
+        Object.keys(mapa).forEach(function (dez) {
+            mapa[dez].forEach(function (chave) { naTabela.add(chave); });
+        });
+        let html = '<div class="gd-grade-wrap" data-id="' + tabela.numero + '"><table class="gd-grid"><thead><tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead><tbody>';
+        tabela.grade.forEach(function (linha, r) {
+            html += '<tr><td class="gd-row">' + (r + 1) + '</td>';
+            linha.forEach(function (dig, c) {
+                const chave = r + ',' + c;
+                const classes = [];
+                if (naTabela.has(chave)) classes.push('gd-na-tabela');
+                if (hits.has(chave)) classes.push('gd-hit');
+                html += '<td class="' + classes.join(' ') + '" data-r="' + r + '" data-c="' + c + '">' + dig + '</td>';
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table><svg class="gd-tracados" aria-hidden="true"></svg></div>';
+        return html;
+    }
+
+    function caixaCelula(td, wrap) {
+        const base = wrap.getBoundingClientRect();
+        const cel = td.getBoundingClientRect();
+        return {
+            left: cel.left - base.left,
+            top: cel.top - base.top,
+            width: cel.width,
+            height: cel.height
+        };
+    }
+
+    function svgTraco(a, b, foco, rotulo) {
+        const ax = a.left + a.width / 2;
+        const ay = a.top + a.height / 2;
+        const bx = b.left + b.width / 2;
+        const by = b.top + b.height / 2;
+        const dist = Math.hypot(bx - ax, by - ay) || 1;
+        const ang = Math.atan2(by - ay, bx - ax) * 180 / Math.PI;
+        const cx = (ax + bx) / 2;
+        const cy = (ay + by) / 2;
+        const largura = dist + a.width + 4;
+        const altura = a.height + 4;
+        const x = cx - largura / 2;
+        const y = cy - altura / 2;
+        const cls = foco ? 'gd-traco gd-traco-foco' : 'gd-traco';
+        const bw = Math.max(26, rotulo.length * 8 + 8);
+        const bh = 16;
+        const rot = 'rotate(' + ang.toFixed(2) + ' ' + cx.toFixed(1) + ' ' + cy.toFixed(1) + ')';
+        return '<rect class="' + cls + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1)
+            + '" width="' + largura.toFixed(1) + '" height="' + altura.toFixed(1)
+            + '" rx="12" transform="' + rot + '"/>'
+            + '<g class="gd-traco-selo">'
+            + '<rect class="gd-traco-fundo" x="' + (cx - bw / 2).toFixed(1) + '" y="' + (cy - bh / 2).toFixed(1)
+            + '" width="' + bw + '" height="' + bh + '" rx="4"/>'
+            + '<text class="gd-traco-num" x="' + cx.toFixed(1) + '" y="' + cy.toFixed(1)
+            + '" text-anchor="middle" dominant-baseline="central">' + rotulo + '</text></g>';
+    }
+
+    function desenharTracos() {
+        document.querySelectorAll('.gd-grade-wrap').forEach(function (wrap) {
+            const tabela = tabelas.find(function (t) { return t.numero === Number(wrap.dataset.id); });
+            const svg = wrap.querySelector('.gd-tracados');
+            if (!tabela || !svg) return;
+            const w = wrap.offsetWidth;
+            const h = wrap.offsetHeight;
+            svg.setAttribute('width', w);
+            svg.setAttribute('height', h);
+            svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+            const foco = tabela.dezenaFoco;
+            const par = foco == null ? null : presentesNaGrade(tabela.grade)[foco];
+            if (!par) {
+                svg.innerHTML = '';
+                return;
+            }
+            const cels = Array.from(par).slice(0, 2).map(function (chave) {
+                const p = chave.split(',');
+                return wrap.querySelector('td[data-r="' + p[0] + '"][data-c="' + p[1] + '"]');
+            });
+            if (!cels[0] || !cels[1]) {
+                svg.innerHTML = '';
+                return;
+            }
+            svg.innerHTML = svgTraco(
+                caixaCelula(cels[0], wrap),
+                caixaCelula(cels[1], wrap),
+                true,
+                fmt(foco)
+            );
+        });
+    }
+
+    function htmlPresentes(tabela) {
+        const mapa = presentesNaGrade(tabela.grade);
+        const nums = Object.keys(mapa).map(Number).sort(function (a, b) { return a - b; });
+        const tem = {};
+        nums.forEach(function (n) { tem[n] = true; });
+        const ausentes = [];
+        for (let n = 1; n <= 31; n++) if (!tem[n]) ausentes.push(n);
+        const chips = nums.map(function (n) {
+            const on = tabela.dezenaFoco === n;
+            return '<button type="button" class="gd-presente' + (on ? ' gd-presente-on' : '') + '" data-id="' + tabela.numero + '" data-dez="' + n + '">' + fmt(n) + '</button>';
+        }).join('');
+        const fora = ausentes.map(function (n) {
+            return '<span class="gd-ausente">' + fmt(n) + '</span>';
+        }).join('');
+        return '<div class="mb-2"><div class="small fw-bold" style="color:#996e00">Na tabela · ' + nums.length + ' dezenas de 01 a 31</div>'
+            + '<div class="small text-muted">Clique numa dezena para ver o traço dela na grade. Laranja escuro: acerto do concurso.</div>'
+            + '<div class="mt-1">' + chips + '</div>'
+            + '<div class="small fw-bold mt-2" style="color:#8a8f8c">Fora da tabela · ' + ausentes.length + '</div>'
+            + '<div class="mt-1">' + (fora || '<span class="small text-muted">Nenhuma. A tabela forma as 31.</span>') + '</div></div>';
+    }
+
+    function contarPremios(listaConc) {
+        let seis = 0;
+        let sete = 0;
+        const concursosSete = [];
+        listaConc.forEach(function (item) {
+            if (item.pontos === 6) seis += 1;
+            if (item.pontos === 7) {
+                sete += 1;
+                concursosSete.push(item.concurso);
+            }
+        });
+        return { seis: seis, sete: sete, concursosSete: concursosSete };
+    }
+
+    function htmlFaixas(faixas) {
+        return '<div class="mt-2 d-flex flex-wrap gap-2">'
+            + '<span class="gd-faixa gd-faixa-6">6 acertos: ' + faixas.seis + '</span>'
+            + '<span class="gd-faixa gd-faixa-7">7 acertos · premiação máxima: ' + faixas.sete + '</span>'
+            + '</div>';
+    }
+
+    function listaVisivel(listaConc) {
+        if (verOutros) return listaConc;
+        return listaConc.filter(function (item) { return item.pontos === 6 || item.pontos === 7; });
+    }
+
+    function htmlAcertos(tabela) {
+        if (!tabela.conferencia) return '';
+        const listaConc = tabela.conferencia.por_concurso || [];
+        if (!listaConc.length) {
+            return '<p class="small text-muted mb-0 mt-2">Nenhum concurso no banco.</p>';
+        }
+        const c = tabela.conferencia;
+        if (modo === 'geral') {
+            const nums = resumoGeral(tabela);
+            const chips = nums.map(function (d) {
+                return '<span class="gd-dez" title="' + d.vezes + ' concursos">' + fmt(d.numero) + '</span>';
+            }).join('');
+            return ''
+                + '<div class="mt-2"><span class="fw-bold">' + c.pontos.toLocaleString('pt-BR') + ' pontos no total</span>'
+                + '<span class="text-muted small"> · soma do concurso ' + c.primeiro + ' ao ' + c.ultimo + '</span></div>'
+                + htmlFaixas(contarPremios(listaConc))
+                + '<div class="mt-2">' + (chips || '<span class="text-muted small">Nenhuma dezena acertada.</span>') + '</div>';
+        }
+        const ativo = concursoAtivo(tabela);
+        const ord = tabela.ordenacao || { coluna: 'concurso', direcao: 'asc' };
+        const visivel = listaVisivel(listaConc);
+        const linhas = ordenarConcursos(visivel, ord).map(function (item) {
+            const sel = ativo && item.concurso === ativo.concurso;
+            const premio = item.pontos === 7;
+            const nums = (item.dezenas || []).map(fmt).join(' ');
+            return '<tr class="gd-linha' + (premio ? ' gd-premio' : '') + (sel ? ' gd-sel' : '') + '" data-id="' + tabela.numero + '" data-concurso="' + item.concurso + '">'
+                + '<td>' + item.concurso + '</td>'
+                + '<td>' + item.pontos + (premio ? ' · premiação máxima' : '') + '</td>'
+                + '<td>' + (nums || '—') + '</td></tr>';
+        }).join('');
+        return ''
+            + '<div class="mt-2 mb-2"><span class="fw-bold">' + c.pontos.toLocaleString('pt-BR') + ' pontos no total</span>'
+            + '<span class="text-muted small"> · soma do concurso ' + c.primeiro + ' ao ' + c.ultimo + ', cada um conferido à parte</span></div>'
+            + htmlFaixas(contarPremios(listaConc))
+            + (linhas
+                ? '<div class="gd-concursos" data-id="' + tabela.numero + '"><table class="table table-sm">'
+                : '<p class="small text-muted mb-0 mt-2">Nenhum concurso com 6 ou 7 acertos.</p>')
+            + (linhas
+                ? '<thead><tr>'
+            + htmlThOrdenacao(tabela, 'concurso', 'Concurso')
+            + htmlThOrdenacao(tabela, 'pontos', 'Pontos')
+            + htmlThOrdenacao(tabela, 'dezenas', 'Dezenas acertadas')
+            + '</tr></thead>'
+            + '<tbody>' + linhas + '</tbody></table></div>'
+                : '');
+    }
+
+    function compararDezenas(a, b) {
+        const aa = a || [];
+        const bb = b || [];
+        const n = Math.max(aa.length, bb.length);
+        for (let i = 0; i < n; i++) {
+            const av = aa[i] == null ? -1 : aa[i];
+            const bv = bb[i] == null ? -1 : bb[i];
+            if (av !== bv) return av - bv;
+        }
+        return 0;
+    }
+
+    function ordenarConcursos(listaConc, ordenacao) {
+        const col = ordenacao.coluna;
+        const dir = ordenacao.direcao === 'desc' ? -1 : 1;
+        return listaConc.slice().sort(function (a, b) {
+            let cmp = 0;
+            if (col === 'pontos') cmp = a.pontos - b.pontos;
+            else if (col === 'dezenas') cmp = compararDezenas(a.dezenas, b.dezenas);
+            else cmp = a.concurso - b.concurso;
+            if (cmp === 0) cmp = a.concurso - b.concurso;
+            return cmp * dir;
+        });
+    }
+
+    function htmlThOrdenacao(tabela, col, titulo) {
+        const ord = tabela.ordenacao || { coluna: 'concurso', direcao: 'asc' };
+        const seta = ord.coluna === col ? (ord.direcao === 'asc' ? ' ▲' : ' ▼') : '';
+        return '<th class="gd-sort" data-id="' + tabela.numero + '" data-col="' + col + '">' + titulo + seta + '</th>';
+    }
+
+    function desenhar() {
+        vazio.classList.toggle('d-none', tabelas.length > 0);
+        lista.innerHTML = tabelas.map(function (t) {
+            return ''
+                + '<div class="col-12"><article class="gd-tabela" data-id="' + t.numero + '">'
+                + '<div class="d-flex justify-content-between align-items-start gap-2 mb-2">'
+                + '<div><div class="fw-bold">Tabela ' + t.numero + '</div>'
+                + '<div class="text-muted small">Inícios ' + t.inicios.join(' · ') + '</div></div>'
+                + '<div class="d-flex gap-2">'
+                + '<button type="button" class="btn btn-success btn-sm gd-conferir" data-id="' + t.numero + '">Conferir</button>'
+                + '<button type="button" class="btn btn-outline-secondary btn-sm gd-excluir" data-id="' + t.numero + '">Excluir</button>'
+                + '</div></div>'
+                + '<div class="gd-lado">'
+                + '<div class="gd-grade-col">' + htmlGrade(t) + '</div>'
+                + '<div class="gd-acertos">' + htmlPresentes(t) + htmlAcertos(t) + '</div>'
+                + '</div>'
+                + '</article></div>';
+        }).join('');
+        desenharTracos();
+    }
+
+    document.getElementById('gdBtnCriar').addEventListener('click', function () {
+        const inicios = [
+            Number(document.getElementById('gdC1').value),
+            Number(document.getElementById('gdC2').value),
+            Number(document.getElementById('gdC3').value),
+            Number(document.getElementById('gdC4').value)
+        ];
+        const igual = tabelas.find(function (t) {
+            return t.inicios.join('-') === inicios.join('-');
+        });
+        if (igual) {
+            window.alert('Esta tabela é igual à Tabela ' + igual.numero + '. Informe outros inícios.');
+            return;
+        }
+        tabelas.push({
+            numero: tabelas.length + 1,
+            inicios: inicios,
+            grade: montarGrade(inicios),
+            celulas: [],
+            conferencia: null
+        });
+        salvar();
+        desenhar();
+    });
+
+    lista.addEventListener('click', async function (ev) {
+        const excluir = ev.target.closest('.gd-excluir');
+        if (excluir) {
+            const id = Number(excluir.dataset.id);
+            tabelas = tabelas.filter(function (t) { return t.numero !== id; });
+            salvar();
+            desenhar();
+            return;
+        }
+        const chip = ev.target.closest('.gd-presente');
+        if (chip) {
+            const idChip = Number(chip.dataset.id);
+            const dez = Number(chip.dataset.dez);
+            const tabelaChip = tabelas.find(function (t) { return t.numero === idChip; });
+            if (!tabelaChip) return;
+            tabelaChip.dezenaFoco = tabelaChip.dezenaFoco === dez ? null : dez;
+            salvar();
+            desenhar();
+            return;
+        }
+        const sortBtn = ev.target.closest('.gd-sort');
+        if (sortBtn) {
+            const idSort = Number(sortBtn.dataset.id);
+            const tabelaSort = tabelas.find(function (t) { return t.numero === idSort; });
+            if (!tabelaSort) return;
+            const col = sortBtn.dataset.col;
+            const atual = tabelaSort.ordenacao || { coluna: 'concurso', direcao: 'asc' };
+            if (atual.coluna === col) {
+                tabelaSort.ordenacao = { coluna: col, direcao: atual.direcao === 'asc' ? 'desc' : 'asc' };
+            } else {
+                tabelaSort.ordenacao = { coluna: col, direcao: col === 'concurso' ? 'asc' : 'desc' };
+            }
+            salvar();
+            const caixaSort = sortBtn.closest('.gd-concursos');
+            const rolagemSort = caixaSort ? caixaSort.scrollTop : 0;
+            desenhar();
+            const novaSort = document.querySelector('.gd-concursos[data-id="' + idSort + '"]');
+            if (novaSort) novaSort.scrollTop = rolagemSort;
+            return;
+        }
+        const linha = ev.target.closest('.gd-linha');
+        if (linha) {
+            const idLinha = Number(linha.dataset.id);
+            const tabelaLinha = tabelas.find(function (t) { return t.numero === idLinha; });
+            if (!tabelaLinha) return;
+            tabelaLinha.concursoSelecionado = Number(linha.dataset.concurso);
+            salvar();
+            const caixa = linha.closest('.gd-concursos');
+            const rolagem = caixa ? caixa.scrollTop : 0;
+            desenhar();
+            const nova = document.querySelector('.gd-concursos[data-id="' + idLinha + '"]');
+            if (nova) nova.scrollTop = rolagem;
+            return;
+        }
+        const btn = ev.target.closest('.gd-conferir');
+        if (!btn) return;
+        const id = Number(btn.dataset.id);
+        const tabela = tabelas.find(function (t) { return t.numero === id; });
+        if (!tabela) return;
+        btn.disabled = true;
+        btn.textContent = 'Conferindo...';
+        try {
+            const resp = await fetch(api, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ inicios: tabela.inicios })
+            });
+            const data = await resp.json();
+            if (!resp.ok || !data.sucesso) {
+                throw new Error(data.erro || 'Falha na conferência.');
+            }
+            tabela.grade = data.grade;
+            tabela.conferencia = data;
+            const primeiro = (data.por_concurso && data.por_concurso[0]) || null;
+            tabela.concursoSelecionado = primeiro ? primeiro.concurso : null;
+            salvar();
+            desenhar();
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Conferir';
+            window.alert(err.message || 'Falha na conferência.');
+        }
+    });
+
+    document.getElementById('gdBtnComparar').addEventListener('click', function () {
+        const painel = document.getElementById('gdComparacao');
+        const corpo = document.getElementById('gdRank');
+        const texto = document.getElementById('gdComparacaoTexto');
+        const conferidas = tabelas.filter(function (t) { return t.conferencia; });
+        painel.classList.remove('d-none');
+        if (!conferidas.length) {
+            texto.textContent = 'Confira ao menos uma tabela antes de comparar.';
+            corpo.innerHTML = '';
+            painel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+        conferidas.sort(function (a, b) {
+            return b.conferencia.pontos - a.conferencia.pontos || a.numero - b.numero;
+        });
+        const faltam = tabelas.length - conferidas.length;
+        const c0 = conferidas[0].conferencia;
+        texto.textContent = 'Cada tabela foi conferida concurso por concurso, do ' + c0.primeiro + ' ao ' + c0.ultimo
+            + '. O total é a soma desses pontos individuais.'
+            + (faltam ? ' ' + faltam + ' tabela(s) ainda sem conferência.' : '');
+        corpo.innerHTML = conferidas.map(function (t, i) {
+            const faixas = contarPremios(t.conferencia.por_concurso || []);
+            return '<tr class="' + (i === 0 ? 'gd-rank-1' : '') + '">'
+                + '<td>' + (i + 1) + (i === 0 ? ' · maior' : '') + '</td>'
+                + '<td>Tabela ' + t.numero + '</td>'
+                + '<td>' + t.inicios.join(' · ') + '</td>'
+                + '<td>' + t.conferencia.pontos.toLocaleString('pt-BR') + '</td>'
+                + '<td>' + faixas.seis + '</td>'
+                + '<td>' + faixas.sete + (faixas.sete ? ' · máxima' : '') + '</td></tr>';
+        }).join('');
+        painel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    btnInd.addEventListener('click', function () {
+        modo = 'individual';
+        marcarModo();
+        salvar();
+        desenhar();
+    });
+    btnGeral.addEventListener('click', function () {
+        modo = 'geral';
+        marcarModo();
+        salvar();
+        desenhar();
+    });
+
+    chkOutros.addEventListener('change', function () {
+        verOutros = chkOutros.checked;
+        salvar();
+        desenhar();
+    });
+
+    window.addEventListener('resize', desenharTracos);
+    carregar();
+    chkOutros.checked = verOutros;
+    marcarModo();
+    desenhar();
+})();
+</script>
+{% endblock %}

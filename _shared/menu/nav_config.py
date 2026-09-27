@@ -266,6 +266,14 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 "icon_color": "#c08b00",
             },
             {
+                "title": "Grades de Dígitos",
+                "desc": "Tabela 4×11 · passo 2 · conferência e comparação",
+                "href": "/analise/grades-digitos/",
+                "icon": "fas fa-th",
+                "icon_bg": "#fff8e1",
+                "icon_color": "#c08b00",
+            },
+            {
                 "title": "Linhas & DD × DU",
                 "desc": "Padronização L1–L10 · Dígito da Dezena × Dígito da Unidade",
                 "href": "/analise/linhas-dd-du/",

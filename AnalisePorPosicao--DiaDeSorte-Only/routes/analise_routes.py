@@ -171,3 +171,6 @@ wire_analise_escolha_visual(analise_bp, "diadesorte")
 # ANALISE_TUBULAR_INTELIGENTE_WIRED
 from analise_tubular_inteligente.app_integration import wire_analise_tubular_inteligente
 wire_analise_tubular_inteligente(analise_bp, "diadesorte")
+
+from grades_digitos.app_integration import wire_grades_digitos
+wire_grades_digitos(analise_bp, "diadesorte")
