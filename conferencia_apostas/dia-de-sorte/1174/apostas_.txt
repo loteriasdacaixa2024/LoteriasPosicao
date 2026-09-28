@@ -1,0 +1,87 @@
+	
+	MELHORIAS A SER  IMPLEMENTADAS..
+	
+	SUPONHA QUE VARIAS LOTERICAS OFERECA  BOLÕES COM 15 DEZENAS - ENTÃO  O SISTEMA DEVE PERMITIR INSERIR  NOVA  LOTERIA... ASIM COMO PERMITE INSERIR  MAIS QUE UM  JOGO DO BOLÃO
+	
+	Resumindo:  uma ou  mais loterica pode oferecer bolão e uma unica lotérica pode oferecer vários jogos...
+	
+	Adicione  placeholder (moeda padrão brasileiro)
+	No select Cidade o sistema deve trazer TODAS AS CIDADES EM TODOS OS ESTADOS (pois as lotéricas estão espelhada por  todo  o pais)
+	
+	O valor  da Cota deve ser somado  com o valor  do Serviço
+	
+	Na  seção "Dezenas Ausentes no Bolão" o Total de dezenas Ausentes  deve ficar  na mesma linha  em  que  aparece as dezenas faltantes...
+	
+	As dezenas  na  seção  "Dezenas Ausentes no Bolão" deve  ser  subtraida das  dezenas  do ultimo sorteio que são 7 dezenas  e  o que sobrar é que deve  permitir ser  conferida  com concursos  em geral... essa é a  ideia  do  fluxo..  
+	
+	ISTO ((Dezenas Ausentes no Bolão 02 03 04 05 11 13 15 18 19 20 21 22 23 24 25 28 Total Ausentes:16))
+	DEVE SER SUBRITAIDO DO ULTIMO CONCURSO (TIRAR 07 DEZENAS) O  QUE  SOBRAR TERÁ POSSIBILIDADE DE SER CONFERIDO..
+	
+	
+	
+	Abaixo  tem UM EXEMPLO... apenas um exemplos pois  os  dados deve ser  DINAMICOS OK
+	
+	=====================EXEMPLO======================APENAS===============================
+    =====================EXEMPLO======================APENAS===============================
+	=====================EXEMPLO======================APENAS===============================
+	=====================EXEMPLO======================APENAS===============================
+
+	
+	    R$ 1.900.000,00
+    Concurso: 1174
+
+    Nome da Lotérica: DIADASORTE LOTERIAS LTDA - 21.015565-5
+    Cidade/UF: SOROCABA - SP
+    Valor da Cota: R$ 162,50
+    Tarifa de Serviço: R$ 57,36 
+	                               R$ 220,86 
+
+    Números selecionados
+
+    Jogo 1
+    01 06 07 08 09 10 12 14 16 17 26 27 29 30 31 (15)
+	Mês da Sorte : Junho
+	
+	
+	Dezena não presentes na aposta  acima
+	02 03 04 05 11 13 15 18 19 20 21 22 23 24 25 28 (16)
+	
+	
+	Ultimo resultado
+	06 08 13 19 22 24 26 (07) 1173
+	
+	
+	Dezenas sem as dezenas do Ultimo Sorteio
+    Portantanto sobraram 11 dezenas...	
+	02 03 04 05 11 15 18 20 21 23 25 28 (12)
+	
+	Estas 12 dezenas deverá ser conferida com o concurso  proposto que será o mesmo acima...
+	ou com outro qualquer (1 ao  ultimo) o usuario  terá opção de escolher... 
+	=====================EXEMPLO======================APENAS===============================
+	=====================EXEMPLO======================APENAS===============================
+	=====================EXEMPLO======================APENAS===============================
+	=====================EXEMPLO======================APENAS===============================
+	=====================EXEMPLO======================APENAS===============================
+Das 
+1. Dezenas Ausentes no Bolão (Não Jogadas) AQUI 16 DEZENAS
+
+NÃO ESTA CHECANDO  QUAL  É O  ULTIMO NUMEROS E  
+ Subtraindo Último Concurso (1174) FALTA ESTA ELIMINAÇÃO
+
+
+2. Saldo para Conferência AQUI 16 DEZENAS SENDO  QUE ERA PRA SER MENOS.. 
+
+
+
+
+BINGO... VC ENTENDEU  TUDO CERTINHO AGORA TEMOS QUE  AJUSTAR  TRES FATOS  QUE NÃO ESTÃO  LEGAL
+
+PRIMEIRO: O select no campo Mês  da Sorte dos dados da loteria ainda não aparecem
+SEGUNDO: Ajuste visualmente para mostrar  no centro as informmações do concurso (Ref. Anterio)
+TERCEIRO: No campo Conferir ou ainda Resultado Conc.  ?? esta mostrando NaN NaN NaN NaN NaN NaN
+
+na verdade no TERCEIRO item a ser  ajustado o  que  eu quero saber é se houve  cobertura dos  numeros apostados...
+
+vou falar em outras palavras ai  sertamentevc  vai entender  o que eu quero..
+por exemplo... entrei no site  da caixa e ela oferece vários boloes  então com esta regra eu posso  ver  pra qual  concurso  ela esta oferencendo e depois com este fluxo eu possa de fato  conferir para ver  se acertaria  alguma dezena ou não... 
+ 

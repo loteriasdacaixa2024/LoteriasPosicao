@@ -118,7 +118,97 @@
   #gc-root .gc-vol-31 { margin-top: .15rem; }
   #gc-root .gc-geo-bloco { font-size: .85rem; }
   #gc-root .gc-geo-bloco strong { font-variant-numeric: tabular-nums; }
-  #gcSessao1, #gcSessao2, #gcSessao3 { scroll-margin-top: 4.75rem; }
+  #gcSessao1, #gcSessao2, #gcSessao3, #gcPanorama { scroll-margin-top: 4.75rem; }
+  #gc-root .gc-sessoes-nav {
+    position: sticky; top: 4.25rem; z-index: 5;
+    justify-content: center;
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+    padding: .4rem; box-shadow: 0 1px 2px rgba(16,24,40,.04);
+  }
+  #gc-root .gc-panorama { text-align: center; }
+  #gc-root .gc-panorama h2 { justify-content: center; }
+  #gc-root .gc-pan-card {
+    border: 1px solid #e5e7eb; border-radius: 10px; background: #fdfcf8;
+    padding: .75rem .85rem; height: 100%; text-align: center;
+  }
+  #gc-root .gc-pan-card h3 {
+    font-size: .92rem; font-weight: 800; margin: 0 0 .45rem;
+  }
+  #gc-root .gc-pan-bloco {
+    display: inline-block;
+    max-width: 100%;
+    text-align: right;
+  }
+  #gc-root .gc-pan-dir {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: .45rem;
+    padding: .2rem 0;
+    white-space: nowrap;
+  }
+  #gc-root .gc-pan-ord {
+    font-weight: 800;
+    min-width: 1.6rem;
+    color: var(--primary-xdark, #1a0a00);
+  }
+  #gc-root .gc-pan-trofeu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15rem;
+    font-size: .85rem;
+  }
+  #gc-root .gc-pan-trofeu.o1 { color: #c9a227; }
+  #gc-root .gc-pan-trofeu.o2 { color: #9aa0a6; }
+  #gc-root .gc-pan-trofeu.o3 { color: #b87333; }
+  #gc-root .gc-pan-legenda {
+    font-size: .68rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: .15rem;
+  }
+  #gc-root .gc-pan-nums {
+    font-size: .95rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary-xdark, #1a0a00);
+    letter-spacing: .02em;
+  }
+  #gc-root .gc-pan-sec {
+    font-size: .72rem;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    color: #94a3b8;
+  }
+  #gc-root .gc-pan-geo {
+    display: inline-grid;
+    grid-template-columns: repeat(4, 1.15rem) 2.2rem 3.3rem;
+    column-gap: .28rem;
+    row-gap: .28rem;
+    align-items: center;
+    justify-items: center;
+  }
+  #gc-root .gc-pan-geo .d {
+    font-size: .95rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary-xdark, #1a0a00);
+    text-align: center;
+    line-height: 1;
+  }
+  #gc-root .gc-pan-geo .d31 {
+    font-size: .82rem;
+    letter-spacing: -.03em;
+  }
+  #gc-root .gc-pan-geo .s {
+    justify-self: end;
+    font-size: .72rem;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    color: #94a3b8;
+    text-align: right;
+  }
   #gc-root .gc-geo-scroll {
     max-height: 32rem; overflow: auto; border: 1px solid #e2e8f0; border-radius: 10px;
   }
@@ -181,11 +271,21 @@
     {% endif %}
   </p>
   {% if modality_key == 'diadesorte' %}
-  <nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Sessões desta análise">
-    <a class="btn btn-sm btn-outline-primary" href="#gcSessao1">1. Gaps</a>
-    <a class="btn btn-sm btn-outline-success" href="#gcSessao2">2. Régua</a>
-    <a class="btn btn-sm btn-outline-dark" href="#gcSessao3">3. Geometria Analítica</a>
+  <nav class="gc-sessoes-nav d-flex flex-wrap gap-2 mb-3" aria-label="Sessões desta análise">
+    <a class="btn btn-sm btn-outline-primary" href="/analise/gaps-ciclo/#gcPanorama" data-gc-alvo="gcPanorama">Resumo</a>
+    <a class="btn btn-sm btn-outline-primary" href="/analise/gaps-ciclo/#gcSessao1" data-gc-alvo="gcSessao1">1. Gaps</a>
+    <a class="btn btn-sm btn-outline-success" href="/analise/gaps-ciclo/#gcSessao2" data-gc-alvo="gcSessao2">2. Régua</a>
+    <a class="btn btn-sm btn-outline-dark" href="/analise/gaps-ciclo/#gcSessao3" data-gc-alvo="gcSessao3">3. Geometria Analítica</a>
   </nav>
+  <div class="gc-card gc-panorama mb-3 p-3" id="gcPanorama">
+    <h2>Resumo / Panorama</h2>
+    <p class="small text-muted mb-2">Top 3 de cada sessão, na base e na janela selecionadas.
+      <a href="/analise/resumo-geral/">O histórico inteiro está no Resumo Geral.</a>
+    </p>
+    <div class="row g-2 text-start" id="gcPanoramaCorpo">
+      <p class="text-muted small mb-0">Carregando…</p>
+    </div>
+  </div>
   {% endif %}
   <p class="small mb-3">
     {% if inicial_ciclo_no_menu_ciclos %}
@@ -239,5 +339,5 @@
   window.__GC_SPEC__ = {{ gc_spec | tojson }};
   window.__GC_API__ = {{ api_base | tojson }};
 </script>
-<script src="/analise/gaps-ciclo/static/analise_gaps_ciclo.js?v=geo3"></script>
+<script src="/analise/gaps-ciclo/static/analise_gaps_ciclo.js?v=panorama9"></script>
 {% endblock %}

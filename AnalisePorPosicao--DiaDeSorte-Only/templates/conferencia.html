@@ -104,21 +104,80 @@
         background: var(--accent-mes);
     }
 
-    .result-row {
-        padding: .5rem .75rem;
-        border-bottom: 1px solid #f0d0b0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
+    .conf-resultados-wrap {
+        overflow-x: auto;
     }
 
-    .result-row:hover {
+    .conf-resultados {
+        width: max-content;
+        min-width: 100%;
+        margin: 0 auto;
+        border-collapse: collapse;
+        font-size: .78rem;
+    }
+
+    .conf-resultados th,
+    .conf-resultados td {
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        padding: .4rem .45rem;
+        border-bottom: 1px solid #f0e2b8;
+    }
+
+    .conf-resultados thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .conf-resultados thead th.conf-th-on {
+        box-shadow: inset 0 -2px 0 var(--accent);
+    }
+
+    .conf-th-inner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .28rem;
+    }
+
+    .conf-th-seta {
+        font-size: .62rem;
+        line-height: 1;
+    }
+
+    .conf-resultados tbody tr:hover {
         background: var(--accent-light);
     }
 
-    .result-meta {
-        min-width: 100px;
+    .conf-resultados .dez-balls,
+    .conf-resultados .dez-balls-ordem {
+        display: inline-flex;
+        gap: 3px;
+        justify-content: center;
+    }
+
+    .conf-resultados .dez-ball {
+        width: 26px;
+        height: 26px;
+        font-size: .68rem;
+    }
+
+    .conf-resultados .dez-ball-ordem {
+        width: 22px;
+        height: 22px;
+        font-size: .62rem;
+    }
+
+    .conf-resultados .mes-result,
+    .conf-resultados .ac-tag {
+        margin-top: 0;
     }
 
     .dez-balls {
@@ -208,8 +267,25 @@
     .conf-legenda-meses {
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
         gap: 4px;
         margin-top: .45rem;
+    }
+
+    #sniperHeader {
+        text-align: center;
+    }
+
+    #sniperBalls {
+        justify-content: center;
+    }
+
+    .sniper-mes-linha {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .35rem;
+        margin-top: .15rem;
     }
 
     .legenda-mes-chip {
@@ -259,6 +335,86 @@
         font-size: .85rem;
         display: none;
     }
+
+    .sniper-origem-nota {
+        margin: .2rem 0 .15rem;
+        font-size: .72rem;
+        font-weight: 500;
+        color: #8a7a62;
+        line-height: 1.35;
+        text-align: center;
+    }
+
+    .sniper-origem-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .35rem;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        margin: 0 0 .35rem;
+        font-size: .72rem;
+        font-weight: 700;
+        color: var(--primary);
+        cursor: pointer;
+    }
+
+    .sniper-origem-toggle i {
+        font-size: .62rem;
+        transition: transform .15s ease;
+    }
+
+    .sniper-origem-toggle[aria-expanded="true"] i {
+        transform: rotate(90deg);
+    }
+
+    .sniper-origem-painel {
+        margin: .1rem auto .5rem;
+        width: max-content;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .sniper-origem-caption {
+        margin: 0 0 .25rem;
+        font-size: .68rem;
+        color: #998;
+        text-align: center;
+    }
+
+    .sniper-origem-tabela {
+        width: max-content;
+        margin: 0 auto;
+        border-collapse: collapse;
+        font-size: .72rem;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .sniper-origem-tabela th,
+    .sniper-origem-tabela td {
+        padding: .2rem .45rem;
+        border-bottom: 1px solid #f0e2b8;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    .sniper-origem-tabela th {
+        font-size: .62rem;
+        letter-spacing: .03em;
+        color: #998;
+        font-weight: 700;
+    }
+
+    .sniper-origem-mes {
+        margin: .35rem 0 0;
+        font-size: .7rem;
+        color: #8a7a62;
+        text-align: center;
+    }
 </style>
 
 <div class="conf-center">
@@ -266,8 +422,7 @@
         <div class="d-flex align-items-center gap-3 flex-wrap">
             <div>
                 <h2><i class="fas fa-trophy me-2"></i>Conferência — Dia de Sorte</h2>
-                <p class="mb-0" style="opacity:.85;font-size:.9rem;">Compara os Top-7 Sniper + Mês Top-1 com o histórico
-                    recente (200 conc.)</p>
+                <p class="mb-0" style="opacity:.85;font-size:.9rem;">Compara as 7 dezenas mais frequentes e o mês mais frequente com o histórico</p>
             </div>
             <div class="ms-auto"><button class="btn btn-sm" id="btnRecarregar"
                     style="background:var(--accent);color:#111;font-weight:700;" onclick="carregar()"><i
@@ -286,7 +441,7 @@
     </div>
 
     <div class="card border-0 shadow-sm">
-        <div class="card-header fw-bold"
+        <div class="card-header fw-bold text-center"
             style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;padding:.7rem 1rem;">
             <div><i class="fas fa-history me-2"></i>Ouro = Acerto Dezena · Cor do mês = Mês sorteado · ✓ = Acerto Sniper</div>
             <div class="conf-legenda-meses fw-normal">
@@ -300,8 +455,28 @@
                 style="display:none;font-size:.78rem;background:#fdfcf8;">
                 <strong style="color:var(--primary);">🎯 Sniper Top-7:</strong>
                 <div class="d-flex gap-1 flex-wrap mt-1 mb-1" id="sniperBalls"></div>
-                <strong style="color:var(--accent-mes);">🗓️ Mês Sniper:</strong><span id="sniperMes"
-                    class="ms-2"></span>
+                <p class="sniper-origem-nota" id="sniperOrigemNota"></p>
+                <button type="button" class="sniper-origem-toggle" id="btnSniperOrigem" hidden
+                    aria-expanded="false" aria-controls="sniperOrigemPainel" onclick="toggleSniperOrigem()">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    <span>Frequência</span>
+                </button>
+                <div class="sniper-origem-painel" id="sniperOrigemPainel" hidden>
+                    <p class="sniper-origem-caption">Da mais sorteada para a menos.</p>
+                    <table class="sniper-origem-tabela">
+                        <thead>
+                            <tr id="sniperOrigemHead"></tr>
+                        </thead>
+                        <tbody>
+                            <tr id="sniperOrigemBody"></tr>
+                        </tbody>
+                    </table>
+                    <p class="sniper-origem-mes" id="sniperOrigemMes"></p>
+                </div>
+                <div class="sniper-mes-linha">
+                    <strong style="color:var(--accent-mes);">🗓️ Mês Sniper:</strong>
+                    <span id="sniperMes"></span>
+                </div>
             </div>
             <div id="conferencia-corpo">
                 <div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Carregando...</div>
@@ -317,6 +492,7 @@
 
 <script>
     let _dados = [], _sniper = [], _filtro = 'all';
+    let _ordem = { chave: 'concurso', dir: 'desc' };
     const MESES_ABREV = {
         Janeiro: 'Jan', Fevereiro: 'Fev', Março: 'Mar', Abril: 'Abr',
         Maio: 'Mai', Junho: 'Jun', Julho: 'Jul', Agosto: 'Ago',
@@ -331,22 +507,74 @@
         corpo.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Calculando...</div>';
         document.getElementById('filterBar').style.display = 'none'; document.getElementById('statsBar').style.display = 'none';
         document.getElementById('sniperHeader').style.display = 'none';
+        fecharSniperOrigem();
         try {
-            const r = await fetch('/central-conferencias/api/conferir', { method: 'POST' }); const d = await r.json();
+            const [r, rAna] = await Promise.all([
+                fetch('/central-conferencias/api/conferir', { method: 'POST' }),
+                fetch('/analise/api/dados'),
+            ]);
+            const d = await r.json();
+            const analise = await rAna.json().catch(() => null);
             if (d.status !== 'success') return corpo.innerHTML = `<div class="text-danger p-3">${d.message}</div>`;
             _dados = d.resultados;
             if (_dados.length) {
                 _sniper = _dados[0].sniper_dez || [];
                 document.getElementById('sniperBalls').innerHTML = _sniper.map(dz => `<span class="dez-ball dg-hit">${String(dz).padStart(2, '0')}</span>`).join('');
                 document.getElementById('sniperMes').innerHTML = mesBadgeHtml(_dados[0].sniper_mes_nome, true, _dados[0].sniper_mes_abrev);
+                renderSniperOrigem(analise, _dados[0]);
                 document.getElementById('sniperHeader').style.display = 'block';
             }
-            _filtro = 'all'; document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
+            _filtro = 'all';
+            _ordem = { chave: 'concurso', dir: 'desc' };
+            document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active'));
             document.querySelector('.ac-filter-btn[data-f="all"]').classList.add('active');
             renderStats(); renderTabela();
             document.getElementById('filterBar').style.display = 'flex';
         } catch (e) { corpo.innerHTML = `<div class="text-danger p-3">Erro: ${e.message}</div>`; }
         finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Recarregar'; } }
+    }
+
+    function fecharSniperOrigem() {
+        const btn = document.getElementById('btnSniperOrigem');
+        const painel = document.getElementById('sniperOrigemPainel');
+        if (btn) { btn.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+        if (painel) painel.hidden = true;
+    }
+
+    function toggleSniperOrigem() {
+        const btn = document.getElementById('btnSniperOrigem');
+        const painel = document.getElementById('sniperOrigemPainel');
+        const aberto = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', aberto ? 'false' : 'true');
+        painel.hidden = aberto;
+    }
+
+    function renderSniperOrigem(analise, amostra) {
+        const nota = document.getElementById('sniperOrigemNota');
+        const btn = document.getElementById('btnSniperOrigem');
+        const head = document.getElementById('sniperOrigemHead');
+        const body = document.getElementById('sniperOrigemBody');
+        const mesEl = document.getElementById('sniperOrigemMes');
+        fecharSniperOrigem();
+        const total = analise && analise.status === 'success' ? analise.total_sorteios : null;
+        const base = total ? `nos ${Number(total).toLocaleString('pt-BR')} concursos` : 'em todo o histórico';
+        nota.textContent = `As 7 dezenas que mais saíram ${base}, em ordem numérica. O mês segue a mesma regra.`;
+        if (!analise || analise.status !== 'success' || !Array.isArray(analise.dados)) return;
+        const porDezena = new Map(analise.dados.map(item => [Number(item.dezena), item]));
+        const ranking = _sniper
+            .map(dz => porDezena.get(Number(dz)))
+            .filter(Boolean)
+            .sort((a, b) => b.freq - a.freq || a.dezena - b.dezena);
+        if (!ranking.length) return;
+        const pct = (v) => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        head.innerHTML = ranking.map(item => `<th>${fmtDez(item.dezena)}</th>`).join('');
+        body.innerHTML = ranking.map(item => `<td>${Number(item.freq).toLocaleString('pt-BR')} · ${pct(item.pct)}%</td>`).join('');
+        const meses = analise.dados_meses || [];
+        const mes = meses.find(m => m.mes_nome === amostra.sniper_mes_nome) || meses.slice().sort((a, b) => b.freq - a.freq)[0];
+        mesEl.textContent = mes
+            ? `${mes.mes_nome} saiu ${Number(mes.freq).toLocaleString('pt-BR')} vezes (${pct(mes.pct)}%), o maior entre os meses.`
+            : '';
+        btn.hidden = false;
     }
 
     function setFiltro(btn) { _filtro = btn.dataset.f; document.querySelectorAll('.ac-filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderTabela(); }
@@ -371,14 +599,55 @@
         return `<span class="${cls.join(' ')}" title="${nome}"><i class="far fa-calendar-alt"></i> ${acerto ? '✓ ' : ''}${abrev}</span>`;
     }
 
-    function renderDezenasConferencia(res, sniperSet) {
-        const ordem = res.dezenas_ordem && res.dezenas_ordem.length ? res.dezenas_ordem : res.dezenas;
-        const balls = res.dezenas.map(dz => `<span class="dez-ball ${sniperSet.has(dz) ? 'dg-hit' : 'dg-miss'}">${fmtDez(dz)}</span>`).join('');
-        const ordemBalls = ordem.map(dz => `<span class="dez-ball-ordem">${fmtDez(dz)}</span>`).join('');
-        return `<div class="dez-balls-col">
-            <div class="dez-balls">${balls}</div>
-            <div class="dez-balls-ordem">${ordemBalls}</div>
-        </div>`;
+    function bolasLinha(nums, classeBola, sniperSet) {
+        return `<span class="${classeBola === 'dez-ball' ? 'dez-balls' : 'dez-balls-ordem'}">` +
+            (nums || []).map(dz => {
+                const hit = sniperSet && sniperSet.has(dz) ? ' dg-hit' : (sniperSet ? ' dg-miss' : '');
+                return `<span class="${classeBola}${hit}">${fmtDez(dz)}</span>`;
+            }).join('') +
+            `</span>`;
+    }
+
+    function chaveData(valor) {
+        const texto = String(valor || '');
+        const br = texto.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (br) return `${br[3]}${br[2]}${br[1]}`;
+        const iso = texto.match(/(\d{4})-(\d{2})-(\d{2})/);
+        if (iso) return `${iso[1]}${iso[2]}${iso[3]}`;
+        return texto;
+    }
+
+    function ordenarColuna(chave) {
+        if (_ordem.chave === chave) _ordem.dir = _ordem.dir === 'asc' ? 'desc' : 'asc';
+        else _ordem = { chave, dir: (chave === 'mes' || chave === 'data') ? 'asc' : 'desc' };
+        renderTabela();
+    }
+
+    function compararResultados(a, b) {
+        const chave = _ordem.chave;
+        let va, vb;
+        if (chave === 'concurso') { va = Number(a.concurso) || 0; vb = Number(b.concurso) || 0; }
+        else if (chave === 'acertos') { va = Number(a.acertos_dez) || 0; vb = Number(b.acertos_dez) || 0; }
+        else if (chave === 'data') { va = chaveData(a.data); vb = chaveData(b.data); }
+        else if (chave === 'mes') { va = a.mes_nome || ''; vb = b.mes_nome || ''; }
+        else if (chave === 'dezenas') { va = (a.dezenas || []).map(fmtDez).join(''); vb = (b.dezenas || []).map(fmtDez).join(''); }
+        else {
+            const oa = a.dezenas_ordem && a.dezenas_ordem.length ? a.dezenas_ordem : (a.dezenas || []);
+            const ob = b.dezenas_ordem && b.dezenas_ordem.length ? b.dezenas_ordem : (b.dezenas || []);
+            va = oa.map(fmtDez).join('');
+            vb = ob.map(fmtDez).join('');
+        }
+        if (va < vb) return _ordem.dir === 'asc' ? -1 : 1;
+        if (va > vb) return _ordem.dir === 'asc' ? 1 : -1;
+        return (Number(b.concurso) || 0) - (Number(a.concurso) || 0);
+    }
+
+    function thOrdenavel(chave, rotulo) {
+        const ativo = _ordem.chave === chave;
+        const seta = ativo ? (_ordem.dir === 'asc' ? '▲' : '▼') : '';
+        return `<th class="conf-th${ativo ? ' conf-th-on' : ''}" onclick="ordenarColuna('${chave}')" title="Ordenar por ${rotulo}">
+            <span class="conf-th-inner">${rotulo}${seta ? `<span class="conf-th-seta">${seta}</span>` : ''}</span>
+        </th>`;
     }
 
     function renderStats() {
@@ -393,21 +662,33 @@
     }
 
     function renderTabela() {
-        const corpo = document.getElementById('conferencia-corpo'), sniperSet = new Set(_sniper), filt = _dados.filter(matchFiltro);
-        let html = '';
-        filt.forEach(res => {
+        const corpo = document.getElementById('conferencia-corpo');
+        const sniperSet = new Set(_sniper);
+        const filt = _dados.filter(matchFiltro).slice().sort(compararResultados);
+        const linhas = filt.map(res => {
             const [cls, lbl] = acTag(res.acertos_dez);
-            html += `<div class="result-row">
-            <div class="result-meta">
-                <div class="fw-bold" style="color:var(--primary);font-size:.82rem;">#${res.concurso}</div>
-                <div class="text-muted" style="font-size:.68rem;">${res.data}</div>
-                <div class="ac-tag ${cls} mt-1">${lbl}</div>
-                <div class="mt-1">${mesBadgeHtml(res.mes_nome, res.acerto_mes, res.mes_abrev)}</div>
-            </div>
-            ${renderDezenasConferencia(res, sniperSet)}
-        </div>`;
-        });
-        corpo.innerHTML = html || ''; document.getElementById('noResults').style.display = filt.length === 0 ? 'block' : 'none';
+            const ordem = res.dezenas_ordem && res.dezenas_ordem.length ? res.dezenas_ordem : res.dezenas;
+            return `<tr>
+                <td>${res.concurso}</td>
+                <td>${res.data || ''}</td>
+                <td>${bolasLinha(res.dezenas, 'dez-ball', sniperSet)}</td>
+                <td>${bolasLinha(ordem, 'dez-ball-ordem', null)}</td>
+                <td>${mesBadgeHtml(res.mes_nome, res.acerto_mes, res.mes_abrev)}</td>
+                <td><span class="ac-tag ${cls}">${lbl}</span></td>
+            </tr>`;
+        }).join('');
+        corpo.innerHTML = `<div class="conf-resultados-wrap"><table class="conf-resultados">
+            <thead><tr>
+                ${thOrdenavel('concurso', 'Concurso')}
+                ${thOrdenavel('data', 'Data')}
+                ${thOrdenavel('dezenas', 'Dezenas')}
+                ${thOrdenavel('ordem', 'Ordem')}
+                ${thOrdenavel('mes', 'Mês')}
+                ${thOrdenavel('acertos', 'Acertos')}
+            </tr></thead>
+            <tbody>${linhas}</tbody>
+        </table></div>`;
+        document.getElementById('noResults').style.display = filt.length === 0 ? 'block' : 'none';
     }
     // carregar via abas (cc_conferencia_scripts)
 </script>

@@ -75,6 +75,32 @@
         color: var(--primary-xdark);
     }
     #rg-root .rg-fonte { font-size: .72rem; color: #6c757d; }
+    #rg-root .rg-geo {
+        display: inline-grid;
+        grid-template-columns: repeat(4, 1.15rem) 2.2rem 3.3rem;
+        column-gap: .28rem;
+        row-gap: .28rem;
+        align-items: center;
+        justify-items: center;
+    }
+    #rg-root .rg-geo .d {
+        font-size: .95rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        text-align: center;
+        line-height: 1;
+    }
+    #rg-root .rg-geo .d31 {
+        font-size: .82rem;
+        letter-spacing: -.03em;
+    }
+    #rg-root .rg-geo .s {
+        justify-self: end;
+        font-size: .72rem;
+        font-weight: 400;
+        color: #94a3b8;
+        text-align: right;
+    }
 </style>
 
 <div class="container-fluid py-3" id="rg-root">
@@ -109,6 +135,12 @@
         <div class="col-6 col-lg"><div class="rg-kpi"><div class="lbl">Com sequência</div><div class="val">{{ k.pct_seq }}%</div></div></div>
         <div class="col-6 col-lg"><div class="rg-kpi"><div class="lbl">Final repetido</div><div class="val">{{ k.pct_final }}%</div></div></div>
         <div class="col-6 col-lg"><div class="rg-kpi"><div class="lbl">1 ou 2 repetidas</div><div class="val">{{ k.pct_rep_1ou2 }}%</div></div></div>
+    </div>
+
+    <div class="rg-section" id="rgTop3Sessoes" hidden>
+        <h2>Top 3 — Gaps, Régua e Geometria</h2>
+        <p class="small text-muted mb-2">Histórico inteiro. Só os números.</p>
+        <div class="row g-2" id="rgTop3Corpo"></div>
     </div>
 
     {% set p = data.painel %}
@@ -444,6 +476,80 @@
     </div>
     {% endif %}
 </div>
+<script>
+(function () {
+    var root = document.getElementById('rg-root');
+    var box = document.getElementById('rgTop3Sessoes');
+    var corpo = document.getElementById('rgTop3Corpo');
+    if (!root || !box || !corpo) return;
+    if ((root.textContent || '').indexOf('Sessão 1 — Gaps') >= 0) return;
+
+    function pct(qtd, total) {
+        var t = Number(total) || 0;
+        var n = t ? (100 * Number(qtd) / t) : 0;
+        var partes = n.toFixed(1).split('.');
+        return partes[0].padStart(2, '0') + ',' + partes[1] + '%';
+    }
+    function pad(n) {
+        var v = Number(n);
+        if (!isFinite(v)) return String(n);
+        var sign = v < 0 ? '-' : '';
+        return sign + String(Math.abs(Math.trunc(v))).padStart(2, '0');
+    }
+    function card(titulo, href, itens, nota) {
+        return '<div class="col-lg-4"><div class="rg-cat h-100"><h3><a href="' + href + '">' + titulo + '</a></h3><div class="p-2 small">'
+            + itens + (nota ? '<div class="text-muted mt-1">' + nota + '</div>' : '') + '</div></div></div>';
+    }
+
+    fetch('/analise/api/gaps-ciclo/contexto?janela=0&base=geral')
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+            if (!j || !j.sucesso) return;
+            var s1 = j.sessao1 || {};
+            var s2 = j.sessao2 || {};
+            var s3 = j.sessao3 || null;
+            var gaps = (s1.ranking_comparativo || []).slice().sort(function (a, b) {
+                return (Number(a.rank) || 99) - (Number(b.rank) || 99);
+            }).slice(0, 3);
+            var gapsHtml = gaps.length
+                ? '<div class="text-muted" style="font-size:.68rem">score · classificado · sorteio</div>' + gaps.map(function (t) {
+                    var seq = (t.gaps && t.gaps.length) ? t.gaps : String(t.padrao || '').split(/\s+/);
+                    var toks = seq.filter(function (x) { return x !== ''; }).map(pad).join(' ');
+                    var cor = t.rank === 1 ? '#c9a227' : (t.rank === 2 ? '#9aa0a6' : '#b87333');
+                    return '<div class="mb-1" style="white-space:nowrap"><i class="fas fa-trophy" title="' + t.rank + 'º" style="color:' + cor + ';width:1.15rem"></i> <strong>' + toks + '</strong>'
+                        + ' <span style="font-size:.72rem;font-weight:400;color:#94a3b8">' + t.score + ' · ' + (t.freq_classificado || 0) + ' · ' + (t.freq_sorteio || 0) + '</span></div>';
+                }).join('')
+                : '<div class="text-muted">Sem padrões.</div>';
+            var refs = (s2.referencias || []).filter(function (r) { return r && r.referencia != null; })
+                .sort(function (a, b) {
+                    return (Number(b.vezes) || 0) - (Number(a.vezes) || 0) || (Number(a.posicao) || 0) - (Number(b.posicao) || 0);
+                }).slice(0, 3);
+            var regHtml = refs.length
+                ? '<div class="text-muted" style="font-size:.68rem">posição · dezena</div>' + refs.map(function (r, i) {
+                    return '<div class="mb-1" style="white-space:nowrap"><strong>' + r.posicao + ' · ' + pad(r.referencia) + '</strong>'
+                        + ' <span style="font-size:.72rem;font-weight:400;color:#94a3b8">' + (r.vezes || 0) + ' · ' + pct(r.vezes, s2.total_concursos) + '</span></div>';
+                }).join('')
+                : '<div class="text-muted">Sem referência.</div>';
+            var html = card('Gaps', '/analise/gaps-ciclo/#gcSessao1', gapsHtml, String(s1.total_concursos || 0))
+                + card('Régua', '/analise/gaps-ciclo/#gcSessao2', regHtml, '');
+            if (s3 && s3.historico) {
+                var hist = s3.historico;
+                var tops = (hist.padroes_linha || []).slice(0, 3);
+                var geoHtml = tops.length ? '<div class="rg-geo">' + tops.map(function (t) {
+                    var nums = String(t.padrao || '').split(/\s*-\s*/).filter(function (x) { return x !== ''; });
+                    while (nums.length < 4) nums.push('');
+                    return nums.slice(0, 4).map(function (n) { return '<span class="d">' + n + '</span>'; }).join('')
+                        + '<span class="s">' + (t.frequencia || 0) + '</span><span class="s">' + pct(t.frequencia, hist.total) + '</span>';
+                }).join('') + '<span class="d"></span><span class="d"></span><span class="d"></span><span class="d d31">31</span><span class="s"></span><span class="s">' + pct(hist.com_31, hist.total) + '</span></div>'
+                    : '<div class="text-muted">Sem geometria.</div>';
+                html += card('Geometria Analítica', '/analise/gaps-ciclo/#gcSessao3', geoHtml, '');
+            }
+            corpo.innerHTML = html;
+            box.hidden = false;
+        })
+        .catch(function () {});
+})();
+</script>
 <script>
 (function () {
     const btn = document.getElementById('rg-gerar');

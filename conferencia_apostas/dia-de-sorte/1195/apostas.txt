@@ -1,0 +1,66 @@
+01 04 07 08 10 11 18 Jan
+19 21 23 24 25 27 28 Fev
+01 07 10 18 21 24 27 Mar
+04 08 11 19 23 25 28 Abr
+01 04 10 19 21 25 27 Mai
+07 08 11 18 23 24 28 Jun
+01 08 10 18 21 23 28 Jul
+04 07 11 19 24 25 27 Nov
+01 04 07 19 21 23 25 Dez
+08 10 11 18 24 27 28 Out
+
+
+Numeros ausentes...
+02, 03, 05, 06, 09, 12, 13, 14, 15, 16, 17, 20, 22, 26, 29, 30, 31
+
+05 11 14 15 19 26 27 
+
+
+05 14 15 26
+
+
+A Visão Macro (O Histograma): A primeira coisa que você bate o olho na tela é o volume total. Responde à pergunta: "Minha estratégia de eliminação está sendo segura ou estou perdendo muitas bolas com frequência?" (Ex: Se a coluna de "0 escapes" for a maior de todas, você está jogando com nível master de eficiência).
+
+A Visão Local (Tabela de Evolução): Se o histograma apontou que você errou 3 vezes num concurso recente, a Evolução logo abaixo permite que você veja linha a linha exatamente a gravidade daquele concurso.
+
+A Visão de Causa (Top Escapes Frequência): Descobrimos o "problema" no Histograma. A tabela final responde à pergunta de ouro: "Quem é o culpado? Qual é a dezena que está furando meu teto máximo?"
+
+O Plano de Ação (Insight + Popup): Pegamos tudo isso e colocamos no balão de dicas e no Top 3 Perigosas alertando: "Corrija a rota no próximo jogo incluindo essas fulanas".
+
+
+
+OBJETIVO:
+Aprimorar a rota existente `/analise-ciclos-dezenas` adicionando análise estatística sobre comportamento das dezenas em ciclos, sem alterar a lógica atual já funcional.
+
+CONTEXTO:
+A aplicação já possui uma análise de ciclos de dezenas baseada em concursos anteriores. A nova implementação deve ser complementar, mantendo total compatibilidade com os dados e estrutura existente.
+
+REQUISITOS FUNCIONAIS (BACKEND / LÓGICA):
+
+1. Calcular a MÉDIA de dezenas novas por ciclo:
+   - Considerar como "dezena nova" aquela que ainda não apareceu dentro do ciclo atual.
+   - Para cada ciclo completo, calcular:
+     → Quantidade total de dezenas novas
+   - Ao final, gerar:
+     → Média de dezenas novas por ciclo
+
+2. Calcular a MÉDIA de dezenas repetidas por ciclo:
+   - Considerar como "repetida" a dezena que já apareceu dentro do mesmo ciclo.
+   - Para cada ciclo:
+     → Quantidade total de dezenas repetidas
+   - Ao final:
+     → Média de repetição por ciclo
+
+3. Gerar indicadores adicionais:
+   - Percentual médio de renovação:
+     → (dezenas novas / total de dezenas do ciclo) * 100
+   - Percentual médio de repetição
+
+4. Estrutura esperada (exemplo JSON):
+```json
+{
+  "media_dezenas_novas": 8.4,
+  "media_dezenas_repetidas": 6.6,
+  "percentual_medio_novas": 56,
+  "percentual_medio_repetidas": 44
+}

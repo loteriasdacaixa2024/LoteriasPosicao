@@ -810,6 +810,84 @@
     bindSortGeo();
   }
 
+  function pctTxt(qtd, total) {
+    const t = Number(total) || 0;
+    const n = t ? (100 * Number(qtd) / t) : 0;
+    const partes = n.toFixed(1).split('.');
+    return partes[0].padStart(2, '0') + ',' + partes[1] + '%';
+  }
+
+  function renderPanorama(s1, s2, geo) {
+    const box = $('gcPanoramaCorpo');
+    if (!box) return;
+    const totalGaps = (s1 && s1.total_concursos) || 0;
+    const topGaps = ((s1 && s1.ranking_comparativo) || [])
+      .slice()
+      .sort((a, b) => (Number(a.rank) || 99) - (Number(b.rank) || 99))
+      .slice(0, 3);
+    const gapsHtml = topGaps.length
+      ? `<div class="gc-pan-legenda">score · classificado · sorteio</div>` + topGaps.map((t) => `<div class="gc-pan-dir"><span class="gc-pan-trofeu o${t.rank}" title="${t.rank}º"><i class="fas fa-trophy"></i></span>${padraoHtml(t.padrao, t.gaps)}<span class="gc-pan-sec">${t.score} · ${t.freq_classificado || 0} · ${t.freq_sorteio || 0}</span></div>`).join('')
+      : '<div class="text-muted">Sem padrões nesta base.</div>';
+
+    const totalReg = (s2 && s2.total_concursos) || 0;
+    const topReg = ((s2 && s2.referencias) || [])
+      .filter((r) => r && r.referencia != null)
+      .slice()
+      .sort((a, b) => (Number(b.vezes) || 0) - (Number(a.vezes) || 0) || (Number(a.posicao) || 0) - (Number(b.posicao) || 0))
+      .slice(0, 3);
+    const regHtml = topReg.length
+      ? `<div class="gc-pan-legenda">posição · dezena</div>` + topReg.map((r) => `<div class="gc-pan-dir"><span class="gc-pan-nums">${r.posicao}</span><span class="gc-tok">${pad(r.referencia)}</span><span class="gc-pan-sec">${r.vezes || 0} · ${pctTxt(r.vezes, totalReg)}</span></div>`).join('')
+      : '<div class="text-muted">Sem referência nesta base.</div>';
+
+    const hist = (geo && geo.historico) || {};
+    const topGeo = (hist.padroes_linha || []).slice(0, 3);
+    const geoHtml = topGeo.length
+      ? `<div class="gc-pan-geo">` + topGeo.map((t) => {
+          const nums = String(t.padrao || '').split(/\s*-\s*/).filter(Boolean);
+          while (nums.length < 4) nums.push('');
+          return nums.slice(0, 4).map((n) => `<span class="d">${escGeo(n)}</span>`).join('')
+            + `<span class="s">${t.frequencia || 0}</span><span class="s">${pctTxt(t.frequencia, hist.total)}</span>`;
+        }).join('')
+        + `<span class="d"></span><span class="d"></span><span class="d"></span><span class="d d31">31</span><span class="s"></span><span class="s">${pctTxt(hist.com_31, hist.total)}</span>`
+        + `</div>`
+      : '<div class="text-muted">Sem geometria nesta base.</div>';
+
+    box.innerHTML = `
+      <div class="col-lg-4">
+        <div class="gc-pan-card">
+          <h3><a href="/analise/gaps-ciclo/#gcSessao1" data-gc-alvo="gcSessao1">Gaps</a></h3>
+          <div class="gc-pan-bloco">${gapsHtml}</div>
+          <div class="small text-muted mt-1">${totalGaps}</div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="gc-pan-card">
+          <h3><a href="/analise/gaps-ciclo/#gcSessao2" data-gc-alvo="gcSessao2">Régua</a></h3>
+          <div class="gc-pan-bloco">${regHtml}</div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="gc-pan-card">
+          <h3><a href="/analise/gaps-ciclo/#gcSessao3" data-gc-alvo="gcSessao3">Geometria Analítica</a></h3>
+          <div class="gc-pan-bloco">${geoHtml}</div>
+        </div>
+      </div>`;
+    bindAlvos(box);
+  }
+
+  function bindAlvos(escopo) {
+    (escopo || document).querySelectorAll('[data-gc-alvo]').forEach((a) => {
+      if (a.dataset.gcBound === '1') return;
+      a.dataset.gcBound = '1';
+      a.addEventListener('click', (ev) => {
+        const el = document.getElementById(a.getAttribute('data-gc-alvo'));
+        if (!el) return;
+        ev.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }
+
   async function load() {
     const bl = $('gcLblBase');
     const jl = $('gcLblJanela');
@@ -829,6 +907,7 @@
       renderS2(true);
       geoLinhas = (j.sessao1 && j.sessao1.linhas) || [];
       geoPayload = j.sessao3 || geometriaLocal(geoLinhas);
+      renderPanorama(j.sessao1, reguaData, geoPayload);
       try { renderS3(); } catch (errGeo) {
         const c3 = $('gcCorpoS3');
         if (c3) c3.innerHTML = `<div class="alert alert-danger small mb-0">${escGeo(errGeo.message || errGeo)}</div>`;
@@ -839,6 +918,7 @@
     }
   }
 
+  bindAlvos(root);
   root.querySelectorAll('.base-tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       root.querySelectorAll('.base-tab-btn').forEach((b) => b.classList.remove('active'));

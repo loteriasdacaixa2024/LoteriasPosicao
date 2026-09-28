@@ -1,0 +1,91 @@
+http://localhost:5153/analise/analises-inteligentes/
+02 11 18 20 25 29 31 Abr
+02 03 14 17 18 20 27 Abr
+02 03 09 11 17 25 29 Abr
+01 03 11 17 28 29 31 Abr
+01 09 14 17 26 28 31 Abr
+01 11 14 17 24 27 29 Abr
+09 11 14 17 22 29 30 Abr
+01 02 05 14 17 18 26 Abr
+07 11 12 14 17 26 29 Abr
+07 11 17 24 26 29 31 Abr
+
+
+http://localhost:5153/geradores-elite/ciclo-apostas/?modo=recorrencia&n=6
+01 02 03 09 13 16 26 Mar
+09 11 13 16 18 26 31 Mar
+13 16 18 20 21 26 28 Mar
+09 11 13 16 18 19 26 Mar
+03 09 13 20 21 26 31 Mar
+09 13 16 20 21 26 28 Mar
+09 20 21 23 26 28 31 Mar
+01 02 03 09 13 16 31 Mar
+13 16 18 20 21 26 31 Mar
+01 02 03 07 09 13 31 Mar
+
+
+
+-----------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------
+http://localhost:5151/central-conferencias
+http://localhost:5151/analise-visual/#pane-simulador-elite
+quase igual
+http://localhost:5153/geradores-elite/ciclo-apostas/?modo=recorrencia&n=6
+
+Na rota http://localhost:5151/analise-visual/#pane-simulador-elite
+tenho um botão chamado super...quando  ele é clicado ele destaca exatamente 15 dezenas (segundo o sistema são  as mais votadas)
+até ai  tudo bem...
+o que eu  quero é o  seguinte...
+Separar estas 15 dezenas sugerida pelo  sistema...
+Ver quais  dezenas não estão entre elas...
+e das "Dezenas Sugeridas", "Dezenas Sobra" quero  escolher 07 para  fazer uma suposta aposta (apenas uma)
+e a partir  desta fazer o máximo de variação possivel, levando em concideração pares, impares, padrão, baixas, médias, altas, soma das dezenas  etc
+não quero  que seja criado lixo - aposta lixo
+
+Resumo... 
+Sistema sugere e verifica quais  dezenas não  estão  entre as sugestão
+Usuario seleciona exatamente 16 dezenas  - elas ficariam dispostas em outro local da tela... como se  fosse uma aposta real...
+Usando  estas 16 dezenas o sistema quando solicitado gera variações usando  estas  dezenas  (as variações será o máximo  que puder fazer) sendo que não poderá trazer apostas lixo..
+tipo todas baixas ou todas medias/altas...  ou seja sem apostas lixo... 
+o sistema deve informar quantas  apostas  foram geradas... quantas desenas sugerias quantas sobraram..etc
+E toda a  pagina deve ter explicação  sutil do  que a analise fará
+A intensão  é ver qual o sistema sugeriu...  eu vou usar umas dezenas da  sugestão  e algumas que sobraram... e depois poder ver pelo  menos o ultimo  resultado...
+
+em outras palavras... vejo a sugestão, escolho as dezenas.. e assim que sair o  resultado vejo se as dezenas que eu escolhi  valeu a pena ter escolhido...
+quero  fazer ao contrario da sugestão... pois elas nunca saem... kk
+
+Concurso 1286
+Sugerido
+02 03 04 06 07 11 12 13 17 20 22 23 24 26 31
+Sobra
+01 05 08 09 10 14 15 16 18 19 21 25 27 28 29 30
+Suposta aposta
+02 07 11 12 20 28 30
+Resultado Real
+02 04 08 10 12 17 23
+
+Resumo exetamente o que eu quero saber... 
+Quantos numeros do sugerido: 05
+Quantos numeros da sobra: 02 
+
+
+Concurso 1287
+Sugerido
+03 04 06 07 08 11 15 17 19 20 21 24 25 26 31
+Sobra
+01 02 05 09 10 12 13 14 16 18 22 23 27 28 29 30 
+Suposta aposta
+03 04 06 10 15 17 23
+Resultado Real
+? concurso ainda não apurado
+
+
+Resumo exetamente o que eu quero saber... 
+Quantos numeros do sugerido: ? concurso ainda não apurado
+Quantos numeros da sobra: ? concurso  ainda não apurado
+
+
+precisa deixar explicado o que  ocorre  aqui para o usuario..
+-----------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------
+
