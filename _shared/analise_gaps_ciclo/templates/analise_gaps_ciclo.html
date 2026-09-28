@@ -103,6 +103,21 @@
   #gc-root .gc-abaixo { background: #e0f2fe; color: #075985; font-weight: 700; }
   #gc-root .gc-zero { background: #dcfce7; color: #166534; font-weight: 700; }
   #gc-root .gc-delta { display: block; margin-top: 2px; font-size: .68rem; font-weight: 800; }
+  #gc-root .gc-volante { display: flex; flex-direction: column; gap: .35rem; }
+  #gc-root .gc-vol-row { display: flex; flex-wrap: wrap; gap: .28rem; }
+  #gc-root .gc-vol-cell {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2rem; height: 2rem; border-radius: 8px;
+    border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b;
+    font-size: .75rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  #gc-root .gc-vol-cell.on {
+    background: var(--accent, #ffd54f); color: var(--on-accent, #1a0a00);
+    border-color: #e6b800; font-weight: 800;
+  }
+  #gc-root .gc-vol-31 { margin-top: .15rem; }
+  #gc-root .gc-geo-bloco { font-size: .85rem; }
+  #gc-root .gc-geo-bloco strong { font-variant-numeric: tabular-nums; }
 </style>
 
 <div class="container-fluid py-3" id="gc-root"
@@ -143,6 +158,9 @@
     <strong>ordem de sorteio</strong> e <strong>classificado</strong>.
     Sessão 2 mede a <strong>Régua</strong>: o quanto cada dezena da combinação ordenada se afasta da referência da sua posição.
     Gap e régua não se substituem.
+    {% if modality_key == 'diadesorte' %}
+    Sessão 3 lê as mesmas dezenas como pontos no volante.
+    {% endif %}
   </p>
   <p class="small mb-3">
     {% if inicial_ciclo_no_menu_ciclos %}
@@ -161,7 +179,7 @@
     <div id="gcCorpoS1"><p class="text-muted small mb-0">Carregando…</p></div>
   </div>
 
-  <div class="gc-card p-3" id="gcSessao2">
+  <div class="gc-card p-3{% if modality_key == 'diadesorte' %} mb-3{% endif %}" id="gcSessao2">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
       <h2><span class="badge bg-success me-1">2</span> Sessão 2 — Régua</h2>
       <span class="small text-muted">Combinação ordenada · dezena − referência da posição</span>
@@ -173,11 +191,28 @@
     </p>
     <div id="gcCorpoS2"><p class="text-muted small mb-0">Carregando…</p></div>
   </div>
+
+  {% if modality_key == 'diadesorte' %}
+  <div class="gc-card p-3" id="gcSessao3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+      <h2><span class="badge bg-dark me-1">3</span> Sessão 3 — Geometria Analítica</h2>
+      <label class="small text-muted mb-0">
+        Concurso
+        <select id="gcGeoConcurso" class="form-select form-select-sm d-inline-block" style="width:auto"></select>
+      </label>
+    </div>
+    <p class="small text-muted mb-2">
+      As 7 dezenas do concurso viram pontos no volante: linhas 01–10, 11–20, 21–30 e o 31 isolado.
+      A base e a janela são as mesmas de Gaps e Régua.
+    </p>
+    <div id="gcCorpoS3"><p class="text-muted small mb-0">Carregando…</p></div>
+  </div>
+  {% endif %}
 </div>
 
 <script>
   window.__GC_SPEC__ = {{ gc_spec | tojson }};
   window.__GC_API__ = {{ api_base | tojson }};
 </script>
-<script src="/analise/gaps-ciclo/static/analise_gaps_ciclo.js?v=regua3"></script>
+<script src="/analise/gaps-ciclo/static/analise_gaps_ciclo.js?v=geo1"></script>
 {% endblock %}

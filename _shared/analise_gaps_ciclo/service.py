@@ -299,9 +299,13 @@ def contexto_analise(
     linhas = _linhas(modality_key, janela, base)
     s1 = analisar_gaps(modality_key, janela=janela, base=base, linhas=linhas)
     s2 = analisar_regua(modality_key, janela=janela, base=base, linhas=linhas)
-    return {
+    out = {
         "sucesso": True,
         "spec": spec,
         "sessao1": s1,
         "sessao2": s2,
     }
+    if modality_key == "diadesorte":
+        from analise_gaps_ciclo.geometria import analisar_geometria
+        out["sessao3"] = analisar_geometria(linhas)
+    return out

@@ -111,6 +111,65 @@
         color: #fff;
         box-shadow: inset 0 0 0 2px #664a00;
     }
+    #gd-root .gd-tipos-toggle {
+        border: none;
+        background: transparent;
+        padding: 0;
+        font-weight: 800;
+        color: inherit;
+        text-align: left;
+    }
+    #gd-root .gd-inicios {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, 6.5rem);
+        gap: .28rem .4rem;
+        justify-content: start;
+    }
+    #gd-root .gd-inicio {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        width: 6.5rem;
+        margin: 0;
+        padding: .18rem .2rem;
+        border-radius: 6px;
+        border: 1px solid #d7ddd8;
+        background: #fff;
+        color: #1a0a00;
+        font-size: .78rem;
+        font-weight: 800;
+        line-height: 1.2;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+    #gd-root .gd-tipo {
+        border-top: 1px solid #eee8d8;
+        padding: .75rem 0;
+    }
+    #gd-root .gd-tipo:first-child {
+        border-top: none;
+        padding-top: 0;
+    }
+    #gd-root .gd-tipo-comum {
+        background: #fffaf0;
+        border: 1px solid #f0e2b8;
+        border-radius: 8px;
+        padding: .75rem;
+        margin-bottom: .35rem;
+    }
+    #gd-root .gd-num {
+        display: inline-block;
+        min-width: 2.1rem;
+        margin: .12rem;
+        padding: .12rem .35rem;
+        border-radius: 6px;
+        border: 1px solid #e6a800;
+        background: #fffaf0;
+        color: #996e00;
+        font-size: .78rem;
+        font-weight: 800;
+        line-height: 1.2;
+        text-align: center;
+    }
     #gd-root .gd-ausente {
         display: inline-block;
         min-width: 2.1rem;
@@ -172,15 +231,23 @@
     }
     #gd-root tr.gd-linha.gd-sel {
         background: rgba(25, 135, 84, .14);
-        font-weight: 700;
     }
     #gd-root tr.gd-premio {
         background: #fff3cd;
         box-shadow: inset 4px 0 0 #b8860b;
-        font-weight: 800;
     }
     #gd-root tr.gd-premio.gd-sel {
         background: #ffe08a;
+    }
+    #gd-root td.gd-dezenas {
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+    #gd-root td.gd-dezenas span {
+        display: inline-block;
+        width: 1.85rem;
+        text-align: center;
     }
     #gd-root .gd-faixa {
         display: inline-block;
@@ -196,6 +263,22 @@
     #gd-root .gd-faixa-7 {
         background: #b8860b;
         color: #fff;
+    }
+    #gd-root .gd-pontos {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .35rem .75rem;
+        width: 100%;
+    }
+    #gd-root .gd-ponto-lbl {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        margin: 0;
+        font-size: .82rem;
+        font-weight: 500;
+        cursor: pointer;
     }
 </style>
 
@@ -276,6 +359,21 @@
                     <i class="fas fa-plus me-1"></i> Criar tabela
                 </button>
             </div>
+        </div>
+    </div>
+
+    <div class="gd-card mb-3">
+        <button type="button" class="gd-tipos-toggle" id="gdTiposToggle" aria-expanded="false" aria-controls="gdTiposCorpo">
+            <i class="fas fa-chevron-right me-2" id="gdTiposSeta"></i>As 625 tabelas possíveis
+        </button>
+        <div id="gdTiposCorpo" class="d-none mt-2">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                <p class="text-muted small mb-0" id="gdTiposResumo">Cada combinação de inícios cai num tipo. O tipo diz quantas dezenas entram e quais ficam de fora.</p>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="gdBtnTipos">
+                    <i class="fas fa-download me-1"></i> Baixar os tipos
+                </button>
+            </div>
+            <div id="gdTipos"></div>
         </div>
     </div>
 
@@ -526,14 +624,135 @@
             const on = tabela.dezenaFoco === n;
             return '<button type="button" class="gd-presente' + (on ? ' gd-presente-on' : '') + '" data-id="' + tabela.numero + '" data-dez="' + n + '">' + fmt(n) + '</button>';
         }).join('');
+        const fixas = { 4: 1, 6: 1, 11: 1, 15: 1, 17: 1, 22: 1, 26: 1, 28: 1 };
         const fora = ausentes.map(function (n) {
-            return '<span class="gd-ausente">' + fmt(n) + '</span>';
+            const fixa = fixas[n];
+            return '<span class="gd-ausente" title="'
+                + (fixa ? 'Não entra em nenhuma tabela' : 'Falta porque as colunas se alinharam')
+                + '">' + fmt(n) + '</span>';
         }).join('');
-        return '<div class="mb-2"><div class="small fw-bold" style="color:#996e00">Na tabela · ' + nums.length + ' dezenas de 01 a 31</div>'
+        const extras = ausentes.filter(function (n) { return !fixas[n]; });
+        const aviso = extras.length
+            ? '04, 06, 11, 15, 17, 22, 26 e 28 ficam de fora em qualquer tabela. Esta grade é de outro tipo: os números não são os das 23 mais comuns.'
+            : 'Estas 8 não entram em nenhuma tabela. Nas 450 combinações mais comuns, as 23 dezenas são sempre estas mesmas. Nos outros tipos, a quantidade e os números mudam.';
+        return '<div class="mb-2"><div class="d-flex flex-wrap align-items-center gap-2"><div class="small fw-bold" style="color:#996e00">Na tabela · ' + nums.length + ' dezenas de 01 a 31</div>'
+            + botaoNums(tabela, 'na', 'Baixar números') + '</div>'
             + '<div class="small text-muted">Clique numa dezena para ver o traço dela na grade. Laranja escuro: acerto do concurso.</div>'
             + '<div class="mt-1">' + chips + '</div>'
-            + '<div class="small fw-bold mt-2" style="color:#8a8f8c">Fora da tabela · ' + ausentes.length + '</div>'
+            + '<div class="d-flex flex-wrap align-items-center gap-2 mt-2"><div class="small fw-bold" style="color:#8a8f8c">Fora da tabela · ' + ausentes.length + '</div>'
+            + botaoNums(tabela, 'fora', 'Baixar números') + '</div>'
+            + '<div class="small text-muted">' + aviso + '</div>'
             + '<div class="mt-1">' + (fora || '<span class="small text-muted">Nenhuma. A tabela forma as 31.</span>') + '</div></div>';
+    }
+
+    function botaoNums(tabela, lado, rotulo) {
+        return '<button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 gd-baixar-nums" data-id="'
+            + tabela.numero + '" data-lado="' + lado + '"><i class="fas fa-download me-1"></i>' + rotulo + '</button>';
+    }
+
+    function linhaNums(nums) {
+        return nums.map(fmt).join(' ');
+    }
+
+    function baixarTxt(nome, texto) {
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = nome;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function listasDaTabela(tabela) {
+        const mapa = presentesNaGrade(tabela.grade);
+        const nums = Object.keys(mapa).map(Number).sort(function (a, b) { return a - b; });
+        const tem = {};
+        nums.forEach(function (n) { tem[n] = true; });
+        const fora = [];
+        for (let n = 1; n <= 31; n++) if (!tem[n]) fora.push(n);
+        return { nums: nums, fora: fora };
+    }
+
+    function baixarNumeros(tabela, lado) {
+        const listas = listasDaTabela(tabela);
+        const lista = lado === 'fora' ? listas.fora : listas.nums;
+        if (!lista.length) {
+            window.alert(lado === 'fora' ? 'Nenhuma dezena fora da tabela.' : 'Nenhuma dezena na tabela.');
+            return;
+        }
+        const inicios = (tabela.inicios || []).join('-');
+        const sufixo = lado === 'fora' ? 'fora' : 'na-tabela';
+        baixarTxt(
+            'tabela-' + tabela.numero + '-inicios-' + inicios + '-' + sufixo + '.txt',
+            linhaNums(lista) + '\r\n'
+        );
+    }
+
+    function tiposDeTabela() {
+        const impares = [1, 3, 5, 7, 9];
+        const pares = [0, 2, 4, 6, 8];
+        const grupos = {};
+        impares.forEach(function (a) {
+            pares.forEach(function (b) {
+                impares.forEach(function (c) {
+                    pares.forEach(function (d) {
+                        const nums = Object.keys(presentesNaGrade(montarGrade([a, b, c, d]))).map(Number).sort(function (x, y) {
+                            return x - y;
+                        });
+                        const id = nums.join(',');
+                        if (!grupos[id]) {
+                            const tem = {};
+                            nums.forEach(function (n) { tem[n] = true; });
+                            const fora = [];
+                            for (let n = 1; n <= 31; n++) if (!tem[n]) fora.push(n);
+                            grupos[id] = { nums: nums, fora: fora, qtd: 0, inicios: [] };
+                        }
+                        grupos[id].qtd += 1;
+                        grupos[id].inicios.push([a, b, c, d]);
+                    });
+                });
+            });
+        });
+        return Object.keys(grupos).map(function (id) { return grupos[id]; }).sort(function (a, b) {
+            return b.nums.length - a.nums.length || b.qtd - a.qtd;
+        });
+    }
+
+    function desenharTipos() {
+        const tipos = tiposDeTabela();
+        const maior = tipos.reduce(function (m, g) { return Math.max(m, g.qtd); }, 0);
+        const resumo = document.getElementById('gdTiposResumo');
+        resumo.textContent = '625 combinações de inícios · ' + tipos.length + ' tipos. Em cada tipo os números são os mesmos. A mais comum tem ' + maior + ' tabelas.';
+        document.getElementById('gdTipos').innerHTML = tipos.map(function (g) {
+            const comum = g.qtd === maior;
+            const dentro = g.nums.map(function (n) { return '<span class="gd-num">' + fmt(n) + '</span>'; }).join('');
+            const fora = g.fora.map(function (n) { return '<span class="gd-ausente">' + fmt(n) + '</span>'; }).join('');
+            const inicios = '<div class="gd-inicios">' + g.inicios.map(function (ini) {
+                return '<span class="gd-inicio">' + ini.map(function (n) {
+                    return '<span>' + n + '</span>';
+                }).join('') + '</span>';
+            }).join('') + '</div>';
+            return '<article class="gd-tipo' + (comum ? ' gd-tipo-comum' : '') + '">'
+                + '<div><span class="fw-bold">' + g.qtd + ' tabelas</span>'
+                + '<span class="text-muted small"> · ' + g.nums.length + ' dentro · ' + g.fora.length + ' fora</span></div>'
+                + '<div class="small text-muted mt-1">Inícios · coluna 1, 2, 3 e 4</div><div>' + inicios + '</div>'
+                + '<div class="small text-muted mt-1">Dentro</div><div>' + dentro + '</div>'
+                + '<div class="small text-muted mt-1">Fora</div><div>' + fora + '</div>'
+                + '</article>';
+        }).join('');
+    }
+
+    function baixarTipos() {
+        const blocos = tiposDeTabela().map(function (g) {
+            return g.qtd + ' tabelas · ' + g.nums.length + ' dentro · ' + g.fora.length + ' fora\r\n'
+                + 'Inícios\r\n'
+                + g.inicios.map(function (ini) { return ini.join(' '); }).join('\r\n') + '\r\n'
+                + linhaNums(g.nums) + '\r\n'
+                + linhaNums(g.fora);
+        });
+        baixarTxt('tipos-de-tabela.txt', blocos.join('\r\n\r\n') + '\r\n');
     }
 
     function contarPremios(listaConc) {
@@ -550,11 +769,108 @@
         return { seis: seis, sete: sete, concursosSete: concursosSete };
     }
 
-    function htmlFaixas(faixas) {
-        return '<div class="mt-2 d-flex flex-wrap gap-2">'
+    function pontosMarcados(tabela) {
+        if (!tabela.pontosBaixar) {
+            tabela.pontosBaixar = { 2: false, 3: false, 4: false, 5: false, 6: true, 7: true };
+        }
+        return tabela.pontosBaixar;
+    }
+
+    function contarPorPontos(listaConc) {
+        const contagem = { 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+        listaConc.forEach(function (item) {
+            if (contagem[item.pontos] != null) contagem[item.pontos] += 1;
+        });
+        return contagem;
+    }
+
+    function htmlBotaoExportar(tabela) {
+        const listaConc = (tabela.conferencia && tabela.conferencia.por_concurso) || [];
+        const contagem = contarPorPontos(listaConc);
+        const marcados = pontosMarcados(tabela);
+        const faixas = contarPremios(listaConc);
+        const caixas = [2, 3, 4, 5, 6, 7].filter(function (pontos) {
+            return contagem[pontos];
+        }).map(function (pontos) {
+            return '<label class="gd-ponto-lbl"><input type="checkbox" class="gd-ponto" data-id="'
+                + tabela.numero + '" value="' + pontos + '"' + (marcados[pontos] ? ' checked' : '') + '> '
+                + pontos + ' pontos <span class="text-muted">(' + contagem[pontos] + ')</span></label>';
+        }).join('');
+        if (!caixas) return '';
+        let html = '<div class="gd-pontos">' + caixas
+            + '<button type="button" class="btn btn-outline-success btn-sm gd-baixar-dezenas" data-id="'
+            + tabela.numero + '" title="Baixa só a coluna Dezenas acertadas dos pontos marcados">'
+            + '<i class="fas fa-download me-1"></i>Baixar dezenas acertadas</button>';
+        if (faixas.sete) {
+            html += '<button type="button" class="btn btn-outline-primary btn-sm gd-enviar-7" data-id="'
+                + tabela.numero + '"><i class="fas fa-share me-1"></i>Enviar 7 pontos para a aba 7</button>';
+        }
+        return html + '</div>';
+    }
+
+    function htmlFaixas(faixas, extra) {
+        return '<div class="mt-2 d-flex flex-wrap gap-2 align-items-center">'
             + '<span class="gd-faixa gd-faixa-6">6 acertos: ' + faixas.seis + '</span>'
             + '<span class="gd-faixa gd-faixa-7">7 acertos · premiação máxima: ' + faixas.sete + '</span>'
+            + (extra || '')
             + '</div>';
+    }
+
+    function textoDezenasAcertadas(tabela) {
+        const marcados = pontosMarcados(tabela);
+        const aceitos = [2, 3, 4, 5, 6, 7].filter(function (pontos) { return marcados[pontos]; });
+        const listaConc = (tabela.conferencia && tabela.conferencia.por_concurso) || [];
+        const linhas = listaConc.filter(function (item) {
+            return aceitos.indexOf(item.pontos) >= 0 && (item.dezenas || []).length;
+        }).sort(function (a, b) { return a.concurso - b.concurso; }).map(function (item) {
+            return (item.dezenas || []).map(fmt).join(' ');
+        });
+        return { aceitos: aceitos, texto: linhas.length ? linhas.join('\r\n') + '\r\n' : '' };
+    }
+
+    function baixarDezenasAcertadas(tabela) {
+        const saida = textoDezenasAcertadas(tabela);
+        if (!saida.aceitos.length) {
+            window.alert('Marque os pontos: 2, 3, 4, 5, 6 ou 7.');
+            return;
+        }
+        if (!saida.texto) {
+            window.alert('Nenhuma dezena acertada nos pontos marcados.');
+            return;
+        }
+        const blob = new Blob([saida.texto], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        const inicios = (tabela.inicios || []).join('-');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'tabela-' + tabela.numero + '-inicios-' + inicios + '-dezenas-' + saida.aceitos.join('-') + '.txt';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function enviarSete(tabela) {
+        const listaConc = (tabela.conferencia && tabela.conferencia.por_concurso) || [];
+        const ord = tabela.ordenacao || { coluna: 'concurso', direcao: 'asc' };
+        const linhas = ordenarConcursos(listaConc.filter(function (item) {
+            return item.pontos === 7;
+        }), ord).map(function (item) {
+            return (item.dezenas || []).map(fmt).join(' ');
+        });
+        if (!linhas.length) {
+            window.alert('Nenhum concurso com 7 acertos para enviar.');
+            return;
+        }
+        try {
+            sessionStorage.setItem('gd-checagem-7', JSON.stringify({
+                texto: linhas.join('\n'),
+                prefixos: [2, 3, 4, 5, 6, 7]
+            }));
+        } catch (e) {
+            window.alert('Não foi possível guardar os acertos para enviar.');
+            return;
+        }
+        window.location.href = '/analise/analises-inteligentes/?aba=checagem-seq';
     }
 
     function listaVisivel(listaConc) {
@@ -577,7 +893,7 @@
             return ''
                 + '<div class="mt-2"><span class="fw-bold">' + c.pontos.toLocaleString('pt-BR') + ' pontos no total</span>'
                 + '<span class="text-muted small"> · soma do concurso ' + c.primeiro + ' ao ' + c.ultimo + '</span></div>'
-                + htmlFaixas(contarPremios(listaConc))
+                + htmlFaixas(contarPremios(listaConc), htmlBotaoExportar(tabela))
                 + '<div class="mt-2">' + (chips || '<span class="text-muted small">Nenhuma dezena acertada.</span>') + '</div>';
         }
         const ativo = concursoAtivo(tabela);
@@ -586,16 +902,18 @@
         const linhas = ordenarConcursos(visivel, ord).map(function (item) {
             const sel = ativo && item.concurso === ativo.concurso;
             const premio = item.pontos === 7;
-            const nums = (item.dezenas || []).map(fmt).join(' ');
+            const nums = (item.dezenas || []).map(function (dez) {
+                return '<span>' + fmt(dez) + '</span>';
+            }).join('');
             return '<tr class="gd-linha' + (premio ? ' gd-premio' : '') + (sel ? ' gd-sel' : '') + '" data-id="' + tabela.numero + '" data-concurso="' + item.concurso + '">'
                 + '<td>' + item.concurso + '</td>'
                 + '<td>' + item.pontos + (premio ? ' · premiação máxima' : '') + '</td>'
-                + '<td>' + (nums || '—') + '</td></tr>';
+                + '<td class="gd-dezenas">' + (nums || '—') + '</td></tr>';
         }).join('');
         return ''
             + '<div class="mt-2 mb-2"><span class="fw-bold">' + c.pontos.toLocaleString('pt-BR') + ' pontos no total</span>'
             + '<span class="text-muted small"> · soma do concurso ' + c.primeiro + ' ao ' + c.ultimo + ', cada um conferido à parte</span></div>'
-            + htmlFaixas(contarPremios(listaConc))
+            + htmlFaixas(contarPremios(listaConc), htmlBotaoExportar(tabela))
             + (linhas
                 ? '<div class="gd-concursos" data-id="' + tabela.numero + '"><table class="table table-sm">'
                 : '<p class="small text-muted mb-0 mt-2">Nenhum concurso com 6 ou 7 acertos.</p>')
@@ -686,7 +1004,46 @@
         desenhar();
     });
 
+    document.getElementById('gdTiposToggle').addEventListener('click', function () {
+        const corpo = document.getElementById('gdTiposCorpo');
+        const aberto = corpo.classList.toggle('d-none') === false;
+        this.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+        document.getElementById('gdTiposSeta').className = 'fas me-2 ' + (aberto ? 'fa-chevron-down' : 'fa-chevron-right');
+    });
+
+    document.getElementById('gdBtnTipos').addEventListener('click', baixarTipos);
+
+    lista.addEventListener('change', function (ev) {
+        const chk = ev.target.closest('.gd-ponto');
+        if (!chk) return;
+        const tabelaChk = tabelas.find(function (t) { return t.numero === Number(chk.dataset.id); });
+        if (!tabelaChk) return;
+        pontosMarcados(tabelaChk)[Number(chk.value)] = chk.checked;
+    });
+
     lista.addEventListener('click', async function (ev) {
+        const baixarDez = ev.target.closest('.gd-baixar-dezenas');
+        if (baixarDez) {
+            const idDez = Number(baixarDez.dataset.id);
+            const tabelaDez = tabelas.find(function (t) { return t.numero === idDez; });
+            if (tabelaDez) baixarDezenasAcertadas(tabelaDez);
+            return;
+        }
+        if (ev.target.closest('.gd-ponto') || ev.target.closest('.gd-ponto-lbl')) return;
+        const numsBtn = ev.target.closest('.gd-baixar-nums');
+        if (numsBtn) {
+            const idNums = Number(numsBtn.dataset.id);
+            const tabelaNums = tabelas.find(function (t) { return t.numero === idNums; });
+            if (tabelaNums) baixarNumeros(tabelaNums, numsBtn.dataset.lado);
+            return;
+        }
+        const enviar = ev.target.closest('.gd-enviar-7');
+        if (enviar) {
+            const idEnv = Number(enviar.dataset.id);
+            const tabelaEnv = tabelas.find(function (t) { return t.numero === idEnv; });
+            if (tabelaEnv) enviarSete(tabelaEnv);
+            return;
+        }
         const excluir = ev.target.closest('.gd-excluir');
         if (excluir) {
             const id = Number(excluir.dataset.id);
@@ -826,6 +1183,7 @@
     carregar();
     chkOutros.checked = verOutros;
     marcarModo();
+    desenharTipos();
     desenhar();
 })();
 </script>

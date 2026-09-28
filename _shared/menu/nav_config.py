@@ -306,8 +306,8 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 "icon_color": "#0d6efd",
             },
             {
-                "title": "Análise por Gaps e Régua",
-                "desc": "Sessão 1 — Gaps  ·  Sessão 2 — Régua",
+                "title": "Gaps, Régua e Geometria Analítica",
+                "desc": "Sessão 1 — Gaps  ·  Sessão 2 — Régua  ·  Sessão 3 — Geometria",
                 "href": "/analise/gaps-ciclo/",
                 "icon": "fas fa-ruler-horizontal",
                 "icon_bg": "#eef2ff",
@@ -883,8 +883,16 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
         tem_gaps_ciclo = lambda _k: False  # noqa: E731
     if tem_gaps_ciclo(modality_key):
         novos_analise.append({
-            "title": "Análise por Gaps e Régua",
-            "desc": "Sessão 1 — Gaps  ·  Sessão 2 — Régua",
+            "title": (
+                "Gaps, Régua e Geometria Analítica"
+                if modality_key == "diadesorte"
+                else "Análise por Gaps e Régua"
+            ),
+            "desc": (
+                "Sessão 1 — Gaps  ·  Sessão 2 — Régua  ·  Sessão 3 — Geometria"
+                if modality_key == "diadesorte"
+                else "Sessão 1 — Gaps  ·  Sessão 2 — Régua"
+            ),
             "href": "/analise/gaps-ciclo/",
             "icon": "fas fa-ruler-horizontal",
             "icon_bg": "#eef2ff",

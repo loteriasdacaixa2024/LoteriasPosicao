@@ -334,10 +334,17 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
             if isinstance(texto, list):
                 texto = "\n".join(str(x) for x in texto)
             prefixo = data.get("prefixo") or data.get("prefixo_n") or 5
+            prefixos = data.get("prefixos")
+            if not isinstance(prefixos, list):
+                prefixos = None
             filtro = (data.get("filtro") or "dentro_novos").strip()
             base = data.get("base") or "geral"
             out = Svc.checar_sequencias(
-                str(texto), prefixo=int(prefixo or 5), filtro=filtro, base=base,
+                str(texto),
+                prefixo=int(prefixo or 5),
+                prefixos=prefixos,
+                filtro=filtro,
+                base=base,
             )
             return jsonify(out), (200 if out.get("sucesso") else 400)
         except Exception as e:
