@@ -3,7 +3,7 @@
         </a>
         {% for extra in nav_cfg.analise_extras %}
         <a class="mobile-link" href="{{ extra.href }}" onclick="closeMobileNav()">
-            <i class="{{ extra.icon }}"></i> {{ extra.title }}
+            <i class="{{ extra.icon }}"></i> {% if extra.href == '/analise/gaps-ciclo/' and nav_cfg.key == 'diadesorte' %}Gaps, Régua e Geometria Analítica{% else %}{{ extra.title }}{% endif %}
         </a>
         {% endfor %}
         <a class="mobile-link" href="{{ nav_cfg.modelos.href }}" onclick="closeMobileNav()">

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block title %}{% if modality_key == 'diadesorte' %}Análise por Gaps, Régua e Geometria Analítica{% else %}{{ page_title }}{% endif %} — {{ modality_nome }}{% endblock %}
 {% block content %}
 <style>
   {% if meses_cores %}
@@ -118,6 +118,24 @@
   #gc-root .gc-vol-31 { margin-top: .15rem; }
   #gc-root .gc-geo-bloco { font-size: .85rem; }
   #gc-root .gc-geo-bloco strong { font-variant-numeric: tabular-nums; }
+  #gcSessao1, #gcSessao2, #gcSessao3 { scroll-margin-top: 4.75rem; }
+  #gc-root .gc-geo-scroll {
+    max-height: 32rem; overflow: auto; border: 1px solid #e2e8f0; border-radius: 10px;
+  }
+  #gc-root .gc-geo-scroll thead th { position: sticky; top: 0; z-index: 2; }
+  #gc-root .gc-geo-table { font-size: .75rem; margin-bottom: 0; }
+  #gc-root .gc-geo-table td { white-space: nowrap; }
+  #gc-root .gc-geo-table td.gc-alinha { text-align: left; }
+  #gc-root .gc-geo-table td.gc-alinha .gc-toks { justify-content: flex-start; }
+  #gc-root .gc-tok-lbl {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.15rem; height: 1.45rem; font-size: .68rem; font-weight: 800; color: #64748b;
+  }
+  #gc-root .gc-tok-x {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 1.85rem; height: 1.45rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  #gc-root .gc-tok-vazio { visibility: hidden; }
 </style>
 
 <div class="container-fluid py-3" id="gc-root"
@@ -125,8 +143,8 @@
      data-gerador="{{ gerador_url }}">
   <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
-      <h1 class="h4 mb-1"><i class="fas fa-ruler-horizontal text-primary"></i> {{ page_title }}</h1>
-      <p class="text-muted small mb-0">{{ page_subtitle }} — {{ modality_nome }}</p>
+      <h1 class="h4 mb-1"><i class="fas fa-ruler-horizontal text-primary"></i> {% if modality_key == 'diadesorte' %}Análise por Gaps, Régua e Geometria Analítica{% else %}{{ page_title }}{% endif %}</h1>
+      <p class="text-muted small mb-0">{% if modality_key == 'diadesorte' %}Sessão 1 — Gaps  ·  Sessão 2 — Régua  ·  Sessão 3 — Geometria Analítica{% else %}{{ page_subtitle }}{% endif %} — {{ modality_nome }}</p>
     </div>
     <div class="d-flex flex-wrap gap-2 align-items-center">
       <span class="badge bg-secondary" id="gcLblBase">Geral</span>
@@ -162,6 +180,13 @@
     Sessão 3 lê as mesmas dezenas como pontos no volante.
     {% endif %}
   </p>
+  {% if modality_key == 'diadesorte' %}
+  <nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Sessões desta análise">
+    <a class="btn btn-sm btn-outline-primary" href="#gcSessao1">1. Gaps</a>
+    <a class="btn btn-sm btn-outline-success" href="#gcSessao2">2. Régua</a>
+    <a class="btn btn-sm btn-outline-dark" href="#gcSessao3">3. Geometria Analítica</a>
+  </nav>
+  {% endif %}
   <p class="small mb-3">
     {% if inicial_ciclo_no_menu_ciclos %}
     <a href="{{ inicial_ciclo_href }}">Inicial + Ciclo</a> está na Análise de Ciclos das Dezenas.
@@ -214,5 +239,5 @@
   window.__GC_SPEC__ = {{ gc_spec | tojson }};
   window.__GC_API__ = {{ api_base | tojson }};
 </script>
-<script src="/analise/gaps-ciclo/static/analise_gaps_ciclo.js?v=geo1"></script>
+<script src="/analise/gaps-ciclo/static/analise_gaps_ciclo.js?v=geo3"></script>
 {% endblock %}

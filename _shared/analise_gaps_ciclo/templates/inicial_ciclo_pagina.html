@@ -53,7 +53,7 @@
   {% if com_nav_ciclo %}
   {% include '_nav_ciclo_analise.html' %}
   {% else %}
-  <p class="small mb-3"><a href="{{ voltar_href or '/analise/gaps-ciclo/' }}"><i class="fas fa-arrow-left"></i> Voltar para Gaps e Régua</a></p>
+  <p class="small mb-3"><a href="{{ voltar_href or '/analise/gaps-ciclo/' }}"><i class="fas fa-arrow-left"></i> Voltar para {{ voltar_titulo|default('Gaps e Régua') }}</a></p>
   {% endif %}
 
   {% if indisponivel or not gc_spec %}

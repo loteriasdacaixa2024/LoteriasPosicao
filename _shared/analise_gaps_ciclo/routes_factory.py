@@ -101,6 +101,11 @@ def register_analise_gaps_ciclo(analise_bp: Blueprint, modality_key: str) -> Non
             gc_spec=spec,
             api_projetar="/analise/api/gaps-ciclo/projetar",
             voltar_href="/analise/gaps-ciclo/",
+            voltar_titulo=(
+                "Análise por Gaps, Régua e Geometria Analítica"
+                if modality_key == "diadesorte"
+                else "Gaps e Régua"
+            ),
         )
 
     @analise_bp.route("/gaps-ciclo/static/<path:filename>")
