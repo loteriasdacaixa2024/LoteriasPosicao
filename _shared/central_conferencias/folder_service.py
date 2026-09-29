@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Concursos em conferencia_apostas/NUMERO/apostas.json — versão multi-modalidade."""
+"""Concursos em conferencia_apostas/<modalidade>/<numero>/apostas.json."""
 import importlib
 import json
 import os
@@ -34,13 +34,39 @@ def _scoring_positional(cfg: dict) -> bool:
     return cfg.get("scoring") == "positional" or cfg.get("key") == "supersete"
 
 
-def _app_base_dir() -> str:
-    """Raiz do app Flask atual (cwd ao rodar o servidor)."""
-    return os.getcwd()
+def _repo_root() -> str:
+    """Raiz do repositório (pai de _shared), independente do cwd do app."""
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
-def _base_dir() -> str:
-    return os.path.join(_app_base_dir(), "conferencia_apostas")
+def _apostas_root() -> str:
+    return os.path.join(_repo_root(), "conferencia_apostas")
+
+
+def pasta_modalidade(cfg: dict) -> str:
+    slug = cfg.get("pasta_apostas") or cfg["key"]
+    return os.path.join(_apostas_root(), slug)
+
+
+def _arquivo_json(pasta: str) -> Optional[str]:
+    """apostas.json do conversor; se não houver, o primeiro *.json que não é cópia."""
+    preferido = os.path.join(pasta, "apostas.json")
+    if os.path.isfile(preferido):
+        return preferido
+    extras = []
+    try:
+        nomes = os.listdir(pasta)
+    except OSError:
+        return None
+    for nome in nomes:
+        baixo = nome.lower()
+        if not baixo.endswith(".json"):
+            continue
+        if "copia" in baixo or baixo.startswith("apostas_"):
+            continue
+        extras.append(os.path.join(pasta, nome))
+    extras.sort()
+    return extras[0] if extras else None
 
 
 def _load_sorteio_model(cfg: dict):
@@ -60,6 +86,69 @@ def _sorteadas(sorteio, cfg: dict) -> List[int]:
     return []
 
 
+_CFG_PRECO = {"diasorte": "diadesorte"}
+
+_MESES = {
+    "jan": 1, "janeiro": 1, "fev": 2, "fevereiro": 2, "mar": 3, "marco": 3, "março": 3,
+    "abr": 4, "abril": 4, "mai": 5, "maio": 5, "jun": 6, "junho": 6,
+    "jul": 7, "julho": 7, "ago": 8, "agosto": 8, "set": 9, "setembro": 9,
+    "out": 10, "outubro": 10, "nov": 11, "novembro": 11, "dez": 12, "dezembro": 12,
+}
+
+
+def _chave_preco(cfg: dict) -> str:
+    return _CFG_PRECO.get(cfg["key"], cfg["key"])
+
+
+def _mes_num(valor) -> Optional[int]:
+    if valor is None:
+        return None
+    if isinstance(valor, int) and 1 <= valor <= 12:
+        return valor
+    txt = str(valor).strip().lower()
+    if txt.isdigit():
+        n = int(txt)
+        return n if 1 <= n <= 12 else None
+    return _MESES.get(txt)
+
+
+def _preco_volante(cfg: dict, n_dezenas: int) -> float:
+    """Preço oficial da página Configurações (aposta simples editável + tabela Caixa)."""
+    chave = _chave_preco(cfg)
+    try:
+        from configuracoes.regras_modalidade import preco_aposta
+        from configuracoes.settings_service import obter_preco_simples
+        from configuracoes.config import MODALITIES
+
+        tabela = preco_aposta(chave, int(n_dezenas))
+        meta = MODALITIES.get(chave) or {}
+        simples_n = int((meta.get("aposta") or {}).get("simples") or cfg["combo_size"])
+        catalogo = preco_aposta(chave, simples_n)
+        atual = float(obter_preco_simples(chave))
+        if tabela is not None and catalogo:
+            return round(float(tabela) * (atual / float(catalogo)), 2)
+        if tabela is not None:
+            return round(float(tabela), 2)
+        if atual:
+            return round(atual, 2)
+    except Exception:
+        pass
+    return float(n_dezenas)
+
+
+def _rateios_concurso(cfg: dict, numero: int) -> Dict[int, float]:
+    if cfg.get("key") != "diasorte":
+        return {}
+    try:
+        from models.caixa_excel_premiacao import CaixaExcelPremiacaoDiaDeSorte
+        row = CaixaExcelPremiacaoDiaDeSorte.query.filter_by(concurso=int(numero)).first()
+    except Exception:
+        return {}
+    if not row:
+        return {}
+    return {7: float(row.rateio_7 or 0), 6: float(row.rateio_6 or 0)}
+
+
 def _classificar_faixa(acertos: int, cfg: dict) -> Optional[str]:
     for min_ac, label in cfg["faixas"]:
         if acertos >= min_ac:
@@ -67,10 +156,30 @@ def _classificar_faixa(acertos: int, cfg: dict) -> Optional[str]:
     return None
 
 
+def _faixa_combo(acertos: int, mes_ok: bool, cfg: dict):
+    """Melhor faixa de uma aposta simples. No Dia de Sorte, 5+ exige o mês; 4 não."""
+    faixas = cfg.get("faixas") or []
+    if cfg.get("has_mes"):
+        exige_mes = {5, 6, 7}
+        for minimo, label in faixas:
+            if acertos >= minimo and (minimo not in exige_mes or mes_ok):
+                return minimo, label
+        if mes_ok:
+            return 0, "Mês"
+        return None, None
+    for minimo, label in faixas:
+        if acertos >= minimo:
+            return minimo, label
+    return None, None
+
+
 def _analisar_aposta(
     numeros: List[int],
     sorteadas,
     cfg: dict,
+    mes_aposta=None,
+    mes_sorteio=None,
+    rateios: Optional[Dict[int, float]] = None,
 ) -> Dict[str, Any]:
     combo = cfg["combo_size"]
 
@@ -80,31 +189,42 @@ def _analisar_aposta(
         sort_list = list(sorteadas)
         ac = contar_acertos_posicional(seq, sort_list, colunas=combo)
         hits = digitos_acertados(seq, sort_list, colunas=combo)
-        faixa = _classificar_faixa(ac, cfg)
+        minimo, faixa = _faixa_combo(ac, True, cfg)
         faixas_unicas = [faixa] if faixa else []
+        unit = float((rateios or {}).get(minimo, 0) or 0) if minimo is not None else 0.0
+        detalhes = []
+        if faixa:
+            detalhes.append({"descricao": faixa, "quantidade": 1, "valor": round(unit, 2)})
         return {
-            "valor_aposta": float(combo),
-            "valor_premio": 0.0,
-            "valor_ganho": 0.0,
+            "valor_aposta": _preco_volante(cfg, combo),
+            "valor_premio": round(unit, 2),
+            "valor_ganho": round(unit, 2),
             "resultado": {
                 "acertos": ac,
                 "acertos_volante": ac,
                 "numeros_acertados": hits,
                 "faixa": faixa,
                 "faixas_atingidas": faixas_unicas,
-                "detalhes_premios": [],
-                "valor_premio": 0.0,
-                "premiado": ac >= cfg["faixas"][-1][0] if cfg["faixas"] else False,
+                "detalhes_premios": detalhes,
+                "valor_premio": round(unit, 2),
+                "premiado": bool(faixa),
+                "destaque": ac > 0,
+                "premio_maximo": bool(faixa) and minimo == (cfg["faixas"][0][0] if cfg.get("faixas") else combo),
             },
         }
 
     sorteadas_set: Set[int] = set(sorteadas) if not isinstance(sorteadas, set) else sorteadas
     unicos = sorted(set(numeros))
     qtd = len(unicos)
-    valor_aposta = float(qtd)  # simplificado; Mega usa tabela Caixa
+    valor_aposta = _preco_volante(cfg, qtd)
     volante_set = set(unicos)
     hits_volante = sorted(volante_set & sorteadas_set)
     acertos_volante = len(hits_volante)
+    mes_ok = True
+    if cfg.get("has_mes"):
+        n_ap = _mes_num(mes_aposta)
+        n_so = _mes_num(mes_sorteio)
+        mes_ok = n_ap is not None and n_so is not None and n_ap == n_so
 
     if qtd == combo:
         combos: List[Tuple[int, ...]] = [tuple(unicos)]
@@ -114,30 +234,49 @@ def _analisar_aposta(
         combos = []
 
     max_acertos = 0
-    faixas_atingidas: List[str] = []
+    contagem: Dict[str, Dict[str, Any]] = {}
     for c in combos:
         ac = len(set(c) & sorteadas_set)
         max_acertos = max(max_acertos, ac)
-        faixa = _classificar_faixa(ac, cfg)
-        if faixa:
-            faixas_atingidas.append(faixa)
+        minimo, faixa = _faixa_combo(ac, mes_ok, cfg)
+        if not faixa:
+            continue
+        item = contagem.setdefault(faixa, {"minimo": minimo, "quantidade": 0})
+        item["quantidade"] += 1
 
-    faixas_unicas = list(dict.fromkeys(faixas_atingidas))
+    detalhes = []
+    valor_ganho = 0.0
+    for faixa, item in contagem.items():
+        unit = float((rateios or {}).get(item["minimo"], 0) or 0)
+        valor = round(unit * item["quantidade"], 2)
+        valor_ganho += valor
+        detalhes.append({
+            "descricao": faixa,
+            "quantidade": item["quantidade"],
+            "valor": valor,
+        })
+    detalhes.sort(key=lambda d: -d["quantidade"])
+    faixas_unicas = [d["descricao"] for d in detalhes]
     faixa_display = " + ".join(faixas_unicas) if faixas_unicas else None
+    topo = cfg["faixas"][0][0] if cfg.get("faixas") else combo
+    premio_maximo = any(item.get("minimo") == topo for item in contagem.values())
 
     return {
         "valor_aposta": valor_aposta,
-        "valor_premio": 0.0,
-        "valor_ganho": 0.0,
+        "valor_premio": round(valor_ganho, 2),
+        "valor_ganho": round(valor_ganho, 2),
         "resultado": {
             "acertos": max_acertos,
             "acertos_volante": acertos_volante,
             "numeros_acertados": hits_volante,
             "faixa": faixa_display,
             "faixas_atingidas": faixas_unicas,
-            "detalhes_premios": [],
-            "valor_premio": 0.0,
-            "premiado": max_acertos >= cfg["faixas"][-1][0] if cfg["faixas"] else False,
+            "detalhes_premios": detalhes,
+            "valor_premio": round(valor_ganho, 2),
+            "premiado": bool(faixas_unicas),
+            "mes_ok": mes_ok if cfg.get("has_mes") else None,
+            "destaque": max_acertos >= 4 or acertos_volante >= 4 or bool(cfg.get("has_mes") and mes_ok),
+            "premio_maximo": premio_maximo,
         },
     }
 
@@ -314,11 +453,14 @@ class ConferenciaApostasFolderService:
             "apostas": apostas_out,
         }
 
+    def pasta_base(self) -> str:
+        return pasta_modalidade(self.cfg)
+
     def listar_concursos_disponiveis(self) -> List[Dict[str, Any]]:
-        base = _base_dir()
+        base = self.pasta_base()
         if not os.path.isdir(base):
-            os.makedirs(base, exist_ok=True)
             return []
+        slug = self.cfg.get("pasta_apostas") or self.cfg["key"]
         concursos = []
         for nome in os.listdir(base):
             pasta = os.path.join(base, nome)
@@ -328,8 +470,8 @@ class ConferenciaApostasFolderService:
                 numero = int(nome)
             except ValueError:
                 continue
-            arquivo_json = os.path.join(pasta, "apostas.json")
-            tem_json = os.path.isfile(arquivo_json)
+            arquivo_json = _arquivo_json(pasta)
+            tem_json = arquivo_json is not None
             total_apostas = 0
             if tem_json:
                 try:
@@ -343,21 +485,23 @@ class ConferenciaApostasFolderService:
             concursos.append({
                 "numero_concurso": numero,
                 "tem_json": tem_json,
+                "arquivo": os.path.basename(arquivo_json) if arquivo_json else None,
                 "total_apostas": total_apostas,
                 "resultado_disponivel": sorteio is not None,
                 "data_sorteio": sorteio.data if sorteio else None,
                 "dezenas_banco": dezenas_banco,
-                "pasta": nome,
+                "pasta": f"{slug}/{nome}",
             })
         concursos.sort(key=lambda x: x["numero_concurso"], reverse=True)
         return concursos
 
     def processar_concurso(self, numero_concurso: int) -> Dict[str, Any]:
-        pasta = os.path.join(_base_dir(), str(numero_concurso))
+        slug = self.cfg.get("pasta_apostas") or self.cfg["key"]
+        pasta = os.path.join(self.pasta_base(), str(numero_concurso))
         if not os.path.isdir(pasta):
             return {
                 "sucesso": False,
-                "mensagem": f"Pasta conferencia_apostas/{numero_concurso} não encontrada.",
+                "mensagem": f"Pasta conferencia_apostas/{slug}/{numero_concurso} não encontrada.",
             }
         sorteio = self.Sorteo.query.filter_by(concurso=numero_concurso).first()
         if not sorteio:
@@ -368,11 +512,11 @@ class ConferenciaApostasFolderService:
                     "Sincronize os sorteios antes de conferir."
                 ),
             }
-        arquivo_json = os.path.join(pasta, "apostas.json")
-        if not os.path.isfile(arquivo_json):
+        arquivo_json = _arquivo_json(pasta)
+        if not arquivo_json:
             return {
                 "sucesso": False,
-                "mensagem": f"Arquivo apostas.json não encontrado em conferencia_apostas/{numero_concurso}/",
+                "mensagem": f"Arquivo apostas.json não encontrado em conferencia_apostas/{slug}/{numero_concurso}/",
             }
         try:
             with open(arquivo_json, "r", encoding="utf-8") as f:
@@ -385,9 +529,18 @@ class ConferenciaApostasFolderService:
 
         sorteadas_list = list(_sorteadas(sorteio, self.cfg))
         sorteadas = sorteadas_list if _scoring_positional(self.cfg) else set(sorteadas_list)
+        mes_sorteio = None
+        if self.cfg.get("has_mes"):
+            if hasattr(sorteio, "mes_abrev"):
+                mes_sorteio = sorteio.mes_abrev()
+            else:
+                mes_sorteio = getattr(sorteio, "mes_nome", None) or getattr(sorteio, "mes_num", None)
+        rateios = _rateios_concurso(self.cfg, numero_concurso)
         apostas_out: List[Dict[str, Any]] = []
         erros: List[str] = []
         total_investido = 0.0
+        total_ganho = 0.0
+        distribuicao: Dict[str, Dict[str, Any]] = {}
 
         for idx, aposta in enumerate(dados.get("apostas", []), 1):
             numeros = aposta.get("numeros", [])
@@ -407,8 +560,21 @@ class ConferenciaApostasFolderService:
             if invalidas:
                 erros.append(f"Aposta {idx}: número(s) fora do volante: {invalidas}")
                 continue
-            analise = _analisar_aposta(numeros, sorteadas, self.cfg)
+            analise = _analisar_aposta(
+                numeros,
+                sorteadas,
+                self.cfg,
+                mes_aposta=aposta.get("mes"),
+                mes_sorteio=mes_sorteio,
+                rateios=rateios,
+            )
             total_investido += analise["valor_aposta"]
+            total_ganho += analise["valor_ganho"]
+            for det in analise["resultado"].get("detalhes_premios") or []:
+                faixa = det.get("descricao") or "Prêmio"
+                slot = distribuicao.setdefault(faixa, {"quantidade": 0, "total_ganho": 0.0})
+                slot["quantidade"] += int(det.get("quantidade") or 0)
+                slot["total_ganho"] = round(slot["total_ganho"] + float(det.get("valor") or 0), 2)
             fmt = (
                 (lambda n: str(n))
                 if self.cfg["key"] == "supersete"
@@ -419,7 +585,8 @@ class ConferenciaApostasFolderService:
                 "numeros_apostados": numeros,
                 "numeros": [fmt(n) for n in numeros],
                 "valor_aposta": analise["valor_aposta"],
-                "valor_ganho": 0.0,
+                "valor_ganho": analise["valor_ganho"],
+                "mes": aposta.get("mes"),
                 "acertos": analise["resultado"]["acertos"],
                 "dezenas_acertadas": [fmt(n) for n in analise["resultado"]["numeros_acertados"]],
                 "premiacao": analise["resultado"]["faixa"]
@@ -440,13 +607,18 @@ class ConferenciaApostasFolderService:
                 for n in dezenas_display
             ],
             "data_sorteio": sorteio.data,
+            "modalidade": self.cfg["nome"],
+            "mes_sorteado": mes_sorteio,
+            "dezenas_oficiais": self.combo,
             "resumo": {
                 "total_apostas_validas": len(apostas_out),
                 "total_apostas": len(apostas_out),
                 "total_investido": round(total_investido, 2),
-                "total_ganho": 0.0,
-                "lucro": round(-total_investido, 2),
-                "roi": 0.0,
+                "total_ganho": round(total_ganho, 2),
+                "lucro": round(total_ganho - total_investido, 2),
+                "roi": round((total_ganho - total_investido) / total_investido * 100, 2) if total_investido else 0.0,
+                "distribuicao_faixas": distribuicao,
+                "premiadas": sum(1 for a in apostas_out if (a.get("resultado") or {}).get("premiado")),
             },
             "erros": erros,
             "apostas": apostas_out,

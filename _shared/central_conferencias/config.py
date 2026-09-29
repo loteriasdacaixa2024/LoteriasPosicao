@@ -4,6 +4,7 @@
 CONF = {
     "lotofacil": {
         "key": "lotofacil",
+        "pasta_apostas": "lotofacil",
         "nome": "Lotofácil",
         "dezena_min": 1,
         "dezena_max": 25,
@@ -25,6 +26,7 @@ CONF = {
     },
     "supersete": {
         "key": "supersete",
+        "pasta_apostas": "supersete",
         "nome": "Super Sete",
         "dezena_min": 0,
         "dezena_max": 9,
@@ -47,6 +49,7 @@ CONF = {
     },
     "lotomania": {
         "key": "lotomania",
+        "pasta_apostas": "lotomania",
         "nome": "Lotomania",
         "dezena_min": 0,
         "dezena_max": 99,
@@ -62,6 +65,7 @@ CONF = {
     },
     "quina": {
         "key": "quina",
+        "pasta_apostas": "quina",
         "nome": "Quina",
         "dezena_min": 1,
         "dezena_max": 80,
@@ -82,6 +86,7 @@ CONF = {
     },
     "megasena": {
         "key": "megasena",
+        "pasta_apostas": "megasena",
         "nome": "Mega-Sena",
         "dezena_min": 1,
         "dezena_max": 60,
@@ -97,6 +102,7 @@ CONF = {
     },
     "maismilionaria": {
         "key": "maismilionaria",
+        "pasta_apostas": "mais-milionaria",
         "nome": "+Milionária",
         "dezena_min": 1,
         "dezena_max": 50,
@@ -112,6 +118,7 @@ CONF = {
     },
     "duplasena": {
         "key": "duplasena",
+        "pasta_apostas": "duplasena",
         "nome": "Dupla Sena",
         "dezena_min": 1,
         "dezena_max": 50,
@@ -127,6 +134,7 @@ CONF = {
     },
     "timemania": {
         "key": "timemania",
+        "pasta_apostas": "timemania",
         "nome": "Timemania",
         "dezena_min": 1,
         "dezena_max": 80,
@@ -142,6 +150,7 @@ CONF = {
     },
     "diasorte": {
         "key": "diasorte",
+        "pasta_apostas": "dia-de-sorte",
         "nome": "Dia de Sorte",
         "dezena_min": 1,
         "dezena_max": 31,

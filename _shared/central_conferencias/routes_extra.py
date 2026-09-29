@@ -6,7 +6,7 @@ import json
 from flask import jsonify, request, send_file
 
 from .conversor_service import ConversorApostasService
-from .folder_service import ConferenciaApostasFolderService, proximo_concurso, _base_dir
+from .folder_service import ConferenciaApostasFolderService, proximo_concurso
 from .config import get_conf
 
 
@@ -116,7 +116,7 @@ def register_central_conferencias_extras(bp, modality_key: str) -> None:
                 "sucesso": True,
                 "total": len(concursos),
                 "concursos": concursos,
-                "pasta_base": _base_dir(),
+                "pasta_base": _folder().pasta_base(),
                 "modalidade": cfg["nome"],
             })
         except Exception as e:

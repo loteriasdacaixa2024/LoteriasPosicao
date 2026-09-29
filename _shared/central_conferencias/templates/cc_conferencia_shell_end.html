@@ -52,7 +52,7 @@
             </div>
             <div class="card-body">
                 <p class="small text-muted mb-3">
-                    Pastas em <code>conferencia_apostas\NUMERO\apostas.json</code> — conferência com o banco local.
+                    Pastas em <code>conferencia_apostas\{{ cc_cfg.pasta_apostas }}\NUMERO\apostas.json</code> — conferência com o banco local.
                 </p>
                 <div id="cdLoading" class="text-center py-4">
                     <i class="fas fa-spinner fa-spin fa-2x text-success"></i>
@@ -80,7 +80,7 @@
                 </div>
                 <div id="cdEmpty" class="text-center py-5" style="display:none;">
                     <h5 class="text-muted">Nenhum concurso encontrado</h5>
-                    <p class="text-muted small">Crie <code>conferencia_apostas\NUMERO\apostas.json</code></p>
+                    <p class="text-muted small">Crie <code>conferencia_apostas\{{ cc_cfg.pasta_apostas }}\NUMERO\apostas.json</code></p>
                 </div>
                 <div id="cdErrorState" class="alert alert-danger mt-3" style="display:none;">
                     <span id="cdErrorMessage"></span>

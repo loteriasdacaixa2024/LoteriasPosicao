@@ -46,13 +46,21 @@
         const resultado = aposta.resultado || {};
         const nums = aposta.numeros_apostados || aposta.numeros || [];
         const numsInt = nums.map(n => parseInt(n, 10));
-        const temPremio = (aposta.valor_ganho || 0) > 0;
-        const acertados = new Set((resultado.numeros_acertados || []).map(n => parseInt(n, 10)));
+        const temPremio = !!(resultado.premiado || (aposta.valor_ganho || 0) > 0);
+        const acertosQtd = Math.max(Number(resultado.acertos) || 0, Number(resultado.acertos_volante) || 0, (resultado.numeros_acertados || []).length);
+        const fundoVerde = acertosQtd >= 4 || resultado.mes_ok === true || !!resultado.premiado;
+        const premioMaximo = !!resultado.premio_maximo;
+        const acertados = new Set((resultado.numeros_acertados || aposta.dezenas_acertadas || []).map(n => parseInt(n, 10)));
         const cat = _categoriaAposta(resultado);
 
         let cardClass = 'cr-aposta-card';
-        if (cat === 'sena' || cat === 'quina') cardClass += ' cr-card-premio-alto';
-        else if (cat === 'quadra') cardClass += ' cr-card-quadra';
+        let cardStyle = '';
+        if (premioMaximo) {
+            cardClass += ' cr-premio-maximo';
+            cardStyle = 'background:linear-gradient(160deg,#fff8e1,#ffe082);border:2px solid #f9a825;';
+        } else if (fundoVerde) {
+            cardStyle = 'background:#e8f6ee;';
+        }
 
         const badgeClasse =
             cat === 'sena' || cat === 'quina' ? 'cr-badge-ms cr-badge-ms-alto' :
@@ -63,18 +71,23 @@
 
         return `
         <div class="col-md-6 col-lg-4">
-            <div class="card h-100 ${cardClass}">
+            <div class="card h-100 ${cardClass}" style="${cardStyle}">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h6 class="mb-0" style="color:${MS.c20}">Aposta ${aposta.numero_aposta}</h6>
-                        ${temPremio ? '<i class="fas fa-trophy" style="color:' + MS.c40 + '"></i>' : ''}
+                        ${premioMaximo ? '<span class="cr-trofeu-max" title="Prêmio máximo"><i class="fas fa-trophy"></i></span>' : ''}
                     </div>
                     <span class="badge mb-2" style="background:${MS.c25};color:${MS.c100}"><i class="fas fa-file-code"></i> JSON</span>
                     <div class="d-flex flex-wrap gap-1 mb-2">
-                        ${numsInt.map((n, i) =>
-                            `<span class="${_classeDezenaCard(n, acertados, cat, i, sorteadosSet)}">${String(n).padStart(2, '0')}</span>`
-                        ).join('')}
+                        ${numsInt.map((n, i) => {
+                            const hit = acertados.has(n);
+                            const estilo = hit
+                                ? 'background:#198754;color:#fff;font-weight:700;'
+                                : 'background:#f1f3f5;color:#333;';
+                            return `<span class="${_classeDezenaCard(n, acertados, cat, i, sorteadosSet)}" style="display:inline-flex;align-items:center;justify-content:center;min-width:1.7rem;height:1.7rem;border-radius:999px;font-size:.8rem;${estilo}">${String(n).padStart(2, '0')}</span>`;
+                        }).join('')}
                     </div>
+                    ${premioMaximo ? '<div class="badge mb-2 cr-selo-max">Prêmio máximo</div>' : ''}
                     <div class="mb-2">
                         <span class="badge ${badgeClasse}">
                             ${acertosVolante} acerto(s) no volante
@@ -83,13 +96,14 @@
                         </span>
                     </div>
                     ${resultado.detalhes_premios && resultado.detalhes_premios.length ? `
-                        <div class="alert alert-success py-2 px-2 mb-2 small">
+                        <div class="alert ${fundoVerde ? 'alert-success' : 'alert-light border'} py-2 px-2 mb-2 small">
                             ${resultado.detalhes_premios.map(p => `
                                 <div class="d-flex justify-content-between">
                                     <span><strong>${p.descricao}</strong></span>
                                     <span class="text-success fw-bold">${fmtMoeda(p.valor)}</span>
                                 </div>`).join('')}
                         </div>` : ''}
+                    <div class="small text-muted">Aposta ${fmtMoeda(aposta.valor_aposta || 0)}${aposta.mes ? ' · mês ' + aposta.mes : ''}</div>
                     <div class="fw-bold ${temPremio ? 'text-success' : 'text-muted'}">
                         ${temPremio ? 'Ganhos: ' : ''}${fmtMoeda(aposta.valor_ganho || 0)}
                     </div>
@@ -127,7 +141,7 @@
                 <div class="card border-0 shadow-sm cr-cobertura-card">
                     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
                         <h6 class="mb-0" style="color:${MS.c30}"><i class="fas fa-bullseye"></i> Cobertura de Acertos Inteligente</h6>
-                        <span class="badge rounded-pill" style="background:${MS.c35};color:${MS.c100}">${cobertas.length}/${DEZENAS_SORTEIO} Cobertas</span>
+                        <span class="badge rounded-pill" style="background:${MS.c35};color:${MS.c100}">${cobertas.length}/${sorteados.length} Cobertas</span>
                     </div>
                     <div class="card-body py-3">
                         <div class="row align-items-center">
@@ -210,24 +224,31 @@
         }
         const sorteadosSet = new Set(sorteados.map(n => parseInt(n, 10)));
 
-        let maxDezenas = DEZENAS_SORTEIO;
+        const oficiais = sorteados.length || DEZENAS_SORTEIO;
+        let maxDezenas = oficiais;
         (resultado.apostas || []).forEach(ap => {
             const n = (ap.numeros_apostados || []).length;
             if (n > maxDezenas) maxDezenas = n;
         });
-        const numColunas = Math.max(DEZENAS_SORTEIO, Math.min(maxDezenas, 20));
+        const numColunas = Math.max(oficiais, Math.min(maxDezenas, 20));
 
         let tableRows = '';
         (resultado.apostas || []).forEach((aposta, rowIdx) => {
             const numeros = aposta.numeros_apostados || [];
-            if (numeros.length < DEZENAS_SORTEIO) return;
+            if (numeros.length < oficiais) return;
 
             const volanteSet = new Set(numeros.map(n => parseInt(n, 10)));
             const numerosOrdenados = [...volanteSet].sort((a, b) => a - b).slice(0, numColunas);
             const dataLabel = `${resultado.resultado_sorteio?.data || resultado.data_sorteio || ''} - ${concurso} - ${aposta.numero_aposta ?? rowIdx + 1}`;
 
-            let rowHtml = `<tr style="height: 32px;">
-                <td class="align-middle fw-bold text-muted text-center text-nowrap p-1" style="font-size: 0.85rem;">${dataLabel}</td>`;
+            const resLinha = aposta.resultado || {};
+            const acertosLinha = Math.max(Number(resLinha.acertos) || 0, Number(resLinha.acertos_volante) || 0, (resLinha.numeros_acertados || []).length);
+            const linhaMax = !!resLinha.premio_maximo;
+            const linhaPremio = linhaMax
+                ? 'background:#fff3cd;'
+                : ((acertosLinha >= 4 || resLinha.mes_ok === true || resLinha.premiado) ? 'background:#e8f6ee;' : '');
+            let rowHtml = `<tr style="height: 32px;${linhaPremio}">
+                <td class="align-middle fw-bold text-muted text-center text-nowrap p-1" style="font-size: 0.85rem;">${dataLabel}${linhaMax ? ' ★' : ''}</td>`;
 
             let jogadosHtml = '';
             for (let i = 0; i < numColunas; i++) {
@@ -246,7 +267,7 @@
 
             let sorteadosHtml = '';
             for (let i = 0; i < numColunas; i++) {
-                if (i < DEZENAS_SORTEIO) {
+                if (i < oficiais) {
                     const sort = sorteados[i];
                     const bgClass = _bgClasseVolante(sort, volanteSet);
                     sorteadosHtml += `<td class="align-middle text-center bg-white" style="width:30px; border: 1px dashed #dee2e6; padding: 0.25rem;">
@@ -263,7 +284,7 @@
             let somaAbsRow = 0;
             let countDeltasRow = 0;
             for (let i = 0; i < numColunas; i++) {
-                if (i < DEZENAS_SORTEIO && numerosOrdenados[i] !== undefined) {
+                if (i < oficiais && numerosOrdenados[i] !== undefined) {
                     const delta = numerosOrdenados[i] - sorteados[i];
                     somaAbsRow += Math.abs(delta);
                     countDeltasRow++;
@@ -380,7 +401,7 @@
                             ${numsOficiais.map(n => `
                                 <span class="cr-bola-oficial">${String(n).padStart(2, '0')}</span>`).join('')}
                         </div>
-                        <span class="badge bg-success mt-2">Mega-Sena</span>
+                        <span class="badge bg-success mt-2">${resultado.modalidade || 'Conferência'}${resultado.mes_sorteado ? ' · mês ' + resultado.mes_sorteado : ''}</span>
                     </div>
                 </div>
             </div>

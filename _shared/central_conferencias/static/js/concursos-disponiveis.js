@@ -167,9 +167,15 @@
             const data = await r.json();
             if (data.sucesso) {
                 resultadosProcessamento[concurso] = data;
+                const faixas = data.resumo.distribuicao_faixas || {};
+                const partes = Object.entries(faixas)
+                    .filter(([, d]) => d && d.quantidade)
+                    .map(([nome, d]) => `${d.quantidade}× ${nome}`);
+                const premio = partes.length ? partes.join(', ') : 'sem faixa premiada';
                 statusEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle"></i> OK — `
-                    + `${data.resumo.quadras} quadra(s), ${data.resumo.quinas} quina(s), `
-                    + `${data.resumo.senas} sena(s) · ${data.resumo.total_apostas_validas} apostas</span>`;
+                    + `${data.resumo.premiadas || 0} premiada(s) · ${premio} · `
+                    + `${data.resumo.total_apostas_validas} apostas · investido `
+                    + `R$ ${Number(data.resumo.total_investido || 0).toFixed(2).replace('.', ',')}</span>`;
             } else {
                 statusEl.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle"></i> ${data.mensagem || 'Erro'}</span>`;
             }
