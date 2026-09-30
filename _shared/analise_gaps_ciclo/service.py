@@ -305,7 +305,6 @@ def contexto_analise(
         "sessao1": s1,
         "sessao2": s2,
     }
-    if modality_key == "diadesorte":
-        from analise_gaps_ciclo.geometria import analisar_geometria
-        out["sessao3"] = analisar_geometria(linhas)
+    from analise_gaps_ciclo.geometria import analisar_geometria
+    out["sessao3"] = analisar_geometria(linhas, modality_key)
     return out

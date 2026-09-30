@@ -536,6 +536,11 @@
       .slice(0, 8);
     return {
       sucesso: true,
+      isolado: 31,
+      posicional: false,
+      rows: 4,
+      cols: 10,
+      volante: [rangeGeo(1, 10), rangeGeo(11, 20), rangeGeo(21, 30), [31]],
       por_concurso: por,
       historico: { total, com_31: com, sem_31: Math.max(0, total - com), padroes_linha: top },
     };
@@ -546,13 +551,22 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  function volanteHtml(dezenas) {
-    const marcadas = new Set((dezenas || []).map((n) => Number(n)));
-    const linhas = [rangeGeo(1, 10), rangeGeo(11, 20), rangeGeo(21, 30), [31]];
+  function temIsolado() {
+    return !!(geoPayload && geoPayload.isolado != null);
+  }
+
+  function volanteHtml(dezenas, ind) {
+    const posicional = !!(geoPayload && geoPayload.posicional);
+    const linhas = (geoPayload && geoPayload.volante && geoPayload.volante.length)
+      ? geoPayload.volante
+      : [rangeGeo(1, 10), rangeGeo(11, 20), rangeGeo(21, 30), [31]];
+    const marcadasNum = new Set((dezenas || []).map((n) => Number(n)));
+    const marcadasPos = new Set((ind && ind.celulas) || []);
     return `<div class="gc-volante">${linhas.map((linha, i) => (
-      `<div class="gc-vol-row${i === 3 ? ' gc-vol-31' : ''}">${linha.map((n) => (
-        `<span class="gc-vol-cell${marcadas.has(n) ? ' on' : ''}">${pad(n)}</span>`
-      )).join('')}</div>`
+      `<div class="gc-vol-row${linha.length === 1 ? ' gc-vol-31' : ''}">${linha.map((n, c) => {
+        const on = posicional ? marcadasPos.has(i + ',' + c) : marcadasNum.has(Number(n));
+        return `<span class="gc-vol-cell${on ? ' on' : ''}">${pad(n)}</span>`;
+      }).join('')}</div>`
     )).join('')}</div>`;
   }
 
@@ -601,21 +615,23 @@
   }
 
   function htmlColunas(ind) {
-    return toksFixos(ind.colunas || [], 7);
+    const cols = ind.colunas || [];
+    return toksFixos(cols, temIsolado() ? 7 : (cols.length || 1));
   }
 
   function htmlRepetidas(ind) {
     const reps = ind.colunas_repetidas || [];
     if (!reps.length) return toksFixos([], 1);
-    return reps.map((c) => (
-      `<span class="gc-toks"><span class="gc-tok">${pad(c.coluna)}</span><span class="gc-tok-x">×${escGeo(c.qtd)}</span>${toksFixos(c.dezenas || [], 4)}</span>`
-    )).join('');
+    return reps.map((c) => {
+      const dz = c.dezenas || [];
+      return `<span class="gc-toks"><span class="gc-tok">${pad(c.coluna)}</span><span class="gc-tok-x">×${escGeo(c.qtd)}</span>${toksFixos(dz, temIsolado() ? 4 : (dz.length || 1))}</span>`;
+    }).join('');
   }
 
   function htmlConcentracao(ind) {
     const faixas = (ind.concentracao && ind.concentracao.faixas) || {};
     const linhas = (ind.concentracao && ind.concentracao.linhas_mais) || [];
-    return `<span class="gc-toks"><span class="gc-tok-lbl">L</span>${toksFixos(linhas, 3)}<span class="gc-tok-lbl">E</span><span class="gc-tok">${pad(faixas.esquerda || 0)}</span><span class="gc-tok-lbl">C</span><span class="gc-tok">${pad(faixas.centro || 0)}</span><span class="gc-tok-lbl">D</span><span class="gc-tok">${pad(faixas.direita || 0)}</span></span>`;
+    return `<span class="gc-toks"><span class="gc-tok-lbl">L</span>${toksFixos(linhas, temIsolado() ? 3 : (linhas.length || 1))}<span class="gc-tok-lbl">E</span><span class="gc-tok">${pad(faixas.esquerda || 0)}</span><span class="gc-tok-lbl">C</span><span class="gc-tok">${pad(faixas.centro || 0)}</span><span class="gc-tok-lbl">D</span><span class="gc-tok">${pad(faixas.direita || 0)}</span></span>`;
   }
 
   function texto31(ind) {
@@ -702,6 +718,7 @@
     if (!regs.length) {
       return '<p class="small text-muted mt-3 mb-0">Ainda não há concurso anterior ao último nesta base.</p>';
     }
+    const iso = temIsolado();
     const body = regs.map((r) => `
       <tr>
         <td>${escGeo(r.concurso)}</td>
@@ -717,7 +734,7 @@
         <td>${r.diagonais}</td>
         <td>${escGeo(r.distancias)}</td>
         <td>${escGeo(r.centro)}</td>
-        <td>${escGeo(r.situacao_31)}</td>
+        ${iso ? `<td>${escGeo(r.situacao_31)}</td>` : ''}
       </tr>`).join('');
     return `
       <div class="mt-3">
@@ -739,7 +756,7 @@
               ${thGeo('Diagonais', 'diagonais')}
               ${thGeo('Distâncias', 'dist_media')}
               ${thGeo('Centro', 'centro')}
-              ${thGeo('31', 'tem_31')}
+              ${iso ? thGeo(String(geoPayload.isolado), 'tem_31') : ''}
             </tr></thead>
             <tbody>${body}</tbody>
           </table>
@@ -778,14 +795,18 @@
     }
     const row = linhas.find((r) => String(r.concurso) === String(geoConc)) || linhas[0];
     const ind = (geoPayload.por_concurso || {})[String(row.concurso)] || {};
-    const dezenas = row.dezenas_classificado || row.dezenas || [];
+    const dezenas = (geoPayload.posicional ? row.dezenas_sorteio : null) || row.dezenas_classificado || row.dezenas || [];
     const hist = geoPayload.historico || {};
     const disp = ind.dispersao || {};
+    const iso = temIsolado();
+    const notaIso = iso
+      ? ` · com ${geoPayload.isolado}: ${escGeo(hist.com_31 || 0)} · sem ${geoPayload.isolado}: ${escGeo(hist.sem_31 || 0)}`
+      : '';
     corpo.innerHTML = `
       <div class="row g-3">
         <div class="col-lg-5">
           <div class="gc-col-title">Volante</div>
-          ${volanteHtml(dezenas)}
+          ${volanteHtml(dezenas, ind)}
           <p class="small text-muted mt-2 mb-0">Dezenas: ${escGeo((dezenas || []).map(pad).join(' '))}</p>
         </div>
         <div class="col-lg-7 gc-geo-bloco">
@@ -802,8 +823,8 @@
           <p class="mb-1"><strong>Diagonais:</strong> ${listaFmt(ind.diagonais)}</p>
           <p class="mb-1"><strong>Distâncias:</strong> ${escGeo(textoDistancias(ind))}</p>
           <p class="mb-1"><strong>Centro:</strong> ${escGeo((ind.centro || {}).rotulo || '—')}</p>
-          <p class="mb-1"><strong>31:</strong> ${escGeo(texto31(ind))}</p>
-          <p class="small text-muted mb-0">Nesta janela: ${escGeo(hist.total || 0)} concursos · com 31: ${escGeo(hist.com_31 || 0)} · sem 31: ${escGeo(hist.sem_31 || 0)}. Padrão de linhas mais comum: ${escGeo((hist.padroes_linha && hist.padroes_linha[0] && hist.padroes_linha[0].padrao) || '—')} (${escGeo((hist.padroes_linha && hist.padroes_linha[0] && hist.padroes_linha[0].frequencia) || 0)}).</p>
+          ${iso ? `<p class="mb-1"><strong>${escGeo(geoPayload.isolado)}:</strong> ${escGeo(texto31(ind))}</p>` : ''}
+          <p class="small text-muted mb-0">Nesta janela: ${escGeo(hist.total || 0)} concursos${notaIso}. Padrão de linhas mais comum: ${escGeo((hist.padroes_linha && hist.padroes_linha[0] && hist.padroes_linha[0].padrao) || '—')} (${escGeo((hist.padroes_linha && hist.padroes_linha[0] && hist.padroes_linha[0].frequencia) || 0)}).</p>
         </div>
       </div>
       ${tabelaGeoHtml()}`;
@@ -841,14 +862,26 @@
 
     const hist = (geo && geo.historico) || {};
     const topGeo = (hist.padroes_linha || []).slice(0, 3);
+    const isoPan = geo && geo.isolado != null;
+    let nColsGeo = isoPan ? 4 : 0;
+    if (!nColsGeo) {
+      topGeo.forEach((t) => {
+        const partes = String(t.padrao || '').split(/\s*-\s*/).filter(Boolean);
+        if (partes.length > nColsGeo) nColsGeo = partes.length;
+      });
+    }
+    if (!nColsGeo) nColsGeo = 4;
     const geoHtml = topGeo.length
-      ? `<div class="gc-pan-geo">` + topGeo.map((t) => {
+      ? `<div class="gc-pan-geo" style="grid-template-columns:repeat(${nColsGeo},1.15rem) 2.2rem 3.3rem">` + topGeo.map((t) => {
           const nums = String(t.padrao || '').split(/\s*-\s*/).filter(Boolean);
-          while (nums.length < 4) nums.push('');
-          return nums.slice(0, 4).map((n) => `<span class="d">${escGeo(n)}</span>`).join('')
+          while (nums.length < nColsGeo) nums.push('');
+          return nums.slice(0, nColsGeo).map((n) => `<span class="d">${escGeo(n)}</span>`).join('')
             + `<span class="s">${t.frequencia || 0}</span><span class="s">${pctTxt(t.frequencia, hist.total)}</span>`;
         }).join('')
-        + `<span class="d"></span><span class="d"></span><span class="d"></span><span class="d d31">31</span><span class="s"></span><span class="s">${pctTxt(hist.com_31, hist.total)}</span>`
+        + (isoPan
+          ? Array.from({ length: nColsGeo - 1 }, () => '<span class="d"></span>').join('')
+            + `<span class="d d31">${escGeo(geo.isolado)}</span><span class="s"></span><span class="s">${pctTxt(hist.com_31, hist.total)}</span>`
+          : '')
         + `</div>`
       : '<div class="text-muted">Sem geometria nesta base.</div>';
 
@@ -906,7 +939,7 @@
       refsEdit = refs.map((r) => r.referencia);
       renderS2(true);
       geoLinhas = (j.sessao1 && j.sessao1.linhas) || [];
-      geoPayload = j.sessao3 || geometriaLocal(geoLinhas);
+      geoPayload = j.sessao3 || (SPEC.key === 'diadesorte' ? geometriaLocal(geoLinhas) : null);
       renderPanorama(j.sessao1, reguaData, geoPayload);
       try { renderS3(); } catch (errGeo) {
         const c3 = $('gcCorpoS3');

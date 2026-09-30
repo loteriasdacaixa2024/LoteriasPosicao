@@ -535,12 +535,24 @@
             if (s3 && s3.historico) {
                 var hist = s3.historico;
                 var tops = (hist.padroes_linha || []).slice(0, 3);
-                var geoHtml = tops.length ? '<div class="rg-geo">' + tops.map(function (t) {
+                var iso = s3.isolado != null;
+                var nCols = iso ? 4 : 0;
+                if (!nCols) {
+                    tops.forEach(function (t) {
+                        var partes = String(t.padrao || '').split(/\s*-\s*/).filter(function (x) { return x !== ''; });
+                        if (partes.length > nCols) nCols = partes.length;
+                    });
+                }
+                if (!nCols) nCols = 4;
+                var geoHtml = tops.length ? '<div class="rg-geo" style="grid-template-columns:repeat(' + nCols + ',1.15rem) 2.2rem 3.3rem">' + tops.map(function (t) {
                     var nums = String(t.padrao || '').split(/\s*-\s*/).filter(function (x) { return x !== ''; });
-                    while (nums.length < 4) nums.push('');
-                    return nums.slice(0, 4).map(function (n) { return '<span class="d">' + n + '</span>'; }).join('')
+                    while (nums.length < nCols) nums.push('');
+                    return nums.slice(0, nCols).map(function (n) { return '<span class="d">' + n + '</span>'; }).join('')
                         + '<span class="s">' + (t.frequencia || 0) + '</span><span class="s">' + pct(t.frequencia, hist.total) + '</span>';
-                }).join('') + '<span class="d"></span><span class="d"></span><span class="d"></span><span class="d d31">31</span><span class="s"></span><span class="s">' + pct(hist.com_31, hist.total) + '</span></div>'
+                }).join('') + (iso
+                    ? new Array(nCols - 1).fill('<span class="d"></span>').join('')
+                        + '<span class="d d31">' + s3.isolado + '</span><span class="s"></span><span class="s">' + pct(hist.com_31, hist.total) + '</span>'
+                    : '') + '</div>'
                     : '<div class="text-muted">Sem geometria.</div>';
                 html += card('Geometria Analítica', '/analise/gaps-ciclo/#gcSessao3', geoHtml, '');
             }

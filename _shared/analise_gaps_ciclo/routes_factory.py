@@ -35,13 +35,11 @@ def _tem_ciclo(modality_key: str) -> bool:
 def _page_analise(modality_key: str) -> dict:
     spec = get_gaps_ciclo_spec(modality_key)
     spec["janela_default"] = 0
+    from analise_gaps_ciclo.geometria import resumo_layout
+    spec.update(resumo_layout(modality_key))
     no_ciclos = _tem_ciclo(modality_key)
-    if modality_key == "diadesorte":
-        titulo = "Análise por Gaps, Régua e Geometria Analítica"
-        subtitulo = "Sessão 1 — Gaps  ·  Sessão 2 — Régua  ·  Sessão 3 — Geometria Analítica"
-    else:
-        titulo = "Análise por Gaps e Régua"
-        subtitulo = "Sessão 1 — Gaps  ·  Sessão 2 — Régua"
+    titulo = "Análise por Gaps, Régua e Geometria Analítica"
+    subtitulo = "Sessão 1 — Gaps  ·  Sessão 2 — Régua  ·  Sessão 3 — Geometria Analítica"
     return {
         "modality_key": modality_key,
         "modality_nome": spec["nome"],
@@ -66,11 +64,7 @@ def _page_gerador(modality_key: str) -> dict:
         "modality_nome": spec["nome"],
         "page_title": "Gaps e Régua → Apostas",
         "page_subtitle": "Sessão 1 — Gaps e/ou Sessão 2 — Régua",
-        "voltar_titulo": (
-            "Análise por Gaps, Régua e Geometria Analítica"
-            if modality_key == "diadesorte"
-            else "Análise por Gaps e Régua"
-        ),
+        "voltar_titulo": "Análise por Gaps, Régua e Geometria Analítica",
         "api_base": "/geradores-elite/api/gaps-ciclo",
         "analise_url": spec["analise_url"],
         "gc_spec": spec,
@@ -101,11 +95,7 @@ def register_analise_gaps_ciclo(analise_bp: Blueprint, modality_key: str) -> Non
             gc_spec=spec,
             api_projetar="/analise/api/gaps-ciclo/projetar",
             voltar_href="/analise/gaps-ciclo/",
-            voltar_titulo=(
-                "Análise por Gaps, Régua e Geometria Analítica"
-                if modality_key == "diadesorte"
-                else "Gaps e Régua"
-            ),
+            voltar_titulo="Análise por Gaps, Régua e Geometria Analítica",
         )
 
     @analise_bp.route("/gaps-ciclo/static/<path:filename>")

@@ -12000,3 +12000,42 @@ Press CTRL+C to quit
 127.0.0.1 - - [29/Sep/2026 06:10:46] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 06:14:11] "GET /api/status-banco HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 06:14:28] "GET /api/status-banco HTTP/1.1" 200 -
+
+--- iniciando 2026-09-29 17:38:49 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [29/Sep/2026 17:39:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/Sep/2026 17:42:23] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-29 18:09:44 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [29/Sep/2026 18:09:53] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/Sep/2026 18:13:32] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [29/Sep/2026 18:34:21] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [29/Sep/2026 18:50:57] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [29/Sep/2026 19:45:03] "GET /analise/gaps-ciclo/ HTTP/1.1" 200 -

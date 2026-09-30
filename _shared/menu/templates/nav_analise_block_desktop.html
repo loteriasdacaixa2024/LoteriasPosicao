@@ -13,8 +13,8 @@
                             <i class="{{ extra.icon }}"></i>
                         </span>
                         <span class="dd-text-block">
-                            <span class="dd-title">{% if extra.href == '/analise/gaps-ciclo/' and nav_cfg.key == 'diadesorte' %}Gaps, Régua e Geometria Analítica{% else %}{{ extra.title }}{% endif %}</span>
-                            <span class="dd-desc">{% if extra.href == '/analise/gaps-ciclo/' and nav_cfg.key == 'diadesorte' %}Sessão 1 — Gaps  ·  Sessão 2 — Régua  ·  Sessão 3 — Geometria{% else %}{{ extra.desc }}{% endif %}</span>
+                            <span class="dd-title">{{ extra.title }}</span>
+                            <span class="dd-desc">{{ extra.desc }}</span>
                         </span>
                     </a>
                     {% endfor %}
