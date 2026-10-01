@@ -171,6 +171,57 @@
   #ldd-root .ldd-table tbody tr.ldd-rank-row-1 { background: rgba(201, 162, 39, .14); font-weight: 700; }
   #ldd-root .ldd-table tbody tr.ldd-rank-row-2 { background: rgba(154, 160, 166, .14); font-weight: 700; }
   #ldd-root .ldd-table tbody tr.ldd-rank-row-3 { background: rgba(196, 123, 58, .12); font-weight: 700; }
+  #ldd-root .ldd-volante-box {
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    overflow-x: auto;
+    text-align: center;
+  }
+  #ldd-root .ldd-volante {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    width: max-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+  #ldd-root .ldd-vol-row {
+    display: grid;
+    grid-template-columns: 2.4rem repeat(var(--lx-cols, 10), 2.75rem);
+    gap: .28rem;
+    align-items: stretch;
+    width: max-content;
+    margin-inline: auto;
+  }
+  #ldd-root .ldd-vol-lab,
+  #ldd-root .ldd-vol-colh {
+    display: flex; align-items: center; justify-content: center;
+    font-size: .68rem; font-weight: 800; color: #6c757d;
+  }
+  #ldd-root .ldd-vol-cell {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 2.55rem; border-radius: 8px;
+    border: 1px solid var(--primary, #c08b00);
+    background: var(--accent, #e6a800);
+    color: var(--on-accent, #1a0a00);
+    font-weight: 800; font-variant-numeric: tabular-nums; cursor: pointer;
+    line-height: 1.05; padding: .15rem .1rem;
+  }
+  #ldd-root .ldd-vol-cell .lx-occ {
+    font-size: .62rem; font-weight: 700; color: var(--primary-xdark, #664a00);
+  }
+  #ldd-root .ldd-vol-cell.lx-on {
+    outline: 2px solid var(--primary, #c08b00);
+    outline-offset: 1px;
+  }
+  #ldd-root tr.lx-row-focus { outline: 2px solid var(--primary, #c08b00); }
+  #ldd-root .lx-alinha {
+    display: inline-block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, Consolas, monospace;
+  }
 </style>
 
 <div class="container-fluid py-3" id="ldd-root">
@@ -212,6 +263,10 @@
     (Dígito da Dezena × Dígito da Unidade). Não altera as análises tradicionais.
     Use <strong>Janela → Todos</strong> para analisar do 1º concurso ao atual.
     Nos históricos, clique no título da coluna para ordenar (abre do <em>último concurso</em>).
+    {% if modality_key == 'diadesorte' %}
+    A aba <strong>Linha × Coluna</strong> usa a posição fixa de cada dezena neste mesmo volante
+    e o mesmo recorte de Base e Janela.
+    {% endif %}
     <a href="/geradores-elite/comportamento-apostas/?tab=linhas" class="fw-bold text-decoration-none ms-1">
       Gerar apostas pelo ranking →
     </a>
@@ -228,6 +283,13 @@
         <i class="fas fa-border-all me-1"></i> DD × DU
       </button>
     </li>
+    {% if modality_key == 'diadesorte' %}
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="ldd-tab-lxcol" data-bs-toggle="tab" data-bs-target="#lddPaneLxCol" type="button" role="tab">
+        <i class="fas fa-table-cells me-1"></i> Linha × Coluna
+      </button>
+    </li>
+    {% endif %}
   </ul>
 
   <div class="tab-content">
@@ -239,11 +301,16 @@
       <div class="row g-2 mb-3" id="lddKpisDdDu"></div>
       <div id="lddCorpoDdDu"><p class="text-muted small">Carregando…</p></div>
     </div>
+    {% if modality_key == 'diadesorte' %}
+    <div class="tab-pane fade" id="lddPaneLxCol" role="tabpanel">
+      <div id="lddCorpoLxCol"><p class="text-muted small">Carregando…</p></div>
+    </div>
+    {% endif %}
   </div>
 </div>
 
 <script>
   window.__LDD_UI__ = {{ estudos_ui | tojson }};
 </script>
-<script src="/analise/linhas-dd-du/static/linhas_dd_du.js?v=20260920n"></script>
+<script src="/analise/linhas-dd-du/static/linhas_dd_du.js?v=20261001d"></script>
 {% endblock %}

@@ -12648,3 +12648,107 @@ Press CTRL+C to quit
 127.0.0.1 - - [29/Sep/2026 18:34:18] "POST /modelos/api/backtesting HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 18:50:54] "POST /modelos/api/backtesting HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 19:45:04] "GET /analise/gaps-ciclo/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 05:24:12] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 05:35:36 ---
+===========================================================
+[OK] Servidor +Milionária rodando na porta 5157
+[URL] Acesse:      http://localhost:5157
+[URL] Análise:     http://localhost:5157/analise/
+[URL] Modelos:     http://localhost:5157/modelos/
+[URL] Conferência: http://localhost:5157/central-conferencias/
+[URL] Desdobramento: http://localhost:5157/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5157
+ * Running on http://10.0.0.10:5157
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 05:35:46] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 08:01:32 ---
+===========================================================
+[OK] Servidor +Milionária rodando na porta 5157
+[URL] Acesse:      http://localhost:5157
+[URL] Análise:     http://localhost:5157/analise/
+[URL] Modelos:     http://localhost:5157/modelos/
+[URL] Conferência: http://localhost:5157/central-conferencias/
+[URL] Desdobramento: http://localhost:5157/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5157
+ * Running on http://10.0.1.218:5157
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 08:01:41] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 08:03:52] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 14:28:29] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 16:26:17 ---
+===========================================================
+[OK] Servidor +Milionária rodando na porta 5157
+[URL] Acesse:      http://localhost:5157
+[URL] Análise:     http://localhost:5157/analise/
+[URL] Modelos:     http://localhost:5157/modelos/
+[URL] Conferência: http://localhost:5157/central-conferencias/
+[URL] Desdobramento: http://localhost:5157/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5157
+ * Running on http://10.0.0.10:5157
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 16:26:24] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 16:31:52] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:22] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:23] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:23] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:24] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [30/Sep/2026 17:19:24] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:25] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:26] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:28] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:29] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:09] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:11] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:58] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:33:01] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:35:12] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:46:38] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:55:19] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:14:27] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:14:39] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:16:58] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:17:21] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-10-01 05:35:22 ---
+===========================================================
+[OK] Servidor +Milionária rodando na porta 5157
+[URL] Acesse:      http://localhost:5157
+[URL] Análise:     http://localhost:5157/analise/
+[URL] Modelos:     http://localhost:5157/modelos/
+[URL] Conferência: http://localhost:5157/central-conferencias/
+[URL] Desdobramento: http://localhost:5157/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5157
+ * Running on http://10.0.0.10:5157
+Press CTRL+C to quit
+[API Caixa] +Milionária 394/394...127.0.0.1 - - [01/Oct/2026 05:35:30] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:37:33] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:37:36] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:49:23] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:49:30] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:00:26] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:16:12] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:18:21] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:18:30] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -

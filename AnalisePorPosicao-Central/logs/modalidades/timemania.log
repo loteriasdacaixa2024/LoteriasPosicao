@@ -11886,3 +11886,113 @@ Press CTRL+C to quit
 127.0.0.1 - - [29/Sep/2026 18:34:23] "POST /modelos/api/backtesting HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 18:50:57] "POST /modelos/api/backtesting HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 19:45:05] "GET /analise/gaps-ciclo/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 05:24:29] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 05:35:41 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+[API Caixa] Timemania 2448/2448...WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 05:35:48] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 08:01:34 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.1.218:5159
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 08:01:44] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 08:03:53] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 14:28:30] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 16:26:21 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 16:26:26] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 16:31:56] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:27] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:29] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:29] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:31] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [30/Sep/2026 17:19:33] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:33] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:35] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:36] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:39] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:18] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:20] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:33] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:45] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:47:02] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:56:04] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:10:27] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:14:48] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:15:19] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:18:03] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:18:49] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-10-01 05:35:26 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [01/Oct/2026 05:35:32] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:37:36] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:37:46] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:39:08] "GET /geradores-elite/escolha-tubular-apostas/?aba=diagonais&padroes=0%201%202%203%204%205%206|0%201%202%204%205%206%207|0%202%203%204%206%206%207|1%202%203%204%205%206%207|2%203%204%205%205%206%207 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:39:08] "GET /analise/api/inteligentes/assets/tubular.css?v=20260903v39 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:39:09] "GET /analise/api/inteligentes/assets/tubular.js?v=20260903v40 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:39:09] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:39:09] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:39:09] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [01/Oct/2026 05:39:10] "GET /geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:39:10] "GET /analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:39:17] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:39:29] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:49:30] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:50:22] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:00:32] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:01:02] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:18:28] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:18:35] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -

@@ -78,6 +78,27 @@ def register_camadas_linhas_dd_du(analise_bp: Blueprint, modality_key: str) -> N
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
 
+    @analise_bp.route("/api/linhas-universo/linha-coluna")
+    def api_linhas_universo_linha_coluna():
+        if modality_key != "diadesorte":
+            return jsonify({
+                "sucesso": False,
+                "erro": "O confronto Linha × Coluna está disponível para o Dia de Sorte.",
+            }), 404
+        try:
+            from linhas_universo.linha_coluna import LinhaColunaService
+
+            janela = request.args.get("janela", type=int)
+            if janela is None:
+                janela = make_estudos_base(modality_key).ui_config()["janela_default"]
+            base = request.args.get("base", "geral")
+            out = LinhaColunaService.analisar(
+                modality_key, janela=janela, base_estatistica=base,
+            )
+            return jsonify(out), (200 if out.get("sucesso") else 400)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+
     @analise_bp.route("/api/dd-du/decompor")
     def api_dd_du_decompor():
         try:

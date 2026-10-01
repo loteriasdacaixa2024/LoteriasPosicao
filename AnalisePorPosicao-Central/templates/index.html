@@ -431,6 +431,109 @@
             margin-right: 4px;
         }
 
+        .cruz-diag {
+            border-top: 1px solid rgba(192, 139, 0, 0.28);
+            background: #fff8e1;
+            padding: 0.85rem 1rem 1rem;
+        }
+
+        .cruz-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.45rem;
+        }
+
+        .cruz-head strong {
+            font-size: 0.92rem;
+        }
+
+        .cruz-lead {
+            font-size: 0.78rem;
+            color: #6c757d;
+            margin: 0 0 0.55rem;
+        }
+
+        .cruz-meta {
+            font-size: 0.78rem;
+        }
+
+        .cruz-cards {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+
+        .cruz-card {
+            border: 1px solid rgba(192, 139, 0, 0.28);
+            border-radius: 8px;
+            background: #fffdf6;
+            padding: 0.5rem 0.6rem;
+            min-height: 100%;
+            cursor: pointer;
+        }
+
+        .cruz-card.is-ultimo {
+            box-shadow: inset 3px 0 0 #c08b00;
+        }
+
+        .cruz-card.is-sel {
+            box-shadow: inset 3px 0 0 #198754, 0 0 0 1px rgba(25, 135, 84, 0.35);
+        }
+
+        .cruz-card .cruz-lbl {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #6c757d;
+            text-transform: uppercase;
+            line-height: 1.25;
+        }
+
+        .cruz-card .cruz-val {
+            font-size: 0.88rem;
+            font-weight: 800;
+            margin: 0.1rem 0 0.2rem;
+        }
+
+        .cruz-card .cruz-sub {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+
+        .cruz-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.08rem 0.35rem;
+            border-radius: 999px;
+            background: #fcf9e8;
+            border: 1px solid #eed877;
+            color: #715f0e;
+            margin: 1px 2px 1px 0;
+            white-space: nowrap;
+        }
+
+        .cruz-chip span {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1100px) {
+            .cruz-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .cruz-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .oraculo-extra {
             margin-top: 0.85rem;
             padding-top: 0.7rem;
@@ -1216,6 +1319,150 @@
             }
         }
 
+        const CRUZ = {};
+
+        function escHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        function fmtN(n) {
+            return Number(n || 0).toLocaleString('pt-BR');
+        }
+
+        function htmlDiagChips(list) {
+            const chips = (list || []).map((d) => {
+                const title = `${d.tipo || ''} · ${d.vezes || 0}×`;
+                return `<span class="cruz-chip" title="${escHtml(title)}">${escHtml(d.dir_sym || '')} ${escHtml(d.nums_fmt || '')} <span>${fmtN(d.vezes)}×</span></span>`;
+            }).join('');
+            return chips || '<span class="small text-muted">sem diagonal neste recorte</span>';
+        }
+
+        function listaCruz(st) {
+            const cruz = st.data || {};
+            if (st.modo === 'ja') return cruz.ja_sairam_com_diagonal || [];
+            if (st.modo === 'sel') return [...st.sel].map((p) => st.porPadrao[p]).filter(Boolean);
+            return cruz.mais_saem || [];
+        }
+
+        function renderCruzamento(mod_id) {
+            const st = CRUZ[mod_id];
+            if (!st || !st.block) return;
+            const cruz = st.data || {};
+            const meta = st.block.querySelector('.cruz-meta');
+            if (meta) {
+                meta.textContent = cruz.n_concursos
+                    ? `${fmtN(cruz.n_com_diagonal)} / ${fmtN(cruz.n_concursos)} concursos com diagonal (${cruz.pct_com_diagonal}%)`
+                    : '';
+            }
+            st.block.querySelectorAll('[data-cruz-modo]').forEach((b) => {
+                b.classList.toggle('active', b.getAttribute('data-cruz-modo') === st.modo);
+            });
+            const lista = listaCruz(st);
+            const cards = st.block.querySelector('.cruz-cards');
+            if (cards) {
+                if (!lista.length) {
+                    const msg = st.modo === 'sel'
+                        ? 'Clique nos cartões para selecionar padrões.'
+                        : 'Nenhum padrão neste recorte.';
+                    cards.innerHTML = `<div class="small text-muted">${msg}</div>`;
+                } else {
+                    cards.innerHTML = lista.slice(0, 5).map((p) => {
+                        const sel = st.sel.has(p.padrao) ? ' is-sel' : '';
+                        const ult = p.eh_padrao_ultimo_concurso ? ' is-ultimo' : '';
+                        const pct = p.pct_com_diagonal ? ` (${escHtml(p.pct_com_diagonal)}%)` : '';
+                        return `<div class="cruz-card${ult}${sel}" data-padrao="${escHtml(p.padrao)}">
+                            <div class="cruz-lbl">${escHtml(p.descricao || '')} · ${fmtN(p.frequencia)}×</div>
+                            <div class="cruz-val"><code>${escHtml(p.padrao)}</code></div>
+                            <div class="cruz-sub">${fmtN(p.n_com_diagonal || 0)} concursos com diagonal${pct}</div>
+                            <div>${htmlDiagChips(p.top_diagonais)}</div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+            const link = st.block.querySelector('.cruz-gerar');
+            if (link) {
+                const pads = (st.modo === 'sel' && st.sel.size)
+                    ? [...st.sel]
+                    : lista.map((p) => p.padrao).filter(Boolean).slice(0, 5);
+                const qs = pads.length ? `&padroes=${encodeURIComponent(pads.join('|'))}` : '';
+                link.href = modalityPublicUrl(mod_id, `/geradores-elite/escolha-tubular-apostas/?aba=diagonais${qs}`);
+                link.classList.toggle('disabled', !pads.length);
+                if (!pads.length) link.setAttribute('aria-disabled', 'true');
+                else link.removeAttribute('aria-disabled');
+            }
+        }
+
+        async function carregarCruzamento(mod_id) {
+            const st = CRUZ[mod_id];
+            if (!st) return;
+            try {
+                const res = await fetch(`/m/${mod_id}/analise/api/inteligentes/catalogo-padroes`);
+                const data = await res.json();
+                if (!data.sucesso || !data.cruzamento_diagonais) {
+                    throw new Error(data.erro || 'Cruzamento indisponível nesta modalidade.');
+                }
+                st.data = data.cruzamento_diagonais;
+                const listas = [...(st.data.mais_saem || []), ...(st.data.ja_sairam_com_diagonal || [])];
+                listas.forEach((p) => {
+                    if (p && p.padrao) st.porPadrao[p.padrao] = p;
+                });
+                renderCruzamento(mod_id);
+            } catch (e) {
+                const cards = st.block.querySelector('.cruz-cards');
+                if (cards) cards.innerHTML = `<div class="small text-danger">${escHtml(e.message || e)}</div>`;
+            }
+        }
+
+        function anexarCruzamento(div, mod_id) {
+            if (!div || div.querySelector('.cruz-diag')) return;
+            const block = document.createElement('div');
+            block.className = 'cruz-diag';
+            block.dataset.mod = mod_id;
+            block.innerHTML = `
+                <div class="cruz-head">
+                    <strong>Cruzamento · diagonais × padrões</strong>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary active" data-cruz-modo="freq">Que mais saem</button>
+                        <button type="button" class="btn btn-outline-secondary" data-cruz-modo="ja">Já saíram com diagonal</button>
+                        <button type="button" class="btn btn-outline-secondary" data-cruz-modo="sel">Selecionados</button>
+                    </div>
+                    <a class="btn btn-sm btn-success cruz-gerar" target="_blank" rel="noopener noreferrer" href="#">
+                        <i class="fas fa-magic me-1"></i>Gerar na Seção 13
+                    </a>
+                    <span class="cruz-meta small text-muted"></span>
+                </div>
+                <p class="cruz-lead">Padrão inicial (dezena alta/média/baixa) cruzado com as diagonais ↘↗ que saíram no mesmo concurso. Use <strong>Gerar na Seção 13</strong> para plantar a diagonal e completar no padrão.</p>
+                <div class="cruz-cards"><div class="small text-muted">Carregando cruzamento…</div></div>
+            `;
+            div.appendChild(block);
+            CRUZ[mod_id] = { modo: 'freq', sel: new Set(), porPadrao: {}, data: null, block };
+            carregarCruzamento(mod_id);
+        }
+
+        document.addEventListener('click', (e) => {
+            const modoBtn = e.target.closest('[data-cruz-modo]');
+            if (modoBtn) {
+                const block = modoBtn.closest('.cruz-diag');
+                const mod = block && block.dataset.mod;
+                if (!mod || !CRUZ[mod] || !CRUZ[mod].data) return;
+                CRUZ[mod].modo = modoBtn.getAttribute('data-cruz-modo');
+                renderCruzamento(mod);
+                return;
+            }
+            const card = e.target.closest('.cruz-card');
+            if (!card) return;
+            const block = card.closest('.cruz-diag');
+            const mod = block && block.dataset.mod;
+            if (!mod || !CRUZ[mod] || !CRUZ[mod].data) return;
+            const pad = card.getAttribute('data-padrao');
+            if (!pad) return;
+            if (CRUZ[mod].sel.has(pad)) CRUZ[mod].sel.delete(pad);
+            else CRUZ[mod].sel.add(pad);
+            renderCruzamento(mod);
+        });
+
         const modalities = ['lotofacil', 'supersete', 'lotomania', 'quina', 'megasena', 'maismilionaria', 'duplasena', 'timemania', 'diadesorte'];
 
         const ACCENTS = {
@@ -1256,6 +1503,7 @@
             const fetchPromises = modalities.map(async (mod_id) => {
                 const div = document.createElement('div');
                 div.className = 'comparativo-box';
+                div.id = 'comparativo-' + mod_id;
                 div.style.setProperty('--accent', ACCENTS[mod_id]);
                 div.innerHTML = `
                     <div class="comparativo-header-box">
@@ -1365,6 +1613,7 @@
                             <div class="p-3 text-muted text-center">${data.error || 'Aguardando Backtesting.'}</div>
                         `;
                     }
+                    anexarCruzamento(div, mod_id);
                 } catch (e) {
                     div.innerHTML = `
                         <div class="comparativo-header-box">
@@ -1372,6 +1621,7 @@
                         </div>
                         <div class="p-3 text-danger text-center">Timeout ou Servidor Offline - Tente iniciar a modalidade no terminal.</div>
                     `;
+                    anexarCruzamento(div, mod_id);
                 }
             });
 

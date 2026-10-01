@@ -13084,3 +13084,107 @@ Press CTRL+C to quit
 127.0.0.1 - - [29/Sep/2026 19:45:04] "GET /analise/gaps-ciclo/ HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 19:45:17] "GET /analise/gaps-ciclo/ HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 19:45:18] "GET /analise/api/gaps-ciclo/contexto?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 05:24:12] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 05:35:33 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+[API Caixa] MegaSena 3064/3064...127.0.0.1 - - [30/Sep/2026 05:35:46] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 08:01:31 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.1.218:5156
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 08:01:40] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 08:03:53] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 14:28:30] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 16:26:17 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 16:26:24] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 16:31:53] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:21] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:22] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:22] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:23] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [30/Sep/2026 17:19:26] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:28] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:29] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:31] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:32] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:06] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:08] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:33:18] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:33:34] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:38:26] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:46:42] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:55:23] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:14:33] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:14:52] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:17:05] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:17:42] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-10-01 05:35:20 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [01/Oct/2026 05:35:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:37:34] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:37:40] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:49:25] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:49:42] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:00:27] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:16:13] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:18:21] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:18:31] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -

@@ -8,11 +8,12 @@
     let base = 'geral';
     // Página abre em "Todos" (1º → atual), independente do default global
     let janela = 0;
-    let loaded = { linhas: false, dddu: false };
-    let cache = { linhas: null, dddu: null };
+    let loaded = { linhas: false, dddu: false, lxcol: false };
+    let cache = { linhas: null, dddu: null, lxcol: null };
     let histState = {
         linhas: { key: 'concurso', dir: 'desc', page: 1, size: 100 },
         dddu: { key: 'concurso', dir: 'desc', page: 1, size: 100 },
+        lxcol: { key: 'dezena', dir: 'asc' },
     };
 
     const $ = (id) => document.getElementById(id);
@@ -21,6 +22,23 @@
         const n = Number(v);
         if (Number.isNaN(n)) return '—';
         return (Math.round(n * 100) / 100).toLocaleString('pt-BR') + '%';
+    }
+
+    function fmtPct2(v) {
+        const n = Number(v);
+        if (!Number.isFinite(n)) return '—';
+        return n.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }) + '%';
+    }
+
+    function larguraCh(textos) {
+        return textos.reduce((m, t) => Math.max(m, String(t).length), 1);
+    }
+
+    function spanAlinha(texto, largura) {
+        return `<span class="lx-alinha" style="width:${largura}ch">${esc(texto)}</span>`;
     }
 
     function sortedDez(arr) {
@@ -657,12 +675,249 @@
         }
     }
 
+    function ordenarLx(rows, state) {
+        const dir = state.dir === 'desc' ? -1 : 1;
+        return [...rows].sort((a, b) => {
+            const va = a[state.key];
+            const vb = b[state.key];
+            const aMiss = va == null || va === '';
+            const bMiss = vb == null || vb === '';
+            if (aMiss && bMiss) return 0;
+            if (aMiss) return 1;
+            if (bMiss) return -1;
+            const na = Number(va);
+            const nb = Number(vb);
+            const cmp = (Number.isFinite(na) && Number.isFinite(nb))
+                ? na - nb
+                : String(va).localeCompare(String(vb), 'pt-BR', { numeric: true });
+            return dir * cmp;
+        });
+    }
+
+    function renderLinhaColuna(data) {
+        cache.lxcol = data;
+        setLabels(data);
+        const corpo = $('lddCorpoLxCol');
+        if (!corpo) return;
+        const st = histState.lxcol;
+        const rows = Array.isArray(data.dezenas) ? data.dezenas : [];
+        const porDez = {};
+        rows.forEach((r) => { porDez[Number(r.dezena)] = r; });
+        const cols = Number(data.cols) > 0 ? Number(data.cols) : 10;
+        const volante = Array.isArray(data.volante) ? data.volante : [];
+
+        const headCols = [];
+        for (let c = 1; c <= cols; c += 1) headCols.push(`<span class="ldd-vol-colh">${c}</span>`);
+        const linhasHtml = volante.map((linha, i) => {
+            const cells = (linha || []).map((n) => {
+                const info = porDez[Number(n)] || {};
+                const tip = [
+                    `Dezena ${padDez(n)}`,
+                    `Linha ${info.linha ?? (i + 1)}`,
+                    `Coluna ${info.coluna ?? ''}`,
+                    `${info.ocorrencias ?? 0} ocorrências`,
+                    fmtPct2(info.pct),
+                    `atraso ${info.atraso_atual ?? '—'}`,
+                ].join(' · ');
+                return `<button type="button" class="ldd-vol-cell" data-dezena="${Number(n)}" title="${esc(tip)}">
+                    <span>${padDez(n)}</span>
+                    <span class="lx-occ">${info.ocorrencias ?? 0}</span>
+                </button>`;
+            }).join('');
+            return `<div class="ldd-vol-row" style="--lx-cols:${cols}"><span class="ldd-vol-lab">L${i + 1}</span>${cells}</div>`;
+        }).join('');
+
+        const ordered = ordenarLx(rows, st);
+        const wPct = larguraCh(rows.map((r) => fmtPct2(r.pct)));
+        const wAtraso = larguraCh(rows.map((r) => String(r.atraso_atual ?? '—')));
+        const body = ordered.map((r) => `
+            <tr data-dezena="${Number(r.dezena)}">
+                <td class="font-mono">${padDez(r.dezena)}</td>
+                <td>${r.linha}</td>
+                <td>${r.coluna}</td>
+                <td>${r.ocorrencias}</td>
+                <td>${spanAlinha(fmtPct2(r.pct), wPct)}</td>
+                <td>${spanAlinha(String(r.atraso_atual), wAtraso)}</td>
+                <td>${r.maior_atraso}</td>
+                <td>${r.ultimo_concurso == null ? '—' : r.ultimo_concurso}</td>
+            </tr>`).join('');
+
+        corpo.innerHTML = `
+            <div class="ldd-help">
+                <strong>Confronto Linha × Coluna.</strong>
+                Esta análise considera a posição física de cada dezena no volante, confrontando sua linha e coluna com seu comportamento histórico nos concursos.
+                <br>
+                A <strong>linha</strong> e a <strong>coluna</strong> são posições fixas no volante — não é a ordem em que a dezena foi sorteada.
+                No Dia de Sorte, 01–10 ficam na linha 1, 11–20 na linha 2, 21–30 na linha 3 e a dezena <strong>31</strong> sozinha na linha 4, coluna 1.
+                <br>
+                <strong>Ocorrências</strong> = quantas vezes a dezena apareceu nos concursos analisados.
+                <strong>%</strong> = participação dessa dezena dentro do universo histórico selecionado (Base e Janela).
+                <strong>Atraso atual</strong> = concursos desde a última ocorrência.
+                <strong>Maior atraso</strong> = maior intervalo histórico identificado.
+                <strong>Último concurso</strong> = concurso mais recente em que a dezena apareceu.
+                O volante abaixo usa o mesmo mapa de linhas e colunas, nas cores da modalidade. Clique numa dezena para localizá-la na tabela.
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6 col-md-3"><div class="ldd-kpi"><div class="lbl">Concursos</div><div class="val">${data.total_concursos || 0}</div></div></div>
+                <div class="col-6 col-md-3"><div class="ldd-kpi"><div class="lbl">Dezenas</div><div class="val">${rows.length}</div></div></div>
+                <div class="col-6 col-md-3"><div class="ldd-kpi"><div class="lbl">Do concurso</div><div class="val">${data.primeiro_concurso ?? '—'}</div></div></div>
+                <div class="col-6 col-md-3"><div class="ldd-kpi"><div class="lbl">Até o concurso</div><div class="val">${data.ultimo_concurso ?? '—'}</div></div></div>
+            </div>
+            <div class="ldd-volante-box mb-3">
+                <div class="ldd-vol-row mb-1" style="--lx-cols:${cols}"><span class="ldd-vol-lab"></span>${headCols.join('')}</div>
+                <div class="ldd-volante">${linhasHtml}</div>
+                <p class="small text-muted mt-2 mb-0">Número grande = dezena. Número menor = ocorrências na janela. A linha 4 mostra somente as células que existem no volante.</p>
+            </div>
+            <p class="small text-muted mb-2">Clique no cabeçalho para ordenar. Números seguem ordem numérica (1, 2, 3, 10), não ordem de texto.</p>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered ldd-table mb-0" id="lddLxColTable">
+                    <thead><tr>
+                        ${thSort(st, 'dezena', 'Dezena', 'Ordenar pela dezena')}
+                        ${thSort(st, 'linha', 'Linha', 'Ordenar pela linha do volante')}
+                        ${thSort(st, 'coluna', 'Coluna', 'Ordenar pela coluna do volante')}
+                        ${thSort(st, 'ocorrencias', 'Ocorrências', 'Ordenar pelas ocorrências')}
+                        ${thSort(st, 'pct', '%', 'Ordenar pelo percentual')}
+                        ${thSort(st, 'atraso_atual', 'Atraso atual', 'Ordenar pelo atraso atual')}
+                        ${thSort(st, 'maior_atraso', 'Maior atraso', 'Ordenar pelo maior atraso')}
+                        ${thSort(st, 'ultimo_concurso', 'Último concurso', 'Ordenar pelo último concurso')}
+                    </tr></thead>
+                    <tbody>${body || '<tr><td colspan="8" class="text-muted">Sem dados</td></tr>'}</tbody>
+                </table>
+            </div>`;
+
+        corpo.querySelectorAll('th.ldd-sort').forEach((th) => {
+            th.addEventListener('click', () => {
+                const key = th.getAttribute('data-sort');
+                if (st.key === key) st.dir = st.dir === 'asc' ? 'desc' : 'asc';
+                else { st.key = key; st.dir = 'asc'; }
+                renderLinhaColuna(cache.lxcol);
+            });
+        });
+        corpo.querySelectorAll('.ldd-vol-cell').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const dez = btn.getAttribute('data-dezena');
+                corpo.querySelectorAll('.ldd-vol-cell').forEach((el) => el.classList.remove('lx-on'));
+                btn.classList.add('lx-on');
+                const tr = corpo.querySelector(`#lddLxColTable tr[data-dezena="${dez}"]`);
+                corpo.querySelectorAll('#lddLxColTable tr').forEach((el) => el.classList.remove('lx-row-focus'));
+                if (tr) {
+                    tr.classList.add('lx-row-focus');
+                    tr.scrollIntoView({ block: 'nearest' });
+                }
+            });
+        });
+        loaded.lxcol = true;
+    }
+
+    function montarLinhaColuna(payload) {
+        const mapa = (payload.mapa && payload.mapa.linhas) || [];
+        const celulas = [];
+        let cols = 1;
+        mapa.forEach((L) => {
+            const linha = linhaNum(L.id);
+            const dezenas = L.dezenas || [];
+            if (dezenas.length > cols) cols = dezenas.length;
+            dezenas.forEach((d, i) => {
+                celulas.push({ dezena: Number(d), linha: linha, coluna: i + 1 });
+            });
+        });
+        const estado = {};
+        celulas.forEach((cell) => {
+            estado[cell.dezena] = {
+                dezena: cell.dezena,
+                linha: cell.linha,
+                coluna: cell.coluna,
+                ocorrencias: 0,
+                ultimo_concurso: null,
+                atraso_atual: 0,
+                maior_atraso: 0,
+                _gap: 0,
+            };
+        });
+        const serie = payload.linhas || [];
+        serie.forEach((row) => {
+            const presentes = new Set((row.dezenas || []).map((d) => Number(d)));
+            const conc = Number(row.concurso);
+            celulas.forEach((cell) => {
+                const st = estado[cell.dezena];
+                if (presentes.has(cell.dezena)) {
+                    if (st._gap > st.maior_atraso) st.maior_atraso = st._gap;
+                    st._gap = 0;
+                    st.ocorrencias += 1;
+                    st.ultimo_concurso = conc;
+                } else {
+                    st._gap += 1;
+                }
+            });
+        });
+        const total = serie.length;
+        const dezenas = Object.keys(estado).map((k) => Number(k)).sort((a, b) => a - b).map((dez) => {
+            const st = estado[dez];
+            if (st._gap > st.maior_atraso) st.maior_atraso = st._gap;
+            st.atraso_atual = st._gap;
+            const pct = total ? (st.ocorrencias / total) * 100 : 0;
+            st.pct = Math.round(pct * 100) / 100;
+            delete st._gap;
+            return st;
+        });
+        const porLinha = {};
+        dezenas.forEach((st) => {
+            if (!porLinha[st.linha]) porLinha[st.linha] = [];
+            porLinha[st.linha].push(st.dezena);
+        });
+        const volante = Object.keys(porLinha).map(Number).sort((a, b) => a - b).map((ln) => porLinha[ln]);
+        return {
+            sucesso: true,
+            base: payload.base,
+            base_label: payload.base_label,
+            janela: payload.janela,
+            total_concursos: payload.total_concursos || total,
+            primeiro_concurso: payload.primeiro_concurso,
+            ultimo_concurso: payload.ultimo_concurso,
+            volante: volante,
+            cols: cols,
+            dezenas: dezenas,
+        };
+    }
+
+    async function loadLinhaColuna() {
+        const corpo = $('lddCorpoLxCol');
+        if (!corpo) return;
+        corpo.innerHTML = '<p class="text-muted small">Carregando…</p>';
+        const qs = `janela=${janela}&base=${encodeURIComponent(base)}`;
+        try {
+            const r = await fetch(`/analise/api/linhas-universo/linha-coluna?${qs}`);
+            if (r.status === 404) {
+                const legado = await fetch(`/analise/api/linhas-universo/analise?${qs}`);
+                const baseJson = await legado.json();
+                if (!baseJson.sucesso) {
+                    corpo.innerHTML = `<p class="text-danger small">${esc(baseJson.erro || 'Falha')}</p>`;
+                    return;
+                }
+                renderLinhaColuna(montarLinhaColuna(baseJson));
+                return;
+            }
+            const j = await r.json();
+            if (!j.sucesso) {
+                corpo.innerHTML = `<p class="text-danger small">${esc(j.erro || 'Falha')}</p>`;
+                return;
+            }
+            renderLinhaColuna(j);
+        } catch (e) {
+            corpo.innerHTML = `<p class="text-danger small">${esc(e.message || e)}</p>`;
+        }
+    }
+
     function reloadAll() {
-        loaded = { linhas: false, dddu: false };
+        loaded = { linhas: false, dddu: false, lxcol: false };
         loadLinhas();
         const pane = document.getElementById('lddPaneDdDu');
         if (pane && (pane.classList.contains('active') || pane.classList.contains('show'))) {
             loadDdDu();
+        }
+        const paneLx = document.getElementById('lddPaneLxCol');
+        if (paneLx && (paneLx.classList.contains('active') || paneLx.classList.contains('show'))) {
+            loadLinhaColuna();
         }
     }
 
@@ -692,6 +947,10 @@
             histState.dddu.page = 1;
             renderDdDuHistOnly();
         }
+    });
+
+    document.querySelector('[data-bs-target="#lddPaneLxCol"]')?.addEventListener('shown.bs.tab', () => {
+        if (!loaded.lxcol) loadLinhaColuna();
     });
 
     document.querySelector('[data-bs-target="#lddPaneLinhas"]')?.addEventListener('shown.bs.tab', () => {

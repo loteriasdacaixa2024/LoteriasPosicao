@@ -11927,3 +11927,102 @@ Press CTRL+C to quit
 127.0.0.1 - - [29/Sep/2026 18:34:22] "POST /modelos/api/backtesting HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 18:50:58] "POST /modelos/api/backtesting HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 19:45:03] "GET /analise/gaps-ciclo/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 05:24:21] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 05:35:28 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 05:35:45] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 08:01:30 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.1.218:5154
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 08:01:38] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 08:03:54] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 14:28:31] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 16:26:15 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 16:26:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 16:31:57] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:14] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:15] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:15] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:15] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [30/Sep/2026 17:19:17] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:17] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:18] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:18] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:23] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:31:57] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:00] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:47:51] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:58:00] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:17:44] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:22:06] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:25:05] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:27:19] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:40:34] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+
+--- iniciando 2026-10-01 05:35:18 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+[API Caixa] Lotomania 2982/2982...127.0.0.1 - - [01/Oct/2026 05:35:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:37:36] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:50:21] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:55:37] "GET /analise/api/linhas-universo/linha-coluna?janela=0&base=geral HTTP/1.1" 404 -
+127.0.0.1 - - [01/Oct/2026 05:56:38] "GET /analise/api/linhas-universo/analise?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:56:38] "GET /analise/api/linhas-universo/linha-coluna?janela=10&base=geral HTTP/1.1" 404 -
+127.0.0.1 - - [01/Oct/2026 05:56:39] "GET /analise/linhas-dd-du/ HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:01:25] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:18:27] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:24:11] "POST /modelos/api/backtesting HTTP/1.1" 200 -

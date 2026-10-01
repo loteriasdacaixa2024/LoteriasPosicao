@@ -12679,3 +12679,110 @@ Press CTRL+C to quit
 127.0.0.1 - - [29/Sep/2026 19:45:06] "GET /analise/gaps-ciclo/ HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 19:45:18] "GET /analise/gaps-ciclo/ HTTP/1.1" 200 -
 127.0.0.1 - - [29/Sep/2026 19:45:18] "GET /analise/api/gaps-ciclo/contexto?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 05:24:11] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 05:35:27 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 05:35:45] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 08:01:29 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.1.218:5160
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 08:01:37] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 08:03:52] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 14:28:29] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-09-30 16:26:14 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [30/Sep/2026 16:26:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 16:31:52] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:30] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:30] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:30] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:30] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [30/Sep/2026 17:19:31] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:31] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:19:32] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:21] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:21] "GET /analise/api/inteligentes/assets/tubular.css?v=20260923v1 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:21] "GET /analise/api/inteligentes/assets/tubular.js?v=20260923v2 HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:22] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:28] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:29] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:32:29] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:46:38] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 17:55:23] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:09:08] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:10:29] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:10:38] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:14:30] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:14:40] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:17:04] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [30/Sep/2026 18:17:25] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-10-01 05:35:18 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+[API Caixa] SuperSete 905/905...127.0.0.1 - - [01/Oct/2026 05:35:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:37:32] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:37:36] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:49:22] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 05:49:30] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:00:24] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:16:12] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:18:21] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [01/Oct/2026 06:18:29] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
