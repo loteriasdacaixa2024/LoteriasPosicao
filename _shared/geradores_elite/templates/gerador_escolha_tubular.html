@@ -200,6 +200,8 @@
     <a class="btn btn-sm btn-outline-secondary" href="{{ tubular_url }}"><i class="fas fa-arrow-left"></i> Análise Tubular</a>
     <a class="btn btn-sm tb-btn-mod" href="/analise/comparar-concursos/"><i class="fas fa-columns"></i> Comparar concursos</a>
     <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-brain"></i> Elite</a>
+    <a class="btn btn-sm btn-outline-primary" href="/analise/analises-inteligentes/?aba=padroes" title="Padrões I — coluna Inicial"><i class="fas fa-list-ol"></i> Padrões (Inicial)</a>
+    <a class="btn btn-sm btn-outline-primary" href="/analise/analises-inteligentes/?aba=checagem-seq"><i class="fas fa-search"></i> Checagem de Sequências</a>
   </div>
   {% include '_diagonais_aposta.html' %}
 
@@ -437,7 +439,7 @@
   </div>
 </div>{# /get-hub #}
 
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260903v39">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20261001v1">
 <style>
   :root {
     --cor-sequencia-1: #86efac;
@@ -455,7 +457,7 @@
   {% endfor %}
   {% endif %}
 </style>
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260903v40"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20261001v1"></script>
 <script>
 (function () {
   const hub = document.getElementById('get-hub');

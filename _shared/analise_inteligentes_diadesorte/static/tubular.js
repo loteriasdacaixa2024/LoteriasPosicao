@@ -78,6 +78,14 @@
     return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
+  /** Padrão inicial clicável — mesma ida da aba Padrões II em Análises Inteligentes. */
+  function linkPadraoInicial(padrao) {
+    const p = String(padrao || '').trim();
+    if (!p || p === '—' || p === '-') return esc(p || '—');
+    const href = '/analise/analises-inteligentes/?aba=padroes-ii&padrao=' + encodeURIComponent(p);
+    return `<a class="tb-link-padrao" href="${href}" title="Abrir na aba 4 · Padrões II">${esc(p)}</a>`;
+  }
+
   function analyzeSequences(numbers) {
     const sequences = [];
     const nums = numbers.map(Number);
@@ -1517,7 +1525,7 @@
         <td class="tb-col-soma"><span class="tb-mono tb-mono-soma">${esc(an.soma)}</span></td>
         <td>${an.pares}</td>
         <td>${an.impares}</td>
-        <td class="tb-align-mono"><span class="tb-mono">${esc(an.padroes.inicial)}</span></td>
+        <td class="tb-align-mono"><span class="tb-mono">${linkPadraoInicial(an.padroes.inicial)}</span></td>
         <td class="tb-align-mono"><span class="tb-mono">${esc(an.padroes.final)}</span></td>
         <td><span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span></td>
         <td class="tb-align-mono"><span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span>${rankHtml}</td>
@@ -1827,7 +1835,7 @@
       <td>${an.soma}</td>
       <td>${an.pares}</td>
       <td>${an.impares}</td>
-      <td>${esc(an.padroes.inicial)}</td>
+      <td>${linkPadraoInicial(an.padroes.inicial)}</td>
       <td>${esc(an.padroes.final)}</td>
       <td><span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span></td>
       <td class="tb-align-mono"><span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span></td>
@@ -1883,7 +1891,7 @@
       <td class="tb-col-soma"><span class="tb-mono tb-mono-soma">${esc(an.soma)}</span></td>
       <td>${an.pares}</td>
       <td>${an.impares}</td>
-      <td class="tb-align-mono"><span class="tb-mono">${esc(an.padroes.inicial)}</span></td>
+      <td class="tb-align-mono"><span class="tb-mono">${linkPadraoInicial(an.padroes.inicial)}</span></td>
       <td class="tb-align-mono"><span class="tb-mono">${esc(an.padroes.final)}</span></td>
       <td><span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span></td>
       <td class="tb-align-mono"><span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span></td>
@@ -1997,7 +2005,7 @@
           <td>${an ? an.soma : '—'}</td>
           <td>${an ? an.pares : '—'}</td>
           <td>${an ? an.impares : '—'}</td>
-          <td>${an ? esc(an.padroes.inicial) : '—'}</td>
+          <td>${an ? linkPadraoInicial(an.padroes.inicial) : '—'}</td>
           <td>${an ? esc(an.padroes.final) : '—'}</td>
           <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
           <td class="tb-align-mono">${an ? `<span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span>` : '—'}</td>
@@ -2026,7 +2034,7 @@
         <td>${an ? an.soma : '—'}</td>
         <td>${an ? an.pares : '—'}</td>
         <td>${an ? an.impares : '—'}</td>
-        <td>${an ? esc(an.padroes.inicial) : '—'}</td>
+        <td>${an ? linkPadraoInicial(an.padroes.inicial) : '—'}</td>
         <td>${an ? esc(an.padroes.final) : '—'}</td>
         <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
         <td class="text-nowrap tb-row-actions">

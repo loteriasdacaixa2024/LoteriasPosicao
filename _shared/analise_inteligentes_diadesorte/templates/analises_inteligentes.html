@@ -885,6 +885,11 @@
     margin-bottom: .4rem;
   }
   #ai-root .ai-pan-resumo .ai-kpi { min-width: 7.2rem; }
+  #ai-root #aiAnaliseSeqIndicadores {
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+  }
   #ai-root .ai-pan-frase {
     text-align: center;
     font-size: .92rem;
@@ -1025,6 +1030,52 @@
   #ai-root .ai-evo-sit-ok { color: #6c757d; white-space: nowrap; }
   #ai-root .badge-ainda_nao_saiu { background: #6c757d; color: #fff; }
 
+  #ai-root #aiAnaliseSeqWrap .ai-seq-padrao {
+    text-align: left;
+    border: 1px solid rgba(192,139,0,.22);
+    border-radius: 10px;
+    padding: .7rem .85rem .55rem;
+    margin: 0 0 .65rem;
+    background: var(--surface, #fff);
+  }
+  #ai-root #aiAnaliseSeqFaixas {
+    width: 100%;
+    max-width: 28rem;
+    margin: .2rem 0 .35rem;
+  }
+  #ai-root #aiAnaliseSeqInsights ul { margin: .25rem 0 0; padding-left: 1.15rem; }
+  #ai-root #aiAnaliseSeqInsights li { margin: .15rem 0; }
+  #ai-root #aiTabelaAnaliseSeq th,
+  #ai-root #aiTabelaAnaliseSeq td {
+    text-align: center !important;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  #ai-root #aiTabelaAnaliseSeq td .ai-col-alinha {
+    display: inline-block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    min-width: 2.8rem;
+  }
+  #ai-root #aiAnaliseSeqApoio { text-align: left; max-width: 52rem; }
+  #ai-root #aiAnaliseSeqAviso {
+    text-align: left;
+    max-width: 52rem;
+    border: 1px solid rgba(192, 139, 0, .45);
+    border-left: 4px solid var(--primary, #c08b00);
+    background: #fff8e1;
+    border-radius: 8px;
+    padding: .7rem .85rem;
+    color: var(--primary-xdark, #5c4a00);
+  }
+  #ai-root #aiAnaliseSeqAviso .ai-seq-aviso-titulo {
+    font-weight: 800;
+    font-size: .84rem;
+    margin-bottom: .3rem;
+  }
+  #ai-root #aiAnaliseSeqAviso ul { margin: 0; padding-left: 1.15rem; }
+  #ai-root #aiAnaliseSeqAviso li { margin: .2rem 0; }
+
 </style>
 
 <div class="container-fluid py-3" id="ai-root"
@@ -1049,6 +1100,9 @@
     </div>
     <div class="d-flex flex-wrap gap-2 align-items-center">
       <span class="badge bg-light text-dark border" id="aiLblUltimo">—</span>
+      <a class="btn btn-sm btn-success" href="/geradores-elite/escolha-tubular-apostas/?aba=manual" title="Abrir a Seção 10 — Manual">
+        <i class="fas fa-pen"></i> Seção 10 — Manual
+      </a>
       <a class="btn btn-sm btn-outline-success" href="{{ gerador_gc_url }}"><i class="fas fa-magic"></i> Gerador Pro / GC</a>
       <a class="btn btn-sm btn-outline-warning" href="{{ gerador_elite_url }}"><i class="fas fa-brain"></i> Gerador Elite</a>
       <a class="btn btn-sm btn-outline-secondary" href="{{ geradores_elite_home }}"><i class="fas fa-home"></i> Geradores Elite</a>
@@ -1684,6 +1738,77 @@
           </table>
         </div>
       </div>
+      {% if modality_key == 'diadesorte' %}
+      <div class="ai-pan-seq" id="aiAnaliseSeqWrap">
+        <div class="ai-pan-col-title">Análise detalhada das sequências</div>
+        <p class="small text-muted mb-2">
+          Cada número é a posição da aposta dentro do padrão, o mesmo da tabela acima.
+          A faixa baixa, média ou alta divide os jogos possíveis daquele padrão com a regra já usada no sistema:
+          até 31 jogos, 1–10, 11–20 e 21–N; acima de 31, três terços.
+          Há predominância significativa quando a faixa líder tem pelo menos 40% e fica 10 pontos percentuais à frente da segunda.
+          A leitura é histórica e não antecipa resultado futuro.
+        </p>
+        <div class="small text-muted mb-2" id="aiAnaliseSeqStatus">Carregando análise das sequências…</div>
+        <div id="aiAnaliseSeqIndicadores" class="ai-pan-resumo"></div>
+        <div id="aiAnaliseSeqAviso" class="mb-3" hidden></div>
+        <div id="aiAnaliseSeqFaixas"></div>
+        <div id="aiAnaliseSeqApoio" class="ai-hint mb-2" hidden></div>
+        <div id="aiAnaliseSeqInsights" class="mb-3">
+          <div class="ai-pan-col-title">Insights das sequências</div>
+          <div class="ai-hint" id="aiAnaliseSeqInsightsBox"><span class="text-muted">—</span></div>
+        </div>
+        <button type="button" class="ai-collapse-toggle" id="aiAnaliseSeqTopToggle"
+                aria-expanded="false" aria-controls="aiAnaliseSeqTop" title="Mostrar ou ocultar">
+          <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+          <span id="aiAnaliseSeqTopTitulo">Sequências predominantes nos 5 principais padrões</span>
+        </button>
+        <div id="aiAnaliseSeqTop" class="mb-3 d-none"></div>
+        <div class="ai-pan-col-title">Ranking geral das sequências</div>
+        <p class="small text-muted mb-2">
+          Os filtros valem só para este ranking. Indicadores, insights e os 5 padrões usam o histórico completo.
+        </p>
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+          <input type="search" id="aiAnaliseSeqPadrao" class="form-control form-control-sm" style="max-width:14rem"
+                 placeholder="Padrão exato" autocomplete="off">
+          <input type="search" id="aiAnaliseSeqNum" class="form-control form-control-sm" style="max-width:8rem"
+                 placeholder="Sequência" inputmode="numeric" autocomplete="off">
+          <select id="aiAnaliseSeqFaixa" class="form-select form-select-sm" style="width:auto">
+            <option value="">Todas as faixas</option>
+            <option value="baixa">Baixa</option>
+            <option value="media">Média</option>
+            <option value="alta">Alta</option>
+          </select>
+          <input type="number" id="aiAnaliseSeqMin" class="form-control form-control-sm" style="width:9.5rem"
+                 min="1" step="1" placeholder="Ocorrências mín.">
+          <select id="aiAnaliseSeqPageSize" class="form-select form-select-sm" style="width:auto">
+            <option value="50" selected>50 / pág.</option>
+            <option value="100">100 / pág.</option>
+            <option value="250">250 / pág.</option>
+            <option value="0">Todos</option>
+          </select>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiAnaliseSeqPrev" disabled>‹</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiAnaliseSeqNext" disabled>›</button>
+          <span class="small text-muted" id="aiAnaliseSeqInfo">—</span>
+        </div>
+        <div class="ai-pan-table-wrap">
+          <table class="table table-sm table-bordered ai-table mb-0" id="aiTabelaAnaliseSeq">
+            <thead>
+              <tr>
+                <th class="col-pan-num" title="Posição na ordenação atual">Posição</th>
+                <th class="ai-sort" data-sort="sequencia" data-table="panSeqAn" title="Clique para ordenar">Sequência <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="ocorrencias" data-table="panSeqAn" title="Clique para ordenar">Ocorrências <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="percentual" data-table="panSeqAn" title="Clique para ordenar">% <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="padroes_diferentes" data-table="panSeqAn" title="Clique para ordenar">Padrões diferentes <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="faixa" data-table="panSeqAn" title="Clique para ordenar">Faixa predominante <span class="ai-sort-ind">⇅</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" class="text-muted">Carregando análise das sequências…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
       </div>
     </div>
 
@@ -1756,7 +1881,7 @@
   </div>
 </div>
 {% if modality_key == 'supersete' %}
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20260923v1">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20261001v1">
 <style>
   {% if extra_mes %}
   {% for nome, cor in (meses_cores or {}).items() %}
@@ -1772,7 +1897,7 @@
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
 {% if modality_key == 'supersete' %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20260923v2"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20261001v1"></script>
 {% endif %}
 <script>
 (function () {
@@ -1834,6 +1959,7 @@
     pan: { key: 'vezes_padrao', dir: 'desc' },
     panFalt: { key: 'padrao', dir: 'asc' },
     panSeq: { key: 'concurso', dir: 'desc' },
+    panSeqAn: { key: 'ocorrencias', dir: 'desc' },
     evo: { key: 'concurso', dir: 'desc' },
     evoCons: { key: 'n_padrao', dir: 'asc' },
     cheq: { key: 'linha', dir: 'asc' },
@@ -1841,6 +1967,7 @@
   let PAGE = { res: 1, pad: 1 };
   let PAN_HIST = { all: [], filtrados: [], faltantes: [], carregado: false, totalTeorico: 0 };
   let PAN_SEQ = { all: [], carregado: false, page: 1, carregando: false };
+  let ANALISE_SEQ = { dados: null, carregado: false, page: 1, carregando: false };
   let EVO = { linhas: [], padroes: [], nao: [], meta: null, carregado: false, page: 1, carregando: false };
 
   function esc(s) {
@@ -2060,7 +2187,7 @@
         <td>${esc(l.data)}</td>
         <td class="td-left text-start td-dezenas">${esc(dezFmt)}</td>
         ${EXTRA_MES ? `<td>${mesBadge(l)}</td>` : ''}
-        <td class="text-nowrap">${esc(pi)}</td>
+        <td class="text-nowrap td-padrao"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(pi)}" title="Abrir na aba 4 · Padrões II">${esc(pi)}</a></td>
         <td class="text-nowrap td-pad-final"><span class="ai-col-alinha">${esc(pf)}</span></td>
         <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
         <td>${esc(l.qtd_digitos)}</td>
@@ -2703,6 +2830,7 @@
     if (PAN_SEQ.carregando) return;
     if (PAN_SEQ.carregado && !force) {
       renderPanSeq();
+      carregarAnaliseSequencias(false);
       return;
     }
     PAN_SEQ.carregando = true;
@@ -2729,6 +2857,274 @@
       }
     } finally {
       PAN_SEQ.carregando = false;
+    }
+    carregarAnaliseSequencias(!!force);
+  }
+
+  function fmtPctBr(p, nd) {
+    const n = Number(p);
+    if (!Number.isFinite(n)) return '—';
+    const casas = nd == null ? 1 : nd;
+    return n.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas }) + '%';
+  }
+
+  function fmtDecBr(p, nd) {
+    const n = Number(p);
+    if (!Number.isFinite(n)) return '—';
+    const casas = nd == null ? 2 : nd;
+    return n.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+  }
+
+  function htmlFaixasAnalise(bloco) {
+    const ordem = ['baixa', 'media', 'alta'];
+    const rows = ordem.map((k) => {
+      const it = (bloco && bloco[k]) || { rotulo: k, ocorrencias: 0, percentual: 0 };
+      return `<tr><td>${esc(it.rotulo || k)}</td><td>${fmtVol(it.ocorrencias)}</td><td>${fmtPctBr(it.percentual, 1)}</td></tr>`;
+    }).join('');
+    const pred = (bloco && bloco.predominancia) || {};
+    const linha = pred.significativa
+      ? `Predominância atual: <strong>${esc(pred.rotulo || '—')}</strong>`
+      : `<strong>${esc(pred.rotulo || 'Não existe predominância significativa.')}</strong>`;
+    return `<table class="table table-sm table-bordered ai-table mb-1">
+        <thead><tr><th>Faixa</th><th>Ocorrências</th><th>%</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="ai-pan-frase mb-2">${linha}</p>`;
+  }
+
+  function kpiAnaliseSeq(lbl, val, sub) {
+    return `<div class="ai-kpi"><div class="lbl">${esc(lbl)}</div><div class="val">${val}</div>${sub ? `<div class="small text-muted">${sub}</div>` : ''}</div>`;
+  }
+
+  function renderAnaliseSeqResumo() {
+    const d = ANALISE_SEQ.dados;
+    if (!d) return;
+    const ind = d.indicadores || {};
+    const status = document.getElementById('aiAnaliseSeqStatus');
+    if (status) {
+      status.classList.remove('text-danger');
+      const de = d.primeiro_concurso;
+      const ate = d.ultimo_concurso;
+      const intervalo = de && ate ? `Concursos ${fmtVol(de)} a ${fmtVol(ate)}. ` : '';
+      status.textContent = `${intervalo}${fmtVol(d.total_ocorrencias || 0)} sorteios com sequência.`;
+    }
+    const box = document.getElementById('aiAnaliseSeqIndicadores');
+    if (box) {
+      const mais = ind.mais_frequentes || [];
+      let maisVal = '—';
+      let maisSub = '';
+      if (mais.length === 1) {
+        maisVal = fmtVol(mais[0].sequencia);
+        maisSub = `${fmtVol(mais[0].ocorrencias)}× · ${fmtPctBr(mais[0].percentual, 2)}`;
+      } else if (mais.length > 1) {
+        maisVal = `${fmtVol(mais.length)} empatam`;
+        maisSub = `${fmtVol(mais[0].ocorrencias)}× cada`;
+      }
+      box.innerHTML = [
+        kpiAnaliseSeq('Sequências diferentes', fmtVol(ind.sequencias_diferentes), ''),
+        kpiAnaliseSeq('Mais frequente', maisVal, maisSub),
+        kpiAnaliseSeq('Menor frequência', fmtVol(ind.menos_frequente_ocorrencias), `${fmtVol(ind.menos_frequente_quantidade)} sequências`),
+        kpiAnaliseSeq('Média por sequência', fmtDecBr(ind.media_ocorrencias, 2), ''),
+        kpiAnaliseSeq('Únicas', fmtVol(ind.sequencias_unicas), 'aparecem 1 vez'),
+        kpiAnaliseSeq('Repetidas', fmtVol(ind.sequencias_repetidas), `taxa ${fmtPctBr(ind.taxa_repeticao, 1)}`),
+        kpiAnaliseSeq('Em vários padrões', fmtVol(ind.em_multiplos_padroes), ''),
+        kpiAnaliseSeq('Máx. padrões', fmtVol(ind.maior_qtd_padroes), 'numa mesma sequência'),
+      ].join('');
+    }
+    const avisoEl = document.getElementById('aiAnaliseSeqAviso');
+    if (avisoEl) {
+      const aviso = d.aviso_apostas || {};
+      const frases = aviso.frases || [];
+      if (frases.length) {
+        avisoEl.hidden = false;
+        avisoEl.innerHTML = `<div class="ai-seq-aviso-titulo">${esc(aviso.titulo || 'Para criar apostas')}</div><ul>${frases.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`;
+      } else {
+        avisoEl.hidden = true;
+        avisoEl.innerHTML = '';
+      }
+    }
+    const faixasEl = document.getElementById('aiAnaliseSeqFaixas');
+    if (faixasEl) {
+      faixasEl.innerHTML = `<div class="ai-pan-col-title">Faixa das sequências sorteadas</div>${htmlFaixasAnalise(d.faixas)}`;
+    }
+    const apoio = document.getElementById('aiAnaliseSeqApoio');
+    if (apoio) {
+      const texto = (d.apoio_escolha && d.apoio_escolha.texto) || '';
+      apoio.hidden = !texto;
+      apoio.textContent = texto;
+    }
+    const insights = document.getElementById('aiAnaliseSeqInsightsBox');
+    if (insights) {
+      const lista = d.insights || [];
+      insights.innerHTML = lista.length
+        ? `<ul>${lista.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`
+        : '<span class="text-muted">Sem insights.</span>';
+    }
+    const tops = d.top_padroes || [];
+    const topTitulo = document.getElementById('aiAnaliseSeqTopTitulo');
+    if (topTitulo) {
+      topTitulo.textContent = tops.length === 5
+        ? 'Sequências predominantes nos 5 principais padrões'
+        : `Sequências predominantes nos ${tops.length} principais padrões`;
+    }
+    const topEl = document.getElementById('aiAnaliseSeqTop');
+    if (!topEl) return;
+    if (!tops.length) {
+      topEl.innerHTML = '<p class="small text-muted">Nenhum padrão no histórico.</p>';
+      return;
+    }
+    topEl.innerHTML = tops.map((p) => {
+      const pred = ((p.faixas || {}).predominancia) || {};
+      const predLinha = pred.significativa
+        ? `Predominância: <strong>${esc(pred.rotulo || '—')}</strong>`
+        : `<strong>${esc(pred.rotulo || 'Não existe predominância significativa.')}</strong>`;
+      const linhasTop = (p.top3 || []).map((t) => `<tr>
+          <td>${esc(t.posicao)}º</td>
+          <td>${fmtVol(t.sequencia)}</td>
+          <td>${fmtVol(t.ocorrencias)}</td>
+          <td>${fmtPctBr(t.percentual, 1)}</td>
+          <td>${esc(t.faixa_rotulo || '—')}</td>
+        </tr>`).join('');
+      const conc = (p.conclusoes || []).map((c) => `<li>${esc(c)}</li>`).join('');
+      const limites = p.faixa_limites_txt
+        ? `<div class="small text-muted">Faixas neste padrão: ${esc(p.faixa_limites_txt)}</div>`
+        : '';
+      const tabela = linhasTop
+        ? `<table class="table table-sm table-bordered ai-table mt-2 mb-1">
+            <thead><tr><th>Posição</th><th>Sequência</th><th>Ocorrências</th><th>%</th><th>Faixa</th></tr></thead>
+            <tbody>${linhasTop}</tbody>
+          </table>`
+        : '';
+      return `<div class="ai-seq-padrao">
+          <div class="ai-pan-col-title">${esc(p.posicao)}º padrão</div>
+          <div><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(p.padrao)}"><code>${esc(p.padrao)}</code></a>${p.descricao ? ` <span class="text-muted">· ${esc(p.descricao)}</span>` : ''}</div>
+          <div class="small text-muted mb-1">${fmtVol(p.ocorrencias)} ocorrências · ${fmtPctBr(p.percentual_historico, 2)} do histórico · ${fmtVol(p.jogos_possiveis)} jogos possíveis</div>
+          ${limites}
+          ${tabela}
+          <p class="mb-1">${predLinha}</p>
+          ${conc ? `<ul class="small mb-0">${conc}</ul>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function linhasAnaliseSeq() {
+    const d = ANALISE_SEQ.dados;
+    if (!d) return [];
+    const padQ = normalizarPadrao(document.getElementById('aiAnaliseSeqPadrao')?.value || '');
+    const seqRaw = String(document.getElementById('aiAnaliseSeqNum')?.value || '').trim();
+    const faixa = String(document.getElementById('aiAnaliseSeqFaixa')?.value || '');
+    const minRaw = String(document.getElementById('aiAnaliseSeqMin')?.value || '').trim();
+    const min = minRaw === '' ? 0 : Number(minRaw);
+    let rows = (d.ranking || []).filter((r) => {
+      if (padQ && !(r.padroes || []).some((p) => normalizarPadrao(p) === padQ)) return false;
+      if (seqRaw && String(r.sequencia) !== seqRaw) return false;
+      if (faixa && r.faixa !== faixa) return false;
+      if (Number.isFinite(min) && min > 0 && Number(r.ocorrencias) < min) return false;
+      return true;
+    });
+    const sort = SORT.panSeqAn || { key: 'ocorrencias', dir: 'desc' };
+    const mul = sort.dir === 'asc' ? 1 : -1;
+    const faixaOrd = { baixa: 0, media: 1, alta: 2 };
+    rows = rows.slice().sort((a, b) => {
+      let cmp = 0;
+      if (sort.key === 'faixa') {
+        cmp = ((faixaOrd[a.faixa] ?? 9) - (faixaOrd[b.faixa] ?? 9)) * mul;
+      } else {
+        const va = Number(a[sort.key]);
+        const vb = Number(b[sort.key]);
+        const na = Number.isFinite(va) ? va : -1;
+        const nb = Number.isFinite(vb) ? vb : -1;
+        cmp = (na - nb) * mul;
+      }
+      if (cmp) return cmp;
+      if (Number(a.ocorrencias) !== Number(b.ocorrencias)) return Number(b.ocorrencias) - Number(a.ocorrencias);
+      return Number(a.sequencia) - Number(b.sequencia);
+    });
+    return rows;
+  }
+
+  function renderAnaliseSeqRanking() {
+    const tb = document.querySelector('#aiTabelaAnaliseSeq tbody');
+    const info = document.getElementById('aiAnaliseSeqInfo');
+    const prev = document.getElementById('aiAnaliseSeqPrev');
+    const next = document.getElementById('aiAnaliseSeqNext');
+    if (!tb) return;
+    const rows = linhasAnaliseSeq();
+    const sizeRaw = Number(document.getElementById('aiAnaliseSeqPageSize')?.value);
+    const size = !sizeRaw || sizeRaw <= 0 ? (rows.length || 1) : sizeRaw;
+    const pages = Math.max(1, Math.ceil(rows.length / size) || 1);
+    if (ANALISE_SEQ.page > pages) ANALISE_SEQ.page = pages;
+    if (ANALISE_SEQ.page < 1) ANALISE_SEQ.page = 1;
+    const ini = (ANALISE_SEQ.page - 1) * size;
+    const pageRows = rows.slice(ini, ini + size);
+    if (!rows.length) {
+      tb.innerHTML = '<tr><td colspan="6" class="text-muted">Nenhuma sequência neste filtro.</td></tr>';
+    } else {
+      tb.innerHTML = pageRows.map((r, i) => {
+        const um = (r.padroes || []).length === 1 ? r.padroes[0] : '';
+        const seq = um
+          ? `<a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(um)}" title="Abrir o padrão na aba 4">${fmtVol(r.sequencia)}</a>`
+          : fmtVol(r.sequencia);
+        return `<tr>
+          <td>${fmtVol(ini + i + 1)}</td>
+          <td>${seq}</td>
+          <td><span class="ai-col-alinha">${fmtVol(r.ocorrencias)}</span></td>
+          <td><span class="ai-col-alinha">${fmtPctBr(r.percentual, 2)}</span></td>
+          <td><span class="ai-col-alinha">${fmtVol(r.padroes_diferentes)}</span></td>
+          <td>${esc(r.faixa_rotulo || '—')}</td>
+        </tr>`;
+      }).join('');
+    }
+    if (info) {
+      info.textContent = rows.length
+        ? `Exibindo ${fmtVol(pageRows.length)} de ${fmtVol(rows.length)} · pág. ${ANALISE_SEQ.page}/${pages}`
+        : '—';
+    }
+    if (prev) prev.disabled = ANALISE_SEQ.page <= 1 || !rows.length;
+    if (next) next.disabled = ANALISE_SEQ.page >= pages || !rows.length;
+    atualizarIndicadoresSort();
+  }
+
+  function renderAnaliseSequencias() {
+    renderAnaliseSeqResumo();
+    renderAnaliseSeqRanking();
+  }
+
+  async function carregarAnaliseSequencias(force) {
+    if (MODALITY_KEY !== 'diadesorte') return;
+    if (!document.getElementById('aiAnaliseSeqWrap')) return;
+    if (ANALISE_SEQ.carregando) return;
+    if (ANALISE_SEQ.carregado && !force) {
+      renderAnaliseSequencias();
+      return;
+    }
+    ANALISE_SEQ.carregando = true;
+    const status = document.getElementById('aiAnaliseSeqStatus');
+    const tb = document.querySelector('#aiTabelaAnaliseSeq tbody');
+    if (status) {
+      status.classList.remove('text-danger');
+      status.textContent = 'Calculando a análise das sequências…';
+    }
+    if (tb) tb.innerHTML = '<tr><td colspan="6" class="text-muted">Calculando…</td></tr>';
+    try {
+      const r = await fetch(`${API}/analise-sequencias`);
+      if (!r.ok) throw new Error('api ' + r.status);
+      const j = await r.json();
+      if (!j || j.sucesso === false) throw new Error((j && j.erro) || 'Falha na análise das sequências');
+      ANALISE_SEQ.dados = j;
+      ANALISE_SEQ.carregado = true;
+      ANALISE_SEQ.page = 1;
+      renderAnaliseSequencias();
+    } catch (e) {
+      ANALISE_SEQ.carregado = false;
+      const msg = String((e && e.message) || e);
+      if (status) {
+        status.classList.add('text-danger');
+        status.textContent = msg;
+      }
+      if (tb) tb.innerHTML = `<tr><td colspan="6" class="text-danger">${esc(msg)}</td></tr>`;
+    } finally {
+      ANALISE_SEQ.carregando = false;
     }
   }
 
@@ -4756,6 +5152,7 @@
     });
   }
   bindCollapseToggle('aiResToggleInfo', 'aiResPainelInfo');
+  bindCollapseToggle('aiAnaliseSeqTopToggle', 'aiAnaliseSeqTop');
   document.getElementById('aiPadIIToggleInfo')?.addEventListener('click', () => {
     const btn = document.getElementById('aiPadIIToggleInfo');
     const painel = document.getElementById('aiPadIIPainelInfo');
@@ -4927,7 +5324,8 @@
         SORT[table].key = key;
         const DESC_FIRST = new Set(['concurso', 'data', 'frequencia', 'jogos_possiveis', 'soma',
           'para_apostar', 'ja_sairam_dentro', 'dentro', 'proxima', 'fora', 'soma_media', 'pct',
-          'atraso_padrao', 'vezes_padrao', 'n_diagonais', 'existe_exata', 'qtd_prefixo']);
+          'atraso_padrao', 'vezes_padrao', 'n_diagonais', 'existe_exata', 'qtd_prefixo',
+          'ocorrencias', 'percentual', 'padroes_diferentes']);
         SORT[table].dir = key === 'distancia' ? 'asc' : (DESC_FIRST.has(key) ? 'desc' : 'asc');
       }
       if (table === 'cheq') {
@@ -4958,6 +5356,11 @@
       if (table === 'panSeq') {
         PAN_SEQ.page = 1;
         renderPanSeq();
+        return;
+      }
+      if (table === 'panSeqAn') {
+        ANALISE_SEQ.page = 1;
+        renderAnaliseSeqRanking();
         return;
       }
       if (table === 'evo' || table === 'evoCons') {
@@ -5073,6 +5476,7 @@
   const n0 = +(root.dataset.n || 0);
   document.getElementById('aiPanHistCarregar')?.addEventListener('click', () => {
     PAN_SEQ.carregado = false;
+    ANALISE_SEQ.carregado = false;
     carregarHistoricoCompleto();
   });
   document.getElementById('aiPanSeqPrev')?.addEventListener('click', () => {
@@ -5085,6 +5489,32 @@
   document.getElementById('aiPanSeqPageSize')?.addEventListener('change', () => {
     PAN_SEQ.page = 1;
     renderPanSeq();
+  });
+  let _anSeqBuscaT = null;
+  function agendaAnaliseSeq() {
+    clearTimeout(_anSeqBuscaT);
+    _anSeqBuscaT = setTimeout(() => {
+      ANALISE_SEQ.page = 1;
+      if (ANALISE_SEQ.carregado) renderAnaliseSeqRanking();
+    }, 220);
+  }
+  document.getElementById('aiAnaliseSeqPadrao')?.addEventListener('input', agendaAnaliseSeq);
+  document.getElementById('aiAnaliseSeqNum')?.addEventListener('input', agendaAnaliseSeq);
+  document.getElementById('aiAnaliseSeqMin')?.addEventListener('input', agendaAnaliseSeq);
+  document.getElementById('aiAnaliseSeqFaixa')?.addEventListener('change', () => {
+    ANALISE_SEQ.page = 1;
+    if (ANALISE_SEQ.carregado) renderAnaliseSeqRanking();
+  });
+  document.getElementById('aiAnaliseSeqPageSize')?.addEventListener('change', () => {
+    ANALISE_SEQ.page = 1;
+    if (ANALISE_SEQ.carregado) renderAnaliseSeqRanking();
+  });
+  document.getElementById('aiAnaliseSeqPrev')?.addEventListener('click', () => {
+    if (ANALISE_SEQ.page > 1) { ANALISE_SEQ.page -= 1; renderAnaliseSeqRanking(); }
+  });
+  document.getElementById('aiAnaliseSeqNext')?.addEventListener('click', () => {
+    ANALISE_SEQ.page += 1;
+    renderAnaliseSeqRanking();
   });
   let _panSeqBuscaT = null;
   document.getElementById('aiPanSeqBusca')?.addEventListener('input', () => {

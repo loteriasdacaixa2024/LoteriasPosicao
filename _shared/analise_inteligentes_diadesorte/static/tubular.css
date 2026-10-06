@@ -311,6 +311,15 @@
   padding-left: .45rem !important;
   padding-right: .35rem !important;
 }
+#ai-tubular-root a.tb-link-padrao {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+#ai-tubular-root a.tb-link-padrao:hover {
+  color: var(--primary, #8a6d12);
+}
 #ai-tubular-root .tb-mono {
   display: inline-block;
   font-family: ui-monospace, "Cascadia Mono", "Consolas", "Courier New", monospace;

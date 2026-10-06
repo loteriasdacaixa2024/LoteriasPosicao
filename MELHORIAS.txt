@@ -49,3 +49,744 @@ para cada modalidade (até mesmo para super7)vc vai pegar parte somente do print
 coloque abaixo da modalidade correspondente... 
 Resumindo vc  até  a rota... http://localhost:8083/ e coloque o resumo Cruzamento · diagonais × padrões
 que se encontra na rota http://localhost:5153/analise/analises-inteligentes/ (para cada modalidade) igual ao print que lhe passei
+
+
+-------------------------------------------------------------------------
+## OBJETIVO
+
+Preciso implementar uma nova análise na aplicação de análise do Dia de Sorte.
+
+A análise deve estudar especificamente a coluna **"Sequência"** existente na tabela **"Sequência sorteada em cada concurso"**, identificando padrões de comportamento, frequência e relação entre as sequências e os padrões de distribuição das dezenas.
+
+### Rota da aplicação
+
+```text
+http://127.0.0.1:5153/analise/analises-inteligentes/
+```
+
+### Aba onde deve ser implementada
+
+```text
+6. Panorama Histórico
+```
+
+### Local da nova análise
+
+A nova análise deve ser inserida **logo abaixo da tabela "Sequência sorteada em cada concurso"**.
+
+Não criar nova aba e não criar novo item de menu.
+
+Nome sugerido:
+
+```text
+Análise detalhada das sequências
+```
+
+O título pode ser ajustado para refletir melhor o conteúdo final, desde que mantenha o conceito.
+
+---
+
+# 1. CONTEXTO ATUAL
+
+A rota **Análises Inteligentes** possui atualmente 7 abas:
+
+1. Resultados e Dígitos
+2. Combinações
+3. Padrões 1
+4. Padrões 2
+5. Aposta por Padrão
+6. Panorama Histórico
+7. Checa as Consequências
+
+A implementação deve ocorrer **exclusivamente na aba 6 — Panorama Histórico**.
+
+Nessa aba já existem duas análises/tabelas importantes que devem ser preservadas exatamente como estão:
+
+* padrões que já saíram;
+* padrões que ainda faltam sair.
+
+**Não alterar, remover ou substituir essas tabelas.**
+
+Também deve ser preservada a tabela existente:
+
+**"Sequência sorteada em cada concurso"**
+
+A nova análise será complementar a essa tabela.
+
+---
+
+# 2. O QUE É A "SEQUÊNCIA"
+
+É importante entender corretamente o conceito antes de implementar.
+
+A tabela **"Sequência sorteada em cada concurso"** possui uma coluna chamada **Sequência**.
+
+Essa sequência representa o identificador/posição da combinação sorteada naquele concurso, conforme a lógica já existente na aplicação.
+
+Exemplo observado:
+
+```text
+Sequência 34
+```
+
+O mesmo número de sequência pode aparecer em concursos diferentes.
+
+O objetivo é descobrir **como essas sequências se comportam historicamente**.
+
+---
+
+# 3. PRIMEIRA DESCOBERTA QUE MOTIVOU A ANÁLISE
+
+Ao analisar visualmente a tabela, encontrei um caso interessante:
+
+A **sequência 34** aparece mais de uma vez, porém associada a **padrões diferentes**.
+
+Por exemplo:
+
+```text
+Padrão A → Sequência 34
+Padrão B → Sequência 34
+```
+
+Isso levantou algumas perguntas:
+
+* Com que frequência uma mesma sequência se repete?
+* Uma sequência costuma repetir dentro do mesmo padrão?
+* Uma sequência costuma aparecer em padrões diferentes?
+* Existem sequências que praticamente nunca se repetem?
+* Existem sequências com maior recorrência?
+* A repetição de uma sequência é comum ou rara?
+
+Não quero que a análise seja limitada ao número 34.
+
+O número 34 é apenas o exemplo que chamou atenção.
+
+A análise deve considerar **todas as sequências existentes no histórico**.
+
+---
+
+# 4. OBJETIVO PRINCIPAL
+
+Quero transformar a coluna **Sequência** em uma variável estatística útil para auxiliar a escolha de jogos.
+
+A análise deve responder:
+
+### A. Frequência
+
+* Quais sequências mais aparecem?
+* Quais aparecem menos?
+* Qual a frequência absoluta?
+* Qual o percentual de ocorrência?
+* Quantas sequências diferentes existem?
+
+### B. Repetição
+
+Verificar:
+
+* quantas vezes cada sequência se repete;
+* se uma sequência aparece em concursos diferentes;
+* se uma sequência aparece repetidamente associada ao mesmo padrão;
+* se uma sequência aparece associada a padrões diferentes.
+
+### C. Repetição entre padrões
+
+Esta é uma análise muito importante.
+
+Para cada sequência, verificar:
+
+```text
+Sequência → quantidade de padrões diferentes em que apareceu
+```
+
+Exemplo:
+
+```text
+Sequência 34
+→ apareceu X vezes
+→ associada a Y padrões diferentes
+```
+
+Criar uma classificação que permita identificar:
+
+* sequências concentradas em poucos padrões;
+* sequências distribuídas entre muitos padrões;
+* sequências que se repetem em padrões diferentes.
+
+---
+
+# 5. RELAÇÃO ENTRE SEQUÊNCIA E PADRÃO
+
+Quero poder partir de um padrão e descobrir quais sequências são mais comuns dentro dele.
+
+Exemplo:
+
+O sistema já identifica que o padrão:
+
+```text
+0, 0, 1, 2, 2, 2
+```
+
+é um dos padrões mais frequentes.
+
+Nesse caso, quero conseguir visualizar:
+
+```text
+Padrão 0,0,1,2,2,2
+
+Sequências mais frequentes:
+1º → sequência X → N ocorrências
+2º → sequência Y → N ocorrências
+3º → sequência Z → N ocorrências
+...
+```
+
+Mas não quero somente o número da sequência.
+
+Também quero saber **que tipo de sequência predomina**.
+
+---
+
+# 6. CLASSIFICAÇÃO DAS SEQUÊNCIAS POR FAIXA
+
+Quero analisar se as sequências sorteadas tendem a estar relacionadas a números:
+
+* baixos;
+* médios;
+* altos.
+
+A classificação deve ser baseada na lógica que já existe na aplicação para divisão das dezenas em faixas.
+
+**Não criar uma nova regra arbitrária sem antes verificar como a aplicação já classifica baixo/médio/alto.**
+
+Se já existir essa classificação em outra parte do sistema, reutilizar a mesma lógica.
+
+Caso não exista, analisar a estrutura atual e propor a divisão mais coerente antes de implementar.
+
+O objetivo é conseguir responder perguntas como:
+
+```text
+Dentro do padrão 0,0,1,2,2,2:
+
+As sequências mais frequentes são predominantemente:
+→ baixas?
+→ médias?
+→ altas?
+```
+
+---
+
+# 7. ANÁLISE DOS 5 PRINCIPAIS PADRÕES
+
+Na aba **Padrões 2** já existe uma relação dos principais padrões.
+
+Quero utilizar esses padrões como referência.
+
+Para os **5 padrões mais relevantes/frequentes apresentados atualmente pelo sistema**, fazer uma análise cruzada:
+
+```text
+PADRÃO
+   ↓
+SEQUÊNCIAS MAIS FREQUENTES
+   ↓
+CLASSIFICAÇÃO BAIXA / MÉDIA / ALTA
+```
+
+Para cada um dos 5 principais padrões, mostrar:
+
+* quantidade de ocorrências do padrão;
+* sequências associadas;
+* sequência mais frequente;
+* Top 3 sequências;
+* frequência de cada uma;
+* percentual dentro daquele padrão;
+* classificação baixa/média/alta;
+* predominância da faixa.
+
+---
+
+# 8. EXEMPLO PRÁTICO
+
+Suponha:
+
+```text
+Padrão: 0,0,1,2,2,2
+Ocorrências: 106
+```
+
+Esse padrão pode possuir diversas sequências diferentes.
+
+A análise poderia apresentar algo conceitualmente semelhante a:
+
+```text
+Padrão 0,0,1,2,2,2
+
+Top sequências
+
+1º Sequência 193
+   Ocorrências: XX
+   Percentual: XX%
+   Faixa predominante: ALTA
+
+2º Sequência 156
+   Ocorrências: XX
+   Percentual: XX%
+   Faixa predominante: ALTA
+
+3º Sequência 74
+   Ocorrências: XX
+   Percentual: XX%
+   Faixa predominante: MÉDIA
+```
+
+Os números acima são **apenas exemplos**.
+
+Não inserir esses valores manualmente.
+
+Todos os dados devem ser calculados dinamicamente a partir do banco de dados/histórico existente.
+
+---
+
+# 9. NÃO QUERO APENAS UMA LISTA DE SEQUÊNCIAS
+
+A análise precisa ser realmente interpretativa.
+
+Quero identificar comportamentos como:
+
+### Exemplo 1
+
+```text
+As sequências mais frequentes deste padrão estão
+concentradas na faixa alta.
+```
+
+### Exemplo 2
+
+```text
+As sequências apresentam distribuição equilibrada
+entre baixa, média e alta.
+```
+
+### Exemplo 3
+
+```text
+Existe forte concentração de determinadas sequências
+dentro deste padrão.
+```
+
+### Exemplo 4
+
+```text
+As sequências apresentam baixa repetição histórica.
+```
+
+### Exemplo 5
+
+```text
+A mesma sequência aparece em diferentes padrões,
+indicando que a sequência não está exclusivamente
+associada a um único padrão.
+```
+
+Essas conclusões devem ser **calculadas automaticamente**, e não textos fixos.
+
+---
+
+# 10. PERGUNTAS QUE A NOVA ANÁLISE DEVE RESPONDER
+
+A interface deve deixar claro o resultado das seguintes perguntas:
+
+### Frequência geral
+
+1. Quantas sequências diferentes existem?
+2. Qual é a sequência mais frequente?
+3. Qual é a menos frequente?
+4. Qual a média de ocorrências por sequência?
+5. Existem sequências extremamente recorrentes?
+
+### Repetição
+
+6. As sequências se repetem com frequência?
+7. Qual é a taxa de repetição?
+8. Quais são as sequências que mais se repetem?
+9. Existem sequências que aparecem apenas uma vez?
+
+### Relação sequência × padrão
+
+10. A mesma sequência aparece em padrões diferentes?
+11. Quais sequências aparecem em mais padrões?
+12. Quais sequências estão mais concentradas em um único padrão?
+13. Qual sequência apresenta maior diversidade de padrões?
+
+### Baixa × média × alta
+
+14. As sequências mais frequentes são predominantemente baixas?
+15. São predominantemente médias?
+16. São predominantemente altas?
+17. Existe alguma tendência clara?
+
+### Por padrão
+
+18. Para cada um dos 5 principais padrões, quais são as sequências mais frequentes?
+19. Qual é o Top 3 de sequências de cada padrão?
+20. Qual faixa predomina em cada padrão?
+21. Existe uma sequência que se destaca fortemente dentro de determinado padrão?
+
+---
+
+# 11. INDICADOR DE REPETIÇÃO
+
+Criar indicadores objetivos.
+
+Por exemplo:
+
+```text
+Repetição de sequências
+────────────────────────────
+Sequências únicas: XX
+Sequências repetidas: XX
+Taxa de repetição: XX%
+```
+
+E, se fizer sentido após análise dos dados:
+
+```text
+Sequências que aparecem em múltiplos padrões: XX
+Maior quantidade de padrões para uma sequência: XX
+```
+
+Os indicadores devem ser calculados dinamicamente.
+
+---
+
+# 12. RANKING GERAL DAS SEQUÊNCIAS
+
+Criar um ranking geral.
+
+Sugestão de colunas:
+
+| Posição | Sequência | Ocorrências |  % | Padrões diferentes | Faixa predominante |
+| ------- | --------: | ----------: | -: | -----------------: | ------------------ |
+
+A tabela deve seguir o padrão visual já utilizado pela aplicação.
+
+As colunas relevantes devem ser **ordenáveis/clicáveis**, seguindo o comportamento das demais tabelas da aplicação.
+
+Especialmente:
+
+* Sequência;
+* Ocorrências;
+* Percentual;
+* Padrões diferentes.
+
+---
+
+# 13. ANÁLISE DOS TOP 5 PADRÕES
+
+Criar uma seção específica, por exemplo:
+
+```text
+Sequências predominantes nos 5 principais padrões
+```
+
+Apresentar os 5 padrões separadamente.
+
+Exemplo conceitual:
+
+```text
+1º Padrão
+0,0,1,2,2,2
+
+Top 3 sequências:
+Seq. X → XX ocorrências → ALTA
+Seq. Y → XX ocorrências → MÉDIA
+Seq. Z → XX ocorrências → ALTA
+
+Predominância: ALTA
+```
+
+Repetir para os 5 padrões.
+
+---
+
+# 14. POSSIBILIDADE DE FILTRO
+
+Se tecnicamente viável e coerente com a interface existente, permitir filtros por:
+
+* padrão;
+* sequência;
+* faixa baixa/média/alta;
+* quantidade mínima de ocorrências.
+
+Não criar filtros desnecessários.
+
+A prioridade é manter a interface simples e coerente com o padrão visual atual.
+
+---
+
+# 15. ANÁLISE COMPARATIVA
+
+Seria interessante apresentar também uma visão resumida:
+
+```text
+Faixa       Ocorrências    Percentual
+Baixa       XX             XX%
+Média       XX             XX%
+Alta        XX             XX%
+```
+
+E uma conclusão automática:
+
+```text
+Predominância atual:
+ALTA
+```
+
+ou
+
+```text
+Predominância atual:
+MÉDIA
+```
+
+ou
+
+```text
+Não existe predominância significativa.
+```
+
+A definição de "predominância significativa" deve ser baseada nos dados, não em uma frase fixa.
+
+---
+
+# 16. IMPORTANTE: NÃO ALTERAR A LÓGICA EXISTENTE
+
+Antes de implementar:
+
+1. Localizar a rota:
+   `/analise/analises-inteligentes/`
+
+2. Localizar exatamente a aba:
+   `6. Panorama Histórico`
+
+3. Localizar a tabela:
+   `Sequência sorteada em cada concurso`
+
+4. Identificar:
+
+   * template utilizado;
+   * rota Flask;
+   * funções Python existentes;
+   * consultas SQLAlchemy/SQLite;
+   * JavaScript;
+   * CSS;
+   * modelos/tabelas do banco;
+   * lógica utilizada para calcular padrão;
+   * lógica utilizada para calcular sequência;
+   * lógica existente de classificação baixo/médio/alto.
+
+5. Entender a origem dos dados antes de criar qualquer consulta nova.
+
+**Não duplicar lógica que já exista.**
+
+Reutilizar funções existentes sempre que possível.
+
+---
+
+# 17. PRESERVAÇÃO DA APLICAÇÃO
+
+É fundamental:
+
+* não alterar rotas existentes;
+* não alterar nomes de abas;
+* não remover funcionalidades;
+* não modificar os cálculos existentes;
+* não modificar o banco sem necessidade;
+* não criar tabela física nova no banco se a análise puder ser calculada a partir dos dados existentes;
+* não alterar a tabela "Sequência sorteada em cada concurso";
+* não alterar as tabelas de padrões já existentes;
+* não quebrar JavaScript;
+* não quebrar filtros existentes;
+* não alterar o layout global da aplicação.
+
+A nova funcionalidade deve ser **aditiva**.
+
+---
+
+# 18. PADRÃO VISUAL
+
+A nova análise deve parecer parte nativa da aplicação.
+
+Seguir exatamente o padrão visual já utilizado:
+
+* títulos;
+* cards;
+* tabelas;
+* botões;
+* filtros;
+* cores;
+* espaçamentos;
+* tipografia;
+* responsividade;
+* ordenação de tabelas.
+
+**Não criar um design visual independente.**
+
+Antes de implementar, pesquisar no projeto componentes semelhantes já existentes e reutilizá-los.
+
+---
+
+# 19. INTERPRETAÇÃO PARA APOIO À ESCOLHA DE JOGOS
+
+O objetivo final dessa análise não é simplesmente mostrar estatísticas.
+
+Quero descobrir se a **sequência** pode ser utilizada como uma variável adicional na escolha de apostas.
+
+A lógica pretendida é:
+
+```text
+1. Identificar o padrão mais frequente.
+        ↓
+2. Consultar as sequências que mais aparecem nesse padrão.
+        ↓
+3. Verificar se existe predominância de sequências
+   baixas, médias ou altas.
+        ↓
+4. Identificar as sequências mais recorrentes.
+        ↓
+5. Usar essas informações como mais um critério
+   na construção das apostas.
+```
+
+Por exemplo:
+
+```text
+Padrão mais frequente:
+0,0,1,2,2,2
+
+Sequências predominantes:
+→ faixa alta
+
+Então:
+ao selecionar esse padrão, posso avaliar
+sequências da faixa alta como uma das opções
+estatisticamente mais recorrentes.
+```
+
+**Importante:** apresentar isso como análise estatística histórica, e não como garantia de resultado futuro.
+
+---
+
+# 20. RESULTADO ESPERADO
+
+Ao final, quero conseguir olhar para a aba **Panorama Histórico** e responder rapidamente:
+
+> "Se eu escolher determinado padrão, quais sequências historicamente aparecem mais associadas a ele?"
+
+E também:
+
+> "Essas sequências são predominantemente baixas, médias ou altas?"
+
+E:
+
+> "A mesma sequência costuma aparecer em padrões diferentes?"
+
+E:
+
+> "Quais são as sequências mais recorrentes de todo o histórico?"
+
+E:
+
+> "Existe algum comportamento relevante que eu não perceberia apenas olhando a tabela original?"
+
+Essa última pergunta é especialmente importante.
+
+A análise deve procurar **padrões estatísticos úteis e não óbvios**, sem inventar conclusões.
+
+---
+
+# 21. ANÁLISE AUTOMÁTICA / INSIGHTS
+
+Além das tabelas, criar uma seção de **Insights da análise**, calculada dinamicamente.
+
+Exemplo conceitual:
+
+```text
+INSIGHTS DAS SEQUÊNCIAS
+
+• A sequência X é a mais frequente do histórico.
+• A sequência Y aparece associada a X padrões diferentes.
+• No padrão A, predominam sequências da faixa alta.
+• No padrão B, existe maior concentração na faixa média.
+• A repetição de sequências entre padrões é baixa/moderada/alta.
+```
+
+Os textos devem ser gerados a partir dos resultados reais.
+
+Não utilizar números ou conclusões pré-definidos.
+
+---
+
+# 22. ANTES DE CODIFICAR
+
+**Não comece imediatamente a alterar os arquivos.**
+
+Primeiro:
+
+1. Explore a estrutura do projeto.
+2. Localize a rota.
+3. Localize o template da aba Panorama Histórico.
+4. Localize a tabela "Sequência sorteada em cada concurso".
+5. Identifique a origem dos dados.
+6. Identifique como os padrões são calculados.
+7. Identifique como a sequência é calculada.
+8. Verifique se já existe alguma função de classificação por faixa.
+9. Verifique se já existe componente de ranking/tabela ordenável que possa ser reutilizado.
+10. Verifique os documentos `docs/*.md` relacionados à aplicação.
+11. Apresente o diagnóstico antes de fazer alterações.
+
+**Converse comigo antes de codificar.**
+
+Primeiro quero entender:
+
+* onde estão os dados;
+* como você pretende calcular a análise;
+* quais arquivos serão alterados;
+* quais funções serão reutilizadas;
+* se haverá necessidade de alterar banco/modelos;
+* como a nova seção será encaixada na aba existente.
+
+Somente depois da minha aprovação faça a implementação.
+
+---
+
+# 23. REGRA FUNDAMENTAL
+
+Não quero apenas uma tabela dizendo:
+
+```text
+Sequência 34 = X ocorrências
+Sequência 74 = X ocorrências
+Sequência 193 = X ocorrências
+```
+
+Quero uma análise que estabeleça a relação:
+
+```text
+PADRÃO
+   ↓
+SEQUÊNCIA
+   ↓
+FREQUÊNCIA
+   ↓
+REPETIÇÃO
+   ↓
+FAIXA (BAIXA / MÉDIA / ALTA)
+   ↓
+COMPORTAMENTO HISTÓRICO
+   ↓
+INSIGHT
+```
+
+Esse é o objetivo principal da nova funcionalidade.
+
+

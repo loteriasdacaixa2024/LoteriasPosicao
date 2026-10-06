@@ -1516,6 +1516,20 @@ class AnaliseInteligentesService:
         )
         return montar_sequencias_sorteadas(cls, base=base)
 
+    @classmethod
+    def analise_sequencias(cls, base: str = "geral") -> Dict[str, Any]:
+        """Frequência, repetição e faixa das sequências já calculadas no Panorama."""
+        from analise_inteligentes_diadesorte.analise_sequencias import agregar_sequencias
+        bruto = cls.sequencias_sorteadas(base=base)
+        if not bruto.get("sucesso"):
+            return bruto
+        out = agregar_sequencias(bruto.get("linhas") or [])
+        out["base"] = base
+        out["primeiro_concurso"] = bruto.get("primeiro_concurso")
+        out["ultimo_concurso"] = bruto.get("ultimo_concurso")
+        out["api"] = "/analise/api/inteligentes/analise-sequencias"
+        return out
+
 
 def make_inteligentes_service(modality_key: str):
     """Factory — serviço de GC/Elite parametrizado pela modalidade."""
