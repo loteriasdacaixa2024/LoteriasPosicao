@@ -934,13 +934,14 @@
   #ai-root #aiTabelaPanSeq td.td-pan-seqn .ai-col-alinha { min-width: 4.2rem; }
   #ai-root #aiTabelaPanSeq td.td-pan-soma .ai-col-alinha { min-width: 2.4rem; }
   #ai-root #aiTabelaPanSeq td.td-pan-status .ai-col-alinha { min-width: 8.2rem; }
-  #ai-root #aiTabelaPanSeq th.col-pan-seqn {
+  /* Coluna observada: o que a tabela está medindo (sequência ou padrão). */
+  #ai-root th.ai-col-medida {
     box-shadow: inset 0 -3px 0 #ffe082;
   }
-  #ai-root #aiTabelaPanSeq td.td-pan-seqn {
+  #ai-root td.ai-col-medida {
     background: #fff8e1 !important;
   }
-  #ai-root #aiTabelaPanSeq tr.tr-padrao-ultimo > td.td-pan-seqn {
+  #ai-root #aiTabelaPanSeq tr.tr-padrao-ultimo > td.ai-col-medida {
     background: #e8f5e9 !important;
   }
   #ai-root #aiTabelaPanSeq a.ai-pan-link-pad {
@@ -1041,7 +1042,11 @@
   #ai-root #aiAnaliseSeqFaixas {
     width: 100%;
     max-width: 28rem;
-    margin: .2rem 0 .35rem;
+    margin: .2rem auto .75rem;
+    text-align: center;
+  }
+  #ai-root #aiAnaliseSeqFaixas .ai-pan-col-title {
+    text-align: center;
   }
   #ai-root #aiAnaliseSeqInsights ul { margin: .25rem 0 0; padding-left: 1.15rem; }
   #ai-root #aiAnaliseSeqInsights li { margin: .15rem 0; }
@@ -1668,7 +1673,7 @@
               <thead>
                 <tr>
                   <th class="col-pan-num" title="Posição na lista">Nº</th>
-                  <th class="ai-sort" data-sort="padrao_inicial" data-table="pan" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort ai-col-medida" data-sort="padrao_inicial" data-table="pan" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort col-pan-vezes" data-sort="vezes_padrao" data-table="pan" title="Quantas vezes este padrão já saiu">Vezes <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort col-pan-jogos" data-sort="jogos_possiveis" data-table="pan" title="Quantidade de jogos possíveis deste padrão">Jogos <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort" data-sort="descricao_bma" data-table="pan" title="Clique para ordenar">B+M+A <span class="ai-sort-ind">⇅</span></th>
@@ -1687,7 +1692,7 @@
               <thead>
                 <tr>
                   <th class="col-pan-num">Nº</th>
-                  <th class="ai-sort" data-sort="padrao" data-table="panFalt" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort ai-col-medida" data-sort="padrao" data-table="panFalt" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort col-pan-jogos" data-sort="jogos_possiveis" data-table="panFalt" title="Quantidade de jogos possíveis deste padrão — clique para ordenar">Jogos <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort" data-sort="descricao" data-table="panFalt" title="Clique para ordenar">B+M+A <span class="ai-sort-ind">⇅</span></th>
                 </tr>
@@ -1726,7 +1731,7 @@
                 <th class="ai-sort" data-sort="concurso" data-table="panSeq" title="Clique para ordenar">Concurso <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort" data-sort="data" data-table="panSeq" title="Clique para ordenar">Data <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort col-pan-pad" data-sort="padrao" data-table="panSeq" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort col-pan-seqn" data-sort="sequencia_n" data-table="panSeq" title="Nº da aposta na aba 5 ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort col-pan-seqn ai-col-medida" data-sort="sequencia_n" data-table="panSeq" title="Nº da aposta na aba 5 ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort" data-sort="dezenas_fmt" data-table="panSeq" title="Clique para ordenar">Dezenas <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort col-pan-soma" data-sort="soma" data-table="panSeq" title="Clique para ordenar">Soma <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort col-pan-status" data-sort="status_media" data-table="panSeq" title="Clique para ordenar">Status <span class="ai-sort-ind">⇅</span></th>
@@ -1754,8 +1759,12 @@
         <div id="aiAnaliseSeqFaixas"></div>
         <div id="aiAnaliseSeqApoio" class="ai-hint mb-2" hidden></div>
         <div id="aiAnaliseSeqInsights" class="mb-3">
-          <div class="ai-pan-col-title">Insights das sequências</div>
-          <div class="ai-hint" id="aiAnaliseSeqInsightsBox"><span class="text-muted">—</span></div>
+          <button type="button" class="ai-collapse-toggle" id="aiAnaliseSeqInsightsToggle"
+                  aria-expanded="false" aria-controls="aiAnaliseSeqInsightsBox" title="Mostrar ou ocultar">
+            <i class="fas fa-chevron-right ai-chevron" aria-hidden="true"></i>
+            <span>Insights das sequências</span>
+          </button>
+          <div class="ai-hint d-none" id="aiAnaliseSeqInsightsBox"><span class="text-muted">—</span></div>
         </div>
         <button type="button" class="ai-collapse-toggle" id="aiAnaliseSeqTopToggle"
                 aria-expanded="false" aria-controls="aiAnaliseSeqTop" title="Mostrar ou ocultar">
@@ -1795,7 +1804,7 @@
             <thead>
               <tr>
                 <th class="col-pan-num" title="Posição na ordenação atual">Posição</th>
-                <th class="ai-sort" data-sort="sequencia" data-table="panSeqAn" title="Clique para ordenar">Sequência <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort ai-col-medida" data-sort="sequencia" data-table="panSeqAn" title="Clique para ordenar">Sequência <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort" data-sort="ocorrencias" data-table="panSeqAn" title="Clique para ordenar">Ocorrências <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort" data-sort="percentual" data-table="panSeqAn" title="Clique para ordenar">% <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort" data-sort="padroes_diferentes" data-table="panSeqAn" title="Clique para ordenar">Padrões diferentes <span class="ai-sort-ind">⇅</span></th>
@@ -2437,7 +2446,7 @@
     }
     tb.innerHTML = lista.map((p, i) => `<tr>
       <td class="td-pan-num">${i + 1}</td>
-      <td class="td-padrao"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(p.padrao)}" title="Abrir na aba 4 · Padrões II">${esc(p.padrao)}</a></td>
+      <td class="td-padrao ai-col-medida"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(p.padrao)}" title="Abrir na aba 4 · Padrões II">${esc(p.padrao)}</a></td>
       <td class="td-pan-jogos"><span class="ai-col-alinha">${fmtVol(p.jogos_possiveis)}</span></td>
       <td>${esc(p.descricao || '—')}</td>
     </tr>`).join('');
@@ -2453,7 +2462,7 @@
     } else {
       tb.innerHTML = itens.map((it, i) => `<tr>
         <td class="td-pan-num">${i + 1}</td>
-        <td class="td-padrao"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(it.padrao_inicial)}" title="Abrir na aba 4 · Padrões II">${esc(it.padrao_inicial)}</a></td>
+        <td class="td-padrao ai-col-medida"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(it.padrao_inicial)}" title="Abrir na aba 4 · Padrões II">${esc(it.padrao_inicial)}</a></td>
         <td class="td-pan-vezes"><span class="ai-col-alinha">${fmtVol(it.vezes_padrao)}</span></td>
         <td class="td-pan-jogos"><span class="ai-col-alinha">${fmtVol(it.jogos_possiveis)}</span></td>
         <td class="td-bma">${esc(it.descricao_bma)}</td>
@@ -2619,7 +2628,7 @@
           <td><a href="#" data-act="ir-concurso" data-concurso="${esc(r.concurso)}">${esc(r.concurso)}</a></td>
           <td>${esc(r.data || '—')}</td>
           <td class="td-pan-pad td-padrao"><span class="ai-col-alinha"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(r.padrao)}" title="${esc(r.descricao || '')}">${esc(r.padrao)}</a></span></td>
-          <td class="td-pan-seqn"><span class="ai-col-alinha">${seq}</span></td>
+          <td class="td-pan-seqn ai-col-medida"><span class="ai-col-alinha">${seq}</span></td>
           <td class="font-monospace">${esc(r.dezenas_fmt || '—')}</td>
           <td class="td-pan-soma"><span class="ai-col-alinha">${esc(r.soma != null ? r.soma : '—')}</span></td>
           <td class="td-pan-status"><span class="ai-col-alinha">${statusPill(r.status_media, r.status_media_label)}</span></td>
@@ -3067,7 +3076,7 @@
           : fmtVol(r.sequencia);
         return `<tr>
           <td>${fmtVol(ini + i + 1)}</td>
-          <td>${seq}</td>
+          <td class="ai-col-medida">${seq}</td>
           <td><span class="ai-col-alinha">${fmtVol(r.ocorrencias)}</span></td>
           <td><span class="ai-col-alinha">${fmtPctBr(r.percentual, 2)}</span></td>
           <td><span class="ai-col-alinha">${fmtVol(r.padroes_diferentes)}</span></td>
@@ -5153,6 +5162,7 @@
   }
   bindCollapseToggle('aiResToggleInfo', 'aiResPainelInfo');
   bindCollapseToggle('aiAnaliseSeqTopToggle', 'aiAnaliseSeqTop');
+  bindCollapseToggle('aiAnaliseSeqInsightsToggle', 'aiAnaliseSeqInsightsBox');
   document.getElementById('aiPadIIToggleInfo')?.addEventListener('click', () => {
     const btn = document.getElementById('aiPadIIToggleInfo');
     const painel = document.getElementById('aiPadIIPainelInfo');
