@@ -139,6 +139,20 @@
   .rec-n-btn:hover{background:var(--accent-light)!important;color:var(--primary-xdark)!important}
   .rec-n-btn.active{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important}
   .rec-linha-cnc{font-variant-numeric:tabular-nums;min-width:3.2rem;font-weight:700;color:var(--primary-xdark)}
+  .rec-oficial-freq{margin-top:.75rem;padding-top:.65rem;border-top:1px solid #e5e7eb}
+  .rec-freq-linha{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .5rem;margin-bottom:.35rem}
+  .rec-freq-rotulo{min-width:7.5rem;font-size:.75rem;font-weight:800;color:var(--primary-xdark)}
+  .rec-escolha{border:2px solid var(--primary);border-radius:12px;background:#fff;padding:1rem 1.15rem;margin-bottom:1rem;box-shadow:0 2px 10px rgba(16,24,40,.06)}
+  .rec-escolha h2{font-size:1.05rem;font-weight:800;color:var(--primary-xdark);margin:0}
+  .rec-pick-grid{display:flex;flex-wrap:wrap;gap:.35rem}
+  .rec-pick{
+    width:36px;height:36px;border-radius:50%;border:1px solid #cbd5e1;
+    background:#fff;color:#0f172a;font-weight:700;font-size:.78rem;
+    cursor:pointer;padding:0;line-height:1;
+  }
+  .rec-pick.is-on{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .rec-pick:hover{border-color:var(--primary)}
+  .rec-escolha-hist{border-top:1px solid #e5e7eb;margin-top:.85rem;padding-top:.75rem}
   .rec-bloco{border:1px solid #e5e7eb;border-radius:10px;padding:.75rem .9rem;background:#fff;height:100%}
   .rec-bloco h3{font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin:0 0 .45rem;color:var(--primary-dark)}
   .rec-fold{border:1px solid var(--accent);border-radius:12px;background:var(--accent-light);margin-bottom:.85rem}
@@ -633,6 +647,9 @@
           As <strong>16 dezenas</strong> do cartão destacado vão para o Construtor nesta ordem:
           primeiro as <strong>pendentes do ciclo</strong> (as que ainda não saíram), depois o núcleo e a baixa presença.
           Se houver mais de 16 faltantes, ficam as de maior score.
+          No topo, cada concurso mostra o resultado oficial e o mês.
+          Em <strong>Minha escolha</strong> você marca as dezenas; elas ficam neste navegador para o próximo concurso
+          e, quando o resultado entra, aparecem pintadas (verde saiu, clara não saiu).
         </div>
       </details>
       <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
@@ -1944,6 +1961,245 @@
     recPadCarregarCatalogo();
   }
 
+  function recEsc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[ch]));
+  }
+
+  function recMesHtml(row){
+    const n = Number(row && row.mes_num) || 0;
+    if(!n) return '';
+    const nome = MESES_NOME[n] || '';
+    const abrev = MESES_ABREV[n] || nome;
+    if(!abrev) return '';
+    return `<span class="mes-badge${nome ? ' mes-nome-'+nome : ''}" title="Mês da Sorte">${recEsc(abrev)}</span>`;
+  }
+
+  function recSetsIguais(a, b){
+    const norm = arr => (arr||[]).map(Number).filter(n => !isNaN(n)).sort((x,y)=>x-y).join(',');
+    return norm(a) === norm(b);
+  }
+
+  function recFreqOficial(linhas, min, max){
+    const freq = {};
+    for(let n = min; n <= max; n++) freq[n] = 0;
+    (linhas||[]).forEach(r => {
+      (r.dezenas||[]).forEach(d => {
+        const k = Number(d);
+        if(freq[k] != null) freq[k] += 1;
+      });
+    });
+    let maxF = 0;
+    Object.keys(freq).forEach(k => { if(freq[k] > maxF) maxF = freq[k]; });
+    const grupos = [];
+    for(let v = maxF; v >= 0; v--){
+      const nums = [];
+      for(let n = min; n <= max; n++) if(freq[n] === v) nums.push(n);
+      if(nums.length) grupos.push({ vezes: v, dezenas: nums });
+    }
+    return { grupos, maxF, freq };
+  }
+
+  function recFonteHtml(j){
+    const linhas = j.linhas || [];
+    const min = Number(j.dezena_min)||1;
+    const max = Number(j.dezena_max)||31;
+    const freq = recFreqOficial(linhas, min, max);
+    const linhasHtml = linhas.map(r => {
+      const oficiais = r.dezenas || [];
+      const reps = r.repetidas || [];
+      const bolas = oficiais.length
+        ? oficiais.map(n => `<span class="cc-ball ${recBallCls(freq.freq[Number(n)]||0, freq.maxF)}">${pad(n)}</span>`).join('')
+        : '<span class="text-muted">—</span>';
+      const repLinha = recSetsIguais(oficiais, reps) ? '' : `
+        <div class="small text-muted d-flex flex-wrap align-items-center gap-1 ps-1 pb-1">
+          Repetidas no ciclo ${reps.length ? reps.map(n=>`<span class="cc-ball dez">${pad(n)}</span>`).join('') : '—'}
+        </div>`;
+      return `<div class="py-1 border-bottom">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <span class="rec-linha-cnc">#${r.concurso||'—'}</span>
+          <span class="small text-muted">${recEsc(r.data||'')}</span>
+          <span>${bolas}</span>
+          ${recMesHtml(r)}
+        </div>
+        ${repLinha}
+      </div>`;
+    }).join('');
+    const freqHtml = freq.grupos.map(f => {
+      const rotulo = f.vezes === 0 ? 'Não apareceu' : (f.vezes + ' vez' + (f.vezes > 1 ? 'es' : ''));
+      return `<div class="rec-freq-linha">
+        <span class="rec-freq-rotulo">${rotulo}</span>
+        <span>${recBalls(f.dezenas, f.vezes, freq.maxF)}</span>
+      </div>`;
+    }).join('');
+    return `<div class="card shadow-sm mb-3">
+      <div class="card-header py-2 small fw-bold">Fonte · Resultado oficial dos últimos ${j.janela_efetiva || linhas.length} concursos</div>
+      <div class="card-body py-2">
+        ${linhasHtml || '<span class="text-muted">—</span>'}
+        <div class="rec-oficial-freq">
+          <div class="small fw-bold mb-2">Quantas vezes cada dezena saiu nestes concursos</div>
+          ${freqHtml || '—'}
+        </div>
+        <p class="small text-muted mb-0 mt-2">As bolas desta caixa são as sorteadas. Se a lista de repetidas do ciclo for outra, ela aparece na linha de baixo. Os quadros seguintes continuam na coluna Repetidas no Ciclo.</p>
+      </div>
+    </div>
+    <div id="rec-escolha"></div>`;
+  }
+
+  const REC_ESCOLHA_MAX_HIST = 8;
+  let recJsonAtual = null;
+
+  function recEscolhaStorageKey(){ return 'lp-rec-escolha:' + MOD_KEY; }
+
+  function recEscolhaLer(){
+    try {
+      const raw = JSON.parse(localStorage.getItem(recEscolhaStorageKey()) || '{}');
+      const out = {};
+      Object.keys(raw || {}).forEach(k => {
+        const c = Number(k);
+        if(!c) return;
+        const nums = [...new Set((raw[k]||[]).map(Number).filter(n => n >= 1 && n <= 99))].sort((a,b)=>a-b);
+        if(nums.length) out[c] = nums;
+      });
+      return out;
+    } catch(e){ return {}; }
+  }
+
+  function recEscolhaGravar(map){
+    const clean = {};
+    Object.keys(map).forEach(k => {
+      if(map[k] && map[k].length) clean[k] = map[k];
+    });
+    localStorage.setItem(recEscolhaStorageKey(), JSON.stringify(clean));
+  }
+
+  function recEscolhaPodar(store, ultimo){
+    const chao = Number(ultimo) - 40;
+    Object.keys(store).forEach(k => {
+      const c = Number(k);
+      if(c < chao || !(store[k] && store[k].length)) delete store[k];
+    });
+  }
+
+  function recMapaResultados(j){
+    const mapa = {};
+    (j.resultados_recentes||[]).forEach(r => { if(r && r.concurso) mapa[Number(r.concurso)] = r; });
+    (j.linhas||[]).forEach(r => { if(r && r.concurso) mapa[Number(r.concurso)] = r; });
+    return mapa;
+  }
+
+  function recUltimoConcurso(j){
+    let u = 0;
+    (j.linhas||[]).concat(j.resultados_recentes||[]).forEach(r => {
+      const c = Number(r && r.concurso) || 0;
+      if(c > u) u = c;
+    });
+    return u;
+  }
+
+  function recEscolhaBolas(nums, resultado){
+    const set = new Set(((resultado && resultado.dezenas) || []).map(Number));
+    const tem = !!(resultado && (resultado.dezenas||[]).length);
+    return (nums||[]).map(n => {
+      if(!tem) return `<span class="cc-ball dez">${pad(n)}</span>`;
+      return `<span class="cc-ball ${set.has(Number(n)) ? 'acerto' : 'rec-0'}">${pad(n)}</span>`;
+    }).join('') || '—';
+  }
+
+  function recBlocoAcomp(c, titulo, store, mapa){
+    const nums = store[c] || [];
+    const res = mapa[c];
+    const set = new Set(((res && res.dezenas) || []).map(Number));
+    const hits = res ? nums.filter(n => set.has(Number(n))).length : null;
+    const frase = res
+      ? `<strong>${hits} de ${nums.length}</strong> saíram no #${c}`
+      : `escolha guardada para o #${c}`;
+    const oficial = res ? `
+      <div class="small text-muted mb-1 d-flex flex-wrap align-items-center gap-2">
+        Resultado #${c} <span>${recEsc(res.data||'')}</span> ${recMesHtml(res)}
+      </div>
+      <div class="mb-1">${(res.dezenas||[]).map(n=>`<span class="cc-ball dez">${pad(n)}</span>`).join('') || '—'}</div>` : '';
+    return `<div class="mb-3">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+        <div class="small fw-bold">${titulo}</div>
+        <button type="button" class="btn btn-sm btn-outline-secondary py-0" data-rec-apagar="${c}">Apagar</button>
+      </div>
+      ${oficial}
+      <div class="small text-muted mb-1">Sua escolha · verde saiu, clara não saiu</div>
+      <div class="mb-1">${recEscolhaBolas(nums, res)}</div>
+      <div class="small">${frase}</div>
+    </div>`;
+  }
+
+  function paintRecEscolha(j){
+    const box = document.getElementById('rec-escolha');
+    if(!box || !j) return;
+    const ultimo = recUltimoConcurso(j);
+    const alvo = ultimo ? ultimo + 1 : 0;
+    const mapa = recMapaResultados(j);
+    const store = recEscolhaLer();
+    const min = Number(j.dezena_min)||1;
+    const max = Number(j.dezena_max)||31;
+    const marcadas = new Set(alvo ? (store[alvo] || []) : []);
+    let picks = '';
+    for(let n = min; n <= max; n++){
+      const on = marcadas.has(n);
+      picks += `<button type="button" class="rec-pick${on?' is-on':''}" data-rec-pick="${n}" aria-pressed="${on?'true':'false'}">${pad(n)}</button>`;
+    }
+    const histKeys = Object.keys(store).map(Number).filter(c => c && c <= ultimo).sort((a,b)=>b-a);
+    const destaque = histKeys[0] || 0;
+    const resto = histKeys.slice(1, REC_ESCOLHA_MAX_HIST);
+    const destaqueHtml = destaque ? recBlocoAcomp(destaque, `Acompanhamento do #${destaque}`, store, mapa) : '';
+    const histHtml = resto.map(c => recBlocoAcomp(c, `#${c}`, store, mapa)).join('');
+    box.innerHTML = `<div class="rec-escolha">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+        <h2><i class="fas fa-check-double me-1"></i>Minha escolha</h2>
+        <span class="small text-muted">${marcadas.size === 1 ? '1 marcada' : marcadas.size + ' marcadas'} para o #${alvo||'—'}</span>
+      </div>
+      <p class="small text-muted mb-2">Marque as dezenas a partir da análise. Elas ficam neste navegador para o concurso #${alvo||'—'}. Quando o resultado entrar, a lista volta pintada.</p>
+      ${destaqueHtml}
+      <div class="small fw-bold mb-2">Escolha para o próximo concurso #${alvo||'—'}</div>
+      <div class="rec-pick-grid mb-2" role="group" aria-label="Dezenas da minha escolha">${picks}</div>
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-rec-limpar ${marcadas.size?'':'disabled'}>Limpar escolha do #${alvo||'—'}</button>
+      ${histHtml ? `<div class="rec-escolha-hist"><div class="small fw-bold mb-2">Escolhas anteriores</div>${histHtml}</div>` : ''}
+    </div>`;
+  }
+
+  function bindRecEscolha(){
+    const box = document.getElementById('rec-escolha');
+    if(!box || box.dataset.bound) return;
+    box.dataset.bound = '1';
+    box.addEventListener('click', (ev) => {
+      const atual = recJsonAtual;
+      if(!atual) return;
+      const ultimo = recUltimoConcurso(atual);
+      const alvo = ultimo ? ultimo + 1 : 0;
+      if(!alvo) return;
+      const pick = ev.target.closest('[data-rec-pick]');
+      const limpar = ev.target.closest('[data-rec-limpar]');
+      const apagar = ev.target.closest('[data-rec-apagar]');
+      if(!pick && !limpar && !apagar) return;
+      const store = recEscolhaLer();
+      if(pick){
+        const n = Number(pick.dataset.recPick);
+        const min = Number(atual.dezena_min)||1;
+        const max = Number(atual.dezena_max)||31;
+        if(n < min || n > max) return;
+        const set = new Set(store[alvo] || []);
+        if(set.has(n)) set.delete(n); else set.add(n);
+        store[alvo] = [...set].sort((a,b)=>a-b);
+      } else if(limpar){
+        delete store[alvo];
+      } else if(apagar){
+        delete store[Number(apagar.dataset.recApagar)];
+      }
+      recEscolhaPodar(store, ultimo);
+      recEscolhaGravar(store);
+      paintRecEscolha(atual);
+    });
+  }
+
   function renderRecorrencia(j){
     const out = document.getElementById('rec-out');
     const st = document.getElementById('rec-status');
@@ -1967,12 +2223,6 @@
     const conc = (j.concursos||[]).join(', ');
     st.textContent = j.leitura || '';
     lbl.textContent = conc ? ('concursos '+conc) : '';
-    const linhasHtml = (j.linhas||[]).map(r=>`
-      <div class="d-flex flex-wrap align-items-center gap-2 py-1 border-bottom">
-        <span class="rec-linha-cnc">#${r.concurso||'—'}</span>
-        <span class="small text-muted">${r.data||''}</span>
-        <span>${(r.repetidas||[]).map(n=>`<span class="badge bg-secondary me-1">${pad(n)}</span>`).join('') || '<span class="text-muted">—</span>'}</span>
-      </div>`).join('');
     const rankingRows = (j.ranking||[]).map(t=>`
       <tr>
         <td class="fw-bold">${pad(t.dezena)}</td>
@@ -2009,10 +2259,7 @@
     const top2txt = (des.top2||[]).map(t=>pad(t.dezena)).join(' + ');
     const cj = recConjunto16(j);
     out.innerHTML = `
-      <div class="card shadow-sm mb-3">
-        <div class="card-header py-2 small fw-bold">Fonte · Repetidas no Ciclo</div>
-        <div class="card-body py-2">${linhasHtml || '<span class="text-muted">—</span>'}</div>
-      </div>
+      ${recFonteHtml(j)}
       <p class="small">${j.leitura||''} Distribuição abaixo.</p>
       <div class="row g-3 mb-3">
         <div class="col-lg-5">
@@ -2131,6 +2378,9 @@
         </div>
       </div>
       ${renderPosAnalise(j)}`;
+    recJsonAtual = j;
+    paintRecEscolha(j);
+    bindRecEscolha();
     bindRecPosBt();
     montarRecPadGerador(j, cj);
   }
@@ -2532,6 +2782,17 @@
   document.getElementById('co-btn-bt').addEventListener('click', ()=>runBacktest(stateOp.apostas, 'co-bt'));
   document.getElementById('cf-btn-bt').addEventListener('click', ()=>runBacktest(stateFech.apostas, 'cf-bt'));
   document.getElementById('ce-btn-bt').addEventListener('click', ()=>runBacktest(stateEst.apostas, 'ce-bt'));
+})();
+</script>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  const m = new URLSearchParams(location.search).get('modo');
+  const id = m === 'recorrencia' ? 'tab-btn-recorrencia' : (m === 'estrategia' ? 'tab-btn-estrategia' : null);
+  if(!id || !window.bootstrap || !bootstrap.Tab) return;
+  const btn = document.getElementById(id);
+  if(btn) bootstrap.Tab.getOrCreateInstance(btn).show();
 })();
 </script>
 {% endblock %}

@@ -1,10 +1,18 @@
 <script>
     window.__MESES_CORES__ = {{ meses_cores | default({}) | tojson }};
     window.__CONV_HAS_MES__ = {{ (cc_cfg.has_mes | default(false)) | tojson }};
+    window.__CC_MODALIDADE__ = {
+        key: {{ cc_cfg.key | tojson }},
+        nome: {{ cc_cfg.nome | tojson }},
+        combo: {{ cc_cfg.combo_size | tojson }},
+        dezenaMin: {{ cc_cfg.dezena_min | tojson }},
+        dezenaMax: {{ cc_cfg.dezena_max | tojson }},
+        hasMes: {{ (cc_cfg.has_mes | default(false)) | tojson }}
+    };
 </script>
 <script src="{{ url_for('cc_static.static', filename='js/conversor-apostas.js') }}"></script>
-<script src="{{ url_for('cc_static.static', filename='js/conferencia-resultados-ui.js') }}"></script>
-<script src="{{ url_for('cc_static.static', filename='js/concursos-disponiveis.js') }}"></script>
+<script src="{{ url_for('cc_static.static', filename='js/conferencia-resultados-ui.js') }}?v=15"></script>
+<script src="{{ url_for('cc_static.static', filename='js/concursos-disponiveis.js') }}?v=4"></script>
 <script>
     let _confTabAtiva = 'historico';
     let _historicoCarregado = false;

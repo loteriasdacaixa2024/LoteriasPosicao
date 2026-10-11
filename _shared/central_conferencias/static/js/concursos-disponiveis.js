@@ -3,10 +3,129 @@
  */
 (function (global) {
     const API = '/central-conferencias/api/conferencia-apostas';
+    const ESCOPO_PESQUISA_KEY = 'cd-escopo-pesquisa';
     let concursosDisponiveis = [];
     let concursosSelecionados = [];
     let resultadosProcessamento = {};
     let _inicializado = false;
+    let _cacheListaCompleta = null;
+
+    function aplicarEscopoLocal(data, escopo, concursoEspecifico) {
+        const lista = data.concursos || [];
+        if (escopo === 'ultimo') {
+            const apurados = lista.filter(c => c.resultado_disponivel);
+            const alvo = apurados[0] || lista[0];
+            const concursos = alvo ? [alvo] : [];
+            return {
+                ...data,
+                escopo: 'ultimo',
+                concursos,
+                total: concursos.length,
+                ultimo_apurado: alvo ? alvo.numero_concurso : null,
+                mensagem: alvo ? null : 'Nenhum concurso com resultado oficial foi encontrado nas pastas.'
+            };
+        }
+        if (escopo === 'especifico') {
+            const n = parseInt(concursoEspecifico, 10);
+            const concursos = lista.filter(c => Number(c.numero_concurso) === n);
+            return {
+                ...data,
+                escopo: 'especifico',
+                concurso: n,
+                concursos,
+                total: concursos.length,
+                mensagem: concursos.length ? null : `A pasta do concurso ${n} não foi encontrada.`
+            };
+        }
+        return { ...data, escopo: 'todos', total: data.total || lista.length };
+    }
+
+    function obterEscopo() {
+        const valor = el('cdEscopo') ? el('cdEscopo').value : 'ultimo';
+        return ['todos', 'especifico', 'ultimo'].includes(valor) ? valor : 'ultimo';
+    }
+
+    function atualizarUiEscopo() {
+        const escopo = obterEscopo();
+        const grupo = el('cdGrupoEspecifico');
+        const hint = el('cdHintEscopo');
+        if (grupo) grupo.style.display = escopo === 'especifico' ? '' : 'none';
+        if (!hint) return;
+        if (escopo === 'ultimo') {
+            hint.textContent = 'Abre só a pasta do concurso mais recente que já tem resultado oficial.';
+        } else if (escopo === 'especifico') {
+            hint.textContent = 'Abre só a pasta do concurso escolhido.';
+        } else {
+            hint.textContent = 'Lê o apostas.json de cada pasta. Fica mais lento conforme a quantidade de concursos.';
+        }
+    }
+
+    function salvarEscopo() {
+        try {
+            sessionStorage.setItem(ESCOPO_PESQUISA_KEY, JSON.stringify({
+                escopo: obterEscopo(),
+                concurso: el('cdSelectEspecifico')?.value || ''
+            }));
+        } catch (e) { /* armazenamento indisponível */ }
+    }
+
+    function restaurarEscopo() {
+        try {
+            const raw = sessionStorage.getItem(ESCOPO_PESQUISA_KEY);
+            if (raw) {
+                const data = JSON.parse(raw);
+                const sel = el('cdEscopo');
+                if (sel && ['todos', 'especifico', 'ultimo'].includes(data.escopo)) {
+                    sel.value = data.escopo;
+                }
+                const concurso = el('cdSelectEspecifico');
+                if (concurso && data.concurso) concurso.dataset.preferido = String(data.concurso);
+            }
+        } catch (e) { /* ignora preferência inválida */ }
+        atualizarUiEscopo();
+    }
+
+    function preencherSelectEspecifico(concursos) {
+        const select = el('cdSelectEspecifico');
+        if (!select) return;
+        const preferido = select.dataset.preferido || select.value;
+        select.innerHTML = '<option value="">Selecione o concurso...</option>';
+        (concursos || []).forEach(concurso => {
+            const opt = document.createElement('option');
+            opt.value = concurso.numero_concurso;
+            const dataStr = concurso.data_sorteio ? ` (${concurso.data_sorteio})` : '';
+            const marca = concurso.resultado_disponivel ? '' : ' — sem resultado';
+            opt.textContent = `Concurso ${concurso.numero_concurso}${dataStr}${marca}`;
+            select.appendChild(opt);
+        });
+        if (preferido) select.value = preferido;
+    }
+
+    function carregarIndice() {
+        return fetch(`${API}/concursos-disponiveis?escopo=indice`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.sucesso) return;
+                preencherSelectEspecifico(data.concursos || []);
+                if (data.escopo !== 'indice') _cacheListaCompleta = data;
+            })
+            .catch(err => console.warn('Índice de concursos:', err));
+    }
+
+    function textoResumoEscopo(data) {
+        const escopo = data.escopo || obterEscopo();
+        if (escopo === 'ultimo') {
+            const n = data.ultimo_apurado || (data.concursos && data.concursos[0] && data.concursos[0].numero_concurso);
+            return n
+                ? `Pesquisa limitada ao último concurso apurado: ${n}.`
+                : 'Nenhum concurso apurado encontrado.';
+        }
+        if (escopo === 'especifico') {
+            const n = data.concurso || el('cdSelectEspecifico')?.value;
+            return `Pesquisa limitada ao concurso ${n}.`;
+        }
+        return `Pesquisa em todos os concursos (${data.total || (data.concursos || []).length}). O apostas.json de cada pasta foi lido.`;
+    }
 
     function el(id) { return document.getElementById(id); }
 
@@ -23,13 +142,45 @@
     }
 
     async function carregarConcursos() {
+        const escopo = obterEscopo();
+        const concursoEspecifico = el('cdSelectEspecifico')?.value || '';
+        if (escopo === 'especifico' && !concursoEspecifico) {
+            esconderEstados();
+            mostrarErro('Escolha o concurso antes de pesquisar.');
+            return;
+        }
+
         esconderEstados();
         el('cdLoading').style.display = 'block';
+        const loadingTexto = el('cdLoading')?.querySelector('p');
+        if (loadingTexto) {
+            loadingTexto.textContent = escopo === 'todos'
+                ? 'Lendo o apostas.json de todos os concursos...'
+                : (escopo === 'especifico'
+                    ? `Lendo o concurso ${concursoEspecifico}...`
+                    : 'Procurando o último concurso apurado...');
+        }
         concursosSelecionados = [];
+        salvarEscopo();
+
+        const params = new URLSearchParams({ escopo });
+        if (escopo === 'especifico') params.set('concurso', concursoEspecifico);
+        const timeoutMs = escopo === 'todos' ? 120000 : 30000;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
         try {
-            const r = await fetch(`${API}/concursos-disponiveis`);
-            const data = await r.json();
+            let data;
+            if (_cacheListaCompleta && escopo !== 'todos') {
+                data = aplicarEscopoLocal(_cacheListaCompleta, escopo, concursoEspecifico);
+                _cacheListaCompleta = null;
+            } else {
+                const r = await fetch(`${API}/concursos-disponiveis?${params.toString()}`, { signal: controller.signal });
+                data = await r.json();
+                if (data.sucesso && !data.escopo) {
+                    data = aplicarEscopoLocal(data, escopo, concursoEspecifico);
+                }
+            }
             el('cdLoading').style.display = 'none';
 
             if (!data.sucesso) {
@@ -39,16 +190,29 @@
 
             concursosDisponiveis = data.concursos || [];
             if (concursosDisponiveis.length === 0) {
+                const emptyMsg = el('cdEmpty')?.querySelector('p');
+                if (emptyMsg && data.mensagem) emptyMsg.textContent = data.mensagem;
                 el('cdEmpty').style.display = 'block';
                 return;
             }
 
             renderizarGrid();
+            const resumo = el('cdResumoEscopo');
+            if (resumo) {
+                resumo.style.display = 'block';
+                resumo.textContent = textoResumoEscopo(data);
+            }
             el('cdEmpty').style.display = 'none';
             el('cdLista').style.display = 'block';
         } catch (e) {
             el('cdLoading').style.display = 'none';
-            mostrarErro('Erro de conexão: ' + e.message);
+            const segundos = Math.round(timeoutMs / 1000);
+            const msg = e.name === 'AbortError'
+                ? `Tempo esgotado ao carregar concursos (${segundos}s). Tente Recarregar.`
+                : ('Erro de conexão: ' + e.message);
+            mostrarErro(msg);
+        } finally {
+            clearTimeout(timeoutId);
         }
     }
 
@@ -67,11 +231,11 @@
                 : '<span class="badge bg-warning text-dark"><i class="fas fa-exclamation"></i> Sem resultado no banco</span>';
 
             const fonte = c.tem_json
-                ? `<i class="fas fa-file-code text-info"></i> JSON · ${c.total_apostas} aposta(s)`
-                : `<i class="fas fa-images text-secondary"></i> ${c.total_screenshots} screenshot(s)`;
+                ? `<i class="fas fa-file-code text-info"></i> JSON · ${c.total_apostas || 0} aposta(s)`
+                : `<i class="fas fa-images text-secondary"></i> ${c.total_screenshots || 0} screenshot(s)`;
 
             const dezenasBanco = c.dezenas_banco?.length
-                ? `<div class="small mt-2"><strong>Sorteadas:</strong> <span class="font-monospace">${c.dezenas_banco.join(' ')}</span></div>`
+                ? `<div class="small mt-2"><strong>Sorteadas:</strong> <span class="font-monospace">${c.dezenas_banco.map(n => String(n).padStart(2, '0')).join(' ')}</span></div>`
                 : '';
 
             const col = document.createElement('div');
@@ -128,12 +292,13 @@
                     <span>Processando ${totalProc} concurso(s)...</span>
                     <span id="cdProgPct">0%</span>
                 </div>
-                <div class="progress" style="height:12px;background:var(--ms-90,#d4f7e9);">
+                <div class="progress" style="height:12px;background:var(--accent-light,#fffaf0);">
                     <div class="progress-bar progress-bar-striped progress-bar-animated"
-                         id="cdProgBar" role="progressbar" style="width:0%;background:var(--ms-35,#1b9a67);"></div>
+                         id="cdProgBar" role="progressbar" style="width:0%;background:var(--primary,#c08b00);"></div>
                 </div>
             </div>`;
         resultadosProcessamento = {};
+        const inicioMs = performance.now();
 
         for (let i = 0; i < concursosSelecionados.length; i++) {
             const num = concursosSelecionados[i];
@@ -145,6 +310,10 @@
             if (lbl) lbl.textContent = pct + '%';
         }
 
+        const elapsedMs = performance.now() - inicioMs;
+        Object.values(resultadosProcessamento).forEach(r => {
+            if (r && r.sucesso) r._elapsedMs = elapsedMs;
+        });
         if (window.ConferenciaResultadosUI) {
             ConferenciaResultadosUI.mostrarResultados(resultadosProcessamento);
         }
@@ -185,6 +354,11 @@
     }
 
     function bindEvents() {
+        el('cdEscopo')?.addEventListener('change', atualizarUiEscopo);
+        el('cdBtnPesquisarEscopo')?.addEventListener('click', () => {
+            salvarEscopo();
+            carregarConcursos();
+        });
         el('cdSelecionarTodos')?.addEventListener('change', e => selecionarTodos(e.target.checked));
         el('cdBtnProcessar')?.addEventListener('click', processarSelecionados);
         el('cdBtnProcessarTopo')?.addEventListener('click', processarSelecionados);
@@ -198,8 +372,9 @@
             return;
         }
         _inicializado = true;
+        restaurarEscopo();
         bindEvents();
-        carregarConcursos();
+        carregarIndice().finally(() => carregarConcursos());
     }
 
     global.ConcursosDisponiveis = { init, recarregar: carregarConcursos };

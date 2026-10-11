@@ -499,6 +499,7 @@
     r.querySelector('#tbSelHead11')?.addEventListener('change', (ev) => this.setSelAll(11, !!ev.target.checked));
     r.querySelector('#tbProcess10')?.addEventListener('click', () => this.processPaste(10));
     r.querySelector('#tbExport10')?.addEventListener('click', () => this.exportManualApostas(10));
+    r.querySelector('#tbS10Comparar')?.addEventListener('click', () => this.sendS10ToAnalise());
     r.querySelector('#tbExport11')?.addEventListener('click', () => this.exportManualApostas(11));
     r.querySelector('#tbJaSaiu10')?.addEventListener('click', () => this.verificarJaSaiu(10));
     r.querySelector('#tbJaSaiu11')?.addEventListener('click', () => this.verificarJaSaiu(11));
@@ -2199,12 +2200,15 @@
     return a.charAt(0) + a.slice(1).toLowerCase();
   };
 
-  /** Exporta somente dezenas + mês abreviado (reutiliza downloadBlob). */
-  TubularApp.prototype.exportManualApostas = function (section) {
+  /** Linhas de dezenas + mês abreviado. uidFilter limita às apostas marcadas. */
+  TubularApp.prototype._manualApostaLines = function (section, uidFilter) {
     const list = section === 10 ? this.manual10 : this.manual11;
     const L = limitsFrom(this.root);
+    const filter = uidFilter && uidFilter.size ? uidFilter : null;
     const lines = [];
     list.forEach((g) => {
+      if (!g) return;
+      if (filter && !filter.has(g._uid)) return;
       let nums = (g.numbers || [])
         .filter(n => n !== '' && n != null)
         .map(Number)
@@ -2219,11 +2223,37 @@
       }
       lines.push(line);
     });
+    return lines;
+  };
+
+  /** Exporta somente dezenas + mês abreviado (reutiliza downloadBlob). */
+  TubularApp.prototype.exportManualApostas = function (section) {
+    const lines = this._manualApostaLines(section, null);
     if (!lines.length) {
       alert('Nenhuma aposta válida para exportar.');
       return;
     }
     downloadBlob(lines.join('\n') + '\n', `secao${section}_apostas.txt`, 'text/plain');
+  };
+
+  /** Envia as apostas da Seção 10 para a Checagem de Sequências. */
+  TubularApp.prototype.sendS10ToAnalise = function () {
+    const sel = this._selSet(10);
+    const marcadas = sel.size > 0;
+    const lines = this._manualApostaLines(10, marcadas ? sel : null);
+    if (!lines.length) {
+      alert(marcadas
+        ? 'Nenhuma aposta marcada está completa para comparar.'
+        : 'Nenhuma aposta válida para comparar. Processe os jogos primeiro.');
+      return;
+    }
+    try {
+      sessionStorage.setItem('gd-checagem-7', JSON.stringify({ texto: lines.join('\n') }));
+    } catch (_) {
+      alert('Não foi possível guardar as apostas para enviar.');
+      return;
+    }
+    window.location.href = '/analise/analises-inteligentes/?aba=checagem-seq';
   };
 
   TubularApp.prototype._fpAposta = function (nums, monthName, prevNums) {

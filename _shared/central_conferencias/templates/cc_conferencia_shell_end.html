@@ -54,11 +54,39 @@
                 <p class="small text-muted mb-3">
                     Pastas em <code>conferencia_apostas\{{ cc_cfg.pasta_apostas }}\NUMERO\apostas.json</code> — conferência com o banco local.
                 </p>
+                <div class="border rounded p-3 mb-3 bg-light" id="cdEscopoPesquisa">
+                    <div class="fw-bold mb-2">
+                        <i class="fas fa-search"></i> Alcance da pesquisa
+                    </div>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label mb-1" for="cdEscopo">O que pesquisar</label>
+                            <select class="form-select" id="cdEscopo">
+                                <option value="ultimo" selected>Último concurso apurado</option>
+                                <option value="especifico">Somente um concurso</option>
+                                <option value="todos">Todos os concursos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4" id="cdGrupoEspecifico" style="display: none;">
+                            <label class="form-label mb-1" for="cdSelectEspecifico">Concurso</label>
+                            <select class="form-select" id="cdSelectEspecifico">
+                                <option value="">Carregando concursos...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-success fw-bold" id="cdBtnPesquisarEscopo">
+                                <i class="fas fa-search"></i> Pesquisar
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2" id="cdHintEscopo"></small>
+                </div>
                 <div id="cdLoading" class="text-center py-4">
                     <i class="fas fa-spinner fa-spin fa-2x text-success"></i>
                     <p class="text-muted mt-2 mb-0">Procurando concursos...</p>
                 </div>
                 <div id="cdLista" style="display:none;">
+                    <div class="alert alert-secondary py-2 small mb-3" id="cdResumoEscopo" style="display: none;"></div>
                     <div class="row mb-3 align-items-center g-2">
                         <div class="col-md-4">
                             <div class="form-check">

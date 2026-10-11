@@ -953,6 +953,19 @@
   #ai-root #aiTabelaJogosPadrao tr.tr-seq-foco > td {
     background-color: rgba(25, 135, 84, .18);
   }
+  /* Só o Nº da sequência que já saiu. A linha verde do vencedor permanece. */
+  #ai-root #aiTabelaJogosPadrao td.td-num-ja-saiu,
+  #ai-root #aiTabelaJogosPadrao tr.tr-ja-saiu > td.td-num-ja-saiu,
+  #ai-root #aiTabelaJogosPadrao tr.tr-ja-saiu.tr-aposta-sel > td.td-num-ja-saiu,
+  #ai-root #aiTabelaJogosPadrao tr.tr-padrao-ultimo > td.td-num-ja-saiu,
+  #ai-root #aiTabelaJogosPadrao tr.tr-jogo-vencedor > td.td-num-ja-saiu,
+  #ai-root #aiTabelaJogosPadrao tr.tr-jogo-vencedor.tr-aposta-sel > td.td-num-ja-saiu,
+  #ai-root #aiTabelaJogosPadrao tr.tr-ja-saiu.tr-jogo-vencedor > td.td-num-ja-saiu,
+  #ai-root #aiTabelaJogosPadrao tr.tr-seq-foco > td.td-num-ja-saiu {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    font-weight: 800;
+  }
   #ai-root #aiTabelaPanoramaHist a.ai-pan-link-pad,
   #ai-root #aiTabelaPanoramaFalt a.ai-pan-link-pad {
     font-weight: 700;
@@ -1906,7 +1919,7 @@
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
 {% if modality_key == 'supersete' %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20261001v1"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20261007v1"></script>
 {% endif %}
 <script>
 (function () {
@@ -4503,9 +4516,14 @@
       const diagHtml = diags.length
         ? `<span class="ai-col-alinha" title="${diags.length} diagonal(is) nesta aposta">${htmlDiagTexto(diags)}</span>`
         : '<span class="text-muted">—</span>';
+      const numSeq = baseNum + i + 1;
+      const numCls = jaSaiu ? 'text-center td-num-ja-saiu' : 'text-center text-muted';
+      const numTit = jaSaiu
+        ? ` title="Sequência ${numSeq} já saiu no concurso ${esc(conc)} — não escolher novamente"`
+        : '';
       return `<tr class="${trCls}"${isWin ? ' data-vencedor="1"' : ''}${jaSaiu ? ' data-ja-saiu="1"' : ''}${concTit}>
         <td><input type="checkbox" class="form-check-input ai-aposta-chk" data-dez="${esc(key)}" ${checked}></td>
-        <td class="text-center text-muted">${baseNum + i + 1}</td>
+        <td class="${numCls}"${numTit}>${numSeq}</td>
         <td class="td-padrao"><code>${esc(j.padrao_inicial || JOGOS_PAD.padrao)}</code></td>
         <td class="td-dezenas-centro font-monospace">${htmlDezenasComDestaque(j.dezenas_fmt, JOGOS_PAD.buscaDezenas)}</td>
         <td class="td-soma-destaque">${esc(j.soma)}</td>

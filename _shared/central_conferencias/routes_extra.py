@@ -111,12 +111,55 @@ def register_central_conferencias_extras(bp, modality_key: str) -> None:
     @bp.route("/api/conferencia-apostas/concursos-disponiveis", methods=["GET"])
     def listar_concursos_disponiveis_pasta():
         try:
-            concursos = _folder().listar_concursos_disponiveis()
+            escopo = (request.args.get("escopo") or "todos").strip().lower()
+            concurso = request.args.get("concurso", type=int)
+            escopos_validos = {"todos", "especifico", "ultimo", "indice"}
+            if escopo not in escopos_validos:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "escopo inválido",
+                    "mensagem": "Escolha todos, um concurso específico ou o último concurso apurado.",
+                }), 400
+
+            folder = _folder()
+            if escopo == "indice":
+                indice = folder.listar_indice_concursos()
+                return jsonify({
+                    "sucesso": True,
+                    "escopo": "indice",
+                    "total": indice["total"],
+                    "ultimo_apurado": indice["ultimo_apurado"],
+                    "concursos": indice["concursos"],
+                    "pasta_base": folder.pasta_base(),
+                    "modalidade": cfg["nome"],
+                })
+
+            if escopo == "especifico" and not concurso:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "concurso obrigatório",
+                    "mensagem": "Informe o número do concurso para pesquisar somente um.",
+                }), 400
+
+            concursos = folder.listar_concursos_disponiveis(escopo=escopo, concurso=concurso)
+            mensagem = None
+            ultimo_apurado = None
+            if escopo == "ultimo":
+                ultimo_apurado = concursos[0]["numero_concurso"] if concursos else None
+                if not concursos:
+                    mensagem = "Nenhum concurso com resultado oficial foi encontrado nas pastas."
+            elif escopo == "especifico" and not concursos:
+                mensagem = f"A pasta do concurso {concurso} não foi encontrada."
+
             return jsonify({
                 "sucesso": True,
+                "escopo": escopo,
+                "concurso": concurso,
+                "ultimo_apurado": ultimo_apurado,
                 "total": len(concursos),
+                "mensagem": mensagem,
                 "concursos": concursos,
-                "pasta_base": _folder().pasta_base(),
+                "pasta_base": folder.pasta_base(),
                 "modalidade": cfg["nome"],
             })
         except Exception as e:
@@ -146,6 +189,13 @@ def register_central_conferencias_extras(bp, modality_key: str) -> None:
             resultado = _folder().historico_aposta_volante(numeros, min_acertos=min_ac)
             status = 200 if resultado.get("sucesso") else 400
             return jsonify(resultado), status
+        except Exception as e:
+            return jsonify({"sucesso": False, "mensagem": str(e)}), 500
+
+    @bp.route("/api/conferencia-apostas/frequencia-abs", methods=["GET"])
+    def frequencia_abs_pasta():
+        try:
+            return jsonify(_folder().frequencia_abs_pasta())
         except Exception as e:
             return jsonify({"sucesso": False, "mensagem": str(e)}), 500
 

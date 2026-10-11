@@ -58,6 +58,8 @@ class AnaliseCicloCoberturaService:
                 "qtd_novas": len(novas),
                 "total_preenchido": len(ciclo_atual["dezenas_saidas"]),
                 "dezenas": sorted(dezenas_set),
+                "mes_num": s.get("mes_num"),
+                "mes_nome": s.get("mes_nome") or "",
             })
 
             if len(ciclo_atual["dezenas_saidas"]) >= alvo:

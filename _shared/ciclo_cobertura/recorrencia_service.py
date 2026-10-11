@@ -35,6 +35,20 @@ def _fmt(nums: Sequence[int]) -> str:
     return " · ".join(f"{int(n):02d}" for n in nums) if nums else "—"
 
 
+def _mes_de(row: dict) -> Dict[str, Any]:
+    bruto = row.get("mes_num")
+    try:
+        mes_num = int(bruto) if bruto not in (None, "") else None
+    except (TypeError, ValueError):
+        mes_num = None
+    if mes_num is not None and not 1 <= mes_num <= 12:
+        mes_num = None
+    return {
+        "mes_num": mes_num,
+        "mes_nome": str(row.get("mes_nome") or ""),
+    }
+
+
 def _rotulo(freq: int, max_f: int) -> str:
     if freq <= 0:
         return "Ausente"
@@ -675,6 +689,16 @@ def analisar_recorrencia(
             "numero_ciclo": row.get("numero_ciclo"),
             "repetidas": reps,
             "dezenas": _ints(row.get("dezenas") or []),
+            **_mes_de(row),
+        })
+
+    resultados_recentes: List[Dict[str, Any]] = []
+    for row in detalhes[:20]:
+        resultados_recentes.append({
+            "concurso": row.get("concurso"),
+            "data": row.get("data") or "",
+            "dezenas": _ints(row.get("dezenas") or []),
+            **_mes_de(row),
         })
 
     clf = _montar_classificacao(freq, univ)
@@ -757,6 +781,7 @@ def analisar_recorrencia(
         "janelas": list(JANELAS),
         "concursos": concursos,
         "linhas": linhas,
+        "resultados_recentes": resultados_recentes,
         "ocorrencias": ocorrencias,
         "leitura": (
             f"Universo {spec.dezena_min:02d}–{spec.dezena_max:02d}: "

@@ -48,6 +48,14 @@ def pasta_modalidade(cfg: dict) -> str:
     return os.path.join(_apostas_root(), slug)
 
 
+def _contar_screenshots(pasta: str) -> int:
+    try:
+        nomes = os.listdir(pasta)
+    except OSError:
+        return 0
+    return sum(1 for nome in nomes if nome.lower().endswith((".jpg", ".jpeg", ".png")))
+
+
 def _arquivo_json(pasta: str) -> Optional[str]:
     """apostas.json do conversor; se não houver, o primeiro *.json que não é cópia."""
     preferido = os.path.join(pasta, "apostas.json")
@@ -84,6 +92,18 @@ def _sorteadas(sorteio, cfg: dict) -> List[int]:
         d = sorteio.dezenas()
         return sorted(d) if isinstance(d, set) else list(d)
     return []
+
+
+def _ordem_sorteio(sorteio, cfg: dict) -> List[int]:
+    """Ordem em que as dezenas saíram (d1…dn). Cai na lista oficial se o modelo não guardar a ordem."""
+    if sorteio is not None and hasattr(sorteio, "dezenas_ordem_lista"):
+        try:
+            ordem = [int(n) for n in sorteio.dezenas_ordem_lista()]
+        except (TypeError, ValueError):
+            ordem = []
+        if ordem:
+            return ordem
+    return list(_sorteadas(sorteio, cfg))
 
 
 _CFG_PRECO = {"diasorte": "diadesorte"}
@@ -136,17 +156,25 @@ def _preco_volante(cfg: dict, n_dezenas: int) -> float:
     return float(n_dezenas)
 
 
+# Caixa: 5 acertos, 4 acertos e Mês da Sorte são prêmios fixos.
+# 7 e 6 vêm do rateio do concurso. O mês acumula com qualquer faixa de dezenas.
+_FIXOS_DIASORTE = {5: 25.0, 4: 5.0, 0: 2.5}
+
+
 def _rateios_concurso(cfg: dict, numero: int) -> Dict[int, float]:
     if cfg.get("key") != "diasorte":
         return {}
+    out = dict(_FIXOS_DIASORTE)
     try:
         from models.caixa_excel_premiacao import CaixaExcelPremiacaoDiaDeSorte
         row = CaixaExcelPremiacaoDiaDeSorte.query.filter_by(concurso=int(numero)).first()
     except Exception:
-        return {}
+        return out
     if not row:
-        return {}
-    return {7: float(row.rateio_7 or 0), 6: float(row.rateio_6 or 0)}
+        return out
+    out[7] = float(row.rateio_7 or 0)
+    out[6] = float(row.rateio_6 or 0)
+    return out
 
 
 def _classificar_faixa(acertos: int, cfg: dict) -> Optional[str]:
@@ -256,6 +284,11 @@ def _analisar_aposta(
             "valor": valor,
         })
     detalhes.sort(key=lambda d: -d["quantidade"])
+    if cfg.get("has_mes") and mes_ok and not any(d["descricao"] == "Mês" for d in detalhes):
+        unit_mes = float((rateios or {}).get(0, _FIXOS_DIASORTE[0]) or 0)
+        if unit_mes:
+            valor_ganho += unit_mes
+            detalhes.append({"descricao": "Mês", "quantidade": 1, "valor": round(unit_mes, 2)})
     faixas_unicas = [d["descricao"] for d in detalhes]
     faixa_display = " + ".join(faixas_unicas) if faixas_unicas else None
     topo = cfg["faixas"][0][0] if cfg.get("faixas") else combo
@@ -456,41 +489,130 @@ class ConferenciaApostasFolderService:
     def pasta_base(self) -> str:
         return pasta_modalidade(self.cfg)
 
-    def listar_concursos_disponiveis(self) -> List[Dict[str, Any]]:
+    def _numeros_pastas(self) -> List[int]:
         base = self.pasta_base()
         if not os.path.isdir(base):
             return []
-        slug = self.cfg.get("pasta_apostas") or self.cfg["key"]
-        concursos = []
+        numeros = []
         for nome in os.listdir(base):
             pasta = os.path.join(base, nome)
             if not os.path.isdir(pasta):
                 continue
             try:
-                numero = int(nome)
+                numeros.append(int(nome))
             except ValueError:
+                continue
+        numeros.sort(reverse=True)
+        return numeros
+
+    def ultimo_concurso_apurado(self, numeros: Optional[List[int]] = None) -> Optional[int]:
+        """Maior concurso que já tem pasta e resultado oficial no banco."""
+        if numeros is None:
+            numeros = self._numeros_pastas()
+        if not numeros:
+            return None
+        sorteio = (
+            self.Sorteo.query.filter(self.Sorteo.concurso.in_(numeros))
+            .order_by(self.Sorteo.concurso.desc())
+            .first()
+        )
+        return int(sorteio.concurso) if sorteio else None
+
+    def listar_indice_concursos(self) -> Dict[str, Any]:
+        """Lista concursos sem ler apostas.json — usado pelo seletor de alcance."""
+        numeros = self._numeros_pastas()
+        sorteios = {}
+        if numeros:
+            for sorteio in self.Sorteo.query.filter(self.Sorteo.concurso.in_(numeros)).all():
+                sorteios[int(sorteio.concurso)] = sorteio
+        base = self.pasta_base()
+        concursos = []
+        for numero in numeros:
+            pasta = os.path.join(base, str(numero))
+            sorteio = sorteios.get(numero)
+            concursos.append({
+                "numero_concurso": numero,
+                "tem_json": _arquivo_json(pasta) is not None,
+                "resultado_disponivel": sorteio is not None,
+                "data_sorteio": sorteio.data if sorteio else None,
+            })
+        apurados = [n for n in numeros if n in sorteios]
+        return {
+            "concursos": concursos,
+            "total": len(concursos),
+            "ultimo_apurado": max(apurados) if apurados else None,
+        }
+
+    def listar_concursos_disponiveis(
+        self,
+        escopo: str = "todos",
+        concurso: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
+        """Lista pastas de conferencia_apostas.
+
+        escopo=todos lê cada apostas.json (comportamento anterior, sem parâmetro).
+        escopo=ultimo lê só o último concurso que já tem resultado oficial.
+        escopo=especifico lê só o concurso informado.
+        """
+        base = self.pasta_base()
+        if not os.path.isdir(base):
+            return []
+        escopo_norm = (escopo or "todos").strip().lower()
+        if escopo_norm not in ("todos", "especifico", "ultimo"):
+            escopo_norm = "todos"
+
+        numeros = self._numeros_pastas()
+        if escopo_norm == "especifico":
+            try:
+                alvo = int(concurso)
+            except (TypeError, ValueError):
+                return []
+            numeros_alvo = [alvo] if alvo in numeros else []
+        elif escopo_norm == "ultimo":
+            alvo = self.ultimo_concurso_apurado(numeros)
+            numeros_alvo = [alvo] if alvo else []
+        else:
+            numeros_alvo = list(numeros)
+
+        if not numeros_alvo:
+            return []
+
+        sorteios = {
+            int(s.concurso): s
+            for s in self.Sorteo.query.filter(self.Sorteo.concurso.in_(numeros_alvo)).all()
+        }
+        slug = self.cfg.get("pasta_apostas") or self.cfg["key"]
+        concursos = []
+        for numero in numeros_alvo:
+            pasta = os.path.join(base, str(numero))
+            if not os.path.isdir(pasta):
                 continue
             arquivo_json = _arquivo_json(pasta)
             tem_json = arquivo_json is not None
             total_apostas = 0
+            total_screenshots = _contar_screenshots(pasta)
             if tem_json:
                 try:
                     with open(arquivo_json, "r", encoding="utf-8") as f:
                         dados = json.load(f)
-                    total_apostas = len(dados.get("apostas", []))
+                    if isinstance(dados, dict):
+                        total_apostas = len(dados.get("apostas", []))
+                    elif isinstance(dados, list):
+                        total_apostas = len(dados)
                 except Exception:
                     total_apostas = 0
-            sorteio = self.Sorteo.query.filter_by(concurso=numero).first()
+            sorteio = sorteios.get(numero)
             dezenas_banco = _sorteadas(sorteio, self.cfg) if sorteio else None
             concursos.append({
                 "numero_concurso": numero,
                 "tem_json": tem_json,
                 "arquivo": os.path.basename(arquivo_json) if arquivo_json else None,
                 "total_apostas": total_apostas,
+                "total_screenshots": total_screenshots,
                 "resultado_disponivel": sorteio is not None,
                 "data_sorteio": sorteio.data if sorteio else None,
                 "dezenas_banco": dezenas_banco,
-                "pasta": f"{slug}/{nome}",
+                "pasta": f"{slug}/{numero}",
             })
         concursos.sort(key=lambda x: x["numero_concurso"], reverse=True)
         return concursos
@@ -599,13 +721,13 @@ class ConferenciaApostasFolderService:
             if _scoring_positional(self.cfg)
             else sorted(sorteadas)
         )
+        fmt_dez = (lambda n: str(n)) if self.cfg["key"] == "supersete" else (lambda n: f"{int(n):02d}")
+        ordem_sorteio = _ordem_sorteio(sorteio, self.cfg)
         return {
             "sucesso": True,
             "concurso": numero_concurso,
-            "dezenas_sorteadas": [
-                (str(n) if self.cfg["key"] == "supersete" else f"{n:02d}")
-                for n in dezenas_display
-            ],
+            "dezenas_sorteadas": [fmt_dez(n) for n in dezenas_display],
+            "dezenas_ordem_sorteio": [fmt_dez(n) for n in ordem_sorteio],
             "data_sorteio": sorteio.data,
             "modalidade": self.cfg["nome"],
             "mes_sorteado": mes_sorteio,
@@ -622,6 +744,75 @@ class ConferenciaApostasFolderService:
             },
             "erros": erros,
             "apostas": apostas_out,
+        }
+
+    def frequencia_abs_pasta(self) -> Dict[str, Any]:
+        """Conta o ABS posicional de cada aposta da pasta, do primeiro concurso ao último."""
+        numeros = self._numeros_pastas()
+        if not numeros:
+            return {
+                "sucesso": True,
+                "max_abs": 0,
+                "total_apostas": 0,
+                "total_concursos": 0,
+                "contagem": {"0": 0},
+            }
+        sorteios = {
+            int(s.concurso): s
+            for s in self.Sorteo.query.filter(self.Sorteo.concurso.in_(numeros)).all()
+        }
+        contagem: Dict[int, int] = {}
+        total_apostas = 0
+        concursos_usados = 0
+        base = self.pasta_base()
+        for numero in numeros:
+            sorteio = sorteios.get(numero)
+            if not sorteio:
+                continue
+            arquivo = _arquivo_json(os.path.join(base, str(numero)))
+            if not arquivo:
+                continue
+            try:
+                with open(arquivo, "r", encoding="utf-8") as f:
+                    dados = json.load(f)
+            except (OSError, json.JSONDecodeError):
+                continue
+            apostas = dados.get("apostas") if isinstance(dados, dict) else dados
+            if not isinstance(apostas, list):
+                continue
+            sorteadas = sorted(int(n) for n in _sorteadas(sorteio, self.cfg))
+            oficiais = len(sorteadas)
+            if not oficiais:
+                continue
+            usou = False
+            for aposta in apostas:
+                bruto = aposta.get("numeros") if isinstance(aposta, dict) else None
+                if bruto is None:
+                    continue
+                nums = []
+                for n in bruto:
+                    try:
+                        nums.append(int(n))
+                    except (TypeError, ValueError):
+                        continue
+                if len(nums) < oficiais:
+                    continue
+                ordenados = sorted(nums)
+                soma = 0
+                for i in range(oficiais):
+                    soma += abs(ordenados[i] - sorteadas[i])
+                contagem[soma] = contagem.get(soma, 0) + 1
+                total_apostas += 1
+                usou = True
+            if usou:
+                concursos_usados += 1
+        max_abs = max(contagem) if contagem else 0
+        return {
+            "sucesso": True,
+            "max_abs": max_abs,
+            "total_apostas": total_apostas,
+            "total_concursos": concursos_usados,
+            "contagem": {str(i): contagem.get(i, 0) for i in range(max_abs + 1)},
         }
 
 

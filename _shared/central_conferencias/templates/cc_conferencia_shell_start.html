@@ -35,6 +35,18 @@
         font-size: 1.1rem; font-weight: 700; width: 140px;
     }
     #panel-concursos.conf-panel-wide { max-width: 100%; }
+    .cr-card-acerto { background: #e8f6ee; }
+    #panel-concursos tr.cr-linha-acerto > td { background-color: #e8f6ee !important; }
+    .cr-sete-pulso { animation: cr-pulso-verde 1.15s ease-in-out infinite; border: 2px solid #198754; }
+    #panel-concursos tr.cr-linha-maximo > td { animation: cr-pulso-verde-td 1.15s ease-in-out infinite; }
+    @keyframes cr-pulso-verde {
+        0%, 100% { background-color: #d8f3e4; box-shadow: 0 0 0 0 rgba(25, 135, 84, .45); }
+        50% { background-color: #7dcea0; box-shadow: 0 0 0 8px rgba(25, 135, 84, 0); }
+    }
+    @keyframes cr-pulso-verde-td {
+        0%, 100% { background-color: #d8f3e4; }
+        50% { background-color: #7dcea0; }
+    }
     .cr-premio-maximo { animation: cr-pulso-max 1.1s ease-in-out infinite; }
     .cr-trofeu-max {
         color: #FFD700; background: linear-gradient(135deg, #ffc107, #fd7e14);
@@ -102,6 +114,205 @@
     .conv-texto-hl .conv-mes-tok {
         border-radius: 3px;
         font-weight: 700;
+    }
+
+    /* Aba Concursos: botões e bolas na cor da modalidade, sem o verde padrão. */
+    #panel-concursos .btn-success {
+        background: var(--primary);
+        border-color: var(--primary-dark);
+        color: #fff;
+    }
+    #panel-concursos .btn-success:hover,
+    #panel-concursos .btn-success:focus,
+    #panel-concursos .btn-success:active {
+        background: var(--primary-dark);
+        border-color: var(--primary-xdark);
+        color: #fff;
+    }
+    #panel-concursos .cd-card h6.text-success { color: var(--primary-dark) !important; }
+    #panel-concursos .cd-card .badge.bg-success { background: var(--primary) !important; }
+    #panel-concursos .cr-visao-toggle .btn-outline-primary {
+        color: var(--primary-dark);
+        border-color: var(--primary);
+    }
+    #panel-concursos .cr-visao-toggle .btn-outline-primary:hover,
+    #panel-concursos .cr-visao-toggle .btn-outline-primary.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+    #panel-concursos .cr-bola-oficial {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--accent, #e6a800);
+        color: var(--on-accent, #1a0a00);
+        font-weight: 800;
+        border: 2px solid var(--primary, #c08b00);
+    }
+    #panel-concursos .cr-total-ganho { color: var(--primary-dark, #996e00); }
+    #panel-concursos .cr-resumo-proc .card-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+    }
+
+    .cr-abs-freq {
+        background: #fff;
+        border: 1px solid #ead9a0;
+        border-radius: 12px;
+        padding: 1rem 1.1rem 1.15rem;
+        box-shadow: 0 2px 10px rgba(120, 86, 0, .06);
+    }
+    .cr-abs-freq .cr-abs-titulo { color: var(--primary-dark, #996e00); }
+    .cr-abs-limites { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .cr-abs-limite {
+        border: 1px solid #ead9a0;
+        border-radius: 10px;
+        padding: .7rem .8rem;
+        background: #fffdf6;
+        min-width: 0;
+    }
+    .cr-abs-limite--max { background: #fff8e8; }
+    .cr-abs-limite-valor {
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--primary-dark, #996e00);
+        font-variant-numeric: tabular-nums;
+    }
+    .cr-abs-exemplo {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: .78rem;
+        background: #fff;
+        border: 1px dashed #e2d3a4;
+        border-radius: 6px;
+        padding: .35rem .5rem;
+        margin-top: .35rem;
+    }
+    .cr-abs-legenda { display: flex; flex-wrap: wrap; gap: .4rem .7rem; }
+    .cr-abs-chip {
+        display: inline-flex; align-items: center; gap: .35rem;
+        font-size: .75rem; color: #5c5346;
+    }
+    .cr-abs-swatch {
+        width: .85rem; height: .85rem; border-radius: 3px; border: 1px solid #ddd;
+        display: inline-block;
+    }
+    .cr-abs-swatch--zero { background: #f3f4f6; }
+    .cr-abs-swatch--ok { background: #fff; border-color: #c08b00; }
+    .cr-abs-swatch--pico { background: linear-gradient(180deg, #ffe08a, #f5c542); border-color: #b8860b; }
+    .cr-abs-pico-banner {
+        background: linear-gradient(90deg, #fff4cc, #fff);
+        border: 1px solid #e6c35c;
+        border-left: 4px solid #c08b00;
+        border-radius: 8px;
+        padding: .55rem .75rem;
+        font-size: .86rem;
+    }
+    .cr-abs-tabela {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        font-size: .84rem;
+    }
+    .cr-abs-tabela thead th {
+        text-align: center;
+        background: #fff8e1;
+        color: #6b5420;
+        font-size: .72rem;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        padding: .4rem .35rem;
+        border-bottom: 2px solid #ead9a0;
+        position: sticky;
+        top: 0;
+    }
+    .cr-abs-tabela td {
+        text-align: center;
+        vertical-align: middle;
+        padding: .28rem .35rem;
+        border-bottom: 1px solid #f3ead2;
+    }
+    .cr-abs-card {
+        border: 1px solid #efe2c0;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+    }
+    .cr-abs-row {
+        --mx: 50%;
+        --my: 50%;
+        transition: background-color .16s ease, box-shadow .16s ease, transform .16s ease;
+        background-color: #fff;
+    }
+    .cr-abs-row:hover {
+        background-color: #fff8e6;
+        background-image: radial-gradient(120px 32px at var(--mx) var(--my), rgba(255, 196, 60, .55), transparent 72%);
+        box-shadow: inset 3px 0 0 #e0b000;
+        transform: translateX(3px);
+    }
+    .cr-abs-col-abs { font-weight: 700; color: #3d3424; width: 42%; }
+    .cr-abs-col-vezes { width: 58%; }
+    .cr-abs-vezes-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .cr-abs-track {
+        width: 72%;
+        height: 4px;
+        border-radius: 99px;
+        background: #f3ead2;
+        overflow: hidden;
+    }
+    .cr-abs-bar {
+        display: block;
+        height: 100%;
+        border-radius: 99px;
+        background: #c08b00;
+    }
+    .cr-abs-vezes-num { font-weight: 800; color: #3d3200; line-height: 1.1; }
+    .cr-abs-zero { background-color: #f7f7f8; }
+    .cr-abs-zero .cr-abs-col-abs { color: #b0b4ba; font-weight: 600; }
+    .cr-abs-vezes-zero {
+        display: inline-block;
+        min-width: 1.4rem;
+        color: #c5c8ce;
+        font-weight: 600;
+        letter-spacing: .02em;
+    }
+    .cr-abs-zero:hover {
+        background-color: #eef0f2;
+        background-image: radial-gradient(120px 32px at var(--mx) var(--my), rgba(180, 184, 190, .45), transparent 72%);
+        box-shadow: inset 3px 0 0 #ced4da;
+    }
+    .cr-abs-ok .cr-abs-vezes-num { color: #5a4300; }
+    .cr-abs-pico {
+        background-color: #ffe9a8;
+        box-shadow: inset 3px 0 0 #c08b00;
+    }
+    .cr-abs-pico .cr-abs-col-abs { color: #7a5600; }
+    .cr-abs-pico .cr-abs-vezes-num { color: #6a4a00; font-size: .95rem; }
+    .cr-abs-pico .cr-abs-bar { background: #8a6400; }
+    .cr-abs-pico:hover {
+        background-color: #ffd56a;
+        background-image: radial-gradient(130px 36px at var(--mx) var(--my), rgba(255, 220, 90, .85), transparent 70%);
+    }
+    .cr-abs-selo {
+        display: inline-block;
+        margin-left: .3rem;
+        padding: 0 .35rem;
+        border-radius: 99px;
+        background: #c08b00;
+        color: #fff;
+        font-size: .62rem;
+        font-weight: 800;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+        vertical-align: 1px;
+    }
+    @media (max-width: 767px) {
+        .cr-abs-limites { grid-template-columns: 1fr; }
     }
 </style>
 
