@@ -27,6 +27,8 @@ from linhas_universo.app_integration import extend_camadas_linhas_dd_du_app
 from analise_escolha_visual.app_integration import extend_analise_escolha_visual_app
 from analise_tubular_inteligente.app_integration import extend_analise_tubular_inteligente_app
 from analise_inteligentes_diadesorte.app_integration import extend_analise_inteligentes_app
+from analise_somas_digitos.app_integration import extend_analise_somas_digitos_app
+from geradores_elite.comportamento_analise_integration import extend_comportamento_analise_app
 from menu.app_integration import extend_nav_app
 from posicao_analise.app_integration import extend_posicao_app
 from resumo_modalidade.app_integration import extend_resumo_modalidade_app
@@ -51,6 +53,8 @@ def create_app():
     extend_analise_escolha_visual_app(app)
     extend_analise_tubular_inteligente_app(app)
     extend_analise_inteligentes_app(app)
+    extend_analise_somas_digitos_app(app)
+    extend_comportamento_analise_app(app)
     extend_posicao_app(app, 'maismilionaria')
     extend_resumo_modalidade_app(app)
     extend_ciclo_cobertura_app(app, 'maismilionaria')

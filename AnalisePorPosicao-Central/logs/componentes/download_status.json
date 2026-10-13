@@ -1,50 +1,51 @@
 {
   "estado": "ok",
   "ok": true,
-  "mensagem": "9 arquivo(s) atualizado(s).",
-  "iniciado_em": "11/10/2026 09:39:18",
-  "terminado_em": "11/10/2026 09:39:36",
+  "mensagem": "Excel já atualizado hoje (12/10/2026). Download pulado.",
+  "iniciado_em": null,
+  "terminado_em": "12/10/2026 17:54:25",
   "arquivos": [
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx",
-      "bytes": 385414
+      "arquivo": "LOTOFACIL.xlsx",
+      "bytes": 385503
     },
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DIA_DE_SORTE.xlsx",
-      "bytes": 101953
+      "arquivo": "DIA_DE_SORTE.xlsx",
+      "bytes": 102020
     },
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOMANIA.xlsx",
-      "bytes": 370141
+      "arquivo": "LOTOMANIA.xlsx",
+      "bytes": 370142
     },
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\QUINA.xlsx",
-      "bytes": 518832
+      "arquivo": "QUINA.xlsx",
+      "bytes": 518905
     },
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\MEGA_SENA.xlsx",
-      "bytes": 229497
+      "arquivo": "MEGA_SENA.xlsx",
+      "bytes": 229567
     },
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\MAIS_MILIONARIA.xlsx",
-      "bytes": 55111
+      "arquivo": "MAIS_MILIONARIA.xlsx",
+      "bytes": 55199
     },
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DUPLA_SENA.xlsx",
-      "bytes": 292598
+      "arquivo": "DUPLA_SENA.xlsx",
+      "bytes": 292597
     },
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\TIMEMANIA.xlsx",
-      "bytes": 221033
+      "arquivo": "TIMEMANIA.xlsx",
+      "bytes": 221113
     },
     {
-      "arquivo": "\\Loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\SUPER_SETE.xlsx",
-      "bytes": 77560
+      "arquivo": "SUPER_SETE.xlsx",
+      "bytes": 77561
     }
   ],
   "erros": [],
-  "pid": 8336,
+  "pid": null,
   "python": "D:\\loterias\\LoteriasPosicao\\VenvLoterias\\Scripts\\python.exe",
   "script": "D:\\loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\DownloadResultadosLoteriasCaixa.py",
-  "returncode": 0
+  "pulado": true,
+  "motivo": "mesmo_dia"
 }

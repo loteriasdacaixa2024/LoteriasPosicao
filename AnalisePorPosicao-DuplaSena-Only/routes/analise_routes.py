@@ -49,6 +49,10 @@ from analise_tubular_inteligente.app_integration import wire_analise_tubular_int
 wire_analise_tubular_inteligente(analise_bp, "duplasena")
 from analise_inteligentes_diadesorte.app_integration import wire_analise_inteligentes
 wire_analise_inteligentes(analise_bp, "duplasena")
+from analise_somas_digitos.app_integration import wire_analise_somas_digitos
+wire_analise_somas_digitos(analise_bp, "duplasena")
+from geradores_elite.comportamento_analise_integration import wire_analise_comportamento
+wire_analise_comportamento(analise_bp, "duplasena")
 
 from resumo_modalidade.app_integration import wire_resumo_modalidade
 wire_resumo_modalidade(analise_bp, "duplasena")

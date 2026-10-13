@@ -16,6 +16,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from analise_inteligentes_diadesorte.service import (
     descricao_bma_do_padrao,
+    indice_aposta_no_padrao,
     jogos_possiveis_padrao,
     padrao_inicial,
     pool_por_digito_universo,
@@ -202,6 +203,8 @@ def montar_sequencias_sorteadas(svc, *, base: str = "geral") -> Dict[str, Any]:
         int(total),
         dmin,
         dmax,
+        "n_padrao",
+        "aposta_n",
     )
     hit = _CACHE.get(cache_key)
     if hit:
@@ -245,6 +248,9 @@ def montar_sequencias_sorteadas(svc, *, base: str = "geral") -> Dict[str, Any]:
         desc = descricao_bma_do_padrao(pad)
         for it in itens:
             cls = classificar_soma(it["soma"], faixa)
+            aposta_n = indice_aposta_no_padrao(
+                it["dezenas"], pad, min_dezena=dmin, max_dezena=dmax,
+            )
             linhas.append({
                 "concurso": it["concurso"],
                 "data": it["data"],
@@ -257,7 +263,18 @@ def montar_sequencias_sorteadas(svc, *, base: str = "geral") -> Dict[str, Any]:
                 "status_media": cls.get("status_media") or "",
                 "status_media_label": cls.get("status_media_label") or "",
                 "jogos_possiveis": jogos,
+                "aposta_n": aposta_n,
             })
+
+    freq_pad = {pad: len(itens) for pad, itens in por_padrao.items()}
+    jogos_pad = {row["padrao"]: int(row.get("jogos_possiveis") or 0) for row in linhas}
+    ordem_pad = sorted(
+        freq_pad,
+        key=lambda p: (-int(freq_pad[p]), -int(jogos_pad.get(p) or 0), p),
+    )
+    n_por_padrao = {p: i + 1 for i, p in enumerate(ordem_pad)}
+    for row in linhas:
+        row["n_padrao"] = n_por_padrao.get(row["padrao"])
 
     linhas.sort(key=lambda r: int(r["concurso"] or 0))
     payload = {

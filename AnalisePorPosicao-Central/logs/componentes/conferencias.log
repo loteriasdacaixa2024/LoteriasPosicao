@@ -32,3 +32,29 @@ MemoryError
 
 --- iniciando 07/10/2026 11:25:55 python=D:\loterias\LoteriasPosicao\LoteriasExtras\conferencias\venv-modalidades\Scripts\python.exe ---
 127.0.0.1 - - [07/Oct/2026 11:26:33] "GET / HTTP/1.1" 200 -
+
+--- iniciando 11/10/2026 17:12:01 python=D:\loterias\LoteriasPosicao\LoteriasExtras\conferencias\venv-modalidades\Scripts\python.exe ---
+127.0.0.1 - - [11/Oct/2026 17:13:39] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [11/Oct/2026 17:13:46] "GET /favicon.ico HTTP/1.1" 404 -
+192.168.11.212 - - [11/Oct/2026 19:49:46] "GET / HTTP/1.1" 200 -
+Error on request:
+Traceback (most recent call last):
+  File "D:\loterias\LoteriasPosicao\LoteriasExtras\conferencias\venv-modalidades\Lib\site-packages\werkzeug\serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\loterias\LoteriasPosicao\LoteriasExtras\conferencias\venv-modalidades\Lib\site-packages\werkzeug\serving.py", line 355, in execute
+    data = self.rfile.read(10_000_000)
+MemoryError
+192.168.11.212 - - [11/Oct/2026 19:49:53] "GET /HNAP1/ HTTP/1.1" 404 -
+192.168.11.212 - - [11/Oct/2026 19:49:57] "POST /mcp HTTP/1.1" 404 -
+192.168.11.212 - - [11/Oct/2026 19:49:57] "POST /mcp HTTP/1.1" 404 -
+192.168.11.212 - - [11/Oct/2026 19:49:57] "GET / HTTP/1.1" 400 -
+192.168.11.212 - - [11/Oct/2026 19:49:57] "GET /loginMsg.js HTTP/1.1" 404 -
+192.168.11.212 - - [11/Oct/2026 19:49:57] "GET /cgi/get.cgi?cmd=home_login HTTP/1.1" 404 -
+10.0.0.10 - - [12/Oct/2026 06:19:19] "GET / HTTP/1.1" 200 -
+10.0.0.10 - - [12/Oct/2026 06:19:23] "GET /HNAP1/ HTTP/1.1" 404 -
+10.0.0.10 - - [12/Oct/2026 06:19:28] "POST /mcp HTTP/1.1" 404 -
+10.0.0.10 - - [12/Oct/2026 06:19:28] "POST /mcp HTTP/1.1" 404 -
+10.0.0.10 - - [12/Oct/2026 06:19:28] "GET / HTTP/1.1" 400 -
+10.0.0.10 - - [12/Oct/2026 06:19:29] "GET /loginMsg.js HTTP/1.1" 404 -
+10.0.0.10 - - [12/Oct/2026 06:19:29] "GET /cgi/get.cgi?cmd=home_login HTTP/1.1" 404 -

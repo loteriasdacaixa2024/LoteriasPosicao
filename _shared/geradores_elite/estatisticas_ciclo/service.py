@@ -15,7 +15,21 @@ def _resumo_diagonais_ctx(linhas, dmin, dmax):
 
 
 def tem_gerador_estatisticas_ciclo(modality_key: str) -> bool:
-    return (modality_key or "").strip().lower() == "diadesorte"
+    """Mesmo gerador do Dia de Sorte nas modalidades com ciclo de cobertura."""
+    key = (modality_key or "").strip().lower()
+    try:
+        from ciclo_cobertura.specs import tem_ciclo_cobertura
+        return bool(tem_ciclo_cobertura(key))
+    except Exception:
+        return key == "diadesorte"
+
+
+def _extra_mes(modality_key: str) -> bool:
+    try:
+        from geradores_elite.modality_config import MODALITIES
+        return (MODALITIES.get(modality_key) or {}).get("extra") == "mes"
+    except Exception:
+        return (modality_key or "").strip().lower() == "diadesorte"
 
 
 def _carregar_padroes(modality_key: str) -> Dict[str, Any]:
@@ -58,7 +72,7 @@ def _carregar_padroes(modality_key: str) -> Dict[str, Any]:
 
 def contexto_estatisticas_ciclo(modality_key: str = "diadesorte") -> Dict[str, Any]:
     if not tem_gerador_estatisticas_ciclo(modality_key):
-        return {"sucesso": False, "erro": "Gerador disponível apenas no Dia de Sorte."}
+        return {"sucesso": False, "erro": "Gerador indisponível nesta modalidade."}
 
     from analise_escolha_visual.service import AnaliseEscolhaVisualService
     from ciclo_cobertura.analise_service import AnaliseCicloCoberturaService
@@ -93,7 +107,7 @@ def contexto_estatisticas_ciclo(modality_key: str = "diadesorte") -> Dict[str, A
         "dezena_max": int(ciclo.get("dezena_max") or ui.get("dezena_max") or 31),
         "sorteadas": int(ui.get("sorteadas") or 7),
         "pad_width": int(ui.get("pad_width") or 2),
-        "extra_mes": True,
+        "extra_mes": _extra_mes(modality_key),
         "ciclo": {
             "numero_ciclo": ciclo.get("numero_ciclo"),
             "concurso_inicio": ciclo.get("concurso_inicio"),
@@ -165,23 +179,24 @@ def gerar_apostas_estatisticas_ciclo(
     if not out.get("sucesso"):
         return out
 
-    n = len(out["apostas"])
-    meses = resolver_meses_para_lote(mes_valor or "atrasado", n)
-    if len(meses) < n:
-        meses = (meses + [meses[-1] if meses else 6])[:n]
-        while len(meses) < n:
-            meses.append(6)
+    if ctx.get("extra_mes"):
+        n = len(out["apostas"])
+        meses = resolver_meses_para_lote(mes_valor or "atrasado", n)
+        if len(meses) < n:
+            meses = (meses + [meses[-1] if meses else 6])[:n]
+            while len(meses) < n:
+                meses.append(6)
 
-    for i, ap in enumerate(out["apostas"]):
-        mn = int(meses[i])
-        ap["mes_num"] = mn
-        ap["mes_nome"] = MESES_NOME.get(mn, f"Mês {mn}")
-        ap["mes_abrev"] = MESES_ABREV.get(mn, str(mn))
-        ap["extras"] = {
-            "tipo": "mes",
-            "num": mn,
-            "label": ap["mes_nome"],
-        }
+        for i, ap in enumerate(out["apostas"]):
+            mn = int(meses[i])
+            ap["mes_num"] = mn
+            ap["mes_nome"] = MESES_NOME.get(mn, f"Mês {mn}")
+            ap["mes_abrev"] = MESES_ABREV.get(mn, str(mn))
+            ap["extras"] = {
+                "tipo": "mes",
+                "num": mn,
+                "label": ap["mes_nome"],
+            }
 
     out.update({
         "ciclo": ciclo,
@@ -214,6 +229,22 @@ def gerar_apostas_estatisticas_ciclo(
 
 def _anexar_meses(out: Dict[str, Any], ctx: Dict[str, Any], mes_valor: Optional[Any]) -> Dict[str, Any]:
     if not out.get("sucesso"):
+        return out
+    if not ctx.get("extra_mes"):
+        est = ctx.get("estatisticas") or {}
+        out.update({
+            "ciclo": ctx.get("ciclo"),
+            "estatisticas": {
+                "total_sorteios": est.get("total_sorteios"),
+                "medias": est.get("medias") or {},
+                "pct_com": est.get("pct_com") or {},
+                "ultimo": est.get("ultimo"),
+            },
+            "fontes": ctx.get("fontes"),
+            "diagonais": ctx.get("diagonais") or out.get("diagonais") or {},
+            "pad_width": ctx.get("pad_width"),
+            "ciclo_panorama": ctx.get("ciclo_panorama") or out.get("ciclo_panorama"),
+        })
         return out
     n = len(out.get("apostas") or [])
     meses = resolver_meses_para_lote(mes_valor or "atrasado", n)

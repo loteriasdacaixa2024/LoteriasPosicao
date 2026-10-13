@@ -161,20 +161,132 @@ def _preco_volante(cfg: dict, n_dezenas: int) -> float:
 _FIXOS_DIASORTE = {5: 25.0, 4: 5.0, 0: 2.5}
 
 
-def _rateios_concurso(cfg: dict, numero: int) -> Dict[int, float]:
-    if cfg.get("key") != "diasorte":
-        return {}
-    out = dict(_FIXOS_DIASORTE)
+_API_SLUG = {
+    "lotofacil": "lotofacil",
+    "quina": "quina",
+    "megasena": "megasena",
+    "maismilionaria": "maismilionaria",
+    "duplasena": "duplasena",
+    "timemania": "timemania",
+    "lotomania": "lotomania",
+    "supersete": "supersete",
+}
+_RATEIO_CACHE: Dict[Tuple[str, int], Dict[Any, float]] = {}
+
+
+def _rateios_concurso(cfg: dict, numero: int) -> Dict[Any, float]:
+    if cfg.get("key") == "diasorte":
+        out: Dict[Any, float] = dict(_FIXOS_DIASORTE)
+        try:
+            from models.caixa_excel_premiacao import CaixaExcelPremiacaoDiaDeSorte
+            row = CaixaExcelPremiacaoDiaDeSorte.query.filter_by(concurso=int(numero)).first()
+        except Exception:
+            return out
+        if not row:
+            return out
+        out[7] = float(row.rateio_7 or 0)
+        out[6] = float(row.rateio_6 or 0)
+        return out
+    chave = (cfg.get("key") or "", int(numero))
+    if chave in _RATEIO_CACHE:
+        return dict(_RATEIO_CACHE[chave])
+    faixas = _faixas_api(cfg, numero) or _faixas_complemento(numero)
+    indexed = _indexar_rateios(cfg.get("key") or "", faixas)
+    _RATEIO_CACHE[chave] = indexed
+    return dict(indexed)
+
+
+def _faixas_complemento(numero: int) -> List[Dict[str, Any]]:
     try:
-        from models.caixa_excel_premiacao import CaixaExcelPremiacaoDiaDeSorte
-        row = CaixaExcelPremiacaoDiaDeSorte.query.filter_by(concurso=int(numero)).first()
+        from sqlalchemy import text
+        row = db.session.execute(
+            text("SELECT payload_json FROM caixa_excel_complemento WHERE concurso = :c"),
+            {"c": int(numero)},
+        ).fetchone()
     except Exception:
-        return out
+        return []
     if not row:
-        return out
-    out[7] = float(row.rateio_7 or 0)
-    out[6] = float(row.rateio_6 or 0)
+        return []
+    try:
+        payload = json.loads(row[0] or "{}")
+    except (TypeError, json.JSONDecodeError):
+        return []
+    return list(payload.get("faixas") or [])
+
+
+def _faixas_api(cfg: dict, numero: int) -> List[Dict[str, Any]]:
+    slug = _API_SLUG.get(cfg.get("key") or "")
+    if not slug:
+        return []
+    url = f"https://servicebus2.caixa.gov.br/portaldeloterias/api/{slug}/{int(numero)}"
+    try:
+        import requests
+        resp = requests.get(
+            url,
+            headers={"Accept": "application/json", "User-Agent": "Mozilla/5.0"},
+            timeout=12,
+            verify=False,
+        )
+        if resp.status_code != 200:
+            return []
+        data = resp.json()
+    except Exception:
+        return []
+    out = []
+    for item in data.get("listaRateioPremio") or []:
+        if not isinstance(item, dict):
+            continue
+        nome = str(item.get("descricaoFaixa") or "").strip()
+        if not nome:
+            continue
+        try:
+            valor = float(item.get("valorPremio") or 0)
+        except (TypeError, ValueError):
+            valor = 0.0
+        out.append({"nome": nome, "rateio": valor})
     return out
+
+
+def _indexar_rateios(key: str, faixas: List[Dict[str, Any]]) -> Dict[Any, float]:
+    out: Dict[Any, float] = {}
+    if key == "duplasena" and faixas and not any(str(f.get("nome") or "").upper().startswith("S") for f in faixas):
+        metade = max(1, len(faixas) // 2)
+        for i, faixa in enumerate(faixas):
+            lado = 1 if i < metade else 2
+            m = re.search(r"(\d+)", str(faixa.get("nome") or ""))
+            if not m:
+                continue
+            n = int(m.group(1))
+            valor = float(faixa.get("rateio") or 0)
+            rotulo = f"S{lado} {n} acertos"
+            out[rotulo] = valor
+            out[(lado, n)] = valor
+        return out
+    for faixa in faixas:
+        nome = str(faixa.get("nome") or "").strip()
+        if not nome:
+            continue
+        valor = float(faixa.get("rateio") or 0)
+        out[nome] = valor
+        if nome.lower().startswith("time"):
+            out["Time"] = valor
+        m = re.match(r"^(\d+)\s+acertos$", nome, re.I)
+        if m and key != "duplasena":
+            out[int(m.group(1))] = valor
+        m2 = re.match(r"^S([12])\s+(\d+)\s+acertos$", nome, re.I)
+        if m2:
+            out[(int(m2.group(1)), int(m2.group(2)))] = valor
+    return out
+
+
+def _valor_unit(rateios: Optional[Dict[Any, float]], minimo, rotulo: Optional[str]) -> float:
+    if not rateios:
+        return 0.0
+    if rotulo and rotulo in rateios:
+        return float(rateios.get(rotulo) or 0)
+    if minimo in rateios:
+        return float(rateios.get(minimo) or 0)
+    return 0.0
 
 
 def _classificar_faixa(acertos: int, cfg: dict) -> Optional[str]:
@@ -195,10 +307,81 @@ def _faixa_combo(acertos: int, mes_ok: bool, cfg: dict):
         if mes_ok:
             return 0, "Mês"
         return None, None
+    if cfg.get("premio_zero") and acertos == 0:
+        return 0, "0 acertos"
+    vistos = set()
     for minimo, label in faixas:
+        if minimo in vistos or minimo == 0:
+            continue
+        vistos.add(minimo)
         if acertos >= minimo:
             return minimo, label
     return None, None
+
+
+def _norm_txt(valor) -> str:
+    txt = str(valor or "").strip().lower()
+    txt = re.sub(r"\s+", " ", txt)
+    txt = txt.split("/")[0].strip()
+    trocas = str.maketrans("áàâãéêíóôõúç", "aaaaeeiooouc")
+    return txt.translate(trocas)
+
+
+def _time_confere(aposta, sorteio) -> bool:
+    a = _norm_txt(aposta)
+    s = _norm_txt(sorteio)
+    if not a or not s:
+        return False
+    return a == s or a in s or s in a
+
+
+def _faixa_maismilionaria(acertos: int, trevos: int) -> Optional[str]:
+    if acertos == 6 and trevos >= 2:
+        return "6 acertos + 2 trevos"
+    if acertos == 6:
+        return "6 acertos + 1 ou nenhum trevo"
+    if acertos == 5 and trevos >= 2:
+        return "5 acertos + 2 trevos"
+    if acertos == 5:
+        return "5 acertos + 1 ou nenhum trevo"
+    if acertos == 4 and trevos >= 2:
+        return "4 acertos + 2 trevos"
+    if acertos == 4:
+        return "4 acertos + 1 ou nenhum trevo"
+    if acertos == 3 and trevos >= 2:
+        return "3 acertos + 2 trevos"
+    if acertos == 3 and trevos == 1:
+        return "3 acertos + 1 trevo"
+    if acertos == 2 and trevos >= 2:
+        return "2 acertos + 2 trevos"
+    if acertos == 2 and trevos == 1:
+        return "2 acertos + 1 trevo"
+    return None
+
+
+def _pacote_aposta(valor_aposta, acertos, acertos_volante, hits, detalhes, cfg, extra=None):
+    valor_ganho = round(sum(float(d.get("valor") or 0) for d in detalhes), 2)
+    faixas_unicas = [d["descricao"] for d in detalhes if d.get("descricao")]
+    extra = extra or {}
+    resultado = {
+        "acertos": acertos,
+        "acertos_volante": acertos_volante,
+        "numeros_acertados": hits,
+        "faixa": " + ".join(faixas_unicas) if faixas_unicas else None,
+        "faixas_atingidas": faixas_unicas,
+        "detalhes_premios": detalhes,
+        "valor_premio": valor_ganho,
+        "premiado": bool(faixas_unicas),
+        "destaque": bool(faixas_unicas),
+        "premio_maximo": bool(extra.get("premio_maximo")),
+    }
+    resultado.update({k: v for k, v in extra.items() if k != "premio_maximo"})
+    return {
+        "valor_aposta": valor_aposta,
+        "valor_premio": valor_ganho,
+        "valor_ganho": valor_ganho,
+        "resultado": resultado,
+    }
 
 
 def _analisar_aposta(
@@ -207,9 +390,11 @@ def _analisar_aposta(
     cfg: dict,
     mes_aposta=None,
     mes_sorteio=None,
-    rateios: Optional[Dict[int, float]] = None,
+    rateios: Optional[Dict[Any, float]] = None,
+    extras: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     combo = cfg["combo_size"]
+    extras = extras or {}
 
     # Super Sete: acertos coluna a coluna (repetições permitidas).
     if _scoring_positional(cfg):
@@ -218,28 +403,15 @@ def _analisar_aposta(
         ac = contar_acertos_posicional(seq, sort_list, colunas=combo)
         hits = digitos_acertados(seq, sort_list, colunas=combo)
         minimo, faixa = _faixa_combo(ac, True, cfg)
-        faixas_unicas = [faixa] if faixa else []
-        unit = float((rateios or {}).get(minimo, 0) or 0) if minimo is not None else 0.0
+        unit = _valor_unit(rateios, minimo, faixa) if faixa else 0.0
         detalhes = []
         if faixa:
             detalhes.append({"descricao": faixa, "quantidade": 1, "valor": round(unit, 2)})
-        return {
-            "valor_aposta": _preco_volante(cfg, combo),
-            "valor_premio": round(unit, 2),
-            "valor_ganho": round(unit, 2),
-            "resultado": {
-                "acertos": ac,
-                "acertos_volante": ac,
-                "numeros_acertados": hits,
-                "faixa": faixa,
-                "faixas_atingidas": faixas_unicas,
-                "detalhes_premios": detalhes,
-                "valor_premio": round(unit, 2),
-                "premiado": bool(faixa),
-                "destaque": ac > 0,
-                "premio_maximo": bool(faixa) and minimo == (cfg["faixas"][0][0] if cfg.get("faixas") else combo),
-            },
-        }
+        topo = cfg["faixas"][0][0] if cfg.get("faixas") else combo
+        return _pacote_aposta(
+            _preco_volante(cfg, combo), ac, ac, hits, detalhes, cfg,
+            {"premio_maximo": bool(faixa) and minimo == topo},
+        )
 
     sorteadas_set: Set[int] = set(sorteadas) if not isinstance(sorteadas, set) else sorteadas
     unicos = sorted(set(numeros))
@@ -253,6 +425,24 @@ def _analisar_aposta(
         n_ap = _mes_num(mes_aposta)
         n_so = _mes_num(mes_sorteio)
         mes_ok = n_ap is not None and n_so is not None and n_ap == n_so
+
+    if cfg.get("key") == "lotomania":
+        minimo, faixa = _faixa_combo(acertos_volante, True, cfg)
+        detalhes = []
+        if faixa:
+            unit = _valor_unit(rateios, minimo, faixa)
+            detalhes.append({"descricao": faixa, "quantidade": 1, "valor": round(unit, 2)})
+        topo = cfg["faixas"][0][0] if cfg.get("faixas") else combo
+        return _pacote_aposta(
+            valor_aposta, acertos_volante, acertos_volante, hits_volante, detalhes, cfg,
+            {"premio_maximo": bool(faixa) and minimo == topo},
+        )
+
+    if cfg.get("dois_sorteios"):
+        return _analisar_duplasena(unicos, sorteadas_set, cfg, valor_aposta, hits_volante, acertos_volante, rateios, extras)
+
+    if cfg.get("has_trevos"):
+        return _analisar_maismilionaria(unicos, sorteadas_set, cfg, valor_aposta, hits_volante, acertos_volante, rateios, extras)
 
     if qtd == combo:
         combos: List[Tuple[int, ...]] = [tuple(unicos)]
@@ -275,7 +465,7 @@ def _analisar_aposta(
     detalhes = []
     valor_ganho = 0.0
     for faixa, item in contagem.items():
-        unit = float((rateios or {}).get(item["minimo"], 0) or 0)
+        unit = _valor_unit(rateios, item["minimo"], faixa)
         valor = round(unit * item["quantidade"], 2)
         valor_ganho += valor
         detalhes.append({
@@ -285,33 +475,96 @@ def _analisar_aposta(
         })
     detalhes.sort(key=lambda d: -d["quantidade"])
     if cfg.get("has_mes") and mes_ok and not any(d["descricao"] == "Mês" for d in detalhes):
-        unit_mes = float((rateios or {}).get(0, _FIXOS_DIASORTE[0]) or 0)
+        unit_mes = _valor_unit(rateios, 0, "Mês") or float(_FIXOS_DIASORTE[0])
         if unit_mes:
-            valor_ganho += unit_mes
             detalhes.append({"descricao": "Mês", "quantidade": 1, "valor": round(unit_mes, 2)})
-    faixas_unicas = [d["descricao"] for d in detalhes]
-    faixa_display = " + ".join(faixas_unicas) if faixas_unicas else None
+    if cfg.get("has_time"):
+        time_ok = _time_confere(extras.get("time_aposta"), extras.get("time_sorteio"))
+        if time_ok and not any(str(d["descricao"]).lower().startswith("time") for d in detalhes):
+            unit_time = _valor_unit(rateios, "Time", "Time")
+            detalhes.append({"descricao": "Time do Coração", "quantidade": 1, "valor": round(unit_time, 2)})
     topo = cfg["faixas"][0][0] if cfg.get("faixas") else combo
     premio_maximo = any(item.get("minimo") == topo for item in contagem.values())
+    extra = {"premio_maximo": premio_maximo}
+    if cfg.get("has_mes"):
+        extra["mes_ok"] = mes_ok
+    if cfg.get("has_time"):
+        extra["time_ok"] = _time_confere(extras.get("time_aposta"), extras.get("time_sorteio"))
+    return _pacote_aposta(
+        valor_aposta, max_acertos, acertos_volante, hits_volante, detalhes, cfg, extra,
+    )
 
-    return {
-        "valor_aposta": valor_aposta,
-        "valor_premio": round(valor_ganho, 2),
-        "valor_ganho": round(valor_ganho, 2),
-        "resultado": {
-            "acertos": max_acertos,
-            "acertos_volante": acertos_volante,
-            "numeros_acertados": hits_volante,
-            "faixa": faixa_display,
-            "faixas_atingidas": faixas_unicas,
-            "detalhes_premios": detalhes,
-            "valor_premio": round(valor_ganho, 2),
-            "premiado": bool(faixas_unicas),
-            "mes_ok": mes_ok if cfg.get("has_mes") else None,
-            "destaque": max_acertos >= 4 or acertos_volante >= 4 or bool(cfg.get("has_mes") and mes_ok),
-            "premio_maximo": premio_maximo,
+
+def _contar_combos(unicos: List[int], sorteadas_set: Set[int], combo: int):
+    qtd = len(unicos)
+    if qtd == combo:
+        combos = [tuple(unicos)]
+    elif qtd > combo:
+        combos = list(combinations(unicos, combo))
+    else:
+        combos = []
+    max_acertos = 0
+    por_ac: Dict[int, int] = {}
+    for c in combos:
+        ac = len(set(c) & sorteadas_set)
+        max_acertos = max(max_acertos, ac)
+        por_ac[ac] = por_ac.get(ac, 0) + 1
+    return max_acertos, por_ac
+
+
+def _analisar_duplasena(unicos, sorteadas_set, cfg, valor_aposta, hits_volante, acertos_volante, rateios, extras):
+    combo = cfg["combo_size"]
+    lados = [(1, sorteadas_set, "S1")]
+    s2 = extras.get("sorteio2") or []
+    if s2:
+        lados.append((2, set(s2), "S2"))
+    detalhes = []
+    max_acertos = 0
+    premio_maximo = False
+    for lado, alvo, prefixo in lados:
+        melhor, por_ac = _contar_combos(unicos, alvo, combo)
+        max_acertos = max(max_acertos, melhor)
+        for ac, qtd in sorted(por_ac.items(), reverse=True):
+            minimo, _faixa = _faixa_combo(ac, True, cfg)
+            if not _faixa:
+                continue
+            rotulo = f"{prefixo} {minimo} acertos"
+            unit = _valor_unit(rateios, (lado, minimo), rotulo)
+            detalhes.append({"descricao": rotulo, "quantidade": qtd, "valor": round(unit * qtd, 2)})
+            if minimo == (cfg["faixas"][0][0] if cfg.get("faixas") else combo):
+                premio_maximo = True
+    hits2 = sorted(set(unicos) & set(s2)) if s2 else []
+    hits = sorted(set(hits_volante) | set(hits2))
+    return _pacote_aposta(
+        valor_aposta, max_acertos, max(acertos_volante, len(hits2)), hits, detalhes, cfg,
+        {"premio_maximo": premio_maximo, "numeros_acertados_s2": hits2},
+    )
+
+
+def _analisar_maismilionaria(unicos, sorteadas_set, cfg, valor_aposta, hits_volante, acertos_volante, rateios, extras):
+    combo = cfg["combo_size"]
+    trevos_sorte = {int(n) for n in (extras.get("trevos_sorteio") or [])}
+    trevos_ap = {int(n) for n in (extras.get("trevos_aposta") or []) if str(n).strip()}
+    n_trevos = len(trevos_ap & trevos_sorte)
+    _melhor, por_ac = _contar_combos(unicos, sorteadas_set, combo)
+    contagem: Dict[str, int] = {}
+    for ac, qtd in por_ac.items():
+        rotulo = _faixa_maismilionaria(ac, n_trevos)
+        if not rotulo:
+            continue
+        contagem[rotulo] = contagem.get(rotulo, 0) + qtd
+    detalhes = []
+    for rotulo, qtd in contagem.items():
+        unit = _valor_unit(rateios, rotulo, rotulo)
+        detalhes.append({"descricao": rotulo, "quantidade": qtd, "valor": round(unit * qtd, 2)})
+    detalhes.sort(key=lambda d: -d["quantidade"])
+    return _pacote_aposta(
+        valor_aposta, acertos_volante, acertos_volante, hits_volante, detalhes, cfg,
+        {
+            "premio_maximo": "6 acertos + 2 trevos" in contagem,
+            "trevos_acertados": n_trevos,
         },
-    }
+    )
 
 
 class ConferenciaApostasFolderService:
@@ -658,6 +911,13 @@ class ConferenciaApostasFolderService:
             else:
                 mes_sorteio = getattr(sorteio, "mes_nome", None) or getattr(sorteio, "mes_num", None)
         rateios = _rateios_concurso(self.cfg, numero_concurso)
+        extras_base: Dict[str, Any] = {}
+        if self.cfg.get("dois_sorteios") and hasattr(sorteio, "sorteio2_lista"):
+            extras_base["sorteio2"] = [int(n) for n in sorteio.sorteio2_lista()]
+        if self.cfg.get("has_trevos") and hasattr(sorteio, "trevos_lista"):
+            extras_base["trevos_sorteio"] = [int(n) for n in sorteio.trevos_lista()]
+        if self.cfg.get("has_time"):
+            extras_base["time_sorteio"] = getattr(sorteio, "time_nome", None) or getattr(sorteio, "time_num", None)
         apostas_out: List[Dict[str, Any]] = []
         erros: List[str] = []
         total_investido = 0.0
@@ -682,6 +942,9 @@ class ConferenciaApostasFolderService:
             if invalidas:
                 erros.append(f"Aposta {idx}: número(s) fora do volante: {invalidas}")
                 continue
+            extras = dict(extras_base)
+            extras["trevos_aposta"] = aposta.get("trevos") or []
+            extras["time_aposta"] = aposta.get("time") or aposta.get("time_coracao")
             analise = _analisar_aposta(
                 numeros,
                 sorteadas,
@@ -689,6 +952,7 @@ class ConferenciaApostasFolderService:
                 mes_aposta=aposta.get("mes"),
                 mes_sorteio=mes_sorteio,
                 rateios=rateios,
+                extras=extras,
             )
             total_investido += analise["valor_aposta"]
             total_ganho += analise["valor_ganho"]
@@ -709,6 +973,8 @@ class ConferenciaApostasFolderService:
                 "valor_aposta": analise["valor_aposta"],
                 "valor_ganho": analise["valor_ganho"],
                 "mes": aposta.get("mes"),
+                "trevos": [int(n) for n in (aposta.get("trevos") or [])],
+                "time": aposta.get("time") or aposta.get("time_coracao"),
                 "acertos": analise["resultado"]["acertos"],
                 "dezenas_acertadas": [fmt(n) for n in analise["resultado"]["numeros_acertados"]],
                 "premiacao": analise["resultado"]["faixa"]
@@ -731,6 +997,9 @@ class ConferenciaApostasFolderService:
             "data_sorteio": sorteio.data,
             "modalidade": self.cfg["nome"],
             "mes_sorteado": mes_sorteio,
+            "trevos_sorteados": [f"{int(n):02d}" for n in extras_base.get("trevos_sorteio") or []],
+            "time_sorteado": extras_base.get("time_sorteio"),
+            "dezenas_sorteio2": [fmt_dez(n) for n in (extras_base.get("sorteio2") or [])],
             "dezenas_oficiais": self.combo,
             "resumo": {
                 "total_apostas_validas": len(apostas_out),

@@ -19,12 +19,14 @@ def register_gerador_estatisticas_ciclo(bp: Blueprint, modality_key: str, modali
     @bp.route("/estatisticas-ciclo/")
     def estatisticas_ciclo_page():
         ctx = contexto_estatisticas_ciclo(modality_key)
+        extra_mes = bool(ctx.get("extra_mes"))
         meses_cores = {}
-        try:
-            from services.cores_meses_service import CoresMesesService
-            meses_cores = CoresMesesService.obter_cores() or {}
-        except Exception:
-            meses_cores = {}
+        if extra_mes:
+            try:
+                from services.cores_meses_service import CoresMesesService
+                meses_cores = CoresMesesService.obter_cores() or {}
+            except Exception:
+                meses_cores = {}
         return render_template(
             "gerador_estatisticas_ciclo.html",
             modality_key=modality_key,
@@ -38,12 +40,15 @@ def register_gerador_estatisticas_ciclo(bp: Blueprint, modality_key: str, modali
             ciclo_url="/analise/ciclo-cobertura/",
             padroes_url="/analise/analises-inteligentes/?aba=padroes-ii",
             panorama_url="/analise/analises-inteligentes/?aba=panorama",
-            extra_mes=True,
+            extra_mes=extra_mes,
         )
 
     @bp.route("/api/estatisticas-ciclo/contexto")
     def api_estatisticas_ciclo_contexto():
         out = contexto_estatisticas_ciclo(modality_key)
+        if isinstance(out, dict):
+            # A janela completa fica no servidor para gerar; a tela só usa o resumo.
+            out = {k: v for k, v in out.items() if k != "linhas_basicas"}
         return jsonify(out), (200 if out.get("sucesso") else 400)
 
     @bp.route("/api/estatisticas-ciclo/gerar", methods=["POST"])

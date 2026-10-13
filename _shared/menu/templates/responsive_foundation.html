@@ -223,11 +223,31 @@
         }
     }
 
-    /* —— Tabelas: scroll interno, nunca estouram a viewport —— */
-    .table-responsive {
+    /* —— Tabelas: rolagem vertical com o título das colunas fixo —— */
+    .table-responsive,
+    .tabela-scroll {
         max-width: 100%;
-        overflow-x: auto;
+        max-height: 70vh;
+        overflow: auto;
         -webkit-overflow-scrolling: touch;
+    }
+    .table-responsive > table,
+    .tabela-scroll > table {
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 0;
+    }
+    .table-responsive thead th,
+    .tabela-scroll thead th,
+    .ai-pan-table-wrap thead th,
+    .ai-jogos-table-wrap thead th,
+    .cc-table-wrap thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background-color: var(--bs-table-bg, var(--surface, #fff));
+        background-clip: padding-box;
+        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .12);
     }
 
     /* —— Modais e dropdowns —— */
@@ -277,8 +297,18 @@
         background: #f4eed0;
         box-shadow: inset 3px 0 0 #b08918;
     }
+    .dd-link.dd-ge-destaque-4,
+    .mobile-link.dd-ge-destaque-4 {
+        background: #efe4c0;
+        box-shadow: inset 3px 0 0 #9a7414;
+    }
     .dd-link.dd-ge-destaque .dd-title {
         font-weight: 800;
+    }
+    .dd-link.dd-ge-sep,
+    .mobile-link.dd-ge-sep {
+        margin-top: .45rem;
+        border-top: 1px solid #eee;
     }
     .dd-ge-rank {
         display: inline-flex;
@@ -526,3 +556,55 @@
         }
     }
 </style>
+<script>
+(function () {
+  var DENTRO = '.table-responsive, .tabela-scroll, .ai-pan-table-wrap, .ai-jogos-table-wrap, .cc-table-wrap, nav, .navbar-main';
+  function ancestralRola(el) {
+    var n = el.parentElement;
+    while (n && n !== document.body) {
+      var cs = getComputedStyle(n);
+      var rola = cs.overflowY === 'auto' || cs.overflowY === 'scroll';
+      if (rola && cs.maxHeight && cs.maxHeight !== 'none') return true;
+      n = n.parentElement;
+    }
+    return false;
+  }
+  function preparar(table) {
+    if (!table || table.tagName !== 'TABLE' || table.dataset.scrollWrap) return;
+    if (!table.tHead || !table.tHead.rows.length) return;
+    if (table.closest(DENTRO)) {
+      table.dataset.scrollWrap = '1';
+      return;
+    }
+    if (ancestralRola(table)) {
+      table.dataset.scrollWrap = '1';
+      return;
+    }
+    var pai = table.parentNode;
+    if (!pai) return;
+    table.dataset.scrollWrap = '1';
+    var wrap = document.createElement('div');
+    wrap.className = 'table-responsive tabela-scroll';
+    pai.insertBefore(wrap, table);
+    wrap.appendChild(table);
+  }
+  function varrer(raiz) {
+    if (!raiz || raiz.nodeType !== 1) return;
+    if (raiz.tagName === 'TABLE') preparar(raiz);
+    if (raiz.querySelectorAll) raiz.querySelectorAll('table').forEach(preparar);
+  }
+  function iniciar() {
+    varrer(document.body);
+    var obs = new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        m.addedNodes.forEach(function (node) {
+          if (node.nodeType === 1) varrer(node);
+        });
+      });
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
+  else iniciar();
+})();
+</script>

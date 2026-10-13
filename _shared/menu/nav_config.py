@@ -60,7 +60,7 @@ def _comportamento_nav(suffix: str, desc: str) -> Dict[str, Any]:
                 {
                     "href": "/geradores-elite/construtor-construcoes/",
                     "title": "Construtor de Construções",
-                    "desc": "Mesmo conjunto-base · múltiplas engenharias",
+                    "desc": "Pool dezenas · pool dígitos · múltiplas engenharias",
                     "icon": "fas fa-layer-group",
                 },
             ],
@@ -220,7 +220,7 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 {
                     "href": "/geradores-elite/construtor-construcoes/",
                     "title": "Construtor de Construções",
-                    "desc": "Mesmo conjunto-base · múltiplas engenharias",
+                    "desc": "Pool dezenas · pool dígitos · múltiplas engenharias",
                     "icon": "fas fa-layer-group",
                 },
             ],
@@ -348,18 +348,25 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                     "highlight": 1,
                 },
                 {
+                    "href": "/geradores-elite/ciclo-apostas/",
+                    "title": "Ciclo — Apostas",
+                    "desc": "Estratégias · ritmo · fechamento · 2+1",
+                    "icon": "fas fa-sync-alt",
+                    "highlight": 2,
+                },
+                {
                     "href": "/geradores-elite/comportamento-apostas/",
                     "title": "Comportamento → Apostas",
                     "desc": "Padrões PA/PR/RT/MO/MS · inteligente",
                     "icon": "fas fa-chart-line",
-                    "highlight": 2,
+                    "highlight": 3,
                 },
                 {
                     "href": "/geradores-elite/construtor-construcoes/",
                     "title": "Construtor de Construções",
                     "desc": "Pool dezenas · pool dígitos · múltiplas engenharias",
                     "icon": "fas fa-layer-group",
-                    "highlight": 3,
+                    "highlight": 4,
                 },
                 {
                     "href": "/geradores-elite/engine-final/",
@@ -384,12 +391,6 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                     "title": "Repetição → Apostas",
                     "desc": "Gerador baseado na repetição entre concursos",
                     "icon": "fas fa-dice",
-                },
-                {
-                    "href": "/geradores-elite/ciclo-apostas/",
-                    "title": "Ciclo — Apostas",
-                    "desc": "Estratégias · ritmo · fechamento · 2+1",
-                    "icon": "fas fa-sync-alt",
                 },
                 {
                     "href": "/geradores-elite/gaps-ciclo-apostas/",
@@ -532,7 +533,7 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 {
                     "href": "/geradores-elite/construtor-construcoes/",
                     "title": "Construtor de Construções",
-                    "desc": "Mesmo conjunto-base · múltiplas engenharias",
+                    "desc": "Pool dezenas · pool dígitos · múltiplas engenharias",
                     "icon": "fas fa-layer-group",
                 },
             ],
@@ -754,7 +755,62 @@ def get_nav_config(modality_key: str) -> dict:
     _inject_posicao_nav(cfg, modality_key)
     _inject_analises_novas_nav(cfg, modality_key)
     _inject_filtros_posicao_nav(cfg)
+    _ordenar_geradores_elite(cfg)
     return cfg
+
+
+# Mesma ordem do Dia de Sorte. O número só aparece se a modalidade tiver o item.
+_GE_ORDEM = [
+    "/geradores-elite/estatisticas-ciclo/",
+    "/geradores-elite/ciclo-apostas/",
+    "/geradores-elite/comportamento-apostas/",
+    "/geradores-elite/construtor-construcoes/",
+    "/geradores-elite/engine-final/",
+    "/geradores-elite/gerador-gc/",
+    "/geradores-elite/gerador-elite/",
+    "/geradores-elite/repeticao-apostas/",
+    "/geradores-elite/gaps-ciclo-apostas/",
+    "/geradores-elite/gerador-por-posicao/",
+    "/geradores-elite/gerador-concentracao/",
+    "/geradores-elite/apostas-inteligentes/",
+    "/geradores-elite/escolha-tubular-apostas/",
+    "/geradores-elite/gerador-digitos-inteligente/",
+]
+_GE_DESTAQUE = {
+    "/geradores-elite/estatisticas-ciclo/": 1,
+    "/geradores-elite/ciclo-apostas/": 2,
+    "/geradores-elite/comportamento-apostas/": 3,
+    "/geradores-elite/construtor-construcoes/": 4,
+}
+
+
+def _ordenar_geradores_elite(cfg: dict) -> None:
+    ge = cfg.get("geradores_elite") or {}
+    items = list(ge.get("items") or [])
+    if not items:
+        return
+    por_href: Dict[str, Dict[str, Any]] = {}
+    vistos: List[str] = []
+    for it in items:
+        href = it.get("href") or ""
+        if href in por_href:
+            continue
+        por_href[href] = it
+        vistos.append(href)
+    destaques = [h for h in _GE_ORDEM if h in _GE_DESTAQUE and h in por_href]
+    resto = [h for h in _GE_ORDEM if h not in _GE_DESTAQUE and h in por_href]
+    ja = set(destaques + resto)
+    extras = [h for h in vistos if h not in ja]
+    ordered = []
+    for href in destaques + resto + extras:
+        it = por_href[href]
+        rank = _GE_DESTAQUE.get(href)
+        if rank:
+            it["highlight"] = rank
+        else:
+            it.pop("highlight", None)
+        ordered.append(it)
+    ge["items"] = ordered
 
 
 def _inject_filtros_posicao_nav(cfg: dict) -> None:
@@ -789,6 +845,20 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
     extras = cfg.setdefault("analise_extras", [])
     ge = cfg.setdefault("geradores_elite", {})
     items = ge.setdefault("items", [])
+
+    try:
+        from ciclo_cobertura.specs import tem_ciclo_cobertura as _tem_ciclo_menu
+    except ImportError:
+        _tem_ciclo_menu = lambda _k: False  # noqa: E731
+    if _tem_ciclo_menu(modality_key):
+        item_ciclo = {
+            "href": "/geradores-elite/estatisticas-ciclo/",
+            "title": "Estatísticas e Ciclo",
+            "desc": "Estatísticas Básicas · ciclo no fim · Panorama (padrão · sequência · soma)",
+            "icon": "fas fa-chart-pie",
+        }
+        if not any(x.get("href") == item_ciclo["href"] for x in items):
+            items.insert(0, item_ciclo)
 
     try:
         from analise_estudos.specs import tem_analise_estudos

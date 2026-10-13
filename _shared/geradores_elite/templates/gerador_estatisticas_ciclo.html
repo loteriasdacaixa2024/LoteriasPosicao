@@ -81,6 +81,8 @@
 
 <div class="container-fluid py-3" id="gec-root"
      data-api="{{ api_base }}"
+     data-modality="{{ modality_key }}"
+     data-extra-mes="{{ '1' if extra_mes else '0' }}"
      data-manual="/geradores-elite/escolha-tubular-apostas/?aba=manual"
      data-volantes="/geradores-elite/escolha-tubular-apostas/?aba=volantes">
   <div class="d-flex flex-wrap gap-2 mb-3 page-links">
@@ -191,10 +193,12 @@
           <label class="form-label small mb-0">Apostas</label>
           <input type="number" class="form-control form-control-sm" id="gecQtd" value="10" min="1" max="200">
         </div>
+        {% if extra_mes %}
         <div class="col-12 col-md-4">
           <label class="form-label small mb-0">Mês da Sorte</label>
           <select class="form-select form-select-sm" id="gecMes"></select>
         </div>
+        {% endif %}
         <div class="col-12 d-flex flex-wrap gap-2 align-items-center mt-1">
           <button type="button" class="btn fw-bold" id="gecBtnGerar"
                   style="background:var(--primary);border-color:var(--primary);color:#fff;">
@@ -238,6 +242,8 @@
   </div>
 </div>
 
+{% if extra_mes %}
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
-<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pan1"></script>
+{% endif %}
+<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pan2"></script>
 {% endblock %}

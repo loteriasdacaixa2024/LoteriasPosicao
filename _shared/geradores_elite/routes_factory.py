@@ -53,12 +53,14 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
     @bp.route("/")
     def index():
         from ciclo_cobertura.specs import tem_ciclo_cobertura
+        from geradores_elite.estatisticas_ciclo.service import tem_gerador_estatisticas_ciclo
         return render_template(
             "geradores_elite_index.html",
             modality_key=modality_key,
             modality_nome=cfg["nome"],
             cfg=cfg,
             tem_ciclo_cobertura=tem_ciclo_cobertura(modality_key),
+            tem_estatisticas_ciclo=tem_gerador_estatisticas_ciclo(modality_key),
         )
 
     def _render_apostas_inteligentes():

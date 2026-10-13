@@ -150,6 +150,10 @@ from concentracao_acertos.app_integration import wire_concentracao_analise
 wire_concentracao_analise(analise_bp, "supersete")
 from analise_estudos.app_integration import wire_analise_estudos
 wire_analise_estudos(analise_bp, "supersete")
+from analise_escolha_visual.app_integration import wire_analise_escolha_visual
+wire_analise_escolha_visual(analise_bp, "supersete")
+from analise_tubular_inteligente.app_integration import wire_analise_tubular_inteligente
+wire_analise_tubular_inteligente(analise_bp, "supersete")
 
 from linhas_universo.app_integration import wire_camadas_linhas_dd_du
 wire_camadas_linhas_dd_du(analise_bp, "supersete")

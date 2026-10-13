@@ -5,6 +5,8 @@
   if (!root) return;
 
   const API = (root.dataset.api || '/geradores-elite/api/estatisticas-ciclo').replace(/\/$/, '');
+  const MODALITY = root.dataset.modality || 'diadesorte';
+  const EXTRA_MES = root.dataset.extraMes === '1';
   const MANUAL_URL = root.dataset.manual || '/geradores-elite/escolha-tubular-apostas/?aba=manual';
   const VOLANTES_URL = root.dataset.volantes || '/geradores-elite/escolha-tubular-apostas/?aba=volantes';
   const MANUAL_KEY = 'tb_manual10_import';
@@ -211,7 +213,7 @@
       box.innerHTML = '<p class="text-muted small mb-0" style="grid-column:1/-1;">Nenhuma aposta gerada.</p>';
       setBtns(false);
       badge.textContent = 'Sem jogos';
-      if (window.__renderPanoramaConjunto) window.__renderPanoramaConjunto([], { key: 'diadesorte' });
+      if (window.__renderPanoramaConjunto) window.__renderPanoramaConjunto([], { key: MODALITY });
       return;
     }
     setBtns(true);
@@ -238,7 +240,7 @@
       return `<div class="gec-card${ap.ja_sorteada ? ' gec-ja-saiu' : ''}${ap.padrao_inedito ? ' gec-inedito' : ''}">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <strong>${String(i + 1).padStart(2, '0')}</strong>
-          <span class="mes-badge${mesCls}">${ap.mes_abrev || ap.mes_nome || ''}</span>
+          ${EXTRA_MES ? `<span class="mes-badge${mesCls}">${ap.mes_abrev || ap.mes_nome || ''}</span>` : ''}
         </div>
         <div class="mb-1">${balls(ap.dezenas, ap.obrigatorias)}</div>
         <div class="d-flex flex-wrap gap-1">
@@ -298,7 +300,7 @@
     if (window.__renderPanoramaConjunto) {
       const ult = ((payload.estatisticas || {}).ultimo) || {};
       window.__renderPanoramaConjunto(apostas, {
-        key: 'diadesorte',
+        key: MODALITY,
         ultimo: { concurso: ult.concurso, dezenas: ult.numeros || ult.dezenas || [] },
       });
     }
@@ -326,7 +328,7 @@
     btn.disabled = true;
     document.getElementById('gecBadge').textContent = 'Gerando…';
     try {
-      const mesEl = document.getElementById('gecMes');
+      const mesEl = EXTRA_MES ? document.getElementById('gecMes') : null;
       const mes = (window.MesSorteSelect && mesEl)
         ? MesSorteSelect.payloadFromSelect(mesEl)
         : (mesEl && mesEl.value);
@@ -447,7 +449,7 @@
   document.getElementById('gecBtnVolantes').addEventListener('click', () => enviarTubular(VOLANTES_URL, true));
   document.getElementById('gecBtnJaSaiu').addEventListener('click', jaSaiu);
 
-  if (window.MesSorteSelect) {
+  if (EXTRA_MES && window.MesSorteSelect) {
     MesSorteSelect.fillFromApi(document.getElementById('gecMes'), '/geradores-elite', { defaultPrefer: 'atrasado' }).catch(() => {});
   }
   carregar();

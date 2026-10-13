@@ -41,6 +41,89 @@
     font-variant-numeric: tabular-nums;
     font-size: .78rem;
   }
+  /* Lotofácil, Lotomania e Timemania: muitas dezenas. Quebram em linhas
+     para a tabela inteira caber na largura, sem cortar número. */
+  #ai-root[data-modality-key="lotofacil"] .ai-table th.col-dezenas,
+  #ai-root[data-modality-key="lotofacil"] .ai-table td.td-dezenas,
+  #ai-root[data-modality-key="lotomania"] .ai-table th.col-dezenas,
+  #ai-root[data-modality-key="lotomania"] .ai-table td.td-dezenas,
+  #ai-root[data-modality-key="timemania"] .ai-table th.col-dezenas,
+  #ai-root[data-modality-key="timemania"] .ai-table td.td-dezenas {
+    white-space: normal !important;
+    width: 11rem;
+    min-width: 11rem;
+    max-width: 11rem;
+    line-height: 1.35;
+  }
+  #ai-root[data-modality-key="lotofacil"] .ai-table td.td-digitos-if,
+  #ai-root[data-modality-key="lotomania"] .ai-table td.td-digitos-if,
+  #ai-root[data-modality-key="timemania"] .ai-table td.td-digitos-if,
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaPadroes td.td-padrao,
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaPadroes td.td-pad-final,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPadroes td.td-padrao,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPadroes td.td-pad-final,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPadroes td.td-padrao,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPadroes td.td-pad-final {
+    white-space: normal !important;
+    max-width: 9.5rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaPanResumo th,
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaPanResumo td,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo th,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo td,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPanResumo th,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPanResumo td {
+    padding-left: .1rem;
+    padding-right: .1rem;
+  }
+  /* Lotomania: volumes de 15 dígitos. Fonte menor para a linha caber na largura. */
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo {
+    font-size: .68rem;
+  }
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo td.td-res-jogos .ai-col-alinha,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo td.td-res-valido .ai-col-alinha,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo td.td-res-rest .ai-col-alinha,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo td.td-res-seq .ai-col-alinha,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo td.td-res-aposta .ai-col-alinha {
+    font-size: .6rem;
+    min-width: 6.4rem;
+  }
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo td.td-diag .ai-col-alinha {
+    grid-template-columns: 3.05rem 0.16rem 3.05rem 0.16rem 3.05rem;
+    width: 9.47rem;
+    min-width: 9.47rem;
+    font-size: .62rem;
+  }
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanSeq td.font-monospace,
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaPanSeq td.font-monospace,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPanSeq td.font-monospace,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanSeq td.td-pan-pad,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanSeq td.td-pan-pad .ai-col-alinha,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPanSeq td.td-pan-pad,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPanSeq td.td-pan-pad .ai-col-alinha {
+    white-space: normal !important;
+    max-width: 11rem;
+    line-height: 1.3;
+  }
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanSeq td.td-pan-jogos,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanSeq td.td-pan-seqn,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanSeq td.td-pan-seqn .ai-col-alinha {
+    font-size: .68rem;
+  }
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaPanResumo td.td-res-pad,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo td.td-res-pad,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPanResumo td.td-res-pad {
+    white-space: normal !important;
+  }
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaPanResumo td.td-res-pad .ai-col-alinha,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPanResumo td.td-res-pad .ai-col-alinha,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPanResumo td.td-res-pad .ai-col-alinha {
+    max-width: 8.5rem;
+    min-width: 6.5rem;
+    white-space: normal;
+  }
   /* Dígitos Ord. / Únicos: SEMPRE na mesma linha */
   #ai-root .ai-table th.col-digitos-unicos,
   #ai-root .ai-table td.td-digitos-unicos {
@@ -54,7 +137,7 @@
     padding: .05rem .28rem;
     font-size: .78rem;
   }
-  /* Volume: bloco centralizado na célula, números alinhados à esquerda entre si */
+  /* Volume: bloco centralizado na célula, números alinhados pela direita */
   #ai-root .ai-table th.col-volume,
   #ai-root .ai-table td.td-volume {
     text-align: center !important;
@@ -64,11 +147,11 @@
   }
   #ai-root .ai-table td.td-volume .ai-col-alinha {
     display: inline-block;
-    text-align: left;
+    text-align: right;
     min-width: 5.6rem;
     font-variant-numeric: tabular-nums;
   }
-  /* Soma: mesmo padrão — esquerda entre si, bloco centralizado */
+  /* Soma: mesmo padrão — direita entre si, bloco centralizado */
   #ai-root .ai-table th.col-soma,
   #ai-root .ai-table td.td-soma {
     text-align: center !important;
@@ -77,7 +160,7 @@
   }
   #ai-root .ai-table td.td-soma .ai-col-alinha {
     display: inline-block;
-    text-align: left;
+    text-align: right;
     min-width: 2.4rem;
     font-variant-numeric: tabular-nums;
   }
@@ -95,6 +178,23 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: .04em;
   }
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaPadroes td.td-pad-final .ai-col-alinha,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPadroes td.td-pad-final .ai-col-alinha,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPadroes td.td-pad-final .ai-col-alinha {
+    white-space: normal;
+    max-width: 9.5rem;
+    min-width: 6.2rem;
+  }
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaPadroes td.td-digitos-unicos,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaPadroes td.td-digitos-unicos,
+  #ai-root[data-modality-key="timemania"] #aiTabelaPadroes td.td-digitos-unicos,
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaResultados td.td-digitos-unicos,
+  #ai-root[data-modality-key="lotomania"] #aiTabelaResultados td.td-digitos-unicos,
+  #ai-root[data-modality-key="timemania"] #aiTabelaResultados td.td-digitos-unicos {
+    white-space: normal !important;
+    width: auto;
+    max-width: 8.5rem;
+  }
   #ai-root .ai-table th.col-nao-sairam,
   #ai-root .ai-table td.td-nao-sairam {
     white-space: nowrap !important;
@@ -108,6 +208,16 @@
     white-space: normal;
   }
   #ai-root .ai-table td.td-gerar .btn-ai { margin-bottom: .15rem; }
+  /* Resultados: os botões cabem na largura da página, sem barra interna. */
+  #ai-root #aiTabelaResultados td.td-gerar {
+    white-space: normal !important;
+    max-width: none;
+  }
+  #ai-root #aiTabelaPadroes th,
+  #ai-root #aiTabelaPadroes td {
+    padding-left: .08rem;
+    padding-right: .08rem;
+  }
   #ai-root .nav-tabs .nav-link.active {
     font-weight:800; color:var(--primary-xdark); border-bottom-color:var(--primary);
   }
@@ -815,7 +925,7 @@
     gap: 1rem 1.25rem;
     align-items: start;
     width: 100%;
-    max-width: 56rem;
+    max-width: none;
     margin-bottom: .85rem;
   }
   @media (max-width: 900px) {
@@ -834,8 +944,9 @@
     text-align: left;
   }
   #ai-root #tab-panorama .ai-pan-table-wrap {
-    overflow: auto;
     max-height: 70vh;
+    overflow-x: hidden;
+    overflow-y: auto;
     width: 100%;
   }
   #ai-root #aiTabelaPanoramaHist,
@@ -903,8 +1014,98 @@
     padding-top: 1rem;
     border-top: 1px solid rgba(0, 0, 0, .08);
   }
+  #ai-root #tab-panorama #aiPanSeqWrap,
+  #ai-root #tab-panorama #aiAnaliseSeqWrap {
+    max-width: none;
+  }
   #ai-root #tab-panorama .ai-pan-seq .ai-pan-table-wrap {
-    max-height: 62vh;
+    max-height: 70vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  #ai-root #aiTabelaPanResumo { margin-bottom: 0; width: 100%; font-size: .78rem; }
+  #ai-root #aiTabelaPanResumo th,
+  #ai-root #aiTabelaPanResumo td {
+    padding: .28rem .22rem;
+  }
+  #ai-root .ai-pan-resumo-ultimo {
+    width: 100%;
+    border: 1px solid rgba(192, 139, 0, .35);
+    border-radius: 10px;
+    padding: .45rem .45rem .15rem;
+    background: #fffdf6;
+    margin-bottom: .85rem;
+  }
+  #ai-root #tab-panorama .ai-pan-resumo-ultimo .ai-pan-table-wrap {
+    max-height: 70vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  #ai-root .ai-jogos-table-wrap {
+    max-height: 70vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  #ai-root #tab-panorama .ai-pan-table-wrap .ai-table,
+  #ai-root .ai-jogos-table-wrap .ai-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  #ai-root #tab-panorama .ai-pan-table-wrap .ai-table thead th,
+  #ai-root .ai-jogos-table-wrap .ai-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--primary) !important;
+    color: #fff !important;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .18);
+  }
+  @media (max-width: 1100px) {
+    #ai-root #tab-panorama .ai-pan-table-wrap,
+    #ai-root #tab-panorama .ai-pan-seq .ai-pan-table-wrap,
+    #ai-root #tab-panorama .ai-pan-resumo-ultimo .ai-pan-table-wrap,
+    #ai-root .ai-jogos-table-wrap {
+      max-height: 70vh;
+      overflow: auto;
+    }
+  }
+  #ai-root #aiTabelaPanResumo th,
+  #ai-root #aiTabelaPanResumo td {
+    text-align: center !important;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  #ai-root #aiTabelaPanResumo .ai-th-sub {
+    display: block;
+    font-size: .62rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: .9;
+  }
+  #ai-root #aiTabelaPanResumo td .ai-col-alinha {
+    display: inline-block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaPanResumo td.td-res-n .ai-col-alinha { min-width: 1.5rem; }
+  #ai-root #aiTabelaPanResumo td.td-res-pad .ai-col-alinha { min-width: 5.2rem; }
+  #ai-root #aiTabelaPanResumo td.td-res-jogos .ai-col-alinha,
+  #ai-root #aiTabelaPanResumo td.td-res-valido .ai-col-alinha,
+  #ai-root #aiTabelaPanResumo td.td-res-rest .ai-col-alinha,
+  #ai-root #aiTabelaPanResumo td.td-res-seq .ai-col-alinha,
+  #ai-root #aiTabelaPanResumo td.td-res-aposta .ai-col-alinha { min-width: 3.6rem; }
+  #ai-root #aiTabelaPanResumo td.td-res-soma .ai-col-alinha { min-width: 2rem; }
+  #ai-root #aiTabelaPanResumo td.td-res-dig .ai-col-alinha { min-width: 6.8rem; }
+  #ai-root #aiTabelaPanResumo td.td-diag .ai-col-alinha {
+    display: inline-grid;
+    grid-template-columns: 3.9rem 0.22rem 3.9rem 0.22rem 3.9rem;
+    justify-items: end;
+    align-items: center;
+    width: 12.14rem;
+    min-width: 12.14rem;
+    white-space: nowrap;
+    font-size: .72rem;
   }
   #ai-root #aiTabelaPanSeq th,
   #ai-root #aiTabelaPanSeq td {
@@ -928,6 +1129,10 @@
   #ai-root #aiTabelaPanSeq td.td-pan-status .ai-col-alinha {
     display: inline-block;
     text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaPanSeq td.td-pan-npad,
+  #ai-root #aiTabelaPanSeq td.td-pan-jogos {
     font-variant-numeric: tabular-nums;
   }
   #ai-root #aiTabelaPanSeq td.td-pan-pad .ai-col-alinha { min-width: 7.6rem; }
@@ -1617,7 +1822,7 @@
         </p>
         <div class="row g-2" id="aiJogosPadCruzCards"></div>
       </div>
-      <div class="table-responsive" style="max-height:560px;overflow:auto;">
+      <div class="table-responsive ai-jogos-table-wrap">
         <table class="table table-sm table-bordered ai-table" id="aiTabelaJogosPadrao">
           <thead>
             <tr>
@@ -1723,7 +1928,47 @@
           Do concurso <strong>1</strong> ao atual: o <strong>nº da sequência</strong> é o mesmo que a aba 5
           mostra ao clicar em <strong>Mostrar vencedor</strong> — a posição da aposta sorteada dentro do padrão.
           Clique no número para abrir essa sequência.
+          O <strong>Nº</strong> é o mesmo da aba 4 (ordem por frequência) e <strong>Jogos</strong> é a quantidade de apostas possíveis daquele padrão.
         </p>
+        <div class="ai-pan-resumo-ultimo">
+          <div class="ai-pan-col-title" id="aiPanResumoTitulo">Resumo de todos os concursos</div>
+          <p class="small text-muted mb-2">Uma linha por concurso, do primeiro ao atual. Quando entra um sorteio novo, a linha correspondente entra junto.</p>
+          <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+            <select id="aiPanResumoPageSize" class="form-select form-select-sm" style="width:auto">
+              <option value="50" selected>50 / pág.</option>
+              <option value="100">100 / pág.</option>
+              <option value="250">250 / pág.</option>
+              <option value="0">Todos</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPanResumoPrev" disabled>‹</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPanResumoNext" disabled>›</button>
+            <span class="small text-muted" id="aiPanResumoInfo">—</span>
+          </div>
+          <div class="ai-pan-table-wrap">
+            <table class="table table-sm table-bordered ai-table mb-2" id="aiTabelaPanResumo">
+              <thead>
+                <tr>
+                  <th class="ai-sort" data-sort="concurso" data-table="panResumo">Concurso <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="n_padrao" data-table="panResumo" title="Nº do padrão na aba 4, ordem por frequência">Nº <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="padrao" data-table="panResumo">Padrão <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="jogos_possiveis" data-table="panResumo" title="Quantidade de apostas possíveis deste padrão">Jogos<span class="ai-th-sub">apostas possíveis</span> <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="aposta_n" data-table="panResumo" title="Posição da aposta sorteada na lista completa do padrão">Nº válido<span class="ai-th-sub">aposta vencedora</span> <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="restantes" data-table="panResumo" title="Jogos menos o Nº válido">Restantes <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="sequencia_n" data-table="panResumo" title="Nº da aba 5 ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="aposta_n" data-table="panResumo" title="Mesma posição da aposta sorteada na lista completa do padrão">Aposta<span class="ai-th-sub">vencedora</span> <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="soma" data-table="panResumo">Soma <span class="ai-sort-ind">⇅</span></th>
+                  <th>Diagonais</th>
+                  <th class="ai-sort" data-sort="digitos_ord" data-table="panResumo">Dígitos <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="qtd_digitos" data-table="panResumo">Qtd <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="par_imp" data-table="panResumo">Par/Ímpar <span class="ai-sort-ind">⇅</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="13" class="text-muted">Carregando resumo…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
         <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
           <input type="search" id="aiPanSeqBusca" class="form-control form-control-sm" style="max-width:18rem"
                  placeholder="Concurso, padrão ou dezenas" autocomplete="off">
@@ -1743,7 +1988,9 @@
               <tr>
                 <th class="ai-sort" data-sort="concurso" data-table="panSeq" title="Clique para ordenar">Concurso <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort" data-sort="data" data-table="panSeq" title="Clique para ordenar">Data <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort col-pan-npad" data-sort="n_padrao" data-table="panSeq" title="Mesmo Nº da aba 4 · Padrões II, na ordem por frequência">Nº <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort col-pan-pad" data-sort="padrao" data-table="panSeq" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort col-pan-jogos" data-sort="jogos_possiveis" data-table="panSeq" title="Jogos possíveis deste padrão, a coluna Jogos da aba 4">Jogos <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort col-pan-seqn ai-col-medida" data-sort="sequencia_n" data-table="panSeq" title="Nº da aposta na aba 5 ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort" data-sort="dezenas_fmt" data-table="panSeq" title="Clique para ordenar">Dezenas <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort col-pan-soma" data-sort="soma" data-table="panSeq" title="Clique para ordenar">Soma <span class="ai-sort-ind">⇅</span></th>
@@ -1751,7 +1998,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr><td colspan="7" class="text-muted">Carregando sequências sorteadas…</td></tr>
+              <tr><td colspan="9" class="text-muted">Carregando sequências sorteadas…</td></tr>
             </tbody>
           </table>
         </div>
@@ -1981,6 +2228,7 @@
     pan: { key: 'vezes_padrao', dir: 'desc' },
     panFalt: { key: 'padrao', dir: 'asc' },
     panSeq: { key: 'concurso', dir: 'desc' },
+    panResumo: { key: 'concurso', dir: 'desc' },
     panSeqAn: { key: 'ocorrencias', dir: 'desc' },
     evo: { key: 'concurso', dir: 'desc' },
     evoCons: { key: 'n_padrao', dir: 'asc' },
@@ -1988,7 +2236,7 @@
   };
   let PAGE = { res: 1, pad: 1 };
   let PAN_HIST = { all: [], filtrados: [], faltantes: [], carregado: false, totalTeorico: 0 };
-  let PAN_SEQ = { all: [], carregado: false, page: 1, carregando: false };
+  let PAN_SEQ = { all: [], carregado: false, page: 1, resumoPage: 1, carregando: false };
   let ANALISE_SEQ = { dados: null, carregado: false, page: 1, carregando: false };
   let EVO = { linhas: [], padroes: [], nao: [], meta: null, carregado: false, page: 1, carregando: false };
 
@@ -2234,9 +2482,19 @@
     const rangeLbl = document.getElementById('aiRangeLbl');
     if (rangeLbl) rangeLbl.textContent = 'Carregando todos os concursos…';
     const r = await fetch(`${API}/resultados?janela=0&base=geral`);
-    const j = await r.json();
+    let j;
+    try {
+      j = await r.json();
+    } catch (err) {
+      if (rangeLbl) rangeLbl.textContent = 'Erro ao ler resultados: ' + (err && err.message ? err.message : err);
+      return;
+    }
     if (!j.sucesso) { alert(j.erro || 'Falha ao carregar'); return; }
-    renderResultados(j.linhas || []);
+    try {
+      renderResultados(j.linhas || []);
+    } catch (err) {
+      if (rangeLbl) rangeLbl.textContent = 'Erro ao montar a tabela: ' + (err && err.message ? err.message : err);
+    }
   }
 
   function renderCatalogo(data) {
@@ -2561,6 +2819,44 @@
     return m ? `${m[3]}${m[2]}${m[1]}` : String(data || '');
   }
 
+  function aplicarNumeroPadraoPanSeq(rows) {
+    if (!rows || !rows.length) return rows;
+    const freq = new Map();
+    const jogos = new Map();
+    rows.forEach((r) => {
+      const p = String(r.padrao || '');
+      if (!p) return;
+      freq.set(p, (freq.get(p) || 0) + 1);
+      const j = Number(r.jogos_possiveis);
+      if (Number.isFinite(j) && j > 0) jogos.set(p, j);
+    });
+    const nmap = new Map();
+    if (CAT_PAD_II && CAT_PAD_II.length) {
+      CAT_PAD_II.forEach((p, i) => {
+        nmap.set(p.padrao, i + 1);
+        if (!jogos.has(p.padrao)) jogos.set(p.padrao, Number(p.jogos_possiveis) || 0);
+      });
+    } else {
+      [...freq.keys()].sort((a, b) => {
+        const df = (freq.get(b) || 0) - (freq.get(a) || 0);
+        if (df) return df;
+        const dj = (jogos.get(b) || 0) - (jogos.get(a) || 0);
+        if (dj) return dj;
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+      }).forEach((p, i) => nmap.set(p, i + 1));
+    }
+    rows.forEach((r) => {
+      const doCat = CAT_PAD_II && CAT_PAD_II.length && nmap.has(r.padrao);
+      if (doCat || r.n_padrao == null || r.n_padrao === '') {
+        r.n_padrao = nmap.get(r.padrao) ?? r.n_padrao ?? null;
+      }
+      if (!r.jogos_possiveis && jogos.has(r.padrao)) r.jogos_possiveis = jogos.get(r.padrao);
+    });
+    return rows;
+  }
+
   function linhasPanSeq() {
     const q = String(document.getElementById('aiPanSeqBusca')?.value || '').trim().toLowerCase();
     let rows = PAN_SEQ.all || [];
@@ -2568,7 +2864,7 @@
       const qDig = q.replace(/\D/g, '');
       rows = rows.filter((r) => {
         const blob = [
-          r.concurso, r.padrao, r.descricao, r.dezenas_fmt, r.sequencia_n, r.data, r.status_media_label,
+          r.concurso, r.n_padrao, r.padrao, r.jogos_possiveis, r.descricao, r.dezenas_fmt, r.sequencia_n, r.data, r.status_media_label,
         ].join(' ').toLowerCase();
         if (blob.includes(q)) return true;
         if (qDig && String(r.dezenas_fmt || '').replace(/\D/g, '').includes(qDig)) return true;
@@ -2590,7 +2886,7 @@
         va = stOrd[a.status_media] ?? 9;
         vb = stOrd[b.status_media] ?? 9;
         if (va !== vb) return (va - vb) * mul;
-      } else if (key === 'concurso' || key === 'sequencia_n' || key === 'soma') {
+      } else if (key === 'concurso' || key === 'sequencia_n' || key === 'soma' || key === 'n_padrao' || key === 'jogos_possiveis') {
         va = Number(a[key]);
         vb = Number(b[key]);
         const na = Number.isFinite(va) ? va : -1;
@@ -2604,6 +2900,157 @@
       return (Number(b.concurso) - Number(a.concurso));
     });
     return rows;
+  }
+
+  function combCountLocal(n, k) {
+    if (k < 0 || k > n) return 0;
+    let r = 1;
+    for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i;
+    return Math.round(r);
+  }
+
+  function indiceApostaLocal(dez, padrao) {
+    const nums = (dez || []).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    const digsPad = String(padrao || '').trim().split(/\s+/).filter(Boolean).map(Number);
+    if (!nums.length || digsPad.length !== nums.length) return null;
+    const pools = poolsDezenaLocal();
+    const need = {};
+    digsPad.forEach((d) => { need[d] = (need[d] || 0) + 1; });
+    const grupos = {};
+    nums.forEach((n) => {
+      const d = Math.floor(n / 10);
+      if (!grupos[d]) grupos[d] = [];
+      grupos[d].push(n);
+    });
+    const digs = Object.keys(need).map(Number).sort((a, b) => a - b);
+    const ranks = [];
+    const sizes = [];
+    for (let i = 0; i < digs.length; i++) {
+      const d = digs[i];
+      const pool = (pools[d] || []).slice().sort((a, b) => a - b);
+      const combo = (grupos[d] || []).slice().sort((a, b) => a - b);
+      const rank = rankCombinacao(pool, combo);
+      if (rank < 0) return null;
+      ranks.push(rank);
+      sizes.push(combCountLocal(pool.length, need[d]));
+    }
+    let idx = 0;
+    for (let i = 0; i < ranks.length; i++) {
+      let mul = 1;
+      for (let j = i + 1; j < sizes.length; j++) mul *= sizes[j];
+      idx += ranks[i] * mul;
+    }
+    return idx + 1;
+  }
+
+  function camposResumoConcurso(r) {
+    if (r._resumo) return r._resumo;
+    const dez = String(r.dezenas_fmt || '').trim().split(/\s+/).map(Number).filter(Number.isFinite);
+    const digSet = new Set();
+    dez.forEach((n) => String(n).padStart(2, '0').split('').forEach((ch) => digSet.add(ch)));
+    const digs = [...digSet].sort();
+    const pares = dez.filter((n) => n % 2 === 0).length;
+    const impares = dez.length - pares;
+    const jogos = Number(r.jogos_possiveis) || 0;
+    const aposta = (r.aposta_n != null && r.aposta_n !== '')
+      ? Number(r.aposta_n)
+      : indiceApostaLocal(dez, r.padrao);
+    const restantes = (Number.isFinite(aposta) && jogos) ? Math.max(0, jogos - aposta) : null;
+    if (r.aposta_n == null || r.aposta_n === '') r.aposta_n = Number.isFinite(aposta) ? aposta : null;
+    r.restantes = restantes;
+    r.qtd_digitos = digs.length;
+    r.digitos_ord = digs.join(' ');
+    r.par_imp = dez.length ? `${pares}P/${impares}I` : '';
+    r._resumo = { dez, digs, jogos, aposta, restantes };
+    return r._resumo;
+  }
+
+  function linhasResumo() {
+    const rows = (PAN_SEQ.all || []).slice();
+    rows.forEach(camposResumoConcurso);
+    const { key, dir } = SORT.panResumo || { key: 'concurso', dir: 'desc' };
+    const mul = dir === 'asc' ? 1 : -1;
+    const numericos = new Set(['concurso', 'n_padrao', 'jogos_possiveis', 'aposta_n', 'restantes', 'sequencia_n', 'soma', 'qtd_digitos']);
+    rows.sort((a, b) => {
+      let va;
+      let vb;
+      if (numericos.has(key)) {
+        va = Number(a[key]);
+        vb = Number(b[key]);
+        const na = Number.isFinite(va) ? va : -1;
+        const nb = Number.isFinite(vb) ? vb : -1;
+        if (na !== nb) return (na - nb) * mul;
+      } else {
+        va = String(a[key] ?? '');
+        vb = String(b[key] ?? '');
+        if (va !== vb) return va.localeCompare(vb, 'pt-BR') * mul;
+      }
+      return Number(b.concurso) - Number(a.concurso);
+    });
+    return rows;
+  }
+
+  function renderPanResumo() {
+    const tb = document.querySelector('#aiTabelaPanResumo tbody');
+    const info = document.getElementById('aiPanResumoInfo');
+    const titulo = document.getElementById('aiPanResumoTitulo');
+    const prev = document.getElementById('aiPanResumoPrev');
+    const next = document.getElementById('aiPanResumoNext');
+    if (!tb) return;
+    const rows = linhasResumo();
+    const ultimo = PAN_SEQ.ultimo;
+    if (titulo) {
+      titulo.textContent = rows.length
+        ? `Resumo de todos os concursos (${fmtVol(PAN_SEQ.primeiro || 1)} ao ${fmtVol(ultimo || rows.length)})`
+        : 'Resumo de todos os concursos';
+    }
+    const sizeRaw = Number(document.getElementById('aiPanResumoPageSize')?.value);
+    const size = !sizeRaw || sizeRaw <= 0 ? rows.length || 1 : sizeRaw;
+    const pages = Math.max(1, Math.ceil(rows.length / size) || 1);
+    if (PAN_SEQ.resumoPage > pages) PAN_SEQ.resumoPage = pages;
+    if (PAN_SEQ.resumoPage < 1) PAN_SEQ.resumoPage = 1;
+    const ini = (PAN_SEQ.resumoPage - 1) * size;
+    const pageRows = rows.slice(ini, ini + size);
+    if (!rows.length) {
+      tb.innerHTML = '<tr><td colspan="13" class="text-muted">Sem concursos.</td></tr>';
+    } else {
+      tb.innerHTML = pageRows.map((r) => {
+        const infoR = r._resumo || camposResumoConcurso(r);
+        const seq = r.sequencia_n
+          ? `<a href="#" class="ai-pan-link-pad" data-act="ir-sequencia" data-padrao="${esc(r.padrao)}" data-dezenas="${esc(r.dezenas_fmt)}" title="Abrir esta sequência na aba 5">${fmtVol(r.sequencia_n)}</a>`
+          : '—';
+        const diags = (typeof diagsDaAposta === 'function')
+          ? diagsDaAposta({ dezenas: infoR.dez, dezenas_fmt: r.dezenas_fmt })
+          : [];
+        const diagHtml = (typeof htmlDiagTexto === 'function') ? htmlDiagTexto(diags) : '—';
+        const ult = ultimo && Number(r.concurso) === Number(ultimo) ? ' class="tr-padrao-ultimo"' : '';
+        const aposta = infoR.aposta;
+        const bloco = (cls, html) => `<td class="${cls}"><span class="ai-col-alinha">${html}</span></td>`;
+        return `<tr${ult}>
+          <td><a href="#" data-act="ir-concurso" data-concurso="${esc(r.concurso)}">${esc(r.concurso)}</a></td>
+          ${bloco('td-res-n', r.n_padrao != null ? fmtVol(r.n_padrao) : '—')}
+          <td class="td-res-pad td-padrao"><span class="ai-col-alinha"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(r.padrao)}">${esc(r.padrao)}</a></span></td>
+          ${bloco('td-res-jogos', infoR.jogos ? fmtVol(infoR.jogos) : '—')}
+          ${bloco('td-res-valido', Number.isFinite(aposta) ? fmtVol(aposta) : '—')}
+          ${bloco('td-res-rest', infoR.restantes != null ? fmtVol(infoR.restantes) : '—')}
+          <td class="td-res-seq"><span class="ai-col-alinha">${seq}</span></td>
+          ${bloco('td-res-aposta', Number.isFinite(aposta) ? fmtVol(aposta) : '—')}
+          ${bloco('td-res-soma', r.soma != null ? esc(r.soma) : '—')}
+          <td class="td-diag"><span class="ai-col-alinha">${diagHtml}</span></td>
+          ${bloco('td-res-dig', esc(r.digitos_ord || '—'))}
+          <td>${r.qtd_digitos || '—'}</td>
+          <td>${r.par_imp || '—'}</td>
+        </tr>`;
+      }).join('');
+    }
+    if (info) {
+      info.textContent = rows.length
+        ? `Exibindo ${fmtVol(pageRows.length)} de ${fmtVol(rows.length)} concursos · pág. ${PAN_SEQ.resumoPage}/${pages}`
+        : '—';
+    }
+    if (prev) prev.disabled = PAN_SEQ.resumoPage <= 1;
+    if (next) next.disabled = PAN_SEQ.resumoPage >= pages;
+    atualizarIndicadoresSort();
   }
 
   function renderPanSeq() {
@@ -2630,17 +3077,22 @@
     const ini = (PAN_SEQ.page - 1) * size;
     const pageRows = rows.slice(ini, ini + size);
     if (!rows.length) {
-      tb.innerHTML = `<tr><td colspan="7" class="text-muted">${totalHist ? 'Nenhum concurso neste filtro.' : 'Sem concursos.'}</td></tr>`;
+      tb.innerHTML = `<tr><td colspan="9" class="text-muted">${totalHist ? 'Nenhum concurso neste filtro.' : 'Sem concursos.'}</td></tr>`;
     } else {
       tb.innerHTML = pageRows.map((r) => {
         const seq = r.sequencia_n
           ? `<a href="#" class="ai-pan-link-pad" data-act="ir-sequencia" data-padrao="${esc(r.padrao)}" data-dezenas="${esc(r.dezenas_fmt)}" title="Abrir esta sequência na aba 5">${fmtVol(r.sequencia_n)}</a>`
           : '—';
+        const jogos = r.jogos_possiveis
+          ? `<a href="#" class="ai-pan-link-pad" data-act="ver-jogos-padrao" data-padrao="${esc(r.padrao)}" title="Ver as ${fmtVol(r.jogos_possiveis)} apostas possíveis">${fmtVol(r.jogos_possiveis)}</a>`
+          : '—';
         const ult = ultimo && Number(r.concurso) === Number(ultimo) ? ' class="tr-padrao-ultimo"' : '';
         return `<tr${ult}>
           <td><a href="#" data-act="ir-concurso" data-concurso="${esc(r.concurso)}">${esc(r.concurso)}</a></td>
           <td>${esc(r.data || '—')}</td>
+          <td class="td-pan-npad">${r.n_padrao != null ? fmtVol(r.n_padrao) : '—'}</td>
           <td class="td-pan-pad td-padrao"><span class="ai-col-alinha"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(r.padrao)}" title="${esc(r.descricao || '')}">${esc(r.padrao)}</a></span></td>
+          <td class="td-pan-jogos"><span class="ai-col-alinha">${jogos}</span></td>
           <td class="td-pan-seqn ai-col-medida"><span class="ai-col-alinha">${seq}</span></td>
           <td class="font-monospace">${esc(r.dezenas_fmt || '—')}</td>
           <td class="td-pan-soma"><span class="ai-col-alinha">${esc(r.soma != null ? r.soma : '—')}</span></td>
@@ -2656,6 +3108,7 @@
     if (prev) prev.disabled = PAN_SEQ.page <= 1;
     if (next) next.disabled = PAN_SEQ.page >= pages;
     atualizarIndicadoresSort();
+    renderPanResumo();
   }
 
   function pyRound(x) {
@@ -2840,11 +3293,12 @@
   function publicarSequenciasLocais(itens) {
     const linhas = sequenciasLocais(itens);
     const concs = linhas.map((r) => r.concurso).filter((n) => n > 0);
-    PAN_SEQ.all = linhas;
+    PAN_SEQ.all = aplicarNumeroPadraoPanSeq(linhas);
     PAN_SEQ.primeiro = concs.length ? Math.min(...concs) : null;
     PAN_SEQ.ultimo = concs.length ? Math.max(...concs) : null;
     PAN_SEQ.carregado = true;
     PAN_SEQ.page = 1;
+    PAN_SEQ.resumoPage = 1;
     renderPanSeq();
   }
 
@@ -2859,18 +3313,19 @@
     PAN_SEQ._apiFalhou = false;
     const tb = document.querySelector('#aiTabelaPanSeq tbody');
     const info = document.getElementById('aiPanSeqInfo');
-    if (tb) tb.innerHTML = '<tr><td colspan="7" class="text-muted">Calculando o nº da sequência de cada sorteio…</td></tr>';
+    if (tb) tb.innerHTML = '<tr><td colspan="9" class="text-muted">Calculando o nº da sequência de cada sorteio…</td></tr>';
     if (info) info.textContent = 'Calculando…';
     try {
       const r = await fetch(`${API}/sequencias-sorteadas`);
       if (!r.ok) throw new Error('api ' + r.status);
       const j = await r.json();
       if (!j || j.sucesso === false) throw new Error((j && j.erro) || 'Falha ao calcular as sequências');
-      PAN_SEQ.all = j.linhas || [];
+      PAN_SEQ.all = aplicarNumeroPadraoPanSeq(j.linhas || []);
       PAN_SEQ.primeiro = j.primeiro_concurso;
       PAN_SEQ.ultimo = j.ultimo_concurso;
       PAN_SEQ.carregado = true;
       PAN_SEQ.page = 1;
+      PAN_SEQ.resumoPage = 1;
       renderPanSeq();
     } catch (e) {
       PAN_SEQ._apiFalhou = true;
@@ -3897,6 +4352,10 @@
       }
       renderBarrasUltimo();
       renderPadroesII();
+      if ((PAN_SEQ.all || []).length) {
+        aplicarNumeroPadraoPanSeq(PAN_SEQ.all);
+        if (document.getElementById('aiTabelaPanSeq')) renderPanSeq();
+      }
       // Resumo operacional (para apostar × já saíram) — carrega em seguida
       carregarResumoOperacionalPadroes();
       carregarEvolucaoPadroes();
@@ -5350,7 +5809,7 @@
       if (SORT[table].key === key) SORT[table].dir = SORT[table].dir === 'asc' ? 'desc' : 'asc';
       else {
         SORT[table].key = key;
-        const DESC_FIRST = new Set(['concurso', 'data', 'frequencia', 'jogos_possiveis', 'soma',
+        const DESC_FIRST = new Set(['concurso', 'data', 'frequencia', 'jogos_possiveis', 'aposta_n', 'restantes', 'sequencia_n', 'soma', 'qtd_digitos',
           'para_apostar', 'ja_sairam_dentro', 'dentro', 'proxima', 'fora', 'soma_media', 'pct',
           'atraso_padrao', 'vezes_padrao', 'n_diagonais', 'existe_exata', 'qtd_prefixo',
           'ocorrencias', 'percentual', 'padroes_diferentes']);
@@ -5384,6 +5843,11 @@
       if (table === 'panSeq') {
         PAN_SEQ.page = 1;
         renderPanSeq();
+        return;
+      }
+      if (table === 'panResumo') {
+        PAN_SEQ.resumoPage = 1;
+        renderPanResumo();
         return;
       }
       if (table === 'panSeqAn') {
@@ -5517,6 +5981,17 @@
   document.getElementById('aiPanSeqPageSize')?.addEventListener('change', () => {
     PAN_SEQ.page = 1;
     renderPanSeq();
+  });
+  document.getElementById('aiPanResumoPrev')?.addEventListener('click', () => {
+    if (PAN_SEQ.resumoPage > 1) { PAN_SEQ.resumoPage -= 1; renderPanResumo(); }
+  });
+  document.getElementById('aiPanResumoNext')?.addEventListener('click', () => {
+    PAN_SEQ.resumoPage += 1;
+    renderPanResumo();
+  });
+  document.getElementById('aiPanResumoPageSize')?.addEventListener('change', () => {
+    PAN_SEQ.resumoPage = 1;
+    renderPanResumo();
   });
   let _anSeqBuscaT = null;
   function agendaAnaliseSeq() {

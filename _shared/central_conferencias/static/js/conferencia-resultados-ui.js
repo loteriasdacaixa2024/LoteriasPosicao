@@ -13,8 +13,63 @@
         c75: '#93ecc8', c80: '#a8f0d3', c85: '#bef4de', c90: '#d4f7e9', c95: '#e9fbf4', c100: '#ffffff',
     };
 
+    function _fmtValor(v) {
+        const n = Math.abs(Number(v) || 0);
+        const partes = n.toFixed(2).split('.');
+        const inteiro = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return inteiro + ',' + partes[1];
+    }
+
     function fmtMoeda(v) {
-        return 'R$ ' + (Number(v) || 0).toFixed(2).replace('.', ',');
+        const n = Number(v) || 0;
+        return (n < 0 ? '-R$ ' : 'R$ ') + _fmtValor(n);
+    }
+
+    function _htmlLinhasFaixas(mapa, ganhoOverride) {
+        const entradas = Object.entries(mapa || {}).map(([faixa, dados]) => ({
+            faixa: String(faixa),
+            qtd: Number(dados.quantidade) || 0,
+            ganho: Number(dados.total_ganho) || 0,
+        }));
+        const qtdTotal = entradas.reduce((s, e) => s + e.qtd, 0);
+        const ganhoTabela = entradas.reduce((s, e) => s + e.ganho, 0);
+        const ganhoExibir = Number.isFinite(ganhoOverride) ? ganhoOverride : ganhoTabela;
+        const nums = entradas.map(e => {
+            const m = e.faixa.match(/^(\d+)/);
+            return m ? m[1] : '';
+        }).filter(Boolean);
+        const numW = Math.max(2, ...nums.map(n => n.length), 0);
+        const qtdW = Math.max(1, String(qtdTotal).length, ...entradas.map(e => String(e.qtd).length), 0);
+        const vals = entradas.map(e => _fmtValor(e.ganho));
+        const totalVal = _fmtValor(ganhoExibir);
+        const valW = Math.max(totalVal.length, ...vals.map(v => v.length), 1);
+        const celNome = (faixa) => {
+            const m = String(faixa).match(/^(\d+)(.*)$/);
+            if (!m) return escTxt(faixa);
+            return `<span class="cr-alinha-num" style="width:${numW}ch">${m[1]}</span>${escTxt(m[2])}`;
+        };
+        const celQtd = (q) => `<span class="cr-alinha-num" style="width:${qtdW}ch">${q}</span><span class="cr-alinha-x">x</span>`;
+        const celMoeda = (txt) => `<span class="cr-alinha-moeda"><span class="cr-alinha-rs">R$</span><span class="cr-alinha-val" style="width:${valW}ch">${txt}</span></span>`;
+        const rows = entradas.map((e, i) => `
+            <tr>
+                <td class="cr-faixa-nome">${celNome(e.faixa)}</td>
+                <td class="cr-qtd">${celQtd(e.qtd)}</td>
+                <td class="cr-moeda cr-total-ganho fw-bold">${celMoeda(vals[i])}</td>
+            </tr>`).join('');
+        const rodape = rows ? `
+            <tr class="fw-bold cr-faixa-total">
+                <td>Total</td>
+                <td class="cr-qtd">${celQtd(qtdTotal)}</td>
+                <td class="cr-moeda cr-total-ganho">${celMoeda(totalVal)}</td>
+            </tr>` : '';
+        return { rows, rodape };
+    }
+
+    function escTxt(v) {
+        return String(v == null ? '' : v)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     }
 
     function _mod() {
@@ -162,69 +217,50 @@
         const resultado = aposta.resultado || {};
         const nums = aposta.numeros_apostados || aposta.numeros || [];
         const numsInt = nums.map(n => parseInt(n, 10));
-        const temPremio = !!(resultado.premiado || (aposta.valor_ganho || 0) > 0);
-        const acertosQtd = Math.max(Number(resultado.acertos) || 0, Number(resultado.acertos_volante) || 0, (resultado.numeros_acertados || []).length);
-        const fundoVerde = !!resultado.premiado || resultado.mes_ok === true || acertosQtd >= 4;
-        const premioMaximo = !!resultado.premio_maximo;
+        const ganho = Number(aposta.valor_ganho) || Number(resultado.valor_premio) || 0;
+        const premiada = !!(resultado.premiado || ganho > 0);
+        const premioMaximo = premiada && !!resultado.premio_maximo;
+        const fundoVerde = premiada && !premioMaximo;
         const acertados = new Set((resultado.numeros_acertados || aposta.dezenas_acertadas || []).map(n => parseInt(n, 10)));
-        const cat = _categoriaAposta(resultado);
-
-        let cardClass = 'cr-aposta-card';
-        let cardStyle = '';
-        if (premioMaximo) {
-            cardClass += ' cr-premio-maximo';
-            cardStyle = 'background:linear-gradient(160deg,#fff8e1,#ffe082);border:2px solid #f9a825;';
-        } else if (fundoVerde) {
-            cardClass += ' cr-card-acerto';
-            cardStyle = 'background:#e8f6ee;';
-        }
-
-        const badgeClasse =
-            cat === 'sena' || cat === 'quina' ? 'cr-badge-ms cr-badge-ms-alto' :
-            cat === 'quadra' ? 'cr-badge-ms cr-badge-ms-quadra' :
-            'cr-badge-ms';
-
         const acertosVolante = resultado.acertos_volante ?? acertados.size;
+        const acertosN = Number(acertosVolante) || 0;
+        const cardStyle = premiada ? 'background:#e8f6ee;' : '';
+        const cardClass = premioMaximo ? 'cr-sete-pulso' : (fundoVerde ? 'cr-card-acerto' : '');
+        const valorHtml = ganho > 0
+            ? `<span class="fw-bold" style="color:var(--primary-dark)">${fmtMoeda(ganho)}</span>`
+            : '';
+        const trevos = (aposta.trevos || []).map(n => String(n).padStart(2, '0'));
+        const timeTxt = aposta.time ? String(aposta.time) : '';
+        const rotuloFaixa = premiada && resultado.faixa
+            ? resultado.faixa
+            : (acertosN === 1 ? '1 acerto' : `${acertosN} acertos`);
+        const largo = numsInt.length > 20;
 
         return `
         <div class="col-md-6 col-lg-4">
             <div class="card h-100 ${cardClass}" style="${cardStyle}">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h6 class="mb-0" style="color:${MS.c20}">Aposta ${aposta.numero_aposta}</h6>
-                        ${premioMaximo ? '<span class="cr-trofeu-max" title="Prêmio máximo"><i class="fas fa-trophy"></i></span>' : ''}
-                    </div>
-                    <span class="badge mb-2" style="background:${MS.c25};color:${MS.c100}"><i class="fas fa-file-code"></i> JSON</span>
-                    <div class="d-flex flex-wrap gap-1 mb-2">
-                        ${numsInt.map((n, i) => {
+                    <h6 class="mb-2" style="color:var(--primary-dark)">Aposta ${aposta.numero_aposta}</h6>
+                    <div class="d-flex flex-wrap align-items-center gap-1 mb-2">
+                        ${numsInt.map(n => {
                             const hit = acertados.has(n);
                             const estilo = hit
-                                ? 'background:#198754;color:#fff;font-weight:700;'
-                                : 'background:#f1f3f5;color:#333;';
-                            return `<span class="${_classeDezenaCard(n, acertados, cat, i, sorteadosSet)}" style="display:inline-flex;align-items:center;justify-content:center;min-width:1.7rem;height:1.7rem;border-radius:999px;font-size:.8rem;${estilo}">${String(n).padStart(2, '0')}</span>`;
+                                ? 'background:var(--primary);color:var(--on-accent,#fff);border:2px solid var(--primary-dark);font-weight:800;'
+                                : 'background:#6c757d;color:#fff;font-weight:700;';
+                            const tam = largo ? 'min-width:1.45rem;height:1.45rem;font-size:.68rem;' : 'min-width:2rem;height:2rem;font-size:.85rem;';
+                            return `<span style="display:inline-flex;align-items:center;justify-content:center;border-radius:8px;${tam}${estilo}">${String(n).padStart(2, '0')}</span>`;
                         }).join('')}
+                        ${trevos.length ? `<span class="badge" style="background:var(--accent);color:var(--on-accent,#fff)">T ${trevos.join(' ')}</span>` : ''}
+                        ${timeTxt ? `<span class="badge" style="background:var(--primary-dark);color:#fff">${escTxt(timeTxt)}</span>` : ''}
                     </div>
-                    ${premioMaximo ? '<div class="badge mb-2 cr-selo-max">Prêmio máximo</div>' : ''}
-                    <div class="mb-2">
-                        <span class="badge ${badgeClasse}">
-                            ${acertosVolante} acerto(s) no volante
-                            ${resultado.acertos > 0 && resultado.acertos !== acertosVolante
-                                ? ` · melhor comb.: ${resultado.acertos}` : ''}
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <span class="badge" style="background:${premiada ? 'var(--primary)' : '#e9ecef'};color:${premiada ? 'var(--on-accent,#fff)' : '#495057'};">
+                            ${escTxt(rotuloFaixa)}
                         </span>
+                        ${valorHtml}
+                        ${premioMaximo ? '<span class="cr-trofeu-max" title="Prêmio máximo"><i class="fas fa-trophy"></i></span>' : ''}
                     </div>
-                    ${resultado.detalhes_premios && resultado.detalhes_premios.length ? `
-                        <div class="alert ${fundoVerde ? 'alert-success' : 'alert-light border'} py-2 px-2 mb-2 small">
-                            ${resultado.detalhes_premios.map(p => `
-                                <div class="d-flex justify-content-between">
-                                    <span><strong>${p.descricao}</strong></span>
-                                    <span class="text-success fw-bold">${fmtMoeda(p.valor)}</span>
-                                </div>`).join('')}
-                        </div>` : ''}
-                    <div class="small text-muted">Aposta ${fmtMoeda(aposta.valor_aposta || 0)}${aposta.mes ? ' · mês ' + aposta.mes : ''}</div>
-                    <div class="fw-bold ${temPremio ? 'text-success' : 'text-muted'}">
-                        ${temPremio ? 'Ganhos: ' : ''}${fmtMoeda(aposta.valor_ganho || 0)}
-                    </div>
-                    <a href="#" class="small cr-link-historico d-block mt-2"
+                    <a href="#" class="small d-block mt-2" style="color:var(--primary-dark)"
                        onclick="ConferenciaResultadosUI.abrirHistoricoAposta([${numsInt.join(',')}], this); return false;">
                         <i class="fas fa-search"></i> Ver Histórico Jogo
                     </a>
@@ -248,9 +284,9 @@
         });
 
         const pct = sorteados.length ? (cobertas.length / sorteados.length) * 100 : 0;
-        const corCheia = _ehDiaSorte() ? 'var(--primary,#c08b00)' : MS.c35;
-        const corMedia = _ehDiaSorte() ? 'var(--accent,#e6a800)' : MS.c55;
-        const corBaixa = _ehDiaSorte() ? 'var(--primary-dark,#996e00)' : MS.c25;
+        const corCheia = 'var(--primary,#672666)';
+        const corMedia = 'var(--accent,#930089)';
+        const corBaixa = 'var(--primary-dark,#4a1c4a)';
         const barStyle = pct === 100
             ? `background:${corCheia}`
             : pct >= 60 ? `background:${corMedia}` : `background:${corBaixa}`;
@@ -260,8 +296,8 @@
             <div class="col-12">
                 <div class="card border-0 shadow-sm cr-cobertura-card">
                     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0" style="color:${_ehDiaSorte() ? 'var(--primary-dark,#996e00)' : MS.c30}"><i class="fas fa-bullseye"></i> Cobertura de Acertos Inteligente</h6>
-                        <span class="badge rounded-pill" style="background:${corCheia};color:${_ehDiaSorte() ? '#fff' : MS.c100}">${cobertas.length}/${sorteados.length} Cobertas</span>
+                        <h6 class="mb-0" style="color:var(--primary-dark)"><i class="fas fa-bullseye"></i> Cobertura de Acertos Inteligente</h6>
+                        <span class="badge rounded-pill" style="background:${corCheia};color:var(--on-accent,#fff)">${cobertas.length}/${sorteados.length} Cobertas</span>
                     </div>
                     <div class="card-body py-3">
                         <div class="row align-items-center">
@@ -277,8 +313,8 @@
                                 <div class="d-flex flex-wrap justify-content-md-end gap-2">
                                     ${cobertas.map(n => `
                                         <div class="text-center">
-                                            <span class="badge shadow-sm p-2 mb-1" style="font-size:1.1em;background:${_ehDiaSorte() ? '#FFD700' : MS.c35};color:${_ehDiaSorte() ? '#1a0a00' : MS.c100};border:2px solid ${_ehDiaSorte() ? '#e6a800' : MS.c25};">${String(n).padStart(2, '0')}</span>
-                                            <div style="font-size:0.7em;color:${_ehDiaSorte() ? 'var(--primary-dark,#996e00)' : MS.c25};font-weight:bold;">COBERTA</div>
+                                            <span class="badge shadow-sm p-2 mb-1" style="font-size:1.1em;background:var(--primary);color:var(--on-accent,#fff);border:2px solid var(--primary-dark);">${String(n).padStart(2, '0')}</span>
+                                            <div style="font-size:0.7em;color:var(--primary-dark);font-weight:bold;">COBERTA</div>
                                         </div>`).join('')}
                                     ${perdidas.map(n => `
                                         <div class="text-center">
@@ -305,22 +341,19 @@
 
     function renderizarDistribuicaoFaixas(resumo) {
         const faixas = resumo.distribuicao_faixas || {};
-        const rows = Object.entries(faixas).map(([faixa, dados]) => `
-            <tr>
-                <td>${faixa}</td>
-                <td>${dados.quantidade}x</td>
-                <td class="${_ehDiaSorte() ? 'cr-total-ganho' : 'text-success'} fw-bold">${fmtMoeda(dados.total_ganho)}</td>
-            </tr>`).join('');
+        const ganhoInformado = Number(resumo.total_ganho);
+        const bloco = _htmlLinhasFaixas(faixas, Number.isFinite(ganhoInformado) ? ganhoInformado : undefined);
 
         return `
         <div class="row mb-4">
             <div class="col-12">
-                <h6>Distribuição de Acertos por Faixa:</h6>
+                <h6 style="color:var(--primary-dark)">Distribuição de Acertos por Faixa:</h6>
                 <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead><tr><th>Faixa</th><th>Quantidade</th><th>Total Ganho</th></tr></thead>
+                    <table class="table table-sm mb-0 cr-faixas">
+                        <thead><tr><th>Faixa</th><th class="cr-qtd">Quantidade</th><th class="cr-moeda">Total Ganho</th></tr></thead>
                         <tbody>
-                            ${rows || `<tr><td colspan="3" class="text-center text-muted">Nenhuma aposta premiada neste concurso</td></tr>`}
+                            ${bloco.rows || `<tr><td colspan="3" class="text-center text-muted">Nenhuma aposta premiada neste concurso</td></tr>`}
+                            ${bloco.rodape}
                         </tbody>
                     </table>
                 </div>
@@ -362,9 +395,8 @@
             const dataLabel = `${resultado.resultado_sorteio?.data || resultado.data_sorteio || ''} - ${concurso} - ${aposta.numero_aposta ?? rowIdx + 1}`;
 
             const resLinha = aposta.resultado || {};
-            const acertosLinha = Math.max(Number(resLinha.acertos) || 0, Number(resLinha.acertos_volante) || 0, (resLinha.numeros_acertados || []).length);
             const linhaMax = !!resLinha.premio_maximo;
-            const linhaAcerto = !linhaMax && (acertosLinha >= 4 || resLinha.mes_ok === true || resLinha.premiado);
+            const linhaAcerto = !linhaMax && !!resLinha.premiado;
             const linhaPremio = linhaMax ? 'background:#fff3cd;' : '';
             let rowHtml = `<tr class="${linhaAcerto ? 'cr-linha-acerto' : ''}" style="height: 32px;${linhaPremio}">
                 <td class="align-middle fw-bold text-muted text-center text-nowrap p-1" style="font-size: 0.85rem;">${dataLabel}${linhaMax ? ' ★' : ''}</td>`;
@@ -484,6 +516,7 @@
         return (resultado.dezenas_sorteadas || []).map(n => parseInt(n, 10));
     }
 
+    const _relatoriosVar = {};
     const _ordemCrescente = {};
     const _ordemSorteio = {};
     const _ordemExplicita = {};
@@ -737,13 +770,15 @@
 
         const numsOficiais = _numerosOficiais(resultado);
         _guardarOrdens(concurso, resultado, numsOficiais);
+        if (global.ConferenciaVolanteUi) global.ConferenciaVolanteUi.guardar(concurso, resultado);
         const sorteadosSet = new Set(numsOficiais.map(n => parseInt(n, 10)));
         const fonte = resultado.fonte_dados || resultado.origem || 'JSON';
         const fonteBadge = fonte === 'JSON'
             ? '<span class="badge bg-info"><i class="fas fa-file-code"></i> Dados: arquivo JSON</span>'
             : '<span class="badge bg-secondary"><i class="fas fa-images"></i> Dados: Screenshots OCR</span>';
 
-        const resumoProc = _ehDiaSorte() ? renderizarResumoProcessamento(resultado, resultado._elapsedMs) : '';
+        const resumoProc = renderizarResumoProcessamento(resultado, resultado._elapsedMs);
+        _relatoriosVar[concurso] = resultado;
         const fundoFin = lucro >= 0 ? '#198754' : '#dc3545';
         const cardFinanceiro = `<div class="card text-white h-100" style="background:${fundoFin};border:none;">
                     <div class="card-body">
@@ -759,10 +794,7 @@
                     </div>
                 </div>`;
 
-        const blocoVariancia = _ehDiaSorte()
-            ? renderizarVarianciaDiaSorte(concurso, resultado)
-            : `<h6 class="text-muted"><i class="fas fa-balance-scale"></i> Análise de Variância Nominal (Desvio Posicional):</h6>
-               ${renderizarTabelaDesvio(concurso, resultado)}`;
+        const blocoVariancia = `<div id="cr-variancia-mount-${concurso}"></div>`;
 
         return `
         ${resumoProc}
@@ -790,6 +822,9 @@
                                 <span class="cr-bola-oficial">${n}</span>`).join('')}
                         </div>
                         ${_ehDiaSorte() && resultado.mes_sorteado ? `<div class="mt-2">${_badgeMes(resultado.mes_sorteado)}</div>` : (resultado.mes_sorteado ? `<span class="badge bg-secondary mt-2">${resultado.mes_sorteado}</span>` : '')}
+                        ${(resultado.trevos_sorteados || []).length ? `<div class="mt-2 small">Trevos sorteados: ${resultado.trevos_sorteados.join(' ')}</div>` : ''}
+                        ${resultado.time_sorteado ? `<div class="mt-2 small">Time do Coração: ${escTxt(resultado.time_sorteado)}</div>` : ''}
+                        ${(resultado.dezenas_sorteio2 || []).length ? `<div class="mt-2 small">2º sorteio: ${resultado.dezenas_sorteio2.join(' ')}</div>` : ''}
                     </div>
                 </div>
             </div>
@@ -815,6 +850,11 @@
                     onclick="ConferenciaResultadosUI.alternarVisao(${concurso}, 'variancia')">
                     <i class="fas fa-table me-1"></i> Análise de Variância
                 </button>
+                <button type="button" class="btn btn-outline-primary px-4 py-2"
+                    id="btn-visao-volante-${concurso}"
+                    onclick="ConferenciaResultadosUI.alternarVisao(${concurso}, 'volante')">
+                    <i class="fas fa-clone me-1"></i> Volante
+                </button>
             </div>
         </div>
 
@@ -828,6 +868,8 @@
         <div id="container-variancia-${concurso}" style="display:none;">
             ${blocoVariancia}
         </div>
+
+        <div id="container-volante-${concurso}" style="display:none;"></div>
 
         <div class="mt-4">
             <button type="button" class="btn btn-success me-2" onclick="ConferenciaResultadosUI.exportarRelatorio(${concurso}, 'csv')">
@@ -859,12 +901,8 @@
         const lucro = totalGanho - totalInvestido;
         const roi = totalInvestido > 0 ? ((lucro / totalInvestido) * 100).toFixed(2) : '0.00';
 
-        let tabelaFaixas = Object.entries(distribuicaoGeral).map(([f, d]) => `
-            <tr><td>${f}</td><td>${d.quantidade}x</td><td class="${_ehDiaSorte() ? 'cr-total-ganho' : 'text-success'} fw-bold">${fmtMoeda(d.total_ganho)}</td></tr>`).join('');
-
-        const resumoTopo = _ehDiaSorte()
-            ? renderizarResumoProcessamentoAgregado(resultadosProcessamento)
-            : '';
+        const blocoFaixas = _htmlLinhasFaixas(distribuicaoGeral, totalGanho);
+        const resumoTopo = renderizarResumoProcessamentoAgregado(resultadosProcessamento);
 
         return `
         ${resumoTopo}
@@ -877,9 +915,9 @@
                 <small>(${roi >= 0 ? '+' : ''}${roi}% ROI)</small>
             </div></div></div>
         </div>
-        <h6>Distribuição consolidada por faixa:</h6>
-        <table class="table table-sm"><thead><tr><th>Faixa</th><th>Qtd</th><th>Total</th></tr></thead>
-        <tbody>${tabelaFaixas || '<tr><td colspan="3" class="text-muted text-center">Sem prêmios</td></tr>'}</tbody></table>`;
+        <h6 style="color:var(--primary-dark)">Distribuição consolidada por faixa:</h6>
+        <table class="table table-sm cr-faixas"><thead><tr><th>Faixa</th><th class="cr-qtd">Quantidade</th><th class="cr-moeda">Total Ganho</th></tr></thead>
+        <tbody>${blocoFaixas.rows || '<tr><td colspan="3" class="text-muted text-center">Sem prêmios</td></tr>'}${blocoFaixas.rodape}</tbody></table>`;
     }
 
     const _FIXOS_DS = { '4 acertos': 5, '5 acertos': 25, 'Mês': 2.5 };
@@ -1011,24 +1049,33 @@
     }
 
     function alternarVisao(concurso, visao) {
-        const btnCards = document.getElementById(`btn-visao-cards-${concurso}`);
-        const btnVar = document.getElementById(`btn-visao-variancia-${concurso}`);
-        const cCards = document.getElementById(`container-cards-${concurso}`);
-        const cVar = document.getElementById(`container-variancia-${concurso}`);
-        if (!btnCards || !cCards) return;
-
-        const isCards = visao === 'cards';
-        btnCards.classList.toggle('active', isCards);
-        btnVar.classList.toggle('active', !isCards);
-        cCards.style.display = isCards ? 'block' : 'none';
-        if (cVar) cVar.style.display = isCards ? 'none' : 'block';
-        if (!isCards) {
+        const panes = [
+            ['cards', `btn-visao-cards-${concurso}`, `container-cards-${concurso}`],
+            ['variancia', `btn-visao-variancia-${concurso}`, `container-variancia-${concurso}`],
+            ['volante', `btn-visao-volante-${concurso}`, `container-volante-${concurso}`],
+        ];
+        if (!document.getElementById(panes[0][2])) return;
+        panes.forEach(([nome, btnId, boxId]) => {
+            const btn = document.getElementById(btnId);
+            const box = document.getElementById(boxId);
+            const on = visao === nome;
+            if (btn) btn.classList.toggle('active', on);
+            if (box) box.style.display = on ? 'block' : 'none';
+        });
+        if (visao === 'variancia') {
+            const mount = document.getElementById(`cr-variancia-mount-${concurso}`);
+            if (mount && mount.dataset.pronto !== '1' && _relatoriosVar[concurso]) {
+                mount.innerHTML = renderizarVarianciaDiaSorte(concurso, _relatoriosVar[concurso]);
+                mount.dataset.pronto = '1';
+            }
+            const cVar = document.getElementById(`container-variancia-${concurso}`);
             const freq = cVar && cVar.querySelector('[id^="cr-freq-abs-pasta-"]');
             if (freq && freq.dataset.carregado !== '1') {
                 freq.dataset.carregado = '1';
                 carregarFrequenciaAbsPasta(freq.id);
             }
         }
+        if (visao === 'volante' && global.ConferenciaVolanteUi) global.ConferenciaVolanteUi.montar(concurso);
     }
 
     async function toggleOrdemNumeros(concurso) {
@@ -1221,6 +1268,34 @@
         return _htmlResumoProcessamento(acc);
     }
 
+    function _faixasUi() {
+        const raw = _mod().faixas || [];
+        const lista = raw.map(item => {
+            if (Array.isArray(item)) return { minimo: Number(item[0]), rotulo: String(item[1]) };
+            return { minimo: Number(item.minimo), rotulo: String(item.rotulo || '') };
+        }).filter(f => f.rotulo);
+        if (lista.length) return lista.slice().sort((a, b) => a.minimo - b.minimo);
+        if (_ehDiaSorte()) return [4, 5, 6, 7].map(n => ({ minimo: n, rotulo: n + ' acertos' }));
+        return [];
+    }
+
+    function _marcaFaixa(res, rotulo) {
+        const lista = [];
+        ((res && res.faixas_atingidas) || []).forEach(f => lista.push(String(f).trim()));
+        if (!lista.length && res && res.faixa) {
+            String(res.faixa).split(' + ').forEach(p => lista.push(p.trim()));
+        }
+        return lista.some(f => f === rotulo || f.endsWith(' ' + rotulo));
+    }
+
+    function _textoAcertosAbs(s) {
+        const faixas = _faixasUi();
+        const partes = faixas.map(f => `${f.minimo}→${(s.tiers && s.tiers[f.rotulo]) || 0}`);
+        if (_mod().hasMes) partes.push(`M→${s.mes || 0}`);
+        if (_mod().hasTime) partes.push(`T→${s.time || 0}`);
+        return partes.length ? 'Acertos: ' + partes.join(' · ') : `${s.apostas} aposta(s)`;
+    }
+
     function _legendaAbs(stats) {
         const linha = (fundo, rotulo, faixa, s) => `
             <div class="col-md-4">
@@ -1229,12 +1304,12 @@
                     <div class="small">
                         <div class="fw-semibold">${faixa}</div>
                         <div class="text-muted">${s.apostas} aposta(s) nesta faixa</div>
-                        <div class="mt-1">Acertos: 4→${s.ac4} · 5→${s.ac5} · 6→${s.ac6} · 7→${s.ac7} · M→${s.mes}</div>
+                        <div class="mt-1">${_textoAcertosAbs(s)}</div>
                     </div>
                 </div>
             </div>`;
         return `
-            <div class="border rounded mb-3 py-2 px-3" style="background:var(--accent-light,#fffaf0);font-size:.82rem;">
+            <div class="border rounded mb-3 py-2 px-3 cr-var-legenda" style="font-size:.82rem;">
                 <div class="fw-bold mb-2" style="color:var(--primary-dark,#996e00)">
                     <i class="fas fa-info-circle me-1"></i> Legenda ABS — erro do desvio posicional
                 </div>
@@ -1246,24 +1321,27 @@
             </div>`;
     }
 
-    function _linhasVarianciaDiaSorte(resultado, maxAbs) {
-        const sorteados = [..._numerosOficiais(resultado)].map(n => parseInt(n, 10)).sort((a, b) => a - b);
-        const oficiais = sorteados.length || 7;
+    function _linhasVarianciaDiaSorte(resultado, maxAbs, montarLinhas, maxLinhas) {
+        const positional = !!_mod().positional;
+        const hasMes = !!_mod().hasMes;
+        const hasTime = !!_mod().hasTime;
+        const faixas = _faixasUi();
+        const topo = faixas.length ? Math.max(...faixas.map(f => f.minimo)) : null;
+        const bruto = [..._numerosOficiais(resultado)].map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+        const sorteados = positional ? bruto : bruto.slice().sort((a, b) => a - b);
+        const oficiais = sorteados.length || Number(_mod().combo) || 7;
         const mesSorteado = resultado.mes_sorteado || '';
-        const stats = {
-            verde: { apostas: 0, ac4: 0, ac5: 0, ac6: 0, ac7: 0, mes: 0 },
-            amarelo: { apostas: 0, ac4: 0, ac5: 0, ac6: 0, ac7: 0, mes: 0 },
-            neutro: { apostas: 0, ac4: 0, ac5: 0, ac6: 0, ac7: 0, mes: 0 },
-        };
+        const novo = () => ({ apostas: 0, tiers: {}, mes: 0, time: 0 });
+        const stats = { verde: novo(), amarelo: novo(), neutro: novo() };
         let totalValidas = 0;
-        let rows = '';
+        const linhas = [];
         let exibidas = 0;
         const valoresAbs = [];
 
         (resultado.apostas || []).forEach((aposta, rowIdx) => {
             const numeros = (aposta.numeros_apostados || []).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
             if (numeros.length < oficiais) return;
-            const ordenados = [...numeros].sort((a, b) => a - b);
+            const ordenados = positional ? numeros.slice(0, oficiais) : [...numeros].sort((a, b) => a - b);
             let somaAbs = 0;
             let deltas = 0;
             for (let i = 0; i < oficiais; i++) {
@@ -1276,30 +1354,25 @@
             valoresAbs.push(somaAbs);
             if (maxAbs != null && somaAbs > maxAbs) return;
 
-            const faixas = aposta.resultado?.faixas_atingidas || [];
-            const hit = (txt) => faixas.some(f => String(f).includes(txt));
-            const marca = { ac4: hit('4 acertos'), ac5: hit('5 acertos'), ac6: hit('6 acertos'), ac7: hit('7 acertos'), mes: hit('Mês') };
+            const resAp = aposta.resultado || {};
             const bucket = somaAbs <= 7 ? 'verde' : somaAbs <= 14 ? 'amarelo' : 'neutro';
             stats[bucket].apostas++;
-            if (marca.ac4) stats[bucket].ac4++;
-            if (marca.ac5) stats[bucket].ac5++;
-            if (marca.ac6) stats[bucket].ac6++;
-            if (marca.ac7) stats[bucket].ac7++;
-            if (marca.mes) stats[bucket].mes++;
+            faixas.forEach(f => {
+                if (_marcaFaixa(resAp, f.rotulo)) stats[bucket].tiers[f.rotulo] = (stats[bucket].tiers[f.rotulo] || 0) + 1;
+            });
+            const mesOk = hasMes && (resAp.mes_ok === true || resAp.acertou_mes === true || _marcaFaixa(resAp, 'Mês'));
+            const timeOk = hasTime && ((resAp.faixas_atingidas || []).some(f => /time/i.test(String(f))) || /time/i.test(String(resAp.faixa || '')));
+            if (mesOk) stats[bucket].mes++;
+            if (timeOk) stats[bucket].time++;
             exibidas++;
+            if (montarLinhas === false || (maxLinhas && linhas.length >= maxLinhas)) return;
 
             const dataLabel = `${resultado.data_sorteio || resultado.resultado_sorteio?.data || ''} - ${resultado.concurso || ''} - ${aposta.numero_aposta ?? rowIdx + 1}`;
-            const setSorteados = new Set(sorteados);
-            const qtdAcertos = ordenados.filter(n => setSorteados.has(n)).length;
-            const resAp = aposta.resultado || {};
-            const sete = qtdAcertos >= 7 || marca.ac7 || !!resAp.premio_maximo;
-            const faixaVerde = !sete && (
-                marca.ac4 || marca.ac5 || marca.ac6 || marca.mes
-                || (qtdAcertos >= 4 && qtdAcertos < 7) || resAp.mes_ok === true || !!resAp.premiado
-            );
+            const sete = !!resAp.premio_maximo;
+            const faixaVerde = !sete && !!resAp.premiado;
             const fundoLinha = faixaVerde ? 'background:#e8f6ee;' : '';
             const cel = (conteudo, extra) => `<td class="align-middle text-center p-1" style="${fundoLinha}border:1px dashed #dee2e6;${extra || ''}">${conteudo}</td>`;
-            const bola = (n, classe) => `<div style="width:26px;height:26px;line-height:26px;margin:0 auto;border-radius:4px;" class="${classe}">${String(n).padStart(2, '0')}</div>`;
+            const bola = (n, classe) => `<div style="width:26px;height:26px;line-height:26px;margin:0 auto;border-radius:4px;" class="${classe}">${_fmtDezenaAbs(n)}</div>`;
 
             let jogados = '';
             let sorteadosHtml = '';
@@ -1309,10 +1382,9 @@
                 const sort = sorteados[i];
                 const perto = num !== undefined && sort !== undefined && Math.abs(num - sort) === 1;
                 const igual = num !== undefined && num === sort;
-                const clsJ = igual ? 'bg-success text-white fw-bold' : perto ? 'bg-warning text-dark fw-bold' : 'text-secondary';
-                const clsS = igual ? 'bg-success text-white fw-bold' : perto ? 'bg-warning text-dark fw-bold' : 'text-secondary';
-                jogados += cel(num !== undefined ? bola(num, clsJ) : '-');
-                sorteadosHtml += cel(sort !== undefined ? bola(sort, clsS) : '');
+                const cls = igual ? 'cr-var-hit' : perto ? 'cr-var-perto' : 'text-secondary';
+                jogados += cel(num !== undefined ? bola(num, cls) : '-');
+                sorteadosHtml += cel(sort !== undefined ? bola(sort, cls) : '');
                 if (num !== undefined && sort !== undefined) {
                     const delta = num - sort;
                     diffHtml += cel(delta === 0 ? '' : delta, `color:${delta < 0 ? '#8b3a3a' : '#333'};`);
@@ -1320,23 +1392,33 @@
                     diffHtml += cel('');
                 }
             }
-            const mesJogado = aposta.mes || '';
-            jogados += cel(mesJogado ? _badgeMes(mesJogado) : '-');
-            sorteadosHtml += cel(mesSorteado ? _badgeMes(mesSorteado) : '-');
-            const absCor = somaAbs <= 7 ? 'color:#996e00;font-weight:700;' : somaAbs <= 14 ? 'color:#b28704;font-weight:700;' : '';
+            if (hasMes) {
+                const mesJogado = aposta.mes || '';
+                jogados += cel(mesJogado ? _badgeMes(mesJogado) : '-');
+                sorteadosHtml += cel(mesSorteado ? _badgeMes(mesSorteado) : '-');
+            }
+            const absCor = somaAbs <= 7 ? 'color:var(--primary-dark);font-weight:700;' : somaAbs <= 14 ? 'color:var(--accent);font-weight:700;' : '';
             const x = (v) => v ? 'X' : '';
-            rows += `<tr class="${sete ? 'cr-linha-maximo' : (faixaVerde ? 'cr-linha-acerto' : '')}">
+            let acertosHtml = '';
+            faixas.forEach(f => {
+                const marca = _marcaFaixa(resAp, f.rotulo);
+                const extra = f.minimo === topo ? 'color:var(--primary-dark);font-weight:700;' : '';
+                acertosHtml += cel(x(marca), extra);
+            });
+            if (hasMes) acertosHtml += cel(x(mesOk));
+            if (hasTime) acertosHtml += cel(x(timeOk));
+            linhas.push(`<tr class="${sete ? 'cr-linha-maximo' : (faixaVerde ? 'cr-linha-acerto' : '')}">
                 <td class="align-middle text-center text-nowrap p-1 text-muted fw-bold" style="font-size:.8rem;${fundoLinha}">${dataLabel}</td>
                 ${jogados}<td style="width:8px;border:none;"></td>
                 ${sorteadosHtml}<td style="width:8px;border:none;"></td>
                 ${diffHtml}<td style="width:8px;border:none;"></td>
                 <td class="align-middle text-center" style="${fundoLinha}${absCor}">${somaAbs}</td>
                 <td style="width:8px;border:none;"></td>
-                ${cel(x(marca.ac4))}${cel(x(marca.ac5))}${cel(x(marca.ac6))}${cel(x(marca.ac7), 'color:#996e00;font-weight:700;')}${cel(x(marca.mes))}
-            </tr>`;
+                ${acertosHtml}
+            </tr>`);
         });
 
-        return { rows, stats, totalValidas, exibidas, oficiais, valoresAbs };
+        return { rows: linhas.join(''), stats, totalValidas, exibidas, oficiais, valoresAbs };
     }
 
     function _fmtDezenaAbs(n) {
@@ -1349,6 +1431,19 @@
         const k = Number(mod.combo) || 7;
         const lo = mod.dezenaMin != null ? Number(mod.dezenaMin) : 1;
         const hi = mod.dezenaMax != null ? Number(mod.dezenaMax) : 31;
+        if (mod.positional) {
+            const maximo = k * Math.abs(hi - lo);
+            const baixo = Array.from({ length: k }, () => _fmtDezenaAbs(lo)).join(' ');
+            const alto = Array.from({ length: k }, () => _fmtDezenaAbs(hi)).join(' ');
+            return {
+                minimo: 0,
+                maximo,
+                apostaIgual: baixo,
+                apostaExtremo: baixo,
+                sorteioExtremo: alto,
+                conta: k + ' × ' + Math.abs(hi - lo) + ' = ' + maximo,
+            };
+        }
         const baixos = [];
         const altos = [];
         for (let i = 0; i < k; i++) {
@@ -1430,7 +1525,7 @@
             : `O ABS <strong>${lista}</strong> é o que mais saiu: <strong>${pico}</strong> vezes.`;
         return `
             <div class="cr-abs-pico-banner mb-3">
-                <i class="fas fa-crown me-1" style="color:#c08b00"></i>
+                <i class="fas fa-crown me-1" style="color:var(--primary)"></i>
                 ${verbo}
                 <span class="text-muted"> É a quantidade de apostas da pasta que fecharam nesse ABS.</span>
             </div>`;
@@ -1572,37 +1667,46 @@
 
     function _tabelaVarianciaDiaSorte(resultado, bloco, titulo) {
         const n = bloco.oficiais;
+        const hasMes = !!_mod().hasMes;
+        const hasTime = !!_mod().hasTime;
+        const faixas = _faixasUi();
+        const extra = hasMes ? 1 : 0;
+        const acertoCols = faixas.length + (hasMes ? 1 : 0) + (hasTime ? 1 : 0);
         let nums = '';
         for (let i = 1; i <= n; i++) nums += `<th class="text-center p-1">${i}</th>`;
-        const mesTh = `<th class="text-center p-1" style="background:#fff8e1;">MÊS</th>`;
+        const mesTh = hasMes ? `<th class="text-center p-1 cr-var-mes">MÊS</th>` : '';
+        const topo = faixas.length ? Math.max(...faixas.map(f => f.minimo)) : null;
+        const thAcerto = faixas.map(f => `<th class="text-center cr-var-acerto${f.minimo === topo ? ' cr-var-acerto-top' : ''}">${f.minimo}</th>`).join('')
+            + (hasMes ? `<th class="text-center cr-var-acerto">M</th>` : '')
+            + (hasTime ? `<th class="text-center cr-var-acerto">T</th>` : '');
         const tituloHtml = titulo ? `
             <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
-                <h6 class="fw-bold mb-0" style="color:var(--primary-dark,#996e00)">
+                <h6 class="fw-bold mb-0" style="color:var(--primary-dark)">
                     <i class="fas fa-filter me-1"></i> Resumo ABS ≤ 20 — todas as apostas do concurso
                 </h6>
-                <span class="badge" style="background:var(--primary,#c08b00)">${bloco.exibidas} de ${bloco.totalValidas} apostas</span>
+                <span class="badge cr-var-badge">${bloco.exibidas} de ${bloco.totalValidas} apostas</span>
             </div>` : '';
         if (!bloco.rows) {
             return `${_legendaAbs(bloco.stats)}${tituloHtml}<div class="alert alert-light border text-muted">Nenhuma aposta neste recorte.</div>`;
         }
         return `${_legendaAbs(bloco.stats)}${tituloHtml}
-            <div class="card border-0 shadow-sm mb-4" style="border:1px solid #e6d7a2 !important;">
+            <div class="card border-0 shadow-sm mb-4 cr-var-card">
                 <div class="table-responsive">
-                    <table class="table table-sm table-borderless mb-0" style="font-size:.8rem;">
-                        <thead style="background:#fff8e1;border-bottom:2px solid #f3e0a0;">
+                    <table class="table table-sm table-borderless mb-0 cr-var-table">
+                        <thead>
                             <tr>
                                 <th class="text-center p-2">DATA</th>
-                                <th colspan="${n + 1}" class="text-center p-2">NÚMEROS JOGADOS</th>
+                                <th colspan="${n + extra}" class="text-center p-2">NÚMEROS JOGADOS</th>
                                 <th style="width:8px;border:none;"></th>
-                                <th colspan="${n + 1}" class="text-center p-2">SORTEADOS</th>
+                                <th colspan="${n + extra}" class="text-center p-2">SORTEADOS</th>
                                 <th style="width:8px;border:none;"></th>
-                                <th colspan="${n}" class="text-center p-2" style="color:#8b3a3a;">DIFERENÇA</th>
+                                <th colspan="${n}" class="text-center p-2 cr-var-diff">DIFERENÇA</th>
                                 <th style="width:8px;border:none;"></th>
                                 <th class="text-center p-2" title="Soma das diferenças sem sinal">ABS</th>
                                 <th style="width:8px;border:none;"></th>
-                                <th colspan="5" class="text-center p-2">ACERTO</th>
+                                <th colspan="${acertoCols || 1}" class="text-center p-2">ACERTO</th>
                             </tr>
-                            <tr style="font-size:.75rem;">
+                            <tr>
                                 <th></th>
                                 ${nums}${mesTh}
                                 <th style="width:8px;border:none;"></th>
@@ -1612,11 +1716,7 @@
                                 <th style="width:8px;border:none;"></th>
                                 <th></th>
                                 <th style="width:8px;border:none;"></th>
-                                <th class="text-center" style="background:#eee;">4</th>
-                                <th class="text-center" style="background:#e0e0e0;">5</th>
-                                <th class="text-center" style="background:#f1c40f;">6</th>
-                                <th class="text-center" style="background:#ffd700;">7</th>
-                                <th class="text-center" style="background:#fff;">M</th>
+                                ${thAcerto || '<th></th>'}
                             </tr>
                         </thead>
                         <tbody>${bloco.rows}</tbody>
@@ -1626,12 +1726,16 @@
     }
 
     function renderizarVarianciaDiaSorte(concurso, resultado) {
-        const completo = _linhasVarianciaDiaSorte(resultado, null);
-        const resumo = _linhasVarianciaDiaSorte(resultado, 20);
+        const grande = (resultado.apostas || []).length > 200;
+        const completo = _linhasVarianciaDiaSorte(resultado, null, !grande);
+        const resumo = _linhasVarianciaDiaSorte(resultado, 20, true, grande ? 200 : null);
         const freqId = `cr-freq-abs-pasta-${concurso}`;
+        const aviso = grande
+            ? `<p class="small text-muted mb-2">A legenda soma as ${completo.totalValidas} apostas do concurso. A tabela abaixo lista até 200 jogos com ABS ≤ 20.</p>`
+            : '';
         return `
-            <h6 class="text-muted"><i class="fas fa-balance-scale"></i> Análise de Variância Nominal (Desvio Posicional):</h6>
-            ${_tabelaVarianciaDiaSorte(resultado, completo, false)}
+            <h6 style="color:var(--primary-dark)"><i class="fas fa-balance-scale"></i> Análise de Variância Nominal (Desvio Posicional):</h6>
+            ${grande ? _legendaAbs(completo.stats) + aviso : _tabelaVarianciaDiaSorte(resultado, completo, false)}
             ${_tabelaVarianciaDiaSorte(resultado, resumo, true)}
             <div id="${freqId}" class="mb-4">
                 <div class="small text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Somando o ABS de todas as apostas da pasta...</div>
