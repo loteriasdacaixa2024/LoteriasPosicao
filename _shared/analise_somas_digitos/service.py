@@ -47,6 +47,63 @@ FAIXAS_SOMA = (
 )
 
 
+_STATUS_ORDEM = ("dentro", "proxima", "fora")
+_STATUS_LABEL = {
+    "dentro": "Dentro da média",
+    "proxima": "Próxima da média",
+    "fora": "Fora da faixa",
+}
+
+
+def _padrao_dezenas(dezenas: List[int]) -> str:
+    return " ".join(str(int(d) // 10) for d in sorted(int(x) for x in dezenas))
+
+
+def classificar_somas_pela_media(linhas: List[Dict[str, Any]]) -> None:
+    """Mesma conta da Checagem: soma de cada concurso frente à média do próprio padrão."""
+    from analise_inteligentes_diadesorte.soma_media import calcular_faixa_soma, classificar_soma
+
+    por_padrao: Dict[str, List[int]] = {}
+    padroes: List[str] = []
+    for linha in linhas:
+        pad = _padrao_dezenas(linha.get("dezenas") or [])
+        padroes.append(pad)
+        por_padrao.setdefault(pad, []).append(int(linha.get("soma") or 0))
+    faixas = {
+        pad: calcular_faixa_soma(somas, fonte="historico")
+        for pad, somas in por_padrao.items()
+    }
+    for linha, pad in zip(linhas, padroes):
+        cls = classificar_soma(linha.get("soma"), faixas.get(pad))
+        linha["status_media"] = cls.get("status_media") or "fora"
+        linha["status_media_label"] = cls.get("status_media_label") or "Fora da faixa"
+
+
+def ranking_da_media(linhas: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    total = len(linhas)
+    cnt = Counter(str(l.get("status_media") or "fora") for l in linhas)
+    chaves = list(_STATUS_ORDEM)
+    for chave in cnt:
+        if chave not in chaves:
+            chaves.append(chave)
+    itens: List[Dict[str, Any]] = []
+    for chave in chaves:
+        n = int(cnt.get(chave, 0))
+        itens.append({
+            "status": chave,
+            "label": _STATUS_LABEL.get(chave, chave),
+            "ocorrencias": n,
+            "pct": round(n / total * 100, 2) if total else 0,
+        })
+    itens.sort(key=lambda item: (
+        -int(item["ocorrencias"]),
+        _STATUS_ORDEM.index(item["status"]) if item["status"] in _STATUS_ORDEM else 9,
+    ))
+    for i, item in enumerate(itens, start=1):
+        item["lugar"] = i
+    return itens
+
+
 def faixa_da_soma(soma: int, faixas=None) -> str:
     tabela = faixas or FAIXAS_SOMA
     for label, lo, hi in tabela:
@@ -148,6 +205,8 @@ class AnaliseSomasDigitosService:
         ]
 
         media = round(sum(somas) / total, 2) if total else 0
+        classificar_somas_pela_media(linhas)
+        ranking_media = ranking_da_media(linhas)
         return {
             "sucesso": True,
             "aba": "somas",
@@ -169,6 +228,7 @@ class AnaliseSomasDigitosService:
             },
             "distribuicao_faixas": distribuicao_faixas,
             "ranking_somas": ranking_somas,
+            "ranking_media": ranking_media,
             "linhas": list(reversed(linhas)),
             "meta_bases": Base.meta_bases(),
         }

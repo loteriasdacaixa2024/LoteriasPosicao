@@ -23,9 +23,12 @@ from .gerador import (
     _completar_com_padrao,
     _diagonais_da_aposta,
     _freq,
+    _maior_sequencia,
     _norm_padrao,
     _perfil_alvo,
     _resumo_diagonais_janela,
+    expandir_aposta,
+    substituir_bloqueadas,
 )
 
 # Poucas pendentes = ciclo no fim. 0 = fechado (próximo sorteio reabre).
@@ -105,6 +108,56 @@ def _sementes_distintas(
     return out[:qtd]
 
 
+def _sementes_ponderadas(
+    linhas: Sequence[Dict[str, Any]],
+    qtd: int,
+    rng: random.Random,
+) -> List[Dict[str, Any]]:
+    """Prefere padrões frequentes e somas dentro ou próximas da média.
+
+    Ainda espalha os padrões: o mesmo padrão não se repete enquanto
+    houver outros disponíveis.
+    """
+    freq: Counter = Counter()
+    for row in linhas:
+        pad = _norm_padrao(row.get("padrao") or "")
+        if pad:
+            freq[pad] += 1
+    pesos_status = {"dentro": 3.0, "proxima": 2.0, "fora": 1.0}
+    pool: List[Dict[str, Any]] = []
+    weights: List[float] = []
+    for row in linhas:
+        pad = _norm_padrao(row.get("padrao") or "")
+        if not pad:
+            continue
+        item = dict(row)
+        item["frequencia"] = int(freq[pad])
+        st = str(row.get("status_media") or "fora")
+        pool.append(item)
+        weights.append(max(0.01, float(freq[pad]) * pesos_status.get(st, 1.0)))
+    if not pool:
+        return []
+    qtd = max(1, int(qtd))
+    out: List[Dict[str, Any]] = []
+    pads: Set[str] = set()
+    guard = 0
+    while pool and len(out) < qtd and guard < qtd * 40:
+        guard += 1
+        pick = rng.choices(pool, weights=weights, k=1)[0]
+        pad = _norm_padrao(pick.get("padrao") or "")
+        if pad in pads and len(pads) < min(qtd, len(freq)):
+            weights[pool.index(pick)] *= 0.2
+            continue
+        out.append(pick)
+        pads.add(pad)
+        idx = pool.index(pick)
+        pool.pop(idx)
+        weights.pop(idx)
+    if len(out) < qtd and pool:
+        out.extend(pool[: qtd - len(out)])
+    return out[:qtd]
+
+
 def _faixas_por_padrao(linhas: Sequence[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     somas: Dict[str, List[int]] = {}
     for row in linhas:
@@ -131,14 +184,25 @@ def gerar_apostas_panorama(
     dezena_min: int = 1,
     dezena_max: int = 31,
     k: int = 7,
+    k_saida: Optional[int] = None,
+    descartar_ja_sorteadas: bool = True,
     rng: Optional[random.Random] = None,
     historico: Optional[Set] = None,
     modality_key: str = "diadesorte",
+    ponderar: bool = False,
 ) -> Dict[str, Any]:
     from analise_inteligentes_diadesorte.service import make_inteligentes_service
 
     rng = rng or random.Random()
-    dmin, dmax, k = int(dezena_min), int(dezena_max), int(k)
+    dmin, dmax = int(dezena_min), int(dezena_max)
+    k_padrao = int(k)
+    teto = max(1, dmax - dmin + 1)
+    k_saida_n = int(k_saida or k_padrao)
+    if k_saida_n < k_padrao:
+        k_saida_n = k_padrao
+    if k_saida_n > teto:
+        k_saida_n = teto
+    k = k_padrao
     pends = sorted({int(x) for x in pendentes if dmin <= int(x) <= dmax})
     hist = set(historico or [])
     qtd_pedida = max(1, min(200, int(quantidade or 10)))
@@ -172,7 +236,11 @@ def gerar_apostas_panorama(
         except (TypeError, ValueError):
             continue
 
-    sementes = _sementes_distintas(linhas, qtd, rng)
+    sementes = (
+        _sementes_ponderadas(linhas, qtd, rng)
+        if ponderar
+        else _sementes_distintas(linhas, qtd, rng)
+    )
     usados: Set[Tuple[int, ...]] = set()
     apostas_out: List[Dict[str, Any]] = []
 
@@ -188,6 +256,8 @@ def gerar_apostas_panorama(
         jogo: List[int] = []
         melhor: List[int] = []
         melhor_ad = 10**9
+        reserva_status: List[int] = []
+        reserva_longa: List[int] = []
         for _t in range(36):
             cand = _completar_com_padrao(
                 locked,
@@ -208,9 +278,14 @@ def gerar_apostas_panorama(
             if not cand:
                 continue
             chave = tuple(cand)
-            if chave in usados or chave in ja_saiu:
+            if chave in usados:
                 continue
-            if hist and frozenset(cand) in hist:
+            if descartar_ja_sorteadas and (chave in ja_saiu or (hist and frozenset(cand) in hist)):
+                continue
+            # 5 dezenas seguidas saíram 5 vezes em 1.328 concursos.
+            if _maior_sequencia(cand) >= 5:
+                if not reserva_longa:
+                    reserva_longa = cand
                 continue
             soma = sum(cand)
             cls = classificar_soma(soma, faixa)
@@ -220,18 +295,36 @@ def gerar_apostas_panorama(
                 melhor_ad = ad
                 melhor = cand
             if cls.get("status_media") == status_alvo:
-                jogo = cand
-                break
+                if not ponderar or _diagonais_da_aposta(cand, dmin, dmax):
+                    jogo = cand
+                    break
+                if not reserva_status:
+                    reserva_status = cand
         if not jogo:
-            jogo = melhor
+            jogo = reserva_status or melhor or reserva_longa
         if not jogo:
+            continue
+        nucleo = list(jogo)
+        if descartar_ja_sorteadas:
+            jogo = substituir_bloqueadas(jogo, ultimo_nums, dmin, dmax)
+        if len(jogo) < k_saida_n:
+            jogo = expandir_aposta(
+                jogo, k_saida_n, dmin, dmax,
+                ultimo_nums if descartar_ja_sorteadas else (),
+                rng,
+            )
+        if len(jogo) != k_saida_n:
             continue
         chave = tuple(jogo)
         if chave in usados:
             continue
         usados.add(chave)
         det = conjuntos_concurso(jogo, ultimo_nums or None)
-        cls = classificar_soma(sum(jogo), faixa)
+        cls = (
+            classificar_soma(sum(nucleo), faixa)
+            if len(jogo) == len(nucleo)
+            else {"status_media": "", "status_media_label": ""}
+        )
         pad_real = _norm_padrao(" ".join(str(n // 10) for n in jogo))
         apostas_out.append({
             "dezenas": list(jogo),

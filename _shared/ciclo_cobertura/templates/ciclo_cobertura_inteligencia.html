@@ -8,6 +8,8 @@
 .badge-pressao-baixa { background: #28a745; }
 .score-bar { height: 8px; border-radius: 4px; background: #e9ecef; }
 .score-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #0d6efd, #6610f2); }
+.ciclo-lugar-link { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.ciclo-lugar-link:hover { opacity: .75; }
 </style>
 <div class="container-fluid py-4">
     <div class="row mb-4">
@@ -51,6 +53,90 @@
     return m[p] || 'bg-secondary';
   }
 
+  function escHtml(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function qtdDezenasPendentes(fonte) {
+    if (fonte && Array.isArray(fonte.dezenas_pendentes)) return fonte.dezenas_pendentes.length;
+    if (fonte && fonte.total_dezenas_pendentes != null && fonte.total_dezenas_pendentes !== '') {
+      return Number(fonte.total_dezenas_pendentes);
+    }
+    return null;
+  }
+  function fraseTetoFaltantes(nPend) {
+    const n = Number(nPend);
+    if (!Number.isFinite(n) || n <= 0) return '';
+    const maximo = Math.min(n, 6);
+    return ' Com ' + n + ' faltantes, o jogo usa no máximo essas ' + maximo + '.';
+  }
+  function juntarCriterios(partes) {
+    const xs = (partes || []).filter(Boolean);
+    if (xs.length <= 1) return xs[0] || '';
+    return xs.slice(0, -1).join(', ') + ' e ' + xs[xs.length - 1];
+  }
+  function linhaCriterioDesdobramento(fase, est, fonte) {
+    const nPend = qtdDezenasPendentes(fonte)
+      ?? Number(fase.dezenas_faltantes ?? est.faltando ?? 0);
+    const concursos = Number(est.concursos_decorridos ?? 0);
+    const pressao = est.pressao || '';
+    const classificacao = est.classificacao || '';
+    let texto = fase.criterio || '';
+    if (!texto) {
+      const motivos = [];
+      if (fase.fase === 'inicio') {
+        if (concursos <= 1) motivos.push(concursos + ' concurso no ciclo (regra: o 1º sorteio conta como início)');
+        motivos.push((fase.dezenas_saidas_ciclo ?? '—') + ' saídas e ' + nPend + ' faltantes (ainda no volume do primeiro sorteio)');
+      } else if (fase.fase === 'finalizacao') {
+        if (nPend <= 8) motivos.push(nPend + ' faltantes (regra: até 8)');
+        if (pressao === 'alta' || pressao === 'extrema') motivos.push('pressão ' + pressao);
+        if (classificacao === 'Avançado' || classificacao === 'Crítico') motivos.push('classificação ' + classificacao);
+      } else {
+        motivos.push(nPend + ' faltantes (acima de 8), pressão ' + (pressao || '—') + ' e classificação ' + (classificacao || '—'));
+      }
+      texto = juntarCriterios(motivos);
+    }
+    if (!texto) return '';
+    const recomendada = fase.estrategia_recomendada !== false
+      && (fase.estrategia_recomendada === true || /2 em 2/.test(fase.hint || ''));
+    const href = (ELITE || '/geradores-elite/ciclo-apostas/?modo=estrategia').split('?')[0]
+      + '?modo=estrategia#ce-desdob';
+    const teto = fraseTetoFaltantes(nPend);
+    const lugar = recomendada
+      ? ' A escolha fica em <a class="ciclo-lugar-link ciclo-link-estrategia" href="' + href + '" title="Abre Ciclo — Estratégias no campo Desdobramento (1 a 6)">Desdobramento</a>, de 1 a 6.' + teto
+      : '';
+    return '<div class="small mt-1 mb-0">Critério: ' + escHtml(texto) + '.' + lugar + '</div>';
+  }
+
+  function linhaEstrategiaDiagonais(d) {
+    const estr = d.estrategia || {};
+    const modo = String(estr.modo_recomendado || '').trim();
+    const k = estr.faltantes_por_jogo;
+    const faixa = estr.priorizar_faixa === 'media' ? 'faixa média'
+      : (estr.priorizar_faixa ? 'faixa ' + estr.priorizar_faixa : '');
+    const diag = d.diagonais || {};
+    const sug = Number(diag.quantidade_costumeira != null ? diag.quantidade_costumeira : (diag.sugerida != null ? diag.sugerida : 1));
+    const partes = [];
+    if (modo) {
+      partes.push('<a class="ciclo-lugar-link" href="/geradores-elite/ciclo-apostas/?modo=operacional&op='
+        + encodeURIComponent(modo) + '#co-modo">' + escHtml(modo) + '</a>');
+    }
+    if (k != null) partes.push(k + ' faltantes por jogo');
+    if (faixa) partes.push(escHtml(faixa));
+    const txt = partes.length ? 'Estratégia indicada: ' + partes.join(' · ') + '.' : '';
+    let diagTxt = String(diag.leitura || '');
+    if (diagTxt.indexOf('Cada aposta já sai com') !== 0) {
+      const pct = diag.pct && diag.pct[String(sug)] != null ? diag.pct[String(sug)] : null;
+      let ge3 = diag.pct_tres_ou_mais != null ? diag.pct_tres_ou_mais : null;
+      if (ge3 == null && diag.pct) ge3 = Math.round((Number(diag.pct['3'] || 0) + Number(diag.pct['4'] || 0)) * 10) / 10;
+      diagTxt = 'Cada aposta já sai com ' + sug + (sug === 1 ? ' diagonal' : ' diagonais');
+      diagTxt += pct != null ? ' — a quantidade que mais aparece nos resultados (' + pct + '%).' : '.';
+      if (ge3 != null) diagTxt += ' 3 ou mais sai em ' + ge3 + '%.';
+    }
+    diagTxt = escHtml(diagTxt);
+    return '<div class="small mt-1 mb-0">' + txt
+      + ' <span class="ciclo-diag-auto" data-diags="' + sug + '">' + diagTxt + '</span></div>';
+  }
+
   function renderOperacional(d) {
     const est = d.estado_atual;
     const op = d.operacional;
@@ -70,8 +156,10 @@
         <span class="badge bg-dark ms-2">${fase.label || fase.fase || '—'}</span>
         <span class="ms-2">${est.faltando} faltantes · ${est.fechamento_percentual}% · pressão ${est.pressao}</span>
         <div class="small mt-1">${fase.hint || ''}</div>
+        ${linhaCriterioDesdobramento(fase, est, d)}
+        ${linhaEstrategiaDiagonais(d)}
       </div>
-      <a href="${eliteEstr}" class="btn btn-dark btn-sm"><i class="fas fa-chess-knight me-1"></i>Ciclo — Estratégias</a>
+      <a href="${eliteEstr}" class="btn btn-dark btn-sm ciclo-link-estrategia"><i class="fas fa-chess-knight me-1"></i>Ciclo — Estratégias</a>
     </div>
     <div class="row mb-4">
       <div class="col-md-8">
@@ -159,7 +247,7 @@
         <div class="card">
           <div class="card-header">Histórico semelhante (${d.historico_semelhante.amostras} amostras)</div>
           <div class="card-body">
-            <table class="table table-sm">
+            <table class="table table-sm tabela-ordenavel">
               <thead><tr><th>Faltantes que entraram</th><th>Frequência</th></tr></thead>
               <tbody>
                 <tr><td>0</td><td>${dist['0'] || 0}%</td></tr>
@@ -188,10 +276,21 @@
       </div>
     </div>
     <div class="text-center">
-      <a href="${eliteEstr}" class="btn btn-success btn-lg">
+      <a href="${eliteEstr}" class="btn btn-success btn-lg ciclo-link-estrategia">
         <i class="fas fa-chess-knight me-2"></i>Ir para Ciclo — Estratégias (Elite)
       </a>
     </div>`;
+    const marcaDiag = document.querySelector('.ciclo-diag-auto');
+    const nDiag = marcaDiag ? marcaDiag.getAttribute('data-diags') : '';
+    if (nDiag) {
+      document.querySelectorAll('a.ciclo-link-estrategia').forEach(a => {
+        const raw = a.getAttribute('href') || '';
+        const hash = raw.indexOf('#') >= 0 ? raw.slice(raw.indexOf('#')) : '';
+        const u = new URL(raw.split('#')[0], location.origin);
+        u.searchParams.set('diags', nDiag);
+        a.setAttribute('href', u.pathname + u.search + hash);
+      });
+    }
   }
 })();
 </script>

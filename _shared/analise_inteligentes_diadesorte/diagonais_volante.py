@@ -233,3 +233,121 @@ def cruzar_linhas(
         "n_com_diagonal": n_com,
         "pct_com_diagonal": round(100.0 * n_com / max(1, n_draws), 1),
     }
+
+
+def resumo_contagem_diagonais(
+    sorteios_dezenas: Iterable[Sequence[int]],
+    *,
+    dmin: int = 1,
+    dmax: int = 31,
+    cols: int = 10,
+    teto: int = 4,
+) -> Dict[str, Any]:
+    """Quantas diagonais 2+ cada concurso trouxe, e os segmentos mais frequentes."""
+    rows = volante_rows(dmin, dmax, cols)
+    lines = diag_lines(rows)
+    pmap = pos_map(rows)
+    hist: Counter = Counter()
+    ranking: Counter = Counter()
+    ranking_trinca: Counter = Counter()
+    presenca_dupla: Counter = Counter()
+    presenca_trinca: Counter = Counter()
+    ultimo_trinca: Dict[str, int] = {}
+    meta: Dict[str, Dict[str, Any]] = {}
+    n = 0
+    for dez in sorteios_dezenas:
+        nums = [int(x) for x in (dez or [])]
+        if len(nums) < 2:
+            continue
+        n += 1
+        runs = [
+            r for r in diag_runs_in_draw(set(nums), lines, pmap)
+            if int(r.get("len") or 0) >= 2
+        ]
+        hist[min(len(runs), int(teto))] += 1
+        vistos_trecho: Set[str] = set()
+        for r in runs:
+            nums_run = list(r.get("nums") or [])
+            for ln in (2, 3):
+                if len(nums_run) < ln:
+                    continue
+                for i in range(0, len(nums_run) - ln + 1):
+                    sl = nums_run[i:i + ln]
+                    d = geom_dir(sl, pmap)
+                    key = seg_key(d, sl)
+                    if key in vistos_trecho:
+                        continue
+                    vistos_trecho.add(key)
+                    meta[key] = {"dir": d, "nums": sl, "len": ln}
+                    if ln == 2:
+                        presenca_dupla[key] += 1
+                    else:
+                        presenca_trinca[key] += 1
+                        ultimo_trinca[key] = n
+        for r in runs:
+            ln = int(r.get("len") or 0)
+            if ln >= 3:
+                ranking_trinca[r["key"]] += 1
+                meta[r["key"]] = r
+            if 2 <= ln <= 3:
+                ranking[r["key"]] += 1
+                meta[r["key"]] = r
+    opcoes = list(range(0, int(teto) + 1))
+    if not n:
+        return {
+            "amostras": 0,
+            "opcoes": opcoes,
+            "sugerida": 0,
+            "hist": {str(k): 0 for k in opcoes},
+            "pct": {str(k): 0 for k in opcoes},
+            "ranking": [],
+            "top_duplas": [],
+            "top_trinca": None,
+            "leitura": "Sem concursos para a análise de diagonais.",
+        }
+    sugerida = max(opcoes, key=lambda k: (hist.get(k, 0), -k))
+    pct = {str(k): round(100.0 * hist.get(k, 0) / n, 1) for k in opcoes}
+    empate = [
+        k for k in opcoes
+        if k != sugerida and hist.get(k, 0) == hist.get(sugerida, 0) and hist.get(k, 0) > 0
+    ]
+    ge3 = sum(hist.get(k, 0) for k in opcoes if k >= 3)
+    pct_ge3 = round(100.0 * ge3 / n, 1)
+    top = [_pack_seg(k, v, meta.get(k)) for k, v in ranking.most_common(10)]
+    top_trinca = None
+    fonte_trinca = presenca_trinca or ranking_trinca
+    if fonte_trinca:
+        kt = max(
+            fonte_trinca,
+            key=lambda k: (
+                fonte_trinca[k],
+                -max(0, n - int(ultimo_trinca.get(k) or 0)),
+                tuple(-ord(ch) for ch in k),
+            ),
+        )
+        top_trinca = _pack_seg(kt, fonte_trinca[kt], meta.get(kt))
+    top_duplas = [_pack_seg(k, v, meta.get(k)) for k, v in presenca_dupla.most_common(3)]
+    qtd = int(sugerida)
+    unidade = "diagonal" if qtd == 1 else "diagonais"
+    leitura = (
+        f"Cada aposta já sai com {qtd} {unidade} — a quantidade que mais aparece "
+        f"nos resultados ({pct[str(qtd)]}% de {n} concursos)."
+    )
+    if empate:
+        outros = ", ".join(str(k) for k in empate)
+        leitura += f" Empate no topo com {outros}."
+    leitura += f" 3 ou mais sai em {pct_ge3}%."
+    return {
+        "amostras": n,
+        "opcoes": opcoes,
+        "sugerida": qtd,
+        "quantidade_costumeira": qtd,
+        "hist": {str(k): int(hist.get(k, 0)) for k in opcoes},
+        "pct": pct,
+        "pct_tres_ou_mais": pct_ge3,
+        "empate": empate,
+        "ranking": top,
+        "top_duplas": top_duplas,
+        "top_trinca": top_trinca,
+        "leitura": leitura,
+    }

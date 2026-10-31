@@ -2,12 +2,35 @@
 {% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css?v=stat2e">
+{% if request.args.get('embed') == '1' %}
+<script>document.body.classList.add('is-embed');</script>
+<style>
+  body.is-embed { padding-top: 0 !important; }
+  body.is-embed .navbar-main,
+  body.is-embed #mobilePanel { display: none !important; }
+  body.is-embed #ev-root > .ev-header,
+  body.is-embed #evTabs,
+  body.is-embed #ev-pane-escolha,
+  body.is-embed #ev-pane-visualizacao,
+  body.is-embed .cmp-voltar { display: none !important; }
+  body.is-embed #ev-pane-estatisticas { display: block !important; opacity: 1 !important; }
+  body.is-embed #evStatContent > section:first-child,
+  body.is-embed #evStatBasicos,
+  body.is-embed .ev-stat-2a,
+  body.is-embed #evStatContent > section:nth-child(2) > h6,
+  body.is-embed #evStatContent > section:nth-child(n+3) { display: none !important; }
+</style>
+{% endif %}
+<link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css?v=stat2l">
 <div class="container-fluid py-3" id="ev-root"
      data-api="{{ api_base }}"
+     data-modality-nome="{{ modality_nome }}"
      data-pad-width="{{ escolha_ui.pad_width }}"
      data-dezena-min="{{ escolha_ui.dezena_min }}"
      data-dezena-max="{{ escolha_ui.dezena_max }}"
+     data-sorteadas="{{ escolha_ui.sorteadas }}"
+     data-volante-cols="{{ escolha_ui.volante_cols }}"
+     data-volante-rows="{{ escolha_ui.volante_rows }}"
      data-extra-mes="{{ 1 if escolha_ui.extra_mes else 0 }}"
      data-meses-cores='{{ (meses_cores or {}) | tojson }}'>
 
@@ -17,6 +40,23 @@
             <p class="mb-0 small opacity-90">{{ page_subtitle }} — {{ modality_nome }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a class="btn btn-sm btn-light d-none" id="btnVoltarRota" href="#">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+            <script>
+            (function () {
+                var raw = new URLSearchParams(location.search).get('voltar');
+                if (!raw) return;
+                var u;
+                try { u = new URL(raw, location.href); } catch (e) { return; }
+                if (!/\/analise\/comparar-concursos\/?/.test(u.pathname)) return;
+                if (u.hostname !== location.hostname && u.hostname !== '127.0.0.1' && u.hostname !== 'localhost') return;
+                var a = document.getElementById('btnVoltarRota');
+                if (!a) return;
+                a.href = u.href;
+                a.classList.remove('d-none');
+            })();
+            </script>
             <span class="badge bg-dark" id="evBadgeTotal">Carregando…</span>
             <a class="btn btn-sm btn-light" href="{{ tubular_url }}">
                 <i class="fas fa-chart-line"></i> Análise Tubular
@@ -222,12 +262,22 @@
                     <h6 class="ev-stat-section-title"><i class="fas fa-list"></i> 2. Estatísticas Básicas — concurso <span id="evStatConcTitulo">—</span></h6>
                     <div class="row g-2" id="evStatBasicos"></div>
                     <div class="ev-stat-2a mt-3">
-                        <button type="button" class="ev-stat-fold-btn" id="evStatBasicosFold"
-                                aria-expanded="false" aria-controls="evStatBasicosTabelaBox">
-                            <i class="fas fa-chevron-right ev-stat-fold-ico" aria-hidden="true"></i>
-                            <span>2a. Estatísticas Básicas</span>
-                            <span class="ev-stat-fold-n" id="evStatBasicosN"></span>
-                        </button>
+                        <div class="ev-stat-2a-head">
+                            <button type="button" class="ev-stat-fold-btn" id="evStatBasicosFold"
+                                    aria-expanded="false" aria-controls="evStatBasicosTabelaBox">
+                                <i class="fas fa-chevron-right ev-stat-fold-ico" aria-hidden="true"></i>
+                                <span>2a. Estatísticas Básicas</span>
+                                <span class="ev-stat-fold-n" id="evStatBasicosN"></span>
+                            </button>
+                            <div class="ev-xls-side">
+                                <button type="button" class="btn btn-sm ev-xls-btn" id="evStatBasicosXls" disabled
+                                        title="Baixar a tabela em Excel (.xlsx), com as colunas formatadas">
+                                    <i class="fas fa-file-excel" aria-hidden="true"></i> Baixar Excel
+                                </button>
+                                <span class="ev-stat-2a-path" id="evStatBasicosPath"
+                                      title="Pasta do acervo em que o Excel desta modalidade é gravado">{{ download_relativo|default('', true) }}</span>
+                            </div>
+                        </div>
                         <div id="evStatBasicosTabelaBox" class="ev-stat-fold-body" hidden>
                             <p class="small text-muted mb-2">Todos os sorteios da janela — não depende do concurso selecionado acima.</p>
                             <div class="table-responsive ev-basic-table-wrap">
@@ -242,11 +292,76 @@
                                             <th>Repetidos</th>
                                             <th>Sequências</th>
                                             <th>Finais Iguais</th>
+                                            <th>Diagonais</th>
                                         </tr>
                                     </thead>
                                     <tbody id="evStatBasicosTabela"></tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                    <div class="ev-apostas mt-3" id="evApostas">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                            <h6 class="ev-stat-section-title mb-0"><i class="fas fa-pen"></i> 2b. Apostas para comparar</h6>
+                            {% if modality_key != 'supersete' %}
+                            <a class="btn btn-sm btn-outline-secondary cmp-voltar" href="/geradores-elite/comparador-apostas/#escolha">
+                                <i class="fas fa-arrow-left"></i> Voltar ao Comparador
+                            </a>
+                            {% endif %}
+                        </div>
+                        <p class="small text-muted mb-2">
+                            A primeira linha é o concurso selecionado. Monte apostas parecidas com esse resultado:
+                            arraste um TXT/CSV, cole uma aposta por linha, envie o arquivo ou use <strong>+</strong>.
+                            Cada casa vai de {{ '%02d'|format(escolha_ui.dezena_min) }} a {{ '%02d'|format(escolha_ui.dezena_max) }}
+                            e a linha recalcula na hora.
+                            A célula marcada está no mesmo patamar (mesma quantidade) do resultado real.
+                            Repetidos da aposta são as dezenas que também estão nesse concurso; essas casas ficam com borda verde.
+                            As apostas ficam só nesta tela.
+                            A primeira linha repete as dezenas do concurso no mesmo formato, sem setas.
+                            {% if escolha_ui.extra_mes %}O mês da sorte fica na coluna ao lado.{% endif %}
+                            Exportar TXT grava as apostas completas, uma por linha.
+                        </p>
+                        <div class="ev-ap-drop mb-2" id="evApostasDrop" tabindex="0">Arraste TXT/CSV aqui · ou cole no campo abaixo</div>
+                        <textarea id="evApostasTexto" class="form-control form-control-sm font-monospace mb-2" rows="4"
+                                  placeholder="02 09 18 21 23 26 28{% if escolha_ui.extra_mes %} Jan{% endif %}&#10;04 07 15 16 22 27 29{% if escolha_ui.extra_mes %} Fev{% endif %}" spellcheck="false"></textarea>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <button type="button" class="btn btn-sm btn-primary" id="evApostasProcessar">Analisar coladas</button>
+                            <label class="btn btn-sm btn-outline-secondary mb-0">
+                                Enviar arquivo
+                                <input type="file" id="evApostasArquivo" accept=".txt,.csv,text/plain,text/csv" hidden>
+                            </label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="evApostasAdd" title="Incluir linhas em branco">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <label class="small mb-0 d-inline-flex align-items-center gap-1">
+                                Qtd
+                                <input type="number" class="form-control form-control-sm" id="evApostasQtd" value="1" min="1" max="500" style="width:4.5rem">
+                            </label>
+                            <button type="button" class="btn btn-sm btn-outline-success" id="evApostasExportar" title="Baixa as apostas completas: dezenas{% if escolha_ui.extra_mes %} e mês abreviado{% endif %}">
+                                <i class="fas fa-file-export"></i> Exportar TXT
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="evApostasLimpar">Limpar</button>
+                            <span class="small text-muted" id="evApostasInfo"></span>
+                        </div>
+                        <p class="small text-danger mb-2 d-none" id="evApostasAviso" role="alert"></p>
+                        <div class="table-responsive ev-basic-table-wrap ev-ap-wrap">
+                            <table class="table table-sm table-bordered ev-basic-table ev-ap-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Dezenas</th>
+                                        {% if escolha_ui.extra_mes %}<th>Mês</th>{% endif %}
+                                        <th>Pares</th>
+                                        <th>Ímpares</th>
+                                        <th>Repetidos</th>
+                                        <th>Sequências</th>
+                                        <th>Finais Iguais</th>
+                                        <th>Diagonais</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="evApostasTabela"></tbody>
+                            </table>
                         </div>
                     </div>
                 </section>
@@ -351,7 +466,7 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visual.js"></script>
-<script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=stat2e"></script>
+<script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=stat2n"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visualizacao.js?v=tub1"></script>
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20261007v1"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20261025v1"></script>
 {% endblock %}

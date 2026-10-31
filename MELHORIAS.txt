@@ -1,139 +1,608 @@
-http://127.0.0.1:5153/analise/resumo-geral/
-Ajustar as outras analises a  este de cima...
+Adicionar cinco  colunas (iguais) fonte menor, tamanho menor
+Uma para contar quantos pares 
+Outra contar quantos impares...
+repetidos, seguencias e diagonais 
 
+Adicionar sempre ao  lado direito  da coluna ex:
+Pares --> Qt
 
-http://127.0.0.1:5153/analise/analises-gerais/
-http://127.0.0.1:5153/analise/analise-tubular/
-http://127.0.0.1:5153/analise/somas-digitos/
-http://127.0.0.1:5153/analise/linhas-dd-du/
-http://127.0.0.1:5153/analise/concentracao-acertos/
+Repetidos --> Qt
+Sequencias --> Qt
+Diagonais --> Qt 
 
+Uma coluna pequena afim de não atrapalhar a tabela como um todo
 
+Obs: se — coloque na contagem (Qt) o  numero  0 (na tabela pois no excel  creio  que não  dá..)
 
+No  final de tudo fazer  um resumo com  as  quantidades... 
+Uma 
 
-AnÃ¡lise por Gaps e RÃ©gua
-http://127.0.0.1:5153/analise/gaps-ciclo/
+-----------------------------------------
+-----------------------------------------
+-----------------------------------------
+-----------------------------------------
+-----------------------------------------
+# PROMPT PROFISSIONAL — AUDITORIA E PADRONIZAÇÃO DA ORDENAÇÃO DAS TABELAS DO SISTEMA
 
-Ajsutar
-http://127.0.0.1:5153/geradores-elite/gerador-digitos-inteligente/
+## 1. Objetivo
 
+Realizar uma auditoria completa nas tabelas do sistema para identificar quais permitem ordenar seus dados clicando diretamente nos títulos das colunas e quais ainda não oferecem esse recurso.
 
+O objetivo é padronizar a experiência de navegação, fazendo com que todas as tabelas compatíveis utilizem o mesmo comportamento visual e funcional já adotado em outras partes do sistema.
 
-USO BASTANTE..
-http://127.0.0.1:5153/geradores-elite/escolha-tubular-apostas/?aba=manual
+**Importante:** antes de realizar qualquer alteração, inspecione o projeto, identifique os padrões existentes e apresente um diagnóstico.
 
+## 2. Auditoria inicial obrigatória
 
+Faça uma varredura no projeto para localizar todas as tabelas HTML e componentes equivalentes, incluindo tabelas geradas dinamicamente por JavaScript ou por bibliotecas de terceiros.
 
-QUASE IGUAIS... 16 DEZENAS
-http://127.0.0.1:5153/geradores-elite/gerador-concentracao/
-http://127.0.0.1:5153/geradores-elite/construtor-construcoes/
+Para cada tabela identificada, verifique:
 
+- Se os títulos das colunas são clicáveis.
+- Se o clique no título ordena os registros daquela coluna.
+- Se existe indicação visual de ordenação crescente ou decrescente, como setas.
+- Se a ordenação funciona para números, textos, datas e valores monetários, conforme o conteúdo da coluna.
+- Se a ordenação respeita os filtros, pesquisas e demais recursos existentes.
+- Se a tabela utiliza paginação ou carregamento dinâmico e se a ordenação funciona corretamente nesses casos.
+- Se existe alguma limitação técnica que impeça a implementação.
+- Se o mesmo recurso já existe em outras tabelas e pode ser reutilizado.
 
-ESTA ANALISE DEVE SERA 4 NO MENU.. (1,2,3,0)
-http://127.0.0.1:5153/geradores-elite/ciclo-apostas/
+Não considere que todas as tabelas precisam obrigatoriamente ser ordenáveis. Identifique também aquelas em que a ordenação não faz sentido ou pode prejudicar o funcionamento.
 
+## 3. Padronização visual e funcional
 
-VER  A POSSIBILIDADE  DE JUNTAR  ESTAS ANALALISES
-http://127.0.0.1:5153/analise/comparar-concursos/?aba=visual
-http://127.0.0.1:5153/analise/escolha-visual/
+Utilize como referência principal as tabelas do próprio sistema que já possuem ordenação pelo clique nos títulos das colunas.
 
+Para as tabelas compatíveis que ainda não possuem o recurso, implemente o mesmo padrão existente, respeitando:
 
-PARECE IGUAL
-http://127.0.0.1:5153/analise/#mes
-http://127.0.0.1:5153/analise/
+1. Clique no título da coluna para ordenar os registros.
+2. Primeiro clique: ordenação crescente.
+3. Segundo clique na mesma coluna: ordenação decrescente.
+4. Indicação visual clara da coluna utilizada e da direção da ordenação, preferencialmente com setas discretas.
+5. Possibilidade de ordenar diferentes colunas individualmente.
+6. Cursor e aparência visual que indiquem que o título é clicável.
+7. Comportamento consistente em todas as páginas e módulos aplicáveis.
 
+A implementação deve respeitar os tipos de dados. Por exemplo, números devem ser ordenados numericamente, e não alfabeticamente. Datas devem seguir a ordem cronológica, e valores monetários devem ser comparados pelo seu valor real.
 
+## 4. Preservação do sistema
 
-Preciso que vc preste a atenÃ§Ã£o no print
-para cada modalidade (atÃ© mesmo para super7)vc vai pegar parte somente do print chamado Cruzamento-diagonais.jpg (para cada modalidade)
-coloque abaixo da modalidade correspondente... 
-Resumindo vc  atÃ©  a rota... http://localhost:8083/ e coloque o resumo Cruzamento Â· diagonais Ã— padrÃµes
-que se encontra na rota http://localhost:5153/analise/analises-inteligentes/ (para cada modalidade) igual ao print que lhe passei
+Não altere desnecessariamente a estrutura, o layout ou o funcionamento das páginas.
 
+Preserve:
 
--------------------------------------------------------------------------
-na rota http://127.0.0.1:5153/analise/analises-inteligentes/
-e medido  "SequÃªncia sorteada em cada concurso" por isso vou pedir para DINAMICAMENTE
-vc destacar o NUMERO do PADRÃƒO para que  nÃ£o seja  escolhido novamente..
-em outras palavras.. 
+- Filtros e campos de pesquisa.
+- Paginação.
+- Botões e ações das linhas.
+- Seleção de registros.
+- Atualização dinâmica dos dados.
+- Cabeçalhos fixos (*sticky headers*), quando existentes.
+- Estilos, cores, espaçamentos e responsividade.
+- Regras de negócio e permissões de acesso.
 
-http://127.0.0.1:5153/analise/analises-inteligentes/ rota seÃ§Ã£o SequÃªncia sorteada em cada concurso vc mede  a sequencia sorteada em cada concurso 
-entÃ£o o numero neste http://127.0.0.1:5153/analise/analises-inteligentes/ correspondente a esta sequencia vc  deve marcar talves com fundo vermelho..
+Evite duplicar códigos de ordenação. Se houver uma função, componente, classe CSS ou solução JavaScript reutilizável no projeto, avalie sua utilização para manter a consistência e facilitar futuras manutenções.
 
+Não introduza bibliotecas externas sem necessidade.
 
-exemplo.. 
-rota http://127.0.0.1:5153/analise/analises-inteligentes/ aba 6
-1316	06/10/2026	0 0 1 1 1 2 2	22.564	01 06 10 16 18 22 29	102	â— Dentro da mÃ©dia
+## 5. Relatório da auditoria
 
-http://127.0.0.1:5153/analise/analises-inteligentes/ aba 5 
-22564	0 0 1 1 1 2 2	01 06 10 16 18 22 29	102	90	8	â†˜18-29 â— Dentro da mÃ©dia	1316jÃ¡ saiu
-MARCADO COM FUNDO VERDE OK (MANTENHA ESTA LÃ“GICA... 
-A UNICA COISA QUE  EU GOSTARIA Ã‰ QUE TIVESSE UM FUNDO VERMELHO SOMENTE EM '22564' POIS DARIA PARA SABER QUE ESTE JA SAIU UM DIA E PELAS ANALISES NÃƒO DEVE SER ESCOLHIDO NOVAMENTE JA QUE ELE  NÃƒO SERÃ MARCADO COM FUNDO VERDE NOVAMENTE.. ME ENTENDES
-OU SENA  O QUE JA SAIU DEVE FICAR DESTACADO SEMPRE MAS SOMENTE O NUMERO OK.. QUE EU APONTEI 
------------------------------------------------------------------------------
-MELHORIAS NA TABELA
-na rota http://127.0.0.1:5153/central-conferencias/#concursos seÃ§Ã£o "FrequÃªncia do ABS â€” pasta inteira"
-preciso  que  vc deixe esta tabela mais profisional
-Centralizar as colunas diferenciar se 0 dos demais  resultados e movimentaÃ§Ã£o conforme passa o mouse e informar com exemplo o valor minimo e o valor mÃ¡ximo de abs possivel
-e destacar o maior valor de "vezes" que saiu o  abs (a quantidade que minhas apostas acertou o abs)
-----------------------------------------------------------------------------------------
-OBSERVE O PRINT E FAREMOS ALGUMAS MELHORIAS.. OK
-ONDE TEM A PALAVRA json acho que nÃ£o precisa aparecer... 
-o mes pode ir na mesma linha  que os  numeros ex: 01 02 03 04 05 06 07 Abr
-A quantidade de  Acertos tbm pode vir na mesma linha que o valor do  acerto ex: 3 acertos R$ 0,00 reais (alias se zero nÃ£o precisa nem mostrar)
-----------------------------------------------
- http://127.0.0.1:5153/geradores-elite/ciclo-apostas/?modo=recorrencia&n=4
+Antes de implementar, apresente um relatório contendo:
 
+- Relação das páginas, rotas ou módulos que possuem tabelas.
+- Identificação de quais tabelas já permitem ordenação.
+- Identificação de quais tabelas são compatíveis, mas ainda não permitem ordenação.
+- Identificação das tabelas que não devem receber esse recurso, com justificativa.
+- Arquivos envolvidos na implementação.
+- Padrão existente que será utilizado como referência.
 
+Organize os resultados em uma tabela com as seguintes colunas:
 
+| Página/rota | Tabela | Situação atual | Recomendação |
+|---|---|---|---|
+| Rota identificada | Nome ou finalidade da tabela | Já ordenável / Não ordenável | Manter / Implementar / Avaliar |
 
+## 6. Implementação e testes
 
+Após a auditoria, implemente a padronização nas tabelas compatíveis, preservando integralmente os recursos existentes.
 
-Na rota: 1
-http://127.0.0.1:5153/geradores-elite/escolha-tubular-apostas/?aba=manual
-Tenho na coluna "Dezenas" a opÃ§Ã£o de manipulÃ¡-las
+Teste, no mínimo:
 
-Na rota: 2
-http://127.0.0.1:5153/analise/analises-inteligentes/
-Tenho  e VisÃ£o "Diagonais"
+- Ordenação crescente e decrescente.
+- Ordenação numérica e textual.
+- Datas e valores monetários, quando aplicáveis.
+- Interação com filtros e pesquisa.
+- Paginação e atualização dos registros, quando existentes.
+- Ausência de erros no console do navegador.
+- Funcionamento das ações e dos botões existentes nas linhas.
+- Consistência visual entre as tabelas.
 
+## 7. Critérios de conclusão
 
-Gostaria de poder manipular  as dezenas (como ja faÃ§o  na rota: 1)e ver as diagonais se formando (com as atualizaÃµes que  ja acontesse)
+Ao finalizar, apresente:
 
-ex: na rota 1 eu tenho  a aposta numero  1 
+1. Resumo da auditoria realizada.
+2. Quantidade de tabelas identificadas, ordenáveis, corrigidas e não aplicáveis.
+3. Lista dos arquivos alterados.
+4. Descrição das implementações realizadas.
+5. Resultado dos testes executados.
+6. Eventuais pendências ou limitações encontradas.
 
-01 04 09 18 21 23 ai eu altero para 02 04 10 19 20 23 os outros  indicadores Seq,Finais,Rept etc se atualizam automaticamente
-gostaria de ter esse mesmo recurso em relaÃ§Ã£o  as diagonais 
-Queria saber o  que vc poderia  fazer para me ajudar..
-mexeria na rota 1 ou rota 2,  PRECISO DE  UM EXEMPLO ANTES  DE FAZER  ALGO
-NÃƒO  FAÃ‡A NADA VAMOS  ALINHAR...  
-----------------------------------------------------
-Como eu sempre estou alterando  as analises... tanto p,l,s,ou str  gostaria de criar uma automaÃ§Ã£o para efetuar  commit
-tenho  vÃ¡rios repositÃ³rio, varias contas ou  seja uma conta para cada  situaÃ§Ã£o
-ex: 
-personal ==> marciofernando.maia@yahoo.com.br
-lotteries ==> loteriascaixa2024@gmail.com
-Work ==> ti.cismetro@gmail.com
-o que vc sugere???
-Queria clicar ter a opÃ§Ã£o de escolher a conta (os app ja relacionado a elas) etc.
+**Diretriz final:** não faça alterações indiscriminadas. Primeiro identifique o padrão já utilizado no sistema, depois avalie cada tabela e implemente somente as melhorias justificadas. O resultado deve ser uma experiência uniforme, intuitiva e consistente em todo o sistema.
 
-ou seja no ultimo concurso o padrÃ£o foi  x e o apostados foram y...
-Observar o que deu por ultimo	08|11  |13  |02
-Observar o que foi apostado		07|1a10|1a10| 
------------------------------------------------------
-Verificar se tem algum lugar onde tem uma analise sobre os digitos...  unico.. como em  
-http://127.0.0.1:5153/analise/analises-inteligentes/
-coluna "Digitos Ord." e "Qtd"
-------------------------------------------------------
+## REGRA OBRIGATÓRIA — PRESERVAÇÃO INTEGRAL DO SISTEMA
 
+**A prioridade máxima é preservar o funcionamento atual do sistema.**
 
------------------------------------------------------precisa a
-na rota http://localhost:5152/central-conferencias
-para todas as modalidades (dia de  sorte  ja ajustado - deve ser usado  como  base)
-precisa ajustar para que somente fique com fundo sutil verde somente as apostas premiadas... mostrar o valor do premio tvm  esta faltando
-este ajuste deve se estender para todas as modalidades usando  as suas caracteriticas...
-neste caso depois que terminar vou testar a modalidade dia  de lotofacil...
-vc pode tbm para fim  de teste colocar  pelo menos 10 apostas em cada modalidade (dia de sorte ja esta ok..
+1. Antes de qualquer alteração, analise a estrutura do projeto e identifique os componentes responsáveis pelas tabelas.
+2. Não altere regras de negócio, rotas, consultas ao banco de dados, modelos, permissões, autenticação ou processamento de dados.
+3. Não remova, renomeie ou substitua funcionalidades existentes.
+4. Não faça refatorações gerais nem alterações fora do escopo desta tarefa.
+5. A auditoria inicial deve ser somente de leitura, sem modificar arquivos.
+6. Antes de implementar, apresente o diagnóstico e identifique os arquivos que realmente precisam ser alterados.
+7. Implemente a ordenação de maneira localizada, preferencialmente reutilizando os recursos já existentes.
+8. Preserve filtros, paginação, botões, formulários, seleções, cabeçalhos fixos e demais interações.
+9. Se a implementação exigir mudanças estruturais ou apresentar risco relevante para outras funcionalidades, interrompa e solicite autorização antes de prosseguir.
+10. Execute os testes disponíveis e verifique se as funcionalidades anteriores continuam funcionando.
 
+**Critério de segurança:** se não for possível garantir que uma alteração está isolada, não a execute sem antes explicar o risco e obter autorização.
 
-as pastas estÃ£o aqui dentro.. D:\Loterias\LoteriasPosicao\conferencia_apostas
+Ao finalizar, informe exatamente o que foi alterado e quais testes foram realizados. Não declare que tudo está funcionando se isso não tiver sido verificado.
+## 8. REGRA INEGOCIÁVEL — AUTORIZAÇÃO PRÉVIA DO DESENVOLVEDOR
+
+**É EXPRESSAMENTE PROIBIDO INICIAR QUALQUER IMPLEMENTAÇÃO OU ALTERAÇÃO DE CÓDIGO SEM A MINHA AUTORIZAÇÃO EXPLÍCITA E FINAL.**
+
+O trabalho deverá seguir obrigatoriamente estas etapas:
+
+**FASE 1 — AUDITORIA**
+- Inspecionar o projeto e identificar as tabelas existentes.
+- Analisar os padrões de ordenação já implementados.
+- Não modificar nenhum arquivo nesta fase.
+
+**FASE 2 — DIAGNÓSTICO E PLANO DE AÇÃO**
+- Apresentar o relatório completo da auditoria.
+- Informar quais tabelas precisam de melhorias.
+- Identificar os arquivos que seriam alterados.
+- Explicar a solução técnica proposta.
+- Avaliar os riscos e os possíveis impactos nas funcionalidades existentes.
+- Apresentar os testes previstos.
+
+**FASE 3 — AGUARDAR AUTORIZAÇÃO**
+Após apresentar o diagnóstico e o plano de ação, interrompa o trabalho e aguarde minha avaliação.
+
+Não implemente, não edite, não crie, não exclua e não substitua arquivos antes da minha autorização explícita.
+
+Não interprete silêncio, continuidade da conversa ou pedidos de esclarecimento como autorização para implementar.
+
+**FASE 4 — IMPLEMENTAÇÃO AUTORIZADA**
+Somente após minha aprovação explícita, execute as alterações que foram autorizadas, respeitando rigorosamente o escopo aprovado.
+
+Se identificar a necessidade de qualquer alteração adicional não prevista no plano aprovado, interrompa essa parte do trabalho e solicite nova autorização.
+
+**FASE 5 — TESTES E RELATÓRIO FINAL**
+Após a implementação autorizada, execute os testes pertinentes, verifique a preservação das funcionalidades existentes e apresente os arquivos modificados, os resultados dos testes e eventuais pendências.
+
+### REGRA FINAL
+
+Minha autorização é obrigatória para iniciar a codificação. Sua função inicial é exclusivamente auditar, analisar, diagnosticar e propor. A decisão de implementar pertence a mim.
+-----------------------------------------
+-----------------------------------------
+-----------------------------------------
+-----------------------------------------
+FALTA  EXECUTAR ESTE PROMPT ABAIXO
+-----------------------------------------
+O PROMPT ABAIXO DE SER USADO  PARA ATUALIZAR A SEGUINTE ROTA.
+https://marciofernandomaia.com.br/centralmodalidades/m/diadesorte/analise/resumo-geral/
+
+# PROMPT PROFISSIONAL — AUDITORIA E PLANEJAMENTO DE ANÁLISES ESTATÍSTICAS DAS LOTERIAS
+
+## 1. Contexto do projeto
+
+Tenho um sistema desenvolvido em Python para análise estatística de resultados das loterias da Caixa Econômica Federal, com diferentes modalidades, telas de análise, tabelas, estatísticas e recursos de exportação para Excel.
+
+A aplicação já possui uma infraestrutura de execução configurada no Windows, com serviços, Nginx e Cloudflare Tunnel. Existem dois ambientes principais:
+
+- **Ambiente de produção:** `marciofernandomaia.com.br`
+- **Ambiente de testes:** `teste.marciofernandomaia.com.br`
+
+A infraestrutura atual está configurada e funcionando. Portanto, o objetivo desta tarefa não é modificar a infraestrutura, os serviços do Windows, o Nginx, o Cloudflare Tunnel, as rotas de acesso ou os mecanismos de publicação.
+
+O objetivo é realizar uma **auditoria funcional e estatística das análises existentes**, identificar oportunidades de melhoria e planejar a consolidação dessas informações para apoiar a elaboração de apostas.
+
+## 2. REGRA OBRIGATÓRIA: NÃO ALTERAR O SISTEMA SEM AUTORIZAÇÃO
+
+Antes de qualquer implementação, cumpra rigorosamente as seguintes determinações:
+
+1. Inspecione a estrutura atual do projeto, os módulos Python, as rotas Flask, os templates, os arquivos JavaScript, as consultas ao banco de dados e a documentação existente.
+2. Identifique quais análises já estão implementadas, quais funcionam corretamente, quais apresentam limitações e quais ainda precisam ser desenvolvidas.
+3. Reaproveite os recursos existentes sempre que possível, evitando duplicidade de código, cálculos e telas.
+4. Não modifique arquivos, não crie novas funcionalidades, não altere o banco de dados e não execute migrações nesta etapa.
+5. Não faça alterações em produção nem em configurações de infraestrutura.
+6. Não remova, substitua ou simplifique funcionalidades existentes.
+7. Preserve integralmente os menus, as abas, as rotas, os filtros, os relatórios, os cálculos e o comportamento atual do sistema.
+8. Não considere uma funcionalidade ausente sem antes verificar toda a aplicação, inclusive recursos existentes em outras abas ou menus.
+9. Apresente um relatório técnico com as conclusões e uma proposta de implementação organizada por etapas.
+10. **Aguarde minha avaliação e autorização expressa antes de começar a codificar.**
+
+Nesta fase, a tarefa é exclusivamente de auditoria, diagnóstico e planejamento.
+
+---
+
+## 3. Auditoria das análises estatísticas por modalidade
+
+Verifique quais das análises a seguir já existem e como estão implementadas.
+
+### 3.1. Análise de frequência por posição ou faixa numérica
+
+No Dia de Sorte, por exemplo, as dezenas são distribuídas em quatro faixas:
+
+- Linha 1: dezenas de 01 a 10.
+- Linha 2: dezenas de 11 a 20.
+- Linha 3: dezenas de 21 a 30.
+- Linha 4: dezena 31.
+
+A análise deve permitir identificar, considerando o histórico de concursos:
+
+- Quais dezenas aparecem com maior frequência em cada linha.
+- Quais dezenas aparecem com menor frequência em cada linha.
+- Quantas vezes cada dezena foi sorteada em sua respectiva faixa.
+- Qual é a distribuição dos sorteios entre as linhas.
+- Quais são as frequências e os percentuais de ocorrência.
+
+A linha 4 do Dia de Sorte contém somente a dezena 31. Nesse caso, não existe uma comparação entre várias dezenas dentro dessa linha, mas é possível analisar a frequência histórica da dezena 31.
+
+Verifique se a lógica atual está correta e se a mesma ideia pode ser aplicada, com as devidas adaptações, às demais modalidades.
+
+Não imponha a mesma divisão numérica a todas as loterias: cada modalidade possui regras e universos de dezenas próprios.
+
+### 3.2. Análise de diagonais do volante
+
+Audite a análise das diagonais do volante e verifique se o sistema consegue identificar:
+
+- Quantas dezenas sorteadas pertencem a diagonais reconhecidas no volante.
+- Quantas duplas de dezenas aparecem na mesma diagonal.
+- Quantas trincas aparecem na mesma diagonal.
+- Quantos agrupamentos de duas, três ou mais dezenas são encontrados.
+- A frequência histórica dessas ocorrências.
+- A quantidade de diagonais utilizadas em cada concurso.
+- A distribuição estatística desses agrupamentos ao longo do histórico.
+
+É importante diferenciar a quantidade de dezenas presentes em diagonais, a quantidade de diagonais ocupadas e a quantidade de agrupamentos encontrados.
+
+A definição geométrica de diagonal deve corresponder ao volante efetivamente utilizado pela modalidade. Não invente uma regra geométrica nem presuma que todas as modalidades utilizam o mesmo desenho.
+
+Se a análise já existir, verifique sua consistência e a possibilidade de aproveitar seus cálculos em outros relatórios.
+
+### 3.3. Soma das dezenas sorteadas
+
+Verifique se o sistema calcula a soma de todas as dezenas de cada concurso.
+
+Exemplo ilustrativo para o Dia de Sorte:
+
+Dezenas: 01, 04, 09, 20, 21, 26 e 28.
+
+Soma: 109.
+
+O sistema deve permitir analisar:
+
+- Soma individual de cada concurso.
+- Menor e maior soma observadas.
+- Média histórica.
+- Mediana, quando aplicável.
+- Distribuição das somas por faixas.
+- Frequência das somas e sua evolução histórica.
+- Distância entre a soma de um concurso e a média histórica.
+
+Avalie a possibilidade de classificar as somas em três grupos:
+
+- Abaixo da média.
+- Próximas ou dentro de uma faixa definida em torno da média.
+- Acima da média.
+
+A definição de “próxima da média” deverá ser fundamentada em um critério estatístico explícito, configurável ou aprovado por mim. Não estabeleça limites arbitrários sem justificativa.
+
+### 3.4. Análise de pares e ímpares
+
+Verifique se o sistema apresenta a distribuição de pares e ímpares por concurso.
+
+A análise deve permitir identificar:
+
+- Quantidade de dezenas pares.
+- Quantidade de dezenas ímpares.
+- Frequência de cada distribuição possível.
+- Percentual de ocorrência de cada distribuição.
+- Evolução histórica dessas distribuições.
+- Comparação com o último concurso.
+- Frequência histórica de padrões como 3 pares e 4 ímpares, por exemplo, quando aplicável à quantidade de dezenas da modalidade.
+
+Os cálculos devem respeitar a quantidade de dezenas sorteadas em cada modalidade.
+
+### 3.5. Análise de sequências consecutivas
+
+Verifique se o sistema identifica sequências de dezenas consecutivas, como 06–07–08 ou 21–22.
+
+Avalie a possibilidade de apresentar:
+
+- Quantidade de sequências por concurso.
+- Tamanho de cada sequência.
+- Quantidade de duplas, trincas e sequências maiores.
+- Concursos sem sequências consecutivas.
+- Frequência histórica de cada padrão.
+- Comparação entre concursos.
+
+Não confunda dezenas consecutivas numericamente com dezenas posicionadas em diagonais no volante. São análises diferentes.
+
+### 3.6. Análise de finais iguais
+
+Verifique se o sistema identifica dezenas com o mesmo algarismo final.
+
+Exemplos:
+
+- Final 0: 10, 20 e 30.
+- Final 1: 01, 11 e 21.
+- Final 7: 07, 17 e 27.
+
+Avalie a apresentação de:
+
+- Quantidade de dezenas por final.
+- Finais repetidos em cada concurso.
+- Quantidade de grupos com finais iguais.
+- Frequência histórica dessas ocorrências.
+- Distribuição dos finais de 0 a 9, respeitando os limites de cada modalidade.
+
+### 3.7. Análise dos dígitos finais ou dígitos únicos
+
+Audite a análise dos algarismos de 0 a 9 presentes nas dezenas sorteadas.
+
+Verifique se o sistema permite identificar:
+
+- Quantas dezenas possuem cada algarismo final.
+- Quantos finais diferentes aparecem em cada concurso.
+- Quantas vezes um mesmo final se repete.
+- Quais concursos apresentam maior diversidade de finais.
+- A frequência histórica de cada distribuição.
+
+Diferencie a quantidade de dezenas com determinado final da quantidade de finais distintos presentes no concurso.
+
+### 3.8. Análise de ciclos
+
+Verifique a análise de ciclos já existente para cada modalidade.
+
+O relatório deverá permitir identificar:
+
+- Ciclo atual.
+- Quantidade de dezenas distintas já sorteadas no ciclo.
+- Dezenas que ainda não apareceram no ciclo.
+- Percentual de conclusão.
+- Concursos transcorridos no ciclo.
+- Histórico de duração dos ciclos anteriores.
+- Quantidade de dezenas que faltam para completar o ciclo.
+
+A definição de ciclo deverá respeitar as regras de cada modalidade e a implementação atual do sistema.
+
+Não altere a lógica existente sem apresentar previamente uma justificativa e solicitar autorização.
+
+### 3.9. Análise do concurso atual e comparação histórica
+
+Verifique a existência de uma análise individual de cada concurso que apresente, quando aplicável:
+
+- Número do concurso.
+- Data do sorteio.
+- Dezenas sorteadas.
+- Pares e ímpares.
+- Soma das dezenas.
+- Sequências consecutivas.
+- Finais iguais.
+- Distribuição por linhas ou faixas.
+- Diagonais.
+- Dígitos finais.
+- Situação do ciclo.
+
+Avalie também a comparação do concurso atual com o concurso anterior e com padrões históricos.
+
+---
+
+## 4. Auditoria da análise tabular e da análise visual
+
+Existe uma funcionalidade recente no menu de análise que apresenta informações em formato tabular e visual.
+
+Localize essa funcionalidade e examine sua estrutura antes de propor qualquer alteração.
+
+Verifique especialmente:
+
+1. Em qual menu e aba a funcionalidade está localizada.
+2. Se existem seções de estatísticas expandidas ou recolhidas.
+3. Se a tabela apresenta data, número do concurso e dezenas sorteadas.
+4. Se há indicação visual das dezenas pares e ímpares.
+5. Se as sequências consecutivas são identificadas.
+6. Se os finais iguais são destacados.
+7. Se a interação com a tabela funciona corretamente.
+8. Se os dados são calculados corretamente para todos os concursos.
+9. Se a funcionalidade possui filtros, ordenação e paginação.
+10. Se os dados exibidos correspondem aos dados efetivamente armazenados no banco.
+
+Verifique também se a análise tabular e a análise visual podem aproveitar a mesma base de cálculos, sem duplicação desnecessária.
+
+Não remova nem reorganize abas, menus ou seções existentes nesta fase.
+
+---
+
+## 5. Auditoria das exportações para Excel
+
+Foi solicitado anteriormente que os dados das análises pudessem ser exportados para Excel.
+
+Verifique o que já foi implementado e identifique:
+
+- Quais análises podem ser exportadas atualmente.
+- Quais modalidades possuem exportação individual.
+- Se os arquivos contêm os mesmos dados apresentados na tela.
+- Se os cálculos estatísticos são preservados na exportação.
+- Se existem cabeçalhos, filtros, formatação e nomes de planilhas adequados.
+- Se os arquivos são gerados corretamente para todo o histórico disponível.
+- Se existem limitações de desempenho ou problemas com grandes volumes de dados.
+
+A auditoria deverá considerar a possibilidade de organizar os relatórios em duas etapas.
+
+### Etapa A — Arquivos individuais por modalidade
+
+Avaliar a geração de um arquivo Excel independente para cada modalidade, com suas respectivas análises e histórico.
+
+### Etapa B — Relatório consolidado de todas as modalidades
+
+Avaliar a criação de um arquivo Excel único contendo as informações resumidas de todas as modalidades.
+
+O relatório consolidado deverá respeitar as particularidades de cada loteria, sem misturar regras, universos numéricos ou indicadores incompatíveis.
+
+Modalidades a considerar:
+
+- Mega-Sena.
+- Quina.
+- Lotofácil.
+- Lotomania.
+- Timemania.
+- Dia de Sorte.
+- Dupla Sena.
+- Super Sete.
+- +Milionária.
+
+Verifique a nomenclatura utilizada no sistema e confirme se todas essas modalidades estão efetivamente cadastradas e possuem dados disponíveis.
+
+Não inclua Loteca ou Loteria Federal nessa proposta, salvo se identificar alguma dependência já existente que precise ser relatada.
+
+---
+
+## 6. Proposta de um painel consolidado para apoiar a análise das apostas
+
+Meu objetivo futuro é consultar, em um único local, um resumo estatístico de cada modalidade para embasar a avaliação das apostas que pretendo realizar.
+
+Por exemplo, ao selecionar dez apostas para uma modalidade, gostaria de consultar informações como:
+
+- Situação atual do ciclo e dezenas que faltam.
+- Frequência histórica das dezenas.
+- Distribuição por pares e ímpares.
+- Soma das dezenas e distância em relação à média.
+- Quantidade de sequências consecutivas.
+- Distribuição dos finais.
+- Quantidade de finais distintos.
+- Distribuição por linhas e diagonais, quando aplicável.
+- Características do último concurso.
+- Frequência histórica dos diferentes padrões.
+- Comparação entre o último concurso e o histórico.
+
+Audite se já existe um resumo por modalidade e identifique se é possível aproveitar, integrar ou aprimorar essa funcionalidade.
+
+A proposta é que cada modalidade tenha um resumo coerente com suas regras e, posteriormente, que exista uma visão consolidada para facilitar a consulta.
+
+O painel deverá apresentar indicadores objetivos, filtros e tabelas claras, permitindo que eu avalie os dados antes de elaborar minhas apostas.
+
+**Importante:** as estatísticas históricas servem para descrever resultados anteriores e apoiar análises. Elas não garantem resultados futuros nem tornam uma dezena mais provável em um sorteio independente.
+
+---
+
+## 7. Auditoria da estrutura técnica e da qualidade dos cálculos
+
+Antes de recomendar qualquer desenvolvimento, verifique:
+
+- Onde cada análise está implementada.
+- Quais funções calculam os indicadores.
+- Quais rotas e templates apresentam os resultados.
+- Quais consultas ao banco de dados são utilizadas.
+- Se existem cálculos duplicados.
+- Se os mesmos indicadores apresentam resultados diferentes em telas distintas.
+- Se há testes automatizados para validar os cálculos.
+- Se os arquivos Excel utilizam a mesma lógica da interface.
+- Se o histórico de concursos está completo e atualizado.
+- Se existem diferenças de nomenclatura entre modalidades.
+- Se o desempenho é adequado para o histórico completo.
+
+Sempre que possível, identifique os arquivos e as funções envolvidos, sem modificá-los.
+
+Caso encontre divergências, descreva o problema, apresente um exemplo reproduzível e explique o impacto potencial.
+
+Não corrija nada nesta etapa.
+
+---
+
+## 8. Entregáveis obrigatórios da auditoria
+
+Ao concluir a inspeção, apresente um relatório organizado nas seguintes seções:
+
+### A. Diagnóstico geral
+
+Resumo do estado atual das análises e dos relatórios.
+
+### B. Matriz de funcionalidades
+
+Utilize uma tabela com as colunas:
+
+| Funcionalidade | Modalidade | Situação atual | Arquivos envolvidos | Problema ou oportunidade |
+|---|---|---|---|---|
+
+Utilize estados objetivos, como:
+
+- Implementada e validada.
+- Implementada, mas precisa de validação.
+- Parcialmente implementada.
+- Não localizada.
+- Não aplicável à modalidade.
+
+Não marque uma análise como ausente antes de pesquisar toda a estrutura relevante.
+
+### C. Divergências e riscos identificados
+
+Liste os problemas encontrados, suas causas prováveis e seus impactos, distinguindo fatos comprovados de hipóteses.
+
+### D. Oportunidades de reaproveitamento
+
+Identifique funções, componentes, tabelas, consultas e relatórios que possam ser aproveitados sem duplicação.
+
+### E. Proposta de arquitetura
+
+Apresente uma proposta para organizar os cálculos estatísticos, a interface, as exportações individuais e o relatório consolidado.
+
+A proposta deverá priorizar a reutilização de componentes e a separação entre regras comuns e regras específicas de cada modalidade.
+
+### F. Plano de implementação por etapas
+
+Organize as possíveis melhorias em etapas independentes, por exemplo:
+
+1. Validação das análises existentes.
+2. Correção de eventuais divergências, se autorizada.
+3. Complementação das análises ausentes.
+4. Auditoria e aprimoramento da análise tabular e visual.
+5. Padronização das exportações individuais.
+6. Planejamento e implementação do relatório consolidado.
+7. Planejamento do painel de resumo por modalidade.
+8. Testes de regressão e validação final.
+
+A ordem definitiva deverá ser proposta com base nas descobertas reais da auditoria.
+
+### G. Critérios de aceitação
+
+Defina como será possível comprovar que cada funcionalidade está correta, incluindo testes de cálculos, consistência entre telas e Excel, preservação das rotas e ausência de regressões.
+
+### H. Decisões pendentes de minha aprovação
+
+Apresente claramente as decisões que dependem de mim, incluindo regras estatísticas que não estejam definidas, limites para classificação de somas e prioridades de implementação.
+
+---
+
+## 9. Condição final obrigatória
+
+Ao terminar, apresente somente o relatório de auditoria e o plano de implementação recomendado.
+
+**NÃO ESCREVA CÓDIGO, NÃO EDITE ARQUIVOS E NÃO EXECUTE ALTERAÇÕES.**
+
+Aguarde minha leitura, avaliação e autorização expressa para a próxima etapa.
+
+Somente após minha aprovação você poderá iniciar a implementação, respeitando rigorosamente o escopo aprovado e apresentando as alterações de forma controlada, com testes e validação para preservar o funcionamento de todo o sistema.
+-----------------------------------------
+-----------------------------------------
+-----------------------------------------
+-----------------------------------------
+FALTA  EXECUTAR ESTE PROMPT ACIMA
+-----------------------------------------
+o ajuste  será na  rota https://marciofernandomaia.com.br/centralmodalidades/m/diadesorte/analise/comparar-concursos/
+indicadores x sorteios anteriores
+veja print figura1.jpg
+quero  saber  se vc pode fixar o titulo na linha  onde esta o Super ou seja quando rolar para baixo o linha onde esta escrito super fique sempre vizivel/congelada
+respona sim ou não e quando tiver a resposta  eu dou ardem para implementar

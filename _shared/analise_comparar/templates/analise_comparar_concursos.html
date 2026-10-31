@@ -121,16 +121,26 @@
     .volante-sorteio-cell { cursor: pointer; }
     .extra-panel { background: #f8f9fa; border-radius: 8px; padding: .75rem; margin-top: 1rem; }
 
+    #ixCard { width: 100%; max-width: 100%; min-width: 0; }
     .ix-wrap { overflow: auto; max-width: 100%; max-height: min(70vh, 56rem); }
     .ix-table {
-        border-collapse: collapse; width: max-content; min-width: 100%;
+        border-collapse: separate; border-spacing: 0;
+        width: max-content; min-width: 100%;
         font-size: .72rem; font-variant-numeric: tabular-nums;
     }
     .ix-table th, .ix-table td {
-        border: 1px solid #d9d9d9; text-align: center; vertical-align: middle;
+        border: 0 solid #d9d9d9; border-width: 0 1px 1px 0;
+        text-align: center; vertical-align: middle;
         padding: 0; line-height: 1;
     }
+    .ix-table tr > :first-child { border-left-width: 1px; }
+    .ix-table thead tr:first-child > * { border-top-width: 1px; }
+    .ix-table thead {
+        position: sticky; top: 0; z-index: 5; background: #f3f3f3;
+    }
+    .ix-table tr.ix-super-row { position: sticky; top: 0; z-index: 4; }
     .ix-table thead th {
+        position: sticky; z-index: 4;
         background: #f3f3f3; font-weight: 800; color: #333;
         padding: .35rem .25rem; white-space: nowrap;
     }
@@ -139,7 +149,22 @@
         min-width: 4.4rem; max-width: 6.5rem; padding: .35rem .4rem !important;
         font-weight: 800; color: var(--primary); text-align: left !important;
     }
-    thead .ix-sticky-col { z-index: 3; background: #f3f3f3; }
+    thead .ix-sticky-col { z-index: 6; background: #f3f3f3; }
+    .ix-nums-gap { background: #f3f3f3; }
+    .ix-table tr.ix-super-row > th,
+    .ix-table tr.ix-super-row > td {
+        position: sticky; z-index: 3; background-color: #fff;
+        border-top-width: 1px;
+        box-shadow: inset 0 -2px 0 #e4c84a;
+    }
+    .ix-table tr.ix-super-row > .ix-sticky-col { z-index: 5; background-color: #fff8dc; }
+    .ix-table tr.ix-linha-foco > th,
+    .ix-table tr.ix-linha-foco > td {
+        box-shadow: inset 0 2px 0 #146c43, inset 0 -2px 0 #146c43;
+    }
+    .ix-table tr.ix-linha-foco > .ix-sticky-col { background: #d1e7dd; }
+    .ix-table tr.ix-super-row > td.ix-indicado { background-color: #ffe566; }
+    .ix-table tr.ix-super-row > .ix-acertos-h { background-color: #ececec; }
     .ix-span-nums { letter-spacing: .04em; }
     .ix-acertos-h {
         background: #ececec; min-width: 4.6rem; padding: .35rem .3rem !important;
@@ -188,8 +213,70 @@
     }
     .ix-rank-resumo { margin-bottom: .45rem; }
     .ix-rank-resumo strong { color: var(--primary); }
+    .ix-rank-corpo {
+        display: grid;
+        grid-template-columns: auto auto;
+        justify-content: center;
+        align-items: center;
+        column-gap: 2.75rem;
+        row-gap: 1rem;
+        width: 100%;
+    }
+    .ix-atalhos {
+        display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+        gap: .85rem; margin: 0; padding: 0;
+        text-align: left;
+    }
+    .ix-atalho-grupo {
+        display: flex; flex-direction: column; align-items: flex-start;
+        gap: .4rem;
+    }
+    .ix-atalhos-rot {
+        font-size: .72rem; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: #888;
+    }
+    .ix-atalhos a {
+        display: block;
+        font-size: .95rem; font-weight: 700; line-height: 1.2;
+        color: var(--primary); text-decoration: none;
+    }
+    .ix-atalhos a:hover { text-decoration: underline; }
+    @media (max-width: 720px) {
+        .ix-rank-corpo { grid-template-columns: 1fr; justify-items: center; }
+        .ix-atalhos, .ix-atalho-grupo { align-items: center; text-align: center; }
+    }
+    .ix-freq-resumo { text-align: center; font-size: .86rem; color: #444; margin-bottom: .7rem; }
+    .ix-freq-resumo strong { color: var(--primary); }
+    .ix-super-faixa, .ix-todas {
+        display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem;
+    }
+    .ix-super-chip, .ix-todas-chip {
+        text-align: center; line-height: 1.15; border-radius: 8px;
+    }
+    .ix-super-chip {
+        min-width: 3.15rem; padding: .3rem .35rem .34rem;
+        background: #ffe566; border: 1px solid #e4c84a;
+    }
+    .ix-super-chip .n, .ix-todas-chip .n { display: block; font-weight: 800; }
+    .ix-super-chip .n { font-size: .95rem; }
+    .ix-super-chip .t { display: block; font-size: .62rem; color: #666; text-transform: uppercase; letter-spacing: .03em; }
+    .ix-super-chip .q, .ix-todas-chip .q { display: block; font-weight: 800; }
+    .ix-super-chip .q { font-size: .78rem; }
+    .ix-super-chip.mais { box-shadow: inset 0 0 0 2px #198754; }
+    .ix-super-chip.menos { box-shadow: inset 0 0 0 2px #dc3545; }
+    .ix-todas-tit {
+        text-align: center; font-size: .78rem; font-weight: 700; color: #666;
+        margin: .9rem 0 .45rem; letter-spacing: .02em;
+    }
+    .ix-todas-chip {
+        width: 2.65rem; padding: .2rem 0 .24rem;
+        background: #fff; border: 1px solid #e3e3e3;
+    }
+    .ix-todas-chip.super { background: #ffe566; border-color: #e4c84a; }
+    .ix-todas-chip .n { font-size: .78rem; }
+    .ix-todas-chip .q { font-size: .68rem; color: #444; }
     .ix-cmp {
-        margin: .35rem auto 0; border-collapse: collapse;
+        margin: 0; border-collapse: collapse;
         font-size: .78rem; font-variant-numeric: tabular-nums;
     }
     .ix-cmp th, .ix-cmp td {
@@ -210,6 +297,7 @@
         border: 1px solid #d9d9d9; padding: .32rem .45rem; text-align: right; white-space: nowrap;
     }
     .auto-tbl th { background: #f3f3f3; font-weight: 800; color: #333; }
+    .auto-tbl th[title], .auto-tbl td[title], #autoCard [title] { cursor: help; }
     .auto-tbl td.auto-lbl, .auto-tbl th.auto-lbl { text-align: left; }
     .auto-tbl .auto-col7 {
         background: #fff3b0; font-weight: 900; color: #5c4300;
@@ -249,6 +337,27 @@
     }
     .auto-conc:hover { background: #fff6c2; border-color: #e6c200; }
     .auto-conc.auto-conc-on { background: #ffe566; border-color: #c4a818; }
+    #m15Card .m15-rank,
+    #m15Card .m15-dez,
+    #m15Card .m15-media {
+        width: 1%; white-space: nowrap;
+        padding-left: .16rem; padding-right: .16rem;
+    }
+    #m15Card .m15-dez { text-align: left; }
+    #m15Card td.m15-dez-larga { white-space: normal; }
+    #m15Card .m15-dez .auto-dez {
+        min-width: 1.42rem; margin: 1px 0; padding: 0 .08rem;
+    }
+    #m15Card .m15-concs {
+        text-align: left; white-space: normal;
+        font-size: .62rem; line-height: 1.45; font-weight: 700;
+    }
+    #m15Card a.m15-conc {
+        color: var(--primary); font-weight: 700; text-decoration: none;
+        margin-right: .32rem; white-space: nowrap;
+    }
+    #m15Card a.m15-conc:hover,
+    #m15Card a.m15-conc-on { text-decoration: underline; }
 
     #compAbas .nav-link, #cvVista .nav-link { color: var(--primary); font-weight: 700; }
     #compAbas .nav-link.active, #cvVista .nav-link.active {
@@ -553,7 +662,7 @@
     </div>
 </div>
 
-<div class="card shadow-sm mb-3">
+<div class="card shadow-sm mb-3" id="cardDoisConcursos">
     <div class="card-body">
         {% if cfg.modos | length > 1 %}
         <div class="comp-bar">
@@ -630,9 +739,10 @@
                     </div>
                 </div>
                 <div class="comparar-meio">
-                    <button class="btn btn-primary btn-sm mb-3" id="btnComparar">
+                    <button class="btn btn-primary btn-sm mb-2" id="btnComparar">
                         <i class="fas fa-sync-alt me-1"></i> Comparar
                     </button>
+                    <div id="avisoParConcursos" class="alert alert-warning py-2 px-2 small mb-2" style="display:none;" role="status"></div>
                     <div class="small text-muted mb-1">Repetidas</div>
                     <div class="resumo-qtd" id="resumoQtd">—</div>
                     <div class="small fw-bold text-muted mb-2" id="resumoModoLbl">—</div>
@@ -642,8 +752,9 @@
                 </div>
                 <div>
                     <div class="volante-head">
-                        <label class="form-label small mb-0" for="selConcursoB">Concurso B (mais recente)</label>
-                        <select class="form-select form-select-sm" id="selConcursoB"></select>
+                        <label class="form-label small mb-0" for="selConcursoB">Concurso B (seguinte ao A)</label>
+                        <select class="form-select form-select-sm" id="selConcursoB" disabled
+                            title="Definido automaticamente: o concurso imediatamente mais recente que o A."></select>
                         {% if cfg.dual_sorteio %}
                         <label class="form-label small mb-0 mt-1" for="selSorteioB">Sorteio B</label>
                         <select class="form-select form-select-sm" id="selSorteioB">
@@ -675,11 +786,18 @@
     <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
         style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
         <span><i class="fas fa-table me-2"></i>Indicados × sorteios anteriores</span>
-        <button type="button" class="btn btn-sm ms-auto" id="ixBtnAjuda"
-            style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);"
-            title="Como ler esta análise">
-            <i class="fas fa-circle-question me-1"></i>Como usar
-        </button>
+        <div class="ms-auto d-flex flex-wrap align-items-center gap-2">
+            <a class="btn btn-sm" id="ixBtnVoltar" href="#"
+                style="display:none;background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);"
+                title="Voltar para a origem da indicação">
+                <i class="fas fa-arrow-left me-1"></i>Voltar
+            </a>
+            <button type="button" class="btn btn-sm" id="ixBtnAjuda"
+                style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);"
+                title="Como ler esta análise">
+                <i class="fas fa-circle-question me-1"></i>Como usar
+            </button>
+        </div>
     </div>
     <div class="px-3 pt-2 pb-0" id="ixAjudaBox" style="display:none;">
         <p class="small text-muted mb-2">
@@ -694,19 +812,7 @@
     <div class="ix-rank" id="ixRanking"></div>
     <div class="ix-wrap">
         <table class="ix-table" id="ixTabela">
-            <thead>
-                <tr>
-                    <th class="ix-sticky-col"></th>
-                    <th class="ix-span-nums" id="ixThIndicados" colspan="1">INDICADO</th>
-                    <th class="ix-acertos-h" colspan="2">ACERTOS</th>
-                </tr>
-                <tr>
-                    <th class="ix-sticky-col"></th>
-                    <th class="ix-nums-head" id="ixThNums" colspan="1"></th>
-                    <th class="ix-acertos-h">Indicado</th>
-                    <th class="ix-acertos-h">Ñ indicado</th>
-                </tr>
-            </thead>
+            <thead></thead>
             <tbody id="ixTbody">
                 <tr><td colspan="4" class="text-muted text-center py-3">Carregando…</td></tr>
             </tbody>
@@ -714,20 +820,33 @@
     </div>
 </div>
 
-{% if cfg.layout != 'colunas' and (cfg.dezena_max - cfg.dezena_min + 1) >= 15 %}
+{% if cfg.layout != 'colunas' %}
+<div class="card shadow-sm mb-3" id="ixFreqCard">
+    <div class="card-header fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <i class="fas fa-balance-scale me-2"></i>Dezenas SUPER — pares, ímpares e frequência
+    </div>
+    <div class="px-3 py-3" id="ixPainelFreq">
+        <div class="text-muted small text-center">Carregando frequência…</div>
+    </div>
+</div>
+{% endif %}
+
+{% if cfg.layout != 'colunas' and (cfg.sorteadas | int) <= 15 and (cfg.dezena_max - cfg.dezena_min + 1) >= 15 %}
 <div class="card shadow-sm mb-3" id="autoCard">
     <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
         style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
-        <span><i class="fas fa-list-ol me-2"></i>Combinações automáticas — desempenho histórico</span>
+        <span title="Testa grupos de 15 dezenas no histórico já sorteado. A coluna 7 conta concursos em que as 7 sorteadas estavam todas dentro do grupo. A coluna 6 conta quando faltou só uma. Não prevê o próximo concurso."><i class="fas fa-list-ol me-2"></i>Combinações automáticas — desempenho histórico</span>
     </div>
     <div class="px-3 pt-2 small text-muted">
-        Pools de <strong>15 dezenas</strong>, gerados com regras já existentes (frequência, atraso, concentração).
-        Teste na base histórica completa. Ranking: <strong>7 acertos</strong> (prêmio principal), depois <strong>6</strong>.
+        Pools de <strong title="Um grupo fechado de 15 dezenas. O jogo simples continua com as dezenas sorteadas; a tabela mede quantas delas cabem neste grupo.">15 dezenas</strong>, gerados com regras já existentes (frequência, atraso, concentração).
+        Teste na base histórica completa. Ranking: <strong title="Quantos concursos tiveram as 7 dezenas sorteadas todas dentro das 15. Quem tem mais desses concursos fica em primeiro.">7 acertos</strong> (prêmio principal), depois <strong title="Quantos concursos tiveram 6 das 7 sorteadas dentro das 15. Serve para desempatar.">6</strong>.
         A indicação SUPER manual não é alterada.
         <span class="d-block mt-1">Resultado histórico — não é previsão do próximo concurso.</span>
     </div>
     <div class="px-3 py-2 d-flex flex-wrap align-items-center gap-2">
-        <button type="button" class="btn btn-sm btn-primary" id="autoBtnGerar">
+        <button type="button" class="btn btn-sm btn-primary" id="autoBtnGerar"
+            title="Monta os grupos de 15 e conta, em cada concurso já sorteado, quantas dezenas do resultado estavam no grupo.">
             <i class="fas fa-play me-1"></i> Gerar e testar
         </button>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="autoBtnExport" disabled>
@@ -738,6 +857,17 @@
     <div class="auto-wrap px-2 pb-3" id="autoWrap">
         <div class="text-muted small text-center py-3">Clique em <strong>Gerar e testar</strong> para montar o ranking.</div>
     </div>
+</div>
+{% endif %}
+
+{% if cfg.layout != 'colunas' and (cfg.pick_max | int) >= (cfg.sorteadas | int) and (cfg.pick_max | int) >= 1 and (cfg.dezena_max - cfg.dezena_min + 1) >= (cfg.pick_max | int) %}
+<div class="card shadow-sm mb-3" id="m15Card">
+    <div class="card-header fw-bold"
+        style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
+        <span title="Procura grupos de {{ cfg.pick_max }} dezenas — o máximo que esta modalidade permite apostar — que, no histórico, mais vezes contiveram as dezenas sorteadas. Roda sozinha quando entra um concurso novo."><i class="fas fa-search me-2"></i>Melhores {{ cfg.pick_max }} — rastreio do histórico</span>
+    </div>
+    <div class="px-3 pt-2 small text-muted" id="m15Status">Carregando o último rastreio…</div>
+    <div class="auto-wrap px-2 pb-3" id="m15Wrap"></div>
 </div>
 {% endif %}
 
@@ -850,6 +980,8 @@
     const API = '/analise/comparar-concursos';
     let modoAtual = (CFG.modos && CFG.modos[0]) || 'volante';
     let concursosLista = [];
+    let parValidoA = '';
+    let parValidoB = '';
     let ordemBolas = 'classificado';
     let linearSorteioA = [];
     let linearSorteioB = [];
@@ -1090,6 +1222,57 @@
         else if (concursosLista.length >= 2) document.getElementById('selConcursoA').value = concursosLista[1].concurso;
         if (qb) document.getElementById('selConcursoB').value = qb;
         else if (concursosLista.length >= 1) document.getElementById('selConcursoB').value = concursosLista[0].concurso;
+        alinharParInicial();
+    }
+    function indiceConcurso(n) {
+        return concursosLista.findIndex(c => String(c.concurso) === String(n));
+    }
+    function mostrarAvisoPar(msg) {
+        const el = document.getElementById('avisoParConcursos');
+        if (!el) return;
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+    function esconderAvisoPar() {
+        const el = document.getElementById('avisoParConcursos');
+        if (el) el.style.display = 'none';
+    }
+    function lembrarPar() {
+        parValidoA = document.getElementById('selConcursoA').value;
+        parValidoB = document.getElementById('selConcursoB').value;
+    }
+    function restaurarPar() {
+        const selA = document.getElementById('selConcursoA');
+        const selB = document.getElementById('selConcursoB');
+        if (parValidoA) selA.value = parValidoA;
+        if (parValidoB) selB.value = parValidoB;
+    }
+    function alinharParInicial() {
+        const selA = document.getElementById('selConcursoA');
+        const selB = document.getElementById('selConcursoB');
+        const i = indiceConcurso(selA.value);
+        if (i > 0) selB.value = String(concursosLista[i - 1].concurso);
+        else if (concursosLista.length >= 2) {
+            selA.value = String(concursosLista[1].concurso);
+            selB.value = String(concursosLista[0].concurso);
+        }
+        lembrarPar();
+        esconderAvisoPar();
+    }
+    function aoMudarConcursoA() {
+        const selA = document.getElementById('selConcursoA');
+        const selB = document.getElementById('selConcursoB');
+        const i = indiceConcurso(selA.value);
+        if (i < 0) return;
+        if (i === 0) {
+            mostrarAvisoPar('O concurso ' + selA.value + ' é o mais recente. Não há um concurso seguinte para o B.');
+            restaurarPar();
+            return;
+        }
+        selB.value = String(concursosLista[i - 1].concurso);
+        esconderAvisoPar();
+        lembrarPar();
+        comparar();
     }
 
     async function comparar() {
@@ -1130,6 +1313,7 @@
         });
     });
     document.getElementById('btnComparar').addEventListener('click', comparar);
+    document.getElementById('selConcursoA').addEventListener('change', aoMudarConcursoA);
 
     (async function init() {
         const m = params.get('modo');
@@ -1157,6 +1341,12 @@
     let indicados = new Set();
     let concursos = [];
     let origem = { label: '', url: '/analise/' };
+    function hrefApp(path) {
+        if (!path) return '';
+        const root = (typeof window.__APP_ROOT__ === 'string' ? window.__APP_ROOT__ : '').replace(/\/$/, '');
+        if (!root || path.charAt(0) !== '/' || path === root || path.indexOf(root + '/') === 0) return path;
+        return root + path;
+    }
     const MAX_PADRAO = { lotofacil: 18, lotomania: 30, quina: 15, megasena: 15, duplasena: 15, maismilionaria: 15, timemania: 20, supersete: 7, diadesorte: 15 };
     let maxInd = Number(CFG.indicacao_max) || MAX_PADRAO[CFG.key] || 15;
     let sortKey = 'concurso';
@@ -1173,15 +1363,6 @@
     }
     function salvar() {
         try { localStorage.setItem(STORE, JSON.stringify([...indicados])); } catch (e) {}
-    }
-    function lidoSalvo() {
-        try {
-            const raw = localStorage.getItem(STORE);
-            if (!raw) return null;
-            const arr = JSON.parse(raw);
-            if (Array.isArray(arr) && arr.length) return arr.map(Number).filter(n => n >= dmin && n <= dmax);
-        } catch (e) {}
-        return null;
     }
     function toggleN(n) {
         n = Number(n);
@@ -1290,11 +1471,65 @@
     function fmt1(n) {
         return Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     }
+    function urlAnalisesGerais() {
+        const loc = window.location;
+        const path = '/analises-gerais/';
+        const viaProxy = (loc.pathname || '').match(/^(.*)\/m\/[^/]+/);
+        if (viaProxy) return loc.origin + (viaProxy[1] || '') + path;
+        if (loc.port && loc.port !== '8083') {
+            return loc.protocol + '//' + loc.hostname + ':8083' + path;
+        }
+        return loc.origin + path;
+    }
+    function rotaVolta() {
+        const u = new URL(hrefApp('/analise/comparar-concursos/'), location.origin);
+        u.hash = 'ixCard';
+        return u.href;
+    }
+    function comVoltar(href) {
+        const u = new URL(href, location.origin);
+        u.searchParams.set('voltar', rotaVolta());
+        if (/^https?:/i.test(href)) return u.href;
+        return u.pathname + u.search + u.hash;
+    }
+    function htmlGrupo(rotulo, itens) {
+        return `<div class="ix-atalho-grupo">`
+            + `<span class="ix-atalhos-rot">${rotulo}</span>`
+            + itens.map(it => `<a href="${it.href}" target="_blank" rel="noopener">${it.nome}</a>`).join('')
+            + `</div>`;
+    }
+    function htmlAtalhos() {
+        const repeticao = [
+            { nome: 'Repetição entre concursos', href: comVoltar(hrefApp('/analise/repeticao-concursos/')) },
+            { nome: 'Escolha Visual', href: comVoltar(hrefApp('/analise/escolha-visual/')) },
+            { nome: 'Análises Gerais', href: comVoltar(urlAnalisesGerais()) },
+        ];
+        const volante = [
+            { nome: 'Escolha Visual', href: comVoltar(hrefApp('/analise/escolha-visual/')) },
+            { nome: 'Seção 12 — Volantes', href: comVoltar(hrefApp('/geradores-elite/escolha-tubular-apostas/?aba=comparador')) },
+        ];
+        return `<nav class="ix-atalhos" aria-label="Ver também">`
+            + htmlGrupo('Repetição', repeticao)
+            + htmlGrupo('Volante', volante)
+            + `</nav>`;
+    }
+    function atualizarVoltar() {
+        const btn = document.getElementById('ixBtnVoltar');
+        if (!btn) return;
+        if (!origem.url) {
+            btn.style.display = 'none';
+            return;
+        }
+        btn.href = hrefApp(origem.url);
+        btn.style.display = '';
+        btn.title = origem.label ? `Voltar para ${origem.label}` : 'Voltar';
+    }
     function renderRanking() {
         const box = document.getElementById('ixRanking');
         if (!box) return;
+        const atalhos = htmlAtalhos();
         if (!concursos.length) {
-            box.innerHTML = '';
+            box.innerHTML = `<div class="ix-rank-corpo">${atalhos}</div>`;
             return;
         }
         const d = desempenhoIndicacao();
@@ -1316,6 +1551,7 @@
                 (${fmt1(pct).replace(',0', '')}%) — média de <strong>${fmt1(d.media)}</strong> acertos por concurso.
                 ${d.maxHits > 0 ? `Melhor: <strong>${d.maxHits} acerto${d.maxHits === 1 ? '' : 's'}</strong> (${melhores}).` : ''}
             </div>
+            <div class="ix-rank-corpo">
             <table class="ix-cmp">
                 <thead>
                     <tr>
@@ -1325,36 +1561,35 @@
                     </tr>
                 </thead>
                 <tbody>${linhas.join('')}</tbody>
-            </table>`;
+            </table>
+            ${atalhos}
+            </div>`;
+    }
+    function fixarCabecalhoIx() {
+        const tabela = document.getElementById('ixTabela');
+        if (!tabela) return;
+        const aplicar = () => {
+            const linha = tabela.querySelector('tr.ix-super-row');
+            if (linha) linha.style.top = '0px';
+        };
+        aplicar();
+        requestAnimationFrame(aplicar);
     }
     function renderGrade() {
-        const nCount = nums.length || 1;
         const thead = document.querySelector('#ixTabela thead');
-        if (thead) {
-            thead.innerHTML = `
-                <tr>
-                    <th class="ix-sticky-col"></th>
-                    <th class="ix-span-nums" colspan="${nCount}">INDICADO</th>
-                    <th class="ix-acertos-h" colspan="2">ACERTOS</th>
-                </tr>
-                <tr>
-                    <th class="${clsSort('concurso')} ix-sticky-col" data-sort="concurso">Nº <span class="ix-sort-ind">${indSort('concurso')}</span></th>
-                    ${nums.map(n => `<th class="ix-cell">${padN(n)}</th>`).join('')}
-                    <th class="${clsSort('ind')} ix-acertos-h" data-sort="ind">Indicado <span class="ix-sort-ind">${indSort('ind')}</span></th>
-                    <th class="${clsSort('nind')} ix-acertos-h" data-sort="nind">Ñ indicado <span class="ix-sort-ind">${indSort('nind')}</span></th>
-                </tr>`;
-        }
-        const superLbl = origem.url
-            ? `<a class="ix-super-link" href="${origem.url}" title="${(origem.label || 'Origem da indicação').replace(/"/g, '&quot;')}">SUPER</a>`
+        if (thead) thead.innerHTML = '';
+        const destino = hrefApp(origem.url);
+        const superLbl = destino
+            ? `<a class="ix-super-link" href="${destino}" title="${(origem.label || 'Origem da indicação').replace(/"/g, '&quot;')}">SUPER</a>`
             : `<span class="ix-super-btn" title="${(origem.label || '').replace(/"/g, '&quot;')}">SUPER</span>`;
-        const linhas = [`<tr>
+        const linhas = [`<tr class="ix-super-row">
             <th class="ix-sticky-col">${superLbl}</th>
             ${htmlNumCells('super')}
-            <td class="ix-acertos"></td>
-            <td class="ix-acertos"></td>
+            <th class="${clsSort('ind')} ix-acertos-h" data-sort="ind">Indicado <span class="ix-sort-ind">${indSort('ind')}</span></th>
+            <th class="${clsSort('nind')} ix-acertos-h" data-sort="nind">Ñ indicado <span class="ix-sort-ind">${indSort('nind')}</span></th>
         </tr>`];
         concursosOrdenados().forEach(({ c, ac, setD }) => {
-            linhas.push(`<tr>
+            linhas.push(`<tr id="ixLinha-${c.concurso}">
                 <th class="ix-sticky-col" title="${c.data || ''}">${c.concurso}</th>
                 ${htmlNumCells('draw', setD)}
                 <td class="ix-acertos">${ac.ind}</td>
@@ -1363,15 +1598,86 @@
         });
         const tb = document.getElementById('ixTbody');
         if (tb) tb.innerHTML = linhas.join('');
+        fixarCabecalhoIx();
         const origEl = document.getElementById('ixOrigemLbl');
         if (origEl) {
             const qtd = indicados.size;
             origEl.innerHTML = origem.url
                 ? `Indicação <strong>SUPER</strong> (<strong class="ix-qtd">${qtd}</strong> dezenas) — origem:
-                   <a href="${origem.url}">${origem.label || 'ver fonte'}</a>. Clique nos números para ajustar.`
+                   <a href="${hrefApp(origem.url)}">${origem.label || 'ver fonte'}</a>. Clique nos números para ajustar.`
                 : `Indicação SUPER (<strong class="ix-qtd">${qtd}</strong> dezenas). Clique nos números para ajustar.`;
         }
+        atualizarVoltar();
         renderRanking();
+        renderPainelFreq();
+    }
+    function frequenciasHistorico() {
+        const freq = {};
+        for (let n = dmin; n <= dmax; n++) freq[n] = 0;
+        concursos.forEach(c => {
+            (c.dezenas || []).forEach(raw => {
+                const n = Number(raw);
+                if (n >= dmin && n <= dmax) freq[n] += 1;
+            });
+        });
+        return freq;
+    }
+    function juntarNums(lista) {
+        const nomes = lista.map(n => pad2(n));
+        if (nomes.length <= 1) return nomes[0] || '';
+        if (nomes.length === 2) return nomes[0] + ' e ' + nomes[1];
+        return nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1];
+    }
+    function pad2(n) {
+        return String(n).padStart(2, '0');
+    }
+    function renderPainelFreq() {
+        const box = document.getElementById('ixPainelFreq');
+        if (!box) return;
+        const freq = frequenciasHistorico();
+        const total = concursos.length;
+        const faixaTxt = pad2(dmin) + ' a ' + pad2(dmax);
+        const lista = [...indicados].filter(n => n >= dmin && n <= dmax).sort((a, b) => a - b);
+        const todas = [];
+        for (let n = dmin; n <= dmax; n++) {
+            todas.push(`<span class="ix-todas-chip${indicados.has(n) ? ' super' : ''}" title="${pad2(n)} saiu ${fmtN(freq[n] || 0)} vezes">
+                <span class="n">${pad2(n)}</span><span class="q">${fmtN(freq[n] || 0)}</span>
+            </span>`);
+        }
+        const blocoTodas = `<div class="ix-todas-tit">Saídas de ${faixaTxt} até hoje · ${fmtN(total)} concursos · amarelo = SUPER</div>
+            <div class="ix-todas">${todas.join('')}</div>`;
+        if (!lista.length) {
+            box.innerHTML = `<div class="ix-freq-resumo">Nenhuma dezena na linha SUPER.</div>${blocoTodas}`;
+            return;
+        }
+        const pares = lista.filter(n => n % 2 === 0);
+        const impares = lista.filter(n => n % 2 !== 0);
+        const maxF = Math.max(...lista.map(n => freq[n] || 0));
+        const minF = Math.min(...lista.map(n => freq[n] || 0));
+        const mais = lista.filter(n => (freq[n] || 0) === maxF);
+        const menos = lista.filter(n => (freq[n] || 0) === minF);
+        const sorteadas = Number(CFG.sorteadas) || 7;
+        const nParesJogo = Math.round(sorteadas * pares.length / lista.length);
+        const nImpJogo = sorteadas - nParesJogo;
+        const chips = lista.map(n => {
+            const q = freq[n] || 0;
+            const tipo = n % 2 === 0 ? 'par' : 'ímpar';
+            let cls = 'ix-super-chip';
+            if (q === maxF) cls += ' mais';
+            else if (q === minF) cls += ' menos';
+            return `<span class="${cls}" title="${pad2(n)} · ${tipo} · ${fmtN(q)} saídas">
+                <span class="n">${pad2(n)}</span><span class="t">${tipo}</span><span class="q">${fmtN(q)}</span>
+            </span>`;
+        }).join('');
+        box.innerHTML = `
+            <div class="ix-freq-resumo">
+                <strong>${pares.length}</strong> pares · <strong>${impares.length}</strong> ímpares.
+                Mais saiu: <strong>${juntarNums(mais)}</strong> (${fmtN(maxF)}).
+                Menos saiu: <strong>${juntarNums(menos)}</strong> (${fmtN(minF)}).
+                Num jogo de ${sorteadas}, o mais próximo deste grupo é <strong>${nParesJogo} pares e ${nImpJogo} ímpares</strong>.
+            </div>
+            <div class="ix-super-faixa">${chips}</div>
+            ${blocoTodas}`;
     }
     async function carregarIndicacao() {
         const r = await fetch(`${API}/api/indicacao-padrao`);
@@ -1381,8 +1687,8 @@
         nums = faixa();
         origem = d.origem || origem;
         if (d.indicacao_max != null) maxInd = Number(d.indicacao_max) || maxInd;
-        const salvo = lidoSalvo();
-        let arr = (salvo && salvo.length ? salvo : (d.dezenas || [])).map(Number)
+        try { localStorage.removeItem(STORE); } catch (e) {}
+        let arr = (d.dezenas || []).map(Number)
             .filter(n => Number.isFinite(n) && n >= dmin && n <= dmax);
         const excedeu = arr.length > maxInd;
         if (excedeu) arr = arr.slice(0, maxInd);
@@ -1403,6 +1709,7 @@
             if (!d.tem_mais || !batch.length) break;
         }
     }
+    window.addEventListener('resize', fixarCabecalhoIx);
     document.getElementById('ixBtnAjuda')?.addEventListener('click', () => {
         const box = document.getElementById('ixAjudaBox');
         if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
@@ -1433,6 +1740,23 @@
             if (!Number.isNaN(n)) toggleN(n);
         }
     });
+    window.irParaLinhaSuper = function (n) {
+        const linha = document.getElementById('ixLinha-' + n);
+        const card = document.getElementById('ixCard');
+        const wrap = document.querySelector('#ixCard .ix-wrap');
+        if (!linha || !wrap) {
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+        wrap.querySelectorAll('tr.ix-linha-foco').forEach(el => el.classList.remove('ix-linha-foco'));
+        linha.classList.add('ix-linha-foco');
+        const sticky = wrap.querySelector('tr.ix-super-row');
+        const stickyH = sticky ? sticky.getBoundingClientRect().height : 0;
+        const delta = linha.getBoundingClientRect().top - wrap.getBoundingClientRect().top - stickyH - 4;
+        wrap.scrollTo({ top: Math.max(0, wrap.scrollTop + delta), behavior: 'smooth' });
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
     (async function initIx() {
         try {
             await carregarIndicacao();
@@ -1445,7 +1769,7 @@
     })();
 })();
 </script>
-{% if cfg.layout != 'colunas' and (cfg.dezena_max - cfg.dezena_min + 1) >= 15 %}
+{% if cfg.layout != 'colunas' and (cfg.sorteadas | int) <= 15 and (cfg.dezena_max - cfg.dezena_min + 1) >= 15 %}
 <script>
 (function () {
     const CFG = {{ cfg | tojson }};
@@ -1487,9 +1811,20 @@
         const maxF = Math.max(7, ...ranking.map(r => Number(r.melhor_acerto) || 0));
         const cols = [];
         for (let h = maxF; h >= 0; h--) cols.push(h);
+        const sorteadas = Number(CFG.sorteadas) || 7;
         const headFaixas = cols.map(h => {
             const cls = h === 7 ? 'auto-col7' : (h === 6 ? 'auto-col6' : '');
-            return `<th class="${cls}" title="${h === 7 ? 'Prêmio principal' : ''}">${h}</th>`;
+            let tip;
+            if (h === sorteadas) {
+                tip = 'Prêmio principal: concursos em que as ' + h + ' dezenas sorteadas estavam todas dentro deste grupo de 15.';
+            } else if (h === sorteadas - 1) {
+                tip = 'Concursos em que faltou só 1 das ' + sorteadas + ' sorteadas para caber neste grupo de 15. Desempata o ranking.';
+            } else if (h === 0) {
+                tip = 'Concursos em que nenhuma dezena sorteada estava neste grupo de 15.';
+            } else {
+                tip = 'Concursos em que ' + h + ' das dezenas sorteadas estavam neste grupo de 15.';
+            }
+            return `<th class="${cls}" title="${tip}">${h}</th>`;
         }).join('');
         const rows = ranking.map(r => {
             const ref = r.referencia ? ' auto-ref' : '';
@@ -1539,20 +1874,20 @@
                 ${concBox}
             </td></tr>` : '';
             return `<tr class="auto-open${ref}" data-auto-id="${r.id}">
-                <td>${r.posicao}º</td>
-                <td class="auto-lbl">${r.label}${r.referencia ? ' <span class="text-muted">(referência)</span>' : ''}</td>
+                <td title="Lugar no ranking. Mais concursos com ${sorteadas} acertos ficam acima. O ${sorteadas - 1} desempatou.">${r.posicao}º</td>
+                <td class="auto-lbl" title="Receita que escolheu estas 15 dezenas. O detalhe abre ao clicar na linha.">${r.label}${r.referencia ? ' <span class="text-muted">(referência)</span>' : ''}</td>
                 ${fa}
-                <td>${r.melhor_acerto}</td>
-                <td>${Number(r.media).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td title="Maior número de sorteadas que couberam neste grupo, em um único concurso.">${r.melhor_acerto}</td>
+                <td title="Média de dezenas sorteadas que caíram dentro das 15, por concurso.">${Number(r.media).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             </tr>${det}`;
         }).join('');
-        wrap.innerHTML = `<table class="auto-tbl">
+        wrap.innerHTML = `<table class="auto-tbl tabela-ordenavel">
             <thead><tr>
-                <th>Ranking</th>
-                <th class="auto-lbl">Combinação</th>
+                <th title="Posição. Quem teve mais concursos com ${sorteadas} acertos fica em primeiro. A coluna ${sorteadas - 1} desempatou.">Ranking</th>
+                <th class="auto-lbl" title="Nome da receita que montou o grupo de 15. Clique na linha para ver as dezenas.">Combinação</th>
                 ${headFaixas}
-                <th>Melhor</th>
-                <th>Média</th>
+                <th title="Maior quantidade de dezenas sorteadas que couberam no grupo de 15, em um único concurso.">Melhor</th>
+                <th title="Média, por concurso, de quantas sorteadas estavam dentro das 15.">Média</th>
             </tr></thead>
             <tbody>${rows}</tbody>
         </table>`;
@@ -1607,12 +1942,18 @@
         if (st) st.textContent = 'Gerando e testando no histórico…';
         if (wrap) wrap.innerHTML = '<div class="text-center py-3 text-muted"><i class="fas fa-spinner fa-spin"></i></div>';
         try {
-            const r = await fetch(API + '/api/combinacoes-auto', {
+            const r = await fetch(`${API}/api/combinacoes-auto`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ dezenas_manual: lidoManual() }),
             });
-            const d = await r.json();
+            const texto = await r.text();
+            let d;
+            try {
+                d = JSON.parse(texto);
+            } catch (err) {
+                throw new Error('Não foi possível ler o resultado. Atualize a página e tente de novo.');
+            }
             if (!d.sucesso) throw new Error(d.erro || 'Falha ao gerar');
             ranking = d.ranking || [];
             aberto = ranking[0] ? ranking[0].id : null;
@@ -1666,6 +2007,125 @@
         const id = tr.getAttribute('data-auto-id');
         aberto = aberto === id ? null : id;
         renderAuto();
+    });
+})();
+</script>
+{% endif %}
+{% if cfg.layout != 'colunas' and (cfg.pick_max | int) >= (cfg.sorteadas | int) and (cfg.pick_max | int) >= 1 and (cfg.dezena_max - cfg.dezena_min + 1) >= (cfg.pick_max | int) %}
+<script>
+(function () {
+    const CFG = {{ cfg | tojson }};
+    const API = '/analise/comparar-concursos';
+    const alvo = Number(CFG.sorteadas) || 7;
+    const pool = Number(CFG.pick_max) || 15;
+    let timer = null;
+
+    function pad2(n) {
+        return String(n).padStart(2, '0');
+    }
+    function fmtN(n) {
+        return Number(n).toLocaleString('pt-BR');
+    }
+    function faixaVal(r, k) {
+        const f = r.faixas || {};
+        return fmtN(f[k] != null ? f[k] : (f[String(k)] != null ? f[String(k)] : 0));
+    }
+    function render(d) {
+        const wrap = document.getElementById('m15Wrap');
+        const st = document.getElementById('m15Status');
+        if (!wrap || !st) return;
+        const ranking = d.ranking || [];
+        if (d.atualizando && d.concurso_ate) {
+            st.textContent = 'Entrou concurso novo. Atualizando a busca… O resultado abaixo vale até o concurso ' + d.concurso_ate + '.';
+        } else if (d.atualizando) {
+            st.textContent = 'Buscando os grupos de ' + pool + ' que mais vezes contiveram as ' + alvo + ' sorteadas. A página atualiza sozinha.';
+        } else if (ranking.length) {
+            st.textContent = 'Atualizado até o concurso ' + d.concurso_ate + ' · ' + (d.gerado_em || '') + ' · ' + fmtN(d.concursos_testados || 0) + ' concursos.';
+        } else {
+            st.textContent = 'Ainda não há rastreio salvo.';
+        }
+        if (!ranking.length) {
+            wrap.innerHTML = '';
+            return;
+        }
+        const maxF = Math.max(alvo, ...ranking.map(r => Number(r.melhor_acerto) || 0));
+        const cols = [];
+        for (let h = maxF; h >= 0; h--) cols.push(h);
+        const head = cols.map(h => {
+            const cls = h === alvo ? 'auto-col7' : (h === alvo - 1 ? 'auto-col6' : '');
+            let tip;
+            if (h === alvo) tip = 'Concursos em que as ' + alvo + ' sorteadas estavam todas dentro destas ' + pool + '.';
+            else if (h === alvo - 1) tip = 'Concursos em que faltou só 1 das ' + alvo + ' sorteadas. Desempata o ranking.';
+            else if (h === 0) tip = 'Concursos em que nenhuma sorteada estava neste grupo.';
+            else tip = 'Concursos em que ' + h + ' sorteadas estavam neste grupo.';
+            return `<th class="${cls}" title="${tip}">${h}</th>`;
+        }).join('');
+        const rows = ranking.map(r => {
+            const fa = cols.map(h => {
+                const cls = h === alvo ? 'auto-col7' : (h === alvo - 1 ? 'auto-col6' : '');
+                return `<td class="${cls}" title="${faixaVal(r, h)} concurso(s) com ${h} sorteadas dentro das ${pool}.">${faixaVal(r, h)}</td>`;
+            }).join('');
+            const dez = (r.dezenas || []).map(n => `<span class="auto-dez">${pad2(n)}</span>`).join('');
+            const concs = (r.concursos_alvo || []).map(c =>
+                `<a class="m15-conc" href="#ixLinha-${c}" data-conc="${c}" title="Ver a linha do concurso ${c} na listagem SUPER">${c}</a>`
+            ).join('') || '—';
+            const clsDez = pool > 15 ? 'm15-dez m15-dez-larga' : 'm15-dez';
+            return `<tr>
+                <td class="m15-rank" title="Lugar. Mais concursos com ${alvo} acertos ficam acima.">${r.posicao}º</td>
+                <td class="${clsDez}">${dez}</td>
+                ${fa}
+                <td class="m15-media" title="Média de sorteadas que caíram dentro das ${pool}, por concurso.">${Number(r.media).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td class="m15-concs" title="Concursos em que as ${alvo} sorteadas estavam todas nestas ${pool}. Clique em um número para ver a linha dele na listagem SUPER.">${concs}</td>
+            </tr>`;
+        }).join('');
+        wrap.innerHTML = `<table class="auto-tbl">
+            <thead><tr>
+                <th class="m15-rank" title="Posição. Quem teve mais concursos com ${alvo} acertos fica em primeiro.">Ranking</th>
+                <th class="m15-dez" title="As ${pool} dezenas deste grupo, o máximo da aposta. O primeiro lugar é o que mais vezes conteve as ${alvo} sorteadas.">${pool} dezenas</th>
+                ${head}
+                <th class="m15-media" title="Média, por concurso, de quantas sorteadas estavam dentro das ${pool}.">Média</th>
+                <th class="m15-concs" title="Números dos concursos em que o prêmio principal coube inteiro nestas ${pool}. Clique para ver a linha na listagem SUPER.">Concursos</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+        </table>`;
+    }
+    async function ler() {
+        const r = await fetch(`${API}/api/melhores-15`);
+        const texto = await r.text();
+        if (!r.ok) {
+            const falha = new Error('Não foi possível ler o rastreio.');
+            falha.status = r.status;
+            throw falha;
+        }
+        let d;
+        try { d = JSON.parse(texto); }
+        catch (err) { throw new Error('Não foi possível ler o rastreio.'); }
+        if (!d.sucesso) throw new Error(d.erro || 'Falha no rastreio.');
+        render(d);
+        if (timer) clearTimeout(timer);
+        if (d.atualizando) timer = setTimeout(ler, 3000);
+    }
+    const wrapFixo = document.getElementById('m15Wrap');
+    if (wrapFixo) {
+        wrapFixo.addEventListener('click', (ev) => {
+            const a = ev.target.closest('a.m15-conc');
+            if (!a) return;
+            ev.preventDefault();
+            wrapFixo.querySelectorAll('.m15-conc-on').forEach(el => el.classList.remove('m15-conc-on'));
+            a.classList.add('m15-conc-on');
+            if (typeof window.irParaLinhaSuper === 'function') {
+                window.irParaLinhaSuper(a.getAttribute('data-conc'));
+            }
+        });
+    }
+    ler().catch(err => {
+        const st = document.getElementById('m15Status');
+        if (!st) return;
+        if (err.status === 404) {
+            st.textContent = 'A busca já está pronta. Feche e abra de novo ' + (CFG.nome || 'esta modalidade') + ' para ela aparecer aqui e passar a rodar sozinha quando entrar um concurso.';
+        } else {
+            st.textContent = err.message || 'Não foi possível carregar o rastreio.';
+        }
     });
 })();
 </script>

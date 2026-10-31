@@ -17,9 +17,9 @@ set NSSM=D:\Nssm-2.24_\win64\nssm.exe
 Pastas de log (criar antes do primeiro `nssm start`):
 
 ```bat
-mkdir "d:\Loterias\LoteriasPosicao\logs"
-mkdir "d:\Loterias\LoteriasLocaisDaSorte\instance\logs"
-mkdir "d:\Loterias\LoteriasBoloesDaSorte\instance\logs"
+mkdir "d:\Loterias\LP-LoteriasPosicao\logs"
+mkdir "d:\Loterias\LLS-LoteriasLocaisDaSorte\instance\logs"
+mkdir "d:\Loterias\LBS-LoteriasBoloesDaSorte\instance\logs"
 ```
 
 O Nginx (`Proxy-Nginx`) é outro serviço. Ele só encaminha o caminho público para estas portas.
@@ -42,24 +42,24 @@ Central 8083: as modalidades 5152–5160 sobem no mesmo processo (um serviço ba
 
 ## 1. Análise Por Posição — todas as modalidades (8083)
 
-Application Path: 		d:\Loterias\LoteriasPosicao\VenvLoterias\Scripts\python.exe  
-Startup Directory:		d:\Loterias\LoteriasPosicao\AnalisePorPosicao-Central  
+Application Path: 		d:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe  
+Startup Directory:		d:\Loterias\LP-LoteriasPosicao\AnalisePorPosicao-Central  
 Arguments:				app.py  
 Detail Display Name:    Análise Por Posição - Todas as modalidades  
 Description:			Central modalidades — http://localhost:8083/ — /centralmodalidades/  
 Startup type:			Automatic  
 Input:					(vazio)  
-Output: 				d:\Loterias\LoteriasPosicao\logs\stdout.log  
-Error:					d:\Loterias\LoteriasPosicao\logs\stderr.log  
+Output: 				d:\Loterias\LP-LoteriasPosicao\logs\stdout.log  
+Error:					d:\Loterias\LP-LoteriasPosicao\logs\stderr.log  
 
 ```bat
-"%NSSM%" install AnalisePorPosicao_TodasModalidades "d:\Loterias\LoteriasPosicao\VenvLoterias\Scripts\python.exe" app.py
-"%NSSM%" set AnalisePorPosicao_TodasModalidades AppDirectory "d:\Loterias\LoteriasPosicao\AnalisePorPosicao-Central"
+"%NSSM%" install AnalisePorPosicao_TodasModalidades "d:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe" app.py
+"%NSSM%" set AnalisePorPosicao_TodasModalidades AppDirectory "d:\Loterias\LP-LoteriasPosicao\AnalisePorPosicao-Central"
 "%NSSM%" set AnalisePorPosicao_TodasModalidades DisplayName "Análise Por Posição - Todas as modalidades"
 "%NSSM%" set AnalisePorPosicao_TodasModalidades Description "Central modalidades — http://localhost:8083/ — https://marciofernandomaia.com.br/centralmodalidades/"
 "%NSSM%" set AnalisePorPosicao_TodasModalidades Start SERVICE_AUTO_START
-"%NSSM%" set AnalisePorPosicao_TodasModalidades AppStdout "d:\Loterias\LoteriasPosicao\logs\stdout.log"
-"%NSSM%" set AnalisePorPosicao_TodasModalidades AppStderr "d:\Loterias\LoteriasPosicao\logs\stderr.log"
+"%NSSM%" set AnalisePorPosicao_TodasModalidades AppStdout "d:\Loterias\LP-LoteriasPosicao\logs\stdout.log"
+"%NSSM%" set AnalisePorPosicao_TodasModalidades AppStderr "d:\Loterias\LP-LoteriasPosicao\logs\stderr.log"
 "%NSSM%" set AnalisePorPosicao_TodasModalidades AppRotateFiles 1
 "%NSSM%" set AnalisePorPosicao_TodasModalidades AppRotateBytes 1048576
 ```
@@ -71,27 +71,27 @@ Público: https://marciofernandomaia.com.br/centralmodalidades/
 
 ## 2. Central Locais da Sorte (8085)
 
-Application Path: 		d:\Loterias\LoteriasLocaisDaSorte\venv\Scripts\python.exe  
-Startup Directory:		d:\Loterias\LoteriasLocaisDaSorte  
+Application Path: 		d:\Loterias\LLS-LoteriasLocaisDaSorte\venv\Scripts\python.exe  
+Startup Directory:		d:\Loterias\LLS-LoteriasLocaisDaSorte  
 Arguments:				servidor.py  
 Detail Display Name:    Central Locais da Sorte  
 Description:			Central Locais da Sorte — http://localhost:8085/ — /centrallocaisdasorte/  
 Startup type:			Automatic  
 Input:					(vazio)  
-Output: 				d:\Loterias\LoteriasLocaisDaSorte\instance\logs\stdout.log  
-Error:					d:\Loterias\LoteriasLocaisDaSorte\instance\logs\stderr.log  
+Output: 				d:\Loterias\LLS-LoteriasLocaisDaSorte\instance\logs\stdout.log  
+Error:					d:\Loterias\LLS-LoteriasLocaisDaSorte\instance\logs\stderr.log  
 
 `servidor.py` sobe 8085 (central) e 5574 (análise) no mesmo processo — igual ao `Iniciar_LocaisDaSorte_Central.bat`.
 
 ```bat
-"%NSSM%" install Central_LocaisDaSorte "d:\Loterias\LoteriasLocaisDaSorte\venv\Scripts\python.exe" servidor.py
-"%NSSM%" set Central_LocaisDaSorte AppDirectory "d:\Loterias\LoteriasLocaisDaSorte"
+"%NSSM%" install Central_LocaisDaSorte "d:\Loterias\LLS-LoteriasLocaisDaSorte\venv\Scripts\python.exe" servidor.py
+"%NSSM%" set Central_LocaisDaSorte AppDirectory "d:\Loterias\LLS-LoteriasLocaisDaSorte"
 "%NSSM%" set Central_LocaisDaSorte DisplayName "Central Locais da Sorte"
 "%NSSM%" set Central_LocaisDaSorte Description "Central Locais da Sorte — http://localhost:8085/ — https://marciofernandomaia.com.br/centrallocaisdasorte/"
 "%NSSM%" set Central_LocaisDaSorte Start SERVICE_AUTO_START
 "%NSSM%" set Central_LocaisDaSorte AppEnvironmentExtra LOCAIS_SORTE_SILENCIOSO=1
-"%NSSM%" set Central_LocaisDaSorte AppStdout "d:\Loterias\LoteriasLocaisDaSorte\instance\logs\stdout.log"
-"%NSSM%" set Central_LocaisDaSorte AppStderr "d:\Loterias\LoteriasLocaisDaSorte\instance\logs\stderr.log"
+"%NSSM%" set Central_LocaisDaSorte AppStdout "d:\Loterias\LLS-LoteriasLocaisDaSorte\instance\logs\stdout.log"
+"%NSSM%" set Central_LocaisDaSorte AppStderr "d:\Loterias\LLS-LoteriasLocaisDaSorte\instance\logs\stderr.log"
 "%NSSM%" set Central_LocaisDaSorte AppRotateFiles 1
 "%NSSM%" set Central_LocaisDaSorte AppRotateBytes 1048576
 ```
@@ -104,27 +104,27 @@ Análise pública: https://marciofernandomaia.com.br/centrallocaisdasorte/analis
 
 ## 3. Central Bolões da Sorte (8086)
 
-Application Path: 		d:\Loterias\LoteriasBoloesDaSorte\venv\Scripts\python.exe  
-Startup Directory:		d:\Loterias\LoteriasBoloesDaSorte  
+Application Path: 		d:\Loterias\LBS-LoteriasBoloesDaSorte\venv\Scripts\python.exe  
+Startup Directory:		d:\Loterias\LBS-LoteriasBoloesDaSorte  
 Arguments:				servidor.py  
 Detail Display Name:    Central Bolões da Sorte  
 Description:			Central Bolões da Sorte — http://localhost:8086/ — /centralbolaodasorte/  
 Startup type:			Automatic  
 Input:					(vazio)  
-Output: 				d:\Loterias\LoteriasBoloesDaSorte\instance\logs\stdout.log  
-Error:					d:\Loterias\LoteriasBoloesDaSorte\instance\logs\stderr.log  
+Output: 				d:\Loterias\LBS-LoteriasBoloesDaSorte\instance\logs\stdout.log  
+Error:					d:\Loterias\LBS-LoteriasBoloesDaSorte\instance\logs\stderr.log  
 
 `servidor.py` sobe 8086 (central) e 5575 (análise/bolões) no mesmo processo — igual ao `Iniciar_BoloesDaSorte_Central.bat`.
 
 ```bat
-"%NSSM%" install Central_BoloesDaSorte "d:\Loterias\LoteriasBoloesDaSorte\venv\Scripts\python.exe" servidor.py
-"%NSSM%" set Central_BoloesDaSorte AppDirectory "d:\Loterias\LoteriasBoloesDaSorte"
+"%NSSM%" install Central_BoloesDaSorte "d:\Loterias\LBS-LoteriasBoloesDaSorte\venv\Scripts\python.exe" servidor.py
+"%NSSM%" set Central_BoloesDaSorte AppDirectory "d:\Loterias\LBS-LoteriasBoloesDaSorte"
 "%NSSM%" set Central_BoloesDaSorte DisplayName "Central Bolões da Sorte"
 "%NSSM%" set Central_BoloesDaSorte Description "Central Bolões da Sorte — http://localhost:8086/ — https://marciofernandomaia.com.br/centralbolaodasorte/"
 "%NSSM%" set Central_BoloesDaSorte Start SERVICE_AUTO_START
 "%NSSM%" set Central_BoloesDaSorte AppEnvironmentExtra BOLOES_SORTE_SILENCIOSO=1
-"%NSSM%" set Central_BoloesDaSorte AppStdout "d:\Loterias\LoteriasBoloesDaSorte\instance\logs\stdout.log"
-"%NSSM%" set Central_BoloesDaSorte AppStderr "d:\Loterias\LoteriasBoloesDaSorte\instance\logs\stderr.log"
+"%NSSM%" set Central_BoloesDaSorte AppStdout "d:\Loterias\LBS-LoteriasBoloesDaSorte\instance\logs\stdout.log"
+"%NSSM%" set Central_BoloesDaSorte AppStderr "d:\Loterias\LBS-LoteriasBoloesDaSorte\instance\logs\stderr.log"
 "%NSSM%" set Central_BoloesDaSorte AppRotateFiles 1
 "%NSSM%" set Central_BoloesDaSorte AppRotateBytes 1048576
 ```

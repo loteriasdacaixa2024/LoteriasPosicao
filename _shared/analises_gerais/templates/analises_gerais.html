@@ -164,6 +164,23 @@
             <p class="mb-0 small opacity-75">Sincroniza pela Central (8083) direto no SQLite — não precisa da Mega na porta 5156</p>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
+            <a class="btn btn-outline-light btn-sm fw-bold d-none" id="btnVoltarRota" href="#">
+                <i class="fas fa-arrow-left me-1"></i>Voltar
+            </a>
+            <script>
+            (function () {
+                var raw = new URLSearchParams(location.search).get('voltar');
+                if (!raw) return;
+                var u;
+                try { u = new URL(raw, location.href); } catch (e) { return; }
+                if (!/\/analise\/comparar-concursos\/?/.test(u.pathname)) return;
+                if (u.hostname !== location.hostname && u.hostname !== '127.0.0.1' && u.hostname !== 'localhost') return;
+                var a = document.getElementById('btnVoltarRota');
+                if (!a) return;
+                a.href = u.href;
+                a.classList.remove('d-none');
+            })();
+            </script>
             <span class="badge bg-light text-dark" id="lbl-atualizado">—</span>
             <button class="btn btn-warning btn-sm fw-bold text-dark" id="btn-sync" type="button">
                 <i class="fas fa-cloud-download-alt me-1"></i>Sincronizar todas (Caixa)
@@ -216,7 +233,7 @@
         <h5 class="mb-2 fw-bold">Volantes (dezenas)</h5>
         <div class="table-wrap">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover tabela-ordenavel mb-0">
                     <thead>
                         <tr>
                             <th>Modalidade</th>
@@ -245,7 +262,7 @@
         </p>
         <div class="table-wrap mb-2" id="wrap-supersete">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover tabela-ordenavel mb-0">
                     <thead>
                         <tr>
                             <th>Modalidade</th>
@@ -320,7 +337,7 @@
             </p>
             <div class="table-wrap mb-4">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover tabela-ordenavel mb-0">
                         <thead>
                             <tr>
                                 <th class="th-modalidade">Modalidade</th>
@@ -667,7 +684,7 @@
                         · ${m.total_concursos || 0} · ${m.qtd_linhas || 0} linhas</div>
                     <div class="linhas-rank-podium">${pods}</div>
                     <div class="table-responsive flex-grow-1">
-                        <table class="table table-sm table-dark tbl-linhas-rank mb-0">
+                        <table class="table table-sm table-dark tbl-linhas-rank tabela-ordenavel mb-0">
                             <thead><tr>
                                 <th>Pos.</th><th>Linha</th><th>Faixa</th>
                                 <th class="text-end">Ocorr.</th><th class="text-end">%</th><th class="text-end">Atraso</th>

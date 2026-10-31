@@ -85,4 +85,10 @@ class ApiSuperSeteService:
             else: print(" [FALHOU]")
             if concurso % 20 == 0: db.session.commit()
         db.session.commit()
+        if sucessos > 0:
+            try:
+                from analise_comparar.melhores15 import agendar_melhores15
+                agendar_melhores15("supersete")
+            except Exception:
+                pass
         return {"status": "success", "message": f"{sucessos} sorteios novos cadastrados.", "news": sucessos}

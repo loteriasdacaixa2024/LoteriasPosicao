@@ -1791,6 +1791,23 @@
     }).join('')}</div>`;
   };
 
+  /** Diagonais da esquerda para a direita, cada faixa na mesma largura. */
+  TubularApp.prototype._diagCelula = function (nums) {
+    const L = limitsFrom(this.root);
+    if (typeof window.__diagsDaAposta !== 'function') return '—';
+    const runs = window.__diagsDaAposta(nums || [], L.dezenaMin, L.dezenaMax) || [];
+    if (!runs.length) return '—';
+    const slots = runs.map((d) => {
+      const dir = d.dir_sym || '';
+      const vals = esc(d.nums_fmt || '');
+      return `${dir ? `<span class="tb-diag-dir">${dir}</span>` : ''}${vals}`;
+    });
+    return `<span class="tb-diag-row">${slots.map((s, i) => {
+      const sep = i > 0 ? '<span class="tb-diag-sep">|</span>' : '';
+      return `${sep}<span class="tb-diag-slot">${s}</span>`;
+    }).join('')}</span>`;
+  };
+
   TubularApp.prototype.renderUltimo10 = function () {
     this._fillUltimoPreviewAligned();
     this._fillUltimoPreview('#tbUltimo11', '#tbUltimo11Lbl');
@@ -1800,7 +1817,7 @@
     const tbody = this.root.querySelector('#tbUltimo10');
     const lbl = this.root.querySelector('#tbUltimo10Lbl');
     if (!tbody) return;
-    const nCols = 14 + (this.extraMes ? 1 : 0);
+    const nCols = 15 + (this.extraMes ? 1 : 0);
     if (!this.data.length) {
       tbody.innerHTML = `<tr><td colspan="${nCols}" class="text-muted">Carregando histórico tubular…</td></tr>`;
       if (lbl) lbl.textContent = 'Último resultado (referência — histórico tubular)';
@@ -1840,6 +1857,7 @@
       <td>${esc(an.padroes.final)}</td>
       <td><span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span></td>
       <td class="tb-align-mono"><span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span></td>
+      <td class="tb-col-diag">${this._diagCelula(nums)}</td>
       <td class="tb-row-actions"></td>
     </tr>`;
   };
@@ -1936,7 +1954,7 @@
     const histMap = jaAtivo ? this._histComboMap() : null;
     const jaHits = [];
     let nValidJa = 0;
-    const emptyCols = 14 + (this.extraMes ? 1 : 0);
+    const emptyCols = 15 + (this.extraMes ? 1 : 0);
     const selSet = this._selSet(section);
     tbody.innerHTML = order.map((origIdx) => {
       const g = list[origIdx];
@@ -2010,6 +2028,7 @@
           <td>${an ? esc(an.padroes.final) : '—'}</td>
           <td>${an ? `<span class="${qCls}" title="Dígitos únicos: ${an.qtdeDigitos}">${an.qtdeDigitos}</span>` : '—'}</td>
           <td class="tb-align-mono">${an ? `<span class="tb-mono tb-mono-digs">${esc(an.digitosUnicos)}</span>` : '—'}</td>
+          <td class="tb-col-diag">${completeOk ? this._diagCelula(valid) : '—'}</td>
           <td class="text-nowrap tb-row-actions">
             <button type="button" class="btn btn-sm btn-outline-success py-0 tb-act" data-add-row="${section}" data-idx="${i}" title="Adicionar linha abaixo" aria-label="Adicionar linha abaixo">+</button>
             <button type="button" class="btn btn-sm btn-outline-danger py-0 tb-act" data-rm="${section}" data-idx="${i}" data-uid="${uid}" title="Remover linha" aria-label="Remover linha">×</button>
@@ -3764,8 +3783,12 @@
         const details = this.root.querySelector('.tb-cmp-diag-details');
         if (details && details.open) {
           const anchor = logBody.querySelector('tr.tb-cmp-diag-focus') || logBody.querySelector('tr.tb-cmp-diag-cur');
-          if (anchor) {
-            try { anchor.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (_) { /* ignore */ }
+          const caixa = anchor && anchor.closest('.tb-cmp-diag-scroll');
+          if (anchor && caixa) {
+            const er = anchor.getBoundingClientRect();
+            const cr = caixa.getBoundingClientRect();
+            if (er.top < cr.top) caixa.scrollTop -= (cr.top - er.top) + 8;
+            else if (er.bottom > cr.bottom) caixa.scrollTop += (er.bottom - cr.bottom) + 8;
           }
         }
       }
@@ -4827,7 +4850,10 @@
       const id = parseInt(tab.getAttribute('data-cmp-tab'), 10);
       if (Number.isFinite(id)) {
         this.cmpActiveId = id;
-        this.renderComparador(true);
+        const idx = this.cmpVolantes.findIndex(x => x.id === id);
+        const contests = this._cmpSelectValues();
+        if (idx >= 0 && contests[idx]) this._showCmpContest(contests[idx]);
+        else this.renderComparador(true);
       }
       return;
     }

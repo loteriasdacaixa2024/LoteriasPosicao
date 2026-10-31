@@ -7,7 +7,8 @@
                         (1, '/geradores-elite/estatisticas-ciclo/'),
                         (2, '/geradores-elite/ciclo-apostas/'),
                         (3, '/geradores-elite/comportamento-apostas/'),
-                        (4, '/geradores-elite/construtor-construcoes/')
+                        (4, '/geradores-elite/construtor-construcoes/'),
+                        (5, '/geradores-elite/comparador-apostas/')
                     ] %}
                     {% for rank, href in _ge_destaque %}
                     {% for item in nav_cfg.geradores_elite['items'] if item.href == href %}
@@ -26,7 +27,8 @@
                         '/geradores-elite/estatisticas-ciclo/',
                         '/geradores-elite/ciclo-apostas/',
                         '/geradores-elite/comportamento-apostas/',
-                        '/geradores-elite/construtor-construcoes/'
+                        '/geradores-elite/construtor-construcoes/',
+                        '/geradores-elite/comparador-apostas/'
                     ] %}
                     <a class="dd-link{% if loop.first %} dd-ge-sep{% endif %}" href="{{ item.href }}">
                         <span class="dd-icon" style="background:var(--accent-light);color:var(--primary);">

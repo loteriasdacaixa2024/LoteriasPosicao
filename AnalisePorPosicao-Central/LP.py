@@ -1,10 +1,13 @@
 import atexit
+import logging
 import os
 import re
 import sys
+from io import BytesIO
+from urllib.parse import quote
 
 import requests
-from flask import Flask, Response, jsonify, redirect, render_template, request
+from flask import Flask, Response, jsonify, redirect, render_template, request, send_file
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -41,6 +44,8 @@ from _shared.componentes_launcher import (
     stop_conferencias_if_started_by_us,
 )
 from modality_proxy import proxy_modality_request
+
+log = logging.getLogger("lp.estatisticas_excel")
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -272,6 +277,41 @@ def api_conferencias_abrir():
     st = ensure_conferencias()
     http = 200 if st.get("ok") else 503
     return jsonify({"status": "success" if st.get("ok") else "error", **st}), http
+
+
+@app.route("/api/estatisticas-basicas/todas.xlsx", methods=["GET"])
+def api_estatisticas_todas_xlsx():
+    """Excel único com a seção 2 de cada modalidade. A cópia fica na raiz do acervo."""
+    try:
+        from analise_escolha_visual.export_estatisticas import (
+            ARQUIVO_CONSOLIDADO,
+            gerar_consolidado,
+        )
+        res = gerar_consolidado()
+    except Exception:
+        log.exception("Falha ao consolidar as estatísticas básicas.")
+        return jsonify({
+            "sucesso": False,
+            "mensagem": "Não foi possível gerar o arquivo agora.",
+        }), 500
+    if not res.get("ok") or not res.get("conteudo"):
+        return jsonify({
+            "sucesso": False,
+            "mensagem": res.get("mensagem") or "Não foi possível gerar o arquivo agora.",
+        }), 503
+    bio = BytesIO(res["conteudo"])
+    bio.seek(0)
+    resp = send_file(
+        bio,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=ARQUIVO_CONSOLIDADO,
+        max_age=0,
+    )
+    resp.headers["Cache-Control"] = "no-store"
+    if res.get("mensagem"):
+        resp.headers["X-Estatisticas-Aviso"] = quote(res["mensagem"])
+    return resp
 
 
 if __name__ == "__main__":

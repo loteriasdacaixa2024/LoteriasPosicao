@@ -9,7 +9,14 @@
         <!-- Seção 10 — MANUAL -->
         <div data-tb-panel="s10" class="{{ '' if show_s10_first and not show_s12_first and not show_s13_first else 'd-none' }}">
           <div class="tb-card">
-            <h2 class="h5 fw-bold">📝 SEÇÃO 10 — MANUAL <span class="badge bg-secondary ms-1">ordem crescente</span></h2>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+              <h2 class="h5 fw-bold mb-0">📝 SEÇÃO 10 — MANUAL <span class="badge bg-secondary ms-1">ordem crescente</span></h2>
+              {% if modality_key is defined and modality_key != 'supersete' %}
+              <a class="btn btn-sm btn-outline-secondary cmp-voltar" href="/geradores-elite/comparador-apostas/#manual">
+                <i class="fas fa-arrow-left"></i> Voltar ao Comparador
+              </a>
+              {% endif %}
+            </div>
             <details class="tb-howto mb-2">
               <summary>Como usar</summary>
               <div class="tb-howto-body">
@@ -104,11 +111,12 @@
                     <th class="tb-sort" data-sort="final" title="Clique para ordenar">Final <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="qtde" title="Clique para ordenar">Qtde <span class="tb-sort-ind">⇅</span></th>
                     <th class="tb-sort" data-sort="numeros" title="Clique para ordenar">Números <span class="tb-sort-ind">⇅</span></th>
+                    <th title="Diagonais desta aposta no volante">Diagonais</th>
                     <th title="Incluir ou remover linha"></th>
                   </tr>
                 </thead>
                 <tbody id="tbUltimo10" class="tb-ultimo-preview">
-                  <tr><td colspan="{{ 14 + (1 if extra_mes else 0) }}" class="text-muted">Carregando histórico tubular…</td></tr>
+                  <tr><td colspan="{{ 15 + (1 if extra_mes else 0) }}" class="text-muted">Carregando histórico tubular…</td></tr>
                 </tbody>
                 <tbody id="tbManual10Body"></tbody>
               </table>
@@ -431,7 +439,7 @@
                     <h3 class="tb-cmp-diag-h">Ranking TOP — segmentos mais frequentes</h3>
                     <p class="small text-muted tb-cmp-diag-hint mb-1">Frequência no histórico. Clique numa linha para ir à última ocorrência e destacar no volante.</p>
                     <div class="tb-cmp-diag-scroll tb-cmp-diag-scroll-rank">
-                      <table class="tb-table tb-cmp-diag-table tb-cmp-diag-table-wide">
+                      <table class="tb-table tb-cmp-diag-table tb-cmp-diag-table-wide tabela-ordenavel">
                         <thead>
                           <tr>
                             <th>#</th>
@@ -453,7 +461,7 @@
                     <p class="small text-muted tb-cmp-diag-hint mb-1" id="tbCmpDiagLogMeta"></p>
                     <p class="small text-muted tb-cmp-diag-hint mb-1">Cada diagonal em sua linha (várias por concurso). Direção pela geometria do volante. Clique para selecionar o concurso e destacar o segmento.</p>
                     <div class="tb-cmp-diag-scroll tb-cmp-diag-scroll-log">
-                      <table class="tb-table tb-cmp-diag-table tb-cmp-diag-table-wide">
+                      <table class="tb-table tb-cmp-diag-table tb-cmp-diag-table-wide tabela-ordenavel">
                         <thead>
                           <tr>
                             <th>Concurso</th>
@@ -608,7 +616,7 @@
               <summary>Tabela resumo (segmento / direção / estatística)</summary>
               <div class="tb-howto-body">
                 <div class="table-responsive">
-                  <table class="table table-sm table-bordered tb-table tb-diag13-table">
+                  <table class="table table-sm table-bordered tb-table tb-diag13-table tabela-ordenavel">
                     <thead>
                       <tr>
                         <th>#</th>

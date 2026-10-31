@@ -2,6 +2,22 @@
 {% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
 
 {% block content %}
+{% if request.args.get('embed') == '1' %}
+<script>document.body.classList.add('is-embed');</script>
+<style>
+  body.is-embed { padding-top: 0 !important; }
+  body.is-embed .navbar-main,
+  body.is-embed #mobilePanel { display: none !important; }
+  body.is-embed #get-hub > .page-links,
+  body.is-embed #get-hub > .get-hub-tabs,
+  body.is-embed #get-hub > .get-hub-legenda,
+  body.is-embed #get-hub-escolha,
+  body.is-embed .cmp-voltar,
+  body.is-embed [data-tb-panel]:not([data-tb-panel="s10"]) { display: none !important; }
+  body.is-embed #ai-tubular-root,
+  body.is-embed [data-tb-panel="s10"] { display: block !important; }
+</style>
+{% endif %}
 <style>
 #get-root .page-links a,
 #get-hub .page-links a {
@@ -195,6 +211,21 @@
 
 <div class="container-fluid py-3" id="get-hub" data-aba-inicial="{{ aba_inicial or 'escolha' }}">
   <div class="d-flex flex-wrap gap-2 mb-3 page-links">
+    <a class="btn btn-sm btn-outline-secondary d-none" id="btnVoltarRota" href="#"><i class="fas fa-arrow-left"></i> Voltar</a>
+    <script>
+    (function () {
+        var raw = new URLSearchParams(location.search).get('voltar');
+        if (!raw) return;
+        var u;
+        try { u = new URL(raw, location.href); } catch (e) { return; }
+        if (!/\/analise\/comparar-concursos\/?/.test(u.pathname)) return;
+        if (u.hostname !== location.hostname && u.hostname !== '127.0.0.1' && u.hostname !== 'localhost') return;
+        var a = document.getElementById('btnVoltarRota');
+        if (!a) return;
+        a.href = u.href;
+        a.classList.remove('d-none');
+    })();
+    </script>
     <a class="btn btn-sm btn-outline-secondary" href="{{ escolha_url }}"><i class="fas fa-arrow-left"></i> Escolha Visual</a>
     <a class="btn btn-sm btn-outline-secondary" href="{{ sequencias_url or '/analise/escolha-visual/?aba=visualizacao&viz=tubular' }}"><i class="fas fa-arrow-left"></i> Sequências (Análise)</a>
     <a class="btn btn-sm btn-outline-secondary" href="{{ tubular_url }}"><i class="fas fa-arrow-left"></i> Análise Tubular</a>
@@ -439,7 +470,7 @@
   </div>
 </div>{# /get-hub #}
 
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20261001v1">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20261028v1">
 <style>
   :root {
     --cor-sequencia-1: #86efac;
@@ -457,7 +488,7 @@
   {% endfor %}
   {% endif %}
 </style>
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20261007v1"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20261030v1"></script>
 <script>
 (function () {
   const hub = document.getElementById('get-hub');

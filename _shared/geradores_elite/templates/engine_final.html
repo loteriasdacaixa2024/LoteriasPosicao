@@ -173,6 +173,89 @@
         color: #664d03;
         border: 1px solid var(--accent);
     }
+    #ge-engine-final .ge-olho {
+        border: 0;
+        background: transparent;
+        color: #6c757d;
+        font-size: .85rem;
+        padding: .15rem .4rem;
+        line-height: 1;
+    }
+    #ge-engine-final .ge-olho:hover { color: #343a40; }
+    #ge-engine-final .ge-leitura {
+        width: 100%;
+        max-width: 42rem;
+        margin: .35rem auto .6rem;
+        text-align: left;
+    }
+    #ge-engine-final .ge-leitura-tit {
+        font-size: .72rem;
+        color: #6c757d;
+        margin: 0 0 .25rem;
+    }
+    #ge-engine-final .ge-leitura ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: .25rem .7rem;
+    }
+    #ge-engine-final .ge-leitura li {
+        font-size: .72rem;
+        color: #495057;
+    }
+    #ge-engine-final .ge-leitura li span {
+        color: #6c757d;
+    }
+    #ge-engine-final .ge-leitura-aviso {
+        font-size: .75rem;
+        color: #6c757d;
+        text-align: center;
+        margin: 0 0 .5rem;
+    }
+    #ge-engine-final .ge-forma {
+        display: none;
+        width: 100%;
+        text-align: center;
+        font-size: .68rem;
+        color: #6c757d;
+        margin-top: .15rem;
+    }
+    #ge-engine-final.ge-leitura-on .ge-forma { display: block; }
+    #ge-engine-final .ge-align { width: 100%; }
+    #ge-engine-final .ge-align-head,
+    #ge-engine-final .ge-align-row {
+        display: grid;
+        grid-template-columns: 2rem 1fr 1fr;
+        gap: .5rem;
+        align-items: center;
+    }
+    #ge-engine-final .ge-align-head {
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+        color: #6c757d;
+        text-align: center;
+        margin-bottom: .35rem;
+    }
+    #ge-engine-final .ge-align-head span:last-child { color: #198754; }
+    #ge-engine-final .ge-align-n {
+        text-align: center;
+        font-size: .75rem;
+        font-weight: 700;
+        color: #868e96;
+    }
+    #ge-engine-final .ge-align-cell {
+        border-bottom: 1px solid #f0f0f0;
+        padding: .35rem .15rem;
+    }
+    #ge-engine-final .ge-align-opt { background: #f8fff9; }
+    #ge-engine-final .ge-align-cell .ge-row-aposta {
+        border-bottom: 0;
+        padding: .2rem 0;
+    }
     #ge-engine-final .draw-balls,
     #ge-engine-final .draw-trevos {
         display: flex;
@@ -232,7 +315,7 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label small mb-1">Apostas</label>
-                <input type="number" class="form-control form-control-sm" id="geQtdApostas" min="1" max="50" value="5">
+                <input type="number" class="form-control form-control-sm" id="geQtdApostas" min="1" max="50" value="10">
             </div>
             {% if cfg.get('extra') == 'mes' %}
             <div class="col-md-3">
@@ -288,6 +371,12 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ge-tab-leitura" data-bs-toggle="tab"
+                data-bs-target="#geTabLeitura" type="button" role="tab">
+                <i class="fas fa-eye me-1"></i> Leitura
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="ge-tab-otimizador" data-bs-toggle="tab"
                 data-bs-target="#geTabOtimizador" type="button" role="tab">
                 <i class="fas fa-compress-arrows-alt me-1"></i> Otimizador de Concentração
@@ -297,6 +386,46 @@
     <div class="tab-content" id="geTabContent">
         <div class="tab-pane fade show active" id="geTabGerador" role="tabpanel">
             <div id="geResultados" class="card shadow-sm border-0 p-2 p-md-3" style="background: var(--surface,#fff);"></div>
+        </div>
+        <div class="tab-pane fade" id="geTabLeitura" role="tabpanel">
+            <div id="geLeituraPainel" class="card shadow-sm border-0 p-3" style="background: var(--surface,#fff);">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-2">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="small text-muted" id="geLeituraQuando">Carregando…</span>
+                        <div class="draw-balls m-0" id="geLeituraBolas"></div>
+                    </div>
+                    <select class="form-select form-select-sm" id="geLeituraSelConcurso" style="max-width:16rem;" aria-label="Concurso">
+                        <option value="">Carregando…</option>
+                    </select>
+                </div>
+                <div class="card shadow-sm mb-3 border-0" id="gePanoramaReferencia" style="border-top:4px solid var(--accent)!important;">
+                    <div class="card-body py-2">
+                        <p class="small text-muted mb-2 d-none" data-pan="legenda"></p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-2 pan-conj-table">
+                                <thead class="table-light" data-pan="thead"></thead>
+                                <tbody data-pan="tbody"></tbody>
+                            </table>
+                        </div>
+                        <p class="small mb-0" data-pan="rodape"></p>
+                    </div>
+                </div>
+                <div class="card shadow-sm mb-0 border-0 d-none" id="gePanoramaGerado" style="border-top:4px solid var(--accent)!important;">
+                    <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
+                        <i class="fas fa-table me-1"></i>Panorama do conjunto gerado
+                    </div>
+                    <div class="card-body py-3">
+                        <p class="small text-muted mb-2" data-pan="legenda">—</p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-2 pan-conj-table">
+                                <thead class="table-light" data-pan="thead"></thead>
+                                <tbody data-pan="tbody"></tbody>
+                            </table>
+                        </div>
+                        <p class="small mb-0" data-pan="rodape"></p>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="tab-pane fade" id="geTabOtimizador" role="tabpanel">
             <div class="card shadow-sm border-0 p-2 p-md-3" style="background: var(--surface,#fff);">
@@ -322,5 +451,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('geradores_elite.static', filename='engine_final.js') }}?v=pano1"></script>
+<script src="{{ url_for('geradores_elite.static', filename='engine_final.js') }}?v=leitura3"></script>
 {% endblock %}

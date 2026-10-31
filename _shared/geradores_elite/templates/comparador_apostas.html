@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}Comparador de Apostas — {{ modality_nome }}{% endblock %}
+
+{% block content %}
+<style>
+  #cmp-root { max-width: none; margin: 0 auto; }
+  #cmp-root h1 { font-weight: 800; color: #3d3208; }
+  #cmp-root .cmp-lead { color: #6b5a2e; max-width: 46rem; }
+  #cmp-root .cmp-item {
+    background: #fff;
+    border: 1px solid #efe4c0;
+    border-radius: 12px;
+    margin-bottom: .75rem;
+    overflow: hidden;
+  }
+  #cmp-root .cmp-head {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    background: #fcf9e8;
+    padding: .45rem .7rem .45rem .45rem;
+  }
+  #cmp-root .cmp-item.is-open .cmp-head { background: #efe4c0; }
+  #cmp-root .cmp-toggle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    font-weight: 800;
+    color: #3d3208;
+    padding: .35rem .25rem;
+    min-width: 0;
+  }
+  #cmp-root .cmp-toggle .cmp-chev { width: .9rem; color: #9a7414; flex-shrink: 0; }
+  #cmp-root .cmp-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 6px;
+    background: #d4b31a;
+    color: #171303;
+    font-size: .82rem;
+    flex-shrink: 0;
+  }
+  #cmp-root .cmp-nome { min-width: 0; }
+  #cmp-root .cmp-open {
+    white-space: nowrap;
+    font-size: .82rem;
+    font-weight: 700;
+    color: #664a00;
+    text-decoration: none;
+  }
+  #cmp-root .cmp-open:hover { text-decoration: underline; }
+  #cmp-root .cmp-body[hidden] { display: none !important; }
+  #cmp-root .cmp-frame {
+    width: 100%;
+    height: 70vh;
+    border: 0;
+    border-top: 1px solid #efe4c0;
+    background: #fffdf5;
+    display: block;
+  }
+</style>
+
+<div class="container-fluid py-3" id="cmp-root">
+  <h1 class="h4 mb-1"><span class="cmp-rank me-1">5</span> Comparador de Apostas</h1>
+  <p class="cmp-lead small mb-3">
+    As três análises continuam nos lugares de origem. Aqui elas ficam juntas para gerar, conferir e registrar.
+    A seta abre a análise; o link da direita abre a tela original.
+  </p>
+
+  <section class="cmp-item" id="cmp-escolha" data-src="/analise/escolha-visual/?aba=estatisticas&amp;embed=1">
+    <div class="cmp-head">
+      <button type="button" class="cmp-toggle" aria-expanded="false" aria-controls="cmp-escolha-body">
+        <i class="fas fa-chevron-right cmp-chev" aria-hidden="true"></i>
+        <span class="cmp-rank">1</span>
+        <span class="cmp-nome">Escolha Visual — Apostas para comparar</span>
+      </button>
+      <a class="cmp-open" href="/analise/escolha-visual/?aba=estatisticas">Abrir original ↗</a>
+    </div>
+    <div class="cmp-body" id="cmp-escolha-body" hidden>
+      <iframe class="cmp-frame" title="Escolha Visual — Apostas para comparar"></iframe>
+    </div>
+  </section>
+
+  <section class="cmp-item" id="cmp-checagem" data-src="/analise/analises-inteligentes/?aba=checagem-seq&amp;embed=1">
+    <div class="cmp-head">
+      <button type="button" class="cmp-toggle" aria-expanded="false" aria-controls="cmp-checagem-body">
+        <i class="fas fa-chevron-right cmp-chev" aria-hidden="true"></i>
+        <span class="cmp-rank">2</span>
+        <span class="cmp-nome">Checagem de Sequências</span>
+      </button>
+      <a class="cmp-open" href="/analise/analises-inteligentes/?aba=checagem-seq">Abrir original ↗</a>
+    </div>
+    <div class="cmp-body" id="cmp-checagem-body" hidden>
+      <iframe class="cmp-frame" title="Checagem de Sequências"></iframe>
+    </div>
+  </section>
+
+  <section class="cmp-item" id="cmp-manual" data-src="/geradores-elite/escolha-tubular-apostas/?aba=manual&amp;embed=1">
+    <div class="cmp-head">
+      <button type="button" class="cmp-toggle" aria-expanded="false" aria-controls="cmp-manual-body">
+        <i class="fas fa-chevron-right cmp-chev" aria-hidden="true"></i>
+        <span class="cmp-rank">3</span>
+        <span class="cmp-nome">Seção 10 — Manual</span>
+      </button>
+      <a class="cmp-open" href="/geradores-elite/escolha-tubular-apostas/?aba=manual">Abrir original ↗</a>
+    </div>
+    <div class="cmp-body" id="cmp-manual-body" hidden>
+      <iframe class="cmp-frame" title="Seção 10 — Manual"></iframe>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const pagina = location.pathname + location.search;
+
+  function ajustarFrame(frame) {
+    if (!frame || frame._cmpLock) return;
+    let doc;
+    try { doc = frame.contentDocument; } catch (_) { return; }
+    if (!doc || !doc.documentElement) return;
+    frame._cmpLock = true;
+    try {
+      const max = Math.round(window.innerHeight * 0.7) + 'px';
+      if (doc.documentElement.style.getPropertyValue('--cmp-table-max') !== max) {
+        doc.documentElement.style.setProperty('--cmp-table-max', max);
+      }
+      let h = 0;
+      if (doc.body) {
+        for (const el of doc.body.children) {
+          const r = el.getBoundingClientRect();
+          const mb = parseFloat(doc.defaultView.getComputedStyle(el).marginBottom) || 0;
+          h = Math.max(h, r.bottom + mb);
+        }
+      }
+      h = Math.ceil(h || doc.documentElement.scrollHeight);
+      const atual = frame.getBoundingClientRect().height;
+      if (h > 80 && Math.abs(atual - h) > 2) frame.style.height = h + 'px';
+    } finally {
+      frame._cmpLock = false;
+    }
+  }
+
+  function observar(frame) {
+    if (!frame || frame.dataset.cmpObs === '1') return;
+    frame.dataset.cmpObs = '1';
+    frame.addEventListener('load', function () {
+      const medir = function () { ajustarFrame(frame); };
+      medir();
+      let doc;
+      try { doc = frame.contentDocument; } catch (_) { return; }
+      if (!doc || !doc.documentElement || frame._cmpObs) return;
+      frame._cmpObs = new ResizeObserver(medir);
+      frame._cmpObs.observe(doc.documentElement);
+      if (doc.body) frame._cmpObs.observe(doc.body);
+      const conteudo = doc.querySelector('.page-content');
+      if (conteudo) frame._cmpObs.observe(conteudo);
+    });
+  }
+
+  document.querySelectorAll('#cmp-root iframe').forEach(observar);
+  window.addEventListener('resize', function () {
+    document.querySelectorAll('#cmp-root iframe').forEach(function (frame) {
+      if (frame.getAttribute('src')) ajustarFrame(frame);
+    });
+  });
+
+  function abrir(item) {
+    document.querySelectorAll('#cmp-root .cmp-item.is-open').forEach(function (outro) {
+      if (outro !== item) fechar(outro);
+    });
+    const body = item.querySelector('.cmp-body');
+    const frame = item.querySelector('iframe');
+    const btn = item.querySelector('.cmp-toggle');
+    const chev = item.querySelector('.cmp-chev');
+    if (frame && !frame.getAttribute('src')) frame.src = item.dataset.src;
+    item.classList.add('is-open');
+    if (body) body.hidden = false;
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+    if (chev) {
+      chev.classList.remove('fa-chevron-right');
+      chev.classList.add('fa-chevron-down');
+    }
+    if (item.id) history.replaceState(null, '', pagina + '#' + item.id.replace(/^cmp-/, ''));
+    if (frame) ajustarFrame(frame);
+  }
+
+  function fechar(item) {
+    const body = item.querySelector('.cmp-body');
+    const btn = item.querySelector('.cmp-toggle');
+    const chev = item.querySelector('.cmp-chev');
+    item.classList.remove('is-open');
+    if (body) body.hidden = true;
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (chev) {
+      chev.classList.remove('fa-chevron-down');
+      chev.classList.add('fa-chevron-right');
+    }
+  }
+
+  document.querySelectorAll('#cmp-root .cmp-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const item = btn.closest('.cmp-item');
+      if (!item) return;
+      if (item.classList.contains('is-open')) fechar(item);
+      else abrir(item);
+    });
+  });
+
+  const chave = (location.hash || '').replace('#', '');
+  const inicial = document.getElementById('cmp-' + chave);
+  if (inicial) abrir(inicial);
+})();
+</script>
+{% endblock %}

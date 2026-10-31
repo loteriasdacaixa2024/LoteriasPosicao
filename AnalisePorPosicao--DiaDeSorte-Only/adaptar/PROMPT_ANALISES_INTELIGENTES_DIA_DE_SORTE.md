@@ -24,13 +24,13 @@ Resultado esperado: uma camada única de análise e geração de palpites basead
 ### Workspace / projeto alvo
 
 ```text
-D:\Loterias\LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only
+D:\Loterias\LP-LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only
 ```
 
 ### Pasta de referência obrigatória (analisar antes de implementar)
 
 ```text
-D:\Loterias\LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only\adaptar
+D:\Loterias\LP-LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only\adaptar
 ```
 
 ### Sistemas externos a unificar (todos principais)
@@ -432,7 +432,7 @@ Ao final, o usuário deve conseguir, **em um único módulo do app local**:
 ### Pasta
 
 ```text
-D:\Loterias\LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only\adaptar
+D:\Loterias\LP-LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only\adaptar
 ```
 
 ### Netlify (principais)

@@ -263,7 +263,7 @@
         <div class="row g-3">
             <div class="col-lg-6">
                 <div class="table-responsive">
-                    <table class="table table-sm rg-table">
+                    <table class="table table-sm rg-table tabela-ordenavel">
                         <thead><tr><th>Perfil</th><th>Concursos</th><th>%</th></tr></thead>
                         <tbody>
                         {% for row in data.par_impar.top %}
@@ -290,7 +290,7 @@
             </div>
             <div class="col-lg-6">
                 <div class="table-responsive">
-                    <table class="table table-sm rg-table">
+                    <table class="table table-sm rg-table tabela-ordenavel">
                         <thead><tr><th>Faixa de soma</th><th>Concursos</th><th>%</th></tr></thead>
                         <tbody>
                         {% for row in data.soma.top_faixas %}
@@ -325,7 +325,7 @@
             {% endfor %}
         </div>
         <div class="table-responsive">
-            <table class="table table-sm rg-table">
+            <table class="table table-sm rg-table tabela-ordenavel">
                 <thead><tr><th>Rank</th><th>Distribuição</th><th>Concursos</th><th>%</th></tr></thead>
                 <tbody>
                 {% for row in data.faixas.top8 %}
@@ -389,7 +389,7 @@
         <h2>Padrão inicial (primeiro dígito)</h2>
         <p class="small text-muted">0 = 01–09 · 1 = 10–19 · 2 = 20–29 · 3 = 30–31. {{ data.padrao_inicial.distintos }} padrões distintos.</p>
         <div class="table-responsive">
-            <table class="table table-sm rg-table">
+            <table class="table table-sm rg-table tabela-ordenavel">
                 <thead><tr><th>Rank</th><th>Padrão</th><th>Concursos</th><th>%</th></tr></thead>
                 <tbody>
                 {% for row in data.padrao_inicial.top5 %}
@@ -585,7 +585,7 @@
             }
             status.textContent = data.examinadas + ' combinações válidas examinadas.';
             let html = '<p class="small text-muted">' + (data.obrigatorios || []).join(' ') + '</p>';
-            html += '<table class="table table-sm rg-table"><thead><tr><th>#</th><th>Dezenas</th><th>Pontos</th><th>Por quê</th></tr></thead><tbody>';
+            html += '<table class="table table-sm rg-table tabela-ordenavel"><thead><tr><th>#</th><th>Dezenas</th><th>Pontos</th><th>Por quê</th></tr></thead><tbody>';
             (data.apostas || []).forEach(function (ap) {
                 html += '<tr><td>' + ap.ordem + '</td><td class="fw-bold">' + ap.dezenas.join(' ') + '</td><td>' + ap.pontos + '</td><td>' + (ap.notas || []).join(' · ') + '</td></tr>';
             });

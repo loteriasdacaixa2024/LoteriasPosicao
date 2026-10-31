@@ -419,6 +419,90 @@ def _seqs(nums: Sequence[int]) -> List[List[int]]:
     return grupos
 
 
+def _maior_sequencia(nums: Sequence[int]) -> int:
+    grupos = _seqs(nums)
+    if not grupos:
+        return 0
+    return max(len(g) for g in grupos)
+
+
+def _comprimento_ao_entrar(n: int, chosen: Sequence[int]) -> int:
+    """Tamanho da sequência seguida se `n` entrar no que já foi escolhido."""
+    presentes = {int(x) for x in chosen}
+    n = int(n)
+    lo = hi = n
+    while lo - 1 in presentes:
+        lo -= 1
+    while hi + 1 in presentes:
+        hi += 1
+    return hi - lo + 1
+
+
+def substituir_bloqueadas(
+    nums: Sequence[int],
+    bloqueadas: Sequence[int],
+    dmin: int,
+    dmax: int,
+) -> List[int]:
+    """Troca dezenas bloqueadas por outra da mesma dezena inicial, quando existe."""
+    atual = sorted({int(x) for x in nums})
+    bloq = {int(x) for x in bloqueadas}
+    guard = 0
+    while guard < len(atual) + 2:
+        guard += 1
+        alvo = next((n for n in atual if n in bloq), None)
+        if alvo is None:
+            break
+        dec = alvo // 10
+        ocup = set(atual)
+        livres = [
+            x for x in range(int(dmin), int(dmax) + 1)
+            if x // 10 == dec and x not in ocup and x not in bloq
+        ]
+        if not livres:
+            livres = [
+                x for x in range(int(dmin), int(dmax) + 1)
+                if x not in ocup and x not in bloq
+            ]
+        if not livres:
+            break
+        base = [n for n in atual if n != alvo]
+        pick = min(livres, key=lambda x: (_comprimento_ao_entrar(x, base), x))
+        atual = sorted(base + [pick])
+    return atual
+
+
+def expandir_aposta(
+    nums: Sequence[int],
+    k: int,
+    dmin: int,
+    dmax: int,
+    bloqueadas: Sequence[int],
+    rng: random.Random,
+) -> List[int]:
+    """Completa a aposta até `k` dezenas, evitando sequência de 5 e as bloqueadas."""
+    chosen = sorted({int(x) for x in nums})
+    bloq = {int(x) for x in bloqueadas}
+    alvo = max(len(chosen), int(k))
+    teto = int(dmax) - int(dmin) + 1
+    if alvo > teto:
+        alvo = teto
+    universo = [n for n in range(int(dmin), int(dmax) + 1) if n not in chosen and n not in bloq]
+    if len(chosen) + len(universo) < alvo:
+        universo = [n for n in range(int(dmin), int(dmax) + 1) if n not in chosen]
+    rng.shuffle(universo)
+    while len(chosen) < alvo and universo:
+        universo.sort(key=lambda n: (
+            _comprimento_ao_entrar(n, chosen) >= 5,
+            n in bloq,
+        ))
+        pick = universo.pop(0)
+        chosen.append(pick)
+        chosen.sort()
+        universo = [n for n in universo if n != pick]
+    return chosen
+
+
 def _finais(nums: Sequence[int]) -> List[List[int]]:
     by: Dict[int, List[int]] = defaultdict(list)
     for n in nums:
@@ -558,9 +642,16 @@ def _score_jogo(
     elif len(reps) == 0:
         pts += 1
     if sg:
-        pts += 6 if len(sg) == 1 else 3
-        if sg and len(sg[0]) == 2:
-            pts += 1.5
+        maior = max(len(g) for g in sg)
+        # 5 seguidas: 5 em 1.328 concursos. 4 seguidas: 32. Par e trinca seguem válidos.
+        if maior >= 5:
+            pts -= 14
+        elif maior == 4:
+            pts -= 6
+        else:
+            pts += 6 if len(sg) == 1 else 3
+            if maior == 2:
+                pts += 1.5
     if fg:
         pts += 5 if len(fg) == 1 else 3
     if alvo["soma_lo"] <= sm <= alvo["soma_hi"]:
@@ -600,9 +691,16 @@ def _rank_candidato(
         pts += 2
     if n in ultimo_set and alvo["rep_min"] <= 1:
         pts += 1.5
-    # finais / sequência com o que já está
-    if any(abs(n - c) == 1 for c in chosen):
+    # Par e trinca ajudam. Alongar para 4 ou 5 seguidas pesa contra.
+    comp = _comprimento_ao_entrar(n, chosen)
+    if comp == 2:
         pts += 3
+    elif comp == 3:
+        pts += 0.5
+    elif comp == 4:
+        pts -= 6
+    elif comp >= 5:
+        pts -= 12
     if any(n % 10 == c % 10 for c in chosen):
         pts += 2.5
     # atraso alto vale (17, 23…), frequência recente baixa também

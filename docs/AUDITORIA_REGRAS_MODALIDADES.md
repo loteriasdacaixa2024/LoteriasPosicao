@@ -1,7 +1,7 @@
 # Auditoria Global — Regras por Modalidade
 
 **Data:** 2025-07-25  
-**Escopo:** `D:\Loterias\LoteriasPosicao` (apps por modalidade + `_shared`)  
+**Escopo:** `D:\Loterias\LP-LoteriasPosicao` (apps por modalidade + `_shared`)  
 **Objetivo:** garantir que limites oficiais (universo, marcação, sorteadas, extras, preços) venham de configuração centralizada, sem hardcodes de uma modalidade “vazando” para outra.
 
 ---

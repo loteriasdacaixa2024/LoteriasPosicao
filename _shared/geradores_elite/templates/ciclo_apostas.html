@@ -33,6 +33,16 @@
   .cc-aposta.operacional{--cc-accent:#6f42c1}
   .cc-aposta.fechamento{--cc-accent:#198754}
   .cc-aposta.estrategia{--cc-accent:#0f172a}
+  @keyframes ce-campo-pulso {
+    0% { box-shadow: 0 0 0 0 rgba(13,110,253,.55); }
+    50% { box-shadow: 0 0 0 4px rgba(13,110,253,.4); }
+    100% { box-shadow: 0 0 0 0 rgba(13,110,253,0); }
+  }
+  .ce-campo-foco {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+    animation: ce-campo-pulso 1.3s ease 2;
+  }
   .cc-aposta.ja-hist{--cc-accent:#dc3545;background:#fff8f8}
   .cc-aposta.ja-hist:hover{background:#fff1f1}
 
@@ -239,7 +249,7 @@
       <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ritmo" type="button" role="tab">Ciclo — Ritmo de Evolução</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-operacional" type="button" role="tab">Ciclo — Modo Operacional</button>
+      <button class="nav-link" id="tab-btn-operacional" data-bs-toggle="tab" data-bs-target="#tab-operacional" type="button" role="tab">Ciclo — Modo Operacional</button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fechamento" type="button" role="tab">Ciclo — Fechamento</button>
@@ -556,6 +566,17 @@
               </select>
             </div>
             <div class="col-6 col-md-2">
+              <label class="form-label small mb-0" for="ce-diags">Diagonais</label>
+              <select id="ce-diags" class="form-select form-select-sm" title="Quantidade aplicada em todas as apostas. Automático usa a que mais sai nos resultados.">
+                <option value="" selected>Automático</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
               <label class="form-label small mb-0">Desdobramento</label>
               <select id="ce-desdob" class="form-select form-select-sm">
                 <option value="auto" selected>Auto (Evolução 1–6)</option>
@@ -620,6 +641,7 @@
             <button type="button" class="btn btn-outline-secondary" id="ce-btn-export" disabled><i class="fas fa-download"></i> Exportar TXT</button>
             <button type="button" class="btn btn-outline-primary" id="ce-btn-bt" disabled><i class="fas fa-chart-line me-1"></i>Back Test</button>
           </div>
+          <p class="small text-muted mt-2 mb-0" id="ce-regra-ds" hidden></p>
           <p class="small text-muted mt-2 mb-0" id="ce-status"></p>
           <div class="cc-legenda">
             <span><span class="cc-ball falt" style="width:18px;height:18px;font-size:.55rem">F</span> Faltantes (novas do ciclo)</span>
@@ -775,6 +797,7 @@
     if(a.digitos_distintos != null) badges.push(chip('Dígitos', a.digitos_distintos));
     if(a.k_faltantes != null) badges.push(chip('k', a.k_faltantes));
     if(a.k_desdobramento != null) badges.push(chip('Desdob.', a.k_desdobramento));
+    if(a.n_diagonais != null) badges.push(chip('Diag.', a.n_diagonais));
     if(a.k_repeticao != null) badges.push(chip('Rep.', a.k_repeticao));
     if(a.qtd_evolucao_alvo != null) badges.push(chip('Evol.', '+'+a.qtd_evolucao_alvo));
     if(a.alinhado_evolucao) badges.push(`<span class="cc-chip" style="background:#ecfdf5;border-color:#a7f3d0;color:#047857"><em>Ritmo</em><strong>ok</strong></span>`);
@@ -1204,6 +1227,39 @@
       return;
     }
     const plano = c.estrategia_ciclo || {};
+    (function preencherDiagonais(){
+      const sel = document.getElementById('ce-diags');
+      const diag = c.diagonais || {};
+      if(!sel || !diag.opcoes || !diag.opcoes.length) return;
+      const pedido = new URLSearchParams(location.search).get('diags');
+      const sug = diag.sugerida != null ? String(diag.sugerida) : '';
+      const pctSug = diag.pct && sug !== '' && diag.pct[sug] != null ? diag.pct[sug] : null;
+      const empates = (diag.empate || []).map(String);
+      sel.innerHTML = '<option value="">Automático'
+        + (sug !== '' ? ' (' + sug + (pctSug != null ? ' · ' + pctSug + '%' : '') + ')' : '')
+        + '</option>' + diag.opcoes.map(function(n){
+        const pct = diag.pct && diag.pct[String(n)];
+        let marca = '';
+        if(String(n) === sug) marca = ' · o que mais sai';
+        else if(empates.indexOf(String(n)) >= 0) marca = ' · empate';
+        const pctTxt = pct != null ? ' (' + pct + '%)' : '';
+        return '<option value="' + n + '">' + n + marca + pctTxt + '</option>';
+      }).join('');
+      if(pedido !== null && Array.from(sel.options).some(function(o){ return o.value === pedido; })) sel.value = pedido;
+      else if(sug !== '' && Array.from(sel.options).some(function(o){ return o.value === sug; })) sel.value = sug;
+      const regra = document.getElementById('ce-regra-ds');
+      if(regra && MOD_KEY === 'diadesorte'){
+        const tops = (diag.ranking || []).filter(function(s){ return Number(s.len) === 2; }).slice(0, 3);
+        const topTxt = tops.map(function(s){ return (s.dir_sym || '') + ' ' + (s.nums_fmt || ''); }).join(' · ');
+        const tr = diag.top_trinca;
+        const trTxt = tr && tr.nums_fmt ? ((tr.dir_sym || '') + ' ' + tr.nums_fmt) : '';
+        regra.hidden = false;
+        regra.textContent = (diag.leitura || '')
+          + (topTxt ? ' Top: ' + topTxt + '.' : '')
+          + (trTxt ? ' Trinca mais vista: ' + trTxt + '.' : '')
+          + ' No Automático, cada aposta leva 4 faltantes do ciclo quando couber; senão 3; senão 2.';
+      }
+    })();
     const fmtDez = (xs, lim=8) => {
       const arr = (xs||[]).slice(0, lim).map(pad);
       return arr.join(' · ') || '—';
@@ -1227,6 +1283,7 @@
               <span class="cc-chip"><em>Cotas</em><strong>${cotasTxt}</strong></span>
             </div>
             <p class="mb-0 mt-2 small text-muted">${plano.aviso_nao_previsao || 'Não é previsão de quais dezenas sairão.'}</p>
+            ${MOD_KEY === 'diadesorte' ? '<p class="mb-0 mt-2 small">Na geração automática, cada aposta leva 4 dezenas que ainda faltam no ciclo, quando couber. Se 4 não couber, usa 3; se 3 não couber, usa 2.</p>' : ''}
           </div>
         </div>`;
     }
@@ -2639,7 +2696,7 @@
   // Deep-link ?modo=estrategia | ?modo=recorrencia
   (function activateModoFromQuery(){
     const m = new URLSearchParams(location.search).get('modo');
-    const id = m === 'recorrencia' ? 'tab-btn-recorrencia' : (m === 'estrategia' ? 'tab-btn-estrategia' : null);
+    const id = m === 'recorrencia' ? 'tab-btn-recorrencia' : (m === 'estrategia' ? 'tab-btn-estrategia' : (m === 'operacional' ? 'tab-btn-operacional' : null));
     if(!id) return;
     const btn = document.getElementById(id);
     if(btn && window.bootstrap && bootstrap.Tab){
@@ -2749,6 +2806,7 @@
       quantidade: Number(document.getElementById('ce-qtd').value||12),
       pick: Number(document.getElementById('ce-pick').value||7),
       desdobramento: desdobRaw === 'auto' ? 'auto' : Number(desdobRaw),
+      n_diagonais: (document.getElementById('ce-diags').value === '' ? null : Number(document.getElementById('ce-diags').value)),
       k_repeticao: krepRaw === '' ? null : Number(krepRaw),
       usar_evolucao: document.getElementById('ce-usar-evo').checked,
       bloquear_exato: document.getElementById('ce-bloquear-exato').checked,
@@ -2788,11 +2846,58 @@
 {% block scripts %}
 <script>
 (function(){
-  const m = new URLSearchParams(location.search).get('modo');
-  const id = m === 'recorrencia' ? 'tab-btn-recorrencia' : (m === 'estrategia' ? 'tab-btn-estrategia' : null);
-  if(!id || !window.bootstrap || !bootstrap.Tab) return;
-  const btn = document.getElementById(id);
-  if(btn) bootstrap.Tab.getOrCreateInstance(btn).show();
+  const params = new URLSearchParams(location.search);
+  const m = params.get('modo');
+  const id = m === 'recorrencia' ? 'tab-btn-recorrencia' : (m === 'estrategia' ? 'tab-btn-estrategia' : (m === 'operacional' ? 'tab-btn-operacional' : null));
+  if(id && window.bootstrap && bootstrap.Tab){
+    const btn = document.getElementById(id);
+    if(btn) bootstrap.Tab.getOrCreateInstance(btn).show();
+  }
+  if(m === 'operacional'){
+    const op = params.get('op');
+    const selM = document.getElementById('co-modo');
+    if(selM && op && Array.from(selM.options).some(function(o){ return o.value === op; })) selM.value = op;
+    const alvoOp = document.getElementById('co-modo');
+    if(alvoOp){
+      alvoOp.classList.add('ce-campo-foco');
+      setTimeout(function(){ alvoOp.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 350);
+    }
+    return;
+  }
+  if(m !== 'estrategia') return;
+  const desdob = params.get('desdob');
+  const rep = params.get('rep');
+  const diags = params.get('diags');
+  const hash = (location.hash || '').replace('#', '');
+  if(!desdob && !rep && diags === null && hash !== 'ce-desdob' && hash !== 'ce-krep' && hash !== 'ce-diags') return;
+
+  function aplicarCampo(){
+    const selD = document.getElementById('ce-desdob');
+    const selR = document.getElementById('ce-krep');
+    const selG = document.getElementById('ce-diags');
+    if(selD && desdob && Array.from(selD.options).some(function(o){ return o.value === String(desdob) && !o.disabled; })){
+      selD.value = String(desdob);
+    }
+    if(selR && rep !== null && rep !== '' && Array.from(selR.options).some(function(o){ return o.value === String(rep); })){
+      selR.value = String(rep);
+    }
+    if(selG && diags !== null && Array.from(selG.options).some(function(o){ return o.value === String(diags); })){
+      selG.value = String(diags);
+    }
+    const alvo = document.getElementById(hash) || (diags !== null ? selG : selD);
+    if(!alvo) return;
+    alvo.classList.add('ce-campo-foco');
+    alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const tabBtn = document.getElementById('tab-btn-estrategia');
+  if(tabBtn){
+    tabBtn.addEventListener('shown.bs.tab', function umaVez(){
+      tabBtn.removeEventListener('shown.bs.tab', umaVez);
+      aplicarCampo();
+    });
+  }
+  setTimeout(aplicarCampo, 350);
 })();
 </script>
 {% endblock %}

@@ -21,6 +21,7 @@
     let conferenciaAtual = null;
     let backtestAtual = null;
     let concursosLista = [];
+    let concursoLeitura = null;
     let sessoesConstrutor = [];
 
     function fmtDezena(n) {
@@ -237,9 +238,8 @@
         const apostas = data.apostas || [];
         if (!apostas.length) {
             box.innerHTML = '<p class="text-muted mb-0">Nenhuma aposta gerada.</p>';
-            if (window.__renderPanoramaConjunto) {
-                window.__renderPanoramaConjunto([], { key: modality });
-            }
+            const gerado = document.getElementById('gePanoramaGerado');
+            if (gerado) gerado.classList.add('d-none');
             return;
         }
 
@@ -261,12 +261,7 @@
             .join('');
 
         box.innerHTML = `${renderAvisosBanner(data)}${renderConfBar()}${renderSorteioHeader()}${rows}`;
-        if (window.__renderPanoramaConjunto) {
-            window.__renderPanoramaConjunto(apostas, {
-                key: modality,
-                ultimo: (concursosLista && concursosLista[0]) || null,
-            });
-        }
+        renderPanoramaGerado(data);
 
         const sel = document.getElementById('geSelConcurso');
         if (sel) {
@@ -283,14 +278,97 @@
         });
     }
 
+    function nomeMes(c) {
+        if (!c) return '';
+        if (c.mes_nome) return String(c.mes_nome);
+        if (c.mes_num) return String(c.mes_num);
+        return '';
+    }
+
+    function concursoAnterior(atual) {
+        if (!atual) return null;
+        const i = concursosLista.findIndex((c) => c.concurso === atual.concurso);
+        if (i < 0 || i + 1 >= concursosLista.length) return null;
+        return concursosLista[i + 1];
+    }
+
+    function renderReferenciaLeitura() {
+        const box = document.getElementById('gePanoramaReferencia');
+        const sel = document.getElementById('geLeituraSelConcurso');
+        if (!box || !window.__renderPanoramaConjunto) return;
+        if (!concursosLista.length) {
+            const quando = document.getElementById('geLeituraQuando');
+            if (quando) quando.textContent = 'Nenhum concurso carregado.';
+            return;
+        }
+        if (!concursoLeitura) concursoLeitura = concursosLista[0];
+        if (sel && sel.dataset.filled !== '1') {
+            sel.innerHTML = concursosLista.map((c) => {
+                return `<option value="${c.concurso}">#${c.concurso} — ${c.data || ''}</option>`;
+            }).join('');
+            sel.dataset.filled = '1';
+            sel.addEventListener('change', () => {
+                concursoLeitura = concursosLista.find((c) => String(c.concurso) === sel.value) || concursosLista[0];
+                renderReferenciaLeitura();
+                if (ultimoPayload && ultimoPayload.apostas) renderPanoramaGerado(ultimoPayload);
+            });
+        }
+        if (sel) sel.value = String(concursoLeitura.concurso);
+        const quando = document.getElementById('geLeituraQuando');
+        const bolas = document.getElementById('geLeituraBolas');
+        const mes = nomeMes(concursoLeitura);
+        if (quando) quando.textContent = `#${concursoLeitura.concurso}`;
+        if (bolas) {
+            bolas.innerHTML = (concursoLeitura.dezenas || [])
+                .map((n) => `<span class="${dezenaClass}">${fmtDezena(n)}</span>`)
+                .join('');
+        }
+        const ant = concursoAnterior(concursoLeitura);
+        const mesCls = `${extraClass || 'mes-badge'} ${mesClassName(mes)}`.trim();
+        window.__renderPanoramaConjunto([{
+            numero: concursoLeitura.concurso,
+            dezenas: concursoLeitura.dezenas || [],
+        }], {
+            key: modality,
+            box: box,
+            ultimo: ant,
+            semCor: true,
+            ocultarRodape: true,
+            ocultarLegenda: true,
+            linhaSorteio: true,
+            data: concursoLeitura.data || '',
+            mes: mes ? mes.slice(0, 3) : '',
+            mesClasse: mesCls,
+        });
+    }
+
+    function renderPanoramaGerado(data) {
+        const box = document.getElementById('gePanoramaGerado');
+        if (!box || !window.__renderPanoramaConjunto) return;
+        const apostas = (data && data.apostas) || [];
+        if (!apostas.length) {
+            box.classList.add('d-none');
+            return;
+        }
+        const ref = concursoLeitura || concursosLista[0] || null;
+        window.__renderPanoramaConjunto(apostas, {
+            key: modality,
+            box: box,
+            ultimo: ref,
+            historico: (data.leitura && data.leitura.historico) || null,
+        });
+    }
+
     async function carregarConcursos() {
         try {
-            const r = await fetch('/geradores-elite/api/inteligente/concursos?limit=80');
+            const r = await fetch('/geradores-elite/api/inteligente/concursos?limit=120');
             const d = await r.json();
             concursosLista = (d.sucesso && d.concursos) ? d.concursos : [];
         } catch (e) {
             concursosLista = [];
         }
+        if (!concursoLeitura && concursosLista.length) concursoLeitura = concursosLista[0];
+        renderReferenciaLeitura();
     }
 
     async function conferirConcurso(concurso) {
@@ -376,20 +454,24 @@
         backtestAtual = null;
         otimizadorPayload = null;
 
-        const r = await fetch('/geradores-elite/api/engine-final/gerar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        });
-        const data = await r.json();
-        if (!data.sucesso) {
-            box.innerHTML = `<div class="alert alert-danger py-2 mb-0">${data.erro || 'Erro ao gerar'}</div>`;
-            return;
-        }
-        ultimoPayload = data;
-        await atualizarConferencia();
-        if (otimizadorOn) {
-            await rodarOtimizador();
+        try {
+            const r = await fetch('/geradores-elite/api/engine-final/gerar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            const data = await r.json();
+            if (!data.sucesso) {
+                box.innerHTML = `<div class="alert alert-danger py-2 mb-0">${data.erro || 'Erro ao gerar'}</div>`;
+                return;
+            }
+            ultimoPayload = data;
+            if (!concursosLista.length) await carregarConcursos();
+            renderApostas(ultimoPayload);
+            await atualizarConferencia();
+            if (otimizadorOn) await rodarOtimizador();
+        } catch (e) {
+            box.innerHTML = `<div class="alert alert-danger py-2 mb-0">${e.message || 'Erro ao gerar'}</div>`;
         }
     }
 
@@ -661,6 +743,7 @@
     }
 
     fillDezenasSelect();
+    carregarConcursos();
     document.getElementById('geBtnGerar').addEventListener('click', gerar);
     document.getElementById('geBtnExportar').addEventListener('click', exportarTxt);
 

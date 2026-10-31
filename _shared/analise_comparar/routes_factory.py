@@ -92,6 +92,11 @@ def build_comparar_blueprint(modality_key: str) -> Blueprint:
             dezenas_manual=body.get("dezenas_manual") or [],
         ))
 
+    @bp.route("/api/melhores-15")
+    def api_melhores_15():
+        from .melhores15 import consultar
+        return jsonify(consultar(modality_key))
+
     return bp
 
 

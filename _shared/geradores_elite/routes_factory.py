@@ -88,6 +88,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 cfg=cfg,
             ), 404
         from geradores_elite.comportamento.specs import COMPORTAMENTO_TITLES, SPECS
+        from geradores_elite.estatisticas_ciclo.service import tem_gerador_estatisticas_ciclo
         from geradores_elite.inteligente_page import repeticao_cfg_for_page
         from resumo_modalidade.specs import tem_resumo_modalidade
 
@@ -113,6 +114,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             comportamento_ui=svc.ui_config() if svc else {},
             meses_cores=meses_cores,
             tem_resumo_geral=tem_resumo_modalidade(modality_key),
+            tem_tres_fontes=tem_gerador_estatisticas_ciclo(modality_key),
         )
 
     @bp.route("/comportamento-apostas/")
@@ -360,6 +362,10 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             return jsonify({"ok": False, "erro": "Indisponível para esta modalidade."}), 404
         data = request.get_json(silent=True) or {}
         desdob_raw = data.get("desdobramento", data.get("k", "auto"))
+        diag_raw = data.get("n_diagonais", data.get("diagonais"))
+        n_diag = None
+        if diag_raw is not None and str(diag_raw).strip() != "":
+            n_diag = int(diag_raw)
         out = gerar_apostas_estrategia(
             modality_key,
             quantidade=int(data.get("quantidade") or 10),
@@ -369,6 +375,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             bloquear_exato=bool(data.get("bloquear_exato", True)),
             filtro_estrutura=bool(data.get("filtro_estrutura", True)),
             usar_evolucao=bool(data.get("usar_evolucao", True)),
+            n_diagonais=n_diag,
             seed=int(data["seed"]) if data.get("seed") is not None else None,
         )
         if out.get("ok"):
@@ -633,6 +640,39 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
             ), "comportamento", data))
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    @bp.route("/api/comportamento/tres-fontes/contexto")
+    def api_comportamento_tres_fontes_contexto():
+        if not tem_gerador_comportamento(modality_key):
+            return jsonify({"sucesso": False, "erro": "Comportamento indisponível."}), 404
+        try:
+            from geradores_elite.tres_fontes.service import contexto_tres_fontes
+            out = contexto_tres_fontes(modality_key)
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+        return jsonify(out), (200 if out.get("sucesso") else 400)
+
+    @bp.route("/api/comportamento/tres-fontes/gerar", methods=["POST"])
+    def api_comportamento_tres_fontes_gerar():
+        if not tem_gerador_comportamento(modality_key):
+            return jsonify({"sucesso": False, "erro": "Comportamento indisponível."}), 404
+        data = request.get_json(silent=True) or {}
+        try:
+            from geradores_elite.tres_fontes.service import gerar_apostas_tres_fontes
+            pedido_dez = data.get("dezenas_por_jogo")
+            flag = data.get("descartar_historico")
+            out = gerar_apostas_tres_fontes(
+                modality_key,
+                quantidade=int(data.get("quantidade") or 10),
+                mes_valor=data.get("mes_num") if data.get("mes_num") not in (None, "", 0, "0") else None,
+                dezenas_pedidas=int(pedido_dez) if str(pedido_dez or "").strip().isdigit() else None,
+                descartar_ja_sorteadas=True if flag is None else bool(flag),
+            )
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+        if out.get("sucesso"):
+            out = _pipeline_elite(out, "tres_fontes", data)
+        return jsonify(out), (200 if out.get("sucesso") else 400)
 
     @bp.route("/api/comportamento/gerar-linhas", methods=["POST"])
     def api_comportamento_gerar_linhas():
@@ -1019,6 +1059,14 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 )
                 resultado["backtest_antes"] = bt_orig
                 resultado["backtest_depois"] = bt_opt
+                if modality_key == "diadesorte":
+                    from geradores_elite.engine_final_leitura import aplicar_forma
+
+                    ultimo = body.get("ultimo_numeros") or []
+                    resultado["apostas"] = aplicar_forma(resultado.get("apostas") or [], ultimo)
+                    resultado["apostas_originais"] = aplicar_forma(
+                        resultado.get("apostas_originais") or apostas, ultimo,
+                    )
             status = 200 if resultado.get("sucesso") else 400
             return jsonify(resultado), status
         except Exception as e:
@@ -1784,5 +1832,16 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
 
     from analise_gaps_ciclo.routes_factory import register_gerador_gaps_ciclo
     register_gerador_gaps_ciclo(bp, modality_key, cfg["nome"])
+
+    from gerador_escolha_tubular.service import tem_gerador_escolha_tubular
+    if tem_gerador_escolha_tubular(modality_key):
+        @bp.route("/comparador-apostas/")
+        def comparador_apostas_page():
+            return render_template(
+                "comparador_apostas.html",
+                modality_key=modality_key,
+                modality_nome=cfg["nome"],
+                page_title="Comparador de Apostas",
+            )
 
     return bp

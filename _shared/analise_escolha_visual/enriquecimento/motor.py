@@ -54,9 +54,45 @@ def _bloco(nome: str, itens: Sequence[int], *, extra: Any = None) -> Dict[str, A
     return out
 
 
+def _bloco_diagonais(
+    nums: Sequence[int],
+    dmin: int,
+    dmax: int,
+    cols: int,
+) -> Dict[str, Any]:
+    from analise_inteligentes_diadesorte.diagonais_volante import diagonais_na_aposta
+
+    runs = diagonais_na_aposta(nums, dmin=int(dmin), dmax=int(dmax), cols=int(cols))
+    grupos: List[Dict[str, Any]] = []
+    flat: List[int] = []
+    for run in runs:
+        grupo = [int(x) for x in (run.get("nums") or [])]
+        if len(grupo) < 2:
+            continue
+        grupos.append({
+            "dir": run.get("dir") or "down",
+            "dir_sym": run.get("dir_sym") or ("↘" if run.get("dir") == "down" else "↗"),
+            "nums": grupo,
+        })
+        flat.extend(grupo)
+    bloco = _bloco(
+        "Diagonais",
+        sorted(set(flat)),
+        extra={"grupos": grupos, "qtd_grupos": len(grupos)},
+    )
+    bloco["quantidade"] = len(grupos)
+    return bloco
+
+
 def conjuntos_concurso(
     numeros: Sequence[int],
     anterior: Optional[Sequence[int]] = None,
+    *,
+    com_cruzamentos: bool = True,
+    com_diagonais: bool = False,
+    dmin: int = 1,
+    dmax: int = 31,
+    cols: int = 10,
 ) -> Dict[str, Any]:
     nums = [int(x) for x in numeros]
     ant = {int(x) for x in (anterior or [])}
@@ -92,20 +128,23 @@ def conjuntos_concurso(
             extra={"grupos": fin_grupos, "qtd_grupos": len(fin_grupos)},
         ),
     }
+    if com_diagonais:
+        basicos["diagonais"] = _bloco_diagonais(nums, dmin, dmax, cols)
 
     cruzamentos = []
-    for a, b, label in CRUZAMENTOS:
-        inter = sorted(sets[a] & sets[b])
+    if com_cruzamentos:
         denom = max(1, len(nums))
-        cruzamentos.append({
-            "id": f"{a}_x_{b}",
-            "label": label,
-            "grupo_a": a,
-            "grupo_b": b,
-            "quantidade": len(inter),
-            "dezenas": inter,
-            "percentual_concurso": round(100.0 * len(inter) / denom, 1),
-        })
+        for a, b, label in CRUZAMENTOS:
+            inter = sorted(sets[a] & sets[b])
+            cruzamentos.append({
+                "id": f"{a}_x_{b}",
+                "label": label,
+                "grupo_a": a,
+                "grupo_b": b,
+                "quantidade": len(inter),
+                "dezenas": inter,
+                "percentual_concurso": round(100.0 * len(inter) / denom, 1),
+            })
 
     return {
         "numeros": nums,
@@ -132,11 +171,63 @@ def _anterior_na_lista(
     return None
 
 
+def _linha_de_basicos(s: Dict[str, Any], det: Dict[str, Any]) -> Dict[str, Any]:
+    b = det["basicos"]
+    linha = {
+        "concurso": int(s["concurso"]) if "concurso" in s else det.get("concurso"),
+        "data": s.get("data") or det.get("data") or "",
+        "numeros": det["numeros"],
+        "pares": b["pares"],
+        "impares": b["impares"],
+        "repetidos": b["repetidos"],
+        "sequencias": b["sequencias"],
+        "finais": b["finais"],
+    }
+    if "diagonais" in b:
+        linha["diagonais"] = b["diagonais"]
+    mes_num = s.get("mes_num") if s.get("mes_num") else det.get("mes_num")
+    if mes_num:
+        linha["mes_num"] = int(mes_num)
+        linha["mes_nome"] = s.get("mes_nome") or det.get("mes_nome") or ""
+    return linha
+
+
+def linhas_basicas(
+    sorteios: List[Dict[str, Any]],
+    *,
+    ordem: str = "desc",
+    dmin: int = 1,
+    dmax: int = 31,
+    cols: int = 10,
+    com_diagonais: bool = True,
+) -> List[Dict[str, Any]]:
+    """Só as colunas da seção 2. Mesmos conjuntos, sem cruzamentos nem gráficos."""
+    out: List[Dict[str, Any]] = []
+    for i, s in enumerate(sorteios):
+        nums = [int(x) for x in s.get("numeros") or []]
+        ant = _anterior_na_lista(sorteios, i, ordem)
+        det = conjuntos_concurso(
+            nums,
+            ant,
+            com_cruzamentos=False,
+            com_diagonais=com_diagonais,
+            dmin=dmin,
+            dmax=dmax,
+            cols=cols,
+        )
+        out.append(_linha_de_basicos(s, det))
+    return out
+
+
 def analisar_janela(
     sorteios: List[Dict[str, Any]],
     *,
     ordem: str = "desc",
     concurso_foco: Optional[int] = None,
+    dmin: int = 1,
+    dmax: int = 31,
+    cols: int = 10,
+    com_diagonais: bool = True,
 ) -> Dict[str, Any]:
     """Analisa a lista já filtrada (mesma da aba Escolha)."""
     if not sorteios:
@@ -151,10 +242,20 @@ def analisar_janela(
     for i, s in enumerate(sorteios):
         nums = [int(x) for x in s.get("numeros") or []]
         ant = _anterior_na_lista(sorteios, i, ordem)
-        det = conjuntos_concurso(nums, ant)
+        det = conjuntos_concurso(
+            nums,
+            ant,
+            com_diagonais=com_diagonais,
+            dmin=dmin,
+            dmax=dmax,
+            cols=cols,
+        )
         det["concurso"] = int(s["concurso"])
         det["data"] = s.get("data") or ""
         det["index"] = i
+        if s.get("mes_num"):
+            det["mes_num"] = int(s["mes_num"])
+            det["mes_nome"] = s.get("mes_nome") or ""
         detalhes.append(det)
 
         for g in GRUPOS:
@@ -208,17 +309,7 @@ def analisar_janela(
         foco = detalhes[0]
 
     def _linha_basica(d: Dict[str, Any]) -> Dict[str, Any]:
-        b = d["basicos"]
-        return {
-            "concurso": d["concurso"],
-            "data": d["data"],
-            "numeros": d["numeros"],
-            "pares": b["pares"],
-            "impares": b["impares"],
-            "repetidos": b["repetidos"],
-            "sequencias": b["sequencias"],
-            "finais": b["finais"],
-        }
+        return _linha_de_basicos(d, d)
 
     return {
         "sucesso": True,

@@ -17,20 +17,37 @@
     color: #5a32a3;
     border-bottom-style: solid;
 }
+.pan-conj-edit {
+    width: 100%;
+    min-width: 11rem;
+    max-width: 22rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .78rem;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    padding: .05rem .3rem;
+    background: #fff;
+}
+.pan-conj-par { display: inline-block; white-space: nowrap; margin: 0 .35rem .12rem 0; }
+.pan-conj-k { font-weight: 800; }
+.pan-conj-v { font-weight: 400; }
+.pan-conj-bar { font-weight: 400; opacity: .55; padding: 0 .2rem; }
 </style>
 <div class="card shadow-sm mb-3 border-0 d-none" id="painelPanoramaConjunto" style="border-top:4px solid var(--accent)!important;">
     <div class="card-header fw-bold py-2" style="background:var(--bg);color:var(--primary-xdark);">
         <i class="fas fa-table me-1"></i>Panorama do conjunto gerado
     </div>
     <div class="card-body py-3">
-        <p class="small text-muted mb-2" id="panoramaConjuntoLegenda">—</p>
+        <p class="small text-muted mb-2" id="panoramaConjuntoLegenda" data-pan="legenda">—</p>
         <div class="table-responsive">
             <table class="table table-sm table-bordered mb-2 pan-conj-table" id="tblPanoramaConjunto">
-                <thead class="table-light" id="theadPanoramaConjunto"></thead>
-                <tbody id="tbodyPanoramaConjunto"></tbody>
+                <thead class="table-light" id="theadPanoramaConjunto" data-pan="thead"></thead>
+                <tbody id="tbodyPanoramaConjunto" data-pan="tbody"></tbody>
             </table>
         </div>
-        <p class="small mb-0" id="panoramaConjuntoRodape"></p>
+        <p class="small mb-0" id="panoramaConjuntoRodape" data-pan="rodape"></p>
     </div>
 </div>
 <script>
@@ -71,11 +88,33 @@
     function padraoInicial(nums) {
         return [...nums].sort((a, b) => a - b).map((n) => Math.floor(n / 10)).join(' ');
     }
+    function marca(chave, valor) {
+        return `<span class="pan-conj-par"><span class="pan-conj-k">${chave}</span><span class="pan-conj-bar">|</span><span class="pan-conj-v">${valor}</span></span>`;
+    }
+    function junta(partes) {
+        return partes.join('<span class="pan-conj-entre"> </span>');
+    }
+    function lerDezenasEdit(texto, dmin, dmax) {
+        const vistos = new Set();
+        const out = [];
+        String(texto || '').split(/[^0-9]+/).forEach((p) => {
+            if (!p) return;
+            const n = Number(p);
+            if (!Number.isFinite(n) || n < dmin || n > dmax || vistos.has(n)) return;
+            vistos.add(n);
+            out.push(n);
+        });
+        out.sort((a, b) => a - b);
+        return out;
+    }
 
     window.__renderPanoramaConjunto = function (apostas, cfg) {
-        const box = document.getElementById('painelPanoramaConjunto');
-        if (!box) return;
         const c = cfg || {};
+        const box = (c.box && c.box.nodeType === 1)
+            ? c.box
+            : (c.box ? document.querySelector(c.box) : null)
+                || document.getElementById('painelPanoramaConjunto');
+        if (!box) return;
         const key = c.key || c.modality_key || '';
         const lista = (apostas || []).map((a, i) => ({
             numero: (a && typeof a === 'object') ? (a.numero || a.id || a.linha || (i + 1)) : (i + 1),
@@ -97,23 +136,39 @@
         const ehDs = key === 'diadesorte';
         const ehSuperSete = key === 'supersete' || c.layout === 'colunas';
         const showPadrao = !ehSuperSete;
+        const showDiag = !ehSuperSete && typeof window.__diagsDaAposta === 'function';
+        const hist = c.historico || {};
+        const dmin = c.dezena_min != null ? c.dezena_min : 1;
+        const dmax = c.dezena_max != null ? c.dezena_max : (ehDs ? 31 : 31);
         const fontesPedidas = Array.isArray(c.fontes) ? c.fontes : [];
         const showGaps = fontesPedidas.indexOf('gaps') >= 0 || lista.some((a) => a.origem === 'gaps');
         const showRegua = fontesPedidas.indexOf('regua') >= 0 || lista.some((a) => a.origem === 'regua');
-        const thead = document.getElementById('theadPanoramaConjunto');
-        const tbody = document.getElementById('tbodyPanoramaConjunto');
-        const leg = document.getElementById('panoramaConjuntoLegenda');
-        const rodape = document.getElementById('panoramaConjuntoRodape');
+        const thead = box.querySelector('[data-pan="thead"]');
+        const tbody = box.querySelector('[data-pan="tbody"]');
+        const leg = box.querySelector('[data-pan="legenda"]');
+        const rodape = box.querySelector('[data-pan="rodape"]');
+        const semCor = !!c.semCor;
+        const linhaSorteio = !!c.linhaSorteio;
         if (thead) {
-            thead.innerHTML = `<tr>
-                <th>#</th>
-                ${showGaps ? '<th>Gaps</th>' : ''}
-                ${showRegua ? '<th>Régua</th>' : ''}
-                <th>Aposta</th><th>Soma</th><th>P/I</th><th>Seq</th>
-                <th>Rep. ${nUlt}</th><th>Finais</th>${showPadrao ? '<th>Padrão</th>' : ''}
-            </tr>`;
+            thead.innerHTML = linhaSorteio
+                ? `<tr>
+                    <th>Data</th><th>Mês</th><th>Soma</th><th>P/I</th><th>Seq</th>
+                    <th>Rep. ${nUlt}</th><th>Finais</th><th>Dígitos</th>
+                    ${showDiag ? '<th>Diagonal</th>' : ''}
+                    ${showPadrao ? '<th>Padrão</th>' : ''}
+                </tr>`
+                : `<tr>
+                    <th>#</th>
+                    ${showGaps ? '<th>Gaps</th>' : ''}
+                    ${showRegua ? '<th>Régua</th>' : ''}
+                    <th>Aposta</th><th>Soma</th><th>P/I</th><th>Seq</th>
+                    <th>Rep. ${nUlt}</th><th>Finais</th><th>Dígitos</th>
+                    ${showDiag ? '<th>Diagonal</th>' : ''}
+                    ${showPadrao ? '<th>Padrão</th>' : ''}
+                </tr>`;
         }
         const freq = {};
+        let comDiagonal = 0;
         const rows = lista.map((a, i) => {
             const dz = a.dezenas.slice().sort((x, y) => x - y);
             dz.forEach((d) => { freq[d] = (freq[d] || 0) + 1; });
@@ -130,8 +185,8 @@
             const finTxt = finGrupos.length
                 ? finGrupos.map((f) => {
                     const nums = dz.filter((n) => n % 10 === Number(f)).map(pad).join(', ');
-                    return `${f}: ${nums}`;
-                }).join('; ')
+                    return marca(f, nums);
+                }).join('<span class="pan-conj-entre"> </span>')
                 : 'distintos';
             const ehGaps = a.origem === 'gaps';
             const ehRegua = a.origem === 'regua';
@@ -141,33 +196,106 @@
             const colRegua = showRegua
                 ? `<td class="${ehRegua ? 'pan-conj-ok' : 'text-muted'}">${ehRegua ? '✓' : '—'}</td>`
                 : '';
+            const diags = showDiag ? window.__diagsDaAposta(dz, dmin, dmax) : [];
+            if (diags.length) comDiagonal += 1;
+            const diagTxt = diags.length
+                ? junta(diags.map((d) => marca(d.dir_sym, d.nums_fmt)))
+                : 'nenhuma';
+            const colDiag = showDiag
+                ? `<td class="${semCor || !ehDs ? '' : (diags.length ? 'pan-conj-ok' : 'pan-conj-at')}">${diagTxt}</td>`
+                : '';
             const padrao = showPadrao ? padraoInicial(dz) : '';
             const padUrl = padrao
                 ? `/analise/analises-inteligentes/?aba=padroes-ii&padrao=${encodeURIComponent(padrao)}`
                 : '/analise/analises-inteligentes/?aba=padroes-ii';
-            const somaOk = soma >= 93 && soma <= 130;
-            const seqOk = seqs.length >= 1 && seqs.length <= 2;
-            const seqAt = seqs.length === 0 || seqs.length >= 3;
+            const digSet = new Set();
+            dz.forEach((n) => String(pad(n)).split('').forEach((ch) => digSet.add(ch)));
+            const nDig = digSet.size;
+            const digOk = hist.digitos == null || nDig === Number(hist.digitos);
+            const paresOk = hist.pares == null || pares === Number(hist.pares);
+            const faixa = hist.soma_faixa;
+            const tamOficial = c.sorteadas != null ? Number(c.sorteadas) : null;
+            const faixaCabe = tamOficial == null || dz.length === tamOficial;
+            const somaOk = Array.isArray(faixa) && faixa.length === 2 && faixaCabe
+                ? (soma >= Number(faixa[0]) && soma <= Number(faixa[1]))
+                : (dz.length === 7 && (tamOficial == null || tamOficial === 7)
+                    ? (soma >= 93 && soma <= 130)
+                    : true);
+            const maiorSeq = seqs.reduce((m, g) => Math.max(m, g.length), 0);
+            const seqLonga = maiorSeq >= 4;
+            const seqOk = !seqLonga && seqs.length >= 1 && seqs.length <= 2;
+            const seqAt = seqLonga || seqs.length === 0 || seqs.length >= 3;
+            const seqTitle = seqLonga
+                ? `Sequência de ${maiorSeq} dezenas seguidas — rara no histórico`
+                : '';
             const repOk = reps.length === 1 || reps.length === 2;
             const finOk = finGrupos.length >= 1;
+            const mesHtml = c.mes
+                ? `<span class="${c.mesClasse || 'mes-badge'}">${c.mes}</span>`
+                : '—';
+            const apostaEdit = linhaSorteio
+                ? ''
+                : `<input class="pan-conj-edit" data-pan-i="${i}" value="${dz.map(pad).join(' ')}" inputmode="numeric" autocomplete="off" aria-label="Aposta ${a.numero || (i + 1)}" title="Edite as dezenas de ${pad(dmin)} a ${pad(dmax)}. Soma, repetidas, finais, diagonal e padrão acompanham.">`;
+            const inicio = linhaSorteio
+                ? `<td>${c.data || '—'}</td><td>${mesHtml}</td>`
+                : `<td>${a.numero || (i + 1)}</td>${colGaps}${colRegua}<td>${apostaEdit}</td>`;
             return `<tr>
-                <td>${a.numero || (i + 1)}</td>
-                ${colGaps}${colRegua}
-                <td class="fw-bold">${dz.map(pad).join(' ')}</td>
-                <td class="${ehDs ? (somaOk ? 'pan-conj-ok' : 'pan-conj-at') : ''}">${soma}</td>
-                <td>${pares}P / ${dz.length - pares}I</td>
-                <td class="${seqAt ? 'pan-conj-at' : (seqOk ? 'pan-conj-ok' : '')}">${seqTxt}</td>
-                <td class="${repOk ? 'pan-conj-ok' : 'pan-conj-at'}">${reps.length}${reps.length ? ' · ' + reps.map(pad).join(', ') : ''}</td>
-                <td class="${finOk ? 'pan-conj-ok' : 'pan-conj-at'}">${finTxt}</td>
+                ${inicio}
+                <td class="${semCor || !ehDs ? '' : (somaOk ? 'pan-conj-ok' : 'pan-conj-at')}">${soma}</td>
+                <td class="${semCor ? '' : (paresOk ? 'pan-conj-ok' : 'pan-conj-at')}">${pares}P / ${dz.length - pares}I</td>
+                <td class="${semCor ? '' : (seqAt ? 'pan-conj-at' : (seqOk ? 'pan-conj-ok' : ''))}"${seqTitle ? ` title="${seqTitle}"` : ''}>${seqTxt}</td>
+                <td class="${semCor ? '' : (repOk ? 'pan-conj-ok' : 'pan-conj-at')}">${reps.length ? marca(reps.length, reps.map(pad).join(', ')) : '0'}</td>
+                <td class="${semCor ? '' : (finOk ? 'pan-conj-ok' : 'pan-conj-at')}">${finTxt}</td>
+                <td class="${semCor ? '' : (digOk ? 'pan-conj-ok' : 'pan-conj-at')}">${nDig}</td>
+                ${colDiag}
                 ${showPadrao ? `<td><a class="pan-conj-pad-link" href="${padUrl}" target="_blank" rel="noopener" title="Abrir na aba 4 · Padrões II">Padrão ${padrao}</a></td>` : ''}
             </tr>`;
         }).join('');
-        if (tbody) tbody.innerHTML = rows;
-        if (leg) {
+        if (tbody) {
+            tbody.innerHTML = rows;
+            if (!linhaSorteio) {
+                window.__panConjEstado = { lista, cfg: c };
+                tbody.querySelectorAll('.pan-conj-edit').forEach((inp) => {
+                    inp.addEventListener('change', () => {
+                        const estado = window.__panConjEstado;
+                        if (!estado || !estado.lista) return;
+                        const idx = Number(inp.dataset.panI);
+                        const item = estado.lista[idx];
+                        if (!item) return;
+                        const lo = c.dezena_min != null ? Number(c.dezena_min) : 1;
+                        const hi = c.dezena_max != null ? Number(c.dezena_max) : 31;
+                        const nums = lerDezenasEdit(inp.value, lo, hi);
+                        if (!nums.length) {
+                            inp.value = (item.dezenas || []).map(pad).join(' ');
+                            return;
+                        }
+                        item.dezenas = nums;
+                        window.__renderPanoramaConjunto(estado.lista, estado.cfg);
+                    });
+                });
+            }
+        }
+        if (leg && c.ocultarLegenda) {
+            leg.textContent = '';
+            leg.classList.add('d-none');
+        } else if (leg && c.legenda != null) {
+            leg.classList.remove('d-none');
+            leg.textContent = c.legenda;
+        } else if (leg) {
+            leg.classList.remove('d-none');
             const ultFmt = (ultimo.dezenas || ultimo.numeros || []).map(pad).join(' ');
-            leg.textContent = ultimo.concurso || ultimo.numero
-                ? `Conjunto de ${lista.length} apostas · repetidas em relação ao concurso #${nUlt}${ultFmt ? ' (' + ultFmt + ')' : ''}. Verde = alinhado ao DNA usual; âmbar = atenção.`
-                : `Conjunto de ${lista.length} apostas.`;
+            const perfilHist = (hist.pares != null)
+                ? ` Histórico mais frequente: ${hist.pares}P/${hist.impares}I`
+                    + (hist.pares_pct != null ? ` (${hist.pares_pct}%)` : '')
+                    + (hist.digitos != null ? ` · ${hist.digitos} dígitos distintos` : '')
+                    + (hist.digitos_pct != null ? ` (${hist.digitos_pct}%)` : '')
+                    + '.'
+                : '';
+            leg.textContent = (ultimo.concurso || ultimo.numero
+                ? `Conjunto de ${lista.length} apostas · repetidas em relação ao concurso #${nUlt}${ultFmt ? ' (' + ultFmt + ')' : ''}.`
+                : `Conjunto de ${lista.length} apostas.`)
+                + perfilHist
+                + ' Verde = alinhado ao histórico; âmbar = atenção.';
         }
         const conc = Object.entries(freq)
             .sort((a, b) => b[1] - a[1] || Number(a[0]) - Number(b[0]))
@@ -175,10 +303,15 @@
             .slice(0, 8)
             .map(([d, q]) => `${pad(d)} em ${q}/${lista.length}`)
             .join(' · ');
-        if (rodape) {
-            rodape.innerHTML = conc
+        if (rodape && c.ocultarRodape) {
+            rodape.textContent = '';
+        } else if (rodape) {
+            const diagNota = showDiag
+                ? `<strong>Diagonais:</strong> ${comDiagonal} de ${lista.length} apostas. `
+                : '';
+            rodape.innerHTML = diagNota + (conc
                 ? `<strong>Concentração:</strong> ${conc}`
-                : 'Nenhuma dezena se repetiu em 3 ou mais apostas.';
+                : 'Nenhuma dezena se repetiu em 3 ou mais apostas.');
         }
         box.classList.remove('d-none');
     };

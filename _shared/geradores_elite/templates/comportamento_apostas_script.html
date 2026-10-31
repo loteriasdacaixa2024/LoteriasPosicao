@@ -19,6 +19,7 @@
     const MESES_CORES = window.__MESES_CORES__ || {};
     const BASE_LABELS = {
         geral: 'Geral',
+        tres_fontes: 'Ciclo + Sequência',
         vencedores: 'Concursos com Vencedores',
         acumulados: 'Concursos Acumulados',
     };
@@ -113,10 +114,11 @@
     let filtrosAtivos = {};
     let ultimasApostas = [];
     const apostasPorBase = {
-        geral: [], vencedores: [], acumulados: [],
+        geral: [], tres_fontes: [], vencedores: [], acumulados: [],
         panorama_geral: [], panorama_vencedores: [], panorama_acumulados: [],
         linhas: [],
     };
+    let tresFontesCtx = null;
     let colecaoExport = [];
     let concursosLista = [];
     let concursoConf = null;
@@ -186,11 +188,16 @@
         return baseAtual === 'faixas';
     }
 
+    function isModoTresFontes() {
+        return baseAtual === 'tres_fontes';
+    }
+
     function chaveApostasAtual() {
         if (isModoPanorama()) return `panorama_${basePanorama}`;
         if (isModoLinhas()) return 'linhas';
         if (isModoAliadas()) return 'aliadas';
         if (isModoFaixas()) return 'faixas';
+        if (isModoTresFontes()) return 'tres_fontes';
         return baseAtual;
     }
 
@@ -206,6 +213,9 @@
         }
         if (isModoFaixas()) {
             return 'Posição crescente (Excel)';
+        }
+        if (isModoTresFontes()) {
+            return 'Ciclo + Sequência';
         }
         return BASE_LABELS[baseAtual] || baseAtual;
     }
@@ -540,12 +550,14 @@
         const painelLinhas = document.getElementById('painelModoLinhas');
         const painelAliadas = document.getElementById('painelModoAliadas');
         const painelFaixas = document.getElementById('painelModoFaixas');
-        const especial = isModoPanorama() || isModoLinhas() || isModoAliadas() || isModoFaixas();
+        const painelTres = document.getElementById('painelModoTresFontes');
+        const especial = isModoPanorama() || isModoLinhas() || isModoAliadas() || isModoFaixas() || isModoTresFontes();
         if (painelBase) painelBase.classList.toggle('d-none', especial);
         if (painelPan) painelPan.classList.toggle('d-none', !isModoPanorama());
         if (painelLinhas) painelLinhas.classList.toggle('d-none', !isModoLinhas());
         if (painelAliadas) painelAliadas.classList.toggle('d-none', !isModoAliadas());
         if (painelFaixas) painelFaixas.classList.toggle('d-none', !isModoFaixas());
+        if (painelTres) painelTres.classList.toggle('d-none', !isModoTresFontes());
     }
 
     function trocarBase(novaBase) {
@@ -553,7 +565,9 @@
         baseAtual = novaBase;
         ultimasApostas = (apostasPorBase[chaveApostasAtual()] || []).slice();
         aplicarVisibilidadeModo();
-        if (isModoLinhas()) {
+        if (isModoTresFontes()) {
+            carregarTresFontes();
+        } else if (isModoLinhas()) {
             window.ComportamentoBasesResumo?.render(metaBases, baseLinhas);
             syncJanelaLinhasUI();
             carregarRankingLinhas();
@@ -835,6 +849,16 @@
     function htmlInfoExtras(a) {
         const comp = a.comportamento || {};
         let html = '';
+        if (a.modo_motor_aposta === 'tres_fontes') {
+            const seed = a.semente || {};
+            html += `<div class="mb-1"><strong>De onde veio:</strong> ${a.perfil_referencia?.texto_curto || 'Ciclo + Sequência'}</div>`;
+            html += `<div class="text-muted">Padrão ${a.padrao_inicial || seed.padrao || '—'} · soma ${a.soma ?? '—'} · ${a.status_media_label || '—'}</div>`;
+            html += `<div class="text-muted">${a.pares ?? '—'} pares · ${a.impares ?? '—'} ímpares · repetidas ${(a.repetidos || []).length}</div>`;
+            if (a.obrigatorias && a.obrigatorias.length) {
+                html += `<div class="text-muted">Pendentes do ciclo nesta aposta: ${a.obrigatorias.map(n => String(n).padStart(2, '0')).join(' ')}</div>`;
+            }
+            return html;
+        }
         if (a.perfil_referencia?.texto_curto) {
             html += `<div class="mb-1"><strong>Perfil:</strong> ${a.perfil_referencia.texto_curto}</div>`;
         } else if (a.modo_motor_aposta === 'panorama_top') {
@@ -885,7 +909,7 @@
         const pad = (n) => (window.__repPadDezena ? window.__repPadDezena(n, CFG) : String(n).padStart(2, '0'));
         const timeHtml = (a) => (CFG.extra_time && a.time_num) ? `<span class="badge bg-success ms-1">T${a.time_num}</span>` : '';
         const trevoHtml = (a) => (CFG.extra_trevos && a.trevos) ? `<span class="badge bg-purple ms-1">${a.trevos.join('-')}</span>` : '';
-        const labelLista = (isModoPanorama() || isModoLinhas() || isModoAliadas() || isModoFaixas()) ? labelApostasAtual() : '';
+        const labelLista = (isModoPanorama() || isModoLinhas() || isModoAliadas() || isModoFaixas() || isModoTresFontes()) ? labelApostasAtual() : '';
         el.innerHTML = avisoHtml + ultimasApostas.map(a => {
             const linhaTxt = fmtLinhaDezenasMes(a);
             const headLista = labelLista
@@ -924,6 +948,9 @@
         window.__renderPanoramaConjunto(apostas, {
             key: CFG.key,
             layout: CFG.layout,
+            sorteadas: SORTEADAS,
+            dezena_min: DEZENA_MIN,
+            dezena_max: UNIVERSO_MAX,
             ultimo: (concursosLista && concursosLista[0]) || null,
         });
     }
@@ -1267,7 +1294,58 @@
         renderApostas(data.apostas, aviso);
     }
 
+    async function carregarTresFontes(forcar) {
+        const painel = document.getElementById('painelModoTresFontes');
+        if (!painel || !window.TresFontes) return;
+        if (tresFontesCtx && !forcar) {
+            window.TresFontes.render(tresFontesCtx);
+            return;
+        }
+        const ideia = document.getElementById('tfIdeia');
+        if (ideia) ideia.textContent = 'Lendo ciclo, estatísticas básicas e sequência sorteada…';
+        try {
+            const r = await fetch(apiPath('/tres-fontes/contexto'));
+            const data = await r.json();
+            tresFontesCtx = data;
+            window.TresFontes.render(data);
+        } catch (err) {
+            window.TresFontes.render({ sucesso: false, erro: err.message || String(err) });
+        }
+    }
+
+    async function gerarTresFontes() {
+        const body = {
+            quantidade: parseInt(document.getElementById('inpQtd').value, 10) || 10,
+            dezenas_por_jogo: parseInt(document.getElementById('inpDezenas').value, 10) || SORTEADAS,
+        };
+        const chk = document.getElementById('chkDescartarHist');
+        if (chk) body.descartar_historico = chk.checked;
+        const r = await fetch(apiPath('/tres-fontes/gerar'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!data.sucesso) {
+            alert(data.erro || data.validacao?.motivo || 'Erro ao gerar');
+            return;
+        }
+        const el = document.getElementById('tfCriteriosTxt');
+        if (el && data.criterios_modo_auto?.length) {
+            el.textContent = data.criterios_modo_auto.join(' · ');
+        }
+        let aviso = data.aviso;
+        if (data.descartadas_historico > 0) {
+            aviso = (aviso ? aviso + ' ' : '') +
+                `(${data.descartadas_historico} descartada(s) por já existirem no histórico.)`;
+        }
+        renderApostas(data.apostas, aviso);
+    }
+
     async function gerar() {
+        if (isModoTresFontes()) {
+            return gerarTresFontes();
+        }
         if (isModoPanorama()) {
             return gerarPanorama();
         }
@@ -1509,6 +1587,7 @@
         document.querySelectorAll('#fxChipsPref input[type="checkbox"]').forEach((el) => {
             el.addEventListener('change', atualizarCriteriosFaixasTxt);
         });
+        document.getElementById('btnAtualizarTresFontes')?.addEventListener('click', () => carregarTresFontes(true));
         document.getElementById('btnGerar')?.addEventListener('click', gerar);
         document.getElementById('btnExport')?.addEventListener('click', exportarTxt);
         document.getElementById('selConcursoConf')?.addEventListener('change', (e) => {
@@ -1540,12 +1619,13 @@
         if (window.__bindConferirTxtHistorico) window.__bindConferirTxtHistorico();
 
         const tabParam = new URLSearchParams(window.location.search).get('tab');
-        if (tabParam === 'linhas' || tabParam === 'aliadas' || tabParam === 'faixas') {
-            const btnTab = document.querySelector(`#tabsBaseGerador .base-tab-btn[data-base="${tabParam}"]`);
+        const tabKey = tabParam === 'tres-fontes' ? 'tres_fontes' : tabParam;
+        if (tabKey === 'linhas' || tabKey === 'aliadas' || tabKey === 'faixas' || tabKey === 'tres_fontes') {
+            const btnTab = document.querySelector(`#tabsBaseGerador .base-tab-btn[data-base="${tabKey}"]`);
             if (btnTab) {
                 document.querySelectorAll('#tabsBaseGerador .base-tab-btn').forEach(x => x.classList.remove('active'));
                 btnTab.classList.add('active');
-                trocarBase(tabParam);
+                trocarBase(tabKey);
             }
         }
     }

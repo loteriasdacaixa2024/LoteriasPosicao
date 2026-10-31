@@ -80,6 +80,13 @@
         font-weight: 800; background: #dee2e6; color: #495057;
     }
     .fluxo-passo.ativo .fluxo-num { background: #0d6efd; color: #fff; }
+    .ciclo-lugar-link {
+        color: inherit;
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+    .ciclo-lugar-link:hover { opacity: .75; }
 </style>
 <div class="container-fluid py-4">
     <div class="row mb-4">
@@ -346,7 +353,7 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
-                        <table class="table table-hover table-striped mb-0 text-center align-middle">
+                        <table class="table table-hover table-striped tabela-ordenavel mb-0 text-center align-middle">
                             <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                 <tr>
                                     <th>Ciclo</th>
@@ -393,6 +400,7 @@
 
         document.getElementById('cicloAtualContent').innerHTML = html;
         renderTabelaSutilEvolucao();
+        ligarDiagonaisCiclo();
     }
 
     function renderTabelaSutilEvolucao() {
@@ -576,6 +584,251 @@
         </details>`;
     }
 
+    function escHtml(s) {
+        return String(s ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function qtdDezenasPendentes(ciclo) {
+        if (ciclo && Array.isArray(ciclo.dezenas_pendentes)) return ciclo.dezenas_pendentes.length;
+        if (ciclo && ciclo.total_dezenas_pendentes != null && ciclo.total_dezenas_pendentes !== '') {
+            return Number(ciclo.total_dezenas_pendentes);
+        }
+        return null;
+    }
+
+    function fraseTetoFaltantes(nPend) {
+        const n = Number(nPend);
+        if (!Number.isFinite(n) || n <= 0) return '';
+        const maximo = Math.min(n, 6);
+        return ' Com ' + n + ' faltantes, o jogo usa no máximo essas ' + maximo + '.';
+    }
+
+    function faixaIndicada(faixa) {
+        if (faixa === 'media') return 'faixa média';
+        if (faixa === 'baixa') return 'faixa baixa';
+        if (faixa === 'alta') return 'faixa alta';
+        return faixa ? ('faixa ' + faixa) : '';
+    }
+
+    /** Contagem de diagonais 2+ por concurso — mesma geometria do volante. */
+    function resumoDiagonaisHistorico(ciclo) {
+        const dmin = ciclo && ciclo.dezena_min != null ? Number(ciclo.dezena_min) : 1;
+        const dmax = ciclo && ciclo.dezena_max != null ? Number(ciclo.dezena_max) : 31;
+        const rows = (dmin === 1 && dmax === 31)
+            ? [[1, 10], [11, 20], [21, 30], [31, 31]]
+            : [];
+        if (!rows.length) {
+            for (let n = dmin; n <= dmax; n += 10) rows.push([n, Math.min(dmax, n + 9)]);
+        }
+        const pmap = {};
+        rows.forEach((ab, r) => { for (let n = ab[0]; n <= ab[1]; n++) pmap[n] = r; });
+        const lines = [];
+        function flush(mapa) {
+            Object.keys(mapa).forEach(k => {
+                const arr = mapa[k];
+                let run = [];
+                let prev = -99;
+                arr.forEach(n => {
+                    const r = pmap[n];
+                    if (!run.length || r === prev + 1) run.push(n);
+                    else { if (run.length >= 2) lines.push(run); run = [n]; }
+                    prev = r;
+                });
+                if (run.length >= 2) lines.push(run);
+            });
+        }
+        const down = {}, up = {};
+        rows.forEach((ab, r) => {
+            for (let n = ab[0]; n <= ab[1]; n++) {
+                const c = n - ab[0];
+                (down[c - r] || (down[c - r] = [])).push(n);
+                (up[c + r] || (up[c + r] = [])).push(n);
+            }
+        });
+        flush(down);
+        flush(up);
+        function contar(nums) {
+            const chosen = new Set(nums);
+            const seen = new Set();
+            let q = 0;
+            lines.forEach(line => {
+                let cur = [];
+                const push = () => {
+                    if (cur.length < 2) return;
+                    const key = cur.join('-');
+                    if (seen.has(key)) return;
+                    seen.add(key);
+                    q++;
+                };
+                line.forEach(n => { if (chosen.has(n)) cur.push(n); else { push(); cur = []; } });
+                push();
+            });
+            return q;
+        }
+        const hist = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
+        const vistos = new Set();
+        let amostras = 0;
+        (ciclo && ciclo.detalhes_concursos || []).forEach(d => {
+            if (d.concurso != null) {
+                if (vistos.has(d.concurso)) return;
+                vistos.add(d.concurso);
+            }
+            const nums = [].concat(d.novas || [], d.repetidas || [])
+                .map(Number)
+                .filter(n => n >= dmin && n <= dmax);
+            if (nums.length < 2) return;
+            amostras++;
+            hist[Math.min(4, contar(nums))]++;
+        });
+        const opcoes = [0, 1, 2, 3, 4];
+        let sugerida = 0;
+        opcoes.forEach(n => { if (hist[n] > hist[sugerida]) sugerida = n; });
+        const pct = {};
+        opcoes.forEach(n => { pct[String(n)] = amostras ? Math.round(1000 * hist[n] / amostras) / 10 : 0; });
+        const ge3 = amostras ? Math.round(1000 * (hist[3] + hist[4]) / amostras) / 10 : 0;
+        const empate = opcoes.filter(n => n !== sugerida && hist[n] === hist[sugerida] && hist[n] > 0);
+        let leitura = '';
+        if (amostras) {
+            leitura = 'Cada aposta já sai com ' + sugerida + (sugerida === 1 ? ' diagonal' : ' diagonais')
+                + ' — a quantidade que mais aparece nos resultados ('
+                + pct[String(sugerida)] + '%).';
+            if (empate.length) leitura += ' Empate no topo com ' + empate.join(', ') + '.';
+            leitura += ' 3 ou mais sai em ' + ge3 + '%.';
+        }
+        return {
+            amostras: amostras,
+            opcoes: opcoes,
+            sugerida: sugerida,
+            quantidade_costumeira: sugerida,
+            pct: pct,
+            pct_tres_ou_mais: ge3,
+            leitura: leitura
+        };
+    }
+
+    function fraseQuantidadeDiagonais(diag, qtd) {
+        const leitura = String((diag && diag.leitura) || '');
+        if (leitura.indexOf('Cada aposta já sai com') === 0) return leitura;
+        const pct = diag && diag.pct && diag.pct[String(qtd)] != null ? diag.pct[String(qtd)] : null;
+        let ge3 = diag && diag.pct_tres_ou_mais != null ? diag.pct_tres_ou_mais : null;
+        if (ge3 == null && diag && diag.pct) {
+            const p3 = Number(diag.pct['3'] || 0);
+            const p4 = Number(diag.pct['4'] || 0);
+            ge3 = Math.round((p3 + p4) * 10) / 10;
+        }
+        const empate = [];
+        if (diag && diag.pct && pct != null) {
+            Object.keys(diag.pct).forEach(k => {
+                if (Number(k) !== Number(qtd) && Number(diag.pct[k]) === Number(pct) && Number(diag.pct[k]) > 0) empate.push(k);
+            });
+        }
+        let texto = 'Cada aposta já sai com ' + qtd + (Number(qtd) === 1 ? ' diagonal' : ' diagonais');
+        texto += pct != null
+            ? ' — a quantidade que mais aparece nos resultados (' + pct + '%).'
+            : '.';
+        if (empate.length) texto += ' Empate no topo com ' + empate.join(', ') + '.';
+        if (ge3 != null) texto += ' 3 ou mais sai em ' + ge3 + '%.';
+        return texto;
+    }
+
+    function linhaEstrategiaDiagonais(m, ciclo) {
+        const estr = (m && m.estrategia) || {};
+        const modo = String(estr.modo_recomendado || '').trim();
+        const k = estr.faltantes_por_jogo;
+        const faixa = faixaIndicada(estr.priorizar_faixa);
+        const diagSrv = m && m.diagonais && m.diagonais.amostras ? m.diagonais : null;
+        const diagCli = resumoDiagonaisHistorico(ciclo);
+        const diag = diagSrv || diagCli;
+        const sug = Number(diag.sugerida != null ? diag.sugerida : 0);
+        const partes = [];
+        if (modo) {
+            const href = '/geradores-elite/ciclo-apostas/?modo=operacional&op='
+                + encodeURIComponent(modo) + '#co-modo';
+            partes.push('<a class="ciclo-lugar-link" href="' + href
+                + '" title="Abre Modo Operacional nesta estratégia">' + escHtml(modo) + '</a>');
+        }
+        if (k != null && k !== '') partes.push(k + ' faltantes por jogo');
+        if (faixa) partes.push(escHtml(faixa));
+        const estrategia = partes.length
+            ? 'Estratégia indicada: ' + partes.join(' · ') + '.'
+            : '';
+        const qtd = Number(diag.quantidade_costumeira != null ? diag.quantidade_costumeira : sug);
+        const diagTxt = escHtml(fraseQuantidadeDiagonais(diag, qtd));
+        return '<div class="small mt-1 mb-0">' + estrategia
+            + ' <span class="ciclo-diag-auto" data-diags="' + qtd + '">' + diagTxt + '</span></div>';
+    }
+
+    function ligarDiagonaisCiclo() {
+        const marca = document.querySelector('.ciclo-diag-auto');
+        const n = marca ? marca.getAttribute('data-diags') : '';
+        if (n === '' || n == null) return;
+        document.querySelectorAll('a.ciclo-link-estrategia').forEach(a => {
+            const raw = a.getAttribute('href') || '';
+            const hash = raw.indexOf('#') >= 0 ? raw.slice(raw.indexOf('#')) : '';
+            const u = new URL(raw.split('#')[0], location.origin);
+            u.searchParams.set('diags', n);
+            a.setAttribute('href', u.pathname + u.search + hash);
+        });
+    }
+
+    function juntarCriterios(partes) {
+        const xs = (partes || []).filter(Boolean);
+        if (xs.length <= 1) return xs[0] || '';
+        return xs.slice(0, -1).join(', ') + ' e ' + xs[xs.length - 1];
+    }
+
+    /** Espelha CicloInteligenciaService._fase_ciclo quando o payload ainda não traz `criterio`. */
+    function criterioDaFase(fase, est, ciclo) {
+        if (fase && fase.criterio) return String(fase.criterio);
+        const nPend = qtdDezenasPendentes(ciclo)
+            ?? Number(fase.dezenas_faltantes ?? est.faltando ?? 0);
+        const saidas = Number(fase.dezenas_saidas_ciclo ?? ciclo.total_dezenas_saidas ?? 0);
+        const concursos = Number(est.concursos_decorridos ?? ciclo.quantidade_concursos ?? 0);
+        const pressao = est.pressao || '';
+        const classificacao = est.classificacao || '';
+        const nome = fase.fase || '';
+        const motivos = [];
+        if (nome === 'inicio') {
+            if (concursos <= 1) {
+                motivos.push(concursos + ' concurso no ciclo (regra: o 1º sorteio conta como início)');
+            }
+            if (concursos > 1 || saidas) {
+                motivos.push(saidas + ' saídas e ' + nPend + ' faltantes (ainda no volume do primeiro sorteio)');
+            }
+        } else if (nome === 'finalizacao') {
+            if (nPend <= 8) motivos.push(nPend + ' faltantes (regra: até 8)');
+            if (pressao === 'alta' || pressao === 'extrema') motivos.push('pressão ' + pressao);
+            if (classificacao === 'Avançado' || classificacao === 'Crítico') {
+                motivos.push('classificação ' + classificacao);
+            }
+        } else {
+            motivos.push(
+                nPend + ' faltantes (acima de 8), pressão ' + (pressao || '—')
+                + ' e classificação ' + (classificacao || '—')
+            );
+        }
+        return juntarCriterios(motivos);
+    }
+
+    function linhaCriterioDesdobramento(fase, est, ciclo) {
+        const texto = criterioDaFase(fase, est, ciclo);
+        if (!texto) return '';
+        const recomendada = fase.estrategia_recomendada !== false
+            && (fase.estrategia_recomendada === true || /2 em 2/.test(fase.hint || ''));
+        const nPend = qtdDezenasPendentes(ciclo)
+            ?? Number(fase.dezenas_faltantes ?? est.faltando ?? 0);
+        const href = '/geradores-elite/ciclo-apostas/?modo=estrategia#ce-desdob';
+        const teto = fraseTetoFaltantes(nPend);
+        const lugar = recomendada
+            ? ' A escolha fica em <a class="ciclo-lugar-link ciclo-link-estrategia" href="' + href + '" title="Abre Ciclo — Estratégias no campo Desdobramento (1 a 6)">Desdobramento</a>, de 1 a 6.' + teto
+            : '';
+        return '<div class="small mt-1 mb-0">Critério: ' + escHtml(texto) + '.' + lugar + '</div>';
+    }
+
     function renderInteligenciaCiclo(m) {
         const est = m.estado_atual || {};
         const f = m.faltantes || {};
@@ -625,8 +878,10 @@
                 <span class="ms-2">Saídas: <strong>${saidasCiclo}</strong>
                 · Faltantes: <strong>${faltando}</strong></span>
                 <div class="small mt-1 mb-0">${fase.hint || ''}</div>
+                ${linhaCriterioDesdobramento(fase, est, ciclo)}
+                ${linhaEstrategiaDiagonais(m, ciclo)}
             </div>
-            <a href="${eliteHref}" class="btn btn-sm btn-dark">
+            <a href="${eliteHref}" class="btn btn-sm btn-dark ciclo-link-estrategia">
                 <i class="fas fa-chess-knight me-1"></i>Ciclo — Estratégias (Elite)
             </a>
         </div>

@@ -1885,7 +1885,7 @@
             </div>
             <p class="small text-muted cc-analise-hint mb-2">Cada coluna: concursos em que a <strong>melhor aposta</strong> teve exatamente N acertos (máx. ${ACERTOS_MAX}). Ordenação: ${[...ACERTOS_TIERS].reverse().join(' → ')} ac.</p>
             <div class="table-responsive">
-                <table class="table table-sm cc-ranking-hist mb-0">
+                <table class="table table-sm cc-ranking-hist tabela-ordenavel mb-0">
                     <thead><tr>
                         <th>#</th><th>Estratégia</th>${theadAcertosCols()}<th>Média máx.</th><th>Pontos</th>
                     </tr></thead>
@@ -1964,7 +1964,7 @@
             ? `<div class="cc-analise-resumo mb-3">
                 <div class="cc-analise-resumo-titulo">Soma por estratégia (todas as sessões)</div>
                 <div class="table-responsive">
-                    <table class="table table-sm cc-ranking-hist mb-0">
+                    <table class="table table-sm cc-ranking-hist tabela-ordenavel mb-0">
                         <thead><tr>
                             <th>Estratégia</th><th>Constr.</th><th>Sessões</th>
                             ${theadAcertosCols()}
@@ -1984,7 +1984,7 @@
                 Cada coluna = concursos em que a melhor aposta teve exatamente N acertos (${k0} a ${k1}).
             </p>
             <div class="table-responsive">
-                <table class="table table-sm cc-ranking-hist mb-0">
+                <table class="table table-sm cc-ranking-hist tabela-ordenavel mb-0">
                     <thead><tr>
                         <th>Sessão</th><th>Nome</th><th>Constr.</th><th>Estratégia</th>
                         ${theadAcertosCols()}

@@ -26,6 +26,11 @@
         vertical-align: middle;
         white-space: nowrap;
     }
+    #asd-root th.ai-sort { cursor: pointer; user-select: none; }
+    #asd-root th.ai-sort:hover { filter: brightness(.92); }
+    #asd-root th.ai-sort .ai-sort-ind { font-size: .65rem; margin-left: .2rem; opacity: .7; }
+    #asd-root th.ai-sort.ai-sort-asc .ai-sort-ind,
+    #asd-root th.ai-sort.ai-sort-desc .ai-sort-ind { opacity: 1; }
     #asd-root .asd-table td {
         text-align: center;
         vertical-align: middle;
@@ -38,6 +43,14 @@
         content: "★ ";
         color: #198754;
     }
+    #asd-root .ai-status-pill {
+        display: inline-flex; align-items: center; gap: .25rem;
+        padding: .1rem .45rem; border-radius: 999px;
+        font-size: .72rem; font-weight: 700; border: 1px solid transparent;
+    }
+    #asd-root .ai-status-pill.dentro { background: #e8f5e9; color: #1b5e20; border-color: #c8e6c9; }
+    #asd-root .ai-status-pill.proxima { background: #fff8e1; color: #8a6d00; border-color: #ffe082; }
+    #asd-root .ai-status-pill.fora { background: #f5f5f5; color: #666; border-color: #e0e0e0; }
     #asd-root .asd-badge-rec {
         display: inline-block;
         font-size: .72rem;
@@ -146,5 +159,5 @@
     window.__ASD_UI__ = {{ estudos_ui | tojson }};
     window.__ASD_API__ = {{ api_base | tojson }};
 </script>
-<script src="/analise/somas-digitos/static/analise_somas_digitos.js"></script>
+<script src="/analise/somas-digitos/static/analise_somas_digitos.js?v=20261029ordem"></script>
 {% endblock %}

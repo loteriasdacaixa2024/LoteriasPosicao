@@ -180,6 +180,12 @@ class ApiMegaSenaService:
 
         restantes = len(candidatos) - len(lote)
         st = cls.status_banco()
+        if sucessos > 0:
+            try:
+                from analise_comparar.melhores15 import agendar_melhores15
+                agendar_melhores15("megasena")
+            except Exception:
+                pass
 
         if restantes > 0:
             msg = (

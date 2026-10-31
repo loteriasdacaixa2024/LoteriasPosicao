@@ -5,6 +5,8 @@
     html {
         -webkit-text-size-adjust: 100%;
         text-size-adjust: 100%;
+        /* Conteúdo que chega depois (tabelas, listas) não empurra a janela. */
+        overflow-anchor: none;
     }
 
     body {
@@ -266,6 +268,44 @@
         max-width: min(calc(100vw - 1rem), 24rem);
     }
 
+    /* O painel fica 8px abaixo do botão. Sem esta ponte, o mouse
+       sai do item, o :hover acaba e o menu fecha antes do clique. */
+    .navbar-main .nav-item-wrap::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        height: 10px;
+        z-index: 1;
+    }
+
+    .navbar-main .nav-item-wrap > .nav-dropdown {
+        transform: none;
+        max-height: calc(100dvh - var(--nav-h) - 1rem);
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        z-index: 2000;
+    }
+
+    .navbar-main .nav-item-wrap.open > .nav-dropdown,
+    .navbar-main .nav-item-wrap:focus-within > .nav-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+    }
+
+    .navbar-main .nav-item-wrap.open > .nav-btn .caret,
+    .navbar-main .nav-item-wrap:focus-within > .nav-btn .caret {
+        transform: rotate(180deg);
+    }
+
+    .navbar-main .nav-item-wrap.nav-dd-right > .nav-dropdown {
+        left: auto;
+        right: 0;
+    }
+
     /* —— Foco visível —— */
     :focus-visible {
         outline: 2px solid var(--accent, currentColor);
@@ -301,6 +341,11 @@
     .mobile-link.dd-ge-destaque-4 {
         background: #efe4c0;
         box-shadow: inset 3px 0 0 #9a7414;
+    }
+    .dd-link.dd-ge-destaque-5,
+    .mobile-link.dd-ge-destaque-5 {
+        background: #ead9a8;
+        box-shadow: inset 3px 0 0 #7d5e10;
     }
     .dd-link.dd-ge-destaque .dd-title {
         font-weight: 800;
@@ -555,7 +600,92 @@
             max-width: none;
         }
     }
+
+    /* Cópia embutida no Comparador: mesma largura da tela original. */
+    body.is-embed .page-content {
+        max-width: none;
+        width: 100%;
+        padding: 0;
+        overflow: visible;
+    }
+    body.is-embed .container-fluid {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    body.is-embed .table-responsive,
+    body.is-embed .tabela-scroll {
+        max-height: var(--cmp-table-max, 70vh);
+    }
+
+    table.tabela-ordenavel thead th.ordem-col {
+        cursor: pointer;
+        user-select: none;
+    }
+    table.tabela-ordenavel thead th.ordem-col:hover { filter: brightness(.92); }
+    table.tabela-ordenavel .ordem-ind {
+        font-size: .65rem;
+        margin-left: .2rem;
+        opacity: .7;
+        font-weight: 700;
+    }
+    table.tabela-ordenavel thead th.ordem-asc .ordem-ind,
+    table.tabela-ordenavel thead th.ordem-desc .ordem-ind { opacity: 1; }
 </style>
+<script>
+/* Abertura: a janela fica no topo. Rolagem interna de tabela continua livre. */
+(function () {
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  var focar = HTMLElement.prototype.focus;
+  HTMLElement.prototype.focus = function (options) {
+    var role = this.getAttribute && this.getAttribute('role');
+    if (role === 'tab') {
+      var opts = (options && typeof options === 'object') ? Object.assign({}, options) : {};
+      opts.preventScroll = true;
+      return focar.call(this, opts);
+    }
+    return focar.apply(this, arguments);
+  };
+
+  var usuarioRolou = false;
+  function marcar() { usuarioRolou = true; }
+  window.addEventListener('wheel', marcar, { passive: true, capture: true });
+  window.addEventListener('touchmove', marcar, { passive: true, capture: true });
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'PageDown' || e.key === 'PageUp' || e.key === 'Home' || e.key === 'End' || e.key === ' ') marcar();
+  }, true);
+
+  function atalhoPediuTrecho() {
+    if (location.hash) return true;
+    try {
+      var q = new URLSearchParams(location.search);
+      return q.has('modo') || q.has('desdob') || q.has('aba') || q.has('viz') || q.has('padrao') || q.has('tab');
+    } catch (e) { return false; }
+  }
+
+  var limite = Date.now() + 4000;
+  var nosso = false;
+  function voltarAoTopo() {
+    if (usuarioRolou || atalhoPediuTrecho() || Date.now() > limite) return;
+    if (window.scrollY <= 0) return;
+    nosso = true;
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('scroll', function () {
+    if (nosso) { nosso = false; return; }
+    voltarAoTopo();
+  }, { passive: true });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', voltarAoTopo);
+  else voltarAoTopo();
+  window.addEventListener('load', voltarAoTopo);
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) return;
+    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (nav && nav.type === 'back_forward') return;
+    voltarAoTopo();
+  });
+})();
+</script>
 <script>
 (function () {
   var DENTRO = '.table-responsive, .tabela-scroll, .ai-pan-table-wrap, .ai-jogos-table-wrap, .cc-table-wrap, nav, .navbar-main';
@@ -606,5 +736,199 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
   else iniciar();
+})();
+</script>
+<script>
+/* Ordenação pelo título. Número, data e dinheiro começam pelo maior. Texto, de A a Z. */
+(function () {
+  function texto(td) {
+    return (td && td.textContent ? td.textContent : '').replace(/\s+/g, ' ').trim();
+  }
+  function valor(txt) {
+    var s = String(txt || '').replace(/\u00a0/g, ' ').trim();
+    if (!s || s === '—' || s === '-' || s === '–') return { t: 'vazio', v: '' };
+    var dm = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (dm) return { t: 'num', v: Number(dm[3] + dm[2] + dm[1]) };
+    var limpo = s.replace(/R\$\s*/i, '').replace(/%/g, '').replace(/\s/g, '').replace(/º$/,'');
+    if (/^-?\d{1,3}(\.\d{3})*(,\d+)?$/.test(limpo) || /^-?\d+(,\d+)?$/.test(limpo)) {
+      var n = Number(limpo.replace(/\./g, '').replace(',', '.'));
+      if (isFinite(n)) return { t: 'num', v: n };
+    }
+    return { t: 'txt', v: s.toLowerCase() };
+  }
+  function tipoColuna(blocos, idx) {
+    var num = 0, txt = 0, i;
+    for (i = 0; i < blocos.length && i < 12; i++) {
+      var v = valor(texto(blocos[i][0].children[idx]));
+      if (v.t === 'vazio') continue;
+      if (v.t === 'num') num++; else txt++;
+    }
+    return num >= txt ? 'num' : 'txt';
+  }
+  function blocosDe(tbody) {
+    var rows = Array.prototype.slice.call(tbody.rows);
+    var out = [];
+    var i;
+    for (i = 0; i < rows.length; i++) {
+      var pack = [rows[i]];
+      var nxt = rows[i + 1];
+      if (nxt && nxt.querySelector('td[colspan]')) {
+        pack.push(nxt);
+        i++;
+      }
+      out.push(pack);
+    }
+    return out;
+  }
+  function preparar(table) {
+    if (!table || !table.tHead) return;
+    var ths = Array.prototype.slice.call(table.tHead.rows[0].cells);
+    var tem = ths.some(function (th) { return th.querySelector('.ordem-ind'); });
+    if (!tem) {
+      delete table.dataset.ordemCol;
+      delete table.dataset.ordemDir;
+    }
+    ths.forEach(function (th, i) {
+      if (th.dataset.ordem === 'nao') return;
+      th.classList.add('ordem-col');
+      if (!th.querySelector('.ordem-ind')) {
+        var ind = document.createElement('span');
+        ind.className = 'ordem-ind';
+        ind.textContent = ' ⇅';
+        th.appendChild(ind);
+      }
+    });
+  }
+  document.addEventListener('click', function (ev) {
+    if (ev.target.closest('button, a, input, select, label')) return;
+    var th = ev.target.closest('table.tabela-ordenavel thead th');
+    if (!th || th.dataset.ordem === 'nao') return;
+    var table = th.closest('table');
+    var idx = Array.prototype.indexOf.call(th.parentElement.children, th);
+    if (idx < 0) return;
+    var tbody = table.tBodies[0];
+    if (!tbody) return;
+    var blocos = blocosDe(tbody);
+    if (blocos.length < 2) return;
+    var tipo = th.dataset.tipo || tipoColuna(blocos, idx);
+    var prev = table.dataset.ordemCol;
+    var dir = prev === String(idx)
+      ? (table.dataset.ordemDir === 'asc' ? 'desc' : 'asc')
+      : (tipo === 'num' ? 'desc' : 'asc');
+    var mult = dir === 'asc' ? 1 : -1;
+    blocos.sort(function (a, b) {
+      var va = valor(texto(a[0].children[idx]));
+      var vb = valor(texto(b[0].children[idx]));
+      if (va.t === 'vazio' && vb.t !== 'vazio') return 1;
+      if (vb.t === 'vazio' && va.t !== 'vazio') return -1;
+      if (va.t === 'num' && vb.t === 'num') return (va.v - vb.v) * mult;
+      return String(va.v).localeCompare(String(vb.v), 'pt-BR', { numeric: true }) * mult;
+    });
+    var frag = document.createDocumentFragment();
+    blocos.forEach(function (pack) { pack.forEach(function (tr) { frag.appendChild(tr); }); });
+    tbody.appendChild(frag);
+    table.dataset.ordemCol = String(idx);
+    table.dataset.ordemDir = dir;
+    Array.prototype.forEach.call(th.parentElement.children, function (h, i) {
+      h.classList.toggle('ordem-asc', i === idx && dir === 'asc');
+      h.classList.toggle('ordem-desc', i === idx && dir === 'desc');
+      var ind = h.querySelector('.ordem-ind');
+      if (ind) ind.textContent = i === idx ? (dir === 'asc' ? ' ▲' : ' ▼') : ' ⇅';
+    });
+  });
+  function achar(node) {
+    if (!node || node.nodeType !== 1) return;
+    if (node.matches && node.matches('table.tabela-ordenavel')) preparar(node);
+    if (node.closest) {
+      var dona = node.closest('table.tabela-ordenavel');
+      if (dona) preparar(dona);
+    }
+    if (node.querySelectorAll) node.querySelectorAll('table.tabela-ordenavel').forEach(preparar);
+  }
+  function iniciar() {
+    document.querySelectorAll('table.tabela-ordenavel').forEach(preparar);
+    var obs = new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        achar(m.target);
+        m.addedNodes.forEach(achar);
+      });
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
+  else iniciar();
+})();
+</script>
+<script>
+/* Menu: o clique deixa o painel aberto até escolher o item ou clicar fora.
+   No celular, fechar o painel no mesmo instante do clique cancelava a ida à página. */
+(function () {
+  function fecharDesktop(exceto) {
+    document.querySelectorAll('.nav-item-wrap.open').forEach(function (el) {
+      if (el !== exceto) el.classList.remove('open');
+    });
+  }
+
+  function alinhar(wrap) {
+    var dd = wrap.querySelector(':scope > .nav-dropdown');
+    if (!dd) return;
+    wrap.classList.remove('nav-dd-right');
+    var caixa = dd.getBoundingClientRect();
+    if (caixa.right > window.innerWidth - 8) wrap.classList.add('nav-dd-right');
+  }
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.navbar-main .nav-item-wrap > button.nav-btn');
+    if (btn) {
+      e.preventDefault();
+      var wrap = btn.parentElement;
+      var abrir = !wrap.classList.contains('open');
+      fecharDesktop(null);
+      if (abrir) {
+        wrap.classList.add('open');
+        alinhar(wrap);
+      } else {
+        btn.blur();
+      }
+      return;
+    }
+
+    var item = e.target.closest('.nav-dropdown a');
+    if (item) {
+      fecharDesktop(null);
+      setTimeout(function () { item.blur(); }, 0);
+      return;
+    }
+
+    if (!e.target.closest('.nav-item-wrap')) {
+      fecharDesktop(null);
+      var ativo = document.activeElement;
+      if (ativo && ativo.closest && ativo.closest('.navbar-main .nav-item-wrap')) ativo.blur();
+    }
+  });
+
+  document.addEventListener('mouseover', function (e) {
+    var wrap = e.target.closest('.navbar-main .nav-item-wrap');
+    if (!wrap || (e.relatedTarget && wrap.contains(e.relatedTarget))) return;
+    fecharDesktop(wrap);
+    var ativo = document.activeElement;
+    if (ativo && ativo.closest && ativo.closest('.nav-item-wrap') && !wrap.contains(ativo)) ativo.blur();
+    alinhar(wrap);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    fecharDesktop(null);
+    var ativo = document.activeElement;
+    if (ativo && ativo.closest && ativo.closest('.nav-item-wrap')) ativo.blur();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof window.closeMobileNav !== 'function' || window.closeMobileNav.__adiado) return;
+    var imediato = window.closeMobileNav;
+    function adiado() { setTimeout(imediato, 0); }
+    adiado.__adiado = true;
+    window.closeMobileNav = adiado;
+  });
 })();
 </script>

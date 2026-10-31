@@ -181,6 +181,23 @@
         <h2 class="h4 mb-1"><i class="fas fa-clone me-2"></i>Repetição entre concursos</h2>
         <p class="mb-0 small opacity-90">{{ cfg.nome }} · {{ cfg.subtitle }}{% if cfg.layout != 'colunas' %} · gera apostas de {{ cfg.dezenas_min }} a {{ cfg.dezenas_max }} dezenas{% else %} · gerador com 7 colunas (0–9){% endif %}</p>
     </div>
+    <a class="btn btn-sm btn-light d-none" id="btnVoltarRota" href="#">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+    <script>
+    (function () {
+        var raw = new URLSearchParams(location.search).get('voltar');
+        if (!raw) return;
+        var u;
+        try { u = new URL(raw, location.href); } catch (e) { return; }
+        if (!/\/analise\/comparar-concursos\/?/.test(u.pathname)) return;
+        if (u.hostname !== location.hostname && u.hostname !== '127.0.0.1' && u.hostname !== 'localhost') return;
+        var a = document.getElementById('btnVoltarRota');
+        if (!a) return;
+        a.href = u.href;
+        a.classList.remove('d-none');
+    })();
+    </script>
     <a class="btn btn-sm btn-light" href="/geradores-elite/repeticao-apostas/">
         <i class="fas fa-arrow-right"></i> Gerar apostas
     </a>
@@ -297,7 +314,7 @@
                 </div>
             </div>
             <div class="table-responsive" style="max-height:420px;">
-                <table class="table table-sm table-hover mb-0">
+                <table class="table table-sm table-hover tabela-ordenavel mb-0">
                     <thead class="table-light sticky-top">
                         <tr>
                             <th>{% if cfg.layout == 'colunas' %}Col.{% else %}Dez.{% endif %}</th>

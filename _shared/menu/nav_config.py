@@ -369,6 +369,13 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                     "highlight": 4,
                 },
                 {
+                    "href": "/geradores-elite/comparador-apostas/",
+                    "title": "Comparador de Apostas",
+                    "desc": "Conferir e registrar apostas reais",
+                    "icon": "fas fa-columns",
+                    "highlight": 5,
+                },
+                {
                     "href": "/geradores-elite/engine-final/",
                     "title": "Engine Final",
                     "desc": "Gerador pensante com análises integradas",
@@ -765,6 +772,7 @@ _GE_ORDEM = [
     "/geradores-elite/ciclo-apostas/",
     "/geradores-elite/comportamento-apostas/",
     "/geradores-elite/construtor-construcoes/",
+    "/geradores-elite/comparador-apostas/",
     "/geradores-elite/engine-final/",
     "/geradores-elite/gerador-gc/",
     "/geradores-elite/gerador-elite/",
@@ -781,6 +789,7 @@ _GE_DESTAQUE = {
     "/geradores-elite/ciclo-apostas/": 2,
     "/geradores-elite/comportamento-apostas/": 3,
     "/geradores-elite/construtor-construcoes/": 4,
+    "/geradores-elite/comparador-apostas/": 5,
 }
 
 
@@ -1060,6 +1069,13 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
             "desc": "Escolha Visual · Seção 10 Manual · Seção 11 Automático",
             "icon": "fas fa-dice",
             "after": "/geradores-elite/comportamento-apostas/",
+        })
+        novos_ge.append({
+            "href": "/geradores-elite/comparador-apostas/",
+            "title": "Comparador de Apostas",
+            "desc": "Conferir e registrar apostas reais",
+            "icon": "fas fa-columns",
+            "after": "/geradores-elite/construtor-construcoes/",
         })
 
     for item in novos_ge:

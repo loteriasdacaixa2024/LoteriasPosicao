@@ -89,10 +89,15 @@ class AnaliseEscolhaVisualService:
         )
         if not lista.get("sucesso"):
             return lista
+        cfg = get_estudos_config(modality_key)
         payload = analisar_janela(
             lista.get("sorteios") or [],
             ordem=lista.get("ordem") or "desc",
             concurso_foco=concurso,
+            dmin=int(cfg["dezena_min"]),
+            dmax=int(cfg["dezena_max"]),
+            cols=int(cfg.get("volante_cols") or 10),
+            com_diagonais=int(cfg.get("volante_rows") or 1) > 1,
         )
         if not payload.get("sucesso"):
             return payload
@@ -113,6 +118,8 @@ class AnaliseEscolhaVisualService:
             "dezena_max": cfg["dezena_max"],
             "sorteadas": cfg["sorteadas"],
             "pad_width": cfg["pad_width"],
+            "volante_cols": int(cfg.get("volante_cols") or 10),
+            "volante_rows": int(cfg.get("volante_rows") or 1),
             "extra_mes": bool(cfg.get("extra_mes")),
             "nome": cfg["nome"],
         }

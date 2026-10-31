@@ -431,7 +431,7 @@
             <div class="row g-2 mb-3">${cards}</div>
             <h6 class="small fw-bold mb-2">Ranking completo</h6>
             <div class="table-responsive">
-              <table class="table table-sm table-bordered ldd-table mb-0">
+              <table class="table table-sm table-bordered ldd-table tabela-ordenavel mb-0">
                 <thead><tr>
                   <th title="Posição no ranking">Pos.</th>
                   <th>Linha</th>
@@ -484,7 +484,7 @@
                 <div class="col-12">
                     <h6 class="small fw-bold mb-2">Mapa de linhas desta modalidade</h6>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered ldd-table mb-0">
+                        <table class="table table-sm table-bordered ldd-table tabela-ordenavel mb-0">
                             <thead><tr>
                                 <th title="Identificador da linha">Linha</th>
                                 <th title="Faixa efetiva no universo">Faixa</th>
@@ -596,7 +596,7 @@
                 <div class="col-lg-6">
                     <h6 class="small fw-bold mb-2">Frequência DD (Dígito da Dezena)</h6>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered ldd-table mb-0">
+                        <table class="table table-sm table-bordered ldd-table tabela-ordenavel mb-0">
                             <thead><tr>
                                 <th title="Dígito da dezena (0 em 01–09, 1 em 10–19…)">DD</th>
                                 <th title="Concursos com pelo menos um DD">Presenças</th>
@@ -611,7 +611,7 @@
                 <div class="col-lg-6">
                     <h6 class="small fw-bold mb-2">Frequência DU (Dígito da Unidade)</h6>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered ldd-table mb-0">
+                        <table class="table table-sm table-bordered ldd-table tabela-ordenavel mb-0">
                             <thead><tr>
                                 <th title="Dígito da unidade (o final da dezena)">DU</th>
                                 <th title="Concursos com pelo menos um DU">Presenças</th>

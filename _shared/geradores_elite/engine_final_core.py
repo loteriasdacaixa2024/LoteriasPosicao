@@ -107,6 +107,19 @@ def build_dezena_scores(modality_key: str) -> Tuple[Dict[int, float], Optional[D
 
     if cfg["loader"] == "diadesorte":
         meta["meses_stats"] = raw.get("dados_meses") or []
+        compacta = []
+        for row in dados:
+            d = row.get("dezena")
+            if d is None:
+                d = row.get("numero")
+            if d is None:
+                continue
+            compacta.append({
+                "dezena": int(d),
+                "freq": int(row.get("freq") or 0),
+                "atraso": int(row.get("atraso") or 0),
+            })
+        meta["dados_dezenas"] = compacta
     if cfg["loader"] == "timemania":
         meta["times_stats"] = raw.get("dados_times") or []
     if cfg["loader"] == "maismilionaria":
@@ -366,6 +379,27 @@ def gerar_apostas(
         for d in nucleus:
             scores[d] = scores.get(d, 0) * 1.35
 
+    leitura = None
+    lote_guiado = None
+    if modality_key == "diadesorte":
+        try:
+            from geradores_elite.engine_final_leitura import escolher_lote, preparar_leitura
+
+            leitura = preparar_leitura(modality_key, scores, meta)
+            if leitura and leitura.get("sucesso"):
+                lote_guiado = escolher_lote(
+                    scores,
+                    leitura,
+                    cfg,
+                    k,
+                    qtd,
+                    montar=_montar_aposta,
+                    candidatos=pool_conjunto,
+                )
+        except Exception as exc:
+            leitura = {"sucesso": False, "erro": str(exc)}
+            lote_guiado = None
+
     apostas_out = []
     anteriores: List[List[int]] = []
 
@@ -419,7 +453,10 @@ def gerar_apostas(
         else:
             if not scores:
                 scores = {d: random.random() for d in range(cfg["dezena_min"], cfg["dezena_max"] + 1)}
-            nums = _montar_aposta(scores, cfg, k, i, anteriores, candidatos=pool_conjunto)
+            if lote_guiado is not None and i < len(lote_guiado):
+                nums = list(lote_guiado[i])
+            else:
+                nums = _montar_aposta(scores, cfg, k, i, anteriores, candidatos=pool_conjunto)
         anteriores.append(nums)
 
         ap_extra = dict(extra_payload)
@@ -433,7 +470,12 @@ def gerar_apostas(
                 }
             ap_extra = comp
 
-        apostas_out.append({"dezenas": nums, "extras": ap_extra})
+        item = {"dezenas": nums, "extras": ap_extra}
+        if leitura and leitura.get("sucesso"):
+            from geradores_elite.engine_final_leitura import resumir_forma
+
+            item["forma"] = resumir_forma(nums, leitura.get("ultimo_numeros") or [])
+        apostas_out.append(item)
 
     out: Dict[str, Any] = {
         "sucesso": True,
@@ -453,6 +495,17 @@ def gerar_apostas(
             "trevo_badge_style": cfg.get("trevo_badge_style", ""),
         },
     }
+    if leitura:
+        if leitura.get("sucesso"):
+            from geradores_elite.engine_final_leitura import leitura_publica
+
+            out["leitura"] = leitura_publica(leitura)
+        else:
+            out["leitura"] = {
+                "sucesso": False,
+                "criterios": [],
+                "aviso": "A leitura integrada não entrou nesta geração.",
+            }
     if ms_analise:
         out["meses_indicados"] = ms_analise
     if conjunto_base_info:

@@ -3,7 +3,7 @@
 | Campo | Valor |
 |-------|-------|
 | **Escopo auditado** | `AnalisePorPosicao--DiaDeSorte-Only` (+ dependências em `_shared/`) |
-| **Workspace** | `D:\Loterias\LoteriasPosicao` |
+| **Workspace** | `D:\Loterias\LP-LoteriasPosicao` |
 | **Data** | 25/07/2026 |
 | **Tipo** | Auditoria somente-leitura (sem alteração de comportamento) |
 | **Objetivo** | Identificar o que pode virar padrão do sistema e o que deve permanecer específico |
@@ -31,7 +31,7 @@ O Dia de Sorte (`AnalisePorPosicao--DiaDeSorte-Only`, porta **5153**) é hoje a 
 ### 1.1 Pasta auditada
 
 ```
-D:\Loterias\LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only
+D:\Loterias\LP-LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only
 ```
 
 > Nota: a variante com hífen simples `AnalisePorPosicao-DiaDeSorte-Only` **não existe** neste workspace. O nome oficial no monólito usa hífen **duplo** (`--`).
@@ -41,7 +41,7 @@ D:\Loterias\LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only
 Grande parte das funcionalidades “novas” **não vive só na pasta da modalidade**. Elas estão em:
 
 ```
-D:\Loterias\LoteriasPosicao\_shared\
+D:\Loterias\LP-LoteriasPosicao\_shared\
 ```
 
 O `app.py` do Dia de Sorte faz o *wiring* desses pacotes. Replicar funcionalidade = **habilitar o mesmo `extend_*` / registry em outra app**, com **spec própria**, nunca copiar o app inteiro.

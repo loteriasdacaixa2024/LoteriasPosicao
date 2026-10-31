@@ -7,8 +7,6 @@ from routes.conferencia_routes import conferencia_bp
 from routes.modelos_routes import modelos_bp
 from routes.desdobramento_routes import desdobramento_bp
 from routes.geradores_elite_routes import geradores_elite_bp
-from routes.analise_repeticao_routes import analise_repeticao_bp
-from routes.analise_comparar_routes import analise_comparar_bp
 
 
 import os as _cc_os
@@ -22,6 +20,8 @@ from central_conferencias.app_integration import extend_app as cc_extend_app, re
 from routes.config_routes import config_bp
 from configuracoes.app_integration import extend_config_app
 from auto_sync import start_auto_sync_once
+from analise_comparar.routes_factory import register_comparar
+from analise_repeticao.routes_factory import register_repeticao
 from menu.app_integration import extend_nav_app
 from filtros_posicao.app_integration import register_filtros_posicao
 from posicao_analise.app_integration import extend_posicao_app
@@ -78,8 +78,8 @@ def create_app():
     app.register_blueprint(desdobramento_bp, url_prefix='/desdobramento')
     app.register_blueprint(config_bp, url_prefix='/configuracoes')
     app.register_blueprint(geradores_elite_bp)
-    app.register_blueprint(analise_repeticao_bp)
-    app.register_blueprint(analise_comparar_bp)
+    register_comparar(app, 'lotofacil')
+    register_repeticao(app, 'lotofacil')
 
     # Criação do banco de dados caso não exista
     with app.app_context():

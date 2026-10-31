@@ -703,15 +703,37 @@
             text-align: center;
         }
 
-        .sat-status {
+        .sat-row {
             margin-top: 0.9rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 0.75rem;
+            justify-content: center;
+            align-items: center;
+            max-width: 72rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .sat-status {
+            margin-top: 0;
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
             justify-content: center;
             max-width: 52rem;
-            margin-left: auto;
-            margin-right: auto;
+        }
+
+        #btn-estatisticas-todas {
+            background: #f8fafc;
+            color: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            font-weight: 600;
+        }
+
+        #btn-estatisticas-todas:hover:not(:disabled) {
+            background: #fff;
+            color: #0f172a;
         }
 
         .sat-chip {
@@ -863,7 +885,13 @@
                 <i class="fas fa-file-excel me-1"></i> Resultados / Atualização dos Resultados
             </button>
         </div>
-        <div id="sat-status" class="sat-status" aria-live="polite"></div>
+        <div class="sat-row">
+            <div id="sat-status" class="sat-status" aria-live="polite"></div>
+            <button type="button" id="btn-estatisticas-todas" class="btn btn-light btn-sm"
+                    title="Um Excel com a seção 2 de cada modalidade">
+                <i class="fas fa-file-excel me-1"></i> Baixar Estatísticas de Todas as Modalidades (Excel)
+            </button>
+        </div>
     </header>
 
     <div class="grid-container">
@@ -1221,11 +1249,60 @@
             }
         }
 
+        function nomeDoAnexo(header, fallback) {
+            const m = /filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i.exec(header || '');
+            if (!m) return fallback;
+            try { return decodeURIComponent((m[1] || m[2] || '').trim()); }
+            catch (e) { return (m[2] || fallback).trim(); }
+        }
+
+        async function baixarEstatisticasTodas() {
+            const btn = document.getElementById('btn-estatisticas-todas');
+            if (!btn || btn.disabled) return;
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Gerando Excel…';
+            try {
+                const res = await fetch('/api/estatisticas-basicas/todas.xlsx');
+                const ctype = res.headers.get('content-type') || '';
+                if (!res.ok || ctype.includes('json')) {
+                    let msg = 'Não foi possível gerar o arquivo agora.';
+                    try {
+                        const data = await res.json();
+                        if (data && data.mensagem) msg = data.mensagem;
+                    } catch (e) { /* mensagem padrão */ }
+                    alert(msg);
+                    return;
+                }
+                const blob = await res.blob();
+                const a = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                a.href = url;
+                a.download = nomeDoAnexo(res.headers.get('content-disposition'), 'Estatisticas_Todas_Modalidades.xlsx');
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
+                const aviso = res.headers.get('X-Estatisticas-Aviso');
+                if (aviso) {
+                    try { alert(decodeURIComponent(aviso)); }
+                    catch (e) { alert(aviso); }
+                }
+            } catch (e) {
+                alert('Não foi possível gerar o arquivo agora.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const bConf = document.getElementById('btn-conferencias');
             const bRes = document.getElementById('btn-resultados');
+            const bEst = document.getElementById('btn-estatisticas-todas');
             if (bConf) bConf.addEventListener('click', abrirConferencias);
             if (bRes) bRes.addEventListener('click', atualizarResultados);
+            if (bEst) bEst.addEventListener('click', baixarEstatisticasTodas);
             document.addEventListener('click', (e) => {
                 const btn = e.target.closest('.btn-baixar-oraculo');
                 if (!btn) return;

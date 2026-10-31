@@ -315,7 +315,7 @@
         <div class="row g-3 mb-3">
             <div class="col-md-4">
                 <h6 class="small fw-bold">Frequência por dígito</h6>
-                <table class="table table-sm estudos-tabela"><thead><tr><th>Díg.</th><th>Conc.</th><th>%</th><th>Apar.</th></tr></thead><tbody>${bars}</tbody></table>
+                <table class="table table-sm estudos-tabela tabela-ordenavel"><thead><tr><th>Díg.</th><th>Conc.</th><th>%</th><th>Apar.</th></tr></thead><tbody>${bars}</tbody></table>
             </div>
             <div class="col-md-4">
                 <h6 class="small fw-bold">Barras — % concursos com dígito</h6>
@@ -333,16 +333,16 @@
             </div>
             <div class="col-md-3">
                 <h6 class="small fw-bold">Top pares</h6>
-                <table class="table table-sm estudos-tabela"><thead><tr><th>Par</th><th>×</th><th>%</th></tr></thead><tbody>${topPares || '<tr><td colspan="3" class="text-muted">—</td></tr>'}</tbody></table>
+                <table class="table table-sm estudos-tabela tabela-ordenavel"><thead><tr><th>Par</th><th>×</th><th>%</th></tr></thead><tbody>${topPares || '<tr><td colspan="3" class="text-muted">—</td></tr>'}</tbody></table>
                 <p class="small text-muted mb-0">Sobreposição entre concursos seguidos: média <strong>${sobre.media ?? '—'}</strong>, moda <strong>${sobre.moda ?? '—'}</strong>.</p>
             </div>
             <div class="col-md-3">
                 <h6 class="small fw-bold">Atraso por dígito</h6>
-                <table class="table table-sm estudos-tabela"><thead><tr><th>Díg.</th><th>Atraso</th></tr></thead><tbody>${atrasos}</tbody></table>
+                <table class="table table-sm estudos-tabela tabela-ordenavel"><thead><tr><th>Díg.</th><th>Atraso</th></tr></thead><tbody>${atrasos}</tbody></table>
             </div>
         </div>
         <h6 class="small fw-bold">Histórico</h6>
-        <div class="table-responsive"><table class="table table-sm estudos-tabela">
+        <div class="table-responsive"><table class="table table-sm estudos-tabela tabela-ordenavel">
             <thead><tr><th>Concurso</th><th>Dígitos</th><th>Qtd</th><th>Rep. ant.</th></tr></thead>
             <tbody>${hist}</tbody></table></div>`;
     }
@@ -407,7 +407,7 @@
         <div class="row g-3 mb-3">
             <div class="col-md-4">
                 <h6 class="small fw-bold">Tabela — soma total (concurso)</h6>
-                <table class="table table-sm estudos-tabela"><thead><tr><th>Soma</th><th>Ocorr.</th><th>%</th></tr></thead><tbody>${distRows}</tbody></table>
+                <table class="table table-sm estudos-tabela tabela-ordenavel"><thead><tr><th>Soma</th><th>Ocorr.</th><th>%</th></tr></thead><tbody>${distRows}</tbody></table>
             </div>
             <div class="col-md-4">
                 <h6 class="small fw-bold">Histograma — soma total dos dígitos</h6>
@@ -421,11 +421,11 @@
         <details class="mb-3">
             <summary class="small fw-bold" style="cursor:pointer">Mapa fixo — soma de dígitos por dezena (01–31)</summary>
             <div class="table-responsive mt-2" style="max-height:200px;overflow:auto">
-                <table class="table table-sm estudos-tabela"><thead><tr><th>Dez.</th><th>Dígitos</th><th>Soma</th></tr></thead><tbody>${mapaRows}</tbody></table>
+                <table class="table table-sm estudos-tabela tabela-ordenavel"><thead><tr><th>Dez.</th><th>Dígitos</th><th>Soma</th></tr></thead><tbody>${mapaRows}</tbody></table>
             </div>
         </details>
         <h6 class="small fw-bold">Últimos concursos</h6>
-        <div class="table-responsive"><table class="table table-sm estudos-tabela">
+        <div class="table-responsive"><table class="table table-sm estudos-tabela tabela-ordenavel">
             <thead><tr><th>Concurso</th><th>Soma dígitos</th><th>Média/dez</th><th>Soma dezenas</th><th>Paridade</th></tr></thead>
             <tbody>${hist}</tbody></table></div>`;
     }
@@ -703,7 +703,7 @@ SORTEIO:     02 09 11 12 16 24 25</div>
         </div>
         <h6 class="small fw-bold">Histórico na janela (ordem posicional → aposta ordenada)</h6>
         <div class="table-responsive">
-            <table class="table table-sm estudos-tabela estudos-tabela-dif-hist">
+            <table class="table table-sm estudos-tabela tabela-ordenavel estudos-tabela-dif-hist">
                 <thead><tr>
                     <th class="text-start">Concurso</th>
                     <th class="text-start">Penúltimo</th>

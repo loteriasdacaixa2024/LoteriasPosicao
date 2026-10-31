@@ -1,6 +1,20 @@
 {% extends "base.html" %}
 {% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
 {% block content %}
+{% if request.args.get('embed') == '1' %}
+<script>document.body.classList.add('is-embed');</script>
+<style>
+  body.is-embed { padding-top: 0 !important; }
+  body.is-embed .navbar-main,
+  body.is-embed #mobilePanel { display: none !important; }
+  body.is-embed #ai-root > .d-flex,
+  body.is-embed #ai-root > .ai-hint,
+  body.is-embed #aiTabs,
+  body.is-embed .cmp-voltar,
+  body.is-embed .tab-pane:not(#tab-checagem-seq) { display: none !important; }
+  body.is-embed #tab-checagem-seq { display: block !important; opacity: 1 !important; }
+</style>
+{% endif %}
 <style>
   :root {
     --cor-sequencia-1: #86efac;
@@ -490,6 +504,51 @@
   }
   #ai-root .ai-cruz-diag-card .val { font-size: .88rem; font-weight: 800; }
   #ai-root .ai-cruz-diag-card .lbl { font-size: .68rem; font-weight: 700; color: #6c757d; text-transform: uppercase; }
+  #ai-root #aiCheqRankMedia {
+    text-align: center;
+    margin-bottom: .75rem;
+  }
+  #ai-root #aiCheqRankMedia .ai-cheq-rank-titulo {
+    font-weight: 800;
+    color: var(--primary-xdark, #664a00);
+    margin-bottom: .45rem;
+  }
+  #ai-root #aiCheqRankMedia .ai-cheq-rank-row {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: .55rem;
+    flex-wrap: wrap;
+  }
+  #ai-root .ai-cheq-rank-card {
+    flex: 1 1 11rem;
+    max-width: 16rem;
+    border: 1px solid color-mix(in srgb, var(--primary, #c08b00) 38%, #fff);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--primary, #c08b00) 14%, #fff);
+    padding: .5rem .65rem .55rem;
+    text-align: center;
+  }
+  #ai-root .ai-cheq-rank-card .lbl {
+    font-size: .68rem;
+    font-weight: 700;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+  }
+  #ai-root .ai-cheq-rank-card .val {
+    line-height: 1.2;
+    margin: .2rem 0 .2rem;
+  }
+  #ai-root .ai-cheq-rank-card .sub {
+    font-size: .75rem;
+    color: #6c757d;
+  }
+  #ai-root #aiCheqRankMedia .ai-cheq-rank-link {
+    display: inline-block;
+    margin-top: .4rem;
+    font-size: .78rem;
+  }
 
   #ai-root #aiTabelaPadroesII .ai-col-alinha {
     display: inline-block;
@@ -824,6 +883,94 @@
     gap: .4rem .65rem;
     font-size: .82rem;
   }
+  #ai-root #aiTabelaCheq td.td-soma {
+    text-align: center !important;
+    white-space: nowrap;
+  }
+  #ai-root #aiTabelaCheq td.td-soma .ai-soma-par {
+    display: inline-grid;
+    grid-template-columns: 2.6rem 9.6rem;
+    align-items: center;
+    column-gap: .35rem;
+  }
+  #ai-root #aiTabelaCheq td.td-soma .ai-col-alinha {
+    display: block;
+    text-align: right;
+    min-width: 2.6rem;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaCheq td:has(> .ai-pan-casas) {
+    text-align: left !important;
+  }
+  #ai-root #aiTabelaCheq .ai-pan-casas {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 2px;
+    vertical-align: middle;
+  }
+  #ai-root #aiTabelaCheq .ai-pan-casa {
+    display: inline-flex;
+    align-items: stretch;
+    width: 2.4rem;
+    flex: 0 0 2.4rem;
+    box-sizing: border-box;
+    border: 1px solid #e4dcc8;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+  }
+  #ai-root #aiTabelaCheq .ai-cheq-num {
+    width: 1.65rem;
+    border: 0;
+    background: transparent;
+    text-align: center;
+    font-weight: 700;
+    font-size: .72rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    padding: 0;
+    color: inherit;
+  }
+  #ai-root #aiTabelaCheq .ai-cheq-num:focus { outline: none; }
+  #ai-root #aiTabelaCheq .ai-pan-spin {
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #efe8d8;
+  }
+  #ai-root #aiTabelaCheq .ai-cheq-step {
+    border: 0;
+    background: #f7f3ea;
+    color: #664a00;
+    font-size: .45rem;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+  }
+  #ai-root #aiTabelaCheq .ai-cheq-step:hover { background: #efe4c4; }
+  #ai-root #aiCheqUltimo td {
+    background: #e7f6ec;
+    vertical-align: middle;
+  }
+  #ai-root #aiCheqUltimo .ai-cheq-ref {
+    line-height: 1.15;
+    white-space: nowrap;
+    text-align: center;
+  }
+  #ai-root #aiCheqUltimo .ai-cheq-ref .small {
+    font-size: .68rem;
+    font-weight: 600;
+    color: #6c757d;
+  }
+  #ai-root #aiTabelaCheq .ai-cheq-ro .ai-cheq-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.35rem;
+    cursor: default;
+  }
+  #ai-root #aiTabelaCheq .ai-cheq-ro .ai-pan-spin {
+    min-width: .72rem;
+    min-height: 1.35rem;
+  }
   #ai-root #aiTabelaCheq td.td-left { text-align: left !important; }
   #ai-root #aiTabelaCheq .ai-cheq-ok { color: #1b5e20; font-weight: 800; }
   #ai-root #aiTabelaCheq .ai-cheq-no { color: #842029; font-weight: 800; }
@@ -1034,6 +1181,7 @@
     border-radius: 10px;
     padding: .45rem .45rem .15rem;
     background: #fffdf6;
+    margin-top: 1.1rem;
     margin-bottom: .85rem;
   }
   #ai-root #tab-panorama .ai-pan-resumo-ultimo .ai-pan-table-wrap {
@@ -1139,6 +1287,15 @@
   #ai-root #aiTabelaPanSeq td.td-pan-seqn .ai-col-alinha { min-width: 4.2rem; }
   #ai-root #aiTabelaPanSeq td.td-pan-soma .ai-col-alinha { min-width: 2.4rem; }
   #ai-root #aiTabelaPanSeq td.td-pan-status .ai-col-alinha { min-width: 8.2rem; }
+  #ai-root #aiTabelaPanSeq .ai-pan-dez {
+    width: 12.5rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .75rem;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    padding: .05rem .3rem;
+    background: #fff;
+  }
   /* Coluna observada: o que a tabela está medindo (sequência ou padrão). */
   #ai-root th.ai-col-medida {
     box-shadow: inset 0 -3px 0 #ffe082;
@@ -1554,7 +1711,7 @@
               <th class="ai-chk-th" title="Selecionar / desmarcar todos visíveis">
                 <input type="checkbox" class="form-check-input" id="aiPadIIChkTodos">
               </th>
-              <th class="text-center" title="Numeração sequencial (ordem atual)">Nº</th>
+              <th class="ai-sort text-center" data-sort="n_padrao" data-table="p2" title="Nº fixo do padrão, na ordem por frequência. Acompanha a linha em qualquer ordenação ou filtro.">Nº <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort text-center" data-sort="padrao" data-table="p2">Padrão <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dist" data-sort="descricao" data-table="p2">Distribuição <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-jogos" data-sort="jogos_possiveis" data-table="p2">Jogos <span class="ai-sort-ind">⇅</span></th>
@@ -1930,6 +2087,40 @@
           Clique no número para abrir essa sequência.
           O <strong>Nº</strong> é o mesmo da aba 4 (ordem por frequência) e <strong>Jogos</strong> é a quantidade de apostas possíveis daquele padrão.
         </p>
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+          <input type="search" id="aiPanSeqBusca" class="form-control form-control-sm" style="max-width:18rem"
+                 placeholder="Concurso, padrão ou dezenas" autocomplete="off">
+          <select id="aiPanSeqPageSize" class="form-select form-select-sm" style="width:auto">
+            <option value="50" selected>50 / pág.</option>
+            <option value="100">100 / pág.</option>
+            <option value="250">250 / pág.</option>
+            <option value="0">Todos</option>
+          </select>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPanSeqPrev" disabled>‹</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPanSeqNext" disabled>›</button>
+          <span class="small text-muted" id="aiPanSeqInfo">—</span>
+        </div>
+        <div class="ai-pan-table-wrap">
+          <table class="table table-sm table-bordered ai-table mb-0" id="aiTabelaPanSeq">
+            <thead>
+              <tr>
+                <th class="ai-sort" data-sort="concurso" data-table="panSeq" title="Clique para ordenar">Concurso <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="data" data-table="panSeq" title="Clique para ordenar">Data <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort col-pan-npad" data-sort="n_padrao" data-table="panSeq" title="Mesmo Nº da aba 4 · Padrões II, na ordem por frequência">Nº <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort col-pan-pad" data-sort="padrao" data-table="panSeq" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort col-pan-jogos" data-sort="jogos_possiveis" data-table="panSeq" title="Jogos possíveis deste padrão, a coluna Jogos da aba 4">Jogos <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort col-pan-seqn ai-col-medida" data-sort="sequencia_n" data-table="panSeq" title="Nº da aposta na aba 5 ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort" data-sort="dezenas_fmt" data-table="panSeq" title="Clique para ordenar">Dezenas <span class="ai-sort-ind">⇅</span></th>
+                <th title="Diagonais desta linha no volante">Diagonais</th>
+                <th class="ai-sort col-pan-soma" data-sort="soma" data-table="panSeq" title="Clique para ordenar">Soma <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort col-pan-status" data-sort="status_media" data-table="panSeq" title="Clique para ordenar">Status <span class="ai-sort-ind">⇅</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="10" class="text-muted">Carregando sequências sorteadas…</td></tr>
+            </tbody>
+          </table>
+        </div>
         <div class="ai-pan-resumo-ultimo">
           <div class="ai-pan-col-title" id="aiPanResumoTitulo">Resumo de todos os concursos</div>
           <p class="small text-muted mb-2">Uma linha por concurso, do primeiro ao atual. Quando entra um sorteio novo, a linha correspondente entra junto.</p>
@@ -1968,39 +2159,6 @@
               </tbody>
             </table>
           </div>
-        </div>
-        <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-          <input type="search" id="aiPanSeqBusca" class="form-control form-control-sm" style="max-width:18rem"
-                 placeholder="Concurso, padrão ou dezenas" autocomplete="off">
-          <select id="aiPanSeqPageSize" class="form-select form-select-sm" style="width:auto">
-            <option value="50" selected>50 / pág.</option>
-            <option value="100">100 / pág.</option>
-            <option value="250">250 / pág.</option>
-            <option value="0">Todos</option>
-          </select>
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPanSeqPrev" disabled>‹</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="aiPanSeqNext" disabled>›</button>
-          <span class="small text-muted" id="aiPanSeqInfo">—</span>
-        </div>
-        <div class="ai-pan-table-wrap">
-          <table class="table table-sm table-bordered ai-table mb-0" id="aiTabelaPanSeq">
-            <thead>
-              <tr>
-                <th class="ai-sort" data-sort="concurso" data-table="panSeq" title="Clique para ordenar">Concurso <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort" data-sort="data" data-table="panSeq" title="Clique para ordenar">Data <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort col-pan-npad" data-sort="n_padrao" data-table="panSeq" title="Mesmo Nº da aba 4 · Padrões II, na ordem por frequência">Nº <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort col-pan-pad" data-sort="padrao" data-table="panSeq" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort col-pan-jogos" data-sort="jogos_possiveis" data-table="panSeq" title="Jogos possíveis deste padrão, a coluna Jogos da aba 4">Jogos <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort col-pan-seqn ai-col-medida" data-sort="sequencia_n" data-table="panSeq" title="Nº da aposta na aba 5 ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort" data-sort="dezenas_fmt" data-table="panSeq" title="Clique para ordenar">Dezenas <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort col-pan-soma" data-sort="soma" data-table="panSeq" title="Clique para ordenar">Soma <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort col-pan-status" data-sort="status_media" data-table="panSeq" title="Clique para ordenar">Status <span class="ai-sort-ind">⇅</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td colspan="9" class="text-muted">Carregando sequências sorteadas…</td></tr>
-            </tbody>
-          </table>
         </div>
       </div>
       {% if modality_key == 'diadesorte' %}
@@ -2083,6 +2241,13 @@
 
     <!-- ABA 8 — Checagem de Sequências -->
     <div class="tab-pane fade" id="tab-checagem-seq">
+      {% if modality_key != 'supersete' %}
+      <div class="d-flex justify-content-end mb-2">
+        <a class="btn btn-sm btn-outline-secondary cmp-voltar" href="/geradores-elite/comparador-apostas/#checagem">
+          <i class="fas fa-arrow-left"></i> Voltar ao Comparador
+        </a>
+      </div>
+      {% endif %}
       <p class="small text-muted mb-2">
         Cole ou arraste as apostas (ex.: <code>02 05 07 08 21 22 24 Dez</code>).
         O sistema identifica o <strong>padrão</strong>, confere as <strong>primeiras N dezenas</strong>
@@ -2124,6 +2289,11 @@
         <span class="small text-muted" id="aiCheqInfo">Universo: dentro da média · ainda não saíram</span>
       </div>
       <div id="aiCheqResumo" class="ai-cheq-resumo mb-2" hidden></div>
+      <div class="small fw-bold text-muted mb-1" id="aiCheqUltimoLbl">Último resultado</div>
+      <div id="aiCheqRankMedia">
+        <div class="ai-cheq-rank-titulo">Ranking da soma — sorteios até hoje</div>
+        <div id="aiCheqRankMediaBody" class="small text-muted">Carregando ranking…</div>
+      </div>
       <div class="table-responsive">
         <table class="table table-sm table-bordered ai-table" id="aiTabelaCheq">
           <thead>
@@ -2141,7 +2311,10 @@
               <th>Abrir</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="aiCheqUltimo">
+            <tr><td colspan="11" class="text-muted">Carregando último resultado…</td></tr>
+          </tbody>
+          <tbody id="aiCheqBody">
             <tr><td colspan="11" class="text-muted">Cole as apostas e clique em Checar.</td></tr>
           </tbody>
         </table>
@@ -2166,7 +2339,7 @@
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
 {% if modality_key == 'supersete' %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20261007v1"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20261025v1"></script>
 {% endif %}
 <script>
 (function () {
@@ -2495,6 +2668,7 @@
     } catch (err) {
       if (rangeLbl) rangeLbl.textContent = 'Erro ao montar a tabela: ' + (err && err.message ? err.message : err);
     }
+    try { renderCheqUltimo(); } catch (_) { /* a linha oficial não impede o restante */ }
   }
 
   function renderCatalogo(data) {
@@ -2832,8 +3006,9 @@
     });
     const nmap = new Map();
     if (CAT_PAD_II && CAT_PAD_II.length) {
+      atribuirNumeroEstavelPadII(CAT_PAD_II);
       CAT_PAD_II.forEach((p, i) => {
-        nmap.set(p.padrao, i + 1);
+        nmap.set(p.padrao, p.n_padrao != null ? p.n_padrao : i + 1);
         if (!jogos.has(p.padrao)) jogos.set(p.padrao, Number(p.jogos_possiveis) || 0);
       });
     } else {
@@ -3077,7 +3252,7 @@
     const ini = (PAN_SEQ.page - 1) * size;
     const pageRows = rows.slice(ini, ini + size);
     if (!rows.length) {
-      tb.innerHTML = `<tr><td colspan="9" class="text-muted">${totalHist ? 'Nenhum concurso neste filtro.' : 'Sem concursos.'}</td></tr>`;
+      tb.innerHTML = `<tr><td colspan="10" class="text-muted">${totalHist ? 'Nenhum concurso neste filtro.' : 'Sem concursos.'}</td></tr>`;
     } else {
       tb.innerHTML = pageRows.map((r) => {
         const seq = r.sequencia_n
@@ -3094,7 +3269,8 @@
           <td class="td-pan-pad td-padrao"><span class="ai-col-alinha"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(r.padrao)}" title="${esc(r.descricao || '')}">${esc(r.padrao)}</a></span></td>
           <td class="td-pan-jogos"><span class="ai-col-alinha">${jogos}</span></td>
           <td class="td-pan-seqn ai-col-medida"><span class="ai-col-alinha">${seq}</span></td>
-          <td class="font-monospace">${esc(r.dezenas_fmt || '—')}</td>
+          <td class="td-pan-dez"><input class="ai-pan-dez" data-concurso="${esc(r.concurso)}" value="${esc(r.dezenas_fmt || '')}" inputmode="numeric" autocomplete="off" title="Edite as dezenas de 01 a 31. Padrão, soma, status e diagonais acompanham."></td>
+          <td class="td-diag"><span class="ai-col-alinha">${(typeof htmlDiagTexto === 'function') ? htmlDiagTexto(diagsDaAposta(r)) : '—'}</span></td>
           <td class="td-pan-soma"><span class="ai-col-alinha">${esc(r.soma != null ? r.soma : '—')}</span></td>
           <td class="td-pan-status"><span class="ai-col-alinha">${statusPill(r.status_media, r.status_media_label)}</span></td>
         </tr>`;
@@ -3108,7 +3284,66 @@
     if (prev) prev.disabled = PAN_SEQ.page <= 1;
     if (next) next.disabled = PAN_SEQ.page >= pages;
     atualizarIndicadoresSort();
+    bindPanSeqEdit();
     renderPanResumo();
+  }
+
+  function bindPanSeqEdit() {
+    const tb = document.getElementById('aiTabelaPanSeq');
+    if (!tb || tb.dataset.editBound) return;
+    tb.dataset.editBound = '1';
+    tb.addEventListener('change', (ev) => {
+      const inp = ev.target.closest('.ai-pan-dez');
+      if (!inp) return;
+      aplicarEdicaoPanSeq(inp.dataset.concurso, inp.value);
+    });
+  }
+
+
+  function aplicarEdicaoPanSeq(concurso, texto) {
+    const row = (PAN_SEQ.all || []).find((r) => String(r.concurso) === String(concurso));
+    if (!row) return;
+    const lim = (typeof limitesDezenaBusca === 'function') ? limitesDezenaBusca() : { min: 1, max: 31 };
+    const vistos = new Set();
+    const nums = [];
+    String(texto || '').split(/[^0-9]+/).forEach((p) => {
+      if (!p) return;
+      const n = Number(p);
+      if (!Number.isFinite(n) || n < lim.min || n > lim.max || vistos.has(n)) return;
+      vistos.add(n);
+      nums.push(n);
+    });
+    nums.sort((a, b) => a - b);
+    if (!nums.length) {
+      renderPanSeq();
+      return;
+    }
+    const padraoAntes = row.padrao;
+    row.dezenas = nums;
+    row.dezenas_fmt = nums.map((n) => String(n).padStart(2, '0')).join(' ');
+    row.soma = nums.reduce((s, n) => s + n, 0);
+    row.padrao = nums.map((n) => Math.floor(n / 10)).join(' ');
+    delete row._diags;
+    const mesmoPadrao = row.padrao === padraoAntes
+      && row.media != null && row.tol_dentro != null && row.tol_proxima != null;
+    let faixa = mesmoPadrao
+      ? { media: row.media, tol_dentro: row.tol_dentro, tol_proxima: row.tol_proxima }
+      : null;
+    if (!faixa) {
+      const somas = (PAN_SEQ.all || [])
+        .filter((r) => r !== row && r.padrao === row.padrao && r.soma != null)
+        .map((r) => Number(r.soma));
+      faixa = faixaSomaLocal(somas);
+      if (faixa) {
+        row.media = faixa.media;
+        row.tol_dentro = faixa.tol_dentro;
+        row.tol_proxima = faixa.tol_proxima;
+      }
+    }
+    const cls = classificarSomaLocal(row.soma, faixa);
+    row.status_media = cls.status_media;
+    row.status_media_label = cls.status_media_label;
+    renderPanSeq();
   }
 
   function pyRound(x) {
@@ -4081,6 +4316,12 @@
     return runs;
   }
 
+  if (typeof window.__diagsDaAposta !== 'function') {
+    window.__diagsDaAposta = function (dezenas) {
+      return diagsDaAposta({ dezenas: dezenas || [] });
+    };
+  }
+
   function padsParaGerarS13() {
     const cards = cruzamentoListaAtual();
     const fromCards = cards.map((p) => p.padrao).filter(Boolean);
@@ -4140,6 +4381,19 @@
     });
   }
 
+  function atribuirNumeroEstavelPadII(lista) {
+    if (!lista || !lista.length) return;
+    if (lista.every((p) => p && p.n_padrao != null && p.n_padrao !== '')) return;
+    const ordem = [...lista].sort((a, b) => {
+      const df = (Number(b.frequencia) || 0) - (Number(a.frequencia) || 0);
+      if (df) return df;
+      const dj = (Number(b.jogos_possiveis) || 0) - (Number(a.jogos_possiveis) || 0);
+      if (dj) return dj;
+      return String(a.padrao || '').localeCompare(String(b.padrao || ''), 'pt-BR');
+    });
+    ordem.forEach((p, i) => { p.n_padrao = i + 1; });
+  }
+
   function filtrarPadII() {
     const st = document.getElementById('aiFiltroStatusPadII')?.value || '';
     const soDiag = !!document.getElementById('aiPadIISoDiag')?.checked;
@@ -4155,24 +4409,29 @@
     const tbody = document.querySelector('#aiTabelaPadroesII tbody');
     const info = document.getElementById('aiPadIIInfo');
     if (!tbody) return;
+    atribuirNumeroEstavelPadII(CAT_PAD_II);
     let rows = filtrarPadII();
     const sk = SORT.p2 || { key: 'frequencia', dir: 'desc' };
     const dir = sk.dir === 'asc' ? 1 : -1;
     rows = [...rows].sort((a, b) => {
       const ka = a[sk.key], kb = b[sk.key];
+      let cmp;
       if (sk.key === 'padrao' || sk.key === 'descricao' || sk.key === 'status' || sk.key === 'diag_top') {
-        return dir * String(ka || '').localeCompare(String(kb || ''), 'pt-BR');
+        cmp = String(ka || '').localeCompare(String(kb || ''), 'pt-BR');
+      } else {
+        const na = ka == null || ka === '' ? -1 : +ka;
+        const nb = kb == null || kb === '' ? -1 : +kb;
+        cmp = na - nb;
       }
-      const na = ka == null ? -1 : +ka;
-      const nb = kb == null ? -1 : +kb;
-      return dir * (na - nb);
+      if (cmp) return dir * cmp;
+      return (Number(a.n_padrao) || 0) - (Number(b.n_padrao) || 0);
     });
     document.querySelectorAll('#aiTabelaPadroesII th.ai-sort').forEach(th => {
       th.classList.toggle('ai-sort-asc', th.dataset.sort === sk.key && sk.dir === 'asc');
       th.classList.toggle('ai-sort-desc', th.dataset.sort === sk.key && sk.dir === 'desc');
     });
     const topSet = new Set((window.__AI_TOP_PAD || []).map(t => t.padrao));
-    tbody.innerHTML = rows.map((p, i) => {
+    tbody.innerHTML = rows.map((p) => {
       const checked = PAD_II_SEL.has(p.padrao) ? 'checked' : '';
       const cls = [
         p.eh_padrao_ultimo_concurso ? 'tr-padrao-ultimo' : '',
@@ -4196,7 +4455,7 @@
         : '<span class="text-muted">—</span>';
       return `<tr class="${cls}" data-padrao="${esc(p.padrao)}"${p.eh_padrao_ultimo_concurso ? ' title="Padrão do último resultado (vencedor)"' : ''}>
         <td><input type="checkbox" class="form-check-input ai-pad-ii-chk" data-padrao="${esc(p.padrao)}" ${checked}></td>
-        <td class="text-center text-muted">${i + 1}</td>
+        <td class="text-center td-npad">${p.n_padrao != null ? esc(p.n_padrao) : '—'}</td>
         <td class="td-padrao"><code>${esc(p.padrao)}</code></td>
         <td class="td-dist"><span class="ai-col-alinha">${esc(p.descricao)}</span></td>
         <td class="td-jogos"><span class="ai-col-alinha">${jogosLink}</span></td>
@@ -5123,6 +5382,8 @@
   }
 
   const CHEQ = { rows: [], sel: new Set() };
+  let CHEQ_ULTIMO = null;
+  let CHEQ_ULTIMO_GEN = 0;
   const MESES_ABREV_EXP = {
     1: 'Jan', 2: 'Fev', 3: 'Mar', 4: 'Abr', 5: 'Mai', 6: 'Jun',
     7: 'Jul', 8: 'Ago', 9: 'Set', 10: 'Out', 11: 'Nov', 12: 'Dez',
@@ -5152,6 +5413,194 @@
     if (sel && EXTRA_MES && window.MesSorteSelect) {
       MesSorteSelect.fillFromApi(sel, '/geradores-elite/api/escolha-tubular', { defaultPrefer: 'atrasado' }).catch(() => {});
     }
+    carregarCheqUltimo();
+    carregarRankMediaCheq();
+  }
+
+  let CHEQ_RANK_OK = false;
+  async function carregarRankMediaCheq() {
+    const el = document.getElementById('aiCheqRankMediaBody');
+    if (!el || CHEQ_RANK_OK) return;
+    try {
+      const r = await fetch('/analise/api/somas-digitos/somas?janela=0&base=geral');
+      const j = await r.json();
+      if (!j || j.sucesso === false) throw new Error((j && j.erro) || 'Falha no ranking');
+      const rank = (j.ranking_media || []).slice(0, 3);
+      if (!rank.length) {
+        el.textContent = 'Sem ranking.';
+        return;
+      }
+      const lugares = ['1º lugar', '2º lugar', '3º lugar'];
+      const cards = rank.map((item, i) => {
+        const pct = Number(item.pct);
+        const pctTxt = Number.isFinite(pct) ? pct.toLocaleString('pt-BR') + '%' : '—';
+        return `<div class="ai-cheq-rank-card">
+          <div class="lbl">${lugares[i] || (i + 1) + 'º lugar'}</div>
+          <div class="val">${statusPill(item.status, item.label)}</div>
+          <div class="sub">${item.ocorrencias} sorteios · ${pctTxt}</div>
+        </div>`;
+      }).join('');
+      el.innerHTML = `<div class="ai-cheq-rank-row">${cards}</div>
+        <a class="ai-cheq-rank-link" href="/analise/somas-digitos/">Ver cada concurso na Análise de Somas</a>`;
+      CHEQ_RANK_OK = true;
+    } catch (e) {
+      el.textContent = 'Não foi possível carregar o ranking.';
+    }
+  }
+
+  function ultimoOficialCheq() {
+    const linhas = CACHE || [];
+    if (!linhas.length) return null;
+    return linhas.reduce((a, b) => (Number(a.concurso) >= Number(b.concurso) ? a : b));
+  }
+
+  function textoOficialCheq(l) {
+    const nums = dezenasOrdenadasDe(l).map((n) => fmtDezena(n)).join(' ');
+    const mes = String((l && (l.mes_abrev || l.mes_nome)) || '').trim();
+    return mes ? `${nums} ${mes.slice(0, 3)}` : nums;
+  }
+
+  async function carregarCheqUltimo() {
+    const tbody = document.getElementById('aiCheqUltimo');
+    if (!tbody) return;
+    let l = ultimoOficialCheq();
+    if (!l) {
+      try {
+        const r = await fetch(`${API}/resultados?janela=1&base=geral`);
+        const j = await r.json();
+        l = ((j && j.linhas) || [])[0] || null;
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="11" class="text-danger small">Não foi possível carregar o último resultado.</td></tr>`;
+        return;
+      }
+    }
+    CHEQ_ULTIMO = l;
+    pintarCheqUltimo(l, null);
+    enriquecerCheqUltimo();
+  }
+
+  async function enriquecerCheqUltimo(prefixos) {
+    const l = CHEQ_ULTIMO;
+    if (!l) return;
+    const gen = (CHEQ_ULTIMO_GEN += 1);
+    const pref = document.getElementById('aiCheqPrefixo');
+    const varios = Array.isArray(prefixos) && prefixos.length > 1;
+    const texto = textoOficialCheq(l);
+    try {
+      let d;
+      if (varios) {
+        const nums = prefixos.map((n) => +n);
+        d = await postChecagem({ texto, filtro: 'dentro_novos', prefixos: nums });
+        const pronto = d && Array.isArray(d.prefixos) && d.prefixos.length > 1
+          && ((d.resultados || [])[0] || {}).por_prefixo;
+        if (!pronto) {
+          const partes = [];
+          for (let i = 0; i < nums.length; i += 1) {
+            partes.push(await postChecagem({ texto, filtro: 'dentro_novos', prefixo: nums[i] }));
+          }
+          d = juntarPrefixos(partes, nums);
+        }
+      } else {
+        d = await postChecagem({
+          texto,
+          filtro: 'dentro_novos',
+          prefixo: +(pref && pref.value) || 5,
+        });
+      }
+      if (gen !== CHEQ_ULTIMO_GEN) return;
+      const row = (d.resultados || [])[0];
+      if (row && row.ok) pintarCheqUltimo(l, row);
+    } catch (_) { /* a linha local permanece até a checagem responder */ }
+  }
+
+  function htmlCheqOficialDezenas(l) {
+    const nums = dezenasOrdenadasDe(l);
+    const casas = `<div class="ai-pan-casas">${nums.map((v) => {
+      const val = fmtDezena(v);
+      return `<span class="ai-pan-casa ai-cheq-ro" title="Resultado oficial">
+        <span class="ai-cheq-num">${esc(val)}</span>
+        <span class="ai-pan-spin" aria-hidden="true"></span>
+      </span>`;
+    }).join('')}</div>`;
+    return casas + (EXTRA_MES ? ` ${mesBadge(l)}` : '');
+  }
+
+  function renderCheqUltimo() {
+    pintarCheqUltimo(ultimoOficialCheq(), null);
+  }
+
+  function colunasCheqCalculadas(r, diagFallback) {
+    const ult = (r.ultimas || []).map((u) => {
+      const cls = u.existe ? 'ai-cheq-ok' : 'ai-cheq-no';
+      return `<span class="${cls}">${esc(u.dezena_fmt)} ${u.existe ? 'tem' : 'não'}</span>`;
+    }).join(' · ') || '—';
+    const varios = (r.por_prefixo || []).length > 1;
+    const existe = varios
+      ? htmlPorPrefixo(r, (p) => (p.existe_exata
+        ? '<span class="ai-cheq-ok">Sim</span>'
+        : '<span class="ai-cheq-no">Não</span>'))
+      : (r.existe_exata
+        ? '<span class="ai-cheq-ok">Sim</span>'
+        : '<span class="ai-cheq-no">Não</span>');
+    const sugHtml = varios
+      ? htmlPorPrefixo(r, (p) => htmlUmaSugestao(p))
+      : htmlUmaSugestao(r);
+    const abrir = `<a href="#" data-act="ir-checagem-jogo" data-padrao="${esc(r.padrao)}" data-busca="${esc(r.prefixo_fmt || r.dezenas_fmt)}">Aba 5</a>`;
+    const somaHtml = (r.soma == null)
+      ? '—'
+      : `<span class="ai-soma-par"><span class="ai-col-alinha">${esc(r.soma)}</span>${statusPill(r.status_media, r.status_media_label)}</span>`;
+    const runs = (r.diagonais && r.diagonais.length) ? r.diagonais : (diagFallback || []);
+    const nDiag = Number(r.n_diagonais) || runs.length;
+    const diagHtml = nDiag
+      ? `<span class="ai-col-alinha" title="${nDiag} diagonal(is) neste resultado"><strong>${nDiag}</strong> · ${htmlDiagTexto(runs)}</span>`
+      : '<span class="text-muted">0 —</span>';
+    const prefixo = varios
+      ? htmlPorPrefixo(r, (p) => `${esc(p.prefixo_fmt)} <span class="text-muted">(${p.qtd_prefixo || 0})</span>`)
+      : `${esc(r.prefixo_fmt)} <span class="text-muted">(${r.qtd_prefixo || 0})</span>`;
+    const pad = String(r.padrao || '').trim();
+    const padHtml = pad
+      ? `<a href="#" data-act="ir-padrao-ii" data-padrao="${esc(pad)}">${esc(pad)}</a>`
+      : '—';
+    return { somaHtml, diagHtml, padHtml, prefixo, existe, ult, sugHtml, abrir };
+  }
+
+  function pintarCheqUltimo(l, calc) {
+    const tbody = document.getElementById('aiCheqUltimo');
+    const lbl = document.getElementById('aiCheqUltimoLbl');
+    if (!tbody) return;
+    if (!l) {
+      if (lbl) lbl.textContent = 'Último resultado';
+      tbody.innerHTML = '<tr><td colspan="11" class="text-muted">Carregando último resultado…</td></tr>';
+      return;
+    }
+    const runs = diagsDaAposta({ dezenas: dezenasOrdenadasDe(l) });
+    const base = calc && calc.ok ? colunasCheqCalculadas(calc, runs) : null;
+    const nDiag = runs.length;
+    const diagHtml = base ? base.diagHtml : (nDiag
+      ? `<span class="ai-col-alinha" title="${nDiag} diagonal(is) neste resultado"><strong>${nDiag}</strong> · ${htmlDiagTexto(runs)}</span>`
+      : '<span class="text-muted">0 —</span>');
+    const somaHtml = base ? base.somaHtml : ((l.soma == null)
+      ? '—'
+      : `<span class="ai-soma-par"><span class="ai-col-alinha">${esc(l.soma)}</span><span class="text-muted">…</span></span>`);
+    const pad = String((calc && calc.padrao) || l.padrao_inicial || '').trim();
+    const padHtml = base ? base.padHtml : (pad
+      ? `<a href="#" data-act="ir-padrao-ii" data-padrao="${esc(pad)}">${esc(pad)}</a>`
+      : '—');
+    const pendente = '<span class="text-muted">…</span>';
+    if (lbl) lbl.textContent = `Último resultado — concurso ${l.concurso}`;
+    tbody.innerHTML = `<tr class="ai-cheq-oficial" title="Resultado oficial do concurso ${esc(l.concurso)}">
+      <td></td>
+      <td class="ai-cheq-ref"><strong>${esc(l.concurso)}</strong><div class="small">${esc(l.data || '')}</div></td>
+      <td class="font-monospace">${htmlCheqOficialDezenas(l)}</td>
+      <td class="td-soma">${somaHtml}</td>
+      <td class="td-diag td-left">${diagHtml}</td>
+      <td>${padHtml}</td>
+      <td class="font-monospace">${base ? base.prefixo : pendente}</td>
+      <td>${base ? base.existe : pendente}</td>
+      <td class="ai-cheq-ult">${base ? base.ult : pendente}</td>
+      <td class="font-monospace td-left">${base ? base.sugHtml : pendente}</td>
+      <td>${base ? base.abrir : ''}</td>
+    </tr>`;
   }
 
   function chaveCheq(r) {
@@ -5212,7 +5661,7 @@
   }
 
   function pintarTabelaCheq() {
-    const tbody = document.querySelector('#aiTabelaCheq tbody');
+    const tbody = document.getElementById('aiCheqBody');
     const btnExp = document.getElementById('aiCheqExport');
     const chkTodos = document.getElementById('aiCheqChkTodos');
     if (!tbody) return;
@@ -5248,7 +5697,7 @@
       const abrir = `<a href="#" data-act="ir-checagem-jogo" data-padrao="${esc(r.padrao)}" data-busca="${esc(r.prefixo_fmt || r.dezenas_fmt)}">Aba 5</a>`;
       const somaHtml = (r.soma == null)
         ? '—'
-        : `<span class="ai-col-alinha">${esc(r.soma)}</span> ${statusPill(r.status_media, r.status_media_label)}`;
+        : `<span class="ai-soma-par"><span class="ai-col-alinha">${esc(r.soma)}</span>${statusPill(r.status_media, r.status_media_label)}</span>`;
       const nDiag = Number(r.n_diagonais) || ((r.diagonais || []).length);
       const diagHtml = nDiag
         ? `<span class="ai-col-alinha" title="${nDiag} diagonal(is) nesta sequência"><strong>${nDiag}</strong> · ${htmlDiagTexto(r.diagonais)}</span>`
@@ -5256,7 +5705,7 @@
       return `<tr>
         <td><input type="checkbox" class="form-check-input ai-cheq-chk" data-key="${esc(k)}" title="${varios ? 'Marcar as sugestões desta linha' : 'Marcar esta linha'}" ${linhaCheqMarcada(r) ? 'checked' : ''}></td>
         <td>${esc(r.linha)}</td>
-        <td class="font-monospace">${esc(r.dezenas_fmt)}${r.mes_colado ? ` <span class="text-muted">${esc(r.mes_colado)}</span>` : ''}</td>
+        <td class="font-monospace">${htmlCheqAposta(r)}</td>
         <td class="td-soma">${somaHtml}</td>
         <td class="td-diag td-left">${diagHtml}</td>
         <td>${padLink}</td>
@@ -5358,7 +5807,7 @@
   async function checarSequencias(prefixos) {
     const ta = document.getElementById('aiCheqTexto');
     const pref = document.getElementById('aiCheqPrefixo');
-    const tbody = document.querySelector('#aiTabelaCheq tbody');
+    const tbody = document.getElementById('aiCheqBody');
     const texto = String((ta && ta.value) || '').trim();
     if (!texto) {
       alert('Cole ou arraste as apostas.');
@@ -5393,6 +5842,7 @@
         });
       }
       renderChecagem(d);
+      enriquecerCheqUltimo(varios ? nums : null);
     } catch (e) {
       if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="text-danger">${esc(e.message || e)}</td></tr>`;
     }
@@ -6077,6 +6527,7 @@
   });
   bindCheqDrop();
   document.getElementById('aiCheqBtn')?.addEventListener('click', checarSequencias);
+  document.getElementById('aiCheqPrefixo')?.addEventListener('change', () => enriquecerCheqUltimo());
   document.getElementById('aiCheqLimpar')?.addEventListener('click', () => {
     const ta = document.getElementById('aiCheqTexto');
     if (ta) ta.value = '';
@@ -6084,7 +6535,7 @@
     CHEQ.sel = new Set();
     const resumo = document.getElementById('aiCheqResumo');
     if (resumo) { resumo.hidden = true; resumo.innerHTML = ''; }
-    const tbody = document.querySelector('#aiTabelaCheq tbody');
+    const tbody = document.getElementById('aiCheqBody');
     if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="text-muted">Cole as apostas e clique em Checar.</td></tr>';
     const btnExp = document.getElementById('aiCheqExport');
     if (btnExp) btnExp.disabled = true;
@@ -6109,7 +6560,175 @@
     });
     syncBtnBaixar();
   });
+  function slotsCheq(row) {
+    const rootEl = document.getElementById('ai-root');
+    const n = Number(rootEl && rootEl.dataset.sorteadas) || 7;
+    const src = (row && Array.isArray(row.dezenas) && row.dezenas.length)
+      ? row.dezenas.map(Number).filter((v) => Number.isFinite(v))
+      : String((row && row.dezenas_fmt) || '').split(/\s+/).map(Number).filter((v) => Number.isFinite(v));
+    const slots = src.slice(0, n);
+    while (slots.length < n) slots.push(null);
+    return slots;
+  }
+
+  function htmlCheqAposta(r) {
+    const slots = slotsCheq(r);
+    const casas = `<div class="ai-pan-casas">${slots.map((v, i) => {
+      const val = v == null ? '' : String(v).padStart(2, '0');
+      return `<span class="ai-pan-casa">
+        <input class="ai-cheq-num" data-linha="${esc(r.linha)}" data-i="${i}" value="${esc(val)}" inputmode="numeric" maxlength="2" autocomplete="off" aria-label="Dezena ${i + 1}" title="Dezena ${i + 1}. Soma, padrão e diagonais acompanham na hora.">
+        <span class="ai-pan-spin">
+          <button type="button" class="ai-cheq-step" data-linha="${esc(r.linha)}" data-i="${i}" data-delta="1" tabindex="-1" aria-label="Aumentar dezena ${i + 1}">▲</button>
+          <button type="button" class="ai-cheq-step" data-linha="${esc(r.linha)}" data-i="${i}" data-delta="-1" tabindex="-1" aria-label="Diminuir dezena ${i + 1}">▼</button>
+        </span>
+      </span>`;
+    }).join('')}</div>`;
+    return casas + (r.mes_colado ? ` <span class="text-muted">${esc(r.mes_colado)}</span>` : '');
+  }
+
+  function proximaDezenaCheq(slots, index, atual, delta, lim) {
+    let v = atual == null ? (delta > 0 ? lim.min - 1 : lim.max + 1) : Number(atual);
+    const span = lim.max - lim.min + 1;
+    for (let step = 0; step < span; step += 1) {
+      v += delta;
+      if (v > lim.max || v < lim.min) return null;
+      if (!slots.some((n, j) => j !== index && Number(n) === v)) return v;
+    }
+    return null;
+  }
+
+  function definirCasaCheq(linha, index, valor) {
+    const row = (CHEQ.rows || []).find((r) => String(r.linha) === String(linha));
+    if (!row) return;
+    const lim = (typeof limitesDezenaBusca === 'function') ? limitesDezenaBusca() : { min: 1, max: 31 };
+    const slots = slotsCheq(row);
+    const i = Number(index);
+    const texto = String(valor == null ? '' : valor).trim();
+    if (!texto) {
+      slots[i] = null;
+    } else {
+      let n = parseInt(texto, 10);
+      if (!Number.isFinite(n)) {
+        pintarTabelaCheq();
+        return;
+      }
+      n = Math.min(lim.max, Math.max(lim.min, n));
+      if (slots.some((v, j) => j !== i && Number(v) === n)) {
+        pintarTabelaCheq();
+        return;
+      }
+      slots[i] = n;
+    }
+    const nums = slots.filter((v) => v != null).sort((a, b) => a - b);
+    if (!nums.length) {
+      pintarTabelaCheq();
+      return;
+    }
+    aplicarEdicaoCheq(linha, nums.map((n) => String(n).padStart(2, '0')).join(' '));
+  }
+
+  const CHEQ_EDIT = {};
+  async function aplicarEdicaoCheq(linha, texto) {
+    const row = (CHEQ.rows || []).find((r) => String(r.linha) === String(linha));
+    if (!row) return;
+    const gen = (CHEQ_EDIT[linha] || 0) + 1;
+    CHEQ_EDIT[linha] = gen;
+    const lim = (typeof limitesDezenaBusca === 'function') ? limitesDezenaBusca() : { min: 1, max: 31 };
+    const root = document.getElementById('ai-root');
+    const oficial = Number(root && root.dataset.sorteadas) || 7;
+    const vistos = new Set();
+    const nums = [];
+    String(texto || '').split(/[^0-9]+/).forEach((p) => {
+      if (!p) return;
+      const n = Number(p);
+      if (!Number.isFinite(n) || n < lim.min || n > lim.max || vistos.has(n)) return;
+      vistos.add(n);
+      nums.push(n);
+    });
+    nums.sort((a, b) => a - b);
+    if (!nums.length) {
+      pintarTabelaCheq();
+      return;
+    }
+    const fmt = nums.map((n) => String(n).padStart(2, '0')).join(' ');
+    row.dezenas = nums;
+    row.dezenas_fmt = fmt;
+    row.soma = nums.reduce((s, n) => s + n, 0);
+    row.padrao = nums.map((n) => Math.floor(n / 10)).join(' ');
+    delete row._diags;
+    row.diagonais = diagsDaAposta(row);
+    row.n_diagonais = row.diagonais.length;
+    const ta = document.getElementById('aiCheqTexto');
+    if (ta) {
+      const linhas = String(ta.value || '').replace(/\r\n/g, '\n').split('\n');
+      const idx = Number(linha) - 1;
+      if (idx >= 0 && idx < linhas.length) {
+        linhas[idx] = fmt + (row.mes_colado ? ' ' + row.mes_colado : '');
+        ta.value = linhas.join('\n');
+      }
+    }
+    pintarTabelaCheq();
+    if (nums.length !== oficial) return;
+    try {
+      const pref = document.getElementById('aiCheqPrefixo');
+      const d = await postChecagem({
+        texto: fmt + (row.mes_colado ? ' ' + row.mes_colado : ''),
+        filtro: 'dentro_novos',
+        prefixo: +(pref && pref.value) || 5,
+      });
+      if (CHEQ_EDIT[linha] !== gen) return;
+      const novo = (d.resultados || [])[0];
+      if (novo && novo.ok) {
+        novo.linha = row.linha;
+        const i = CHEQ.rows.indexOf(row);
+        if (i >= 0) CHEQ.rows[i] = novo;
+      }
+    } catch (e) {
+      /* a linha local já mostra soma, padrão e diagonais */
+    }
+    if (CHEQ_EDIT[linha] !== gen) return;
+    pintarTabelaCheq();
+  }
+
+  document.getElementById('aiTabelaCheq')?.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.ai-cheq-step');
+    if (!btn) return;
+    ev.preventDefault();
+    const row = (CHEQ.rows || []).find((r) => String(r.linha) === String(btn.dataset.linha));
+    if (!row) return;
+    const lim = (typeof limitesDezenaBusca === 'function') ? limitesDezenaBusca() : { min: 1, max: 31 };
+    const slots = slotsCheq(row);
+    const i = Number(btn.dataset.i);
+    const next = proximaDezenaCheq(slots, i, slots[i], Number(btn.dataset.delta) || 0, lim);
+    if (next == null) return;
+    definirCasaCheq(btn.dataset.linha, i, next);
+  });
+  document.getElementById('aiTabelaCheq')?.addEventListener('keydown', (ev) => {
+    const inp = ev.target.closest('.ai-cheq-num');
+    if (!inp || (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown')) return;
+    ev.preventDefault();
+    const row = (CHEQ.rows || []).find((r) => String(r.linha) === String(inp.dataset.linha));
+    if (!row) return;
+    const lim = (typeof limitesDezenaBusca === 'function') ? limitesDezenaBusca() : { min: 1, max: 31 };
+    const slots = slotsCheq(row);
+    const i = Number(inp.dataset.i);
+    const next = proximaDezenaCheq(slots, i, slots[i], ev.key === 'ArrowUp' ? 1 : -1, lim);
+    if (next == null) return;
+    definirCasaCheq(inp.dataset.linha, i, next);
+  });
+  document.getElementById('aiTabelaCheq')?.addEventListener('input', (ev) => {
+    const inp = ev.target.closest('.ai-cheq-num');
+    if (!inp) return;
+    const digitos = String(inp.value || '').replace(/\D/g, '');
+    if (digitos.length < 2) return;
+    definirCasaCheq(inp.dataset.linha, inp.dataset.i, digitos.slice(0, 2));
+  });
   document.getElementById('aiTabelaCheq')?.addEventListener('change', (ev) => {
+    const dez = ev.target.closest('.ai-cheq-num');
+    if (dez) {
+      definirCasaCheq(dez.dataset.linha, dez.dataset.i, dez.value);
+      return;
+    }
     const sug = ev.target.closest('.ai-cheq-sug');
     if (sug) {
       const k = sug.dataset.key;

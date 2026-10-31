@@ -129,11 +129,23 @@ class CicloInteligenciaService:
     ) -> Dict[str, Any]:
         """inicio | andamento | finalizacao — estratégia pesada no início e no fim."""
         saidas = max(0, universo - n_pend)
+        limiar_inicio = universo - sorteadas - 2
+        motivos: List[str] = []
         # Início: 1º sorteio do ciclo (tipicamente 24 faltantes após 7 sorteadas)
-        if concursos <= 1 or (saidas <= sorteadas and n_pend >= universo - sorteadas - 2):
+        if concursos <= 1 or (saidas <= sorteadas and n_pend >= limiar_inicio):
             fase = "inicio"
             label = "Início do ciclo"
             estrategia_recomendada = True
+            if concursos <= 1:
+                motivos.append(
+                    f"{concursos} concurso no ciclo (regra: o 1º sorteio conta como início)"
+                )
+            if saidas <= sorteadas and n_pend >= limiar_inicio:
+                motivos.append(
+                    f"{saidas} saídas e {n_pend} faltantes "
+                    f"(ainda no volume do primeiro sorteio: até {sorteadas} saídas "
+                    f"e pelo menos {limiar_inicio} faltantes)"
+                )
         elif (
             n_pend <= 8
             or pressao in ("alta", "extrema")
@@ -142,16 +154,36 @@ class CicloInteligenciaService:
             fase = "finalizacao"
             label = "Finalização do ciclo"
             estrategia_recomendada = True
+            if n_pend <= 8:
+                motivos.append(f"{n_pend} faltantes (regra: até 8)")
+            if pressao in ("alta", "extrema"):
+                motivos.append(f"pressão {pressao}")
+            if classificacao in ("Avançado", "Crítico"):
+                motivos.append(f"classificação {classificacao}")
         else:
             fase = "andamento"
             label = "Andamento do ciclo"
             estrategia_recomendada = False
+            motivos.append(
+                f"{n_pend} faltantes (acima de 8), pressão {pressao} "
+                f"e classificação {classificacao}"
+            )
+
+        def _juntar(partes: List[str]) -> str:
+            partes = [p for p in partes if p]
+            if len(partes) <= 1:
+                return partes[0] if partes else ""
+            return ", ".join(partes[:-1]) + " e " + partes[-1]
+
         return {
             "fase": fase,
             "label": label,
             "estrategia_recomendada": estrategia_recomendada,
             "dezenas_saidas_ciclo": saidas,
             "dezenas_faltantes": n_pend,
+            "criterio": _juntar(motivos),
+            "desdobramento_k": 2,
+            "repeticao_k": 2,
             "hint": (
                 "Momento ideal para desdobramento estratégico (2 em 2)."
                 if estrategia_recomendada
@@ -410,6 +442,30 @@ class CicloInteligenciaService:
         return [s for s in todos if s.get("pendente")]
 
     @staticmethod
+    def _diagonais_historico(modality_key: str = "diadesorte") -> Dict[str, Any]:
+        """Contagem de diagonais por concurso (cache pelo último concurso carregado)."""
+        from analise_inteligentes_diadesorte.diagonais_volante import resumo_contagem_diagonais
+
+        cache = getattr(CicloInteligenciaService, "_diag_cache", None)
+        if cache is None:
+            cache = {}
+            CicloInteligenciaService._diag_cache = cache
+        sorteios = carregar_sorteios_asc(modality_key)
+        ultimo = int(sorteios[-1]["concurso"]) if sorteios else 0
+        chave = (modality_key, len(sorteios), ultimo)
+        if chave in cache:
+            return cache[chave]
+        spec = get_ciclo_spec(modality_key)
+        res = resumo_contagem_diagonais(
+            (s.get("dezenas") or [] for s in sorteios),
+            dmin=spec.dezena_min,
+            dmax=spec.dezena_max,
+        )
+        cache.clear()
+        cache[chave] = res
+        return res
+
+    @staticmethod
     def _gerar_leitura(
         estado, n_pend, pct, pressao, media_entrada, tipo_fech, dist_media, media_hist
     ) -> str:
@@ -578,6 +634,7 @@ class CicloInteligenciaService:
             "correlacao_mes": None,
             "leitura_automatica": leitura,
             "estrategia": estrategia,
+            "diagonais": CicloInteligenciaService._diagonais_historico(modality_key),
             "ultimo_sorteio": ultimo,
             "dezenas_pendentes": list(pendentes),
             "dezenas_saidas": list(ciclo.get("dezenas_saidas") or []),
@@ -1285,6 +1342,7 @@ class CicloInteligenciaService:
             "ultimo_sorteio": analise.get("ultimo_sorteio") or [],
             "scores_faltantes": analise.get("scores_faltantes") or [],
             "estrategia": analise.get("estrategia"),
+            "diagonais": analise.get("diagonais") or {},
             "leitura": analise.get("leitura_automatica"),
             "elite_href": "/geradores-elite/ciclo-apostas/?modo=estrategia",
         }

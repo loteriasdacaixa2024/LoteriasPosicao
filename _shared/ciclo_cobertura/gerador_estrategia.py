@@ -6,7 +6,7 @@ import itertools
 import math
 import random
 from collections import Counter
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 from .inteligencia_service import CicloInteligenciaService
 from .loaders import carregar_sorteios_asc
@@ -265,6 +265,94 @@ def _completar_com_plano(
     return sorted(jogo)
 
 
+def _contador_diagonais(dmin: int, dmax: int):
+    from analise_inteligentes_diadesorte.diagonais_volante import (
+        diag_lines,
+        diag_runs_in_draw,
+        pos_map,
+        volante_rows,
+    )
+
+    rows = volante_rows(dmin, dmax)
+    lines = diag_lines(rows)
+    pmap = pos_map(rows)
+
+    def contar(dezenas: Sequence[int]) -> int:
+        nums = {int(x) for x in dezenas}
+        return len([
+            r for r in diag_runs_in_draw(nums, lines, pmap)
+            if int(r.get("len") or 0) >= 2
+        ])
+
+    return contar
+
+
+def _aproximar_diagonais(
+    jogo: Sequence[int],
+    locked: Sequence[int],
+    alvo: int,
+    pool: Sequence[int],
+    contar,
+    segmentos: Sequence[Sequence[int]],
+    pick_n: int,
+) -> List[int]:
+    """Aproxima a aposta da quantidade de diagonais pedida, sem tirar as faltantes."""
+    atual = sorted({int(x) for x in jogo})
+    fixos = {int(x) for x in locked}
+    reserva = [int(x) for x in pool if int(x) not in fixos][:16]
+    segs = [list(s) for s in segmentos if len(s) >= 2][:8]
+
+    def dist(q: int) -> int:
+        return abs(int(q) - int(alvo))
+
+    for _ in range(16):
+        qtd = contar(atual)
+        if qtd == alvo or len(atual) != pick_n:
+            break
+        melhor = None
+        if qtd < alvo:
+            for seg in segs:
+                faltam = [n for n in seg if n not in atual]
+                if not faltam:
+                    continue
+                livres = [d for d in atual if d not in fixos and d not in seg]
+                if len(livres) < len(faltam):
+                    continue
+                drop = set(livres[:len(faltam)])
+                trial = sorted((d for d in atual if d not in drop)) 
+                trial = sorted(set(trial + faltam))
+                if len(trial) != pick_n:
+                    continue
+                nq = contar(trial)
+                if dist(nq) < dist(qtd) and (melhor is None or dist(nq) < dist(melhor[0])):
+                    melhor = (nq, trial)
+                    if nq == alvo:
+                        break
+        else:
+            livres = [d for d in atual if d not in fixos]
+            for d in livres:
+                base = [x for x in atual if x != d]
+                for p in reserva:
+                    if p in atual:
+                        continue
+                    trial = sorted(set(base + [p]))
+                    if len(trial) != pick_n:
+                        continue
+                    nq = contar(trial)
+                    if dist(nq) < dist(qtd) and (melhor is None or dist(nq) < dist(melhor[0])):
+                        melhor = (nq, trial)
+                        if nq == alvo:
+                            break
+                if melhor and melhor[0] == alvo:
+                    break
+        if not melhor:
+            break
+        atual = melhor[1]
+        if melhor[0] == alvo:
+            break
+    return atual
+
+
 def _escolher_diversos(bucket: List[dict], n_alvo: int) -> List[dict]:
     """Prioriza score, mas rotaciona pendentes para todas aparecerem no conjunto."""
     if n_alvo <= 0 or not bucket:
@@ -319,6 +407,193 @@ def _como_influenciou(finais: List[dict], plano: Dict[str, Any]) -> str:
     )
 
 
+def _k_alvo_diadesorte(
+    n_pend: int,
+    pick_n: int,
+    n_saidas: int,
+    k_fixo: Optional[int],
+) -> Tuple[Optional[int], str]:
+    """
+    Dia de Sorte: no automático, 4 faltantes quando cabe; senão 3; senão 2.
+    k explícito vale para todas as apostas. Se o jogo não fecha, ajusta e avisa.
+    """
+    k_min = max(0, int(pick_n) - int(n_saidas))
+    k_max = min(int(n_pend), int(pick_n))
+    if k_min > k_max:
+        return None, "inviavel"
+    if k_fixo is not None:
+        pedido = int(k_fixo)
+        k = min(max(pedido, k_min), k_max, 6)
+        return k, ("fixo" if k == pedido else "ajustado")
+    for k in (4, 3, 2):
+        if k_min <= k <= k_max:
+            return k, "auto"
+    k = min(k_max, max(k_min, 1 if k_max >= 1 else 0))
+    return k, "excecao"
+
+
+def _combos_cobertura(
+    pendentes: List[int],
+    k: int,
+    scores_map: Dict[int, float],
+    quantidade: int,
+) -> List[Tuple[int, ...]]:
+    """Combinações de faltantes que cobrem o conjunto antes de repetir as mesmas."""
+    nums = sorted(
+        (int(x) for x in pendentes),
+        key=lambda d: (-float(scores_map.get(d, 0) or 0), d),
+    )
+    n = len(nums)
+    if k <= 0 or n < k or quantidade <= 0:
+        return []
+    vistos: Set[Tuple[int, ...]] = set()
+    out: List[Tuple[int, ...]] = []
+    for start in range(n):
+        if len(out) >= quantidade:
+            break
+        picked = [nums[(start + i) % n] for i in range(k)]
+        if len(set(picked)) < k:
+            continue
+        combo = tuple(sorted(picked))
+        if combo in vistos:
+            continue
+        vistos.add(combo)
+        out.append(combo)
+    if len(out) < quantidade:
+        for combo in _limitar_combinacoes(nums, k, scores_map, random.Random(0)):
+            if len(out) >= quantidade:
+                break
+            if combo not in vistos:
+                vistos.add(combo)
+                out.append(combo)
+    return out
+
+
+def _segmentos_top(diag_info: Dict[str, Any]) -> Tuple[List[List[int]], Optional[List[int]]]:
+    duplas: List[List[int]] = []
+    fonte = diag_info.get("top_duplas") or diag_info.get("ranking") or []
+    for s in fonte:
+        nums = [int(x) for x in (s.get("nums") or [])]
+        if len(nums) == 2 and nums not in duplas:
+            duplas.append(nums)
+        if len(duplas) >= 3:
+            break
+    trinca = None
+    top_t = diag_info.get("top_trinca") or None
+    if top_t and top_t.get("nums"):
+        nums_t = [int(x) for x in top_t["nums"]]
+        if len(nums_t) >= 3:
+            trinca = nums_t
+    return duplas, trinca
+
+
+def _plantar_segmento(
+    jogo: Sequence[int],
+    locked: Sequence[int],
+    segmento: Sequence[int],
+    pool: Sequence[int],
+    pick_n: int,
+) -> Optional[List[int]]:
+    """Inclui o trecho trocando só dezenas que não são faltantes do jogo."""
+    atual = {int(x) for x in jogo}
+    fixos = {int(x) for x in locked}
+    permitidos = set(int(x) for x in pool) | fixos | atual
+    seg = [int(x) for x in segmento]
+    if any(n not in permitidos for n in seg):
+        return None
+    if any(n not in fixos and n not in pool for n in seg):
+        return None
+    faltam = [n for n in seg if n not in atual]
+    if not faltam:
+        return sorted(atual)
+    livres = [d for d in sorted(atual) if d not in fixos and d not in seg]
+    if len(livres) < len(faltam):
+        return None
+    drop = set(livres[:len(faltam)])
+    trial = (atual - drop) | set(faltam)
+    if len(trial) != pick_n:
+        return None
+    return sorted(trial)
+
+
+def _fechar_com_segmento(
+    faltantes: Sequence[int],
+    segmento: Sequence[int],
+    pool: Sequence[int],
+    alvo: int,
+    pick_n: int,
+    contar,
+    ordem: int = 0,
+) -> Optional[List[int]]:
+    """Monta o jogo em volta do trecho e completa sem passar da quantidade de diagonais."""
+    fixos: List[int] = []
+    for n in list(faltantes) + list(segmento):
+        n = int(n)
+        if n not in fixos:
+            fixos.append(n)
+    if len(fixos) > pick_n:
+        return None
+    reserva = [int(p) for p in pool if int(p) not in fixos]
+    atual = list(fixos)
+    need = pick_n - len(atual)
+    if need == 1:
+        achados: List[List[int]] = []
+        for p in reserva:
+            trial = sorted(atual + [p])
+            if contar(trial) != int(alvo):
+                continue
+            if any(int(n) not in trial for n in segmento):
+                continue
+            achados.append(trial)
+        if not achados:
+            return None
+        return achados[int(ordem) % len(achados)]
+    for _ in range(need):
+        melhor_p = None
+        for p in reserva:
+            if p in atual:
+                continue
+            trial = atual + [p]
+            nq = contar(trial)
+            dist = abs(nq - int(alvo))
+            if melhor_p is None or (dist, p) < melhor_p[0]:
+                melhor_p = ((dist, p), p)
+        if not melhor_p:
+            return None
+        atual.append(melhor_p[1])
+    trial = _aproximar_diagonais(atual, fixos, alvo, reserva, contar, [list(segmento)], pick_n)
+    if len(trial) != pick_n or contar(trial) != int(alvo):
+        return None
+    if any(int(n) not in trial for n in segmento):
+        return None
+    return sorted(trial)
+
+
+def _aposta_aceitavel(
+    dezenas: Sequence[int],
+    pick_n: int,
+    *,
+    hist: Set[Tuple[int, ...]],
+    estrut_cnt: Counter,
+    limiar_estrut: int,
+    bloquear_exato: bool,
+    filtro_estrutura: bool,
+    dmin: int,
+    dmax: int,
+) -> bool:
+    nums = [int(x) for x in dezenas]
+    if len(nums) != pick_n or len(set(nums)) != pick_n:
+        return False
+    if any(n < dmin or n > dmax for n in nums):
+        return False
+    chave = tuple(sorted(nums))
+    if bloquear_exato and chave in hist:
+        return False
+    if filtro_estrutura and estrut_cnt.get(_padrao_estrutura(nums), 0) >= limiar_estrut:
+        return False
+    return True
+
+
 def gerar_apostas_estrategia(
     modality_key: str,
     *,
@@ -329,6 +604,7 @@ def gerar_apostas_estrategia(
     bloquear_exato: bool = True,
     filtro_estrutura: bool = True,
     usar_evolucao: bool = True,
+    n_diagonais: Optional[int] = None,
     seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
@@ -435,7 +711,20 @@ def gerar_apostas_estrategia(
     por_k_ok: Counter = Counter()
 
     # Garante exemplos do usuário: pelo menos 1 aposta com k=1 e k=2 se possível
-    if usar_evolucao and auto_desdob:
+    k_ds: Optional[int] = None
+    k_ds_motivo = ""
+    if modality_key == "diadesorte":
+        k_ds, k_ds_motivo = _k_alvo_diadesorte(
+            n_pend, pick_n, len(atrasadas), None if auto_desdob else k_fixo,
+        )
+        if k_ds is None:
+            return {
+                "ok": False,
+                "erro": "Não há dezenas suficientes para fechar o jogo com as faltantes do ciclo.",
+            }
+        cotas = {int(k_ds): qtd}
+        pesos_k = {int(k_ds): 100.0}
+    elif usar_evolucao and auto_desdob:
         if 1 <= n_pend and cotas.get(1, 0) == 0 and 1 in pesos_k:
             cotas[1] = 1
         if 2 <= n_pend and cotas.get(2, 0) == 0 and 2 in pesos_k:
@@ -448,14 +737,22 @@ def gerar_apostas_estrategia(
         if need < 0 or need > len(atrasadas):
             continue
 
-        combos = _limitar_combinacoes(pendentes, k, scores_map, rng)
+        if modality_key == "diadesorte":
+            combos = _combos_cobertura(pendentes, k, scores_map, max(n_alvo * 6, n_alvo))
+            vistos_combo = set(combos)
+            for extra in _limitar_combinacoes(pendentes, k, scores_map, rng):
+                if extra not in vistos_combo:
+                    combos.append(extra)
+                    vistos_combo.add(extra)
+        else:
+            combos = _limitar_combinacoes(pendentes, k, scores_map, rng)
         if not combos:
             continue
-        # Ordena combos: faltantes com mais atraso/score primeiro
-        combos = sorted(
-            combos,
-            key=lambda t: (-sum(scores_map.get(x, 0) for x in t), t),
-        )
+        if modality_key != "diadesorte":
+            combos = sorted(
+                combos,
+                key=lambda t: (-sum(scores_map.get(x, 0) for x in t), t),
+            )
 
         geradas_k = 0
         for idx_combo, falt_t in enumerate(combos):
@@ -465,15 +762,34 @@ def gerar_apostas_estrategia(
                 break
 
             falt = list(falt_t)
-            n_var = 3 if plano else 1
+            if modality_key == "diadesorte":
+                n_var = max(qtd * 3, 24)
+            else:
+                n_var = 3 if plano else 1
             for variante in range(n_var):
                 analisadas += 1
+                if modality_key == "diadesorte" and atrasadas:
+                    shift = variante % len(atrasadas)
+                    atrasadas_var = atrasadas[shift:] + atrasadas[:shift]
+                else:
+                    atrasadas_var = atrasadas
                 if plano:
                     jogo = _completar_com_plano(
-                        falt, plano, pick_n, idx_combo + variante + k, atrasadas,
+                        falt, plano, pick_n, idx_combo + variante + k, atrasadas_var,
                     )
                 else:
-                    jogo = _completar_com_atrasadas(falt, atrasadas, pick_n)
+                    jogo = _completar_com_atrasadas(falt, atrasadas_var, pick_n)
+                if modality_key == "diadesorte" and atrasadas_var:
+                    livres = [d for d in jogo if d not in set(falt)]
+                    if livres:
+                        drop = livres[variante % len(livres)]
+                        for p in atrasadas_var:
+                            if p in jogo or p in falt:
+                                continue
+                            trial = sorted((set(jogo) - {drop}) | {p})
+                            if len(trial) == pick_n:
+                                jogo = trial
+                                break
                 if len(jogo) != pick_n:
                     motivos["tamanho"] += 1
                     eliminadas += 1
@@ -540,6 +856,35 @@ def gerar_apostas_estrategia(
             if geradas_k >= max(n_alvo * 4, n_alvo + 2):
                 break
 
+    alvo_diag: Optional[int] = None
+    diag_info: Dict[str, Any] = {}
+    try:
+        diag_info = CicloInteligenciaService._diagonais_historico(modality_key) or {}
+    except Exception:
+        diag_info = {}
+    bruto = "" if n_diagonais is None else str(n_diagonais).strip().lower()
+    if bruto in ("", "auto", "costume", "none"):
+        alvo_diag = int(diag_info.get("quantidade_costumeira", diag_info.get("sugerida", 1)) or 0)
+    else:
+        try:
+            alvo_diag = int(n_diagonais)
+        except (TypeError, ValueError):
+            alvo_diag = int(diag_info.get("sugerida") or 0)
+    alvo_diag = max(0, min(4, int(alvo_diag)))
+    contar_diag = None
+    segmentos_diag: List[List[int]] = []
+    if candidatos:
+        contar_diag = _contador_diagonais(spec.dezena_min, spec.dezena_max)
+        segmentos_diag = [
+            [int(x) for x in (s.get("nums") or [])]
+            for s in (diag_info.get("ranking") or [])
+            if s.get("nums")
+        ]
+        for c in candidatos:
+            nd = contar_diag(c["dezenas"])
+            c["n_diagonais"] = nd
+            c["score"] = round(float(c["score"]) + (40.0 if nd == alvo_diag else -6.0 * abs(nd - alvo_diag)), 2)
+
     # Seleção final: respeita cotas por k (mistura realista)
     finais: List[dict] = []
     por_bucket: Dict[int, List[dict]] = {}
@@ -571,6 +916,78 @@ def gerar_apostas_estrategia(
                 break
             finais.append(c)
 
+    if alvo_diag is not None and contar_diag is not None:
+        from analise_inteligentes_diadesorte.diagonais_volante import diagonais_na_aposta
+
+        duplas_top, trinca_top = _segmentos_top(diag_info) if modality_key == "diadesorte" else ([], None)
+        if modality_key == "diadesorte":
+            pool_diag = list(atrasadas)
+            segmentos_diag = duplas_top or segmentos_diag
+        else:
+            pool_diag = list(dict.fromkeys(
+                list(atrasadas) + [n for seg in segmentos_diag for n in seg]
+            ))
+        for idx_item, item in enumerate(finais):
+            antes = list(item["dezenas"])
+            falt_set = set(int(x) for x in (item.get("faltantes") or []))
+            if modality_key == "diadesorte":
+                preferido = None
+                if alvo_diag >= 1 and duplas_top:
+                    preferido = duplas_top[idx_item % len(duplas_top)]
+                usar_trinca = bool(alvo_diag >= 1 and idx_item % 8 == 0 and trinca_top)
+                novo = None
+                usados_finais = {_chave(a["dezenas"]) for a in finais[:idx_item]}
+                for salto in range(8):
+                    cand = None
+                    if usar_trinca and trinca_top and all(n in falt_set or n in pool_diag for n in trinca_top):
+                        cand = _fechar_com_segmento(
+                            list(falt_set), trinca_top, pool_diag, alvo_diag, pick_n, contar_diag,
+                            ordem=idx_item + salto,
+                        )
+                    if cand is None and preferido and all(n in falt_set or n in pool_diag for n in preferido):
+                        cand = _fechar_com_segmento(
+                            list(falt_set), preferido, pool_diag, alvo_diag, pick_n, contar_diag,
+                            ordem=idx_item + salto,
+                        )
+                    if not cand or _chave(cand) in usados_finais:
+                        continue
+                    if _aposta_aceitavel(
+                        cand, pick_n,
+                        hist=hist, estrut_cnt=estrut_cnt, limiar_estrut=limiar_estrut,
+                        bloquear_exato=bloquear_exato, filtro_estrutura=filtro_estrutura,
+                        dmin=spec.dezena_min, dmax=spec.dezena_max,
+                    ) and falt_set.issubset(cand):
+                        novo = cand
+                        break
+                if novo is None:
+                    novo = _aproximar_diagonais(
+                        antes, list(falt_set), alvo_diag, pool_diag, contar_diag,
+                        segmentos_diag, pick_n,
+                    )
+                if not _aposta_aceitavel(
+                    novo, pick_n,
+                    hist=hist, estrut_cnt=estrut_cnt, limiar_estrut=limiar_estrut,
+                    bloquear_exato=bloquear_exato, filtro_estrutura=filtro_estrutura,
+                    dmin=spec.dezena_min, dmax=spec.dezena_max,
+                ) or not falt_set.issubset(novo):
+                    novo = antes
+            else:
+                novo = _aproximar_diagonais(
+                    antes, list(falt_set), alvo_diag, pool_diag, contar_diag,
+                    segmentos_diag, pick_n,
+                )
+            diags = diagonais_na_aposta(novo, dmin=spec.dezena_min, dmax=spec.dezena_max)
+            item["dezenas"] = novo
+            item["repetentes"] = sorted(d for d in novo if d not in falt_set)
+            item["ja_saidas"] = item["repetentes"]
+            item["atrasadas"] = item["repetentes"]
+            item["n_diagonais"] = len(diags)
+            item["diagonais"] = diags
+            item["soma"] = sum(novo)
+            item["pares"] = sum(1 for d in novo if d % 2 == 0)
+            item["diagonais_alvo"] = alvo_diag
+            item["diagonal_atingida"] = len(diags) == alvo_diag
+
     aviso_fase = None
     if fase.get("fase") == "andamento" and not fase.get("estrategia_recomendada"):
         aviso_fase = (
@@ -581,7 +998,9 @@ def gerar_apostas_estrategia(
         f"k={k}:{n}" for k, n in sorted(Counter(a["k_faltantes"] for a in finais).items())
     )
     aviso_evo = None
-    if usar_evolucao and (plano or evo):
+    if modality_key == "diadesorte":
+        aviso_evo = None
+    elif usar_evolucao and (plano or evo):
         if plano:
             aviso_evo = plano.get("leitura_curta")
         else:
@@ -600,7 +1019,16 @@ def gerar_apostas_estrategia(
         "faltantes": n_pend,
         "faltantes_lista": pendentes,
         "k_desdobramento": "auto" if auto_desdob else k_fixo,
+        "k_faltantes_regra": k_ds,
+        "k_faltantes_motivo": k_ds_motivo or None,
         "k_repeticao": k_repeticao_alvo,
+        "n_diagonais": alvo_diag,
+        "diagonais_leitura": diag_info.get("leitura"),
+        "diagonais_pct_tres_ou_mais": diag_info.get("pct_tres_ou_mais"),
+        "diagonais_acertadas": (
+            sum(1 for a in finais if int(a.get("n_diagonais") or 0) == alvo_diag)
+            if alvo_diag is not None else None
+        ),
         "completacao": "plano" if plano else "atrasadas",
         "usar_evolucao": usar_evolucao,
         "cotas_k": cotas,
@@ -642,6 +1070,19 @@ def gerar_apostas_estrategia(
     }
 
     avisos = [a for a in (aviso_fase, aviso_evo) if a]
+    if modality_key == "diadesorte" and k_ds is not None:
+        if k_ds_motivo == "auto":
+            avisos.append(f"Cada aposta leva {k_ds} dezena(s) que ainda faltam no ciclo.")
+        elif k_ds_motivo == "excecao":
+            avisos.append(
+                f"A faixa de 2 a 4 faltantes não coube: cada aposta ficou com {k_ds}."
+            )
+        elif k_ds_motivo == "ajustado":
+            avisos.append(
+                f"O desdobramento foi ajustado para {k_ds} faltante(s) para fechar o jogo."
+            )
+        elif k_ds_motivo == "fixo":
+            avisos.append(f"Cada aposta leva {k_ds} faltante(s), como marcado no Desdobramento.")
     if len(finais) < qtd:
         avisos.append(f"Geradas {len(finais)} de {qtd} após filtros (qualidade > volume).")
 

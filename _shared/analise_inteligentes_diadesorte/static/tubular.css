@@ -347,6 +347,41 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+/* Diagonais: faixas da esquerda para a direita, mesma largura em todas as linhas */
+#ai-tubular-root .tb-table td.tb-col-diag {
+  text-align: left !important;
+  padding-left: .45rem !important;
+  padding-right: .35rem !important;
+  white-space: nowrap;
+}
+#ai-tubular-root .tb-diag-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-variant-numeric: tabular-nums;
+  font-size: .72rem;
+  white-space: nowrap;
+}
+#ai-tubular-root .tb-diag-slot {
+  display: inline-block;
+  min-width: 6.6rem;
+  text-align: left;
+  white-space: nowrap;
+}
+#ai-tubular-root .tb-diag-sep {
+  display: inline-block;
+  width: .7rem;
+  text-align: center;
+  color: #6c757d;
+  font-weight: 600;
+}
+#ai-tubular-root .tb-diag-dir {
+  display: inline-block;
+  width: .85em;
+  text-align: center;
+  font-weight: 800;
+  margin-right: .15em;
+}
 #ai-tubular-root .tb-mono-digs {
   min-width: 19ch; /* "0 1 2 3 4 5 6 7 8 9" */
 }
@@ -581,6 +616,9 @@
 }
 #ai-tubular-root .tb-s10-board .table-responsive {
   max-width: 100%;
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 #ai-tubular-root .tb-s10-board #tbManual10 {
   width: max-content;

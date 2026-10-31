@@ -11,7 +11,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-DB = Path(r"D:\Loterias\LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only\instance\diadesorte.db")
+DB = Path(r"D:\Loterias\LP-LoteriasPosicao\AnalisePorPosicao--DiaDeSorte-Only\instance\diadesorte.db")
 MESES = [
     "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
     "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",

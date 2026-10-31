@@ -322,6 +322,13 @@
 
 <ul class="nav nav-tabs mb-3" id="tabsBaseGerador" role="tablist">
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn active" data-base="geral">Geral</button></li>
+    {% if tem_tres_fontes %}
+    <li class="nav-item">
+        <button type="button" class="nav-link base-tab-btn" data-base="tres_fontes" title="Ciclo, Estatísticas Básicas e Sequência sorteada">
+            <i class="fas fa-project-diagram me-1"></i>Ciclo + Sequência
+        </button>
+    </li>
+    {% endif %}
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="vencedores">Concursos com Vencedores</button></li>
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="acumulados">Concursos Acumulados</button></li>
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="panorama"><i class="fas fa-layer-group me-1"></i>Panorama Top-3</button></li>
@@ -331,6 +338,120 @@
     <li class="nav-item"><button type="button" class="nav-link base-tab-btn" data-base="faixas"><i class="fas fa-ban me-1"></i>Posição crescente</button></li>
     {% endif %}
 </ul>
+
+{% if tem_tres_fontes %}
+<style>
+#painelModoTresFontes .tf-ideia {
+  font-size: .84rem; line-height: 1.45; color: #3f3610;
+  background: #fcf9e8; border: 1px solid #ead98a; border-left: 3px solid var(--primary);
+  border-radius: 8px; padding: .6rem .75rem;
+}
+#painelModoTresFontes .tf-fonte { font-size: .75rem; }
+#painelModoTresFontes .tf-fonte a { font-weight: 600; }
+#painelModoTresFontes .tf-ball {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  font-size: .68rem; font-weight: 700; margin: 1px;
+}
+#painelModoTresFontes .tf-ball.pend { background: #d4b31a; color: #171303; }
+#painelModoTresFontes .tf-ball.saiu { background: #198754; color: #fff; }
+#painelModoTresFontes .tf-ball.fora { background: #e2e8f0; color: #64748b; }
+#painelModoTresFontes .tf-chip {
+  display: inline-flex; font-size: .68rem; font-weight: 600;
+  padding: .1rem .4rem; border-radius: 6px; background: #f8fafc; border: 1px solid #e5e7eb;
+}
+#painelModoTresFontes .tf-chip-diag { background: #eef6ff; border-color: #bfd7f2; color: #1e4b7b; }
+#painelModoTresFontes .tf-st-dentro { background: #e8f5e9; color: #1b5e20; border-color: #c8e6c9; }
+#painelModoTresFontes .tf-st-proxima { background: #fff8e1; color: #8a6d00; border-color: #ffe082; }
+#painelModoTresFontes .tf-st-fora { background: #f5f5f5; color: #666; border-color: #e0e0e0; }
+#painelModoTresFontes .tf-status-slot {
+  display: inline-block;
+  min-width: 9.4rem;
+  text-align: left;
+}
+#painelModoTresFontes .tf-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  padding: .1rem .45rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  font-family: inherit;
+}
+#painelModoTresFontes .tf-volante-row { line-height: 1; margin-bottom: 2px; }
+/* Números: bloco centralizado na célula, dígitos alinhados da direita para a esquerda */
+#painelModoTresFontes .tf-seq th,
+#painelModoTresFontes .tf-seq td {
+  text-align: center !important;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+#painelModoTresFontes .tf-seq th.tf-sort {
+  cursor: pointer;
+  user-select: none;
+}
+#painelModoTresFontes .tf-seq th.tf-sort:hover { filter: brightness(.95); }
+#painelModoTresFontes .tf-sort-ind {
+  font-size: .65rem;
+  margin-left: .2rem;
+  opacity: .55;
+}
+#painelModoTresFontes th.tf-sort-asc .tf-sort-ind,
+#painelModoTresFontes th.tf-sort-desc .tf-sort-ind { opacity: 1; }
+#painelModoTresFontes .tf-alinha {
+  display: inline-block;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+</style>
+<div id="painelModoTresFontes" class="d-none">
+    <div class="tf-ideia mb-3" id="tfIdeia">Carregando a ideia das três fontes…</div>
+    <div class="row g-3 mb-3">
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100 border-0" style="border-top:4px solid var(--accent)!important;">
+                <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
+                    <i class="fas fa-sync-alt me-1"></i>Progresso do ciclo
+                    <a class="tf-fonte float-end" href="/analise/ciclo-cobertura/">ver análise</a>
+                </div>
+                <div class="card-body py-3" id="tfCiclo"><p class="text-muted small mb-0">Carregando…</p></div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100 border-0" style="border-top:4px solid var(--accent)!important;">
+                <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
+                    <i class="fas fa-chart-pie me-1"></i>2a. Estatísticas Básicas
+                    <a class="tf-fonte float-end" href="/analise/escolha-visual/">ver análise</a>
+                </div>
+                <div class="card-body py-3" id="tfStats"><p class="text-muted small mb-0">Carregando…</p></div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card shadow-sm h-100 border-0" style="border-top:4px solid var(--accent)!important;">
+                <div class="card-header fw-bold py-2 small" style="background:var(--bg);color:var(--primary-xdark);">
+                    <i class="fas fa-slash me-1"></i>Diagonais
+                </div>
+                <div class="card-body py-3" id="tfDiags"><p class="text-muted small mb-0">Carregando…</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm mb-3 border-0" style="border-top:4px solid var(--accent)!important;">
+        <div class="card-header fw-bold py-2 small d-flex flex-wrap align-items-center gap-2" style="background:var(--bg);color:var(--primary-xdark);">
+            <span><i class="fas fa-list-ol me-1"></i>Sequência sorteada em cada concurso</span>
+            <a class="tf-fonte ms-auto" href="/analise/analises-inteligentes/">ver análise</a>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-0" id="btnAtualizarTresFontes" title="Atualizar prévia">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        <div class="card-body py-3" id="tfSeq"><p class="text-muted small mb-0">Carregando…</p></div>
+    </div>
+    <div class="alert border-0 py-2" style="background:var(--accent-light);color:var(--primary-xdark);" id="tfCriteriosPreview">
+        <strong>Geração:</strong> <span id="tfCriteriosTxt">Ciclo no fim entra na aposta · forma da janela · padrão e soma da sequência sorteada · diagonal no volante.</span>
+    </div>
+</div>
+{% endif %}
 
 <div id="painelModoLinhas" class="d-none">
     <div class="alert border-0 py-2 small mb-3" style="background:var(--accent-light);color:var(--primary-xdark);">
@@ -768,5 +889,6 @@
 <script src="{{ url_for('geradores_elite.static', filename='comportamento_col_concurso.js') }}"></script>
 <script src="{{ url_for('geradores_elite.static', filename='comportamento_bases_resumo.js') }}"></script>
 <script src="{{ url_for('geradores_elite.static', filename='panorama_modos.js') }}"></script>
+<script src="{{ url_for('geradores_elite.static', filename='tres_fontes.js') }}?v=20261022v2"></script>
 {% include 'comportamento_apostas_script.html' %}
 {% endblock %}

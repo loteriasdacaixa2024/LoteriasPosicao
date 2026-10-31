@@ -364,6 +364,12 @@ class ApiDiaDeSorteService:
         db.session.commit()
         restantes = len(candidatos) - len(lote)
         st = cls.status_banco()
+        if sucessos > 0:
+            try:
+                from analise_comparar.melhores15 import agendar_melhores15
+                agendar_melhores15("diadesorte")
+            except Exception:
+                pass
         msg = (f"{sucessos} concurso(s) importado(s) neste lote. Faltam {restantes} de {len(candidatos)} — continue a sincronização." if restantes > 0
                else f"Sincronização concluída! {sucessos} concurso(s) importado(s) neste lote.")
         return {"status": "progress" if restantes > 0 else "success", "message": msg, "news": sucessos, "falhas": falhas,

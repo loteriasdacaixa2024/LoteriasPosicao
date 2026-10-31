@@ -440,7 +440,7 @@
                 <div class="fp-minmax-body">
                     <p class="small text-muted mb-2">Menor e maior dezena que já saíram naquela posição, em todos os concursos.</p>
                     <div style="overflow:auto">
-                        <table class="fp-minmax-table">
+                        <table class="fp-minmax-table tabela-ordenavel">
                             <thead>
                                 <tr>
                                     <th>Posição</th>
@@ -472,7 +472,7 @@
         const extra = data.extra ? `
             <div class="fp-card">
                 <h3>${esc(data.extra.titulo)}</h3>
-                <table class="fp-freq">
+                <table class="fp-freq tabela-ordenavel">
                     <thead><tr><th>Valor</th><th>Vezes</th><th>%</th></tr></thead>
                     <tbody>${(data.extra.itens || []).slice(0, 12).map(it =>
                         `<tr><td>${esc(it.label)}</td><td>${it.freq}</td><td>${it.pct}%</td></tr>`
@@ -494,7 +494,7 @@
                 <div class="fp-card">
                     <h3 id="fpTableTitle">Todas as dezenas desta posição</h3>
                     <div style="max-height:360px;overflow:auto">
-                        <table class="fp-freq" id="fpTable"></table>
+                        <table class="fp-freq tabela-ordenavel" id="fpTable"></table>
                     </div>
                 </div>
             </div>
@@ -546,7 +546,7 @@
                 <td style="width:40%"><div class="fp-bar"><span style="width:${(100 * x.freq / maxF).toFixed(1)}%"></span></div></td>
             </tr>`).join('');
         table.innerHTML =
-            `<thead><tr><th>Dezena</th><th>Vezes</th><th>%</th><th></th></tr></thead><tbody>${rows}</tbody>`;
+            `<thead><tr><th>Dezena</th><th>Vezes</th><th>%</th><th data-ordem="nao"></th></tr></thead><tbody>${rows}</tbody>`;
 
         if (chart) chart.destroy();
         const top = freqs.slice(0, 16);

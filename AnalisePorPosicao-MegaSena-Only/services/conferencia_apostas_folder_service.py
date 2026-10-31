@@ -39,8 +39,9 @@ TABELA_PRECOS: Dict[int, float] = {
 }
 
 BASE_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
     "conferencia_apostas",
+    "megasena",
 )
 
 

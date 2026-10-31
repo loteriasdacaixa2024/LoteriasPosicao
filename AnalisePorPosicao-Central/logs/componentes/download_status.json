@@ -1,51 +1,48 @@
 {
   "estado": "ok",
   "ok": true,
-  "mensagem": "Excel já atualizado hoje (12/10/2026). Download pulado.",
-  "iniciado_em": null,
-  "terminado_em": "12/10/2026 17:54:25",
+  "mensagem": "8 arquivo(s) atualizado(s).",
+  "iniciado_em": "31/10/2026 14:03:28",
+  "terminado_em": "31/10/2026 14:03:51",
   "arquivos": [
     {
-      "arquivo": "LOTOFACIL.xlsx",
-      "bytes": 385503
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx",
+      "bytes": 386956
     },
     {
-      "arquivo": "DIA_DE_SORTE.xlsx",
-      "bytes": 102020
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DIA_DE_SORTE.xlsx",
+      "bytes": 102933
     },
     {
-      "arquivo": "LOTOMANIA.xlsx",
-      "bytes": 370142
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOMANIA.xlsx",
+      "bytes": 370997
     },
     {
-      "arquivo": "QUINA.xlsx",
-      "bytes": 518905
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\QUINA.xlsx",
+      "bytes": 520108
     },
     {
-      "arquivo": "MEGA_SENA.xlsx",
-      "bytes": 229567
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\MEGA_SENA.xlsx",
+      "bytes": 230265
     },
     {
-      "arquivo": "MAIS_MILIONARIA.xlsx",
-      "bytes": 55199
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\MAIS_MILIONARIA.xlsx",
+      "bytes": 55925
     },
     {
-      "arquivo": "DUPLA_SENA.xlsx",
-      "bytes": 292597
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DUPLA_SENA.xlsx",
+      "bytes": 293399
     },
     {
-      "arquivo": "TIMEMANIA.xlsx",
-      "bytes": 221113
-    },
-    {
-      "arquivo": "SUPER_SETE.xlsx",
-      "bytes": 77561
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\TIMEMANIA.xlsx",
+      "bytes": 221736
     }
   ],
-  "erros": [],
-  "pid": null,
-  "python": "D:\\loterias\\LoteriasPosicao\\VenvLoterias\\Scripts\\python.exe",
-  "script": "D:\\loterias\\LoteriasPosicao\\DownloadTodosResultadosLoterias\\DownloadResultadosLoteriasCaixa.py",
-  "pulado": true,
-  "motivo": "mesmo_dia"
+  "erros": [
+    "Erro ao baixar Super-Sete. HTTP 404"
+  ],
+  "pid": 13772,
+  "python": "D:\\Loterias\\LP-LoteriasPosicao\\VenvLoterias\\Scripts\\python.exe",
+  "script": "D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\DownloadResultadosLoteriasCaixa.py",
+  "returncode": 0
 }
