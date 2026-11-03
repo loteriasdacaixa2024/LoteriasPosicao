@@ -303,6 +303,8 @@
     this._histMap = null;
     this._histMapN = -1;
     this.faltantesCiclo = new Set(); // dezenas pendentes do ciclo atual
+    this.faltantesCicloOrdem = [];
+    this.faltantesCicloTop3 = [];
     this.manual10BlockMsg = '';
     this.auto11Janela = 10;
     this.auto11SomaModo = 'padrao';
@@ -835,8 +837,19 @@
       const dados = (j && j.dados) || j || {};
       const pend = dados.dezenas_pendentes || [];
       this.faltantesCiclo = new Set((Array.isArray(pend) ? pend : []).map(Number).filter(Number.isFinite));
+      this.faltantesCicloOrdem = [...this.faltantesCiclo].sort((a, b) => a - b);
+      const topRaw = (j && j.top_3) || [];
+      const top = [];
+      (Array.isArray(topRaw) ? topRaw : []).forEach((n) => {
+        const d = Number(n);
+        if (!Number.isFinite(d) || !this.faltantesCiclo.has(d) || top.includes(d)) return;
+        if (top.length < 3) top.push(d);
+      });
+      this.faltantesCicloTop3 = top;
     } catch (_) {
       this.faltantesCiclo = new Set();
+      this.faltantesCicloOrdem = [];
+      this.faltantesCicloTop3 = [];
     }
   };
 
@@ -3312,6 +3325,36 @@
     this.renderS10VolPreview();
     this._syncCmpPlayBtn();
     this.renderCmpDiagonais();
+    this.renderCmpPendentes();
+  };
+
+  /** Faixa discreta: só as dezenas ainda fora do ciclo, com o TOP 3 já calculado pela API. */
+  TubularApp.prototype.renderCmpPendentes = function () {
+    const box = this.root.querySelector('#tbCmpPendentes');
+    if (!box) return;
+    const ordem = this.faltantesCicloOrdem || [];
+    if (!ordem.length) {
+      box.hidden = true;
+      box.innerHTML = '';
+      return;
+    }
+    const rank = new Map((this.faltantesCicloTop3 || []).map((d, i) => [d, i + 1]));
+    const active = this._cmpActive();
+    const sel = new Set(((active && active.nums) || []).map(Number));
+    const chips = ordem.map((d) => {
+      const r = rank.get(d) || 0;
+      const on = sel.has(d);
+      const cls = ['tb-cmp-pend-dez', r ? 'is-top' : '', on ? 'is-on' : ''].filter(Boolean).join(' ');
+      const titulo = r
+        ? `TOP ${r} do ciclo — inserir ${fmt2(d)} na Escolha manual`
+        : `Inserir ${fmt2(d)} na Escolha manual`;
+      const badge = r ? `<span class="tb-cmp-pend-rank" aria-hidden="true">${r}</span>` : '';
+      return `<button type="button" class="${cls}" data-cmp-pend="${d}" title="${esc(titulo)}" aria-pressed="${on ? 'true' : 'false'}">${badge}${fmt2(d)}</button>`;
+    }).join('');
+    const nPend = ordem.length;
+    const tituloTotal = `${nPend} dezenas pendentes do ciclo`;
+    box.hidden = false;
+    box.innerHTML = `<span class="tb-cmp-pend-lbl" title="${esc(tituloTotal)}"><strong>${nPend}</strong></span><span class="tb-cmp-pend-row">${chips}</span>`;
   };
 
   TubularApp.prototype._diagDirSym = function (dir) {
@@ -4861,6 +4904,17 @@
     if (del) {
       const id = parseInt(del.getAttribute('data-cmp-del'), 10);
       this.removeCmpVolante(id);
+      return;
+    }
+    const pendBtn = ev.target.closest('[data-cmp-pend]');
+    if (pendBtn) {
+      const dez = parseInt(pendBtn.getAttribute('data-cmp-pend'), 10);
+      if (!Number.isFinite(dez)) return;
+      const active = this._cmpActive();
+      if (!active) return;
+      const ja = new Set((active.nums || []).map(Number));
+      if (ja.has(dez)) return;
+      this.toggleCmpDezena(active.id, dez);
       return;
     }
     const cell = ev.target.closest('[data-cmp-dez]');

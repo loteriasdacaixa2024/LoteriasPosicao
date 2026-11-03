@@ -10,6 +10,13 @@
     let _inicializado = false;
     let _cacheListaCompleta = null;
 
+    function _fmtMoeda(v) {
+        const n = Number(v) || 0;
+        const partes = Math.abs(n).toFixed(2).split('.');
+        const inteiro = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return (n < 0 ? '-R$ ' : 'R$ ') + inteiro + ',' + partes[1];
+    }
+
     function aplicarEscopoLocal(data, escopo, concursoEspecifico) {
         const lista = data.concursos || [];
         if (escopo === 'ultimo') {
@@ -344,7 +351,7 @@
                 statusEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle"></i> OK — `
                     + `${data.resumo.premiadas || 0} premiada(s) · ${premio} · `
                     + `${data.resumo.total_apostas_validas} apostas · investido `
-                    + `R$ ${Number(data.resumo.total_investido || 0).toFixed(2).replace('.', ',')}</span>`;
+                    + `${_fmtMoeda(data.resumo.total_investido)}</span>`;
             } else {
                 statusEl.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle"></i> ${data.mensagem || 'Erro'}</span>`;
             }

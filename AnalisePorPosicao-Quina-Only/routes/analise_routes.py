@@ -64,3 +64,5 @@ wire_analise_tubular_inteligente(analise_bp, "quina")
 
 from resumo_modalidade.app_integration import wire_resumo_modalidade
 wire_resumo_modalidade(analise_bp, "quina")
+from resumos_modalidade.app_integration import wire_resumos_modalidade
+wire_resumos_modalidade(analise_bp, "quina")

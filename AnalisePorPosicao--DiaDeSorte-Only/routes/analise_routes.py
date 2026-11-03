@@ -153,6 +153,13 @@ wire_camadas_linhas_dd_du(analise_bp, "diadesorte")
 from resumo_modalidade.app_integration import wire_resumo_modalidade
 wire_resumo_modalidade(analise_bp, "diadesorte")
 
+# RESUMO_GERAL_DAS_MODALIDADES (pacote próprio — não altera resumo_modalidades)
+from resumo_modalidades.app_integration import wire_resumo_modalidades
+wire_resumo_modalidades(analise_bp)
+
+from resumos_modalidade.app_integration import wire_resumos_modalidade
+wire_resumos_modalidade(analise_bp, "diadesorte")
+
 # ANALISE_SOMAS_DIGITOS_WIRED
 from analise_somas_digitos.app_integration import wire_analise_somas_digitos
 wire_analise_somas_digitos(analise_bp, "diadesorte")

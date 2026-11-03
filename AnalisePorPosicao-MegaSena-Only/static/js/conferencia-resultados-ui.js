@@ -13,8 +13,17 @@
         c75: '#93ecc8', c80: '#a8f0d3', c85: '#bef4de', c90: '#d4f7e9', c95: '#e9fbf4', c100: '#ffffff',
     };
 
+    function _fmtNumero(v, casas) {
+        const n = Number(v);
+        const abs = Math.abs(Number.isFinite(n) ? n : 0);
+        const partes = abs.toFixed(casas == null ? 2 : casas).split('.');
+        const inteiro = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return (n < 0 ? '-' : '') + inteiro + ',' + partes[1];
+    }
+
     function fmtMoeda(v) {
-        return 'R$ ' + (v || 0).toFixed(2).replace('.', ',');
+        const n = Number(v) || 0;
+        return (n < 0 ? '-R$ ' : 'R$ ') + _fmtNumero(Math.abs(n), 2);
     }
 
     function _categoriaAposta(resultado) {
@@ -46,9 +55,9 @@
         const resultado = aposta.resultado || {};
         const nums = aposta.numeros_apostados || aposta.numeros || [];
         const numsInt = nums.map(n => parseInt(n, 10));
-        const temPremio = (aposta.valor_ganho || 0) > 0;
-        const acertados = new Set((resultado.numeros_acertados || []).map(n => parseInt(n, 10)));
         const cat = _categoriaAposta(resultado);
+        const temPremio = (aposta.valor_ganho || 0) > 0 || cat === 'sena';
+        const acertados = new Set((resultado.numeros_acertados || []).map(n => parseInt(n, 10)));
 
         let cardClass = 'cr-aposta-card';
         if (cat === 'sena' || cat === 'quina') cardClass += ' cr-card-premio-alto';
@@ -85,9 +94,9 @@
                     ${resultado.detalhes_premios && resultado.detalhes_premios.length ? `
                         <div class="alert alert-success py-2 px-2 mb-2 small">
                             ${resultado.detalhes_premios.map(p => `
-                                <div class="d-flex justify-content-between">
-                                    <span><strong>${p.descricao}</strong></span>
-                                    <span class="text-success fw-bold">${fmtMoeda(p.valor)}</span>
+                                <div class="d-flex justify-content-between gap-2">
+                                    <span><strong>${p.descricao}</strong>${p.quantidade > 1 ? ` <span class="text-muted">(${p.quantidade} comb.)</span>` : ''}</span>
+                                    <span class="text-success fw-bold text-nowrap">${fmtMoeda(p.valor)}</span>
                                 </div>`).join('')}
                         </div>` : ''}
                     <div class="fw-bold ${temPremio ? 'text-success' : 'text-muted'}">
@@ -349,7 +358,8 @@
         const investido = resumo.total_investido ?? 0;
         const ganho = resumo.total_ganho ?? 0;
         const lucro = ganho - investido;
-        const roi = investido > 0 ? ((lucro / investido) * 100).toFixed(2) : '0.00';
+        const roiNum = investido > 0 ? ((lucro / investido) * 100) : 0;
+        const roi = _fmtNumero(roiNum, 2);
 
         const numsOficiais = _numerosOficiais(resultado);
         const sorteadosSet = new Set(numsOficiais.map(n => parseInt(n, 10)));
@@ -358,11 +368,18 @@
             ? '<span class="badge bg-info"><i class="fas fa-file-code"></i> Dados: arquivo JSON</span>'
             : '<span class="badge bg-secondary"><i class="fas fa-images"></i> Dados: Screenshots OCR</span>';
 
+        const senaAcumulada = !!(resultado.premios_concurso && resultado.premios_concurso.sena_acumulada);
+        const avisoAcumulada = senaAcumulada ? `
+        <div class="alert alert-warning py-2 mb-3">
+            A Sena deste concurso acumulou (0 ganhadores na Caixa). O valor mostrado é o prêmio que passou para o concurso seguinte, contado uma vez por aposta que fechou os 6 números.
+        </div>` : '';
+
         return `
         <div class="alert alert-info mb-4">
             ${fonteBadge}
             <small class="ms-2 text-muted">Apostas carregadas do arquivo apostas.json</small>
         </div>
+        ${avisoAcumulada}
 
         <div class="row mb-4">
             <div class="col-md-6">
@@ -394,7 +411,7 @@
                         <div>
                             <strong>${lucro >= 0 ? 'LUCRO' : 'PREJUÍZO'}:</strong>
                             <strong class="ms-2 fs-5">${fmtMoeda(Math.abs(lucro))}</strong>
-                            <span class="ms-2">(${roi >= 0 ? '+' : ''}${roi}%)</span>
+                            <span class="ms-2">(${roiNum >= 0 ? '+' : ''}${roi}%)</span>
                         </div>
                     </div>
                 </div>
@@ -459,7 +476,8 @@
         });
 
         const lucro = totalGanho - totalInvestido;
-        const roi = totalInvestido > 0 ? ((lucro / totalInvestido) * 100).toFixed(2) : '0.00';
+        const roiNum = totalInvestido > 0 ? ((lucro / totalInvestido) * 100) : 0;
+        const roi = _fmtNumero(roiNum, 2);
 
         let tabelaFaixas = Object.entries(distribuicaoGeral).map(([f, d]) => `
             <tr><td>${f}</td><td>${d.quantidade}x</td><td class="text-success fw-bold">${fmtMoeda(d.total_ganho)}</td></tr>`).join('');
@@ -471,7 +489,7 @@
             <div class="col-md-3"><div class="card text-center bg-danger text-white"><div class="card-body"><h6>Investido</h6><h4 class="mb-0">${fmtMoeda(totalInvestido)}</h4></div></div></div>
             <div class="col-md-3"><div class="card text-center ${lucro >= 0 ? 'bg-success' : 'bg-danger'} text-white"><div class="card-body">
                 <h6>${lucro >= 0 ? 'LUCRO' : 'PREJUÍZO'}</h6><h4 class="mb-0">${fmtMoeda(Math.abs(lucro))}</h4>
-                <small>(${roi >= 0 ? '+' : ''}${roi}% ROI)</small>
+                <small>(${roiNum >= 0 ? '+' : ''}${roi}% ROI)</small>
             </div></div></div>
         </div>
         <h6>Distribuição consolidada por faixa:</h6>

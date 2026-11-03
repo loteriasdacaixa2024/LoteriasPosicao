@@ -32,6 +32,7 @@ from geradores_elite.comportamento_analise_integration import extend_comportamen
 from menu.app_integration import extend_nav_app
 from posicao_analise.app_integration import extend_posicao_app
 from resumo_modalidade.app_integration import extend_resumo_modalidade_app
+from resumos_modalidade.app_integration import extend_resumos_modalidade_app
 from ciclo_cobertura.app_integration import extend_ciclo_cobertura_app
 
 def create_app():
@@ -57,6 +58,7 @@ def create_app():
     extend_comportamento_analise_app(app)
     extend_posicao_app(app, 'maismilionaria')
     extend_resumo_modalidade_app(app)
+    extend_resumos_modalidade_app(app)
     extend_ciclo_cobertura_app(app, 'maismilionaria')
     app.register_blueprint(index_bp)
     app.register_blueprint(analise_bp,     url_prefix='/analise')

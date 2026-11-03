@@ -61,21 +61,48 @@ def _calcular_valor_aposta(qtd: int) -> float:
     return TABELA_PRECOS.get(qtd, TABELA_PRECOS[6])
 
 
-def _obter_premios_concurso(numero_concurso: int) -> Dict[str, float]:
-    """Busca valores de quadra/quina/sena na API Caixa."""
-    premios = {"quadra": 0.0, "quina": 0.0, "sena": 0.0}
+def _obter_premios_concurso(numero_concurso: int) -> Dict[str, Any]:
+    """Busca valores de quadra/quina/sena na API Caixa.
+
+    Quando a Sena acumula, a Caixa grava ``valorPremio`` 0 e
+    ``numeroDeGanhadores`` 0. O valor que a aposta teria recebido é o
+    prêmio que passou para o concurso seguinte.
+    """
+    premios: Dict[str, Any] = {
+        "quadra": 0.0,
+        "quina": 0.0,
+        "sena": 0.0,
+        "sena_ganhadores": None,
+        "sena_acumulada": False,
+    }
     dados = ApiMegaSenaService.buscar_concurso_especifico(numero_concurso)
     if not dados:
         return premios
     for item in dados.get("listaRateioPremio") or []:
-        desc = (item.get("descricaoFaixa") or "").lower()
-        valor = float(item.get("valorPremio") or 0)
-        if "6 acertos" in desc or "sena" in desc:
+        desc = (item.get("descricaoFaixa") or "").lower().strip()
+        try:
+            valor = float(item.get("valorPremio") or 0)
+        except (TypeError, ValueError):
+            valor = 0.0
+        try:
+            ganhadores = int(item.get("numeroDeGanhadores") or 0)
+        except (TypeError, ValueError):
+            ganhadores = 0
+        if "6 acertos" in desc or desc == "sena" or desc.startswith("sena "):
             premios["sena"] = valor
+            premios["sena_ganhadores"] = ganhadores
         elif "5 acertos" in desc or "quina" in desc:
             premios["quina"] = valor
         elif "4 acertos" in desc or "quadra" in desc:
             premios["quadra"] = valor
+    if premios.get("sena_ganhadores") == 0 and float(premios.get("sena") or 0) <= 0:
+        try:
+            acumulado = float(dados.get("valorAcumuladoProximoConcurso") or 0)
+        except (TypeError, ValueError):
+            acumulado = 0.0
+        if acumulado > 0:
+            premios["sena"] = round(acumulado, 2)
+            premios["sena_acumulada"] = True
     return premios
 
 
@@ -124,22 +151,44 @@ def _analisar_aposta(
     detalhes_premios: List[Dict[str, Any]] = []
     valor_premio_total = 0.0
     contagem_faixas: Counter = Counter()
+    sena_acumulada = bool(premios.get("sena_acumulada"))
+    sena_qtd = 0
 
     for combo in combos:
         acertos = len(set(combo) & sorteadas)
         max_acertos = max(max_acertos, acertos)
         faixa = _classificar_faixa(acertos)
-        if faixa:
-            valor = _valor_premio_por_acertos(acertos, premios)
-            if valor > 0:
-                valor_premio_total += valor
-                contagem_faixas[faixa] += 1
-                faixas_atingidas.append(faixa)
-                detalhes_premios.append({
-                    "descricao": faixa,
-                    "valor": valor,
-                    "faixa": faixa,
-                })
+        if not faixa:
+            continue
+        valor = _valor_premio_por_acertos(acertos, premios)
+        # Sena acumulada é o prêmio total do concurso (0 ganhadores oficiais):
+        # entra uma vez na aposta, não uma vez por combinação.
+        if acertos >= 6 and (sena_acumulada or valor <= 0):
+            sena_qtd += 1
+            continue
+        if valor > 0:
+            valor_premio_total += valor
+            contagem_faixas[faixa] += 1
+            faixas_atingidas.append(faixa)
+            detalhes_premios.append({
+                "descricao": faixa,
+                "valor": valor,
+                "faixa": faixa,
+            })
+
+    if sena_qtd:
+        faixa_sena = "Sena (6 acertos)"
+        valor_sena = round(float(premios.get("sena") or 0), 2)
+        valor_premio_total += valor_sena
+        contagem_faixas[faixa_sena] += 1
+        faixas_atingidas.insert(0, faixa_sena)
+        detalhes_premios.insert(0, {
+            "descricao": faixa_sena + (" · acumulou" if sena_acumulada else ""),
+            "valor": valor_sena,
+            "faixa": faixa_sena,
+            "quantidade": sena_qtd,
+            "acumulada": sena_acumulada,
+        })
 
     faixas_unicas = list(dict.fromkeys(faixas_atingidas))
     faixa_display = " + ".join(faixas_unicas) if faixas_unicas else None
@@ -158,7 +207,7 @@ def _analisar_aposta(
             "faixas_atingidas": faixas_unicas,
             "detalhes_premios": detalhes_premios,
             "valor_premio": valor_premio_total,
-            "premiado": valor_premio_total > 0,
+            "premiado": valor_premio_total > 0 or sena_qtd > 0,
         },
     }
 

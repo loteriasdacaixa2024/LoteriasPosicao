@@ -35,6 +35,8 @@ from analise_tubular_inteligente.app_integration import extend_analise_tubular_i
 from configuracoes.app_integration import extend_config_app
 from ciclo_cobertura.app_integration import extend_ciclo_cobertura_app
 from resumo_modalidade.app_integration import extend_resumo_modalidade_app
+from resumo_modalidades.app_integration import extend_resumo_modalidades_app
+from resumos_modalidade.app_integration import extend_resumos_modalidade_app
 from grades_digitos.app_integration import extend_grades_digitos_app
 
 def create_app():
@@ -66,6 +68,8 @@ def create_app():
     extend_analise_tubular_inteligente_app(app)
     extend_ciclo_cobertura_app(app, 'diadesorte')
     extend_resumo_modalidade_app(app)
+    extend_resumo_modalidades_app(app)
+    extend_resumos_modalidade_app(app)
     extend_grades_digitos_app(app)
     from menu.app_integration import _merge_template_dirs
     _merge_template_dirs(app, [os.path.join(_CC_ROOT, 'geradores_elite', 'templates')])
@@ -126,6 +130,8 @@ if __name__ == '__main__':
     print(f"[URL] Acesse:      http://localhost:{porta}")
     print(f"[URL] Análise:     http://localhost:{porta}/analise/")
     print(f"[URL] Resumo Geral: http://localhost:{porta}/analise/resumo-geral/")
+    print(f"[URL] Resumo modalidades: http://localhost:{porta}/analise/resumo-modalidades/")
+    print(f"[URL] Resumos modalidade: http://localhost:{porta}/analise/resumos-modalidade/")
     print(f"[URL] Análise Comp: http://localhost:{porta}/analise/comportamento/")
     print(f"[URL] Análise Pos.: http://localhost:{porta}/analise/por-posicao/")
     print(f"[URL] Filtros pos.: http://localhost:{porta}/dados/filtros-posicao/")

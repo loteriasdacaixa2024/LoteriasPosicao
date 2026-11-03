@@ -389,6 +389,9 @@
               <span><span class="tb-cmp-swatch tb-cmp-swatch-sel"></span> Escolha</span>
               <span><span class="tb-cmp-swatch tb-cmp-swatch-rept"></span> Repetida</span>
             </div>
+            {% if modality_key == 'diadesorte' %}
+            <div class="tb-cmp-pend" id="tbCmpPendentes" hidden></div>
+            {% endif %}
             <div class="tb-cmp-pair" id="tbCmpPair">
               <div class="tb-cmp-ticket tb-cmp-ticket-oficial">
                 <div class="tb-cmp-head">

@@ -242,6 +242,14 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 "icon_color": "#996e00",
             },
             {
+                "title": "Resumo Geral das modalidades",
+                "desc": "Cards da modalidade e do ciclo — dezenas que faltam",
+                "href": "/analise/resumos-modalidade/",
+                "icon": "fas fa-border-all",
+                "icon_bg": "#e8f4fd",
+                "icon_color": "#1565c0",
+            },
+            {
                 "title": "Resultados & Padrões",
                 "desc": "Concursos · Padrões I/II · tubular · alimenta Construtor/Elite",
                 "href": "/analise/analises-inteligentes/",
@@ -902,6 +910,14 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
             "icon_bg": "#fff3cd",
             "icon_color": "#996e00",
         })
+    novos_analise.append({
+        "title": "Resumo Geral das modalidades",
+        "desc": "Cards da modalidade e do ciclo — dezenas que faltam",
+        "href": "/analise/resumos-modalidade/",
+        "icon": "fas fa-border-all",
+        "icon_bg": "#e8f4fd",
+        "icon_color": "#1565c0",
+    })
     # Paridade com Dia de Sorte: Resultados & Padrões
     novos_analise.append({
         "title": "Resultados & Padrões",

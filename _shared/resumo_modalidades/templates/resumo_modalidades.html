@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Resumo Geral das modalidades{% endblock %}
+
+{% block content %}
+<style>
+    .rgm-page { max-width: 1100px; margin: 0 auto; }
+    .rgm-head {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        color: #fff;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .12);
+    }
+    .rgm-head h2 { font-weight: 800; }
+    .rgm-bloco {
+        background: transparent;
+        margin-bottom: 1.5rem;
+    }
+    .rgm-mod {
+        font-weight: 800;
+        color: var(--primary-xdark, #664a00);
+        margin: 0 0 .75rem;
+    }
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .07);
+        padding: 1.2rem 1.5rem;
+        border: 1px solid #fce7a2;
+        text-align: center;
+        height: 100%;
+    }
+    .stat-card .sc-val {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--primary);
+        line-height: 1.1;
+    }
+    .stat-card .sc-lbl {
+        font-size: .75rem;
+        color: #888;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        margin-top: .15rem;
+    }
+    .stat-card .sc-val.cor-dez { color: var(--accent); }
+    .stat-card .sc-val.cor-mes { color: var(--accent-mes, #196f3d); }
+    .info-card {
+        border-left: 4px solid #007bff;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        height: 100%;
+    }
+    .info-card h6 {
+        color: #6c757d;
+        font-size: .95rem;
+        margin-bottom: .35rem;
+    }
+    .info-card h2 { font-weight: 800; }
+    .rgm-pend {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: .45rem .65rem;
+        margin-top: .35rem;
+        padding: .85rem .5rem 0;
+    }
+    .rgm-pend-legenda {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: .85rem 1.25rem;
+        width: 100%;
+        font-size: .78rem;
+        color: #6b5420;
+    }
+    .rgm-swatch {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 1px solid #c08b00;
+        border-radius: 2px;
+        vertical-align: -1px;
+        margin-right: .3rem;
+        background: #fffdf6;
+    }
+    .rgm-swatch.top {
+        background: var(--accent, #ffd54f);
+        border-color: #c08b00;
+    }
+    .rgm-pend-lbl {
+        font-size: .95rem;
+        font-weight: 800;
+        color: #6b4f00;
+        min-width: 1.4rem;
+        text-align: center;
+    }
+    .rgm-pend-row {
+        display: inline-flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: .35rem;
+    }
+    .rgm-pend-dez {
+        position: relative;
+        min-width: 2.15rem;
+        height: 1.7rem;
+        padding: 0 .4rem;
+        border: 1px solid rgba(192, 139, 0, .35);
+        border-radius: 3px;
+        background: #fffdf6;
+        color: #6b4f00;
+        font-family: ui-monospace, Consolas, "Courier New", monospace;
+        font-size: .85rem;
+        font-weight: 800;
+        line-height: 1.7rem;
+        text-align: center;
+    }
+    .rgm-pend-dez.is-top {
+        background: var(--accent, #ffd54f);
+        color: #1a0a00;
+        border-color: #c08b00;
+        box-shadow: 0 0 0 1px rgba(255, 213, 79, .9);
+        padding-left: 1.05rem;
+    }
+    .rgm-pend-rank {
+        position: absolute;
+        left: 3px;
+        top: 1px;
+        font-size: .52rem;
+        font-weight: 800;
+        line-height: 1;
+        color: #8a5a00;
+        font-family: inherit;
+    }
+</style>
+
+<div class="container-fluid py-4 rgm-page">
+    <div class="rgm-head">
+        <h2 class="mb-1">Resumo Geral das modalidades</h2>
+        <p class="mb-0" style="opacity:.9;">Cards da própria modalidade e do ciclo atual. As dezenas que faltam ficam abaixo, com as três indicadas em destaque.</p>
+    </div>
+
+    {% for m in data.modalidades %}
+    <section class="rgm-bloco" aria-label="{{ m.nome }}">
+        <h3 class="rgm-mod">{{ m.nome }}</h3>
+
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="sc-val">{{ m.concursos }}</div>
+                    <div class="sc-lbl">Concursos</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="sc-val">{{ m.ultimo }}</div>
+                    <div class="sc-lbl">Último</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="sc-val cor-dez">{{ m.dezenas }}</div>
+                    <div class="sc-lbl">Dezenas</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="sc-val cor-mes">{{ m.extra_valor or '—' }}</div>
+                    <div class="sc-lbl">{{ m.extra_rotulo or 'Extra' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-2">
+            <div class="col-6 col-md-3">
+                <div class="card info-card">
+                    <div class="card-body text-center">
+                        <h6>Ciclo Atual</h6>
+                        <h2 class="mb-0 text-primary">{{ m.ciclo_numero }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card info-card">
+                    <div class="card-body text-center">
+                        <h6>Concursos no Ciclo</h6>
+                        <h2 class="mb-0 text-info">{{ m.ciclo_concursos }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card info-card">
+                    <div class="card-body text-center">
+                        <h6>Dezenas Saídas</h6>
+                        <h2 class="mb-0 text-success">{{ m.ciclo_saidas }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card info-card">
+                    <div class="card-body text-center">
+                        <h6>Dezenas Pendentes</h6>
+                        <h2 class="mb-0 text-warning">{{ m.ciclo_pendentes }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rgm-pend">
+            <div class="rgm-pend-legenda">
+                <span><span class="rgm-swatch top"></span> 3 indicadas do ciclo</span>
+                <span><span class="rgm-swatch"></span> Demais dezenas que faltam</span>
+            </div>
+            {% if m.chips %}
+            <span class="rgm-pend-lbl" title="{{ m.n_pendentes }} dezenas pendentes do ciclo">{{ m.n_pendentes }}</span>
+            <span class="rgm-pend-row">
+                {% for chip in m.chips %}
+                <span class="rgm-pend-dez{% if chip.rank %} is-top{% endif %}"
+                      title="{% if chip.rank %}TOP {{ chip.rank }} do ciclo{% else %}Dezena que falta no ciclo{% endif %}">
+                    {% if chip.rank %}<span class="rgm-pend-rank">{{ chip.rank }}</span>{% endif %}{{ chip.txt }}
+                </span>
+                {% endfor %}
+            </span>
+            {% else %}
+            <span class="text-muted small">Nenhuma dezena pendente neste ciclo.</span>
+            {% endif %}
+        </div>
+    </section>
+    {% else %}
+    <div class="alert alert-warning">Nenhuma modalidade configurada neste resumo.</div>
+    {% endfor %}
+</div>
+{% endblock %}

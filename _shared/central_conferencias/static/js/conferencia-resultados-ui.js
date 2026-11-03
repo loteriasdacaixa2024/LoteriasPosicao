@@ -13,11 +13,16 @@
         c75: '#93ecc8', c80: '#a8f0d3', c85: '#bef4de', c90: '#d4f7e9', c95: '#e9fbf4', c100: '#ffffff',
     };
 
-    function _fmtValor(v) {
-        const n = Math.abs(Number(v) || 0);
-        const partes = n.toFixed(2).split('.');
+    function _fmtNumero(v, casas) {
+        const n = Number(v);
+        const abs = Math.abs(Number.isFinite(n) ? n : 0);
+        const partes = abs.toFixed(casas == null ? 2 : casas).split('.');
         const inteiro = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        return inteiro + ',' + partes[1];
+        return (n < 0 ? '-' : '') + inteiro + ',' + partes[1];
+    }
+
+    function _fmtValor(v) {
+        return _fmtNumero(Math.abs(Number(v) || 0), 2);
     }
 
     function fmtMoeda(v) {
@@ -687,7 +692,7 @@
                 <h6 class="mb-1" style="color:#1a5276;">
                     <i class="fas fa-lightbulb me-1"></i> Insight — concurso ${concurso}
                 </h6>
-                <p class="small mb-2"><strong>${fato}</strong> Média ${media.toFixed(1)} acerto(s). Mês sorteado ${acertouMes ? 'entrou em algum jogo' : 'ficou de fora'}.</p>
+                <p class="small mb-2"><strong>${fato}</strong> Média ${_fmtNumero(media, 1)} acerto(s). Mês sorteado ${acertouMes ? 'entrou em algum jogo' : 'ficou de fora'}.</p>
                 <p class="small text-muted mb-2">Parecer geral do ABS, para o próximo palpite. Vale com o orçamento atual: 10 jogos de 7 dezenas.</p>
                 <ol class="small mb-0 ps-3" style="line-height:1.45;">
                     <li class="mb-1"><strong>Dez jogos diferentes.</strong> Não gaste vagas variando ±1 a cartela que ficou verde ou amarela no concurso anterior.</li>
@@ -706,7 +711,7 @@
             <div class="card-body">
                 <div class="alert ${furos.length ? 'alert-danger' : 'alert-success'} py-2 mb-3">
                     <strong>${headline}</strong>
-                    <span class="ms-2">${n} jogos · média ${media.toFixed(1)} acerto(s) · premiadas ${premiadas} · mês ${acertouMes ? 'sim' : 'não'}</span>
+                    <span class="ms-2">${n} jogos · média ${_fmtNumero(media, 1)} acerto(s) · premiadas ${premiadas} · mês ${acertouMes ? 'sim' : 'não'}</span>
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-lg-6">
@@ -766,7 +771,8 @@
         const investido = resumo.total_investido ?? 0;
         const ganho = resumo.total_ganho ?? 0;
         const lucro = ganho - investido;
-        const roi = investido > 0 ? ((lucro / investido) * 100).toFixed(2) : '0.00';
+        const roiNum = investido > 0 ? ((lucro / investido) * 100) : 0;
+        const roi = _fmtNumero(roiNum, 2);
 
         const numsOficiais = _numerosOficiais(resultado);
         _guardarOrdens(concurso, resultado, numsOficiais);
@@ -789,7 +795,7 @@
                         <div>
                             <strong>${lucro >= 0 ? 'LUCRO' : 'PREJUÍZO'}:</strong>
                             <strong class="ms-2 fs-5">${fmtMoeda(Math.abs(lucro))}</strong>
-                            <span class="ms-2">(${roi >= 0 ? '+' : ''}${roi}%)</span>
+                            <span class="ms-2">(${roiNum >= 0 ? '+' : ''}${roi}%)</span>
                         </div>
                     </div>
                 </div>`;
@@ -899,7 +905,8 @@
         });
 
         const lucro = totalGanho - totalInvestido;
-        const roi = totalInvestido > 0 ? ((lucro / totalInvestido) * 100).toFixed(2) : '0.00';
+        const roiNum = totalInvestido > 0 ? ((lucro / totalInvestido) * 100) : 0;
+        const roi = _fmtNumero(roiNum, 2);
 
         const blocoFaixas = _htmlLinhasFaixas(distribuicaoGeral, totalGanho);
         const resumoTopo = renderizarResumoProcessamentoAgregado(resultadosProcessamento);
@@ -912,7 +919,7 @@
             <div class="col-md-3"><div class="card text-center bg-danger text-white"><div class="card-body"><h6>Investido</h6><h4 class="mb-0">${fmtMoeda(totalInvestido)}</h4></div></div></div>
             <div class="col-md-3"><div class="card text-center ${lucro >= 0 ? 'bg-success' : 'bg-danger'} text-white"><div class="card-body">
                 <h6>${lucro >= 0 ? 'LUCRO' : 'PREJUÍZO'}</h6><h4 class="mb-0">${fmtMoeda(Math.abs(lucro))}</h4>
-                <small>(${roi >= 0 ? '+' : ''}${roi}% ROI)</small>
+                <small>(${roiNum >= 0 ? '+' : ''}${roi}% ROI)</small>
             </div></div></div>
         </div>
         <h6 style="color:var(--primary-dark)">Distribuição consolidada por faixa:</h6>
@@ -1193,7 +1200,7 @@
         const validas = Number(resumo.total_apostas_validas ?? resumo.total_apostas) || 0;
         const total = validas + erros;
         const premiadas = Number(resumo.premiadas) || 0;
-        const taxa = total > 0 ? ((validas / total) * 100).toFixed(1) : '0.0';
+        const taxa = total > 0 ? _fmtNumero((validas / total) * 100, 1) : '0,0';
         return { total, validas, erros, premiadas, taxa, tempo: resultado._elapsedMs };
     }
 
@@ -1264,7 +1271,7 @@
             acc.premiadas += c.premiadas;
             if (c.tempo != null) acc.tempo = c.tempo;
         });
-        acc.taxa = acc.total > 0 ? ((acc.validas / acc.total) * 100).toFixed(1) : '0.0';
+        acc.taxa = acc.total > 0 ? _fmtNumero((acc.validas / acc.total) * 100, 1) : '0,0';
         return _htmlResumoProcessamento(acc);
     }
 

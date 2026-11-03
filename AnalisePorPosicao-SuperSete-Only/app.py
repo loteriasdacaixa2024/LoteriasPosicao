@@ -33,6 +33,7 @@ from analise_somas_digitos.app_integration import extend_analise_somas_digitos_a
 from analise_gaps_ciclo.app_integration import extend_analise_gaps_ciclo_app
 from analise_inteligentes_diadesorte.app_integration import extend_analise_inteligentes_app
 from resumo_modalidade.app_integration import extend_resumo_modalidade_app
+from resumos_modalidade.app_integration import extend_resumos_modalidade_app
 
 def create_app():
     app = Flask(__name__)
@@ -60,6 +61,7 @@ def create_app():
     extend_analise_gaps_ciclo_app(app)
     extend_analise_inteligentes_app(app)
     extend_resumo_modalidade_app(app)
+    extend_resumos_modalidade_app(app)
 
     app.register_blueprint(index_bp)
     app.register_blueprint(analise_bp,    url_prefix='/analise')

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Satélites da Central 8083: job de Excel (boot) e Conferências (sob demanda)."""
+"""Satélites da Central 8083: job de Excel (boot) e Conferências (serviço NSSM)."""
 from __future__ import annotations
 
 import json
@@ -28,6 +28,7 @@ EXPECTED_XLSX = (
 )
 CONFERENCIAS_PORT = 8081
 CONFERENCIAS_URL = f"http://127.0.0.1:{CONFERENCIAS_PORT}/"
+CONFERENCIAS_SERVICE = "LotoCheck-Central"
 DOWNLOAD_TIMEOUT_SEC = 240
 CONFERENCIAS_WAIT_SEC = 75.0
 
@@ -47,9 +48,6 @@ _download_status: Dict[str, Any] = {
 }
 
 _conf_lock = threading.Lock()
-_conf_proc: Optional[subprocess.Popen] = None
-_conf_started_by_us = False
-_conf_log_handle = None
 
 
 def _now() -> str:
@@ -607,163 +605,146 @@ def start_download_job_background() -> None:
     t.start()
 
 
+def _run_sc(args: List[str], timeout: float = 30) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["sc.exe", *args],
+        capture_output=True,
+        text=True,
+        errors="replace",
+        timeout=timeout,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+
+
+def _service_info(name: str = CONFERENCIAS_SERVICE) -> Dict[str, Any]:
+    """Estado do serviço NSSM. Não cria processo próprio na porta 8081."""
+    try:
+        cp = _run_sc(["query", name])
+    except Exception as e:
+        return {"existe": False, "estado": "UNKNOWN", "detalhe": str(e)}
+    text = ((cp.stdout or "") + (cp.stderr or "")).strip()
+    if cp.returncode != 0:
+        return {"existe": False, "estado": "AUSENTE", "detalhe": text[-500:]}
+    upper = text.upper()
+    estado = "UNKNOWN"
+    for token in ("START_PENDING", "STOP_PENDING", "RUNNING", "STOPPED", "PAUSED"):
+        if token in upper:
+            estado = token
+            break
+    return {"existe": True, "estado": estado, "detalhe": text[-500:]}
+
+
+def _service_start(name: str = CONFERENCIAS_SERVICE) -> tuple:
+    try:
+        cp = _run_sc(["start", name], timeout=45)
+    except Exception as e:
+        return False, str(e)
+    text = ((cp.stdout or "") + (cp.stderr or "")).strip()
+    if cp.returncode == 0 or "1056" in text:
+        return True, text[-500:]
+    return False, text[-500:]
+
+
+def _service_stop(name: str = CONFERENCIAS_SERVICE) -> None:
+    try:
+        _run_sc(["stop", name], timeout=45)
+    except Exception:
+        return
+    deadline = time.time() + 25
+    while time.time() < deadline:
+        if _service_info(name).get("estado") in ("STOPPED", "AUSENTE"):
+            return
+        time.sleep(0.4)
+
+
 def status_conferencias() -> Dict[str, Any]:
-    online = _tcp_up(CONFERENCIAS_PORT)
-    alive = bool(_conf_proc is not None and _conf_proc.poll() is None)
+    svc = _service_info()
+    pagina_ok = port_open(CONFERENCIAS_PORT, timeout=1.5)
+    rodando = svc.get("estado") == "RUNNING"
     return {
-        "online": online,
+        "online": bool(pagina_ok and rodando),
+        "pagina_ok": bool(pagina_ok),
         "porta": CONFERENCIAS_PORT,
         "url": CONFERENCIAS_URL,
-        "iniciado_pela_central": bool(_conf_started_by_us and alive),
-        "pid": _conf_proc.pid if alive else None,
+        "servico": CONFERENCIAS_SERVICE,
+        "servico_existe": bool(svc.get("existe")),
+        "servico_estado": svc.get("estado"),
         "python": resolve_conferencias_python(),
         "pasta": conferencias_dir(),
     }
 
 
 def ensure_conferencias(wait_timeout: float = CONFERENCIAS_WAIT_SEC) -> Dict[str, Any]:
-    """Sobe a Central LotoCheck (8081) se necessário. Não mata processo existente."""
-    global _conf_proc, _conf_started_by_us, _conf_log_handle
-
+    """Sobe o serviço NSSM LotoCheck-Central. A porta 8081 não usa outro processo."""
     with _conf_lock:
-        if port_open(CONFERENCIAS_PORT):
-            st = status_conferencias()
-            st["ok"] = True
-            st["iniciado_agora"] = False
-            st["mensagem"] = "Conferências já estavam em execução."
-            return st
-
-        cwd = conferencias_dir()
-        py = resolve_conferencias_python()
-        app_py = os.path.join(cwd, "app.py")
-        if not os.path.isdir(cwd) or not os.path.isfile(app_py):
+        svc = _service_info()
+        if not svc.get("existe"):
             return {
                 "ok": False,
                 "online": False,
                 "iniciado_agora": False,
                 "porta": CONFERENCIAS_PORT,
                 "url": CONFERENCIAS_URL,
-                "mensagem": f"Pasta de conferências não encontrada: {cwd}",
-            }
-        if not os.path.isfile(py):
-            return {
-                "ok": False,
-                "online": False,
-                "iniciado_agora": False,
-                "porta": CONFERENCIAS_PORT,
-                "url": CONFERENCIAS_URL,
-                "mensagem": f"Python das conferências não encontrado: {py}",
-            }
-
-        log_path = os.path.join(_state_dir(), "conferencias.log")
-        try:
-            if _conf_log_handle:
-                try:
-                    _conf_log_handle.close()
-                except Exception:
-                    pass
-            _conf_log_handle = open(log_path, "a", encoding="utf-8")
-            _conf_log_handle.write(f"\n--- iniciando {_now()} python={py} ---\n")
-            _conf_log_handle.flush()
-            env = os.environ.copy()
-            env.pop("LOTOCHECK_SKIP_CHILDREN", None)
-            conf_root = os.path.dirname(cwd)
-            env["PYTHONPATH"] = conf_root
-            _conf_proc = subprocess.Popen(
-                [py, "app.py"],
-                cwd=cwd,
-                env=env,
-                stdout=_conf_log_handle,
-                stderr=subprocess.STDOUT,
-                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-            )
-        except Exception as e:
-            return {
-                "ok": False,
-                "online": False,
-                "iniciado_agora": False,
-                "porta": CONFERENCIAS_PORT,
-                "url": CONFERENCIAS_URL,
-                "mensagem": f"Falha ao iniciar conferências: {e}",
-            }
-
-        time.sleep(0.4)
-        if _conf_proc.poll() is not None:
-            _conf_started_by_us = False
-            return {
-                "ok": False,
-                "online": False,
-                "iniciado_agora": False,
-                "porta": CONFERENCIAS_PORT,
-                "url": CONFERENCIAS_URL,
-                "pid": _conf_proc.pid,
+                "servico": CONFERENCIAS_SERVICE,
+                "servico_existe": False,
+                "servico_estado": svc.get("estado"),
                 "mensagem": (
-                    f"Conferências encerraram ao iniciar (código {_conf_proc.returncode}). "
-                    f"Veja {log_path}"
+                    "O serviço Windows LotoCheck-Central (NSSM) não está instalado. "
+                    "O endereço http://localhost:8081/ só sobe por esse serviço."
                 ),
             }
 
-        _conf_started_by_us = True
+        if svc.get("estado") == "RUNNING" and port_open(CONFERENCIAS_PORT, timeout=2.0):
+            return {
+                "ok": True,
+                "online": True,
+                "pagina_ok": True,
+                "iniciado_agora": False,
+                "porta": CONFERENCIAS_PORT,
+                "url": CONFERENCIAS_URL,
+                "servico": CONFERENCIAS_SERVICE,
+                "servico_existe": True,
+                "servico_estado": "RUNNING",
+                "mensagem": "Conferências já estavam no ar pelo serviço LotoCheck-Central.",
+            }
+
+        if svc.get("estado") == "RUNNING":
+            _service_stop()
+
+        ok, detalhe = _service_start()
+        if not ok:
+            return {
+                "ok": False,
+                "online": False,
+                "iniciado_agora": False,
+                "porta": CONFERENCIAS_PORT,
+                "url": CONFERENCIAS_URL,
+                "servico": CONFERENCIAS_SERVICE,
+                "servico_existe": True,
+                "servico_estado": _service_info().get("estado"),
+                "mensagem": (
+                    "Não consegui iniciar o serviço LotoCheck-Central. " + (detalhe or "")
+                ).strip(),
+            }
+
         up = wait_for_port(CONFERENCIAS_PORT, timeout_sec=wait_timeout)
-        if not up:
-            return {
-                "ok": False,
-                "online": False,
-                "iniciado_agora": True,
-                "porta": CONFERENCIAS_PORT,
-                "url": CONFERENCIAS_URL,
-                "pid": _conf_proc.pid,
-                "iniciado_pela_central": True,
-                "mensagem": (
-                    f"Conferências iniciadas (PID {_conf_proc.pid}) mas a porta "
-                    f"{CONFERENCIAS_PORT} não respondeu em {int(wait_timeout)}s. "
-                    f"Veja {log_path}"
-                ),
-            }
-
         st = status_conferencias()
-        st["ok"] = True
         st["iniciado_agora"] = True
-        st["mensagem"] = "Conferências iniciadas e disponíveis."
+        if up and st.get("online"):
+            st["ok"] = True
+            st["mensagem"] = "Serviço LotoCheck-Central iniciado. Conferências disponíveis."
+            return st
+        st["ok"] = False
+        st["mensagem"] = (
+            f"O serviço LotoCheck-Central não respondeu em {CONFERENCIAS_URL} "
+            f"após {int(wait_timeout)}s. Veja o log do serviço."
+        )
         return st
 
 
 def stop_conferencias_if_started_by_us() -> None:
-    """Encerra só o processo que a Central 8083 criou (árvore no Windows)."""
-    global _conf_proc, _conf_started_by_us, _conf_log_handle
-    if not _conf_started_by_us or _conf_proc is None:
-        return
-    pid = _conf_proc.pid
-    if sys.platform == "win32":
-        try:
-            subprocess.run(
-                f"taskkill /F /T /PID {pid}",
-                shell=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except Exception:
-            try:
-                _conf_proc.kill()
-            except Exception:
-                pass
-    else:
-        try:
-            _conf_proc.terminate()
-            _conf_proc.wait(timeout=5)
-        except Exception:
-            try:
-                _conf_proc.kill()
-            except Exception:
-                pass
-    _conf_proc = None
-    _conf_started_by_us = False
-    if _conf_log_handle:
-        try:
-            _conf_log_handle.close()
-        except Exception:
-            pass
-        _conf_log_handle = None
+    """O dashboard não encerra o serviço NSSM LotoCheck-Central."""
+    return
 
 
 def status_componentes() -> Dict[str, Any]:
@@ -776,7 +757,7 @@ def status_componentes() -> Dict[str, Any]:
 def boot_satelites() -> None:
     """Excel só se o dia dos arquivos for anterior a hoje. Conferências sob demanda."""
     boot_download_se_necessario()
-    print("[Central] Conferências só sobem se o botão for clicado.")
+    print("[Central] Conferências: serviço NSSM LotoCheck-Central, pelo botão.")
 
 
 def boot_satelites_depois_da_central(port: int) -> None:

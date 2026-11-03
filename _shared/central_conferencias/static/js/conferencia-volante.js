@@ -363,7 +363,10 @@
     }
 
     function moeda(v) {
-        return 'R$ ' + (Number(v) || 0).toFixed(2).replace('.', ',');
+        const n = Number(v) || 0;
+        const partes = Math.abs(n).toFixed(2).split('.');
+        const inteiro = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return (n < 0 ? '-R$ ' : 'R$ ') + inteiro + ',' + partes[1];
     }
 
     function listaNums(nums) {

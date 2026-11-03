@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<style>
+    #rsm-root { max-width: 1240px; }
+    #rsm-root h1 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--primary-xdark, #664a00);
+    }
+    .rsm-bloco {
+        background: var(--rsm-bg, #fbf7ef);
+        border: 1px solid color-mix(in srgb, var(--rsm, #c08b00) 28%, #fff);
+        border-radius: 16px;
+        padding: 1.15rem 1.15rem 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    /* Paleta oficial (temas_modalidade). Vale mesmo se o processo ainda não mandar bloco.cor. */
+    .rsm-bloco[data-nome="Dia de Sorte"], .rsm-tabela tr[data-nome="Dia de Sorte"] { --rsm: #c08b00; --rsm-ciclo: #996e00; --rsm-bg: #fffdf5; --rsm-ink: #1a1a1a; --rsm-ink-ciclo: #fff; }
+    .rsm-bloco[data-nome="Mega-Sena"], .rsm-tabela tr[data-nome="Mega-Sena"] { --rsm: #0a6b1a; --rsm-ciclo: #07520f; --rsm-bg: #f4fbf5; --rsm-ink: #fff; --rsm-ink-ciclo: #fff; }
+    .rsm-bloco[data-nome="Quina"], .rsm-tabela tr[data-nome="Quina"] { --rsm: #6a0dad; --rsm-ciclo: #520a9a; --rsm-bg: #f8f4fc; --rsm-ink: #fff; --rsm-ink-ciclo: #fff; }
+    .rsm-bloco[data-nome="+Milionária"], .rsm-tabela tr[data-nome="+Milionária"] { --rsm: #8b6914; --rsm-ciclo: #6e520e; --rsm-bg: #fdfaf0; --rsm-ink: #fff; --rsm-ink-ciclo: #fff; }
+    .rsm-bloco[data-nome="Lotofácil"], .rsm-tabela tr[data-nome="Lotofácil"] { --rsm: #672666; --rsm-ciclo: #4a1c4a; --rsm-bg: #f3ecf8; --rsm-ink: #fff; --rsm-ink-ciclo: #fff; }
+    .rsm-bloco[data-nome="Lotomania"], .rsm-tabela tr[data-nome="Lotomania"] { --rsm: #c45c00; --rsm-ciclo: #9e4900; --rsm-bg: #fff8f2; --rsm-ink: #fff; --rsm-ink-ciclo: #fff; }
+    .rsm-bloco[data-nome="Dupla Sena"], .rsm-tabela tr[data-nome="Dupla Sena"] { --rsm: #8b0000; --rsm-ciclo: #6e0000; --rsm-bg: #fffafa; --rsm-ink: #fff; --rsm-ink-ciclo: #fff; }
+    .rsm-bloco[data-nome="Timemania"], .rsm-tabela tr[data-nome="Timemania"] { --rsm: #8b3a00; --rsm-ciclo: #6e2d00; --rsm-bg: #fffaf5; --rsm-ink: #fff; --rsm-ink-ciclo: #fff; }
+    .rsm-bloco[data-nome="Super Sete"], .rsm-tabela tr[data-nome="Super Sete"] { --rsm: #708e25; --rsm-ciclo: #50651a; --rsm-bg: #f6faeb; --rsm-ink: #fff; --rsm-ink-ciclo: #fff; }
+    .rsm-bloco h2 {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--rsm, #664a00);
+        margin: 0 0 .85rem;
+        text-align: center;
+    }
+    .rsm-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .7rem;
+    }
+    .rsm-grid.topo {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    .rsm-grid + .rsm-grid { margin-top: .7rem; }
+    .rsm-card {
+        background: var(--rsm, #c08b00);
+        color: var(--rsm-ink, #fff);
+        border-radius: 12px;
+        text-align: center;
+        padding: 1rem .55rem .85rem;
+        border: 1px solid transparent;
+        min-height: 92px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .rsm-card.ciclo {
+        background: var(--rsm-ciclo, #996e00);
+        color: var(--rsm-ink-ciclo, #fff);
+    }
+    .rsm-val {
+        font-size: 1.85rem;
+        font-weight: 800;
+        line-height: 1.05;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -.02em;
+    }
+    .rsm-bloco .rsm-card .rsm-val { color: var(--rsm-ink, #fff); }
+    .rsm-bloco .rsm-card.ciclo .rsm-val { color: var(--rsm-ink-ciclo, #fff); }
+    .rsm-lbl {
+        margin-top: .28rem;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .045em;
+        text-transform: uppercase;
+        color: inherit;
+        opacity: .82;
+    }
+    .rsm-card.ciclo .rsm-lbl { margin-top: 0; margin-bottom: .2rem; }
+    .rsm-atalhos {
+        grid-column: 5;
+        align-items: center;
+        text-align: center;
+        gap: .28rem;
+        padding: .65rem .75rem;
+    }
+    .rsm-link {
+        color: inherit;
+        font-size: .72rem;
+        font-weight: 600;
+        line-height: 1.25;
+        letter-spacing: 0;
+        text-transform: none;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        opacity: .88;
+    }
+    .rsm-link:hover { color: inherit; opacity: 1; }
+    .rsm-faltam {
+        margin: .55rem 0 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: .1rem .4rem;
+        align-items: baseline;
+        text-align: center;
+    }
+    .rsm-num {
+        font-size: .75rem;
+        font-weight: 600;
+        color: #7a756c;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.35;
+    }
+    .rsm-num.indicada {
+        color: var(--rsm, #6b4f00);
+        font-weight: 800;
+    }
+    .rsm-faltam-vazio {
+        font-size: .75rem;
+        color: #8a847a;
+        text-align: center;
+    }
+    .rsm-tabela-wrap { margin-top: .4rem; }
+    .rsm-tabela-wrap h2 {
+        font-size: 1rem;
+        font-weight: 800;
+        text-align: left;
+        color: var(--primary-xdark, #664a00);
+        margin: 0 0 .6rem;
+    }
+    .rsm-tabela {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #fff;
+        border: 1px solid #efe6d4;
+        border-radius: 12px;
+        overflow: hidden;
+        font-size: .78rem;
+    }
+    .rsm-tabela th {
+        text-align: left;
+        font-size: .68rem;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #8a847a;
+        font-weight: 700;
+        padding: .55rem .7rem;
+        background: #fbf7ef;
+        border-bottom: 1px solid #efe6d4;
+    }
+    .rsm-tabela td {
+        text-align: left;
+        padding: .45rem .7rem;
+        border-bottom: 1px solid #f4efe4;
+        vertical-align: middle;
+    }
+    .rsm-tabela tr:last-child td { border-bottom: 0; }
+    .rsm-tabela .rsm-mod {
+        font-weight: 800;
+        white-space: nowrap;
+        color: var(--rsm, #664a00);
+    }
+    .rsm-ponto {
+        display: inline-block;
+        width: .55rem;
+        height: .55rem;
+        border-radius: 50%;
+        margin-right: .4rem;
+        vertical-align: 0;
+        background: var(--rsm, #c08b00);
+    }
+    .rsm-tabela .rsm-nums {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: .1rem .35rem;
+    }
+    @media (max-width: 992px) {
+        .rsm-grid.topo { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .rsm-atalhos { grid-column: auto; }
+    }
+    @media (max-width: 768px) {
+        .rsm-grid, .rsm-grid.topo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .rsm-val { font-size: 1.55rem; }
+    }
+</style>
+
+<div class="container-fluid py-3" id="rsm-root">
+    <h1 class="mb-1"><i class="fas fa-border-all me-2" style="color:var(--primary,#c08b00)"></i>{{ page_title }}</h1>
+    <p class="text-muted small mb-3">Cards da modalidade e do ciclo atual, com as dezenas que ainda faltam sair.</p>
+
+    {% for bloco in blocos %}
+    <section class="rsm-bloco" data-nome="{{ bloco.nome }}"{% if bloco.cor %} style="--rsm: {{ bloco.cor }}; --rsm-ciclo: {{ bloco.cor_ciclo }}; --rsm-bg: {{ bloco.cor_suave }}; --rsm-ink: {{ bloco.tinta }}; --rsm-ink-ciclo: {{ bloco.tinta_ciclo }};"{% endif %}>
+        <h2>{{ bloco.nome }}</h2>
+
+        {% if bloco.cards_modalidade or bloco.cards_ciclo or bloco.links %}
+        <div class="rsm-grid topo">
+            {% for card in bloco.cards_modalidade %}
+            <div class="rsm-card">
+                <div class="rsm-val">{{ card.valor }}</div>
+                <div class="rsm-lbl">{{ card.rotulo }}</div>
+            </div>
+            {% endfor %}
+            {% for card in bloco.cards_ciclo %}
+            <div class="rsm-card ciclo">
+                <div class="rsm-lbl">{{ card.rotulo }}</div>
+                <div class="rsm-val">{{ card.valor }}</div>
+            </div>
+            {% endfor %}
+            {% if bloco.links %}
+            <div class="rsm-card rsm-atalhos">
+                {% for link in bloco.links %}
+                <a class="rsm-link" href="{{ link.href }}">{{ link.titulo }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if bloco.erro and not bloco.cards_ciclo %}
+        <p class="rsm-faltam-vazio mt-2 mb-0">{{ bloco.erro }}</p>
+        {% endif %}
+
+        {% if bloco.pendentes %}
+        <p class="rsm-faltam">
+            {% for dez in bloco.pendentes %}
+            <span class="rsm-num{% if dez.rank %} indicada{% endif %}">{{ dez.txt }}</span>
+            {% endfor %}
+        </p>
+        {% elif bloco.cards_ciclo %}
+        <p class="rsm-faltam rsm-faltam-vazio">Ciclo fechado.</p>
+        {% endif %}
+    </section>
+    {% endfor %}
+
+    <section class="rsm-tabela-wrap" id="rsm-tabela">
+        <h2>Dezenas que faltam</h2>
+        <table class="rsm-tabela">
+            <thead>
+                <tr>
+                    <th>Modalidade</th>
+                    <th>Faltam</th>
+                    <th>Números</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bloco in blocos %}
+                <tr data-nome="{{ bloco.nome }}">
+                    <td class="rsm-mod"{% if bloco.cor %} style="color: {{ bloco.cor }};"{% endif %}>
+                        <i class="rsm-ponto"{% if bloco.cor %} style="background: {{ bloco.cor }};"{% endif %}></i>{{ bloco.nome }}
+                    </td>
+                    <td>{{ bloco.n_pendentes }}</td>
+                    <td>
+                        {% if bloco.pendentes %}
+                        <span class="rsm-nums">
+                            {% for dez in bloco.pendentes %}
+                            <span class="rsm-num{% if dez.rank %} indicada{% endif %}"{% if bloco.cor %} style="--rsm: {{ bloco.cor }};"{% endif %}>{{ dez.txt }}</span>
+                            {% endfor %}
+                        </span>
+                        {% else %}
+                        <span class="rsm-faltam-vazio">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

@@ -878,7 +878,7 @@
             <a href="/analises-gerais/" class="btn btn-success btn-sm" title="Comparativo estatístico das 9 modalidades">
                 <i class="fas fa-chart-line me-1"></i> Análises Gerais
             </a>
-            <a href="http://localhost:8081/" target="_blank" rel="noopener noreferrer" id="btn-conferencias" class="btn btn-info btn-sm" title="Abre a Central de Conferências em http://localhost:8081">
+            <a href="http://localhost:8081/" target="_blank" rel="noopener noreferrer" id="btn-conferencias" class="btn btn-info btn-sm" title="Inicia o serviço NSSM LotoCheck-Central e abre http://localhost:8081">
                 <i class="fas fa-clipboard-check me-1"></i> Conferências
             </a>
             <button type="button" id="btn-resultados" class="btn btn-outline-warning btn-sm" title="Atualiza os Excel oficiais da Caixa">
@@ -1192,7 +1192,9 @@
             const dlTxt = dl.mensagem || 'Excel: sem status';
             const cfTxt = cf.online
                 ? ('Conferências online na porta ' + (cf.porta || 8081))
-                : 'Conferências desligadas (sob demanda)';
+                : (cf.servico_existe === false
+                    ? 'Serviço LotoCheck-Central não instalado'
+                    : 'Serviço LotoCheck-Central parado');
             box.innerHTML = `
                 <span class="sat-chip ${satChipClass(dlEstado)}"><i class="fas fa-file-excel me-1"></i>${dlTxt}</span>
                 <span class="sat-chip ${satChipClass(cf.online ? 'ok' : 'idle')}"><i class="fas fa-clipboard-check me-1"></i>${cfTxt}</span>
@@ -1213,10 +1215,33 @@
             }
         }
 
-        function abrirConferencias() {
-            fetch('/api/componentes/conferencias/abrir', { method: 'POST' })
-                .then(() => refreshSatStatus())
-                .catch(() => {});
+        async function abrirConferencias(ev) {
+            if (ev) ev.preventDefault();
+            const btn = document.getElementById('btn-conferencias');
+            const original = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.classList.add('disabled');
+                btn.setAttribute('aria-disabled', 'true');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Abrindo serviço…';
+            }
+            try {
+                const res = await fetch('/api/componentes/conferencias/abrir', { method: 'POST' });
+                const data = await res.json();
+                if (data.ok && data.url) {
+                    window.open(data.url, '_blank', 'noopener');
+                } else {
+                    alert(data.mensagem || 'O serviço LotoCheck-Central não subiu.');
+                }
+                await refreshSatStatus();
+            } catch (e) {
+                alert('Não foi possível falar com o dashboard para iniciar o serviço.');
+            } finally {
+                if (btn) {
+                    btn.classList.remove('disabled');
+                    btn.removeAttribute('aria-disabled');
+                    btn.innerHTML = original;
+                }
+            }
         }
 
         async function atualizarResultados() {
