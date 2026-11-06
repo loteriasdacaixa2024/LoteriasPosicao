@@ -165,6 +165,13 @@
     });
   }
 
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== location.origin || !ev.data || ev.data.type !== 'cmp-refit') return;
+    document.querySelectorAll('#cmp-root iframe').forEach(function (frame) {
+      if (frame.contentWindow === ev.source) ajustarFrame(frame);
+    });
+  });
+
   document.querySelectorAll('#cmp-root iframe').forEach(observar);
   window.addEventListener('resize', function () {
     document.querySelectorAll('#cmp-root iframe').forEach(function (frame) {

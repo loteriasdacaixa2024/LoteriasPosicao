@@ -1,0 +1,49 @@
+PLANO RAPIDO DE MIGRACAO
+De: DESKTOP-V9OCCLC  (10.0.0.10)  — servicos parados; uso so local
+Para: DESKTOP-JSI11HH (10.0.0.52) — servicos no ar o tempo todo
+
+Nada disto foi executado. E so a lista do que fazer.
+
+1. Copiar para o outro PC, nos mesmos caminhos D:\
+   - D:\Loterias\LP-LoteriasPosicao
+   - D:\Loterias\LLS-LoteriasLocaisDaSorte
+   - D:\Loterias\LBS-LoteriasBoloesDaSorte
+   - D:\Nssm-2.24_
+   - D:\Proxy_\nginx-1.30.4
+   Copiar também os bancos (instance e data). Sem isso o outro PC sobe vazio.
+
+2. DESKTOP-V9OCCLC — deixar PARADOS e em Manual (nao sobem no boot)
+   - AnalisePorPosicao_TodasModalidades   porta 8083
+   - Central_LocaisDaSorte                 portas 8085 e 5574
+   - Central_BoloesDaSorte                 portas 8086 e 5575
+   - LotoCheck-Central                     porta 8081
+   - LotoCheck-Lotofacil                   5555
+   - LotoCheck-DiaDeSorte                  5556
+   - LotoCheck-Quina                       5557
+   - LotoCheck-MegaSena                    5558
+   - LotoCheck-Lotomania                   5559
+   - LotoCheck-Timemania                   5560
+   - LotoCheck-DuplaSena                   5561
+   - LotoCheck-MaisMilionaria              5562
+   - LotoCheck-SuperSete                   5563
+   - Proxy-Nginx
+   Uso local neste PC: abrir pelo .bat, quando quiser, sem o Nginx.
+   Nao deixar o .bat e o servico na mesma porta.
+
+3. DESKTOP-JSI11HH — CRIAR os mesmos servicos, tipo Automatic, e iniciar
+   Os 14 nomes acima, mais o Proxy-Nginx.
+   Comandos prontos:
+   - LP:     nssm-servicos.md
+   - LotoCheck: LoteriasExtras\conferencias\nssm-lotocheck.ps1  -Acao Criar
+   Prompt de administrador. Python do venv, nao pythonw.
+
+4. Internet
+   Apontar o roteador / site publico para 10.0.0.52.
+   O Nginx deste PC (10.0.0.10) fica parado, senao o site continua caindo aqui.
+
+5. Conferir no PC novo
+   http://localhost:8083/   modalidades
+   http://localhost:8085/   locais
+   http://localhost:8086/   boloes
+   http://localhost:8081/   LotoCheck
+   So depois disso desligar de vez os servicos do PC antigo.

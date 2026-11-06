@@ -138,4 +138,110 @@
             </div>
         </div>
     </div>
+
+    <div class="conf-panel conf-panel-wide" id="panel-retroativa" style="display:none;">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header fw-bold text-white" style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));">
+                <i class="fas fa-ranking-star me-2"></i>Análise Retroativa — {{ cc_cfg.nome }}
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">
+                    Usa as apostas já salvas em <code>conferencia_apostas\{{ cc_cfg.pasta_apostas }}\</code>
+                    e compara cada uma só com os concursos anteriores da mesma modalidade.
+                    Os arquivos originais não são alterados.
+                </p>
+                <button type="button" class="btn btn-success fw-bold" id="arBtnExecutar">
+                    EXECUTAR ANÁLISE RETROATIVA
+                </button>
+                <span class="small text-muted ms-2" id="arStatus"></span>
+                <div id="arErro" class="alert alert-danger mt-3" style="display:none;"></div>
+                <div id="arResumo" class="alert ar-resumo py-2 small mt-3 mb-0" style="display:none;"></div>
+            </div>
+        </div>
+        <div id="arConjuntosCard" class="card border-0 shadow-sm mb-3" style="display:none;">
+            <div class="card-header ar-card-head fw-bold">Conjuntos por pasta</div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height:240px;">
+                    <table class="ar-tabela" id="arTabelaConjuntos">
+                        <colgroup>
+                            <col style="width:22%">
+                            <col style="width:26%">
+                            <col style="width:26%">
+                            <col style="width:26%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="ar-num"><button type="button" data-ar-table="conjuntos" data-ar-sort="origem">Origem <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="conjuntos" data-ar-sort="apostas">Apostas <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="conjuntos" data-ar-sort="melhor">Melhor <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="conjuntos" data-ar-sort="media">Média <span class="ar-seta"></span></button></th>
+                            </tr>
+                        </thead>
+                        <tbody id="arConjuntos"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="arRankingCard" class="card border-0 shadow-sm mb-3" style="display:none;">
+            <div class="card-header ar-card-head fw-bold d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span>Ranking das apostas</span>
+                <input type="search" class="form-control form-control-sm" id="arFiltro" placeholder="Filtrar origem ou dezenas" style="max-width:240px;">
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height:480px;">
+                    <table class="ar-tabela" id="arTabelaRanking">
+                        <colgroup>
+                            <col style="width:5%">
+                            <col style="width:9%">
+                            <col style="width:8%">
+                            <col style="width:30%">
+                            <col style="width:8%">
+                            <col style="width:8%">
+                            <col style="width:8%">
+                            <col style="width:12%">
+                            <col style="width:12%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="ar-mid"><button type="button" data-ar-table="ranking" data-ar-sort="_ordem"># <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="ranking" data-ar-sort="origem">Origem <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="ranking" data-ar-sort="numero">Aposta <span class="ar-seta"></span></button></th>
+                                <th><button type="button" data-ar-table="ranking" data-ar-sort="dezenas">Dezenas <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="ranking" data-ar-sort="melhor">Melhor <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="ranking" data-ar-sort="no_melhor">Vezes <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="ranking" data-ar-sort="media">Média <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="ranking" data-ar-sort="concursos">Concursos <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="ranking" data-ar-sort="real">Resultado real <span class="ar-seta"></span></button></th>
+                            </tr>
+                        </thead>
+                        <tbody id="arRanking"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="arDetalheCard" class="card border-0 shadow-sm" style="display:none;">
+            <div class="card-header ar-card-head fw-bold" id="arDetalheTitulo">Detalhe</div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height:420px;">
+                    <table class="ar-tabela" id="arTabelaDetalhe">
+                        <colgroup>
+                            <col style="width:14%">
+                            <col style="width:12%">
+                            <col style="width:32%">
+                            <col style="width:42%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="ar-num"><button type="button" data-ar-table="detalhe" data-ar-sort="concurso">Concurso <span class="ar-seta"></span></button></th>
+                                <th class="ar-num"><button type="button" data-ar-table="detalhe" data-ar-sort="acertos">Acertos <span class="ar-seta"></span></button></th>
+                                <th><button type="button" data-ar-table="detalhe" data-ar-sort="coincidiram">Coincidiram <span class="ar-seta"></span></button></th>
+                                <th><button type="button" data-ar-table="detalhe" data-ar-sort="sorteadas">Resultado oficial <span class="ar-seta"></span></button></th>
+                            </tr>
+                        </thead>
+                        <tbody id="arDetalhe"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div><!-- /conf-center-wide -->

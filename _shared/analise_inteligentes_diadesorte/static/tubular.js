@@ -682,6 +682,7 @@
       if (ev.target === ev.currentTarget) this._closeCmpMesModal();
     });
     r.querySelector('#tbS10ToVolantes')?.addEventListener('click', () => this.sendS10ToVolantes());
+    r.querySelector('#tbEmbedVoltar10')?.addEventListener('click', () => this._goHubAba('manual'));
     r.querySelector('#tbS10VolPreview')?.addEventListener('click', (ev) => this._onS10VolPreviewClick(ev));
     r.querySelector('#tbGerar13')?.addEventListener('click', () => {
       const inp = r.querySelector('#tbGerar13Qtd');
@@ -788,6 +789,20 @@
   };
 
   TubularApp.prototype.showSub = function (key) {
+    if (document.body && document.body.classList.contains('is-embed')) {
+      const verVolantes = key === 's12';
+      const estava = document.body.classList.contains('is-embed-volantes');
+      document.body.classList.toggle('is-embed-volantes', verVolantes);
+      if (verVolantes || estava) {
+        try { window.scrollTo(0, 0); } catch (_) { /* ignore */ }
+        if (window.parent && window.parent !== window) {
+          const ping = () => {
+            try { window.parent.postMessage({ type: 'cmp-refit' }, window.location.origin); } catch (_) { /* ignore */ }
+          };
+          requestAnimationFrame(() => requestAnimationFrame(ping));
+        }
+      }
+    }
     this.root.querySelectorAll('[data-tb-sub]').forEach(b => b.classList.toggle('active', b.dataset.tbSub === key));
     this.root.querySelectorAll('[data-tb-panel]').forEach(p => {
       p.classList.toggle('d-none', p.dataset.tbPanel !== key);

@@ -207,3 +207,26 @@ def register_central_conferencias_extras(bp, modality_key: str) -> None:
             return jsonify(resultado), status
         except Exception as e:
             return jsonify({"sucesso": False, "mensagem": str(e)}), 500
+
+    @bp.route("/api/conferencia-apostas/analise-retroativa", methods=["POST"])
+    def analise_retroativa_pasta():
+        try:
+            resultado = _folder().analise_retroativa()
+            status = 200 if resultado.get("sucesso") else 400
+            return jsonify(resultado), status
+        except Exception as e:
+            return jsonify({"sucesso": False, "mensagem": str(e)}), 500
+
+    @bp.route("/api/conferencia-apostas/analise-retroativa/detalhe", methods=["POST"])
+    def detalhe_retroativo_pasta():
+        try:
+            dados = request.get_json(silent=True) or {}
+            origem = str(dados.get("origem") or "").strip()
+            numero = int(dados.get("numero"))
+            resultado = _folder().detalhe_retroativo(origem, numero)
+            status = 200 if resultado.get("sucesso") else 400
+            return jsonify(resultado), status
+        except (TypeError, ValueError):
+            return jsonify({"sucesso": False, "mensagem": "Informe a origem e o número da aposta."}), 400
+        except Exception as e:
+            return jsonify({"sucesso": False, "mensagem": str(e)}), 500

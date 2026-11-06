@@ -16,7 +16,7 @@ COMPARE_MODALITIES = {
         "ordered_fields": [f"posicao_{i}" for i in range(1, 16)],
         "set_from_ordered": True,
         "subtitle": "15 dezenas (01–25) · ordem de sorteio",
-        "indicacao_max": 18,
+        "indicacao_max": 20,
     },
     "lotomania": {
         "nome": "Lotomania",

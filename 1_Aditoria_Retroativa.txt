@@ -1,0 +1,249 @@
+# AUDITORIA RETROATIVA E RANKING HISTÓRICO DE DESEMPENHO DAS APOSTAS
+
+## 1. OBJETIVO DO PROJETO
+
+Quero implementar no sistema existente uma funcionalidade de **Análise Retroativa das Apostas**, com o objetivo de identificar quais apostas que realmente realizei no passado apresentaram o melhor desempenho quando comparadas aos resultados oficiais de concursos posteriores.
+
+A funcionalidade deverá aproveitar integralmente a estrutura atual do projeto, os arquivos existentes, o banco de dados e os mecanismos de conferência já implementados.
+
+**IMPORTANTE: Nesta primeira etapa, NÃO programe, NÃO altere arquivos e NÃO implemente absolutamente nada. Faça somente uma análise técnica e apresente um diagnóstico completo. Aguarde minha autorização antes de iniciar qualquer desenvolvimento.**
+
+## 2. ESTRUTURA EXISTENTE DAS APOSTAS
+
+Existe uma pasta principal chamada:
+
+`conferencia_apostas`
+
+Dentro dela existem diversas subpastas, organizadas por modalidade e por concurso.
+
+Exemplos de modalidades:
+
+- Dia de Sorte
+- Mega-Sena
+- Quina
+- Lotofácil
+- Lotomania
+- Timemania
+- Dupla Sena
+- Super Sete
+- +Milionária
+
+Cada modalidade possui suas próprias pastas, organizadas por concurso.
+
+Dentro de cada pasta de concurso podem existir arquivos como:
+
+- Arquivo JSON com os dados das apostas.
+- Arquivos TXT com os números das apostas.
+- Arquivos relacionados à conferência.
+- Arquivo `J_apostas.json` (ou sua nomenclatura real, que deverá ser identificada durante a auditoria).
+
+O arquivo JSON que contém as apostas é especialmente importante, pois já é utilizado pelo sistema atual para realizar a conferência.
+
+**A auditoria deverá identificar exatamente qual arquivo contém as apostas originais, qual é sua estrutura interna e como o sistema atual utiliza esses dados. Não presuma nomes, formatos ou caminhos sem verificar o código e os arquivos reais.**
+
+## 3. FUNCIONAMENTO PRETENDIDO
+
+Quero aproveitar todas as apostas que já fiz e armazenadas nessas pastas.
+
+Por exemplo:
+
+Imagine que tenho uma pasta referente ao concurso 1337 do Dia de Sorte.
+
+Dentro dela existem 10 apostas, cada uma contendo 7 dezenas.
+
+Quero que o sistema consiga utilizar essas mesmas 10 apostas e compará-las retroativamente com os resultados oficiais de concursos anteriores.
+
+Exemplo ilustrativo:
+
+Apostas originalmente registradas para o concurso 1337.
+
+O sistema deverá verificar como essas mesmas combinações teriam se saído nos concursos anteriores:
+
+- Concurso 1336
+- Concurso 1335
+- Concurso 1334
+- Concurso 1333
+- Concurso 1332
+- E assim sucessivamente.
+
+A comparação deverá utilizar os resultados oficiais que já estão cadastrados no banco de dados.
+
+Não quero gerar novas combinações aleatórias. Quero testar exatamente as apostas que fiz e que estão armazenadas nas pastas.
+
+## 4. VARREDURA AUTOMÁTICA
+
+A funcionalidade deverá permitir executar uma varredura automática de todas as pastas existentes.
+
+O sistema deverá:
+
+1. Identificar todas as modalidades disponíveis.
+2. Localizar todas as pastas de concursos existentes.
+3. Identificar os arquivos JSON de apostas.
+4. Extrair as combinações originais de cada arquivo.
+5. Identificar a qual modalidade e concurso pertence cada aposta.
+6. Consultar os resultados oficiais no banco de dados.
+7. Comparar cada combinação com os resultados dos demais concursos elegíveis.
+8. Registrar os resultados da análise para produzir estatísticas e rankings.
+
+A varredura deverá respeitar a estrutura atual das pastas.
+
+Não deverá modificar, excluir, renomear ou sobrescrever os arquivos originais.
+
+## 5. RANKING DE DESEMPENHO
+
+Ao finalizar a análise, quero visualizar um ranking das apostas com melhor desempenho histórico.
+
+Exemplo ilustrativo:
+
+| Ranking | Origem da aposta | Concurso de origem | Melhor pontuação |
+|---|---|---|---|
+| 1º | Dia de Sorte | 1337 | 6 pontos |
+| 2º | Dia de Sorte | 1295 | 5 pontos |
+| 3º | Dia de Sorte | 1280 | 5 pontos |
+
+Os dados acima são apenas exemplos.
+
+O ranking deverá considerar:
+
+- Quantidade de apostas analisadas.
+- Melhor pontuação obtida.
+- Quantidade de vezes que cada aposta atingiu determinada pontuação.
+- Frequência de 3, 4, 5, 6 ou mais acertos, conforme a modalidade.
+- Média de acertos.
+- Quantidade de concursos comparados.
+- Desempenho geral de cada conjunto de apostas.
+
+Quero conseguir identificar não apenas a aposta que teve uma pontuação máxima, mas também aquelas que apresentaram resultados consistentes ao longo dos concursos.
+
+## 6. DETALHAMENTO DOS RESULTADOS
+
+Ao selecionar uma aposta no ranking, quero conseguir visualizar:
+
+- Modalidade.
+- Concurso para o qual a aposta foi originalmente criada.
+- Identificação da aposta.
+- Dezenas originais.
+- Concurso utilizado na comparação.
+- Resultado oficial daquele concurso.
+- Quantidade de acertos.
+- Dezenas que coincidiram.
+
+Exemplo:
+
+Aposta original: concurso 1337.
+
+Dezenas: 05, 07, 13, 28, 29, 30, 31.
+
+Comparação:
+
+| Concurso comparado | Acertos |
+|---|---:|
+| 1336 | 3 |
+| 1335 | 4 |
+| 1334 | 2 |
+| 1333 | 5 |
+| 1332 | 3 |
+
+Esse detalhamento deverá permitir compreender por que determinada aposta ficou bem posicionada no ranking.
+
+## 7. INTEGRAÇÃO COM A INTERFACE EXISTENTE
+
+Não quero criar um novo menu principal.
+
+Quero aproveitar a organização visual e estrutural que já existe no sistema.
+
+Avalie a possibilidade de incorporar essa funcionalidade dentro de uma área já existente, utilizando uma nova aba ou uma seção interna, caso seja tecnicamente adequado.
+
+A interface deverá ser simples e objetiva.
+
+Minha ideia é ter um botão de execução, por exemplo:
+
+**EXECUTAR ANÁLISE RETROATIVA**
+
+Ao clicar, o sistema inicia a varredura das pastas, realiza as comparações e apresenta o ranking final.
+
+Se necessário, poderá existir uma indicação de progresso da análise.
+
+Não quero criar menus desnecessários nem aumentar excessivamente a quantidade de opções existentes.
+
+## 8. REGRAS IMPORTANTES
+
+- Utilizar os arquivos JSON originais das apostas.
+- Não duplicar desnecessariamente os dados existentes.
+- Utilizar o banco de dados atual para consultar os resultados oficiais.
+- Respeitar a separação entre as modalidades.
+- Não comparar apostas de modalidades diferentes.
+- Não alterar os arquivos originais.
+- Não interferir nas funcionalidades atuais de conferência.
+- Não modificar os mecanismos existentes de geração de apostas.
+- Não criar um segundo mecanismo de conferência independente sem necessidade.
+- Preservar os menus, abas, rotas e recursos existentes.
+- Garantir que a análise possa ser executada novamente quando novas pastas e apostas forem adicionadas.
+- Evitar comparações duplicadas e contabilizações incorretas.
+
+## 9. PONTOS TÉCNICOS QUE PRECISAM SER INVESTIGADOS
+
+Durante a auditoria, investigue:
+
+1. Onde está localizada a pasta principal `conferencia_apostas`.
+2. Como estão organizadas as pastas das modalidades e dos concursos.
+3. Quais são os nomes reais dos arquivos JSON.
+4. Qual JSON contém efetivamente as apostas utilizadas na conferência.
+5. Como os números estão estruturados dentro desses arquivos.
+6. Como o sistema identifica a modalidade e o concurso.
+7. Como funciona atualmente a conferência das apostas.
+8. Onde estão armazenados os resultados oficiais.
+9. Como consultar os resultados de concursos anteriores.
+10. Quais rotas, templates, componentes e abas poderiam receber essa funcionalidade.
+11. Se existe alguma estrutura de histórico ou estatísticas que possa ser reutilizada.
+12. Qual seria a maneira mais eficiente de executar uma varredura de milhares de apostas e concursos sem comprometer o desempenho.
+
+## 10. ENTREGA OBRIGATÓRIA DESTA PRIMEIRA ETAPA
+
+Ao concluir a auditoria, apresente um relatório técnico contendo:
+
+**A. Estrutura encontrada**
+- Pastas existentes.
+- Modalidades identificadas.
+- Quantidade de concursos encontrados por modalidade.
+- Quantidade de arquivos JSON encontrados.
+- Identificação dos arquivos que realmente contêm as apostas.
+
+**B. Funcionamento atual**
+- Como acontece a conferência.
+- Como os arquivos JSON são utilizados.
+- Como os resultados oficiais são consultados.
+
+**C. Viabilidade técnica**
+- Se a funcionalidade é plenamente viável com a estrutura atual.
+- Quais componentes existentes podem ser reutilizados.
+- Quais limitações foram encontradas.
+
+**D. Proposta de implementação**
+- Onde incorporar a funcionalidade na interface atual.
+- Como executar a varredura.
+- Como realizar as comparações.
+- Como calcular o ranking.
+- Como apresentar os resultados.
+- Como evitar duplicações e preservar o desempenho.
+
+**E. Arquivos que precisariam ser modificados**
+Apresente uma lista dos arquivos que provavelmente precisarão de alterações, explicando a finalidade de cada alteração.
+
+## 11. REGRA FINAL: NÃO IMPLEMENTAR SEM AUTORIZAÇÃO
+
+Esta solicitação é exclusivamente para auditoria e planejamento.
+
+Não crie arquivos.
+Não altere arquivos.
+Não modifique banco de dados.
+Não crie tabelas.
+Não altere rotas.
+Não modifique templates.
+Não implemente funcionalidades.
+
+Primeiro quero analisar o relatório apresentado, discutir os detalhes e aprovar a proposta.
+
+**Somente depois da minha autorização expressa você poderá iniciar a implementação.**
+
+Priorize a preservação de tudo que já funciona no sistema. A nova funcionalidade deverá ser uma evolução integrada, e não uma reconstrução da estrutura existente.

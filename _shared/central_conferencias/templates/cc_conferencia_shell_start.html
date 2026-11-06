@@ -241,7 +241,7 @@
     #panel-concursos .cr-var-table thead th { color: var(--primary-dark); font-size: .75rem; }
     #panel-concursos .cr-var-diff { color: #8b3a3a; }
     #panel-concursos .cr-var-badge { background: var(--primary); color: var(--on-accent, #fff); }
-    #panel-concursos .cr-var-hit { background: var(--primary); color: var(--on-accent, #fff); font-weight: 700; }
+    #panel-concursos .cr-var-hit { background: #198754; color: #fff; font-weight: 700; }
     #panel-concursos .cr-var-perto { background: color-mix(in srgb, var(--primary) 22%, white); color: var(--primary-dark); font-weight: 700; }
     #panel-concursos .cr-var-acerto-top { background: var(--accent); color: var(--on-accent, #1a0a00); }
     #panel-concursos .cr-var-mes { background: var(--accent-light); }
@@ -402,6 +402,99 @@
     @media (max-width: 767px) {
         .cr-abs-limites { grid-template-columns: 1fr; }
     }
+
+    #panel-retroativa .btn-success {
+        background: var(--primary);
+        border-color: var(--primary-dark);
+        color: #fff;
+    }
+    #panel-retroativa .btn-success:hover,
+    #panel-retroativa .btn-success:focus,
+    #panel-retroativa .btn-success:active {
+        background: var(--primary-dark);
+        border-color: var(--primary-xdark);
+        color: #fff;
+    }
+    #panel-retroativa .ar-card-head {
+        background: linear-gradient(135deg, var(--primary), var(--primary-xdark));
+        color: var(--on-accent, #fff);
+    }
+    #panel-retroativa .ar-resumo {
+        background: var(--accent-light);
+        color: var(--primary-dark);
+        border: 1px solid color-mix(in srgb, var(--primary) 35%, white);
+    }
+    #panel-retroativa .ar-tabela {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-variant-numeric: tabular-nums;
+    }
+    #panel-retroativa .ar-tabela thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--primary);
+        color: var(--on-accent, #fff);
+        font-size: .75rem;
+        font-weight: 700;
+        white-space: normal;
+        border: 0;
+        padding: 0;
+        vertical-align: middle;
+    }
+    #panel-retroativa .ar-tabela thead button {
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        width: 100%;
+        margin: 0;
+        padding: .5rem .65rem;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-weight: 700;
+        text-align: left;
+        cursor: pointer;
+    }
+    #panel-retroativa .ar-tabela thead th.ar-num button { justify-content: flex-end; }
+    #panel-retroativa .ar-tabela thead th.ar-mid button { justify-content: center; }
+    #panel-retroativa .ar-tabela thead button:hover,
+    #panel-retroativa .ar-tabela thead th.ar-ativo button {
+        background: color-mix(in srgb, #000 18%, var(--primary));
+    }
+    #panel-retroativa .ar-seta { width: .7rem; text-align: center; opacity: .45; }
+    #panel-retroativa .ar-ativo .ar-seta { opacity: 1; }
+    #panel-retroativa .ar-tabela td {
+        padding: .4rem .65rem;
+        border-bottom: 1px solid color-mix(in srgb, var(--primary) 12%, white);
+        vertical-align: middle;
+    }
+    #panel-retroativa .ar-tabela td.ar-num {
+        text-align: right;
+        white-space: nowrap;
+    }
+    #panel-retroativa .ar-tabela td.ar-mid { text-align: center; }
+    #panel-retroativa .ar-tabela td.ar-dezenas,
+    #panel-retroativa .ar-tabela td.ar-origem {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        letter-spacing: .03em;
+    }
+    #panel-retroativa .ar-tabela td.ar-dezenas { white-space: normal; }
+    #panel-retroativa #arTabelaRanking tbody tr { cursor: pointer; }
+    #panel-retroativa #arTabelaRanking tbody tr:hover td,
+    #panel-retroativa #arTabelaDetalhe tbody tr:hover td {
+        background: var(--accent-light);
+    }
+    #panel-retroativa .ar-tabela tbody tr.ar-sel td {
+        background: color-mix(in srgb, var(--primary) 16%, white);
+        box-shadow: inset 3px 0 0 var(--primary);
+    }
+    #panel-retroativa .ar-tabela tbody tr.ar-topo td {
+        background: color-mix(in srgb, var(--primary) 24%, white);
+    }
 </style>
 
 <div class="conf-center-wide mb-4">
@@ -419,6 +512,9 @@
         </button>
         <button type="button" class="conf-tab-btn" data-tab="concursos" onclick="setConfTab('concursos')">
             <i class="fas fa-folder-open"></i> Concursos Disponíveis
+        </button>
+        <button type="button" class="conf-tab-btn" data-tab="retroativa" onclick="setConfTab('retroativa')">
+            <i class="fas fa-ranking-star"></i> Análise Retroativa
         </button>
     </div>
 

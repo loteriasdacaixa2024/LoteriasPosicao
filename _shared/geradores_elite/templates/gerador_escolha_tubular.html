@@ -16,6 +16,10 @@
   body.is-embed [data-tb-panel]:not([data-tb-panel="s10"]) { display: none !important; }
   body.is-embed #ai-tubular-root,
   body.is-embed [data-tb-panel="s10"] { display: block !important; }
+  /* Visualizar nos Volantes: a Seção 12 (volantes + diagonais) precisa aparecer. */
+  body.is-embed.is-embed-volantes [data-tb-panel="s10"] { display: none !important; }
+  body.is-embed.is-embed-volantes #tbSecao12 { display: block !important; }
+  body.is-embed.is-embed-volantes #tbEmbedVoltar10 { display: inline-flex !important; }
 </style>
 {% endif %}
 <style>
@@ -488,7 +492,7 @@
   {% endfor %}
   {% endif %}
 </style>
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20261031v2"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20261104v1"></script>
 <script>
 (function () {
   const hub = document.getElementById('get-hub');

@@ -90,8 +90,8 @@
     }
 
     /**
-     * Prêmios fixos da Caixa. 6 e 7 com mês dependem do rateio e não são estimados.
-     * 5+ sem o mês cai na faixa de 4 acertos.
+     * Prêmios fixos da Caixa: 5 acertos R$ 25, 4 acertos R$ 5, mês R$ 2,50.
+     * 6 e 7 só entram no rateio quando o mês fecha. Sem o mês, 6 ou 7 caem no fixo de 5.
      */
     function premiacaoFixa(acertos, mesOk) {
         const partes = [];
@@ -105,7 +105,7 @@
         if (n >= 6 && mesOk) {
             incompleto = true;
             partes.push({ descricao: n + ' acertos', valor: null });
-        } else if (n >= 5 && mesOk) {
+        } else if (n >= 5) {
             partes.push({ descricao: '5 acertos', valor: 25 });
             total += 25;
         } else if (n >= 4) {

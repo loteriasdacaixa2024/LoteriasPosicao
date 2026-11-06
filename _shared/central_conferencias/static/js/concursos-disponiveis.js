@@ -340,7 +340,14 @@
         const statusEl = el(`${itemId}-status`);
         try {
             const r = await fetch(`${API}/processar/${concurso}`, { method: 'POST' });
-            const data = await r.json();
+            const texto = await r.text();
+            let data;
+            try {
+                data = JSON.parse(texto);
+            } catch (parseErr) {
+                const limpo = texto.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+                throw new Error(`O servidor respondeu ${r.status}${limpo ? ' — ' + limpo : ''}.`);
+            }
             if (data.sucesso) {
                 resultadosProcessamento[concurso] = data;
                 const faixas = data.resumo.distribuicao_faixas || {};

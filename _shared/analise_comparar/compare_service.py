@@ -356,15 +356,30 @@ class CompararConcursosService:
             if tem_concentracao_acertos(self.modality_key):
                 cc = get_concentracao_config(self.modality_key)
                 ests = cc.get("estrategias") or []
-                size = min(int((ests[0] or {}).get("pool_size") or tamanho) if ests else tamanho, max_ind)
+                pool_estrategia = int((ests[0] or {}).get("pool_size") or 0) if ests else 0
+                size = min(pool_estrategia or tamanho, max_ind)
+                # Volante maior que a aposta: o SUPER vai até a aposta máxima.
+                # Na Lotofácil, 25 no volante e teto 20 — 5 ficam de fora.
+                if pool_estrategia and pool_estrategia < tamanho:
+                    size = tamanho
+                    fora = (dmax - dmin + 1) - size
+                    origem = {
+                        "id": "frequencia",
+                        "label": (
+                            f"As {size} dezenas mais frequentes — aposta máxima; "
+                            f"{fora} ficam de fora do volante"
+                        ),
+                        "url": "/analise/",
+                    }
+                else:
+                    origem = {
+                        "id": "concentracao",
+                        "label": "Concentração de acertos — Estratégia A (frequência)",
+                        "url": "/analise/concentracao-acertos/",
+                    }
                 dezenas = pool_sugerido(
                     dados_freq, size, "freq", dezena_min=dmin, dezena_max=dmax,
                 )
-                origem = {
-                    "id": "concentracao",
-                    "label": "Concentração de acertos — Estratégia A (frequência)",
-                    "url": "/analise/concentracao-acertos/",
-                }
                 return self._pack_indicacao(dezenas, origem, dmin, dmax, n_sort)
         except Exception:
             pass

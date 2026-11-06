@@ -15060,3 +15060,410 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5159
 Press CTRL+C to quit
 127.0.0.1 - - [02/Nov/2026 19:42:19] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 06:10:58] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 06:11:21] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-03 06:24:52 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [03/Nov/2026 06:25:04] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 07:40:45] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:37:35] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:37:44] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:36] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:43] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:44] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:44] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:48] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:50] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:54] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:41:03] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:41:06] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:41:10] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 16:41:11] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:17] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:28] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:31] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 18:11:31] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:34] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:34] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:48] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:49] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:31] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:32] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:32] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:32] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:32] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 18:17:33] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=2461&concurso_b=2462 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:44] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:44] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:45] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:50] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:52] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:52] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:53] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=2461&concurso_b=2462 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:33] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:21:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:15] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:23:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:19] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:19] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:19] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:23:19] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:23] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:25] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:25] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:25] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:25] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=2461&concurso_b=2462 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:26] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:24:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:24:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:36:29] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:36:51] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:36:58] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:37:13] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 304 -
+127.0.0.1 - - [03/Nov/2026 19:37:13] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 304 -
+127.0.0.1 - - [03/Nov/2026 19:37:14] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:37:15] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:37:15] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:37:16] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:37:21] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+
+--- iniciando 2026-11-03 19:40:14 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [03/Nov/2026 19:40:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:46:54] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:05] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:06] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:06] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 304 -
+127.0.0.1 - - [03/Nov/2026 19:47:06] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 304 -
+127.0.0.1 - - [03/Nov/2026 19:47:19] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:25] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:36] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:47:37] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:37] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:47] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+
+--- iniciando 2026-11-03 20:05:20 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [03/Nov/2026 20:05:28] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 20:09:52] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 20:10:03] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 23:19:22] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 23:19:36] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 05:14:18] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 05:16:32] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 05:16:47] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-04 05:24:12 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [04/Nov/2026 05:24:22] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 05:43:39] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 05:44:01] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 06:08:24] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 06:08:46] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-04 07:45:20 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.1.218:5159
+Press CTRL+C to quit
+[API Caixa] Timemania 2463/2463...127.0.0.1 - - [04/Nov/2026 07:45:48] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 18:05:03] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 18:05:19] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 19:30:03] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 19:30:27] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-05 14:13:18 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://127.0.0.1:5159
+Press CTRL+C to quit
+127.0.0.1 - - [05/Nov/2026 14:13:39] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 16:42:28] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 16:42:50] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-05 17:19:40 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [05/Nov/2026 17:20:04] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-05 17:33:47 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [05/Nov/2026 17:33:55] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:44:53] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:45:13] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:55:49] "GET /api/status-banco HTTP/1.1" 200 -
+
+--- iniciando 2026-11-05 17:56:32 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [05/Nov/2026 17:56:42] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:56:56] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:57:07] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:57:19] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:57:29] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 18:07:41] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:23:33] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:23:51] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:24:01] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:24:10] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:58:36] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:59:01] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:59:22] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:59:37] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:59:56] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 20:00:17] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 20:53:40] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [06/Nov/2026 04:32:44] "GET /analise/ciclo-cobertura/ HTTP/1.1" 200 -
+127.0.0.1 - - [06/Nov/2026 04:33:22] "GET /analise/ciclo-cobertura/ HTTP/1.1" 200 -
+127.0.0.1 - - [06/Nov/2026 04:33:28] "GET /geradores-elite/gerador-gc/ HTTP/1.1" 200 -
+127.0.0.1 - - [06/Nov/2026 04:35:46] "GET /analise/api/ciclo-cobertura/ciclo-atual?v=1793664000000 HTTP/1.1" 200 -

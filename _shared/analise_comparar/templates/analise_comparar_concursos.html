@@ -1347,7 +1347,7 @@
         if (!root || path.charAt(0) !== '/' || path === root || path.indexOf(root + '/') === 0) return path;
         return root + path;
     }
-    const MAX_PADRAO = { lotofacil: 18, lotomania: 30, quina: 15, megasena: 15, duplasena: 15, maismilionaria: 15, timemania: 20, supersete: 7, diadesorte: 15 };
+    const MAX_PADRAO = { lotofacil: 20, lotomania: 30, quina: 15, megasena: 15, duplasena: 15, maismilionaria: 15, timemania: 20, supersete: 7, diadesorte: 15 };
     let maxInd = Number(CFG.indicacao_max) || MAX_PADRAO[CFG.key] || 15;
     let sortKey = 'concurso';
     let sortDir = 'desc';

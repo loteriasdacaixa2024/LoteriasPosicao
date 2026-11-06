@@ -196,8 +196,8 @@
                         ${numsInt.map(n => {
                             const hit = acertados.has(n);
                             const estilo = hit
-                                ? 'background:#FFD700;color:#1a0a00;border:2px solid #e6a800;font-weight:800;'
-                                : 'background:#6c757d;color:#fff;font-weight:700;';
+                                ? 'background:#198754;color:#fff;border:2px solid #146c43;font-weight:800;'
+                                : 'background:#FFD700;color:#1a0a00;border:2px solid #e6a800;font-weight:700;';
                             return `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:2rem;height:2rem;border-radius:8px;font-size:.85rem;${estilo}">${String(n).padStart(2, '0')}</span>`;
                         }).join('')}
                         ${mes ? _badgeMes(mes) : ''}
@@ -277,9 +277,13 @@
     function renderizarCobertura(resultado) {
         const sorteados = _numerosOficiais(resultado);
         const dezenasJogadas = new Set();
-        (resultado.apostas || []).forEach(ap => {
-            (ap.numeros_apostados || []).forEach(n => dezenasJogadas.add(parseInt(n, 10)));
-        });
+        if (resultado.lista_parcial && Array.isArray(resultado.cobertura_dezenas)) {
+            resultado.cobertura_dezenas.forEach(n => dezenasJogadas.add(parseInt(n, 10)));
+        } else {
+            (resultado.apostas || []).forEach(ap => {
+                (ap.numeros_apostados || []).forEach(n => dezenasJogadas.add(parseInt(n, 10)));
+            });
+        }
 
         const cobertas = [];
         const perdidas = [];
@@ -586,14 +590,18 @@
     }
 
     function renderizarInsightEParecer(concurso, resultado) {
-        const apostas = (resultado.apostas || []).filter(a => !a.erro && !a.erro_ocr && !a.dados_incompletos);
-        if (!apostas.length) return '';
+        const est = resultado.lista_parcial && resultado.estatisticas ? resultado.estatisticas : null;
+        const apostas = est ? [] : (resultado.apostas || []).filter(a => !a.erro && !a.erro_ocr && !a.dados_incompletos);
+        if (!est && !apostas.length) return '';
 
         const pad = n => String(n).padStart(2, '0');
         const sorteados = _numerosOficiais(resultado).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
         const setSaiu = new Set(sorteados);
         const resumo = resultado.resumo || {};
-        const n = apostas.length;
+        const n = est
+            ? (Number(est.total) || Number(resumo.total_apostas_validas) || 0)
+            : apostas.length;
+        if (!n) return '';
         const freq = {};
         const meses = {};
         const dist = {};
@@ -604,7 +612,21 @@
         let somaAcertos = 0;
         let acertouMes = false;
 
-        apostas.forEach(a => {
+        if (est) {
+            Object.entries(est.freq || {}).forEach(([k, v]) => { freq[parseInt(k, 10)] = Number(v) || 0; });
+            Object.entries(est.meses || {}).forEach(([k, v]) => { meses[k] = Number(v) || 0; });
+            Object.entries(est.dist_acertos || {}).forEach(([k, v]) => { dist[parseInt(k, 10)] = Number(v) || 0; });
+            somaAcertos = Number(est.soma_acertos) || 0;
+            acertouMes = !!est.acertou_mes;
+            if (est.melhor) {
+                melhorAc = Number(est.melhor.acertos);
+                melhorAposta = est.melhor.numero;
+                melhorNums = (est.melhor.numeros || []).map(x => parseInt(x, 10)).filter(x => !isNaN(x));
+                melhorHits = (est.melhor.hits || []).map(x => parseInt(x, 10)).filter(x => !isNaN(x));
+            }
+        }
+
+        if (!est) apostas.forEach(a => {
             const nums = _numsAposta(a);
             const mes = a.mes || (a.dados_extraidos && a.dados_extraidos.mes_apostado);
             if (mes != null && mes !== '') meses[String(mes)] = (meses[String(mes)] || 0) + 1;
@@ -865,6 +887,7 @@
         </div>
 
         <div id="container-cards-${concurso}">
+            ${resultado.lista_parcial ? `<div class="alert alert-info py-2">${escTxt(resultado.aviso_lista || 'Lista resumida. Os totais usam o arquivo inteiro.')}</div>` : ''}
             <h6 class="text-muted"><i class="fas fa-list"></i> Apostas Processadas:</h6>
             <div class="row g-3 mt-1">
                 ${(resultado.apostas || []).map(a => renderizarAposta(a, sorteadosSet)).join('')}
@@ -955,7 +978,7 @@
                 mudou = true;
             }
         });
-        if (!mudou) return;
+        if (!mudou || resultado.lista_parcial) return;
         const dist = {};
         let total = 0;
         let premiadas = 0;
@@ -1626,8 +1649,24 @@
                 box.innerHTML = `<div class="small text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Somando o ABS da pasta: ${i} de ${lista.length} concursos...</div>`;
             }
             const resp = await fetch(`/central-conferencias/api/conferencia-apostas/processar/${lista[i].numero_concurso}`, { method: 'POST' });
-            const data = await resp.json();
+            let data;
+            try {
+                data = JSON.parse(await resp.text());
+            } catch (parseErr) {
+                continue;
+            }
             if (!data || !data.sucesso) continue;
+            if (data.lista_parcial && data.abs_contagem) {
+                let nAbs = 0;
+                Object.entries(data.abs_contagem).forEach(([k, q]) => {
+                    const v = Number(k);
+                    const vezes = Number(q) || 0;
+                    for (let i = 0; i < vezes; i++) valores.push(v);
+                    nAbs += vezes;
+                });
+                if (nAbs) concursos += 1;
+                continue;
+            }
             const sorteados = _numerosOficiais(data).map(n => parseInt(n, 10)).filter(n => !isNaN(n)).sort((a, b) => a - b);
             if (!sorteados.length) continue;
             let usou = false;
@@ -1733,6 +1772,23 @@
     }
 
     function renderizarVarianciaDiaSorte(concurso, resultado) {
+        if (resultado.lista_parcial && resultado.estatisticas && resultado.estatisticas.abs) {
+            const amostra = Object.assign({}, resultado, { apostas: resultado.apostas_variancia || [] });
+            const totalArquivo = Number(resultado.estatisticas.total) || Number((resultado.resumo || {}).total_apostas_validas) || 0;
+            const completo = { totalValidas: totalArquivo, stats: resultado.estatisticas.abs };
+            const resumo = _linhasVarianciaDiaSorte(amostra, null, true, null);
+            resumo.totalValidas = totalArquivo;
+            const freqId = `cr-freq-abs-pasta-${concurso}`;
+            const aviso = `<p class="small text-muted mb-2">A legenda soma as ${completo.totalValidas} apostas do concurso. A tabela lista as ${(amostra.apostas || []).length} melhores, as de menor ABS.</p>`;
+            return `
+            <h6 style="color:var(--primary-dark)"><i class="fas fa-balance-scale"></i> Análise de Variância Nominal (Desvio Posicional):</h6>
+            ${_legendaAbs(completo.stats)}
+            ${aviso}
+            ${_tabelaVarianciaDiaSorte(resultado, resumo, true)}
+            <div id="${freqId}" class="mb-4">
+                <div class="small text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Somando o ABS de todas as apostas da pasta...</div>
+            </div>`;
+        }
         const grande = (resultado.apostas || []).length > 200;
         const completo = _linhasVarianciaDiaSorte(resultado, null, !grande);
         const resumo = _linhasVarianciaDiaSorte(resultado, 20, true, grande ? 200 : null);

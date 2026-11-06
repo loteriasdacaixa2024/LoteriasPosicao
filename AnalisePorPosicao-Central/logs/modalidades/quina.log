@@ -15224,3 +15224,961 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5155
 Press CTRL+C to quit
 127.0.0.1 - - [02/Nov/2026 19:42:17] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 06:10:58] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 06:11:18] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-03 06:24:40 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [03/Nov/2026 06:24:59] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 07:40:46] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:37:36] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:37:43] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:36] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:50] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:54] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:54] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:54] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:55] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 16:40:58] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:40:58] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:41:03] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:41:16] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 16:41:18] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:16] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 18:11:17] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:18] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:27] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:11:58] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:26] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:27] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:27] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:28] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:34] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=7156&concurso_b=7157 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:17:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:18:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:56] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 18:28:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:28:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:01] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:01] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:01] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:01] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:01] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:01] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:01] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:02] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:02] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:02] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:02] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:02] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:02] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:02] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:29:13] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:01] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:01] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:02] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:04] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=7156&concurso_b=7157 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:05] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 18:30:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:37] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:39] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:41] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:43] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:43] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:43] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:43] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:43] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:43] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:44] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:44] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:44] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:44] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:44] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:45] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:45] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:47] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:47] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:47] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:47] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:47] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:47] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:48] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:48] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:48] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:48] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:48] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 18:30:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:27] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:08:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2640 HTTP/1.1" 200 -
+Error on request:
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 347, in execute
+    data = self.rfile.read(10_000_000)
+MemoryError
+127.0.0.1 - - [03/Nov/2026 19:08:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:33] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=7140&concurso_b=7141 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:35] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:36] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=7144&concurso_b=7145 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:08:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:40] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:44] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:45] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:46] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:48] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:11:48] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:48] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=7156&concurso_b=7157 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:48] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:48] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:51] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:51] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:51] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:51] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:51] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:51] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:51] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:52] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:52] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:52] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:52] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:52] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:52] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:52] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:53] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:53] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:53] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:53] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:53] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:53] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:53] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:53] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:54] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:56] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:57] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:11:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:00] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:19] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:20] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:20] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:20] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:20] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:12:20] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=7156&concurso_b=7157 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:20] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:23] "GET /analise/comparar-concursos/api/historico-visual?limit=10 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:23] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:12:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:26] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:27] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:28] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:29] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:30] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:31] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:33] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:12:47] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:21:11] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:21:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:15] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:17] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:18] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:19] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:20] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:20] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:20] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:20] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:20] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:20] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:21] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5200 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5280 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5360 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5440 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5520 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5600 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5680 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:22] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5760 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5840 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5920 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6000 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6080 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6160 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6240 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6320 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6400 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:23] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6480 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6560 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6640 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6720 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6800 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6880 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6960 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:24] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7040 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:21:25] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7120 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:36:30] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:36:48] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-03 19:40:02 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [03/Nov/2026 19:40:19] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:46:54] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:04] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:30] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:30] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 304 -
+127.0.0.1 - - [03/Nov/2026 19:47:30] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 304 -
+127.0.0.1 - - [03/Nov/2026 19:47:31] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [03/Nov/2026 19:47:32] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:33] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:34] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:37] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 19:47:44] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+
+--- iniciando 2026-11-03 20:05:09 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [03/Nov/2026 20:05:25] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 20:09:54] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 20:10:07] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 23:19:15] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [03/Nov/2026 23:19:33] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 05:14:20] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 05:16:31] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 05:16:45] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-04 05:23:49 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [04/Nov/2026 05:24:19] "GET / HTTP/1.1" 200 -
+[API Caixa] Quina 7158/7158...127.0.0.1 - - [04/Nov/2026 05:43:37] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 05:43:56] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 06:08:20] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 06:08:31] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-04 07:45:17 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.1.218:5155
+Press CTRL+C to quit
+127.0.0.1 - - [04/Nov/2026 07:45:47] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 18:05:02] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 18:05:15] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 19:30:02] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [04/Nov/2026 19:30:18] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-05 14:13:10 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://127.0.0.1:5155
+Press CTRL+C to quit
+127.0.0.1 - - [05/Nov/2026 14:13:36] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 16:42:25] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 16:42:41] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-05 17:19:30 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+[API Caixa] Quina 7159/7159...127.0.0.1 - - [05/Nov/2026 17:19:57] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:19:57] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:19:57] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-05 17:33:38 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [05/Nov/2026 17:33:52] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:44:53] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:45:08] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:50:47] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:50:48] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 304 -
+127.0.0.1 - - [05/Nov/2026 17:50:48] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 304 -
+127.0.0.1 - - [05/Nov/2026 17:50:59] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:51:01] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:51:04] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:51:06] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [05/Nov/2026 17:51:09] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:51:11] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:29] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:31] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:31] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:31] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:40] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [05/Nov/2026 17:53:46] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=7158&concurso_b=7159 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:46] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:49] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:52] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:52] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:53:53] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:04] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1360 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1440 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1520 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1600 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1680 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1760 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1840 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1920 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:05] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2000 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2080 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2160 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2240 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2320 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2400 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2480 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:06] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2560 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2640 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2720 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2800 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2880 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=2960 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3120 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:07] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3200 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3280 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3360 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3440 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3520 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3600 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3680 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3760 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3840 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=3920 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:08] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4000 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4080 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4160 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4240 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4320 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4400 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4480 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4560 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:09] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4640 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4720 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4800 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4880 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=4960 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5040 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:10] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5120 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5200 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5280 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5360 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5440 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5520 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5600 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5680 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:11] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5760 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5840 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=5920 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6000 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6080 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6160 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6240 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6320 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6400 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6480 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6560 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6640 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6720 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6800 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6880 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=6960 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7040 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:54:14] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=7120 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:55:28] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:56:09] "GET /api/status-banco HTTP/1.1" 200 -
+
+--- iniciando 2026-11-05 17:56:23 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [05/Nov/2026 17:56:40] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:56:51] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:57:03] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:57:14] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 17:57:24] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 18:07:41] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:23:24] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:23:43] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:23:57] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:24:06] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:58:38] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:58:47] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:59:19] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:59:22] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 19:59:45] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 20:00:05] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [05/Nov/2026 20:53:41] "POST /modelos/api/backtesting HTTP/1.1" 200 -
