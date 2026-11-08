@@ -23,6 +23,7 @@
     let concursosLista = [];
     let concursoLeitura = null;
     let sessoesConstrutor = [];
+    const analisesAbertas = { todas: false, cabem: false };
 
     function fmtDezena(n) {
         if (pickMin === 0 && pickMax >= 99) return String(n).padStart(2, '0');
@@ -232,12 +233,70 @@
         </div>`;
     }
 
+    function esc(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function renderAnalises(data) {
+        const leitura = (data && data.leitura) || {};
+        const lista = leitura.analises || [];
+        if (!lista.length) {
+            if (leitura.aviso) {
+                return `<p class="ge-leitura-aviso">${esc(leitura.aviso)}</p>`;
+            }
+            return '';
+        }
+        const rotulo = { cabe: 'cabe', nao_cabe: 'não cabe', nao_opina: 'não opina' };
+        const linha = (a) => {
+            const v = a.veredito || 'nao_opina';
+            return `<li class="ge-v-${esc(v)}"><strong>${esc(a.nome)}</strong> <em>${esc(rotulo[v] || v)}</em> <span>${esc(a.leitura || '')}</span></li>`;
+        };
+        const todas = lista.map(linha).join('');
+        const cabem = lista.filter((a) => (a.veredito || '') === 'cabe');
+        const cabemHtml = cabem.length
+            ? cabem.map(linha).join('')
+            : '<li class="ge-v-nao_opina"><span>Nenhuma análise coube nesta geração.</span></li>';
+        const bloco = (chave, titulo, contagem, html) => {
+            const aberto = analisesAbertas[chave];
+            return `<button type="button" class="ge-analises-toggle${aberto ? ' is-open' : ''}" data-ge-analise="${chave}" aria-expanded="${aberto ? 'true' : 'false'}" aria-controls="geAnalises-${chave}">
+                <i class="fas fa-chevron-right ge-chevron" aria-hidden="true"></i>
+                ${titulo}
+                <span class="ge-analises-contagem">${esc(contagem)}</span>
+            </button>
+            <ul id="geAnalises-${chave}"${aberto ? '' : ' hidden'}>${html}</ul>`;
+        };
+        return `<div class="ge-analises">
+            ${bloco('todas', 'Todas as análises', String(lista.length), todas)}
+            ${bloco('cabem', 'As que cabem nesta geração', String(cabem.length), cabemHtml)}
+        </div>`;
+    }
+
+    function bindAnalisesToggle(box) {
+        if (!box) return;
+        box.querySelectorAll('.ge-analises-toggle').forEach((btn) => {
+            const chave = btn.getAttribute('data-ge-analise');
+            const painel = document.getElementById(btn.getAttribute('aria-controls'));
+            if (!chave || !painel) return;
+            btn.addEventListener('click', () => {
+                const abrir = painel.hasAttribute('hidden');
+                analisesAbertas[chave] = abrir;
+                painel.toggleAttribute('hidden', !abrir);
+                btn.classList.toggle('is-open', abrir);
+                btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+            });
+        });
+    }
+
     function renderApostas(data) {
         const box = document.getElementById('geResultados');
         if (!box) return;
         const apostas = data.apostas || [];
         if (!apostas.length) {
-            box.innerHTML = '<p class="text-muted mb-0">Nenhuma aposta gerada.</p>';
+            box.innerHTML = `${renderAnalises(data)}<p class="text-muted mb-0">Nenhuma aposta gerada.</p>`;
+            bindAnalisesToggle(box);
             const gerado = document.getElementById('gePanoramaGerado');
             if (gerado) gerado.classList.add('d-none');
             return;
@@ -260,7 +319,8 @@
             .map((ap, idx) => renderApostaRow(ap, data, confMap[idx] || null))
             .join('');
 
-        box.innerHTML = `${renderAvisosBanner(data)}${renderConfBar()}${renderSorteioHeader()}${rows}`;
+        box.innerHTML = `${renderAnalises(data)}${renderAvisosBanner(data)}${renderConfBar()}${renderSorteioHeader()}${rows}`;
+        bindAnalisesToggle(box);
         renderPanoramaGerado(data);
 
         const sel = document.getElementById('geSelConcurso');

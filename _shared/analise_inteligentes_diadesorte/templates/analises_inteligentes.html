@@ -37,6 +37,69 @@
   #ai-root .ai-kpi .lbl { font-size:.7rem; font-weight:700; color:#6c757d; text-transform:uppercase; }
   #ai-root .ai-kpi .val { font-size:1.1rem; font-weight:800; color:var(--primary-xdark); }
   #ai-root .ai-kpi .small { text-align: center; }
+  #ai-root #aiTabelaRecorrencia th,
+  #ai-root #aiTabelaRecorrencia td {
+    text-align: center !important;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  #ai-root #aiTabelaRecorrencia .ai-col-alinha {
+    display: inline-block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaRecorrencia td.td-n .ai-col-alinha { min-width: 2rem; }
+  #ai-root #aiTabelaRecorrencia td.td-saiu .ai-col-alinha,
+  #ai-root #aiTabelaRecorrencia td.td-desde .ai-col-alinha { min-width: 2.8rem; }
+  #ai-root #aiTabelaRecorrencia td.td-cada .ai-col-alinha { min-width: 2.6rem; }
+  #ai-root #aiTabelaRecorrencia td.td-padrao code {
+    display: inline-block;
+    min-width: 7.6rem;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em;
+  }
+  #ai-root #aiTabelaRecorrencia th.col-hora {
+    background: var(--primary-xdark, #664a00);
+  }
+  #ai-root #aiTabelaRecorrencia td.td-hora {
+    background: rgba(192, 139, 0, .14);
+    font-weight: 800;
+  }
+  #ai-root #aiTabelaRecorrencia td.td-hora .ai-col-alinha {
+    min-width: 9.2rem;
+    font-weight: 750;
+  }
+  #ai-root #aiTabelaRecorrencia tr.tr-rec-sel > td { background: rgba(192,139,0,.08); }
+  #ai-root #aiTabelaRecorrencia tr.tr-rec-hora > td {
+    background: rgba(192, 139, 0, .22);
+  }
+  #ai-root #aiTabelaRecorrencia tr.tr-rec-hora > td.td-hora {
+    background: rgba(192, 139, 0, .38);
+  }
+  #ai-root #aiTabelaRecorrencia tr.tr-rec-agora > td {
+    background: rgba(25, 135, 84, .16);
+  }
+  #ai-root #aiTabelaRecorrencia tr.tr-rec-agora > td.td-hora {
+    background: rgba(25, 135, 84, .30);
+  }
+  #ai-root #aiTabelaRecorrencia tr[data-act="ver-recorrencia"] { cursor: pointer; }
+  #ai-root #aiTabelaRecorrencia .ai-th-sub {
+    display: block;
+    font-size: .62rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: .92;
+  }
+  #ai-root .ai-rec-bar-track { background: rgba(192,139,0,.15); border-radius: 4px; height: .55rem; min-width: 5rem; }
+  #ai-root .ai-rec-bar { background: var(--primary, #c08b00); height: 100%; border-radius: 4px; }
+  #ai-root #aiRecDetalhe {
+    border: 1px solid rgba(192,139,0,.28);
+    border-radius: 10px;
+    background: var(--accent-light, #fffaf0);
+    padding: .75rem 1rem;
+  }
   #ai-root .ai-table { font-size:.82rem; }
   #ai-root .ai-table thead th {
     background: var(--primary); color:#fff; font-weight:700;
@@ -420,26 +483,31 @@
   #ai-root #aiTabelaPadroesII th.col-diag,
   #ai-root #aiTabelaPadroesII td.td-diag,
   #ai-root #aiTabelaJogosPadrao th.col-diag,
-  #ai-root #aiTabelaJogosPadrao td.td-diag {
+  #ai-root #aiTabelaJogosPadrao td.td-diag,
+  #ai-root #aiTabelaCheq td.td-diag {
     width: 1%;
     min-width: 0;
-    max-width: 13.6rem;
+    max-width: none;
     white-space: nowrap;
-    text-align: center !important;
+    text-align: left !important;
     padding-left: .28rem;
     padding-right: .28rem;
   }
-  /* Diag: 3 faixas da direita p/ esquerda; bloco estreito e centralizado */
+  /* Diag: todas as diagonais na mesma linha */
   #ai-root #aiTabelaPadroesII td.td-diag .ai-col-alinha,
-  #ai-root #aiTabelaJogosPadrao td.td-diag .ai-col-alinha {
-    display: inline-grid;
-    grid-template-columns: 4.15rem 0.28rem 4.15rem 0.28rem 4.15rem;
-    justify-items: end;
+  #ai-root #aiTabelaJogosPadrao td.td-diag .ai-col-alinha,
+  #ai-root #aiTabelaCheq td.td-diag .ai-col-alinha,
+  #ai-root #aiTabelaPanResumo td.td-diag .ai-col-alinha {
+    display: inline-flex;
     align-items: center;
-    width: 13.01rem;
+    justify-content: flex-start;
+    width: auto;
+    min-width: 0;
+    max-width: none;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
-    font-size: .76rem;
+    font-size: .72rem;
+    text-align: left;
   }
   #ai-root td.td-diag .ai-diag-sep {
     color: #6c757d;
@@ -564,8 +632,8 @@
   #ai-root #aiTabelaPadroesII td.td-apostar .ai-col-alinha { min-width: 4.2rem; }
   #ai-root #aiTabelaPadroesII td.td-ja-saiu .ai-col-alinha { min-width: 2.4rem; }
   #ai-root #aiTabelaPadroesII td.td-diag .ai-col-alinha {
-    display: inline-grid;
-    text-align: right;
+    display: inline-flex;
+    text-align: left;
   }
   #ai-root #aiTabelaJogosPadrao th.col-conc-jogo,
   #ai-root #aiTabelaJogosPadrao td.td-conc-jogo {
@@ -884,20 +952,29 @@
     font-size: .82rem;
   }
   #ai-root #aiTabelaCheq td.td-soma {
-    text-align: center !important;
+    text-align: left !important;
     white-space: nowrap;
+    padding-left: .4rem;
   }
   #ai-root #aiTabelaCheq td.td-soma .ai-soma-par {
-    display: inline-grid;
-    grid-template-columns: 2.6rem 9.6rem;
+    display: inline-flex;
     align-items: center;
-    column-gap: .35rem;
+    justify-content: flex-start;
+    gap: .18rem;
+    white-space: nowrap;
   }
   #ai-root #aiTabelaCheq td.td-soma .ai-col-alinha {
-    display: block;
+    display: inline-block;
+    box-sizing: border-box;
     text-align: right;
-    min-width: 2.6rem;
+    width: 2.15rem;
+    min-width: 2.15rem;
     font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaCheq .ai-status-pill {
+    padding: .02rem .28rem;
+    font-size: .62rem;
+    gap: .1rem;
   }
   #ai-root #aiTabelaCheq td:has(> .ai-pan-casas) {
     text-align: left !important;
@@ -950,13 +1027,42 @@
     background: #e7f6ec;
     vertical-align: middle;
   }
+  #ai-root #aiTabelaCheq {
+    font-size: .74rem;
+  }
+  #ai-root #aiTabelaCheq th,
+  #ai-root #aiTabelaCheq td {
+    white-space: nowrap;
+  }
+  #ai-root #aiTabelaCheq .ai-col-alinha,
+  #ai-root #aiTabelaCheq .ai-soma-par,
+  #ai-root #aiTabelaCheq .ai-status-pill,
+  #ai-root #aiTabelaCheq .ai-cheq-pref,
+  #ai-root #aiTabelaCheq .ai-pan-casas,
+  #ai-root #aiTabelaCheq .ai-cheq-ult {
+    white-space: nowrap;
+  }
+  #ai-root .ai-cheq-wrap {
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  #ai-root #aiTabelaCheq th:nth-child(2),
+  #ai-root #aiTabelaCheq td:nth-child(2) {
+    width: 1%;
+    padding-left: .15rem;
+    padding-right: .15rem;
+    font-size: .66rem;
+  }
   #ai-root #aiCheqUltimo .ai-cheq-ref {
     line-height: 1.15;
     white-space: nowrap;
     text-align: center;
   }
   #ai-root #aiCheqUltimo .ai-cheq-ref .small {
-    font-size: .68rem;
+    display: inline;
+    margin-left: .15rem;
+    font-size: .6rem;
     font-weight: 600;
     color: #6c757d;
   }
@@ -1246,12 +1352,10 @@
   #ai-root #aiTabelaPanResumo td.td-res-soma .ai-col-alinha { min-width: 2rem; }
   #ai-root #aiTabelaPanResumo td.td-res-dig .ai-col-alinha { min-width: 6.8rem; }
   #ai-root #aiTabelaPanResumo td.td-diag .ai-col-alinha {
-    display: inline-grid;
-    grid-template-columns: 3.9rem 0.22rem 3.9rem 0.22rem 3.9rem;
-    justify-items: end;
+    display: inline-flex;
     align-items: center;
-    width: 12.14rem;
-    min-width: 12.14rem;
+    width: auto;
+    min-width: 0;
     white-space: nowrap;
     font-size: .72rem;
   }
@@ -1490,7 +1594,7 @@
   </div>
 
   <div class="ai-hint mb-3">
-    Esta rota é <strong>análise</strong> ({% if modality_key == 'supersete' %}8{% else %}7{% endif %} abas). Em <strong>Padrões II</strong>, a coluna
+    Esta rota é <strong>análise</strong> ({% if modality_key == 'diadesorte' or modality_key == 'supersete' %}8{% else %}7{% endif %} abas). Em <strong>Padrões II</strong>, a coluna
     <em>Jogos</em> abre <strong>Padrões II (Apostas)</strong> (selecione, copie ou exporte para apostar).
     Os padrões selecionados alimentam o
     <a href="{{ construtor_url }}">Construtor de Construções</a> e os Geradores Elite.
@@ -1501,12 +1605,18 @@
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-combinacoes" type="button" data-aba="combinacoes">2 · Combinações</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-padroes" type="button" data-aba="padroes">3 · Padrões I</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-padroes-ii" type="button" data-aba="padroes-ii">4 · Padrões II</button></li>
+    {% if modality_key == 'diadesorte' %}
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-recorrencia" type="button" data-aba="recorrencia">5 · Recorrências</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-jogos-padrao" type="button" data-aba="jogos-padrao">6 · Apostas por Padrão</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-panorama" type="button" data-aba="panorama">7 · Panorama Histórico</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-checagem-seq" type="button" data-aba="checagem-seq">8 · Checagem de Sequências</button></li>
+    {% elif modality_key == 'supersete' %}
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-jogos-padrao" type="button" data-aba="jogos-padrao">5 · Apostas por Padrão</button></li>
-    {% if modality_key == 'supersete' %}
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tubular" type="button" data-aba="tubular">6 · Visualização Tubular</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-panorama" type="button" data-aba="panorama">7 · Panorama Histórico</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-checagem-seq" type="button" data-aba="checagem-seq">8 · Checagem de Sequências</button></li>
     {% else %}
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-jogos-padrao" type="button" data-aba="jogos-padrao">5 · Apostas por Padrão</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-panorama" type="button" data-aba="panorama">6 · Panorama Histórico</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-checagem-seq" type="button" data-aba="checagem-seq">7 · Checagem de Sequências</button></li>
     {% endif %}
@@ -1716,9 +1826,9 @@
               <th class="ai-sort col-dist" data-sort="descricao" data-table="p2">Distribuição <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-jogos" data-sort="jogos_possiveis" data-table="p2">Jogos <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-freq" data-sort="frequencia" data-table="p2">Freq. <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="p2" title="Concursos deste padrão que saíram com diagonal (Dif = Freq − Con/Diag)">Con/Diag <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-dif" data-sort="dif_diagonal" data-table="p2" title="Frequência − concursos com diagonal">Dif <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-diag" data-sort="diag_top" data-table="p2" title="Diagonais ↘↗ que mais acompanharam este padrão">Diag <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="p2" title="Quantos concursos deste padrão saíram com pelo menos uma diagonal no volante. Ex.: 40 de 55. Não diz quais diagonais — isso fica na coluna Diag.">Con/Diag <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dif" data-sort="dif_diagonal" data-table="p2" title="Freq. menos Con/Diag. É quantas vezes o padrão saiu sem diagonal. Ex.: Freq. 55 e Con/Diag 40 → Dif 15.">Dif <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-diag" data-sort="diag_top" data-table="p2" title="Até 3 diagonais que mais saíram junto com este padrão. ↘ desce para a direita; ↗ desce para a esquerda. Os números são as dezenas (ex.: 14-25). O | separa uma diagonal da outra. O vazio à esquerda é lugar reservado para caber 3. Con/Diag, ao lado, conta quantas vezes o padrão saiu com alguma diagonal.">Diag <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-atraso" data-sort="atraso" data-table="p2">Atraso <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-apostar" data-sort="para_apostar" data-table="p2" title="Dentro da média e ainda não saíram">Para apostar <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-ja-saiu" data-sort="ja_sairam_dentro" data-table="p2" title="Dentro da média e já saíram no histórico">Já saíram <span class="ai-sort-ind">⇅</span></th>
@@ -1861,6 +1971,57 @@
       </div>
     </div>
 
+    {% if modality_key == 'diadesorte' %}
+    <!-- ABA 5 — Recorrências (somente Dia de Sorte) -->
+    <div class="tab-pane fade" id="tab-recorrencia">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <h2 class="ai-evo-title mb-0">Recorrências</h2>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="aiRecAtualizar">
+          <i class="fas fa-sync"></i> Atualizar
+        </button>
+        <span class="small text-muted" id="aiRecInfo">—</span>
+      </div>
+      <p class="small text-muted mb-2">
+        <strong>Hora</strong> é quando apostar, mais ou menos: o concurso da última saída deste padrão, somado ao espaço médio. A linha dourada é a que está a até 3 concursos dessa hora, para um lado ou para o outro. A linha verde é o padrão que saiu agora.
+      </p>
+      <div class="row g-2 mb-3" id="aiRecKpis"></div>
+      <div class="mb-2">
+        <strong class="small">Voltam mais cedo</strong>
+        <div class="row g-2 mt-1" id="aiRecTopRapidos"></div>
+      </div>
+      <div id="aiRecDetalhe" class="mb-3" hidden></div>
+      <div class="d-flex flex-wrap gap-2 align-items-end mb-2">
+        <label class="small text-muted mb-0">Padrão (nº ou dígitos)
+          <input type="text" class="form-control form-control-sm" id="aiRecBusca" placeholder="12 ou 0 0 1…" autocomplete="off">
+        </label>
+        <select id="aiRecUso" class="form-select form-select-sm" style="width:auto">
+          <option value="todos" selected>Todos os 85</option>
+          <option value="com">Com intervalo (2 ou mais saídas)</option>
+          <option value="uma">Saíram uma vez</option>
+          <option value="nunca">Ainda não saíram</option>
+        </select>
+        <span class="small text-muted" id="aiRecMeta"></span>
+      </div>
+      <div class="table-responsive mb-2">
+        <table class="table table-sm table-bordered ai-table" id="aiTabelaRecorrencia">
+          <thead>
+            <tr>
+              <th class="ai-sort" data-sort="n_padrao" data-table="rec" title="Mesmo Nº da aba 4 · Padrões II">Nº <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="padrao" data-table="rec">Padrão <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-cada" data-sort="intervalo_medio" data-table="rec" title="De uma saída até a próxima: diferença dos números dos concursos. A coluna mostra a média dessas diferenças, arredondada.">Espaço médio <span class="ai-th-sub">de uma saída à próxima</span><span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-desde" data-sort="desde_ultima" data-table="rec" title="Zero = este padrão saiu no último concurso. A linha fica verde.">Desde a última <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-hora" data-sort="hora_abs" data-table="rec" title="Concurso da última saída somado ao espaço médio. Mais ou menos 3 concursos para cada lado.">Hora <span class="ai-th-sub">perto deste concurso</span><span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="ocorrencias" data-table="rec" title="Quantas vezes o padrão saiu no histórico">Saiu <span class="ai-sort-ind">⇅</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" class="text-muted">Abra esta aba para calcular a recorrência.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
 <!-- ABA 5 — Padrões II (Apostas) -->
     <!-- ABA 5 — Padrões II (Apostas) — visão operacional -->
     <div class="tab-pane fade" id="tab-jogos-padrao">
@@ -1990,9 +2151,9 @@
               <th class="ai-sort" data-sort="padrao_inicial" data-table="jogos">Padrão <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dezenas-centro" data-sort="dezenas_fmt" data-table="jogos">Aposta <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="soma" data-table="jogos">Soma <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="jogos" title="Concursos do padrão com diagonal (Dif = Freq − Con/Diag)">Con/Diag <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-dif" data-sort="dif_diagonal" data-table="jogos" title="Frequência − concursos com diagonal">Dif <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort col-diag" data-sort="qtd_diag" data-table="jogos" title="Diagonais ↘↗ presentes nesta aposta">Diag <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="jogos" title="Quantos concursos deste padrão saíram com pelo menos uma diagonal no volante. Ex.: 40 de 55. Não diz quais diagonais — isso fica na coluna Diag.">Con/Diag <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-dif" data-sort="dif_diagonal" data-table="jogos" title="Freq. menos Con/Diag. É quantas vezes o padrão saiu sem diagonal. Ex.: Freq. 55 e Con/Diag 40 → Dif 15.">Dif <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-diag" data-sort="qtd_diag" data-table="jogos" title="Diagonais desta aposta no volante. ↘ desce para a direita; ↗ desce para a esquerda. Os números são as dezenas (ex.: 14-25). O | separa uma diagonal da outra.">Diag <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="status_media" data-table="jogos">Status <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-conc-jogo" data-sort="concurso" data-table="jogos">Concurso <span class="ai-sort-ind">⇅</span></th>
             </tr>
@@ -2034,8 +2195,8 @@
         <div class="ai-hint mb-0">
           Padrões que <strong>já saíram</strong> no histórico, sem repetição: o padrão, quantas vezes
           e a distribuição B+M+A. Clique no <strong>padrão</strong> para abrir na aba 4 · Padrões II.
-          Abaixo, a <strong>sequência sorteada</strong> de cada concurso: o mesmo Nº da aba 5
-          em «Mostrar vencedor».
+          Abaixo, a <strong>sequência sorteada</strong> de cada concurso: o mesmo Nº de
+          <strong>Apostas por Padrão</strong> em «Mostrar vencedor».
         </div>
       </div>
       <div id="aiPanHistResumo" class="ai-pan-resumo"></div>
@@ -2082,8 +2243,8 @@
       <div class="ai-pan-seq" id="aiPanSeqWrap">
         <div class="ai-pan-col-title" id="aiPanSeqTitulo">Sequência sorteada em cada concurso</div>
         <p class="small text-muted mb-2">
-          Do concurso <strong>1</strong> ao atual: o <strong>nº da sequência</strong> é o mesmo que a aba 5
-          mostra ao clicar em <strong>Mostrar vencedor</strong> — a posição da aposta sorteada dentro do padrão.
+          Do concurso <strong>1</strong> ao atual: o <strong>nº da sequência</strong> é o mesmo que
+          <strong>Apostas por Padrão</strong> mostra ao clicar em <strong>Mostrar vencedor</strong> — a posição da aposta sorteada dentro do padrão.
           Clique no número para abrir essa sequência.
           O <strong>Nº</strong> é o mesmo da aba 4 (ordem por frequência) e <strong>Jogos</strong> é a quantidade de apostas possíveis daquele padrão.
         </p>
@@ -2109,9 +2270,9 @@
                 <th class="ai-sort col-pan-npad" data-sort="n_padrao" data-table="panSeq" title="Mesmo Nº da aba 4 · Padrões II, na ordem por frequência">Nº <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort col-pan-pad" data-sort="padrao" data-table="panSeq" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort col-pan-jogos" data-sort="jogos_possiveis" data-table="panSeq" title="Jogos possíveis deste padrão, a coluna Jogos da aba 4">Jogos <span class="ai-sort-ind">⇅</span></th>
-                <th class="ai-sort col-pan-seqn ai-col-medida" data-sort="sequencia_n" data-table="panSeq" title="Nº da aposta na aba 5 ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
+                <th class="ai-sort col-pan-seqn ai-col-medida" data-sort="sequencia_n" data-table="panSeq" title="Nº da aposta em Apostas por Padrão, ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort" data-sort="dezenas_fmt" data-table="panSeq" title="Clique para ordenar">Dezenas <span class="ai-sort-ind">⇅</span></th>
-                <th title="Diagonais desta linha no volante">Diagonais</th>
+                <th title="Diagonais deste concurso no volante. ↘ desce para a direita; ↗ desce para a esquerda. Os números são as dezenas. O | separa uma diagonal da outra.">Diagonais</th>
                 <th class="ai-sort col-pan-soma" data-sort="soma" data-table="panSeq" title="Clique para ordenar">Soma <span class="ai-sort-ind">⇅</span></th>
                 <th class="ai-sort col-pan-status" data-sort="status_media" data-table="panSeq" title="Clique para ordenar">Status <span class="ai-sort-ind">⇅</span></th>
               </tr>
@@ -2145,10 +2306,10 @@
                   <th class="ai-sort" data-sort="jogos_possiveis" data-table="panResumo" title="Quantidade de apostas possíveis deste padrão">Jogos<span class="ai-th-sub">apostas possíveis</span> <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort" data-sort="aposta_n" data-table="panResumo" title="Posição da aposta sorteada na lista completa do padrão">Nº válido<span class="ai-th-sub">aposta vencedora</span> <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort" data-sort="restantes" data-table="panResumo" title="Jogos menos o Nº válido">Restantes <span class="ai-sort-ind">⇅</span></th>
-                  <th class="ai-sort" data-sort="sequencia_n" data-table="panResumo" title="Nº da aba 5 ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
+                  <th class="ai-sort" data-sort="sequencia_n" data-table="panResumo" title="Nº em Apostas por Padrão ao clicar em Mostrar vencedor">Sequência <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort" data-sort="aposta_n" data-table="panResumo" title="Mesma posição da aposta sorteada na lista completa do padrão">Aposta<span class="ai-th-sub">vencedora</span> <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort" data-sort="soma" data-table="panResumo">Soma <span class="ai-sort-ind">⇅</span></th>
-                  <th>Diagonais</th>
+                  <th title="Diagonais deste concurso no volante. ↘ desce para a direita; ↗ desce para a esquerda. Os números são as dezenas. O | separa uma diagonal da outra.">Diagonais</th>
                   <th class="ai-sort" data-sort="digitos_ord" data-table="panResumo">Dígitos <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort" data-sort="qtd_digitos" data-table="panResumo">Qtd <span class="ai-sort-ind">⇅</span></th>
                   <th class="ai-sort" data-sort="par_imp" data-table="panResumo">Par/Ímpar <span class="ai-sort-ind">⇅</span></th>
@@ -2294,7 +2455,7 @@
         <div class="ai-cheq-rank-titulo">Ranking da soma — sorteios até hoje</div>
         <div id="aiCheqRankMediaBody" class="small text-muted">Carregando ranking…</div>
       </div>
-      <div class="table-responsive">
+      <div class="table-responsive ai-cheq-wrap">
         <table class="table table-sm table-bordered ai-table" id="aiTabelaCheq">
           <thead>
             <tr>
@@ -2302,7 +2463,7 @@
               <th class="ai-sort" data-sort="linha" data-table="cheq" title="Clique para ordenar">Nº <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="dezenas_fmt" data-table="cheq" title="Clique para ordenar">Aposta <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="soma" data-table="cheq" title="Clique para ordenar">Soma <span class="ai-sort-ind">⇅</span></th>
-              <th class="ai-sort" data-sort="n_diagonais" data-table="cheq" title="Clique para ordenar">Diagonais <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="n_diagonais" data-table="cheq" title="Diagonais desta linha no volante. ↘ desce para a direita; ↗ desce para a esquerda. Os números são as dezenas. O | separa uma diagonal da outra. O número antes do ponto é a quantidade.">Diagonais <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="padrao" data-table="cheq" title="Clique para ordenar">Padrão <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="prefixo_fmt" data-table="cheq" title="Clique para ordenar">Prefixo <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="existe_exata" data-table="cheq" title="Clique para ordenar">Existe? <span class="ai-sort-ind">⇅</span></th>
@@ -2405,6 +2566,7 @@
     panSeqAn: { key: 'ocorrencias', dir: 'desc' },
     evo: { key: 'concurso', dir: 'desc' },
     evoCons: { key: 'n_padrao', dir: 'asc' },
+    rec: { key: 'hora_abs', dir: 'asc' },
     cheq: { key: 'linha', dir: 'asc' },
   };
   let PAGE = { res: 1, pad: 1 };
@@ -2436,6 +2598,30 @@
     const ab = l.mes_abrev || nome.slice(0, 3).toUpperCase() || '—';
     const cls = nome ? `mes-nome-${nome}` : '';
     return `<span class="mes-pill ${cls}">${esc(ab)}</span>`;
+  }
+  const MES_NOME_CHEQ = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const MES_ABREV_CHEQ = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const MES_ALIAS_CHEQ = {
+    jan: 1, janeiro: 1, fev: 2, fevereiro: 2, mar: 3, marco: 3, março: 3, abr: 4, abril: 4,
+    mai: 5, maio: 5, jun: 6, junho: 6, jul: 7, julho: 7, ago: 8, agosto: 8,
+    set: 9, setembro: 9, out: 10, outubro: 10, nov: 11, novembro: 11, dez: 12, dezembro: 12,
+  };
+  function mesNumCheq(token, num) {
+    const n = Number(num);
+    if (n >= 1 && n <= 12) return n;
+    const raw = String(token || '').trim();
+    if (!raw) return 0;
+    if (/^\d+$/.test(raw)) {
+      const v = Number(raw);
+      return v >= 1 && v <= 12 ? v : 0;
+    }
+    const key = raw.toLowerCase().replace('ç', 'c');
+    return MES_ALIAS_CHEQ[key] || MES_ALIAS_CHEQ[raw.toLowerCase()] || 0;
+  }
+  function mesBadgeCheq(token, num) {
+    const n = mesNumCheq(token, num);
+    if (!n) return token ? `<span class="text-muted">${esc(token)}</span>` : '';
+    return `<span class="mes-pill mes-nome-${MES_NOME_CHEQ[n]}">${esc(MES_ABREV_CHEQ[n])}</span>`;
   }
   function downloadTxt(txt, nome) {
     const a = document.createElement('a');
@@ -3192,7 +3378,7 @@
       tb.innerHTML = pageRows.map((r) => {
         const infoR = r._resumo || camposResumoConcurso(r);
         const seq = r.sequencia_n
-          ? `<a href="#" class="ai-pan-link-pad" data-act="ir-sequencia" data-padrao="${esc(r.padrao)}" data-dezenas="${esc(r.dezenas_fmt)}" title="Abrir esta sequência na aba 5">${fmtVol(r.sequencia_n)}</a>`
+          ? `<a href="#" class="ai-pan-link-pad" data-act="ir-sequencia" data-padrao="${esc(r.padrao)}" data-dezenas="${esc(r.dezenas_fmt)}" title="Abrir esta sequência em Apostas por Padrão">${fmtVol(r.sequencia_n)}</a>`
           : '—';
         const diags = (typeof diagsDaAposta === 'function')
           ? diagsDaAposta({ dezenas: infoR.dez, dezenas_fmt: r.dezenas_fmt })
@@ -3256,7 +3442,7 @@
     } else {
       tb.innerHTML = pageRows.map((r) => {
         const seq = r.sequencia_n
-          ? `<a href="#" class="ai-pan-link-pad" data-act="ir-sequencia" data-padrao="${esc(r.padrao)}" data-dezenas="${esc(r.dezenas_fmt)}" title="Abrir esta sequência na aba 5">${fmtVol(r.sequencia_n)}</a>`
+          ? `<a href="#" class="ai-pan-link-pad" data-act="ir-sequencia" data-padrao="${esc(r.padrao)}" data-dezenas="${esc(r.dezenas_fmt)}" title="Abrir esta sequência em Apostas por Padrão">${fmtVol(r.sequencia_n)}</a>`
           : '—';
         const jogos = r.jogos_possiveis
           ? `<a href="#" class="ai-pan-link-pad" data-act="ver-jogos-padrao" data-padrao="${esc(r.padrao)}" title="Ver as ${fmtVol(r.jogos_possiveis)} apostas possíveis">${fmtVol(r.jogos_possiveis)}</a>`
@@ -4178,6 +4364,28 @@
     }).join('') || '<span class="small text-muted">sem diagonal neste recorte</span>';
   }
 
+  function diagDica(list, modo) {
+    const bits = (list || []).slice(0, 3).map((d) => {
+      const dir = String((d && d.dir_sym) || '').trim();
+      const nums = String((d && d.nums_fmt) || '').trim();
+      return `${dir} ${nums}`.trim();
+    }).filter(Boolean);
+    const leitura = bits.length ? bits.join(' | ') + '. ' : '';
+    const legenda = modo === 'aposta'
+      ? 'Diagonais desta aposta no volante. ↘ desce para a direita; ↗ desce para a esquerda. Os números são as dezenas. O | separa uma diagonal da outra.'
+      : 'Até 3 diagonais que mais saíram junto com este padrão. ↘ desce para a direita; ↗ desce para a esquerda. Os números são as dezenas. O | separa uma diagonal da outra. O vazio à esquerda é lugar reservado para caber 3.';
+    return leitura + legenda;
+  }
+
+  function dicaConDiag(n, freq, pct) {
+    const pctTxt = (pct != null && pct !== '') ? ` (${pct}%)` : '';
+    return `${fmtVol(n)} de ${fmtVol(freq)} concursos deste padrão saíram com diagonal${pctTxt}. Con/Diag conta quantas vezes o padrão veio com pelo menos uma diagonal. A coluna Diag mostra quais foram.`;
+  }
+
+  function dicaDif(dif, freq, n) {
+    return `Dif ${fmtVol(dif)} = Freq. ${fmtVol(freq)} − Con/Diag ${fmtVol(n)}. É quantas vezes este padrão saiu sem diagonal.`;
+  }
+
   function htmlDiagTexto(list) {
     const arr = (list || []).slice(0, 3);
     if (!arr.length) return '<span class="text-muted">—</span>';
@@ -4445,13 +4653,13 @@
       p.dif_diagonal = dif;
       const condiagCell = !Number.isFinite(nDiag)
         ? '<span class="text-muted">—</span>'
-        : `<span class="ai-col-alinha" title="${fmtVol(nDiag)} de ${fmtVol(freq)} concursos deste padrão tiveram diagonal (${esc(p.pct_com_diagonal || 0)}%)">${fmtVol(nDiag)}</span>`;
+        : `<span class="ai-col-alinha" title="${esc(dicaConDiag(nDiag, freq, p.pct_com_diagonal || 0))}">${fmtVol(nDiag)}</span>`;
       const difCell = !Number.isFinite(nDiag)
         ? '<span class="text-muted">—</span>'
-        : `<span class="ai-col-alinha">${fmtVol(dif)}</span>`;
+        : `<span class="ai-col-alinha" title="${esc(dicaDif(dif, freq, nDiag))}">${fmtVol(dif)}</span>`;
       const tops = p.top_diagonais || [];
       const diagCell = tops.length
-        ? `<span class="ai-col-alinha" title="Top diagonais deste padrão">${htmlDiagTexto(tops)}</span>`
+        ? `<span class="ai-col-alinha" title="${esc(diagDica(tops, 'padrao'))}">${htmlDiagTexto(tops)}</span>`
         : '<span class="text-muted">—</span>';
       return `<tr class="${cls}" data-padrao="${esc(p.padrao)}"${p.eh_padrao_ultimo_concurso ? ' title="Padrão do último resultado (vencedor)"' : ''}>
         <td><input type="checkbox" class="form-check-input ai-pad-ii-chk" data-padrao="${esc(p.padrao)}" ${checked}></td>
@@ -5205,10 +5413,10 @@
     const meta = metaPadraoDiag(JOGOS_PAD.padrao);
     const condiag = (meta.n_com_diagonal == null)
       ? '<span class="text-muted">—</span>'
-      : `<span class="ai-col-alinha" title="${fmtVol(meta.n_com_diagonal)} de ${fmtVol(meta.frequencia)} concursos deste padrão tiveram diagonal (${esc(meta.pct_com_diagonal || 0)}%)">${fmtVol(meta.n_com_diagonal)}</span>`;
+      : `<span class="ai-col-alinha" title="${esc(dicaConDiag(meta.n_com_diagonal, meta.frequencia, meta.pct_com_diagonal || 0))}">${fmtVol(meta.n_com_diagonal)}</span>`;
     const dif = (meta.n_com_diagonal == null)
       ? '<span class="text-muted">—</span>'
-      : `<span class="ai-col-alinha">${fmtVol(meta.dif_diagonal)}</span>`;
+      : `<span class="ai-col-alinha" title="${esc(dicaDif(meta.dif_diagonal, meta.frequencia, meta.n_com_diagonal))}">${fmtVol(meta.dif_diagonal)}</span>`;
     const baseNum = Number(JOGOS_PAD.offset) || 0;
     tbody.innerHTML = rows.map((j, i) => {
       const key = j.dezenas_fmt;
@@ -5232,7 +5440,7 @@
         ? `<span class="ai-col-alinha"><a href="#" class="fw-bold text-decoration-underline" data-act="ir-concurso" data-concurso="${esc(conc)}" title="Abrir concurso ${esc(conc)} na aba Resultados">${esc(conc)}</a><span class="badge-ja-saiu">já saiu</span></span>`
         : '<span class="text-muted small">—</span>';
       const diagHtml = diags.length
-        ? `<span class="ai-col-alinha" title="${diags.length} diagonal(is) nesta aposta">${htmlDiagTexto(diags)}</span>`
+        ? `<span class="ai-col-alinha" title="${esc(diagDica(diags, 'aposta'))}">${htmlDiagTexto(diags)}</span>`
         : '<span class="text-muted">—</span>';
       const numSeq = baseNum + i + 1;
       const numCls = jaSaiu ? 'text-center td-num-ja-saiu' : 'text-center text-muted';
@@ -5588,9 +5796,11 @@
       : '—');
     const pendente = '<span class="text-muted">…</span>';
     if (lbl) lbl.textContent = `Último resultado — concurso ${l.concurso}`;
+    const dataCheia = String(l.data || '').trim();
+    const dataCurta = dataCheia.replace(/^(\d{2}\/\d{2})\/\d{2,4}$/, '$1');
     tbody.innerHTML = `<tr class="ai-cheq-oficial" title="Resultado oficial do concurso ${esc(l.concurso)}">
       <td></td>
-      <td class="ai-cheq-ref"><strong>${esc(l.concurso)}</strong><div class="small">${esc(l.data || '')}</div></td>
+      <td class="ai-cheq-ref" title="${esc(l.concurso)}${dataCheia ? ' ' + esc(dataCheia) : ''}"><strong>${esc(l.concurso)}</strong>${dataCurta ? ` <span class="small">${esc(dataCurta)}</span>` : ''}</td>
       <td class="font-monospace">${htmlCheqOficialDezenas(l)}</td>
       <td class="td-soma">${somaHtml}</td>
       <td class="td-diag td-left">${diagHtml}</td>
@@ -6109,6 +6319,234 @@
   bindCollapseToggle('aiJogosPadToggleInfo', 'aiJogosPadPainelInfo');
   bindCollapseToggle('aiPanHistToggleInfo', 'aiPanHistPainelInfo');
   bindCollapseToggle('aiEvoToggleInfo', 'aiEvoPainelInfo');
+
+  let REC = { padroes: [], meta: null, carregado: false, carregando: false, sel: '' };
+  function marcarHoraRec(p, ultimo) {
+    const esp = Number(p.intervalo_medio);
+    const ultP = Number(p.ultimo_concurso);
+    const ultG = Number(ultimo);
+    if (!Number.isFinite(esp) || !Number.isFinite(ultP) || !Number.isFinite(ultG)) {
+      p.hora_alvo = null;
+      p.hora_falta = null;
+      p.hora_abs = null;
+      return p;
+    }
+    const alvo = ultP + Math.round(esp);
+    const falta = alvo - ultG;
+    p.hora_alvo = alvo;
+    p.hora_falta = falta;
+    p.hora_abs = Math.abs(falta);
+    return p;
+  }
+  function htmlHora(p) {
+    if (p.hora_alvo == null) return '—';
+    const alvo = fmtVol(p.hora_alvo);
+    const falta = Number(p.hora_falta);
+    let sub = `passou ${fmtVol(-falta)}`;
+    if (Math.abs(falta) <= 3) sub = 'agora';
+    else if (falta > 0) sub = `falta ${fmtVol(falta)}`;
+    return `<span class="ai-col-alinha">(${alvo} ${sub})</span>`;
+  }
+  function fmtRecVolta(n) {
+    if (n == null || n === '') return '—';
+    const v = Number(n);
+    if (!Number.isFinite(v)) return '—';
+    return String(Math.round(v));
+  }
+  function fmtRecNum(n, casas) {
+    if (n == null || n === '') return '—';
+    const v = Number(n);
+    if (!Number.isFinite(v)) return '—';
+    return v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+  }
+  function fmtRecInt(n) {
+    if (n == null || n === '') return '—';
+    return fmtVol(n);
+  }
+  function fmtRecModa(p) {
+    if (p.moda_intervalo == null) return '—';
+    if (p.moda_empate && (p.modas || []).length > 1) {
+      return `${esc(p.moda_intervalo)} <span class="text-muted" title="Empate entre ${esc((p.modas || []).join(', '))}">(empate)</span>`;
+    }
+    return esc(p.moda_intervalo);
+  }
+  function recBateBusca(p, q) {
+    if (!q) return true;
+    if (String(p.n_padrao) === q) return true;
+    const dig = String(p.padrao || '').replace(/\s+/g, '');
+    const qq = q.replace(/\s+/g, '');
+    return dig.includes(qq) || String(p.descricao || '').toLowerCase().includes(q.toLowerCase());
+  }
+  function filtrarRec() {
+    const q = String(document.getElementById('aiRecBusca')?.value || '').trim();
+    const uso = document.getElementById('aiRecUso')?.value || 'todos';
+    return (REC.padroes || []).filter((p) => {
+      if (uso === 'com' && !(Number(p.qtd_intervalos) > 0)) return false;
+      if (uso === 'uma' && Number(p.ocorrencias) !== 1) return false;
+      if (uso === 'nunca' && Number(p.ocorrencias) !== 0) return false;
+      return recBateBusca(p, q);
+    });
+  }
+  function cmpRec(a, b) {
+    const sk = SORT.rec || { key: 'hora_abs', dir: 'asc' };
+    const dir = sk.dir === 'asc' ? 1 : -1;
+    const key = sk.key;
+    if (key === 'padrao' || key === 'descricao') {
+      const cmp = String(a[key] || '').localeCompare(String(b[key] || ''), 'pt-BR');
+      return cmp ? dir * cmp : (Number(a.n_padrao) || 0) - (Number(b.n_padrao) || 0);
+    }
+    const aNull = a[key] == null || a[key] === '';
+    const bNull = b[key] == null || b[key] === '';
+    if (aNull && bNull) return (Number(a.n_padrao) || 0) - (Number(b.n_padrao) || 0);
+    if (aNull) return 1;
+    if (bNull) return -1;
+    const cmp = dir * ((+a[key]) - (+b[key]));
+    return cmp || ((Number(a.n_padrao) || 0) - (Number(b.n_padrao) || 0));
+  }
+  function htmlRecCard(t, rotulo, detalhe) {
+    return `<div class="col-md-4"><div class="ai-kpi ai-top-freq-card" role="button" tabindex="0" data-act="ver-recorrencia" data-padrao="${esc(t.padrao)}" title="${esc(t.descricao || '')}">
+      <div class="lbl">${esc(rotulo)} · Nº ${esc(t.n_padrao)}</div>
+      <div class="val" style="font-size:.92rem"><code>${esc(t.padrao)}</code></div>
+      <div class="small text-muted">${detalhe}</div>
+    </div></div>`;
+  }
+  function renderRecDetalhe(p) {
+    const box = document.getElementById('aiRecDetalhe');
+    if (!box) return;
+    if (!p || !(Number(p.qtd_intervalos) > 0)) {
+      box.hidden = !p;
+      box.innerHTML = p
+        ? `<strong>Padrão <code>${esc(p.padrao)}</code></strong> saiu ${fmtRecInt(p.ocorrencias)} vez. Ainda não há intervalo entre saídas.`
+        : '';
+      return;
+    }
+    const hist = p.histograma_intervalos || [];
+    const maxV = Math.max(1, ...hist.map((h) => Number(h.vezes) || 0));
+    const total = Number(p.qtd_intervalos) || hist.reduce((s, h) => s + (Number(h.vezes) || 0), 0);
+    const linhas = hist.map((h) => {
+      const vezes = Number(h.vezes) || 0;
+      const pct = total ? (100 * vezes / total) : 0;
+      const w = Math.max(4, Math.round(100 * vezes / maxV));
+      return `<tr>
+        <td>${esc(h.intervalo)}</td>
+        <td>${fmtVol(vezes)}</td>
+        <td>${fmtRecNum(pct, 1)}%</td>
+        <td><div class="ai-rec-bar-track"><div class="ai-rec-bar" style="width:${w}%"></div></div></td>
+      </tr>`;
+    }).join('');
+    const seq = (p.intervalos || []).join(', ');
+    const modaTxt = p.moda_intervalo == null
+      ? ''
+      : ` O espaço que mais se repete é <strong>${esc(p.moda_intervalo)}</strong> concursos (${fmtVol(p.moda_vezes)} vezes).`;
+    box.hidden = false;
+    box.innerHTML = `
+      <div class="mb-2">
+        <strong><code>${esc(p.padrao)}</code></strong> tem espaço médio de <strong>${fmtRecVolta(p.intervalo_medio)}</strong> concursos, de uma saída até a próxima
+        (média exata ${fmtRecNum(p.intervalo_medio, 2)}).
+        Desde a última: <strong>${fmtRecInt(p.desde_ultima)}</strong>.
+        Hora de apostar, mais ou menos: concurso <strong>${p.hora_alvo == null ? '—' : fmtVol(p.hora_alvo)}</strong>
+        (${Math.abs(Number(p.hora_falta)) <= 3 ? 'é por volta de agora' : (Number(p.hora_falta) > 0 ? `faltam ${fmtVol(p.hora_falta)}` : `passou há ${fmtVol(-Number(p.hora_falta))}`)}).${modaTxt}
+      </div>
+      <div class="table-responsive mb-2">
+        <table class="table table-sm table-bordered ai-table mb-0">
+          <thead><tr><th>Espaço</th><th>Vezes</th><th>Frequência</th><th></th></tr></thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      </div>
+      <div class="small text-muted">Na ordem dos sorteios: <span class="font-monospace">${esc(seq)}</span></div>`;
+  }
+  function renderRecorrencia() {
+    const meta = REC.meta || {};
+    const kpis = document.getElementById('aiRecKpis');
+    if (kpis) {
+      kpis.innerHTML = [
+        ['Padrões', meta.total_padroes],
+        ['Com intervalo', meta.padroes_com_intervalo],
+        ['Uma vez', meta.padroes_uma_vez],
+        ['Nunca saíram', meta.padroes_nunca],
+        ['Concursos', meta.total_concursos],
+        ['Último', meta.ultimo_concurso],
+      ].map(([lab, val]) => `
+        <div class="col-6 col-md-2"><div class="ai-kpi"><div class="lbl">${esc(lab)}</div>
+        <div class="val">${val == null ? '—' : fmtVol(val)}</div></div></div>`).join('');
+    }
+    const rap = document.getElementById('aiRecTopRapidos');
+    const reg = document.getElementById('aiRecTopRegulares');
+    const lon = document.getElementById('aiRecTopLongos');
+    if (rap) {
+      rap.innerHTML = (meta.top_mais_rapidos || []).map((t, i) => htmlRecCard(
+        t, `Top ${i + 1}`,
+        `espaço médio ${fmtRecVolta(t.intervalo_medio)} · hora ${t.hora_alvo == null ? '—' : fmtVol(t.hora_alvo)}`
+      )).join('') || '<div class="col-12 small text-muted">Sem intervalo ainda.</div>';
+    }
+    const sk = SORT.rec || { key: 'hora_abs', dir: 'asc' };
+    document.querySelectorAll('#aiTabelaRecorrencia th.ai-sort').forEach((th) => {
+      th.classList.toggle('ai-sort-asc', th.dataset.sort === sk.key && sk.dir === 'asc');
+      th.classList.toggle('ai-sort-desc', th.dataset.sort === sk.key && sk.dir === 'desc');
+    });
+    const rows = filtrarRec().sort(cmpRec);
+    const tbody = document.querySelector('#aiTabelaRecorrencia tbody');
+    if (tbody) {
+      tbody.innerHTML = rows.map((p) => {
+        const agora = p.desde_ultima != null && Number(p.desde_ultima) === 0;
+        const naHora = !agora && p.hora_abs != null && Number(p.hora_abs) <= 3;
+        const cls = [agora ? 'tr-rec-agora' : '', naHora ? 'tr-rec-hora' : '', p.padrao === REC.sel ? 'tr-rec-sel' : ''].filter(Boolean).join(' ');
+        const titulo = agora ? 'Saiu no último concurso' : (naHora ? 'Mais ou menos a hora de apostar neste padrão' : '');
+        return `<tr class="${cls}" data-act="ver-recorrencia" data-padrao="${esc(p.padrao)}"${titulo ? ` title="${titulo}"` : ''}>
+        <td class="td-n"><span class="ai-col-alinha">${esc(p.n_padrao)}</span></td>
+        <td class="td-padrao"><code>${esc(p.padrao)}</code></td>
+        <td class="td-cada"><span class="ai-col-alinha">${fmtRecVolta(p.intervalo_medio)}</span></td>
+        <td class="td-desde"><span class="ai-col-alinha">${fmtRecInt(p.desde_ultima)}</span></td>
+        <td class="td-hora">${htmlHora(p)}</td>
+        <td class="td-saiu"><span class="ai-col-alinha">${fmtRecInt(p.ocorrencias)}</span></td>
+      </tr>`;
+      }).join('') || '<tr><td colspan="6" class="text-muted">Nenhum padrão com este filtro.</td></tr>';
+    }
+    const metaEl = document.getElementById('aiRecMeta');
+    if (metaEl) metaEl.textContent = `Exibindo ${rows.length} de ${REC.padroes.length}`;
+    const info = document.getElementById('aiRecInfo');
+    if (info && meta.total_concursos != null) {
+      const ms = meta.elapsed_ms != null ? ` · ${meta.elapsed_ms} ms` : '';
+      const cache = meta.cache_hit ? ' (cache)' : '';
+      info.textContent = `${fmtVol(meta.total_concursos)} concursos · ${fmtVol(meta.padroes_com_intervalo)} com intervalo${ms}${cache}`;
+    }
+    renderRecDetalhe((REC.padroes || []).find((p) => p.padrao === REC.sel));
+  }
+  async function carregarRecorrencia(force) {
+    if (MODALITY_KEY !== 'diadesorte') return;
+    const info = document.getElementById('aiRecInfo');
+    if (REC.carregando) return;
+    if (REC.carregado && !force) {
+      renderRecorrencia();
+      return;
+    }
+    REC.carregando = true;
+    if (info) info.textContent = 'Calculando intervalos…';
+    try {
+      const r = await fetch(`${API}/recorrencia-padroes`);
+      const d = await r.json();
+      if (!d.sucesso) throw new Error(d.erro || 'Falha ao calcular a recorrência');
+      REC.padroes = (d.padroes || []).map((p) => marcarHoraRec(p, d.ultimo_concurso));
+      (d.top_mais_rapidos || []).forEach((p) => marcarHoraRec(p, d.ultimo_concurso));
+      REC.meta = d;
+      REC.carregado = true;
+      if (!REC.sel) {
+        const perto = REC.padroes.filter((p) => p.hora_abs != null).sort((a, b) => a.hora_abs - b.hora_abs)[0];
+        if (perto) REC.sel = perto.padrao;
+      }
+      renderRecorrencia();
+    } catch (e) {
+      if (info) info.textContent = e.message || String(e);
+      const tbody = document.querySelector('#aiTabelaRecorrencia tbody');
+      if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="text-danger">${esc(e.message || e)}</td></tr>`;
+    } finally {
+      REC.carregando = false;
+    }
+  }
+  document.getElementById('aiRecAtualizar')?.addEventListener('click', () => carregarRecorrencia(true));
+  document.getElementById('aiRecBusca')?.addEventListener('input', () => { if (REC.carregado) renderRecorrencia(); });
+  document.getElementById('aiRecUso')?.addEventListener('change', () => { if (REC.carregado) renderRecorrencia(); });
+
   // Auto-carrega Padrões II / Combinações ao clicar na aba
   document.querySelectorAll('#aiTabs [data-bs-toggle="tab"]').forEach(btn => {
     btn.addEventListener('shown.bs.tab', () => {
@@ -6135,6 +6573,7 @@
         if (!PAN_HIST.carregado) carregarHistoricoCompleto();
         else renderPanoramaHist();
       }
+      if (aba === 'recorrencia') carregarRecorrencia();
     });
   });
 
@@ -6310,6 +6749,10 @@
         renderEvolucaoPadroes();
         return;
       }
+      if (table === 'rec') {
+        renderRecorrencia();
+        return;
+      }
       PAGE[table] = 1;
       renderResultados(CACHE, { keepCache: true });
       return;
@@ -6374,6 +6817,15 @@
       ev.preventDefault();
       const pad = btn.dataset.padrao || '';
       if (pad) abrirPadraoNaAba4(pad);
+      return;
+    }
+    if (act === 'ver-recorrencia') {
+      ev.preventDefault();
+      const padRec = btn.dataset.padrao || '';
+      if (!padRec) return;
+      REC.sel = padRec;
+      renderRecorrencia();
+      document.getElementById('aiRecDetalhe')?.scrollIntoView({ block: 'nearest' });
       return;
     }
     if (act === 'ir-vencedor') {
@@ -6524,6 +6976,7 @@
       else goAba('padroes-ii');
     }
     if (aba0 === 'panorama') carregarHistoricoCompleto();
+    if (aba0 === 'recorrencia') carregarRecorrencia();
   });
   bindCheqDrop();
   document.getElementById('aiCheqBtn')?.addEventListener('click', checarSequencias);
@@ -6583,7 +7036,10 @@
         </span>
       </span>`;
     }).join('')}</div>`;
-    return casas + (r.mes_colado ? ` <span class="text-muted">${esc(r.mes_colado)}</span>` : '');
+    const mesHtml = (r.mes_colado || r.mes_num_colado)
+      ? mesBadgeCheq(r.mes_colado, r.mes_num_colado)
+      : '';
+    return casas + (mesHtml ? ` ${mesHtml}` : '');
   }
 
   function proximaDezenaCheq(slots, index, atual, delta, lim) {

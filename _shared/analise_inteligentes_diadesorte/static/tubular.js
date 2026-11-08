@@ -3662,6 +3662,33 @@
     return (Math.round(n * 10) / 10).toFixed(1).replace('.', ',');
   };
 
+  TubularApp.prototype._diagAlignMetrics = function (rows) {
+    let segCh = 5;
+    let numW = 2;
+    let pctW = 6;
+    (rows || []).forEach((d) => {
+      const segLen = (d.nums || []).map(fmt2).join('-').length;
+      if (segLen > segCh) segCh = segLen;
+      const vz = this._diagPadNum(d.vezes || 0).length;
+      const at = this._diagPadNum(d.atraso || 0).length;
+      if (vz > numW) numW = vz;
+      if (at > numW) numW = at;
+      const pctLen = this._diagPadPct(d.pct || 0).length;
+      if (pctLen > pctW) pctW = pctLen;
+    });
+    return { segCh, numW, pctW };
+  };
+
+  TubularApp.prototype._diagPadNum = function (n) {
+    return String(Math.max(0, Number(n) || 0)).padStart(2, '0');
+  };
+
+  TubularApp.prototype._diagPadPct = function (n) {
+    const raw = String(this._diagFmtPct(n || 0));
+    const bits = raw.split(',');
+    return bits[0].padStart(2, '0') + (bits.length > 1 ? ',' + bits[1] : '') + '%';
+  };
+
   TubularApp.prototype._diagRowHtml = function (s, opts) {
     opts = opts || {};
     const sym = this._diagDirSym(s.dir);
@@ -3673,18 +3700,22 @@
     const last = opts.showLast
       ? `<td>${s.last != null ? '#' + s.last : '—'}</td>`
       : '';
+    const align = opts.align || {};
+    const numW = align.numW || 2;
+    const pctCh = align.pctW || 6;
+    const segCh = Math.max(align.segCh || 0, nums.length);
     const curCls = opts.isCurrent ? ' tb-cmp-diag-cur' : '';
     const onCls = opts.isOn ? ' tb-cmp-diag-on' : '';
     const focusCls = opts.isFocus ? ' tb-cmp-diag-focus' : '';
     const concAttr = s.contest != null ? ` data-diag-contest="${esc(String(s.contest))}"` : '';
     return `<tr class="tb-cmp-diag-row${curCls}${onCls}${focusCls}" data-diag-nums="${(s.nums || []).join(',')}" data-diag-dir="${esc(s.dir || '')}" data-diag-key="${esc(s.key || '')}"${concAttr} title="Clique para ver no volante">
       ${idx}${conc}
-      <td class="tb-align-mono tb-cmp-diag-seg">${nums}</td>
+      <td class="tb-align-mono tb-cmp-diag-seg"><span class="tb-rank-slot" style="width:${segCh}ch">${nums}</span></td>
       <td class="tb-cmp-diag-dir" title="${esc(this._diagDirTitle(s.dir))}"><span class="tb-cmp-diag-arrow">${sym}</span></td>
       <td><span class="${tipoCls}">${tipo}</span></td>
-      <td>${s.vezes || 0}</td>
-      <td>${this._diagFmtPct(s.pct || 0)}%</td>
-      <td>${s.vezes ? s.atraso : '—'}</td>
+      <td class="tb-rank-num"><span class="tb-rank-slot" style="width:${numW}ch">${this._diagPadNum(s.vezes || 0)}</span></td>
+      <td class="tb-rank-num"><span class="tb-rank-slot" style="width:${pctCh}ch">${this._diagPadPct(s.pct || 0)}</span></td>
+      <td class="tb-rank-num"><span class="tb-rank-slot" style="width:${numW}ch">${s.vezes ? this._diagPadNum(s.atraso) : '—'}</span></td>
       ${last}
     </tr>`;
   };
@@ -3708,7 +3739,7 @@
           const sym = this._diagDirSym(r.dir);
           return `<span class="tb-cmp-diag-run" title="${esc(this._diagDirTitle(r.dir))}">${sym} ${r.nums.map(fmt2).join('-')}</span>`;
         });
-        now.innerHTML = `Concurso <strong>#${esc(String(ofc.contest))}</strong>: ` + bits.join(' · ');
+        now.innerHTML = `Concurso <strong>#${esc(String(ofc.contest))}</strong>: ` + bits.join(' <span class="tb-diag13-sep">|</span> ');
       }
     }
 
@@ -3798,9 +3829,11 @@
     const rankBody = this.root.querySelector('#tbCmpDiagBody');
     if (rankBody) {
       if (rankBody.getAttribute('data-diag-sig') !== stats.sig) {
+        const rankAlign = this._diagAlignMetrics(stats.ranking || []);
         rankBody.innerHTML = (stats.ranking || []).map((s, i) => this._diagRowHtml(s, {
           rank: i + 1,
           showLast: true,
+          align: rankAlign,
           isOn: s.nums.every(x => set.has(x)),
           isFocus: !!(focusKey && s.key === focusKey),
         })).join('');
@@ -3818,23 +3851,36 @@
     const logBody = this.root.querySelector('#tbCmpDiagLogBody');
     if (logBody) {
       const curContest = ofc ? Number(ofc.contest) : null;
+      const groups = [];
+      (stats.log || []).forEach((s) => {
+        const last = groups[groups.length - 1];
+        if (last && Number(last[0].contest) === Number(s.contest)) last.push(s);
+        else groups.push([s]);
+      });
+      groups.reverse();
       if (logBody.getAttribute('data-diag-sig') !== stats.sig) {
-        logBody.innerHTML = (stats.log || []).map((s) => this._diagRowHtml(s, {
-          showContest: true,
-          isCurrent: curContest != null && Number(s.contest) === curContest,
-          isOn: curContest != null && Number(s.contest) === curContest && s.nums.every(x => set.has(x)),
-          isFocus: !!(focus && Number(focus.contest) === Number(s.contest) && (focus.key || '') === (s.key || '')),
-        })).join('');
+        const logAlign = this._diagAlignMetrics(stats.log || []);
+        logBody.innerHTML = groups.map((items) => {
+          const conc = Number(items[0].contest);
+          const isCur = curContest != null && conc === curContest;
+          return this._diagLogContestRowHtml(items, {
+            isCurrent: isCur,
+            isOn: isCur && items.every((s) => (s.nums || []).every((x) => set.has(x))),
+            focusKey: (focus && Number(focus.contest) === conc) ? (focus.key || '') : '',
+            align: logAlign,
+          });
+        }).join('');
         logBody.setAttribute('data-diag-sig', stats.sig);
       } else {
         logBody.querySelectorAll('tr[data-diag-contest]').forEach((tr) => {
           const conc = Number(tr.getAttribute('data-diag-contest'));
-          const ns = String(tr.getAttribute('data-diag-nums') || '').split(',').map(Number).filter(Number.isFinite);
-          const key = tr.getAttribute('data-diag-key') || '';
           const isCur = curContest != null && conc === curContest;
           tr.classList.toggle('tb-cmp-diag-cur', isCur);
-          tr.classList.toggle('tb-cmp-diag-on', isCur && ns.length > 0 && ns.every(x => set.has(x)));
-          tr.classList.toggle('tb-cmp-diag-focus', !!(focus && Number(focus.contest) === conc && (focus.key || '') === key));
+          tr.classList.toggle('tb-cmp-diag-on', isCur);
+          tr.querySelectorAll('.tb-diag-log-piece').forEach((el) => {
+            const key = el.getAttribute('data-diag-key') || '';
+            el.classList.toggle('is-focus', !!(focus && Number(focus.contest) === conc && key === (focus.key || '')));
+          });
         });
       }
       if (curContest != null && !this.cmpPlaying) {
@@ -3857,14 +3903,51 @@
       const nLog = (stats.log || []).length;
       const nConc = stats.n || 0;
       logMeta.textContent = nConc
-        ? `${nLog} diagonais registradas em ${stats.nComDiag || 0} de ${nConc} concursos (do 1º ao atual).`
+        ? `${nLog} diagonais registradas em ${stats.nComDiag || 0} de ${nConc} concursos (do atual ao 1º).`
         : '';
     }
   };
 
+  TubularApp.prototype._diagLogContestRowHtml = function (items, opts) {
+    opts = opts || {};
+    const list = items || [];
+    if (!list.length) return '';
+    const align = opts.align || this._diagAlignMetrics(list);
+    const numW = align.numW || 2;
+    const pctCh = align.pctW || 6;
+    const segCh = align.segCh || 5;
+    const sep = '<span class="tb-diag13-sep">|</span>';
+    const piece = (item, html, ch) => {
+      const on = opts.focusKey && item.key === opts.focusKey ? ' is-focus' : '';
+      return `<span class="tb-diag-log-piece${on}" style="width:${ch}" data-diag-nums="${(item.nums || []).join(',')}" data-diag-dir="${esc(item.dir || '')}" data-diag-key="${esc(item.key || '')}">${html}</span>`;
+    };
+    const seg = list.map((s) => piece(s, (s.nums || []).map(fmt2).join('-'), segCh + 'ch')).join(sep);
+    const dir = list.map((s) => piece(s, `<span class="tb-cmp-diag-arrow">${this._diagDirSym(s.dir)}</span>`, '1.7rem')).join('');
+    const tipo = list.map((s) => {
+      const k = s.tipo || this._diagTipoKey(s.len || 2);
+      return piece(s, `<span class="tb-cmp-diag-tipo tb-cmp-diag-tipo-${k}">${this._diagTipoLabel(s.len || k)}</span>`, '4.8rem');
+    }).join(sep);
+    const vezes = list.map((s) => piece(s, this._diagPadNum(s.vezes || 0), numW + 'ch')).join(sep);
+    const pct = list.map((s) => piece(s, this._diagPadPct(s.pct || 0), pctCh + 'ch')).join(sep);
+    const atraso = list.map((s) => piece(s, s.vezes ? this._diagPadNum(s.atraso) : '—', numW + 'ch')).join(sep);
+    const first = list[0];
+    const curCls = opts.isCurrent ? ' tb-cmp-diag-cur' : '';
+    const onCls = opts.isOn ? ' tb-cmp-diag-on' : '';
+    return `<tr class="tb-cmp-diag-row tb-diag-log-conc${curCls}${onCls}" data-diag-contest="${esc(String(first.contest))}" title="Clique numa diagonal para destacar no volante">
+      <td class="tb-cmp-diag-conc">#${esc(String(first.contest))}</td>
+      <td class="tb-align-mono tb-cmp-diag-seg">${seg}</td>
+      <td class="tb-cmp-diag-dir">${dir}</td>
+      <td>${tipo}</td>
+      <td>${vezes}</td>
+      <td>${pct}</td>
+      <td>${atraso}</td>
+    </tr>`;
+  };
+
   TubularApp.prototype._onCmpDiagRowClick = function (tr) {
     if (!tr) return;
-    const contest = parseInt(tr.getAttribute('data-diag-contest'), 10);
+    const row = tr.closest ? (tr.closest('tr') || tr) : tr;
+    const contest = parseInt(tr.getAttribute('data-diag-contest') || row.getAttribute('data-diag-contest'), 10);
     const nums = String(tr.getAttribute('data-diag-nums') || '').split(',').map(Number).filter(Number.isFinite);
     const dir = tr.getAttribute('data-diag-dir') || '';
     const key = tr.getAttribute('data-diag-key') || this._diagSegKey(dir, nums);
@@ -4817,29 +4900,55 @@
       body.innerHTML = `<tr><td colspan="${colspan}" class="text-muted">Gere apostas com diagonal + DNA.</td></tr>`;
       return;
     }
+    let segCh = 5;
+    let numW = 2;
+    let pctW = 6;
+    list.forEach((g) => {
+      (g.diags || []).forEach((d) => {
+        const segLen = (d.nums || []).map(fmt2).join('-').length;
+        if (segLen > segCh) segCh = segLen;
+        const vz = String(Math.max(0, Number(d.vezes) || 0)).padStart(2, '0').length;
+        const at = String(Math.max(0, Number(d.atraso) || 0)).padStart(2, '0').length;
+        if (vz > numW) numW = vz;
+        if (at > numW) numW = at;
+        const pctShown = String(this._diagFmtPct(d.pct || 0));
+        const pctBits = pctShown.split(',');
+        const pctLen = (pctBits[0].padStart(2, '0') + (pctBits.length > 1 ? ',' + pctBits[1] : '') + '%').length;
+        if (pctLen > pctW) pctW = pctLen;
+      });
+    });
+    const padNum = (n) => String(Math.max(0, Number(n) || 0)).padStart(2, '0');
+    const padPct = (n) => {
+      const raw = this._diagFmtPct(n || 0);
+      const bits = String(raw).split(',');
+      return bits[0].padStart(2, '0') + (bits.length > 1 ? ',' + bits[1] : '') + '%';
+    };
+    const slot = (cls, html, ch) => `<span class="tb-diag13-slot ${cls}" style="width:${ch}">${html}</span>`;
+    const sep = '<span class="tb-diag13-sep">|</span>';
     body.innerHTML = list.map((g, i) => {
       const diags = g.diags || [];
-      const seg = diags.map((d) => (d.nums || []).map(fmt2).join('-')).join('<br>');
-      const dir = diags.map((d) => `<span class="tb-cmp-diag-arrow">${this._diagDirSym(d.dir)}</span>`).join('<br>');
+      const seg = diags.map((d) => slot('tb-diag13-slot-seg', (d.nums || []).map(fmt2).join('-'), segCh + 'ch')).join(sep);
+      const dir = diags.map((d) => slot('tb-diag13-slot-dir', `<span class="tb-cmp-diag-arrow">${this._diagDirSym(d.dir)}</span>`, '1.4rem')).join('');
       const tipo = diags.map((d) => {
         const k = d.tipo || this._diagTipoKey(d.len || 2);
-        return `<span class="tb-cmp-diag-tipo tb-cmp-diag-tipo-${k}">${this._diagTipoLabel(d.len || k)}</span>`;
-      }).join('<br>');
-      const vezes = diags.map((d) => d.vezes || 0).join('<br>');
-      const pct = diags.map((d) => this._diagFmtPct(d.pct || 0) + '%').join('<br>');
-      const atraso = diags.map((d) => (d.vezes ? d.atraso : '—')).join('<br>');
+        return slot('tb-diag13-slot-tipo', `<span class="tb-cmp-diag-tipo tb-cmp-diag-tipo-${k}">${this._diagTipoLabel(d.len || k)}</span>`, '4.6rem');
+      }).join('');
+      const vezes = diags.map((d) => slot('tb-diag13-slot-vezes', padNum(d.vezes || 0), numW + 'ch')).join(sep);
+      const pct = diags.map((d) => slot('tb-diag13-slot-pct', padPct(d.pct || 0), pctW + 'ch')).join(sep);
+      const atraso = diags.map((d) => slot('tb-diag13-slot-atr', d.vezes ? padNum(d.atraso) : '—', numW + 'ch')).join(sep);
+      const dezenas = (g.numbers || []).map((n) => `<span class="tb-diag13-dez">${fmt2(n)}</span>`).join('');
       const mesTd = extra
         ? `<td>${g.monthName ? `<span class="mes-cor ${esc(this.mesClass(g.monthName))}" style="${this.mesStyle(g.monthName)}">${esc(this._mesAbrev(g.monthName))}</span>` : '—'}</td>`
         : '';
       return `<tr>
         <td>${i + 1}</td>
-        <td class="tb-align-mono fw-bold">${(g.numbers || []).map(fmt2).join(' ')}</td>
-        <td class="tb-align-mono">${seg || '—'}</td>
-        <td class="tb-cmp-diag-dir">${dir || '—'}</td>
-        <td>${tipo || '—'}</td>
-        <td>${vezes || '—'}</td>
-        <td>${pct || '—'}</td>
-        <td>${atraso || '—'}</td>
+        <td class="tb-diag13-dezenas">${dezenas || '—'}</td>
+        <td class="tb-diag13-seg">${seg || '—'}</td>
+        <td class="tb-diag13-stats">${dir || '—'}</td>
+        <td class="tb-diag13-stats">${tipo || '—'}</td>
+        <td class="tb-diag13-stats">${vezes || '—'}</td>
+        <td class="tb-diag13-stats">${pct || '—'}</td>
+        <td class="tb-diag13-stats">${atraso || '—'}</td>
         ${mesTd}
       </tr>`;
     }).join('');
@@ -4898,9 +5007,10 @@
   };
 
   TubularApp.prototype._onCmpVolanteClick = function (ev) {
+    const diagPiece = ev.target.closest('#tbCmpDiag .tb-diag-log-piece');
     const diagRow = ev.target.closest('#tbCmpDiag tr.tb-cmp-diag-row');
-    if (diagRow) {
-      this._onCmpDiagRowClick(diagRow);
+    if (diagPiece || diagRow) {
+      this._onCmpDiagRowClick(diagPiece || diagRow);
       return;
     }
     const tab = ev.target.closest('[data-cmp-tab]');

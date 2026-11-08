@@ -1,3 +1,4 @@
         <a class="mobile-link" href="/analise/repeticao-concursos/" onclick="closeMobileNav()">
-            <i class="fas fa-clone"></i> {{ nav_cfg.repeticao.title }}
+            <i class="fas fa-clone"></i>
+            <span class="mobile-link-label">{{ nav_cfg.repeticao.title }}{% if nav_cfg.repeticao.desc %}<span class="mobile-link-sub"> - {{ nav_cfg.repeticao.desc }}</span>{% endif %}</span>
         </a>

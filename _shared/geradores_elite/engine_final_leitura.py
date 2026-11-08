@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """Leitura integrada do Engine Final — Dia de Sorte.
 
-Consulta análises já calculadas e devolve só os critérios que entraram
-na decisão. Um critério sem dado não aparece na lista.
+Toda análise que participa da geração entra em `analises` com um
+veredito: cabe, nao_cabe ou nao_opina. Análise sem veredito não
+influencia o lote. Se o veredito é nao_cabe, a análise não é usada.
 """
 from __future__ import annotations
 
@@ -18,6 +19,16 @@ from analise_inteligentes_diadesorte.service import (
 )
 from linhas_universo.core import linha_da_dezena
 from posicao_analise.core import soma_digitos
+
+from .engine_final_sintonia import (
+    CATALOGO_ANALISES as _CATALOGO_ANALISES,
+    aplicar_trava,
+    cortar_universo as _cortar_universo,
+    diag_alcanca as _diag_alcanca,
+    padroes_na_hora,
+    resolver_ciclo,
+    voto_intersecta as _voto_intersecta,
+)
 
 
 def _moda(cont: Counter) -> Dict[str, Any]:
@@ -105,6 +116,18 @@ def resumir_forma(nums: Sequence[int], ultimo: Sequence[int]) -> Dict[str, Any]:
         "digitos": len(_digitos(s)),
         "soma_digitos": _soma_digitos_jogo(s),
     }
+
+
+def _carregar_recorrencia(modality_key: str):
+    try:
+        from analise_inteligentes_diadesorte.service import make_inteligentes_service
+
+        out = make_inteligentes_service(modality_key).recorrencia_padroes(base="geral")
+    except Exception:
+        return None
+    if not out or not out.get("sucesso"):
+        return None
+    return out
 
 
 def _voto_posicao_sniper() -> Tuple[Optional[Set[int]], Optional[Set[int]]]:
@@ -301,89 +324,231 @@ def preparar_leitura(
             pool_conc = None
 
     posicao, sniper = _voto_posicao_sniper()
+    ciclo_info = resolver_ciclo(pendentes, k_jogo, dmin, dmax)
+    numero_ciclo = ciclo.get("numero_ciclo") or "—"
+    ciclo_leitura = f"ciclo {numero_ciclo} · {ciclo_info['leitura']}"
+    rec_raw = _carregar_recorrencia(modality_key)
+    freq_padrao = Counter(freq_ini)
+    if rec_raw:
+        na_hora, n_hora = padroes_na_hora(
+            rec_raw.get("padroes") or [],
+            rec_raw.get("ultimo_concurso"),
+            ciclo_info["pool_padrao"],
+            k_jogo,
+            bool(ciclo_info["travar_padrao"]),
+            freq_padrao,
+        )
+        if na_hora:
+            total_vezes = sum(int(r["vezes"]) for r in na_hora) or 1
+            for r in na_hora:
+                r["pct"] = round(100.0 * int(r["vezes"]) / total_vezes, 1)
+            ranking_padroes = na_hora
+            rec_veredito = "cabe"
+            amostra_hora = ", ".join(r["padrao"] for r in na_hora[:3])
+            rec_leitura = (
+                f"{len(na_hora)} de {n_hora} padrão(ões) na hora cabem no ciclo "
+                f"({amostra_hora}). O lote usa só esses formatos."
+            )
+            padrao_veredito = "cabe"
+            padrao_leitura = f"Formatos na hora que cabem no ciclo: {amostra_hora}."
+        else:
+            ranking_padroes = []
+            rec_veredito = "nao_cabe"
+            rec_leitura = (
+                f"{n_hora} padrão(ões) na hora, nenhum cabe nas dezenas deste ciclo. "
+                "Recorrência não entra neste lote."
+            )
+            padrao_veredito = "nao_cabe"
+            padrao_leitura = "O padrão frequente da janela fica de fora: a recorrência não coube no ciclo."
+    else:
+        rec_veredito = "nao_opina"
+        rec_leitura = "A aba Recorrências não respondeu. O lote não usa a hora do padrão."
+        if ranking_padroes:
+            amostra = ", ".join(r["padrao"] for r in ranking_padroes[:3])
+            padrao_veredito = "cabe"
+            padrao_leitura = f"Sem a hora da recorrência, entram os formatos mais vistos na janela ({amostra})."
+        else:
+            padrao_veredito = "nao_opina"
+            padrao_leitura = "Sem ranking de padrão nesta janela."
 
-    criterios: List[Dict[str, str]] = []
+    locked = list(ciclo_info["locked"])
+    pares_alvo = alvo.get("pares")
+    exigir_pares = True
+    if pares_alvo is not None and locked:
+        pares_lock = sum(1 for n in locked if int(n) % 2 == 0)
+        impares_lock = len(locked) - pares_lock
+        if pares_lock > int(pares_alvo) or impares_lock > (k_jogo - int(pares_alvo)):
+            exigir_pares = False
+    exigir_digitos = True
+    if historico.get("digitos") is not None and locked:
+        if len({int(n) // 10 for n in locked}) > int(historico["digitos"]):
+            exigir_digitos = False
 
-    def add(cid: str, nome: str, papel: str, texto: str) -> None:
-        criterios.append({"id": cid, "nome": nome, "papel": papel, "leitura": texto})
+    universo = list(ciclo_info["universo"])
+    sniper_v = _voto_intersecta(sniper, universo)
+    posicao_v = _voto_intersecta(posicao, universo)
+    conc_set = set(pool_conc or [])
+    conc_v = _voto_intersecta(conc_set, universo) if pool_conc else "nao_opina"
+    if sniper_v == "nao_cabe":
+        sniper = None
+    if posicao_v == "nao_cabe":
+        posicao = None
+    if conc_v == "nao_cabe":
+        pool_conc = None
 
-    n_pend = len(pendentes)
-    add(
-        "ciclo", "Ciclo", "forma",
-        f"ciclo {ciclo.get('numero_ciclo') or '—'} · {n_pend} pendentes",
+    usar_diagonal = True
+    diag_v = "nao_opina"
+    diag_leitura = "Sem leitura de diagonal nesta janela."
+    if diag:
+        pct_diag = float(diag.get("janela_pct") or 0)
+        if pct_diag >= 55 and top_diags and not _diag_alcanca(top_diags, universo):
+            usar_diagonal = False
+            diag_v = "nao_cabe"
+            diag_leitura = (
+                f"A janela tem diagonal em {pct_diag}% dos concursos, "
+                "mas nenhuma dessas diagonais cabe no universo deste ciclo. Não entra na nota."
+            )
+        else:
+            diag_v = "cabe"
+            diag_leitura = (
+                f"Em {pct_diag}% dos concursos. O lote acompanha essa presença dentro do ciclo."
+            )
+
+    pares_v = "cabe" if historico.get("pares") is not None else "nao_opina"
+    pares_leitura = (
+        f"mais frequente no histórico: {historico.get('pares')} pares / {historico.get('impares')} ímpares ({historico.get('pares_pct')}%)"
     )
-    add(
-        "pares", "Pares", "forma",
-        f"mais frequente no histórico: {historico.get('pares')} pares / {historico.get('impares')} ímpares ({historico.get('pares_pct')}%)",
+    if pares_v == "cabe" and not exigir_pares:
+        pares_v = "nao_cabe"
+        pares_leitura = (
+            "As pendentes travadas já estouram o par/ímpar da janela. "
+            "Pares não entram como trava neste lote."
+        )
+    impares_v = pares_v
+    impares_leitura = (
+        pares_leitura
+        if pares_v == "nao_cabe"
+        else f"acompanha os pares · {historico.get('impares')} ímpares"
     )
-    add(
-        "impares", "Ímpares", "forma",
-        f"acompanha os pares · {historico.get('impares')} ímpares",
+    if historico.get("impares") is None and pares_v != "nao_cabe":
+        impares_v = "nao_opina"
+        impares_leitura = "Sem leitura de ímpares nesta janela."
+
+    digitos_v = "cabe" if historico.get("digitos") is not None else "nao_opina"
+    digitos_leitura = (
+        f"mais frequente: {historico.get('digitos')} dígitos distintos ({historico.get('digitos_pct')}%)"
     )
-    add(
-        "repetidas", "Repetidas", "forma",
+    if digitos_v == "cabe" and not exigir_digitos:
+        digitos_v = "nao_cabe"
+        digitos_leitura = (
+            "As pendentes travadas já usam mais grupos de dígito do que a moda. "
+            "A quantidade de dígitos não trava este lote."
+        )
+
+    def _tem(valor: Any, texto: str, vazio: str) -> Tuple[str, str]:
+        if valor is None or valor == "" or valor == []:
+            return "nao_opina", vazio
+        return "cabe", texto
+
+    rep_v, rep_l = _tem(
+        historico.get("repetidas"),
         f"mais frequente: {historico.get('repetidas')} ({historico.get('repetidas_pct')}%)",
+        "Sem leitura de repetidas nesta janela.",
     )
-    add(
-        "sequencias", "Sequências", "forma",
+    seq_v, seq_l = _tem(
+        historico.get("sequencias"),
         f"mais frequente: {historico.get('sequencias')} grupo(s) ({historico.get('sequencias_pct')}%)",
+        "Sem leitura de sequências nesta janela.",
     )
-    add(
-        "finais", "Finais iguais", "forma",
+    fin_v, fin_l = _tem(
+        historico.get("finais"),
         f"mais frequente: {historico.get('finais')} grupo(s) ({historico.get('finais_pct')}%)",
+        "Sem leitura de finais nesta janela.",
     )
     if soma_faixa:
-        add(
-            "soma", "Soma das dezenas", "forma",
-            f"valor mais frequente {historico.get('soma')} · faixa {soma_faixa[0]}–{soma_faixa[1]}",
-        )
-    add(
-        "linhas", "Linhas", "forma",
-        f"assinatura mais frequente: {linha_moda or '—'}",
-    )
-    if diag:
-        add(
-            "diagonal", "Diagonal", "forma",
-            f"em {diag.get('janela_pct')}% dos concursos · o lote acompanha essa presença no volante",
-        )
-    if ranking_padroes:
-        amostra = ", ".join(r["padrao"] for r in ranking_padroes[:3])
-        add(
-            "padrao_inicial", "Padrão inicial", "forma",
-            f"na ordem do histórico ({amostra}, …). "
-            f"5 apostas usam os 5 primeiros, 10 os 10, 20 os 20",
-        )
+        soma_v, soma_l = "cabe", f"valor mais frequente {historico.get('soma')} · faixa {soma_faixa[0]}–{soma_faixa[1]}"
+    else:
+        soma_v, soma_l = "nao_opina", "Sem faixa de soma nesta janela."
+    if linha_moda:
+        lin_v, lin_l = "cabe", f"assinatura mais frequente: {linha_moda}"
+    else:
+        lin_v, lin_l = "nao_opina", "Sem assinatura de linhas nesta janela."
     if freq_fim:
-        add("padrao_final", "Padrão final", "forma", "o final mais repetido no histórico")
-    if moda_dig.get("valor") is not None:
-        add(
-            "digitos", "Dígitos utilizados", "forma",
-            f"mais frequente: {moda_dig.get('valor')} dígitos distintos ({moda_dig.get('pct')}%)",
-        )
+        pf_v, pf_l = "cabe", "o final mais repetido no histórico entra na nota"
+    else:
+        pf_v, pf_l = "nao_opina", "Sem padrão final nesta janela."
     if dig_faixa:
-        add(
-            "soma_digitos", "Soma dos dígitos", "forma",
-            f"mais frequente: {historico.get('soma_digitos')} · faixa {dig_faixa[0]}–{dig_faixa[1]}",
-        )
+        sd_v, sd_l = "cabe", f"mais frequente: {historico.get('soma_digitos')} · faixa {dig_faixa[0]}–{dig_faixa[1]}"
+    else:
+        sd_v, sd_l = "nao_opina", "Sem faixa da soma dos dígitos nesta janela."
     if gaps_top:
-        add("gaps", "Gaps", "forma", "saltos entre as dezenas ordenadas")
-    if sniper:
-        add("sniper", "Sniper", "voto", f"{len(sniper)} dezenas fortes no mapa")
-    if posicao:
-        add("posicao", "Posição", "voto", "dezena mais frequente em cada ordem oficial")
-    if pool_conc:
-        add("concentracao", "Concentração", "voto", f"pool de {len(pool_conc)} dezenas por frequência")
+        gap_v, gap_l = "cabe", "saltos entre as dezenas ordenadas entram na nota quando batem com a janela"
+    else:
+        gap_v, gap_l = "nao_opina", "Sem leitura de gaps nesta janela."
+    if sniper_v == "cabe":
+        sn_l = f"{len(sniper or [])} dezenas fortes que ainda cabem no ciclo"
+    elif sniper_v == "nao_cabe":
+        sn_l = "As dezenas fortes do sniper estão fora do universo deste ciclo. Sniper não entra."
+    else:
+        sn_l = "Sniper sem dezenas fortes nesta leitura."
+    if posicao_v == "cabe":
+        po_l = "dezena mais frequente em cada ordem oficial, dentro do ciclo"
+    elif posicao_v == "nao_cabe":
+        po_l = "O favorito de cada posição está fora do universo deste ciclo. Posição não entra."
+    else:
+        po_l = "Posição sem voto nesta leitura."
+    if conc_v == "cabe":
+        co_l = f"pool de {len(pool_conc or [])} dezenas por frequência, dentro do ciclo"
+    elif conc_v == "nao_cabe":
+        co_l = "O pool da concentração não cruza o universo deste ciclo. Concentração não entra."
+    else:
+        co_l = "Concentração sem pool nesta leitura."
     if dados:
-        add(
-            "modelos", "Central de Modelos", "voto",
-            "núcleo de frequência, atraso e equilíbrio 01–15 / 16–31",
-        )
+        mod_v, mod_l = "cabe", "núcleo de frequência, atraso e equilíbrio 01–15 / 16–31"
+    else:
+        mod_v, mod_l = "nao_opina", "Central de Modelos sem núcleo nesta geração."
+
+    textos = {
+        "ciclo": (ciclo_info["veredito"], ciclo_leitura),
+        "recorrencia": (rec_veredito, rec_leitura),
+        "padrao_inicial": (padrao_veredito, padrao_leitura),
+        "pares": (pares_v, pares_leitura),
+        "impares": (impares_v, impares_leitura),
+        "repetidas": (rep_v, rep_l),
+        "sequencias": (seq_v, seq_l),
+        "finais": (fin_v, fin_l),
+        "soma": (soma_v, soma_l),
+        "linhas": (lin_v, lin_l),
+        "diagonal": (diag_v, diag_leitura),
+        "padrao_final": (pf_v, pf_l),
+        "digitos": (digitos_v, digitos_leitura),
+        "soma_digitos": (sd_v, sd_l),
+        "gaps": (gap_v, gap_l),
+        "sniper": (sniper_v, sn_l),
+        "posicao": (posicao_v, po_l),
+        "concentracao": (conc_v, co_l),
+        "modelos": (mod_v, mod_l),
+    }
+    analises = [
+        {"id": cid, "nome": nome, "veredito": textos[cid][0], "leitura": textos[cid][1]}
+        for cid, nome in _CATALOGO_ANALISES
+    ]
+    criterios = [
+        {"id": a["id"], "nome": a["nome"], "papel": "veredito", "leitura": a["leitura"], "veredito": a["veredito"]}
+        for a in analises
+    ]
 
     return {
         "sucesso": True,
         "concurso_referencia": ultimo.get("concurso"),
         "ultimo_numeros": ultimo_nums,
         "pendentes": pendentes,
+        "ciclo_modo": ciclo_info["modo"],
+        "universo": list(ciclo_info["universo"]),
+        "locked": locked,
+        "exigir_pares": exigir_pares and pares_v == "cabe",
+        "exigir_digitos": exigir_digitos and digitos_v == "cabe",
+        "usar_diagonal": usar_diagonal and diag_v == "cabe",
         "alvo": alvo,
         "atrasos": _atrasos(linhas, dmin, dmax),
         "soma_faixa": soma_faixa,
@@ -403,9 +568,10 @@ def preparar_leitura(
         "sniper": sniper,
         "posicao": posicao,
         "pool_concentracao": set(pool_conc or []),
-        "usar_modelos": bool(dados),
+        "usar_modelos": bool(dados) and mod_v == "cabe",
         "scores": scores,
         "criterios": criterios,
+        "analises": analises,
     }
 
 
@@ -453,6 +619,8 @@ def leitura_publica(leitura: Dict[str, Any]) -> Dict[str, Any]:
         "concurso_referencia": leitura.get("concurso_referencia"),
         "ultimo_numeros": list(leitura.get("ultimo_numeros") or []),
         "criterios": list(leitura.get("criterios") or []),
+        "analises": list(leitura.get("analises") or []),
+        "ciclo_modo": leitura.get("ciclo_modo") or "livre",
         "historico": dict(leitura.get("historico") or {}),
     }
 
@@ -522,12 +690,13 @@ def _pontuar(nums: Sequence[int], leitura: Dict[str, Any], scores_base: Dict[int
     if df and df[0] <= sd <= df[1]:
         pts += 1.5
 
-    tem_diag = _tem_diagonal(s)
-    pct_diag = float(leitura.get("diag_pct") or 0)
-    if tem_diag:
-        pts += 9.0 if pct_diag >= 60 else 4.0
-    elif pct_diag >= 60:
-        pts -= 7.0
+    if leitura.get("usar_diagonal", True):
+        tem_diag = _tem_diagonal(s)
+        pct_diag = float(leitura.get("diag_pct") or 0)
+        if tem_diag:
+            pts += 9.0 if pct_diag >= 60 else 4.0
+        elif pct_diag >= 60:
+            pts -= 7.0
 
     gp = padrao_gaps(gaps_de(s))
     if gp and gp in (leitura.get("gaps_top") or set()):
@@ -567,9 +736,9 @@ def _casa_historico(nums: Sequence[int], leitura: Dict[str, Any]) -> bool:
         return True
     pares = hist.get("pares")
     digitos = hist.get("digitos")
-    if pares is not None and int(forma["pares"]) != int(pares):
+    if leitura.get("exigir_pares", True) and pares is not None and int(forma["pares"]) != int(pares):
         return False
-    if digitos is not None and int(forma["digitos"]) != int(digitos):
+    if leitura.get("exigir_digitos", True) and digitos is not None and int(forma["digitos"]) != int(digitos):
         return False
     return True
 
@@ -655,8 +824,14 @@ def _universo_cfg(cfg: Dict[str, Any], candidatos: Optional[Sequence[int]]) -> L
     return list(range(dmin, dmax + 1))
 
 
-def _ajustar_paridade(nums: Sequence[int], universo: Sequence[int], pares_alvo: int) -> List[int]:
+def _ajustar_paridade(
+    nums: Sequence[int],
+    universo: Sequence[int],
+    pares_alvo: int,
+    congelados: Optional[Sequence[int]] = None,
+) -> List[int]:
     atual = list(nums)
+    fixos = {int(n) for n in (congelados or [])}
     for _ in range(8):
         pares = sum(1 for n in atual if n % 2 == 0)
         if pares == int(pares_alvo):
@@ -665,7 +840,7 @@ def _ajustar_paridade(nums: Sequence[int], universo: Sequence[int], pares_alvo: 
         mudou = False
         usados = set(atual)
         for i, n in enumerate(atual):
-            if (n % 2 == 0) == quer_par:
+            if n in fixos or (n % 2 == 0) == quer_par:
                 continue
             dig = n // 10
             for cand in universo:
@@ -686,8 +861,10 @@ def _ajustar_digitos_mesmo_grupo(
     universo: Sequence[int],
     alvo: int,
     pares_alvo: int,
+    congelados: Optional[Sequence[int]] = None,
 ) -> List[int]:
     atual = list(nums)
+    fixos = {int(n) for n in (congelados or [])}
     for _ in range(16):
         qtd = len(_digitos(atual))
         pares = sum(1 for n in atual if n % 2 == 0)
@@ -695,6 +872,8 @@ def _ajustar_digitos_mesmo_grupo(
             return sorted(atual)
         mudou = False
         for i, n in enumerate(list(atual)):
+            if n in fixos:
+                continue
             for cand in universo:
                 if cand in atual or cand // 10 != n // 10 or cand % 2 != n % 2:
                     continue
@@ -720,30 +899,48 @@ def _montar_no_padrao(
     digitos_alvo: Optional[int],
     idx: int,
     candidatos: Optional[List[int]],
+    locked: Optional[Sequence[int]] = None,
+    exigir_pares: bool = True,
+    exigir_digitos: bool = True,
 ) -> Optional[List[int]]:
     digs = [int(x) for x in str(padrao).replace(",", " ").split() if str(x).strip().isdigit()]
     if len(digs) != k:
         return None
     need = Counter(digs)
     universo = _universo_cfg(cfg, candidatos)
-    nums: List[int] = []
-    for dig, qtd in sorted(need.items()):
-        pool = [n for n in universo if n // 10 == dig]
-        if len(pool) < qtd:
+    uni = set(universo)
+    fixos = [int(n) for n in (locked or []) if int(n) in uni or not uni]
+    if len(fixos) > k:
+        return None
+    have = Counter(n // 10 for n in fixos)
+    for dig, qtd in have.items():
+        if need.get(dig, 0) < qtd:
             return None
+    nums: List[int] = list(fixos)
+    ocupados = set(fixos)
+    for dig, qtd in sorted(need.items()):
+        falta = qtd - have.get(dig, 0)
+        if falta < 0:
+            return None
+        pool = [n for n in universo if n // 10 == dig and n not in ocupados]
+        if len(pool) < falta:
+            return None
+        if not pool or falta == 0:
+            continue
         pool.sort(key=lambda n: (-float(busca.get(n) or 0), n))
         giro = int(idx) % len(pool)
         girado = pool[giro:] + pool[:giro]
-        nums.extend(girado[:qtd])
-    nums = _ajustar_paridade(nums, universo, int(pares_alvo))
-    if sum(1 for n in nums if n % 2 == 0) != int(pares_alvo):
-        return None
+        nums.extend(girado[:falta])
+    if exigir_pares:
+        nums = _ajustar_paridade(nums, universo, int(pares_alvo), fixos)
+        if sum(1 for n in nums if n % 2 == 0) != int(pares_alvo):
+            return None
     esperado = " ".join(str(d) for d in digs)
     if padrao_inicial(sorted(nums)) != esperado:
         return None
-    if digitos_alvo is not None:
-        nums = _ajustar_digitos_mesmo_grupo(nums, universo, int(digitos_alvo), int(pares_alvo))
-        if sum(1 for n in nums if n % 2 == 0) != int(pares_alvo):
+    if exigir_digitos and digitos_alvo is not None:
+        nums = _ajustar_digitos_mesmo_grupo(nums, universo, int(digitos_alvo), int(pares_alvo), fixos)
+        if exigir_pares and sum(1 for n in nums if n % 2 == 0) != int(pares_alvo):
             return None
         if padrao_inicial(sorted(nums)) != esperado:
             return None
@@ -761,13 +958,18 @@ def _lote_pelos_padroes(
 ) -> List[List[int]]:
     ranking = list(leitura.get("ranking_padroes") or [])
     hist = leitura.get("historico") or {}
-    if not ranking or hist.get("pares") is None:
+    exigir_pares = bool(leitura.get("exigir_pares", True))
+    exigir_digitos = bool(leitura.get("exigir_digitos", True))
+    if not ranking:
+        return []
+    if exigir_pares and hist.get("pares") is None:
         return []
     if k != int(leitura.get("k_historico") or k):
         return []
-    pares_alvo = int(hist["pares"])
-    digitos_alvo = hist.get("digitos")
-    pct_diag = float(leitura.get("diag_pct") or 0)
+    pares_alvo = int(hist["pares"]) if hist.get("pares") is not None else 0
+    digitos_alvo = hist.get("digitos") if exigir_digitos else None
+    locked = [int(n) for n in (leitura.get("locked") or [])]
+    pct_diag = float(leitura.get("diag_pct") or 0) if leitura.get("usar_diagonal", True) else 0
     quota_diag = int(round(qtd * pct_diag / 100.0)) if pct_diag >= 55 else 0
     out: List[List[int]] = []
     usados: Set[Tuple[int, ...]] = set()
@@ -787,6 +989,7 @@ def _lote_pelos_padroes(
         for t in range(48):
             nums = _montar_no_padrao(
                 padrao, busca, cfg, k, pares_alvo, digitos_alvo, rank * 7 + t, candidatos,
+                locked=locked, exigir_pares=exigir_pares, exigir_digitos=exigir_digitos,
             )
             if not nums:
                 continue
@@ -824,14 +1027,65 @@ def escolher_lote(
     candidatos: Optional[List[int]] = None,
 ) -> List[List[int]]:
     """Monta um lote diversificado. A nota usa a leitura; a busca não copia o último concurso inteiro."""
+    universo, locked, conjunto_rejeitado = _cortar_universo(leitura, candidatos)
+    if conjunto_rejeitado:
+        analises = [a for a in (leitura.get("analises") or []) if a.get("id") != "conjunto_base"]
+        analises.append({
+            "id": "conjunto_base",
+            "nome": "Conjunto-base",
+            "veredito": "nao_cabe",
+            "leitura": "O conjunto não inclui as dezenas que o ciclo exige. O lote segue o ciclo.",
+        })
+        leitura["analises"] = analises
+        criterios = [c for c in (leitura.get("criterios") or []) if c.get("id") != "conjunto_base"]
+        criterios.append({
+            "id": "conjunto_base",
+            "nome": "Conjunto-base",
+            "papel": "veredito",
+            "veredito": "nao_cabe",
+            "leitura": analises[-1]["leitura"],
+        })
+        leitura["criterios"] = criterios
+    elif candidatos:
+        analises = [a for a in (leitura.get("analises") or []) if a.get("id") != "conjunto_base"]
+        analises.append({
+            "id": "conjunto_base",
+            "nome": "Conjunto-base",
+            "veredito": "cabe",
+            "leitura": "O conjunto cabe no ciclo. O lote usa a interseção.",
+        })
+        leitura["analises"] = analises
+    leitura["locked"] = locked
+    candidatos = universo or candidatos
     busca = dict(scores)
     for n in leitura.get("ultimo_numeros") or []:
         if int(n) in busca:
             busca[int(n)] = float(busca[int(n)]) - float(cfg.get("sorteadas") or 7) * 0.8
 
     por_padrao = _lote_pelos_padroes(busca, leitura, scores, cfg, k, qtd, candidatos)
-    if len(por_padrao) >= qtd:
-        return por_padrao[:qtd]
+
+    def _fechar(lista: Sequence[Sequence[int]]) -> List[List[int]]:
+        saida: List[List[int]] = []
+        vistos_trava: Set[Tuple[int, ...]] = set()
+        base = list(candidatos or [])
+        for nums in lista:
+            travado = aplicar_trava(nums, locked, base, k)
+            chave = tuple(travado)
+            if len(chave) != k or chave in vistos_trava:
+                continue
+            if locked and any(n not in chave for n in locked):
+                continue
+            if leitura.get("ciclo_modo") == "recorte" and base and any(n not in set(base) for n in chave):
+                continue
+            vistos_trava.add(chave)
+            saida.append(list(chave))
+            if len(saida) >= qtd:
+                break
+        return saida
+
+    fechado_padrao = _fechar(por_padrao)
+    if len(fechado_padrao) >= qtd:
+        return fechado_padrao
 
     vistos: Set[Tuple[int, ...]] = set()
     ranqueados: List[Tuple[float, List[int], bool]] = []
@@ -850,31 +1104,46 @@ def escolher_lote(
     hist = leitura.get("historico") or {}
     pares_alvo = hist.get("pares")
     digitos_alvo = hist.get("digitos")
-    perfil_do_historico = pares_alvo is not None and k == int(leitura.get("k_historico") or k)
+    perfil_do_historico = (
+        leitura.get("exigir_pares", True)
+        and pares_alvo is not None
+        and k == int(leitura.get("k_historico") or k)
+    )
+    digitos_moda = digitos_alvo if leitura.get("exigir_digitos", True) else None
     if perfil_do_historico:
         for i in range(max(30, int(qtd) * 4)):
             montada = _montar_moda(
                 busca, cfg, k, int(pares_alvo),
-                int(digitos_alvo) if digitos_alvo is not None else None,
-                i, candidatos,
+                int(digitos_moda) if digitos_moda is not None else None,
+                i, candidatos, locked=locked,
             )
             if montada:
                 _guardar(montada)
 
-    segmentos = list(leitura.get("top_diags") or [])
+    segmentos = list(leitura.get("top_diags") or []) if leitura.get("usar_diagonal", True) else []
     if perfil_do_historico:
         for i, seg in enumerate(segmentos[:12]):
+            trava_diag = list(locked)
+            for n in seg.get("nums") or []:
+                if int(n) not in trava_diag:
+                    trava_diag.append(int(n))
+            if len(trava_diag) > k:
+                continue
             montada = _montar_moda(
                 busca, cfg, k, int(pares_alvo),
-                int(digitos_alvo) if digitos_alvo is not None else None,
-                i + 3, candidatos, locked=seg.get("nums") or [],
+                int(digitos_moda) if digitos_moda is not None else None,
+                i + 3, candidatos, locked=trava_diag,
             )
             if montada:
                 _guardar(montada)
     for i, seg in enumerate(segmentos):
-        plantada = _plantar_diagonal(
-            seg.get("nums") or [], busca, cfg, k, candidatos, i,
-        )
+        segmento = list(locked)
+        for n in seg.get("nums") or []:
+            if int(n) not in segmento:
+                segmento.append(int(n))
+        if len(segmento) > k:
+            continue
+        plantada = _plantar_diagonal(segmento, busca, cfg, k, candidatos, i)
         if plantada:
             _guardar(plantada)
         if len(segmentos) > 8 and i >= 20:
@@ -884,7 +1153,7 @@ def escolher_lote(
 
     escolhidas: List[List[int]] = []
     assinaturas: List[str] = []
-    pct_diag = float(leitura.get("diag_pct") or 0)
+    pct_diag = float(leitura.get("diag_pct") or 0) if leitura.get("usar_diagonal", True) else 0
     quota_diag = int(round(qtd * pct_diag / 100.0)) if pct_diag >= 55 else 0
 
     def cabe(nums: Sequence[int], rigor: int) -> bool:
@@ -928,7 +1197,7 @@ def escolher_lote(
             _pegar(False, rigor, False)
             if len(escolhidas) >= qtd:
                 break
-    return escolhidas
+    return _fechar(list(por_padrao) + escolhidas)
 
 
 def aplicar_forma(apostas: Sequence[Dict[str, Any]], ultimo: Sequence[int]) -> List[Dict[str, Any]]:

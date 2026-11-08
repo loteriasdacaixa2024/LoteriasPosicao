@@ -1509,6 +1509,12 @@ class AnaliseInteligentesService:
         return montar_evolucao(cls, base=base)
 
     @classmethod
+    def recorrencia_padroes(cls, base: str = "geral") -> Dict[str, Any]:
+        """Intervalos entre ocorrências de cada padrão inicial."""
+        from analise_inteligentes_diadesorte.recorrencia_padroes import montar_recorrencia
+        return montar_recorrencia(cls, base=base)
+
+    @classmethod
     def sequencias_sorteadas(cls, base: str = "geral") -> Dict[str, Any]:
         """Concurso → Nº da sequência sorteada no padrão (aba Panorama)."""
         from analise_inteligentes_diadesorte.sequencias_sorteadas import (

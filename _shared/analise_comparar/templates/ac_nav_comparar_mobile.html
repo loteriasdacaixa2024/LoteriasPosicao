@@ -1,3 +1,4 @@
         <a class="mobile-link" href="/analise/comparar-concursos/" onclick="closeMobileNav()">
-            <i class="fas fa-columns"></i> {{ nav_cfg.comparar.title }}
+            <i class="fas fa-columns"></i>
+            <span class="mobile-link-label">{{ nav_cfg.comparar.title }}{% if nav_cfg.comparar.desc %}<span class="mobile-link-sub"> - {{ nav_cfg.comparar.desc }}</span>{% endif %}</span>
         </a>

@@ -369,7 +369,7 @@
                   <li>As abas <strong>1 2 3…</strong> são os volantes. Use <strong>+1 / +5 / +10</strong> para incluir mais.</li>
                   <li><strong>Exportar</strong> baixa o TXT das apostas marcadas{% if extra_mes %} (com escolha do Mês da Sorte){% endif %}.</li>
                   <li>Apostas da Seção 10, se enviadas, aparecem <strong>abaixo</strong> — um volante por aposta, todos iguais na estrutura. Os volantes 1–10 de cima não mudam.</li>
-                  <li>Abaixo dos volantes: diagonais <strong>deste concurso</strong>, Top 1–3, insight e a seta abre o ranking + log do 1º ao atual (uma linha por diagonal).</li>
+                  <li>Abaixo dos volantes: diagonais <strong>deste concurso</strong> na mesma linha, Top 1–3, insight e a seta abre o ranking + log do atual ao 1º (um concurso por linha, diagonais separadas por |).</li>
                 </ol>
               </div>
             </details>
@@ -466,11 +466,11 @@
                     </div>
                   </div>
                   <div class="tb-cmp-diag-block">
-                    <h3 class="tb-cmp-diag-h">Diagonais por concurso (1º → atual)</h3>
+                    <h3 class="tb-cmp-diag-h">Diagonais por concurso (atual → 1º)</h3>
                     <p class="small text-muted tb-cmp-diag-hint mb-1" id="tbCmpDiagLogMeta"></p>
-                    <p class="small text-muted tb-cmp-diag-hint mb-1">Cada diagonal em sua linha (várias por concurso). Direção pela geometria do volante. Clique para selecionar o concurso e destacar o segmento.</p>
+                    <p class="small text-muted tb-cmp-diag-hint mb-1">Um concurso por linha. As diagonais do sorteio ficam na mesma linha, separadas por |. Clique numa diagonal para destacar no volante.</p>
                     <div class="tb-cmp-diag-scroll tb-cmp-diag-scroll-log">
-                      <table class="tb-table tb-cmp-diag-table tb-cmp-diag-table-wide tabela-ordenavel">
+                      <table class="tb-table tb-cmp-diag-table tb-cmp-diag-table-wide tabela-ordenavel" data-scroll-wrap="1">
                         <thead>
                           <tr>
                             <th>Concurso</th>
@@ -624,18 +624,18 @@
             <details class="tb-howto mt-3 mb-0">
               <summary>Tabela resumo (segmento / direção / estatística)</summary>
               <div class="tb-howto-body">
-                <div class="table-responsive">
+                <div class="table-responsive tb-diag13-wrap">
                   <table class="table table-sm table-bordered tb-table tb-diag13-table tabela-ordenavel">
                     <thead>
                       <tr>
                         <th>#</th>
                         <th>Dezenas</th>
                         <th>Segmento</th>
-                        <th>Direção</th>
-                        <th>Tipo</th>
-                        <th>Vezes</th>
-                        <th>%</th>
-                        <th>Atraso</th>
+                        <th class="tb-diag13-stats">Direção</th>
+                        <th class="tb-diag13-stats">Tipo</th>
+                        <th class="tb-diag13-stats">Vezes</th>
+                        <th class="tb-diag13-stats">%</th>
+                        <th class="tb-diag13-stats">Atraso</th>
                         {% if extra_mes %}<th>Mês</th>{% endif %}
                       </tr>
                     </thead>

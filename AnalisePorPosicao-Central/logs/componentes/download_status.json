@@ -1,48 +1,15 @@
 {
-  "estado": "ok",
-  "ok": true,
-  "mensagem": "8 arquivo(s) atualizado(s).",
-  "iniciado_em": "05/11/2026 17:56:46",
-  "terminado_em": "05/11/2026 17:57:00",
-  "arquivos": [
-    {
-      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx",
-      "bytes": 387204
-    },
-    {
-      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DIA_DE_SORTE.xlsx",
-      "bytes": 103106
-    },
-    {
-      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOMANIA.xlsx",
-      "bytes": 371112
-    },
-    {
-      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\QUINA.xlsx",
-      "bytes": 520338
-    },
-    {
-      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\MEGA_SENA.xlsx",
-      "bytes": 230397
-    },
-    {
-      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\MAIS_MILIONARIA.xlsx",
-      "bytes": 56006
-    },
-    {
-      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DUPLA_SENA.xlsx",
-      "bytes": 293500
-    },
-    {
-      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\TIMEMANIA.xlsx",
-      "bytes": 221894
-    }
-  ],
+  "estado": "erro",
+  "ok": false,
+  "mensagem": "Falha no download: Processo encerrou com código 1.",
+  "iniciado_em": "08/11/2026 11:32:33",
+  "terminado_em": "08/11/2026 11:32:39",
+  "arquivos": [],
   "erros": [
-    "Erro ao baixar Super-Sete. HTTP 404"
+    "Processo encerrou com código 1."
   ],
-  "pid": 20704,
+  "pid": 13796,
   "python": "D:\\Loterias\\LP-LoteriasPosicao\\VenvLoterias\\Scripts\\python.exe",
   "script": "D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\DownloadResultadosLoteriasCaixa.py",
-  "returncode": 0
+  "returncode": 1
 }

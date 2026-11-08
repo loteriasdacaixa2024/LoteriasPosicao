@@ -100,9 +100,11 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
             aba = "checagem-seq"
         elif aba in ("combinacoes", "combinações"):
             aba = "combinacoes"
+        elif aba in ("recorrencia", "recorrencia-padroes", "recorrencia_padroes"):
+            aba = "recorrencia" if modality_key == "diadesorte" else "resultados"
         elif aba not in (
             "resultados", "combinacoes", "padroes", "padroes-ii",
-            "jogos-padrao", "tubular", "panorama", "checagem-seq",
+            "jogos-padrao", "tubular", "panorama", "checagem-seq", "recorrencia",
         ):
             aba = "resultados"
         if aba == "tubular" and modality_key != "supersete":
@@ -458,6 +460,17 @@ def register_analise_inteligentes(analise_bp: Blueprint, modality_key: str) -> N
             return jsonify(out), (200 if out.get("sucesso") else 500)
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+    if modality_key == "diadesorte":
+        @analise_bp.route("/api/inteligentes/recorrencia-padroes")
+        def api_inteligentes_recorrencia_padroes():
+            """Intervalos entre ocorrências dos padrões iniciais (Dia de Sorte)."""
+            try:
+                base = request.args.get("base", "geral")
+                out = Svc.recorrencia_padroes(base=base)
+                return jsonify(out), (200 if out.get("sucesso") else 500)
+            except Exception as e:
+                return jsonify({"sucesso": False, "erro": str(e)}), 500
 
     @analise_bp.route("/api/inteligentes/sequencias-sorteadas")
     def api_inteligentes_sequencias_sorteadas():

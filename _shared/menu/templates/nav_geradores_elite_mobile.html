@@ -10,7 +10,8 @@
         {% for item in nav_cfg.geradores_elite['items'] if item.href == href %}
         <a class="mobile-link dd-ge-destaque dd-ge-destaque-{{ rank }}" href="{{ item.href }}" onclick="closeMobileNav()">
             <span class="dd-ge-rank">{{ rank }}</span>
-            <i class="{{ item.icon }}"></i> {{ item.title }}
+            <i class="{{ item.icon }}"></i>
+            <span class="mobile-link-label">{{ item.title }}{% if item.desc %}<span class="mobile-link-sub"> - {{ item.desc }}</span>{% endif %}</span>
         </a>
         {% endfor %}
         {% endfor %}
@@ -22,6 +23,7 @@
             '/geradores-elite/comparador-apostas/'
         ] %}
         <a class="mobile-link{% if loop.first %} dd-ge-sep{% endif %}" href="{{ item.href }}" onclick="closeMobileNav()">
-            <i class="{{ item.icon }}"></i> {{ item.title }}
+            <i class="{{ item.icon }}"></i>
+            <span class="mobile-link-label">{{ item.title }}{% if item.desc %}<span class="mobile-link-sub"> - {{ item.desc }}</span>{% endif %}</span>
         </a>
         {% endfor %}

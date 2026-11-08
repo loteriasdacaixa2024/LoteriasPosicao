@@ -2519,3 +2519,460 @@ Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoter
 Erro ao baixar Super-Sete. HTTP 404
 
 [exit 0]
+
+--- 06/11/2026 05:20:47 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387297 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103160 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOMANIA.xlsx (371112 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\QUINA.xlsx (520407 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MEGA_SENA.xlsx (230397 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MAIS_MILIONARIA.xlsx (56006 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DUPLA_SENA.xlsx (293500 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\TIMEMANIA.xlsx (221965 bytes)
+Erro ao baixar Super-Sete. HTTP 404
+
+[exit 0]
+
+--- 06/11/2026 05:43:31 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387297 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103160 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOMANIA.xlsx (371112 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\QUINA.xlsx (520407 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MEGA_SENA.xlsx (230397 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MAIS_MILIONARIA.xlsx (56006 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DUPLA_SENA.xlsx'
+
+[exit 1]
+
+--- 06/11/2026 05:55:35 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387297 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103160 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOMANIA.xlsx'
+
+[exit 1]
+
+--- 06/11/2026 06:03:58 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]
+
+--- 06/11/2026 06:27:16 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]
+
+--- 06/11/2026 12:39:18 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387297 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103160 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOMANIA.xlsx (371112 bytes)
+Erro ao baixar Quina. HTTP 503
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MEGA_SENA.xlsx (230397 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MAIS_MILIONARIA.xlsx (56006 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DUPLA_SENA.xlsx (293500 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\TIMEMANIA.xlsx (221965 bytes)
+Erro ao baixar Super-Sete. HTTP 404
+
+[exit 0]
+
+--- 07/11/2026 15:49:10 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103223 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOMANIA.xlsx (371212 bytes)
+Erro ao baixar Quina. HTTP 503
+Erro ao baixar Mega-Sena. HTTP 503
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MAIS_MILIONARIA.xlsx (56098 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DUPLA_SENA.xlsx (293612 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\TIMEMANIA.xlsx (221966 bytes)
+Erro ao baixar Super-Sete. HTTP 503
+
+[exit 0]
+
+--- 08/11/2026 07:14:35 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Erro ao baixar Lotofacil. HTTP 503
+Erro ao baixar Dia-de-Sorte. HTTP 503
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOMANIA.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 08:11:32 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DIA_DE_SORTE.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 08:14:04 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103223 bytes)
+Erro ao baixar Lotomania. HTTP 503
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\QUINA.xlsx (520481 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MEGA_SENA.xlsx (230461 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\MAIS_MILIONARIA.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 08:18:28 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103223 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOMANIA.xlsx (371211 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\QUINA.xlsx (520481 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MEGA_SENA.xlsx (230461 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MAIS_MILIONARIA.xlsx (56097 bytes)
+Erro ao baixar Dupla-Sena. HTTP 503
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\TIMEMANIA.xlsx (221966 bytes)
+Erro ao baixar Super-Sete. HTTP 404
+
+[exit 0]
+
+--- 08/11/2026 08:33:22 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103223 bytes)
+Erro ao baixar Lotomania. HTTP 503
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\QUINA.xlsx (520481 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MEGA_SENA.xlsx (230461 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\MAIS_MILIONARIA.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 09:35:47 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 09:46:48 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103223 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOMANIA.xlsx (371211 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\QUINA.xlsx (520481 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MEGA_SENA.xlsx (230461 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MAIS_MILIONARIA.xlsx (56097 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DUPLA_SENA.xlsx (293612 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\TIMEMANIA.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 09:51:03 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DIA_DE_SORTE.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 09:55:29 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103223 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOMANIA.xlsx (371211 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\QUINA.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 10:06:20 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103223 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOMANIA.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 10:08:45 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Erro ao baixar Dia-de-Sorte. HTTP 503
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOMANIA.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 10:11:55 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 10:30:27 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 10:34:48 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 10:45:48 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 10:55:46 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DIA_DE_SORTE.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 11:02:08 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103223 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOMANIA.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 11:11:03 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\LOTOFACIL.xlsx (387389 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\DIA_DE_SORTE.xlsx (103223 bytes)
+Erro ao baixar Lotomania. HTTP 503
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\QUINA.xlsx (520481 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MEGA_SENA.xlsx (230461 bytes)
+Download concluído: D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\downloads\MAIS_MILIONARIA.xlsx (56097 bytes)
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DUPLA_SENA.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 11:14:30 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 11:21:29 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]
+
+--- 08/11/2026 11:32:33 python=D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Scripts\python.exe ---
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\DownloadTodosResultadosLoterias\DownloadResultadosLoteriasCaixa.py", line 47, in <module>
+    dest.write_bytes(response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 796, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "D:\Python_\Lib\pathlib\__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx'
+
+[exit 1]

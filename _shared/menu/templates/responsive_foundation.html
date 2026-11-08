@@ -347,8 +347,49 @@
         background: #ead9a8;
         box-shadow: inset 3px 0 0 #7d5e10;
     }
+    .dd-link.dd-ge-destaque,
+    .dd-link.dd-ge-destaque:hover,
+    .dd-link.dd-ge-destaque .dd-title,
+    .dd-link.dd-ge-destaque:hover .dd-title {
+        color: #1a1408;
+    }
+    .dd-link.dd-ge-destaque .dd-desc,
+    .dd-link.dd-ge-destaque:hover .dd-desc {
+        color: #5c5344;
+    }
     .dd-link.dd-ge-destaque .dd-title {
         font-weight: 800;
+    }
+    .mobile-link.dd-ge-destaque,
+    .mobile-link.dd-ge-destaque:hover {
+        color: #1a1408;
+    }
+    .mobile-link.dd-ge-destaque i,
+    .mobile-link.dd-ge-destaque:hover i {
+        color: #1a1408;
+        opacity: .9;
+    }
+    .mobile-link.dd-ge-destaque .mobile-link-sub,
+    .mobile-link.dd-ge-destaque:hover .mobile-link-sub {
+        color: #4a3f28;
+    }
+    .nav-mobile-panel .mobile-link {
+        align-items: flex-start;
+    }
+    .nav-mobile-panel .mobile-link > i,
+    .nav-mobile-panel .mobile-link > .dd-ge-rank {
+        margin-top: .18rem;
+        flex-shrink: 0;
+    }
+    .mobile-link-label {
+        flex: 1;
+        min-width: 0;
+        line-height: 1.35;
+        white-space: normal;
+    }
+    .mobile-link-sub {
+        font-weight: 500;
+        color: rgba(255, 255, 255, .82);
     }
     .dd-link.dd-ge-sep,
     .mobile-link.dd-ge-sep {
@@ -688,7 +729,7 @@
 </script>
 <script>
 (function () {
-  var DENTRO = '.table-responsive, .tabela-scroll, .ai-pan-table-wrap, .ai-jogos-table-wrap, .cc-table-wrap, nav, .navbar-main';
+  var DENTRO = '.table-responsive, .tabela-scroll, .ai-pan-table-wrap, .ai-jogos-table-wrap, .cc-table-wrap, .tb-cmp-diag-scroll-log, nav, .navbar-main';
   function ancestralRola(el) {
     var n = el.parentElement;
     while (n && n !== document.body) {

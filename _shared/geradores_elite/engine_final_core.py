@@ -453,8 +453,11 @@ def gerar_apostas(
         else:
             if not scores:
                 scores = {d: random.random() for d in range(cfg["dezena_min"], cfg["dezena_max"] + 1)}
+            ciclo_modo = (leitura or {}).get("ciclo_modo") if isinstance(leitura, dict) else None
             if lote_guiado is not None and i < len(lote_guiado):
                 nums = list(lote_guiado[i])
+            elif ciclo_modo in ("travar", "recorte"):
+                break
             else:
                 nums = _montar_aposta(scores, cfg, k, i, anteriores, candidatos=pool_conjunto)
         anteriores.append(nums)
@@ -481,7 +484,7 @@ def gerar_apostas(
         "sucesso": True,
         "modalidade": cfg["nome"],
         "modo": modo,
-        "quantidade": qtd,
+        "quantidade": len(apostas_out),
         "dezenas_por_aposta": k if cfg["loader"] != "supersete_colunas" else 7,
         "apostas": apostas_out,
         "extra": extra_payload,

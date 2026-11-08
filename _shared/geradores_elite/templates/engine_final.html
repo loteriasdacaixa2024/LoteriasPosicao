@@ -214,6 +214,64 @@
         text-align: center;
         margin: 0 0 .5rem;
     }
+    #ge-engine-final .ge-analises {
+        width: 100%;
+        max-width: 52rem;
+        margin: 0 auto .75rem;
+        text-align: left;
+    }
+    #ge-engine-final .ge-analises-toggle {
+        border: 0;
+        background: transparent;
+        color: var(--primary-xdark, #3f3610);
+        font-size: .82rem;
+        font-weight: 700;
+        padding: .15rem 0 .35rem;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        cursor: pointer;
+    }
+    #ge-engine-final .ge-analises-toggle:hover { text-decoration: underline; }
+    #ge-engine-final .ge-analises-toggle .ge-chevron {
+        transition: transform .15s ease;
+        font-size: .7rem;
+        width: .85rem;
+    }
+    #ge-engine-final .ge-analises-toggle.is-open .ge-chevron { transform: rotate(90deg); }
+    #ge-engine-final .ge-analises-contagem {
+        font-weight: 600;
+        font-size: .72rem;
+        color: #6c757d;
+    }
+    #ge-engine-final .ge-analises ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: .28rem;
+    }
+    #ge-engine-final .ge-analises li {
+        font-size: .75rem;
+        line-height: 1.35;
+        color: #343a40;
+        padding: .28rem .45rem;
+        border-radius: 6px;
+        background: #f8f9fa;
+    }
+    #ge-engine-final .ge-analises li em {
+        font-style: normal;
+        font-weight: 700;
+        margin-right: .35rem;
+    }
+    #ge-engine-final .ge-analises li span { color: #6c757d; }
+    #ge-engine-final .ge-v-cabe { border-left: 3px solid #198754; }
+    #ge-engine-final .ge-v-cabe em { color: #198754; }
+    #ge-engine-final .ge-v-nao_cabe { border-left: 3px solid #9f1239; }
+    #ge-engine-final .ge-v-nao_cabe em { color: #9f1239; }
+    #ge-engine-final .ge-v-nao_opina { border-left: 3px solid #adb5bd; }
+    #ge-engine-final .ge-v-nao_opina em { color: #6c757d; }
     #ge-engine-final .ge-forma {
         display: none;
         width: 100%;
@@ -284,6 +342,9 @@
             <div>
                 <h1 class="h5 mb-1"><i class="fas fa-brain"></i> Engine Final</h1>
                 <span class="text-muted small">Gerador pensante — {{ modality_nome }}</span>
+                {% if modality_key == 'diadesorte' %}
+                <p class="text-muted small mb-0">Cada análise entra no lote com um veredito: cabe, não cabe ou não opina.</p>
+                {% endif %}
             </div>
             <a href="{{ url_for('geradores_elite.index') }}" class="btn btn-sm btn-outline-secondary">Geradores de Elite</a>
         </div>
@@ -451,5 +512,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('geradores_elite.static', filename='engine_final.js') }}?v=leitura3"></script>
+<script src="{{ url_for('geradores_elite.static', filename='engine_final.js') }}?v=leitura6"></script>
 {% endblock %}

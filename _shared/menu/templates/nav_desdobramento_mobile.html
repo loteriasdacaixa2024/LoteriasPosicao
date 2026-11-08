@@ -1,11 +1,13 @@
         {% if nav_cfg.desdobramento.mode == 'dropdown' %}
         {% for item in nav_cfg.desdobramento['items'] %}
         <a class="mobile-link" href="{{ item.href }}" onclick="closeMobileNav()">
-            <i class="{{ item.icon }}"></i> {{ item.title }}
+            <i class="{{ item.icon }}"></i>
+            <span class="mobile-link-label">{{ item.title }}{% if item.desc %}<span class="mobile-link-sub"> - {{ item.desc }}</span>{% endif %}</span>
         </a>
         {% endfor %}
         {% else %}
         <a class="mobile-link" href="{{ nav_cfg.desdobramento.href }}" onclick="closeMobileNav()">
-            <i class="fas fa-sparkles"></i> {{ nav_cfg.desdobramento.title }}
+            <i class="fas fa-sparkles"></i>
+            <span class="mobile-link-label">{{ nav_cfg.desdobramento.title }}{% if nav_cfg.desdobramento.desc %}<span class="mobile-link-sub"> - {{ nav_cfg.desdobramento.desc }}</span>{% endif %}</span>
         </a>
         {% endif %}
