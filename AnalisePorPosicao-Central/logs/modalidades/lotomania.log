@@ -16251,3 +16251,292 @@ Press CTRL+C to quit
 127.0.0.1 - - [08/Nov/2026 11:43:11] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
 127.0.0.1 - - [08/Nov/2026 11:43:12] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
 127.0.0.1 - - [08/Nov/2026 11:43:12] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 12:53:34 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 12:53:48] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 13:21:11 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 13:21:24] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 13:21:25] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 14:10:04] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 14:10:15] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:14:33] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 15:32:23 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 15:32:39] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:34:32] "GET /geradores-elite/gerador-elite/?n=9&digitos=0,1,2,3,4,5,7,8,9&concurso=2994 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:34:57] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:35:29] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2961 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:35:34] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 15:38:46 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 15:39:07] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 15:44:39 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 15:44:49] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 16:05:49] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%200%201%201%201%201%201%201%201%201%202%202%202%202%202%203%203%203%203%203%203%204%204%204%204%205%205%205%205%205%205%205%207%207%207%207%207%207%208%208%208%208%209%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 16:05:53] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 16:51:39] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+Error on request:
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 347, in execute
+    data = self.rfile.read(10_000_000)
+MemoryError
+127.0.0.1 - - [08/Nov/2026 16:51:48] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+Error on request:
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 347, in execute
+    data = self.rfile.read(10_000_000)
+MemoryError
+127.0.0.1 - - [08/Nov/2026 16:51:52] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+Error on request:
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 347, in execute
+    data = self.rfile.read(10_000_000)
+MemoryError
+
+--- iniciando 2026-11-08 17:04:45 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://192.168.11.212:5154
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 17:05:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 17:20:04] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2954 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 17:20:10] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 17:20:10] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 17:20:22] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 17:32:14] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2966 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 17:32:22] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 18:39:14] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 18:53:39] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 19:30:22] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%200%201%201%201%201%201%201%201%202%202%202%202%202%202%203%203%203%203%203%203%204%204%204%204%205%205%205%206%206%206%206%207%207%207%207%207%207%208%208%208%208%209%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 19:39:28] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 19:42:45] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 20:25:27] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+127.0.0.1 - - [08/Nov/2026 20:25:39] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+127.0.0.1 - - [08/Nov/2026 20:26:04] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+Error on request:
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 347, in execute
+    data = self.rfile.read(10_000_000)
+MemoryError
+127.0.0.1 - - [08/Nov/2026 20:35:54] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2974 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 20:36:10] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:21:07] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2995 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:21:11] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:32:19] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%200%200%201%201%201%201%201%201%202%202%202%202%203%203%203%203%203%203%204%204%204%204%205%205%205%205%206%206%206%207%207%207%207%207%207%208%208%208%208%209%209%209%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:32:25] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:47:33] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+127.0.0.1 - - [08/Nov/2026 21:47:36] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+127.0.0.1 - - [08/Nov/2026 21:47:47] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+Error on request:
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 347, in execute
+    data = self.rfile.read(10_000_000)
+MemoryError
+127.0.0.1 - - [08/Nov/2026 21:51:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:51:15] "GET /caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:51:16] "GET /caixa-excel/premiacao.js?v=20260831s HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:58:57] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:58:57] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'servicebus2.caixa.gov.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+127.0.0.1 - - [08/Nov/2026 21:58:58] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:58:58] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:58:59] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 23:30:24] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2956 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 23:32:34] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 23:52:12] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2983 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 23:52:12] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2962 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 23:52:16] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 23:53:05] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 23:55:14] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2957 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 23:55:20] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 23:58:15] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2963 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:04:24] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2968 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:04:29] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:06:57] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2948 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:07:05] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:07:58] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:09:58] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2973 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:10:02] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:13:01] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,7,8,9&concurso=2994 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:13:13] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:19:12] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%200%201%201%201%201%201%201%201%201%202%202%202%202%203%203%203%203%204%204%204%204%204%204%205%205%205%206%206%206%206%207%207%207%207%208%208%208%208%208%209%209%209%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:19:13] "GET /analise/comportamento/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:19:15] "GET /geradores-elite/static/analise_comportamento.js HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:19:15] "GET /geradores-elite/static/comportamento_bases_resumo.js HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:19:15] "GET /geradores-elite/static/comportamento_col_concurso.js HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:19:31] "GET /analise/api/comportamento?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:19:33] "GET /analise/api/comportamento/panorama-indicadores?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:20:14] "GET /analise/api/comportamento/comparativo?janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:33:37] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2979 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:35:13] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:40:53] "GET /analise/comparar-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:40:59] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:40:59] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:41:10] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=2995&concurso_b=2996 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:41:10] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:44:20] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%201%201%201%201%201%201%201%201%201%202%202%202%202%202%203%203%203%204%204%204%204%205%205%205%205%205%206%206%206%206%207%207%207%207%207%207%208%208%208%208%209%209%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:48:38] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%200%200%201%201%201%201%201%201%201%202%202%203%203%203%203%203%203%204%204%204%204%205%205%205%205%205%206%206%206%206%207%207%207%207%208%208%208%208%208%208%209%209%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:01:06] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2958 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:03:15] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:05:11] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,7,8,9&concurso=2988 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:09:03] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2978 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:13:15] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2990 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:15:49] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:17:29] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2965 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:18:50] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:21:58] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2985 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:22:00] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2964 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:24:22] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:29:53] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:41:44] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2959 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:46:47] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2980 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:49:45] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:50:56] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2996 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:52:57] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+Error on request:
+Traceback (most recent call last):
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\Loterias\LP-LoteriasPosicao\VenvLoterias\Lib\site-packages\werkzeug\serving.py", line 347, in execute
+    data = self.rfile.read(10_000_000)
+MemoryError
+127.0.0.1 - - [09/Nov/2026 01:53:06] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+
+--- iniciando 2026-11-09 05:10:49 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [09/Nov/2026 05:11:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 05:11:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 05:21:34] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 05:49:04] "GET /analise/ciclo-cobertura/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 05:49:22] "GET /analise/api/ciclo-cobertura/ciclo-atual?v=1793664000000 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 06:27:07] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 07:42:05] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 500 -
+
+--- iniciando 2026-11-09 08:19:20 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://127.0.0.1:5154
+Press CTRL+C to quit
+127.0.0.1 - - [09/Nov/2026 08:19:46] "GET / HTTP/1.1" 200 -

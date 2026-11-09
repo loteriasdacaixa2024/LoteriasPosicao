@@ -305,6 +305,7 @@
     this.faltantesCiclo = new Set(); // dezenas pendentes do ciclo atual
     this.faltantesCicloOrdem = [];
     this.faltantesCicloTop3 = [];
+    this.padroesHora = []; // padrões a até 3 concursos da hora de apostar
     this.manual10BlockMsg = '';
     this.auto11Janela = 10;
     this.auto11SomaModo = 'padrao';
@@ -868,6 +869,37 @@
     }
   };
 
+  /** Padrões da aba Recorrências que estão a até 3 concursos da hora de apostar. */
+  TubularApp.prototype._loadPadroesHora = async function () {
+    if (!this.root.querySelector('#tbCmpPadroesHora')) {
+      this.padroesHora = [];
+      return;
+    }
+    try {
+      const r = await fetch(`${this.api}/recorrencia-padroes?base=geral`);
+      const j = await r.json();
+      const ultimo = Number(j && j.ultimo_concurso);
+      const lista = [];
+      (Array.isArray(j && j.padroes) ? j.padroes : []).forEach((p) => {
+        const agora = p.desde_ultima != null && Number(p.desde_ultima) === 0;
+        const esp = Number(p.intervalo_medio);
+        const ultP = Number(p.ultimo_concurso);
+        if (agora || !Number.isFinite(esp) || !Number.isFinite(ultP) || !Number.isFinite(ultimo)) return;
+        const alvo = ultP + Math.round(esp);
+        const falta = alvo - ultimo;
+        const abs = Math.abs(falta);
+        if (abs > 3) return;
+        const padrao = String(p.padrao || '').trim();
+        if (!padrao) return;
+        lista.push({ padrao, alvo, falta, abs });
+      });
+      lista.sort((a, b) => a.abs - b.abs || a.falta - b.falta || a.padrao.localeCompare(b.padrao));
+      this.padroesHora = lista;
+    } catch (_) {
+      this.padroesHora = [];
+    }
+  };
+
   /** Hit-set do último concurso carregado (Seção 10 — comparar com a prévia). */
   TubularApp.prototype._ultimoHitSet = function () {
     const chrono = this._chronoAsc();
@@ -898,6 +930,7 @@
       const [r] = await Promise.all([
         fetch(`${this.api}/tubular?base=geral`),
         this._loadFaltantesCiclo(),
+        this._loadPadroesHora(),
       ]);
       const j = await r.json();
       if (!j.sucesso) throw new Error(j.erro || 'Falha');
@@ -3341,6 +3374,8 @@
     this._syncCmpPlayBtn();
     this.renderCmpDiagonais();
     this.renderCmpPendentes();
+    this.renderCmpEscolhaDiag();
+    this.renderCmpPadroesHora();
   };
 
   /** Faixa discreta: só as dezenas ainda fora do ciclo, com o TOP 3 já calculado pela API. */
@@ -3370,6 +3405,100 @@
     const tituloTotal = `${nPend} dezenas pendentes do ciclo`;
     box.hidden = false;
     box.innerHTML = `<span class="tb-cmp-pend-lbl" title="${esc(tituloTotal)}"><strong>${nPend}</strong></span><span class="tb-cmp-pend-row">${chips}</span>`;
+  };
+
+  /** Linha discreta: volante.qtd e as diagonais das dezenas já marcadas. Não altera a escolha. */
+  TubularApp.prototype.renderCmpEscolhaDiag = function () {
+    const box = this.root.querySelector('#tbCmpEscolhaDiag');
+    if (!box) return;
+    const vols = this.cmpVolantes || [];
+    let lines = null;
+    const rows = [];
+    vols.forEach((v, i) => {
+      const nums = (v.nums || []).map(Number).filter(Number.isFinite);
+      if (!nums.length) return;
+      if (!lines) lines = this._diagLines();
+      const runs = this._diagRunsInDraw(new Set(nums), lines);
+      rows.push({
+        i,
+        n: nums.length,
+        diags: runs.map((r) => (r.nums || []).map(fmt2).join('.')),
+      });
+    });
+    if (!rows.length) {
+      box.hidden = true;
+      box.innerHTML = '';
+      return;
+    }
+    let slots = 0;
+    rows.forEach((r) => { if (r.diags.length > slots) slots = r.diags.length; });
+    const widths = [];
+    for (let s = 0; s < slots; s++) {
+      let w = 0;
+      rows.forEach((r) => {
+        const t = r.diags[s] || '';
+        if (t.length > w) w = t.length;
+      });
+      widths.push(w);
+    }
+    const headW = rows.reduce((m, r) => Math.max(m, String(r.i + 1).length + 1 + String(r.n).length), 0);
+    box.hidden = false;
+    box.innerHTML = rows.map((r) => {
+      const head = `${r.i + 1}.${r.n}`;
+      const dica = r.diags.length
+        ? `Diagonais das dezenas marcadas no volante ${r.i + 1}. O ponto junta as dezenas; o | separa uma diagonal da outra.`
+        : `Volante ${r.i + 1}: ${r.n} dezenas, sem diagonal.`;
+      const body = r.diags.length
+        ? `<span class="tb-cmp-escolha-eq">=</span>` + r.diags.map((d, s) => {
+          const slot = `<span class="tb-cmp-escolha-slot" style="width:${widths[s]}ch">${esc(d)}</span>`;
+          const sep = s < r.diags.length - 1 ? '<span class="tb-cmp-escolha-sep">|</span>' : '';
+          return slot + sep;
+        }).join('')
+        : '';
+      return `<span class="tb-cmp-escolha-item" title="${esc(dica)}"><span class="tb-cmp-escolha-head" style="width:${headW}ch">${esc(head)}</span>${body}</span>`;
+    }).join('');
+  };
+
+  /** Lista discreta dos padrões que estão quase na hora de apostar. Não altera a escolha. */
+  TubularApp.prototype.renderCmpPadroesHora = function () {
+    const box = this.root.querySelector('#tbCmpPadroesHora');
+    if (!box) return;
+    const lista = this.padroesHora || [];
+    if (!lista.length) {
+      box.hidden = true;
+      box.innerHTML = '';
+      return;
+    }
+    const k = limitsFrom(this.root).sorteadas || 7;
+    const nosVolantes = new Map();
+    (this.cmpVolantes || []).forEach((v, i) => {
+      const nums = (v.nums || []).map(Number).filter(Number.isFinite);
+      if (nums.length !== k) return;
+      const ordenados = nums.slice().sort((a, b) => a - b);
+      const pad = ordenados.map((n) => String(Math.trunc(n / 10))).join(' ');
+      if (!nosVolantes.has(pad)) nosVolantes.set(pad, []);
+      nosVolantes.get(pad).push({ vol: i + 1, nums: ordenados });
+    });
+    const linhas = lista.map((p) => {
+      const vols = nosVolantes.get(p.padrao) || [];
+      const falta = Number(p.falta);
+      let quando = `passou ${-falta}`;
+      if (falta === 0) quando = 'agora';
+      else if (falta > 0) quando = `falta ${falta}`;
+      const onde = vols.length ? ` Volante ${vols.map((v) => v.vol).join(', ')}.` : '';
+      const dica = `Quase na hora de apostar neste padrão. Concurso ${p.alvo}, ${quando}.${onde}`;
+      const cls = vols.length ? 'tb-cmp-padrao-hora is-on' : 'tb-cmp-padrao-hora';
+      const digs = String(p.padrao || '').trim().split(/\s+/).filter(Boolean)
+        .map((d) => `<span class="tb-cmp-padrao-dig">${esc(d)}</span>`).join('');
+      const apostas = vols.map((v) => {
+        const txt = v.nums.map(fmt2).join(' ');
+        return `<span class="tb-cmp-padrao-aposta" title="Volante ${v.vol}">${esc(txt)}</span>`;
+      }).join('');
+      const frente = apostas ? `<span class="tb-cmp-padrao-apostas">${apostas}</span>` : '';
+      return `<span class="${cls}" title="${esc(dica)}">${digs}${frente}</span>`;
+    }).join('');
+    box.hidden = false;
+    box.innerHTML = `<a class="tb-cmp-padroes-hora-lbl" href="/analise/analises-inteligentes/?aba=recorrencia" title="Abrir a análise original: Recorrências, coluna Hora">Padrões</a>${linhas}`;
   };
 
   TubularApp.prototype._diagDirSym = function (dir) {

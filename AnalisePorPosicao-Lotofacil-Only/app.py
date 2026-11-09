@@ -54,6 +54,8 @@ def create_app():
 
     # Inicializa o banco de dados com a aplicação
     db.init_app(app)
+    from simulador_globo.app_integration import extend_simulador_globo_app
+    extend_simulador_globo_app(app, 'lotofacil')
     extend_config_app(app)
     cc_extend_app(app, 'lotofacil')
     extend_nav_app(app, 'lotofacil')

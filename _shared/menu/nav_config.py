@@ -770,8 +770,23 @@ def get_nav_config(modality_key: str) -> dict:
     _inject_posicao_nav(cfg, modality_key)
     _inject_analises_novas_nav(cfg, modality_key)
     _inject_filtros_posicao_nav(cfg)
+    _inject_simulador_globo_nav(cfg)
     _ordenar_geradores_elite(cfg)
     return cfg
+
+
+def _inject_simulador_globo_nav(cfg: dict) -> None:
+    item = {
+        "title": "Painel de Cores",
+        "desc": "Cores das bolas e simulador de globo",
+        "href": "/simulador-globo/",
+        "icon": "fas fa-circle-dot",
+        "icon_bg": "#fdecea",
+        "icon_color": "#c62828",
+    }
+    extras = cfg.setdefault("analise_extras", [])
+    if not any(x.get("href") == item["href"] for x in extras):
+        extras.insert(0, item)
 
 
 # Mesma ordem do Dia de Sorte. O número só aparece se a modalidade tiver o item.

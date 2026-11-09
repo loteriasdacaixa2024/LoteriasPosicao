@@ -51,6 +51,8 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     db.init_app(app)
+    from simulador_globo.app_integration import extend_simulador_globo_app
+    extend_simulador_globo_app(app, 'duplasena')
     extend_config_app(app)
     cc_extend_app(app, 'duplasena')
     extend_nav_app(app, 'duplasena')

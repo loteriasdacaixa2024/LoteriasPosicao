@@ -16889,3 +16889,181 @@ WARNING: This is a development server. Do not use it in a production deployment.
 Press CTRL+C to quit
 127.0.0.1 - - [08/Nov/2026 11:32:27] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [08/Nov/2026 11:32:27] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 12:53:33 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 12:53:47] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 12:53:48] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 13:21:11 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 13:21:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 13:21:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 13:22:07] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,5,6,7,9&concurso=886 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 13:22:10] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 13:55:33] "GET /geradores-elite/gerador-digitos-inteligente/ HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 13:55:36] "GET /geradores-elite/static/construtor_digitos.js?v=19 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 13:55:40] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 13:55:40] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 13:55:40] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:14:31] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:14:34] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 15:32:22 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 15:32:39] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 15:38:45 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 15:39:07] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 15:44:39 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 15:44:48] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:50:11] "GET /geradores-elite/comportamento-apostas/?tab=aliadas HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:50:16] "GET /geradores-elite/static/comportamento_col_concurso.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:50:16] "GET /geradores-elite/static/panorama_modos.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:50:16] "GET /geradores-elite/static/comportamento_bases_resumo.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:50:16] "GET /geradores-elite/static/tres_fontes.js?v=20261022v2 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:50:22] "GET /geradores-elite/api/comportamento/analise?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 15:50:23] "GET /geradores-elite/api/comportamento/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 17:00:22] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-11-08 17:04:43 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://192.168.11.212:5160
+Press CTRL+C to quit
+127.0.0.1 - - [08/Nov/2026 17:05:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 18:39:10] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 18:39:15] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 18:53:13] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 18:53:20] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 19:37:55] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 20:04:21] "GET /analise/ HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:31:17] "GET /geradores-elite/gerador-gc/?digitos=0,3,4,6,7,8,9&concurso=869 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Nov/2026 21:31:24] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:40:54] "GET /geradores-elite/gerador-por-posicao/ HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:41:41] "GET /geradores-elite/api/posicao/analise?janela=50 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 00:41:42] "GET /geradores-elite/api/posicao/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 01:04:07] "GET /geradores-elite/gerador-gc/ HTTP/1.1" 200 -
+
+--- iniciando 2026-11-09 05:10:47 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [09/Nov/2026 05:11:03] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 05:21:35] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 06:27:03] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [09/Nov/2026 06:27:09] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-09 08:19:17 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://127.0.0.1:5160
+Press CTRL+C to quit
+127.0.0.1 - - [09/Nov/2026 08:19:46] "GET / HTTP/1.1" 200 -
