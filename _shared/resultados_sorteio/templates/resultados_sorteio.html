@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div id="rs-root" data-api="{{ api_url }}">
+    <header class="rs-banner">
+        <h1><i class="fas fa-trophy"></i> Resultados — {{ modality_nome }}</h1>
+        <p>Consulte os últimos concursos e as dezenas deslocadas</p>
+    </header>
+
+    <div class="rs-switch" role="tablist">
+        <button type="button" class="rs-tab is-on" data-aba="ultimos" role="tab" aria-selected="true">
+            <i class="fas fa-star"></i> Últimos Resultados
+        </button>
+        <button type="button" class="rs-tab" data-aba="alterados" role="tab" aria-selected="false">
+            <i class="fas fa-sliders-h"></i> Resultados Alterados
+        </button>
+        <button type="button" class="rs-reset" id="rsReset" title="Resetar ajustes">
+            <i class="fas fa-rotate-right" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <section id="rsUltimos" class="rs-pane">
+        <p class="rs-atalho">
+            <a href="/central-conferencias/#concursos">Concursos Disponíveis</a>
+        </p>
+        <div class="rs-cards" id="rsCards"></div>
+        <div class="rs-pager" id="rsPagerCards"></div>
+    </section>
+
+    <section id="rsAlterados" class="rs-pane" hidden>
+        <div class="rs-config">
+            <div class="rs-config-title"><i class="fas fa-sliders-h"></i> Configurações de ajustes das dezenas</div>
+            <div class="rs-config-grid">
+                <label>Qtd. ajustes
+                    <select id="rsQtd" class="form-select form-select-sm"></select>
+                </label>
+                <label class="rs-aj-lab" data-i="0">Ajuste 1
+                    <select class="form-select form-select-sm rs-offset"></select>
+                </label>
+                <label class="rs-aj-lab" data-i="1">Ajuste 2
+                    <select class="form-select form-select-sm rs-offset"></select>
+                </label>
+                <label class="rs-aj-lab" data-i="2">Ajuste 3
+                    <select class="form-select form-select-sm rs-offset"></select>
+                </label>
+                <label class="rs-aj-lab" data-i="3">Ajuste 4
+                    <select class="form-select form-select-sm rs-offset"></select>
+                </label>
+            </div>
+            <button type="button" class="btn rs-load" id="rsCarregar">
+                <i class="fas fa-sync-alt"></i> Carregar resultados
+            </button>
+        </div>
+        <div class="rs-status" id="rsStatus"></div>
+        <div class="table-responsive rs-table-wrap">
+            <table class="table table-sm rs-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Concurso</th>
+                        <th>Data</th>
+                        <th>Dezenas originais</th>
+                        <th class="rs-col-mes">Mês</th>
+                        <th id="rsThAjustes">Ajustes</th>
+                    </tr>
+                </thead>
+                <tbody id="rsBody"></tbody>
+            </table>
+        </div>
+        <div class="rs-pager" id="rsPagerAlt"></div>
+    </section>
+</div>
+<style>
+    #rs-root { color: var(--on-accent, #1a0a00); }
+    #rs-root .rs-banner {
+        background: linear-gradient(180deg, #d4a017 0%, #b8860b 100%);
+        color: #fff;
+        text-align: center;
+        border-radius: 14px;
+        padding: 1.15rem 1rem 1rem;
+        margin-bottom: .85rem;
+    }
+    #rs-root .rs-banner h1 { font-size: 1.55rem; font-weight: 800; margin: 0; }
+    #rs-root .rs-banner p { margin: .25rem 0 0; font-size: .92rem; opacity: .95; }
+    #rs-root .rs-atalho { text-align: right; margin: 0 0 .45rem; }
+    #rs-root .rs-atalho a {
+        color: #8a8175;
+        font-size: .8rem;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    #rs-root .rs-atalho a:hover { color: #996e00; text-decoration: underline; }
+    #rs-root .rs-switch {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        gap: .5rem;
+        background: #fff8e6;
+        border: 1px solid rgba(192, 139, 0, .25);
+        border-radius: 12px;
+        padding: .45rem 2.4rem;
+        margin-bottom: .9rem;
+    }
+    #rs-root .rs-reset {
+        position: absolute;
+        right: .45rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.8rem;
+        height: 1.8rem;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #8a8175;
+        font-size: .85rem;
+    }
+    #rs-root .rs-reset:hover { background: rgba(192, 139, 0, .16); color: #6b5710; }
+    #rs-root .rs-reset.is-on { color: #996e00; }
+    #rs-root .rs-tab {
+        border: 0;
+        background: transparent;
+        color: #6b5a28;
+        font-weight: 700;
+        border-radius: 9px;
+        padding: .45rem .9rem;
+    }
+    #rs-root .rs-tab.is-on { background: #c08b00; color: #fff; }
+    #rs-root .rs-cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .75rem;
+    }
+    #rs-root .rs-card {
+        background: #fff;
+        border: 1px solid rgba(192, 139, 0, .2);
+        border-radius: 14px;
+        box-shadow: 0 1px 4px rgba(102, 74, 0, .06);
+        padding: .85rem .7rem .75rem;
+        text-align: center;
+    }
+    #rs-root .rs-card h2 {
+        color: #b8860b;
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin: 0;
+    }
+    #rs-root .rs-card .rs-data { color: #8a8175; font-size: .82rem; margin: .15rem 0 .55rem; }
+    #rs-root .rs-bolas { display: flex; flex-wrap: wrap; justify-content: center; gap: .28rem; }
+    #rs-root .rs-bola {
+        width: 28px; height: 28px; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: .72rem; font-weight: 800;
+    }
+    #rs-root .rs-bola-ouro { background: #c08b00; color: #fff; }
+    #rs-root .rs-bola-cinza { background: #4e5964; color: #fff; }
+    #rs-root .rs-mes { margin: .55rem 0 .45rem; }
+    #rs-root .rs-mes .mes-pill {
+        display: inline-block;
+        min-width: 4.5rem;
+        padding: .18rem .7rem;
+        border-radius: 999px;
+        font-size: .78rem;
+        font-weight: 700;
+    }
+    #rs-root .rs-box {
+        background: #fffaf0;
+        border-radius: 10px;
+        padding: .45rem .4rem;
+        margin-top: .4rem;
+        font-size: .78rem;
+    }
+    #rs-root .rs-acumulou { color: #c0392b; font-weight: 800; letter-spacing: .02em; }
+    #rs-root .rs-ganhou { color: #1F8959; font-weight: 800; }
+    #rs-root .rs-box .rs-sub { color: #6c6458; margin-top: .1rem; }
+    #rs-root .rs-estimado { font-weight: 800; color: #1a0a00; margin-top: .2rem; }
+    #rs-root .rs-config {
+        background: #fff8e6;
+        border: 1px solid rgba(192, 139, 0, .28);
+        border-radius: 14px;
+        padding: .85rem;
+        margin-bottom: .7rem;
+    }
+    #rs-root .rs-config-title { font-weight: 800; color: #6b5710; margin-bottom: .6rem; }
+    #rs-root .rs-config-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: .55rem;
+        margin-bottom: .7rem;
+    }
+    #rs-root .rs-config-grid label {
+        background: #fff;
+        border: 1px solid rgba(192, 139, 0, .2);
+        border-radius: 10px;
+        padding: .4rem .5rem .5rem;
+        font-size: .68rem;
+        font-weight: 800;
+        letter-spacing: .03em;
+        color: #8a8175;
+        text-transform: uppercase;
+    }
+    #rs-root .rs-load {
+        background: #c08b00;
+        color: #fff;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: .4rem .9rem;
+    }
+    #rs-root .rs-load:hover { background: #996e00; color: #fff; }
+    #rs-root .rs-status {
+        text-align: center;
+        border: 1px solid rgba(192, 139, 0, .25);
+        border-radius: 10px;
+        padding: .45rem;
+        margin-bottom: .7rem;
+        font-weight: 700;
+        color: #6b5710;
+        background: #fff;
+    }
+    #rs-root .rs-table-wrap {
+        border: 1px solid rgba(192, 139, 0, .25);
+        border-radius: 12px;
+        max-height: 70vh;
+        overflow: auto;
+    }
+    #rs-root .rs-table thead th {
+        position: sticky; top: 0; z-index: 1;
+        background: #c08b00; color: #fff;
+        text-align: center; vertical-align: middle;
+    }
+    #rs-root .rs-table td { text-align: center; vertical-align: middle; background: #fffef8; }
+    #rs-root .rs-table th.rs-col-mes,
+    #rs-root .rs-table td.rs-col-mes { text-align: left; padding-left: .85rem; }
+    #rs-root .rs-col-mes .mes-pill { min-width: 2.5rem; text-align: center; }
+    #rs-root .rs-table tbody tr:nth-child(even) td { background: #fffaf0; }
+    #rs-root .rs-aj-linha { display: flex; justify-content: center; gap: .22rem; margin: .18rem 0; }
+    #rs-root .rs-pager { display: flex; justify-content: center; gap: .35rem; margin-top: .75rem; flex-wrap: wrap; }
+    #rs-root .rs-pager button {
+        border: 1px solid rgba(192, 139, 0, .4);
+        background: #fff;
+        color: #6b5710;
+        border-radius: 8px;
+        min-width: 2.1rem;
+        font-weight: 700;
+    }
+    #rs-root .rs-pager button[disabled] { opacity: .45; }
+    #rs-root .rs-pager .is-on { background: #c08b00; color: #fff; }
+    @media (max-width: 1100px) {
+        #rs-root .rs-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        #rs-root .rs-config-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+        #rs-root .rs-cards,
+        #rs-root .rs-config-grid { grid-template-columns: 1fr; }
+    }
+</style>
+<script>
+(function () {
+    const root = document.getElementById('rs-root');
+    const API = root.dataset.api;
+    const POR_CARDS = 12;
+    const POR_ALT = 20;
+    const AJUSTES_PADRAO = [-1, 1, -2, 2];
+    let pacote = null;
+    let pagCards = 1;
+    let pagAlt = 1;
+
+    function pad(n) {
+        const w = Number(pacote && pacote.pad) || 2;
+        return String(n).padStart(w, '0');
+    }
+    function esc(v) {
+        return String(v == null ? '' : v)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function bolas(nums, classe) {
+        return (nums || []).map((n) => `<span class="rs-bola ${classe}">${pad(n)}</span>`).join('');
+    }
+    function deslocar(nums, offset) {
+        const min = Number(pacote.dezena_min) || 1;
+        const max = Number(pacote.dezena_max) || 31;
+        const span = max - min + 1;
+        const out = nums.map((n) => {
+            const v = Number(n) + offset;
+            return ((v - min) % span + span) % span + min;
+        });
+        if (!pacote.posicional) out.sort((a, b) => a - b);
+        return out;
+    }
+    function sinal(n) { return n > 0 ? `+${n}` : String(n); }
+
+    const MES_ABREV = {
+        Janeiro: 'Jan', Fevereiro: 'Fev', Março: 'Mar', Abril: 'Abr',
+        Maio: 'Mai', Junho: 'Jun', Julho: 'Jul', Agosto: 'Ago',
+        Setembro: 'Set', Outubro: 'Out', Novembro: 'Nov', Dezembro: 'Dez',
+    };
+    function mesHtml(ln) {
+        if (!ln.mes_nome) return '—';
+        const abrev = MES_ABREV[ln.mes_nome] || String(ln.mes_nome).slice(0, 3);
+        return `<span class="mes-pill mes-nome-${esc(ln.mes_nome)}">${esc(abrev)}</span>`;
+    }
+    function premioHtml(ln) {
+        const g = ln.ganhadores_7;
+        if (g == null) {
+            return '<div class="rs-box"><div class="rs-sub">Faixa principal sem dado de ganhadores.</div></div>';
+        }
+        const qtd = Number(pacote && pacote.sorteadas) || 0;
+        if (g <= 0) {
+            const texto = qtd ? `Ninguém acertou os ${qtd} números` : 'Ninguém acertou a faixa principal';
+            return `<div class="rs-box"><div class="rs-acumulou">ACUMULOU!</div><div class="rs-sub">${texto}</div></div>`;
+        }
+        const premio = ln.premio ? `<div class="rs-sub">Prêmio: ${esc(ln.premio)}</div>` : '';
+        return `<div class="rs-box"><div class="rs-ganhou">${g} GANHADOR${g === 1 ? '' : 'ES'}</div>${premio}</div>`;
+    }
+    function proximoHtml(ln) {
+        const p = ln.proximo;
+        if (!p) return '';
+        const quando = p.data
+            ? `${esc(p.data)}${p.dia ? ' (' + esc(p.dia) + ')' : ''}`
+            : 'Ainda não sorteado';
+        const estimado = p.estimado
+            ? `<div class="rs-estimado">Estimado: ${esc(p.estimado)}</div>`
+            : '';
+        return `<div class="rs-box"><div>Próximo: Concurso ${p.concurso}</div><div class="rs-sub">${quando}</div>${estimado}</div>`;
+    }
+    function cardHtml(ln) {
+        const quando = `${esc(ln.data)}${ln.dia ? ' (' + esc(ln.dia) + ')' : ''}`;
+        return `<article class="rs-card">
+            <h2>Concurso ${ln.concurso}</h2>
+            <div class="rs-data">${quando}</div>
+            <div class="rs-bolas">${bolas(ln.dezenas, 'rs-bola-ouro')}</div>
+            ${(ln.segundo || []).length ? `<div class="rs-data">2º sorteio</div><div class="rs-bolas">${bolas(ln.segundo, 'rs-bola-ouro')}</div>` : ''}
+            ${pacote.tem_mes ? `<div class="rs-mes">${mesHtml(ln)}</div>` : ''}
+            ${ln.extra ? `<div class="rs-mes"><span class="mes-pill">${esc(ln.extra)}</span></div>` : ''}
+            ${premioHtml(ln)}
+            ${proximoHtml(ln)}
+        </article>`;
+    }
+
+    function pager(alvo, pag, total, ir) {
+        const el = document.getElementById(alvo);
+        const pags = Math.max(1, Math.ceil(total / (alvo === 'rsPagerCards' ? POR_CARDS : POR_ALT)));
+        if (pags <= 1) { el.innerHTML = ''; return; }
+        const btn = (rotulo, dest, off, on) =>
+            `<button type="button" ${off ? 'disabled' : ''} class="${on ? 'is-on' : ''}" data-go="${dest}">${rotulo}</button>`;
+        let html = btn('«', 1, pag <= 1, false) + btn('‹', pag - 1, pag <= 1, false);
+        const ini = Math.max(1, pag - 2);
+        const fim = Math.min(pags, ini + 4);
+        for (let i = ini; i <= fim; i++) html += btn(String(i), i, false, i === pag);
+        html += btn('›', pag + 1, pag >= pags, false) + btn('»', pags, pag >= pags, false);
+        el.innerHTML = html;
+        el.querySelectorAll('button[data-go]').forEach((b) => {
+            b.addEventListener('click', () => ir(Number(b.dataset.go)));
+        });
+    }
+
+    function renderCards() {
+        const linhas = (pacote && pacote.linhas) || [];
+        const ini = (pagCards - 1) * POR_CARDS;
+        document.getElementById('rsCards').innerHTML = linhas.slice(ini, ini + POR_CARDS).map(cardHtml).join('')
+            || '<p class="text-muted text-center">Nenhum concurso no banco.</p>';
+        pager('rsPagerCards', pagCards, linhas.length, (n) => { pagCards = n; renderCards(); });
+    }
+
+    function offsetsAtivos() {
+        const qtd = Number(document.getElementById('rsQtd').value) || 1;
+        return [...document.querySelectorAll('.rs-offset')].slice(0, qtd).map((el) => Number(el.value));
+    }
+    function syncAjustes() {
+        const qtd = Number(document.getElementById('rsQtd').value) || 1;
+        document.querySelectorAll('.rs-aj-lab').forEach((lab) => {
+            lab.hidden = Number(lab.dataset.i) >= qtd;
+        });
+    }
+    function renderAlterados() {
+        const linhas = (pacote && pacote.linhas) || [];
+        const offsets = offsetsAtivos();
+        const th = document.getElementById('rsThAjustes');
+        th.textContent = offsets.map((off, i) => `Ajuste ${i + 1} (${sinal(off)})`).join(' | ') || 'Ajustes';
+        document.querySelectorAll('.rs-col-mes').forEach((el) => { el.hidden = !pacote.tem_mes; });
+        const ultimo = pacote && pacote.ultimo;
+        document.getElementById('rsStatus').textContent =
+            `${linhas.length.toLocaleString('pt-BR')} concursos carregados | Último: ${ultimo || '—'}`;
+        const ini = (pagAlt - 1) * POR_ALT;
+        const fatia = linhas.slice(ini, ini + POR_ALT);
+        document.getElementById('rsBody').innerHTML = fatia.map((ln) => {
+            const linhasAj = offsets.map((off) => {
+                const principal = `<div class="rs-aj-linha">${bolas(deslocar(ln.dezenas, off), 'rs-bola-cinza')}</div>`;
+                const segundo = (ln.segundo || []).length
+                    ? `<div class="rs-aj-linha">${bolas(deslocar(ln.segundo, off), 'rs-bola-cinza')}</div>`
+                    : '';
+                return principal + segundo;
+            }).join('');
+            const origem2 = (ln.segundo || []).length
+                ? `<div class="rs-data">2º</div><div class="rs-bolas">${bolas(ln.segundo, 'rs-bola-ouro')}</div>`
+                : '';
+            const mes = pacote.tem_mes ? `<td class="rs-col-mes">${mesHtml(ln)}</td>` : '';
+            return `<tr>
+                <td class="fw-bold">${ln.concurso}</td>
+                <td>${esc(ln.data)}</td>
+                <td><div class="rs-bolas">${bolas(ln.dezenas, 'rs-bola-ouro')}</div>${origem2}</td>
+                ${mes}
+                <td>${linhasAj}</td>
+            </tr>`;
+        }).join('');
+        pager('rsPagerAlt', pagAlt, linhas.length, (n) => { pagAlt = n; renderAlterados(); });
+    }
+
+    function preencherAjustes() {
+        const qtd = document.getElementById('rsQtd');
+        qtd.innerHTML = [1, 2, 3, 4].map((n) => `<option value="${n}"${n === 4 ? ' selected' : ''}>${n}</option>`).join('');
+        document.querySelectorAll('.rs-offset').forEach((sel, i) => {
+            const opts = [];
+            for (let n = -9; n <= 9; n++) {
+                if (n === 0) continue;
+                const on = n === AJUSTES_PADRAO[i];
+                opts.push(`<option value="${n}"${on ? ' selected' : ''}>${sinal(n)}</option>`);
+            }
+            sel.innerHTML = opts.join('');
+        });
+        qtd.addEventListener('change', syncAjustes);
+        syncAjustes();
+    }
+
+    document.querySelectorAll('.rs-tab').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const aba = btn.dataset.aba;
+            document.querySelectorAll('.rs-tab').forEach((b) => {
+                const on = b === btn;
+                b.classList.toggle('is-on', on);
+                b.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+            document.getElementById('rsUltimos').hidden = aba !== 'ultimos';
+            document.getElementById('rsAlterados').hidden = aba !== 'alterados';
+            if (aba === 'alterados' && pacote && !document.getElementById('rsBody').children.length) renderAlterados();
+        });
+    });
+    function restaurarAjustes() {
+        const qtd = document.getElementById('rsQtd');
+        qtd.value = '1';
+        document.querySelectorAll('.rs-offset').forEach((sel) => {
+            sel.value = '-1';
+        });
+        syncAjustes();
+    }
+    function mostrarAba(aba) {
+        document.querySelectorAll('.rs-tab').forEach((b) => {
+            const on = b.dataset.aba === aba;
+            b.classList.toggle('is-on', on);
+            b.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        document.getElementById('rsUltimos').hidden = aba !== 'ultimos';
+        document.getElementById('rsAlterados').hidden = aba !== 'alterados';
+    }
+    function carregarDados() {
+        const btn = document.getElementById('rsReset');
+        if (btn) btn.classList.add('is-on');
+        return fetch(API).then((r) => r.json()).then((data) => {
+            if (!data || !data.sucesso) {
+                document.getElementById('rsCards').innerHTML =
+                    `<p class="text-danger text-center">${esc((data && data.mensagem) || 'Não foi possível carregar os concursos.')}</p>`;
+                return;
+            }
+            pacote = data;
+            pacote.tem_mes = !!(data.tem_mes || (data.linhas || []).some((ln) => ln.mes_nome));
+            renderCards();
+            if (!document.getElementById('rsAlterados').hidden) renderAlterados();
+        }).catch((err) => {
+            document.getElementById('rsCards').innerHTML =
+                `<p class="text-danger text-center">Erro ao carregar: ${esc(err.message)}</p>`;
+        }).finally(() => {
+            if (btn) btn.classList.remove('is-on');
+        });
+    }
+
+    document.getElementById('rsCarregar').addEventListener('click', () => {
+        pagAlt = 1;
+        renderAlterados();
+    });
+    document.getElementById('rsReset').addEventListener('click', () => {
+        pagAlt = 1;
+        restaurarAjustes();
+        mostrarAba('alterados');
+        if (pacote) renderAlterados();
+    });
+
+    preencherAjustes();
+    carregarDados();
+})();
+</script>
+{% endblock %}

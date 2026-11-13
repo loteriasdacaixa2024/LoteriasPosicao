@@ -1,51 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
-<link rel="stylesheet" href="/simulador-globo/static/globo.css?v=1">
+<link rel="stylesheet" href="/simulador-globo/static/globo.css?v=13">
 <div class="sg-wrap" id="sg-root">
     <p class="sg-aviso">{{ boot.aviso }}</p>
     <div class="sg-abas" role="tablist">
-        <button type="button" class="sg-aba ativa" data-aba="cores" role="tab">Painel de Cores</button>
-        <button type="button" class="sg-aba" data-aba="simulador" role="tab">Simulador de Sorteios</button>
+        <button type="button" class="sg-aba ativa" data-aba="simulador" role="tab" aria-selected="true">Simulador de Sorteios</button>
         <button type="button" class="sg-aba" data-aba="historico" role="tab">Histórico</button>
+        <button type="button" class="sg-aba" data-aba="cores" role="tab">Painel de Cores</button>
+        <a class="sg-atalho" href="/analise/tabela-cores/">Tabela de cores</a>
     </div>
 
-    <section class="sg-painel ativo" id="sg-aba-cores" role="tabpanel">
-        <div class="sg-topo-painel">
-            <div>
-                <div class="sg-kicker">Distribuição das cores</div>
-                <h1 class="sg-titulo" id="sg-painel-nome"></h1>
-                <p class="sg-nota" id="sg-painel-universo"></p>
-                <p class="sg-nota" id="sg-painel-resumo"></p>
-                <p class="sg-nota" id="sg-painel-nota"></p>
-            </div>
-            <div>
-                <label for="sg-modalidade">Modalidade</label><br>
-                <select id="sg-modalidade" class="sg-select"></select>
-                <a id="sg-abrir" class="sg-abrir" hidden></a>
-            </div>
-        </div>
-        <div class="sg-cores" id="sg-cores"></div>
-        <div class="sg-graficos">
-            <div class="sg-grafico"><h3>Participação no universo</h3><canvas id="sg-chart-rosca"></canvas></div>
-            <div class="sg-grafico"><h3>Comparação entre as cores</h3><canvas id="sg-chart-barras"></canvas></div>
-        </div>
-        <table class="sg-tabela" id="sg-tabela-cores" style="margin-top:.8rem">
-            <thead><tr><th>Cor</th><th>Dezenas</th><th>Quantidade</th><th>Percentual</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </section>
-
-    <section class="sg-painel" id="sg-aba-simulador" role="tabpanel">
+    <section class="sg-painel ativo" id="sg-aba-simulador" role="tabpanel">
         <div class="sg-topo-sim">
-            <div>
+            <div class="sg-topo-texto">
                 <div class="sg-kicker">Simulador de sorteios</div>
                 <h1 class="sg-titulo">{{ modality_nome }}</h1>
                 <p class="sg-nota" id="sg-sim-nota"></p>
             </div>
-            <label class="sg-velocidade">Intervalo
-                <input id="sg-velocidade" type="range" min="1000" max="10000" step="500" value="5000">
-                <span id="sg-velocidade-lbl">5 s</span>
-            </label>
+            <div class="sg-ajustes">
+                <label class="sg-velocidade">Intervalo
+                    <input id="sg-velocidade" type="range" min="1000" max="10000" step="500" value="5000">
+                    <span id="sg-velocidade-lbl">5 s</span>
+                </label>
+                <label class="sg-velocidade">Giro das bolas
+                    <input id="sg-giro" type="range" min="1" max="5" step="1" value="3">
+                    <span id="sg-giro-lbl">normal</span>
+                </label>
+            </div>
         </div>
         <div class="sg-controles" style="margin-top:.7rem">
             <button type="button" class="sg-btn" id="sg-preparar">Preparar Bolas</button>
@@ -58,7 +39,10 @@
         </div>
         <p class="sg-erro" id="sg-erro" hidden></p>
         <div class="sg-sim-grid">
-            <div class="sg-arena" id="sg-arena" aria-label="Globo do sorteio"></div>
+            <div class="sg-palco">
+                <div class="sg-arena" id="sg-arena" aria-label="Globo do sorteio"></div>
+                <div class="sg-saida" id="sg-resultado" aria-label="Bolas sorteadas"></div>
+            </div>
             <aside class="sg-lateral">
                 <div class="sg-contagens">
                     <div><span>Sorteadas</span><strong id="sg-sorteadas">0</strong></div>
@@ -70,7 +54,6 @@
                     <div class="sg-hero-bola" id="sg-hero-bola">—</div>
                     <strong id="sg-hero-cor">Aguardando o sorteio</strong>
                 </div>
-                <div class="sg-resultado" id="sg-resultado"></div>
                 <div class="sg-final" id="sg-final" hidden></div>
                 <div id="sg-live" class="visually-hidden" aria-live="polite"></div>
             </aside>
@@ -89,12 +72,33 @@
             <tbody id="sg-hist-corpo"></tbody>
         </table>
     </section>
+
+    <section class="sg-painel" id="sg-aba-cores" role="tabpanel">
+        <div class="sg-topo-painel">
+            <div>
+                <div class="sg-kicker">Distribuição das cores</div>
+                <h1 class="sg-titulo" id="sg-painel-nome"></h1>
+                <p class="sg-nota" id="sg-painel-universo"></p>
+                <p class="sg-nota" id="sg-painel-resumo"></p>
+                <p class="sg-nota" id="sg-painel-nota"></p>
+            </div>
+        </div>
+        <div class="sg-cores" id="sg-cores"></div>
+        <div class="sg-graficos">
+            <div class="sg-grafico"><h3>Participação no universo</h3><canvas id="sg-chart-rosca"></canvas></div>
+            <div class="sg-grafico"><h3>Comparação entre as cores</h3><canvas id="sg-chart-barras"></canvas></div>
+        </div>
+        <table class="sg-tabela" id="sg-tabela-cores" style="margin-top:.8rem">
+            <thead><tr><th>Cor</th><th>Dezenas</th><th>Quantidade</th><th>Percentual</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </section>
 </div>
 <script type="application/json" id="sg-boot">{{ boot|tojson }}</script>
 {% endblock %}
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="/simulador-globo/static/vendor/three.min.js?v=1"></script>
-<script src="/simulador-globo/static/globo.js?v=3"></script>
-<script src="/simulador-globo/static/simulador.js?v=1"></script>
+<script src="/simulador-globo/static/globo.js?v=7"></script>
+<script src="/simulador-globo/static/simulador.js?v=14"></script>
 {% endblock %}

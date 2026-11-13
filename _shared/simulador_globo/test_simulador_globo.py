@@ -37,6 +37,16 @@ class TestCores(unittest.TestCase):
         for numero, cor in esperados.items():
             self.assertEqual(cor_da_dezena(numero)["id"], cor, numero)
 
+    def test_meses_usam_a_cor_do_proprio_mes(self):
+        from simulador_globo.regras_globo import cores_meses_publicas, novo_estado
+        meses = {b["numero"]: b for b in novo_estado("diadesorte")["fases"][1]["restantes"]}
+        paleta = cores_meses_publicas()
+        self.assertEqual(meses[1]["hex"].lower(), paleta["Jan"]["hex"].lower())
+        self.assertEqual(meses[1]["cor_nome"], "Janeiro")
+        self.assertNotEqual(meses[1]["hex"].lower(), cor_da_dezena(1)["hex"].lower())
+        self.assertNotEqual(meses[10]["hex"].lower(), cor_da_dezena(10)["hex"].lower())
+        self.assertEqual(meses[5]["rotulo"], "Mai")
+
     def test_extensao_alem_de_60_e_zero(self):
         self.assertEqual(cor_da_dezena(0)["id"], "branca")
         self.assertEqual(cor_da_dezena(61)["id"], "vermelha")
@@ -169,11 +179,29 @@ class TestHistorico(unittest.TestCase):
     def test_pagina_e_fluxo_sqlite(self):
         pagina = self.client.get("/simulador-globo/")
         self.assertEqual(pagina.status_code, 200)
-        self.assertIn("Painel de Cores".encode(), pagina.data)
-        self.assertIn("Preparar Bolas".encode(), pagina.data)
+        html = pagina.get_data(as_text=True)
+        self.assertLess(html.find("Simulador de Sorteios"), html.find("Histórico"))
+        self.assertLess(html.find(">Histórico<"), html.find("Painel de Cores"))
+        self.assertRegex(html, r'class="sg-aba ativa"[^>]*data-aba="simulador"')
+        self.assertIn('href="/analise/tabela-cores/"', html)
+        self.assertIn("Preparar Bolas", html)
 
-        painel = self.client.get("/simulador-globo/api/painel/lotofacil").get_json()
-        self.assertEqual(painel["universo"], 25)
+    def test_dia_de_sorte_liga_tabela_de_cores(self):
+        from flask import Flask
+        from simulador_globo.app_integration import extend_simulador_globo_app
+
+        app = Flask(__name__, template_folder=os.path.join(self.tmp.name, "templates"))
+        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + self.path.replace("\\", "/")
+        app.config["TESTING"] = True
+        extend_simulador_globo_app(app, "diadesorte")
+        html = app.test_client().get("/simulador-globo/").get_data(as_text=True)
+        self.assertIn('href="/analise/tabela-cores/"', html)
+        self.assertIn("Tabela de cores", html)
+
+        painel = self.client.get("/simulador-globo/api/painel/megasena").get_json()
+        self.assertEqual(painel["universo"], 60)
+        outra = self.client.get("/simulador-globo/api/painel/lotofacil")
+        self.assertEqual(outra.status_code, 404)
 
         prep = self.client.post("/simulador-globo/api/preparar", json={"velocidade_ms": 5000})
         self.assertEqual(prep.status_code, 200)

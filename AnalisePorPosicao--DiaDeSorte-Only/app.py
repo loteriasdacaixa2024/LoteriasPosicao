@@ -28,6 +28,7 @@ from concentracao_acertos.app_integration import extend_concentracao_app
 from analise_estudos.app_integration import extend_analise_estudos_app
 from linhas_universo.app_integration import extend_camadas_linhas_dd_du_app
 from analise_somas_digitos.app_integration import extend_analise_somas_digitos_app
+from analise_cores.app_integration import extend_analise_cores_app
 from analise_gaps_ciclo.app_integration import extend_analise_gaps_ciclo_app
 from analise_inteligentes_diadesorte.app_integration import extend_analise_inteligentes_app
 from analise_escolha_visual.app_integration import extend_analise_escolha_visual_app
@@ -35,6 +36,7 @@ from analise_tubular_inteligente.app_integration import extend_analise_tubular_i
 from configuracoes.app_integration import extend_config_app
 from ciclo_cobertura.app_integration import extend_ciclo_cobertura_app
 from resumo_modalidade.app_integration import extend_resumo_modalidade_app
+from resultados_sorteio.app_integration import extend_resultados_sorteio_app
 from resumo_modalidades.app_integration import extend_resumo_modalidades_app
 from resumos_modalidade.app_integration import extend_resumos_modalidade_app
 from grades_digitos.app_integration import extend_grades_digitos_app
@@ -64,12 +66,14 @@ def create_app():
     extend_analise_estudos_app(app)
     extend_camadas_linhas_dd_du_app(app)
     extend_analise_somas_digitos_app(app)
+    extend_analise_cores_app(app)
     extend_analise_gaps_ciclo_app(app)
     extend_analise_inteligentes_app(app)
     extend_analise_escolha_visual_app(app)
     extend_analise_tubular_inteligente_app(app)
     extend_ciclo_cobertura_app(app, 'diadesorte')
     extend_resumo_modalidade_app(app)
+    extend_resultados_sorteio_app(app)
     extend_resumo_modalidades_app(app)
     extend_resumos_modalidade_app(app)
     extend_grades_digitos_app(app)
@@ -97,13 +101,16 @@ def create_app():
         import models.comportamento_estrategia
         import models.historico_analise_inteligente
         db.create_all()
-        try:
-            db.session.execute(db.text(
-                "ALTER TABLE sorteio_diadesorte ADD COLUMN ganhadores_7 INTEGER"
-            ))
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
+        for sql in (
+            "ALTER TABLE sorteio_diadesorte ADD COLUMN ganhadores_7 INTEGER",
+            "ALTER TABLE sorteio_diadesorte ADD COLUMN estimativa_proximo FLOAT",
+            "ALTER TABLE sorteio_diadesorte ADD COLUMN data_proximo VARCHAR(20)",
+        ):
+            try:
+                db.session.execute(db.text(sql))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
         from geradores_elite.construtor.schema_ensure import ensure_construtor_schema
         ensure_construtor_schema()
         try:

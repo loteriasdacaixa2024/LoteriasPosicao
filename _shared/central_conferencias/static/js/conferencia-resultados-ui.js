@@ -166,7 +166,7 @@
         return cls;
     }
 
-    function renderizarApostaDiaSorte(aposta) {
+    function renderizarApostaDiaSorte(aposta, sorteadosSet) {
         const resultado = aposta.resultado || {};
         const nums = aposta.numeros_apostados || aposta.numeros || [];
         const numsInt = nums.map(n => parseInt(n, 10));
@@ -177,15 +177,27 @@
         const acertosN = Number(acertosVolante) || 0;
         const sete = acertosN >= 7 || !!resultado.premio_maximo;
         const faixaVerde = !sete && (acertosN >= 4 || resultado.mes_ok === true || temPremio);
-        const cardStyle = faixaVerde ? 'background:#e8f6ee;' : '';
+        const cardStyle = faixaVerde ? 'background:#E7F5EE;' : '';
         const cardClass = sete ? 'cr-sete-pulso' : (faixaVerde ? 'cr-card-acerto' : '');
         const mes = aposta.mes ? String(aposta.mes) : '';
 
-        const faixaPaga = acertosN >= 4 || resultado.mes_ok === true || temPremio;
         const rotuloAcertos = acertosN === 1 ? '1 acerto' : `${acertosN} acertos`;
         const valorHtml = ganho > 0
             ? `<span class="fw-bold" style="color:var(--primary-dark,#996e00)">${fmtMoeda(ganho)}</span>`
             : '';
+        const estiloAcerto = 'background:#198754;color:#fff;font-weight:700;';
+        const estiloErro = 'background:color-mix(in srgb, var(--primary) 22%, white);color:var(--primary-dark);font-weight:700;';
+        const badgeAcerto = acertosN > 0 ? estiloAcerto : estiloErro;
+        const oficiais = Number(_mod().combo) || 7;
+        const sorteadosOrd = [...(sorteadosSet || [])]
+            .map(n => parseInt(n, 10))
+            .filter(n => !isNaN(n))
+            .sort((a, b) => a - b);
+        const ordenados = numsInt.filter(n => !isNaN(n)).slice().sort((a, b) => a - b).slice(0, oficiais);
+        const acertoPosicao = new Set();
+        ordenados.forEach((num, i) => {
+            if (sorteadosOrd[i] !== undefined && num === sorteadosOrd[i]) acertoPosicao.add(num);
+        });
 
         return `
         <div class="col-md-6 col-lg-4">
@@ -194,16 +206,13 @@
                     <h6 class="mb-2" style="color:var(--primary-dark,#996e00)">Aposta ${aposta.numero_aposta}</h6>
                     <div class="d-flex flex-wrap align-items-center gap-1 mb-2">
                         ${numsInt.map(n => {
-                            const hit = acertados.has(n);
-                            const estilo = hit
-                                ? 'background:#198754;color:#fff;border:2px solid #146c43;font-weight:800;'
-                                : 'background:#FFD700;color:#1a0a00;border:2px solid #e6a800;font-weight:700;';
+                            const estilo = acertoPosicao.has(n) ? estiloAcerto : estiloErro;
                             return `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:2rem;height:2rem;border-radius:8px;font-size:.85rem;${estilo}">${String(n).padStart(2, '0')}</span>`;
                         }).join('')}
                         ${mes ? _badgeMes(mes) : ''}
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge" style="background:${faixaPaga ? '#ffd700' : '#e9ecef'};color:${faixaPaga ? '#1a0a00' : '#495057'};">
+                        <span class="badge" style="${badgeAcerto}">
                             ${rotuloAcertos}
                         </span>
                         ${valorHtml}
@@ -218,7 +227,7 @@
     }
 
     function renderizarAposta(aposta, sorteadosSet) {
-        if (_ehDiaSorte()) return renderizarApostaDiaSorte(aposta);
+        if (_ehDiaSorte()) return renderizarApostaDiaSorte(aposta, sorteadosSet);
         const resultado = aposta.resultado || {};
         const nums = aposta.numeros_apostados || aposta.numeros || [];
         const numsInt = nums.map(n => parseInt(n, 10));
@@ -293,9 +302,19 @@
         });
 
         const pct = sorteados.length ? (cobertas.length / sorteados.length) * 100 : 0;
-        const corCheia = 'var(--primary,#672666)';
-        const corMedia = 'var(--accent,#930089)';
-        const corBaixa = 'var(--primary-dark,#4a1c4a)';
+        const dia = _ehDiaSorte();
+        const corCheia = dia ? '#1F8959' : 'var(--primary,#672666)';
+        const corMedia = dia ? '#8FCBB0' : 'var(--accent,#930089)';
+        const corBaixa = dia ? '#176B45' : 'var(--primary-dark,#4a1c4a)';
+        const estiloCoberta = dia
+            ? 'font-size:1.1em;background:#1F8959;color:#fff;border:2px solid #176B45;'
+            : 'font-size:1.1em;background:var(--primary);color:var(--on-accent,#fff);border:2px solid var(--primary-dark);';
+        const estiloPerdida = dia
+            ? 'font-size:1.1em;background:#ECE5C8;color:#1a0a00;border:2px solid #D4CBA8;'
+            : 'font-size:1.1em;border:2px dashed #dc3545;';
+        const classePerdida = dia ? 'badge shadow-sm p-2 mb-1' : 'badge bg-light text-danger shadow-sm p-2 mb-1';
+        const corRotuloCoberta = dia ? '#145238' : 'var(--primary-dark)';
+        const corRotuloPerdida = dia ? '#8A7000' : '#dc3545';
         const barStyle = pct === 100
             ? `background:${corCheia}`
             : pct >= 60 ? `background:${corMedia}` : `background:${corBaixa}`;
@@ -306,7 +325,7 @@
                 <div class="card border-0 shadow-sm cr-cobertura-card">
                     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
                         <h6 class="mb-0" style="color:var(--primary-dark)"><i class="fas fa-bullseye"></i> Cobertura de Acertos Inteligente</h6>
-                        <span class="badge rounded-pill" style="background:${corCheia};color:var(--on-accent,#fff)">${cobertas.length}/${sorteados.length} Cobertas</span>
+                        <span class="badge rounded-pill" style="background:${corCheia};color:${dia ? '#fff' : 'var(--on-accent,#fff)'}">${cobertas.length}/${sorteados.length} Cobertas</span>
                     </div>
                     <div class="card-body py-3">
                         <div class="row align-items-center">
@@ -322,22 +341,22 @@
                                 <div class="d-flex flex-wrap justify-content-md-end gap-2">
                                     ${cobertas.map(n => `
                                         <div class="text-center">
-                                            <span class="badge shadow-sm p-2 mb-1" style="font-size:1.1em;background:var(--primary);color:var(--on-accent,#fff);border:2px solid var(--primary-dark);">${String(n).padStart(2, '0')}</span>
-                                            <div style="font-size:0.7em;color:var(--primary-dark);font-weight:bold;">COBERTA</div>
+                                            <span class="badge shadow-sm p-2 mb-1" style="${estiloCoberta}">${String(n).padStart(2, '0')}</span>
+                                            <div style="font-size:0.7em;color:${corRotuloCoberta};font-weight:bold;">COBERTA</div>
                                         </div>`).join('')}
                                     ${perdidas.map(n => `
                                         <div class="text-center">
-                                            <span class="badge bg-light text-danger shadow-sm p-2 mb-1" style="font-size:1.1em;border:2px dashed #dc3545;">${String(n).padStart(2, '0')}</span>
-                                            <div style="font-size:0.7em;color:#dc3545;font-weight:bold;">PERDIDA</div>
+                                            <span class="${classePerdida}" style="${estiloPerdida}">${String(n).padStart(2, '0')}</span>
+                                            <div style="font-size:0.7em;color:${corRotuloPerdida};font-weight:bold;">PERDIDA</div>
                                         </div>`).join('')}
                                 </div>
                                 ${perdidas.length ? `
                                     <div class="text-end mt-2">
-                                        <small class="text-danger"><i class="fas fa-exclamation-triangle"></i>
+                                        <small class="${dia ? '' : 'text-danger'}" style="${dia ? 'color:#8A7000' : ''}"><i class="fas fa-exclamation-triangle"></i>
                                         Você não jogou ${perdidas.length === 1 ? 'este número' : 'estes ' + perdidas.length + ' números'} em nenhuma aposta!</small>
                                     </div>` : `
                                     <div class="text-end mt-2">
-                                        <small class="text-success"><i class="fas fa-check-double"></i>
+                                        <small class="${dia ? '' : 'text-success'}" style="${dia ? 'color:#1F8959' : ''}"><i class="fas fa-check-double"></i>
                                         Excelência! Todos os números sorteados estavam em seus jogos.</small>
                                     </div>`}
                             </div>
@@ -661,16 +680,16 @@
         const bola = (num, tipo, vezes) => {
             const label = pad(num) + (vezes > 0 ? '<small style="font-size:9px;font-weight:600;margin-left:1px;">×' + vezes + '</small>' : '');
             if (tipo === 'furo') {
-                return '<span class="me-1 mb-1" title="Saiu e ninguém jogou" style="' + estiloBola('#c0392b', '#fff', 'border:2px solid #922b21;') + '">' + pad(num) + '</span>';
+                return '<span class="me-1 mb-1" title="Saiu e ninguém jogou" style="' + estiloBola('#ECE5C8', '#1a0a00', 'border:2px solid #D4CBA8;') + '">' + pad(num) + '</span>';
             }
             if (tipo === 'hit') {
-                return '<span class="me-1 mb-1" title="Saiu e estava nos jogos" style="' + estiloBola('#FFD700', '#111', 'border:2px solid #e6a800;') + '">' + label + '</span>';
+                return '<span class="me-1 mb-1" title="Saiu e estava nos jogos" style="' + estiloBola('#1F8959', '#fff', 'border:2px solid #176B45;') + '">' + label + '</span>';
             }
             if (tipo === 'vicio') {
                 return '<span class="me-1 mb-1" title="Muito apostada e não saiu" style="' + estiloBola('#1a5276', '#fff', 'border:2px solid #154360;') + '">' + label + '</span>';
             }
             if (tipo === 'aposta') {
-                return '<span class="me-1 mb-1" title="Apostada" style="' + estiloBola('#6c757d', '#fff', '') + '">' + label + '</span>';
+                return '<span class="me-1 mb-1" title="Apostada" style="' + estiloBola('#ECE5C8', '#1a0a00', 'border:2px solid #D4CBA8;') + '">' + label + '</span>';
             }
             return '<span class="me-1 mb-1" title="Fora dos jogos" style="' + estiloBola('#f4f6f7', '#95a5a6', 'border:1px dashed #bdc3c7;') + '">' + pad(num) + '</span>';
         };
@@ -689,7 +708,7 @@
         const barras = [0, 1, 2, 3, 4, 5, 6, 7].map(k => {
             const q = Number(dist[k] || 0);
             const h = Math.max(q ? 8 : 2, Math.round((q / maxDist) * 56));
-            const cor = k >= 4 ? '#1e8449' : (k === 3 ? '#d4a017' : '#adb5bd');
+            const cor = k >= 4 ? '#1F8959' : (k === 3 ? '#ECE5C8' : '#adb5bd');
             return '<div class="text-center px-1" style="min-width:36px;">' +
                 '<div class="d-flex align-items-end justify-content-center" style="height:60px;"><div style="width:18px;height:' + h + 'px;background:' + cor + ';border-radius:4px 4px 0 0;"></div></div>' +
                 '<div class="fw-bold" style="font-size:12px;">' + k + '</div>' +
@@ -807,7 +826,7 @@
 
         const resumoProc = renderizarResumoProcessamento(resultado, resultado._elapsedMs);
         _relatoriosVar[concurso] = resultado;
-        const fundoFin = lucro >= 0 ? '#198754' : '#dc3545';
+        const fundoFin = lucro >= 0 ? (_ehDiaSorte() ? '#1F8959' : '#198754') : '#dc3545';
         const cardFinanceiro = `<div class="card text-white h-100" style="background:${fundoFin};border:none;">
                     <div class="card-body">
                         <h6 class="mb-2">Resultado Financeiro</h6>
@@ -1103,6 +1122,11 @@
             if (freq && freq.dataset.carregado !== '1') {
                 freq.dataset.carregado = '1';
                 carregarFrequenciaAbsPasta(freq.id);
+            }
+            const hist = cVar && cVar.querySelector('[id^="cr-hist-abs-pasta-"]');
+            if (hist && hist.dataset.carregado !== '1') {
+                hist.dataset.carregado = '1';
+                carregarHistoricoAbsPasta(hist.id, 1);
             }
         }
         if (visao === 'volante' && global.ConferenciaVolanteUi) global.ConferenciaVolanteUi.montar(concurso);
@@ -1439,9 +1463,9 @@
             if (hasTime) acertosHtml += cel(x(timeOk));
             linhas.push(`<tr class="${sete ? 'cr-linha-maximo' : (faixaVerde ? 'cr-linha-acerto' : '')}">
                 <td class="align-middle text-center text-nowrap p-1 text-muted fw-bold" style="font-size:.8rem;${fundoLinha}">${dataLabel}</td>
-                ${jogados}<td style="width:8px;border:none;"></td>
-                ${sorteadosHtml}<td style="width:8px;border:none;"></td>
-                ${diffHtml}<td style="width:8px;border:none;"></td>
+                ${jogados}<td class="cr-var-sep"></td>
+                ${sorteadosHtml}<td class="cr-var-sep-diff"></td>
+                ${diffHtml}<td class="cr-var-sep-sm"></td>
                 <td class="align-middle text-center" style="${fundoLinha}${absCor}">${somaAbs}</td>
                 <td style="width:8px;border:none;"></td>
                 ${acertosHtml}
@@ -1732,10 +1756,11 @@
                 </h6>
                 <span class="badge cr-var-badge">${bloco.exibidas} de ${bloco.totalValidas} apostas</span>
             </div>` : '';
+        const legendaHtml = titulo ? '' : _legendaAbs(bloco.stats);
         if (!bloco.rows) {
-            return `${_legendaAbs(bloco.stats)}${tituloHtml}<div class="alert alert-light border text-muted">Nenhuma aposta neste recorte.</div>`;
+            return `${legendaHtml}${tituloHtml}<div class="alert alert-light border text-muted">Nenhuma aposta neste recorte.</div>`;
         }
-        return `${_legendaAbs(bloco.stats)}${tituloHtml}
+        return `${legendaHtml}${tituloHtml}
             <div class="card border-0 shadow-sm mb-4 cr-var-card">
                 <div class="table-responsive">
                     <table class="table table-sm table-borderless mb-0 cr-var-table">
@@ -1743,11 +1768,11 @@
                             <tr>
                                 <th class="text-center p-2">DATA</th>
                                 <th colspan="${n + extra}" class="text-center p-2">NÚMEROS JOGADOS</th>
-                                <th style="width:8px;border:none;"></th>
+                                <th class="cr-var-sep"></th>
                                 <th colspan="${n + extra}" class="text-center p-2">SORTEADOS</th>
-                                <th style="width:8px;border:none;"></th>
+                                <th class="cr-var-sep-diff"></th>
                                 <th colspan="${n}" class="text-center p-2 cr-var-diff">DIFERENÇA</th>
-                                <th style="width:8px;border:none;"></th>
+                                <th class="cr-var-sep-sm"></th>
                                 <th class="text-center p-2" title="Soma das diferenças sem sinal">ABS</th>
                                 <th style="width:8px;border:none;"></th>
                                 <th colspan="${acertoCols || 1}" class="text-center p-2">ACERTO</th>
@@ -1755,11 +1780,11 @@
                             <tr>
                                 <th></th>
                                 ${nums}${mesTh}
-                                <th style="width:8px;border:none;"></th>
+                                <th class="cr-var-sep"></th>
                                 ${nums}${mesTh}
-                                <th style="width:8px;border:none;"></th>
+                                <th class="cr-var-sep-diff"></th>
                                 ${nums}
-                                <th style="width:8px;border:none;"></th>
+                                <th class="cr-var-sep-sm"></th>
                                 <th></th>
                                 <th style="width:8px;border:none;"></th>
                                 ${thAcerto || '<th></th>'}
@@ -1785,6 +1810,7 @@
             ${_legendaAbs(completo.stats)}
             ${aviso}
             ${_tabelaVarianciaDiaSorte(resultado, resumo, true)}
+            ${_slotHistoricoAbs(concurso)}
             <div id="${freqId}" class="mb-4">
                 <div class="small text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Somando o ABS de todas as apostas da pasta...</div>
             </div>`;
@@ -1800,9 +1826,241 @@
             <h6 style="color:var(--primary-dark)"><i class="fas fa-balance-scale"></i> Análise de Variância Nominal (Desvio Posicional):</h6>
             ${grande ? _legendaAbs(completo.stats) + aviso : _tabelaVarianciaDiaSorte(resultado, completo, false)}
             ${_tabelaVarianciaDiaSorte(resultado, resumo, true)}
+            ${_slotHistoricoAbs(concurso)}
             <div id="${freqId}" class="mb-4">
                 <div class="small text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Somando o ABS de todas as apostas da pasta...</div>
             </div>`;
+    }
+
+    function _slotHistoricoAbs(concurso) {
+        return `<div id="cr-hist-abs-pasta-${concurso}" class="mb-4">
+            <div class="small text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Montando o resumo ABS ≤ 20 de todos os concursos da pasta...</div>
+        </div>`;
+    }
+
+    function _fmtContagem(n) {
+        return Number(n || 0).toLocaleString('pt-BR');
+    }
+
+    const _histAbsSort = {};
+
+    function _marcaHistorico(linha, rotulo) {
+        return (linha.faixas || []).some(f => f === rotulo || String(f).endsWith(' ' + rotulo));
+    }
+
+    function _thHistorico(alvoId, col, label, colspan, classe) {
+        const cs = colspan ? ` colspan="${colspan}"` : '';
+        return `<th class="text-center p-2 cr-hist-sort ${classe || ''}"${cs} style="cursor:pointer;user-select:none;" title="Clique para ordenar" onclick="ConferenciaResultadosUI.ordenarHistoricoAbs('${alvoId}','${col}')">${label} <i class="fas fa-sort" id="cr-hist-ico-${alvoId}-${col}" style="font-size:.65rem;opacity:.45;"></i></th>`;
+    }
+
+    function _pintarIconeHistorico(alvoId, colAtiva, dir) {
+        ['data', 'jogados', 'sorteados', 'diff', 'abs'].forEach(col => {
+            const icon = document.getElementById(`cr-hist-ico-${alvoId}-${col}`);
+            if (!icon) return;
+            if (col === colAtiva) {
+                icon.className = `fas fa-sort-${dir === 'asc' ? 'up' : 'down'}`;
+                icon.style.opacity = '1';
+            } else {
+                icon.className = 'fas fa-sort';
+                icon.style.opacity = '0.45';
+            }
+        });
+    }
+
+    function _linhaHistoricoAbs(linha) {
+        const jogados = linha.jogados || [];
+        const sorteados = linha.sorteados || [];
+        const oficiais = Math.max(jogados.length, sorteados.length);
+        const faixas = _faixasUi();
+        const topo = faixas.length ? Math.max(...faixas.map(f => f.minimo)) : null;
+        const hasMes = !!_mod().hasMes;
+        const hasTime = !!_mod().hasTime;
+        const cel = (conteudo, extra) => `<td class="align-middle text-center p-1" style="border:1px dashed #dee2e6;${extra || ''}">${conteudo}</td>`;
+        const bola = (n, classe) => `<div style="width:26px;height:26px;line-height:26px;margin:0 auto;border-radius:4px;" class="${classe}">${_fmtDezenaAbs(n)}</div>`;
+        let jogadosHtml = '';
+        let sorteadosHtml = '';
+        let diffHtml = '';
+        const diffs = [];
+        for (let i = 0; i < oficiais; i++) {
+            const num = jogados[i];
+            const sort = sorteados[i];
+            const igual = num !== undefined && num === sort;
+            const perto = num !== undefined && sort !== undefined && Math.abs(num - sort) === 1;
+            const cls = igual ? 'cr-var-hit' : perto ? 'cr-var-perto' : 'text-secondary';
+            jogadosHtml += cel(num !== undefined ? bola(num, cls) : '-');
+            sorteadosHtml += cel(sort !== undefined ? bola(sort, cls) : '');
+            if (num !== undefined && sort !== undefined) {
+                const delta = num - sort;
+                diffs.push(String(delta));
+                diffHtml += cel(delta === 0 ? '' : delta, delta < 0 ? 'color:#8b3a3a;' : '');
+            } else {
+                diffs.push('');
+                diffHtml += cel('');
+            }
+        }
+        if (hasMes) {
+            jogadosHtml += cel(linha.mes ? _badgeMes(linha.mes) : '-');
+            sorteadosHtml += cel(linha.mes_sorteado ? _badgeMes(linha.mes_sorteado) : '-');
+        }
+        const somaAbs = Number(linha.abs) || 0;
+        const absCor = somaAbs <= 7 ? 'color:var(--primary-dark);font-weight:700;' : somaAbs <= 14 ? 'color:var(--accent);font-weight:700;' : '';
+        let acertosHtml = '';
+        faixas.forEach(f => {
+            const extra = f.minimo === topo ? 'color:var(--primary-dark);font-weight:700;' : 'font-weight:700;';
+            acertosHtml += cel(_marcaHistorico(linha, f.rotulo) ? 'X' : '', extra);
+        });
+        if (hasMes) acertosHtml += cel(linha.mes_ok ? 'X' : '', 'font-weight:700;');
+        if (hasTime) acertosHtml += cel(linha.time_ok ? 'X' : '', 'font-weight:700;');
+        const dataLabel = `${linha.data || ''} - ${linha.concurso_label || linha.concurso || ''} - ${linha.numero ?? ''}`;
+        const sortData = (Number(linha.concurso) || 0) * 1000000 + (Number(linha.numero) || 0);
+        return `<tr class="linha-historico-abs" data-sort-data="${sortData}" data-filtro-jogados="${jogados.map(_fmtDezenaAbs).join(' ')}" data-filtro-sorteados="${sorteados.map(_fmtDezenaAbs).join(' ')}" data-filtro-diff="${diffs.join(' ')}" data-filtro-abs="${somaAbs}">
+            <td class="align-middle text-center text-nowrap p-1 text-muted fw-bold" style="font-size:.8rem;">${escTxt(dataLabel)}</td>
+            ${jogadosHtml}<td class="cr-var-sep"></td>
+            ${sorteadosHtml}<td class="cr-var-sep-diff"></td>
+            ${diffHtml}<td class="cr-var-sep-sm"></td>
+            <td class="align-middle text-center" style="${absCor}">${somaAbs}</td>
+            <td style="width:8px;border:none;"></td>
+            ${acertosHtml}
+        </tr>`;
+    }
+
+    function _htmlHistoricoAbsPasta(alvoId, data) {
+        const filtradas = Number(data.total_apostas_filtradas) || 0;
+        const validas = Number(data.total_apostas_validas) || 0;
+        const concursos = Number(data.total_concursos) || 0;
+        const maxAbs = Number(data.max_abs) || 20;
+        const titulo = `
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2 mt-2">
+                <h6 class="fw-bold mb-0" style="color:var(--primary-dark)">
+                    <i class="fas fa-history me-1"></i> Resumo ABS ≤ ${maxAbs} — histórico de todos os concursos na pasta
+                </h6>
+                <span class="badge cr-var-badge">${_fmtContagem(filtradas)} de ${_fmtContagem(validas)} apostas · ${_fmtContagem(concursos)} concursos</span>
+                <small class="text-muted"><i class="fas fa-hand-pointer me-1"></i>Clique no cabeçalho para ordenar</small>
+            </div>`;
+        if (!filtradas) {
+            return `${titulo}<div class="alert alert-light border text-muted">Nenhuma aposta com ABS ≤ ${maxAbs} na pasta (${_fmtContagem(validas)} apostas em ${_fmtContagem(concursos)} concursos).</div>`;
+        }
+        const pagina = Number(data.pagina) || 1;
+        const totalPaginas = Number(data.total_paginas) || 1;
+        const por = Number(data.por_pagina) || 40;
+        const ini = (pagina - 1) * por + 1;
+        const fim = Math.min(pagina * por, filtradas);
+        const btn = (rotulo, dest, off) => `<button type="button" class="btn btn-outline-secondary" ${off ? 'disabled' : ''} onclick="ConferenciaResultadosUI.paginarHistoricoAbs('${alvoId}', ${dest})">${rotulo}</button>`;
+        const pager = `<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2 cr-hist-pager">
+            <small class="text-muted">Linhas ${_fmtContagem(ini)}–${_fmtContagem(fim)} de ${_fmtContagem(filtradas)} · a ordenação vale para esta página</small>
+            <div class="btn-group btn-group-sm">
+                ${btn('«', 1, pagina <= 1)}
+                ${btn('‹', pagina - 1, pagina <= 1)}
+                <button type="button" class="btn btn-outline-secondary" disabled>${pagina}/${totalPaginas}</button>
+                ${btn('›', pagina + 1, pagina >= totalPaginas)}
+                ${btn('»', totalPaginas, pagina >= totalPaginas)}
+            </div>
+        </div>`;
+        const amostra = (data.linhas || [])[0] || {};
+        const n = (amostra.jogados || amostra.sorteados || []).length || Number(_mod().combo) || 7;
+        const hasMes = !!_mod().hasMes;
+        const hasTime = !!_mod().hasTime;
+        const faixas = _faixasUi();
+        const extra = hasMes ? 1 : 0;
+        const acertoCols = faixas.length + (hasMes ? 1 : 0) + (hasTime ? 1 : 0);
+        const topo = faixas.length ? Math.max(...faixas.map(f => f.minimo)) : null;
+        let nums = '';
+        for (let i = 1; i <= n; i++) nums += `<th class="text-center p-1">${i}</th>`;
+        const mesTh = hasMes ? `<th class="text-center p-1 cr-var-mes">MÊS</th>` : '';
+        const thAcerto = faixas.map(f => `<th class="text-center cr-var-acerto${f.minimo === topo ? ' cr-var-acerto-top' : ''}">${f.minimo}</th>`).join('')
+            + (hasMes ? `<th class="text-center cr-var-acerto">M</th>` : '')
+            + (hasTime ? `<th class="text-center cr-var-acerto">T</th>` : '');
+        const rows = (data.linhas || []).map(_linhaHistoricoAbs).join('');
+        return `${titulo}${pager}
+            <div class="card border-0 shadow-sm mb-2 cr-var-card">
+                <div class="table-responsive">
+                    <table class="table table-sm table-borderless mb-0 cr-var-table">
+                        <thead>
+                            <tr>
+                                ${_thHistorico(alvoId, 'data', 'DATA')}
+                                ${_thHistorico(alvoId, 'jogados', 'NÚMEROS JOGADOS', n + extra)}
+                                <th class="cr-var-sep"></th>
+                                ${_thHistorico(alvoId, 'sorteados', 'SORTEADOS', n + extra)}
+                                <th class="cr-var-sep-diff"></th>
+                                ${_thHistorico(alvoId, 'diff', 'DIFERENÇA', n, 'cr-var-diff')}
+                                <th class="cr-var-sep-sm"></th>
+                                ${_thHistorico(alvoId, 'abs', 'ABS')}
+                                <th style="width:8px;border:none;"></th>
+                                <th colspan="${acertoCols || 1}" class="text-center p-2">ACERTO</th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                ${nums}${mesTh}
+                                <th class="cr-var-sep"></th>
+                                ${nums}${mesTh}
+                                <th class="cr-var-sep-diff"></th>
+                                ${nums}
+                                <th class="cr-var-sep-sm"></th>
+                                <th></th>
+                                <th style="width:8px;border:none;"></th>
+                                ${thAcerto || '<th></th>'}
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-${alvoId}">${rows}</tbody>
+                    </table>
+                </div>
+            </div>`;
+    }
+
+    function carregarHistoricoAbsPasta(alvoId, pagina) {
+        const box = document.getElementById(alvoId);
+        if (!box) return;
+        const pag = Math.max(1, Number(pagina) || 1);
+        if (!box.querySelector('table')) {
+            box.innerHTML = `<div class="small text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Montando o resumo ABS ≤ 20 de todos os concursos da pasta...</div>`;
+        }
+        fetch(`/central-conferencias/api/conferencia-apostas/resumo-abs-historico?max_abs=20&pagina=${pag}&por_pagina=40`)
+            .then(r => r.json())
+            .then(data => {
+                const alvo = document.getElementById(alvoId);
+                if (!alvo) return;
+                if (!data || !data.sucesso) {
+                    alvo.innerHTML = `<div class="alert alert-warning mb-0">${(data && data.mensagem) || 'Não foi possível montar o histórico ABS da pasta.'}</div>`;
+                    return;
+                }
+                alvo.innerHTML = _htmlHistoricoAbsPasta(alvoId, data);
+                _histAbsSort[alvoId] = { col: 'abs', dir: 'asc' };
+                _pintarIconeHistorico(alvoId, 'abs', 'asc');
+            })
+            .catch(err => {
+                const alvo = document.getElementById(alvoId);
+                if (alvo) alvo.innerHTML = `<div class="alert alert-danger mb-0">Erro ao carregar o histórico ABS: ${escTxt(err.message)}</div>`;
+            });
+    }
+
+    function paginarHistoricoAbs(alvoId, pagina) {
+        carregarHistoricoAbsPasta(alvoId, pagina);
+    }
+
+    function ordenarHistoricoAbs(alvoId, col) {
+        const tbody = document.getElementById(`tbody-${alvoId}`);
+        if (!tbody) return;
+        const prev = _histAbsSort[alvoId];
+        const dir = (prev && prev.col === col && prev.dir === 'asc') ? 'desc' : 'asc';
+        _histAbsSort[alvoId] = { col, dir };
+        const mult = dir === 'asc' ? 1 : -1;
+        const valor = (tr) => {
+            if (col === 'data') return parseInt(tr.dataset.sortData || '0', 10);
+            if (col === 'abs') return parseFloat(tr.dataset.filtroAbs || '9999');
+            if (col === 'jogados') return tr.dataset.filtroJogados || '';
+            if (col === 'sorteados') return tr.dataset.filtroSorteados || '';
+            if (col === 'diff') return tr.dataset.filtroDiff || '';
+            return '';
+        };
+        const rows = Array.from(tbody.querySelectorAll('tr.linha-historico-abs'));
+        rows.sort((a, b) => {
+            const va = valor(a);
+            const vb = valor(b);
+            if (col === 'data' || col === 'abs') return (va - vb) * mult;
+            return String(va).localeCompare(String(vb), 'pt-BR', { numeric: true }) * mult;
+        });
+        rows.forEach(r => tbody.appendChild(r));
+        _pintarIconeHistorico(alvoId, col, dir);
     }
 
     global.ConferenciaResultadosUI = {
@@ -1814,5 +2072,7 @@
         toggleOrdemNumeros,
         exportarRelatorio,
         abrirHistoricoAposta,
+        paginarHistoricoAbs,
+        ordenarHistoricoAbs,
     };
 })(window);

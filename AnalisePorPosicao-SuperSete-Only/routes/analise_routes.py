@@ -171,3 +171,9 @@ from resumo_modalidade.app_integration import wire_resumo_modalidade
 wire_resumo_modalidade(analise_bp, "supersete")
 from resumos_modalidade.app_integration import wire_resumos_modalidade
 wire_resumos_modalidade(analise_bp, "supersete")
+
+from analise_cores.app_integration import wire_tabela_cores
+wire_tabela_cores(analise_bp, "supersete")
+
+from resultados_sorteio.app_integration import wire_resultados_sorteio
+wire_resultados_sorteio(analise_bp, "supersete")

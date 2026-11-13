@@ -50,6 +50,7 @@
             this.bolas = [];
             this.geracao = 0;
             this.girando = false;
+            this.ritmo = 1;
             this.modo = "2d";
             this._ultimo = 0;
             this.faseTitulo = "";
@@ -124,6 +125,13 @@
             this.girando = !!ativo;
         }
 
+        definirRitmo(fator) {
+            var n = Number(fator);
+            if (!n || n < 0.25) n = 0.25;
+            if (n > 2) n = 2;
+            this.ritmo = n;
+        }
+
         _limpar() {
             this.bolas.forEach(function (b) {
                 if (b.sprite) {
@@ -132,6 +140,11 @@
                     b.sprite.material.dispose();
                 }
                 if (!b.mesh) return;
+                if (b.numeroGeo) b.numeroGeo.dispose();
+                if (b.numeroMat) {
+                    if (b.numeroMat.map) b.numeroMat.map.dispose();
+                    b.numeroMat.dispose();
+                }
                 if (b.mesh.geometry) b.mesh.geometry.dispose();
                 var mat = b.mesh.material;
                 if (mat && mat.map) mat.map.dispose();
@@ -218,20 +231,30 @@
             mesh.position.copy(pontoDentro(maxR * 0.92));
             mesh.userData.chave = bola.chave;
             pai.add(mesh);
-            var sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+            var vel = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+            vel.setLength(2.6 + Math.random() * 1.6);
+            function giro() { return (Math.random() < 0.5 ? -1 : 1) * (2.4 + Math.random() * 2.2); }
+            var matNum = new THREE.MeshBasicMaterial({
                 map: texturaNumero(bola.rotulo, bola.texto),
                 transparent: true,
-                depthTest: true,
                 depthWrite: false,
-            }));
-            sprite.scale.set(rb * 1.55, rb * 0.82, 1);
-            sprite.renderOrder = 4;
-            this.scene.add(sprite);
-            var vel = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
-            vel.setLength(0.55 + Math.random() * 0.45);
+                side: THREE.DoubleSide,
+            });
+            var geoNum = new THREE.PlaneGeometry(rb * 1.65, rb * 0.88);
+            var frente = new THREE.Mesh(geoNum, matNum);
+            frente.position.z = rb * 1.04;
+            frente.renderOrder = 2;
+            mesh.add(frente);
+            var verso = new THREE.Mesh(geoNum, matNum);
+            verso.position.z = -rb * 1.04;
+            verso.rotation.y = Math.PI;
+            verso.renderOrder = 2;
+            mesh.add(verso);
             this.bolas.push({
-                chave: bola.chave, mesh: mesh, sprite: sprite, rb: rb,
+                chave: bola.chave, mesh: mesh, sprite: null, rb: rb,
                 vel: vel, maxR: maxR, saindo: false, local: true,
+                spin: new THREE.Vector3(giro(), giro(), giro() * 0.55),
+                numeroMat: matNum, numeroGeo: geoNum,
             });
         }
 
@@ -356,8 +379,10 @@
                     el: el,
                     x: x,
                     y: y,
-                    vx: (Math.random() - 0.5) * 40,
-                    vy: (Math.random() - 0.5) * 40,
+                    vx: (Math.random() - 0.5) * 160,
+                    vy: (Math.random() - 0.5) * 160,
+                    ang: Math.random() * Math.PI * 2,
+                    vang: (Math.random() < 0.5 ? -1 : 1) * (4 + Math.random() * 5),
                     cx: cx,
                     cy: cy,
                     alcance: alcance,
@@ -388,8 +413,11 @@
             if (item.mesh) {
                 item.saindo = true;
                 var inicio = performance.now();
-                var origem = item.mesh.position.clone();
-                var destino = new THREE.Vector3(item.mesh.position.x * 0.2, item.maxR + 0.85, 1.4);
+                var origem = new THREE.Vector3();
+                item.mesh.getWorldPosition(origem);
+                if (item.mesh.parent) this.scene.attach(item.mesh);
+                var fundo = -(item.maxR + item.rb + 1.35);
+                var destino = new THREE.Vector3(origem.x * 0.08, fundo, 0.35);
                 return new Promise(function (resolve) {
                     function step(now) {
                         if (self.geracao !== g) { resolve(); return; }
@@ -410,13 +438,15 @@
             var el = item.el;
             var x0 = item.x, y0 = item.y;
             var t0 = performance.now();
+            var fundo = (self.el.clientHeight || 520) - item.lado - 18;
+            var centro = (self.el.clientWidth || 640) * 0.5;
             return new Promise(function (resolve) {
                 function step(now) {
                     if (self.geracao !== g) { resolve(); return; }
                     var k = Math.min(1, (now - t0) / 700);
                     var e = 1 - Math.pow(1 - k, 3);
-                    el.style.left = (x0 + (self.el.clientWidth * 0.72 - x0) * e) + "px";
-                    el.style.top = (y0 * (1 - e) + 24 * e) + "px";
+                    el.style.left = (x0 + (centro - x0) * e) + "px";
+                    el.style.top = (y0 + (fundo - y0) * e) + "px";
                     el.style.transform = "scale(" + (1 + e * 0.45) + ")";
                     if (k < 1) requestAnimationFrame(step);
                     else {
@@ -435,12 +465,18 @@
                 if (this.spinIndividual) {
                     this.root.children.forEach(function (ch) { ch.rotation.y += dt * 0.7; });
                 } else {
-                    this.root.rotation.y += dt * 0.42;
+                    this.root.rotation.y += dt * 2.2 * this.ritmo;
                 }
                 for (var i = 0; i < this.bolas.length; i++) {
                     var b = this.bolas[i];
-                    if (!b.mesh || b.saindo) continue;
-                    b.mesh.position.addScaledVector(b.vel, dt);
+                    if (!b.mesh) continue;
+                    if (b.spin) {
+                        b.mesh.rotation.x += b.spin.x * dt * this.ritmo;
+                        b.mesh.rotation.y += b.spin.y * dt * this.ritmo;
+                        b.mesh.rotation.z += b.spin.z * dt * this.ritmo;
+                    }
+                    if (b.saindo) continue;
+                    b.mesh.position.addScaledVector(b.vel, dt * this.ritmo);
                     var len = b.mesh.position.length();
                     if (len > b.maxR) {
                         b.mesh.position.setLength(b.maxR);
@@ -448,11 +484,11 @@
                         var vn = b.vel.dot(n);
                         if (vn > 0) b.vel.addScaledVector(n, -1.9 * vn);
                     }
-                    b.vel.multiplyScalar(0.994);
-                    if (b.vel.length() < 0.22) {
-                        b.vel.x += (Math.random() - 0.5) * 0.5;
-                        b.vel.y += (Math.random() - 0.5) * 0.5;
-                        b.vel.z += (Math.random() - 0.5) * 0.5;
+                    b.vel.multiplyScalar(0.998);
+                    if (b.vel.length() < 1.8) {
+                        b.vel.x += (Math.random() - 0.5) * 1.6;
+                        b.vel.y += (Math.random() - 0.5) * 1.6;
+                        b.vel.z += (Math.random() - 0.5) * 1.6;
                     }
                 }
             }
@@ -460,17 +496,20 @@
                 for (var j = 0; j < this.bolas.length; j++) {
                     var d = this.bolas[j];
                     if (!d.el || d.saindo || d.lista) continue;
-                    d.x += d.vx * dt;
-                    d.y += d.vy * dt;
+                    var ritmo = this.ritmo || 1;
+                    d.x += d.vx * dt * ritmo;
+                    d.y += d.vy * dt * ritmo;
                     var dx = d.x - d.cx;
                     var dy = (d.y - d.cy) / 0.72;
                     if (dx * dx + dy * dy > d.alcance * d.alcance) {
                         var ang = Math.atan2(d.y - d.cy, d.x - d.cx);
-                        d.vx = -Math.cos(ang) * (30 + Math.random() * 30);
-                        d.vy = -Math.sin(ang) * (30 + Math.random() * 30);
+                        d.vx = -Math.cos(ang) * (110 + Math.random() * 70);
+                        d.vy = -Math.sin(ang) * (110 + Math.random() * 70);
                     }
+                    d.ang += d.vang * dt * ritmo;
                     d.el.style.left = d.x + "px";
                     d.el.style.top = d.y + "px";
+                    d.el.style.transform = "rotate(" + (d.ang * 180 / Math.PI) + "deg)";
                 }
             }
             if (this.modo === "3d" && this.scene) this._syncNumeros();

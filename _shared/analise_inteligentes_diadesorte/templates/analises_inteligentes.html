@@ -1698,7 +1698,13 @@
       <div class="table-responsive">
         <table class="table table-sm table-bordered ai-table" id="aiTabelaCatalogo">
           <thead>
-            <tr><th>#</th><th>Dígitos</th><th>Nº válidos</th><th>Volume C(n,{{ sorteadas }})</th><th>Gerar apostas em…</th></tr>
+            <tr>
+              <th class="ai-sort" data-sort="indice" data-table="cat" title="Clique para ordenar"># <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="digitos_fmt" data-table="cat" title="Clique para ordenar">Dígitos <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="qtd_numeros_validos" data-table="cat" title="Clique para ordenar">Nº válidos <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort" data-sort="volume_combinacoes" data-table="cat" title="Clique para ordenar">Volume C(n,{{ sorteadas }}) <span class="ai-sort-ind">⇅</span></th>
+              <th>Gerar apostas em…</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -2523,6 +2529,7 @@
   }
   let CACHE = [];
   let CAT = [];
+  let CAT_RESUMO = {};
   let CAT_PAD_II = [];
   let PAD_II_SEL = new Set();
   let PAD_II_BUSCA = '';
@@ -2568,6 +2575,7 @@
     evoCons: { key: 'n_padrao', dir: 'asc' },
     rec: { key: 'hora_abs', dir: 'asc' },
     cheq: { key: 'linha', dir: 'asc' },
+    cat: { key: 'indice', dir: 'asc' },
   };
   let PAGE = { res: 1, pad: 1 };
   let PAN_HIST = { all: [], filtrados: [], faltantes: [], carregado: false, totalTeorico: 0 };
@@ -2695,7 +2703,7 @@
     if (typeof v === 'number') return v;
     if (Array.isArray(v)) return v.join(' ');
     const s = String(v);
-    if (key === 'volume_combinacoes' || key === 'soma' || key === 'concurso' || key === 'qtd_digitos' || key === 'mes_num' || key === 'pares' || key === 'qtd_nao_sairam') {
+    if (key === 'volume_combinacoes' || key === 'soma' || key === 'concurso' || key === 'qtd_digitos' || key === 'mes_num' || key === 'pares' || key === 'qtd_nao_sairam' || key === 'indice' || key === 'qtd_numeros_validos') {
       const nn = Number(v);
       return Number.isFinite(nn) ? nn : s;
     }
@@ -2859,7 +2867,8 @@
 
   function renderCatalogo(data) {
     CAT = data.linhas || [];
-    const res = data.resumo || {};
+    if (data.resumo && Object.keys(data.resumo).length) CAT_RESUMO = data.resumo;
+    const res = CAT_RESUMO;
     const nCat = +(document.getElementById('aiNDigitos')?.value || data.n_digitos || 8);
     const badge = document.getElementById('aiCombNBadge');
     if (badge) badge.textContent = `${nCat}d`;
@@ -2874,6 +2883,8 @@
       const parts = parseDigitos(busca);
       rows = CAT.filter(r => parts.every(p => (r.digitos||[]).includes(p)));
     }
+    const ordCat = SORT.cat || { key: 'indice', dir: 'asc' };
+    rows = ordenarLinhas(rows, ordCat.key, ordCat.dir);
     document.querySelector('#aiTabelaCatalogo tbody').innerHTML = rows.map(r => {
       const dig = (r.digitos || []).join(',');
       const podeGc = nCat >= 3 && r.pode_gerar_jogo;
@@ -2891,6 +2902,7 @@
         <td class="text-nowrap">${links}</td>
       </tr>`;
     }).join('') || '<tr><td colspan="5" class="text-muted">Sem linhas</td></tr>';
+    atualizarIndicadoresSort();
   }
 
   async function carregarCatalogo(n) {
@@ -6706,6 +6718,11 @@
       }
       if (table === 'cheq') {
         pintarTabelaCheq();
+        return;
+      }
+      if (table === 'cat') {
+        const nCat = document.getElementById('aiNDigitos')?.value;
+        renderCatalogo({ linhas: CAT, resumo: CAT_RESUMO, n_digitos: nCat });
         return;
       }
       if (table === 'p2') {

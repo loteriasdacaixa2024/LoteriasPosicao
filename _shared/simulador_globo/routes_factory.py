@@ -16,7 +16,6 @@ from simulador_globo.historico_service import (
 )
 from simulador_globo.regras_globo import (
     AVISO,
-    ORDEM_MODALIDADES,
     SorteioEncerrado,
     aplicar_finalizar,
     aplicar_proxima,
@@ -98,24 +97,20 @@ def register_simulador_globo(app, modality_key: str) -> None:
         from configuracoes.regras_modalidade import get_regras
 
         painel = montar_painel(modality_key)
-        mods = []
-        for item in listar_modalidades():
-            item = dict(item)
-            item["url"] = _url_modalidade(item["key"])
-            item["atual"] = item["key"] == modality_key
-            mods.append(item)
         boot = {
             "modalidade": modality_key,
             "nome": get_regras(modality_key)["nome"],
             "aviso": AVISO,
             "painel": painel,
-            "modalidades": mods,
             "fases": fases_publicas(modality_key),
-            "ordem": list(ORDEM_MODALIDADES),
+            "cores_meses": {},
         }
+        if modality_key == "diadesorte":
+            from simulador_globo.regras_globo import cores_meses_publicas
+            boot["cores_meses"] = cores_meses_publicas()
         return render_template(
             "simulador_globo.html",
-            page_title="Painel de Cores",
+            page_title="Simulador de Sorteios",
             modality_key=modality_key,
             modality_nome=boot["nome"],
             boot=boot,
@@ -128,8 +123,8 @@ def register_simulador_globo(app, modality_key: str) -> None:
     @bp.route("/api/painel/<key>")
     def api_painel(key):
         key = (key or "").strip().lower()
-        if key not in ORDEM_MODALIDADES:
-            return jsonify({"erro": "Modalidade desconhecida."}), 404
+        if key != modality_key:
+            return jsonify({"erro": "Esta aplicação mostra só a própria modalidade."}), 404
         painel = montar_painel(key)
         painel["url"] = _url_modalidade(key)
         painel["atual"] = key == modality_key
@@ -137,13 +132,11 @@ def register_simulador_globo(app, modality_key: str) -> None:
 
     @bp.route("/api/catalogo")
     def api_catalogo():
-        mods = []
-        for item in listar_modalidades():
-            item = dict(item)
-            item["url"] = _url_modalidade(item["key"])
-            item["atual"] = item["key"] == modality_key
-            mods.append(item)
-        return jsonify({"modalidades": mods, "aviso": AVISO})
+        atual = next(item for item in listar_modalidades() if item["key"] == modality_key)
+        atual = dict(atual)
+        atual["url"] = _url_modalidade(modality_key)
+        atual["atual"] = True
+        return jsonify({"modalidades": [atual], "aviso": AVISO})
 
     @bp.route("/api/preparar", methods=["POST"])
     def api_preparar():

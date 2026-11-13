@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+    #tc-root { --tc-linha: #f2f2f2; }
+    #tc-root .tc-subnav {
+        position: sticky; top: 0; z-index: 5;
+        background: var(--surface, #fff);
+        border-bottom: 1px solid #e6e6e6;
+        padding: .35rem 0;
+        margin-bottom: 1rem;
+    }
+    #tc-root .tc-subnav a {
+        font-size: .8rem; font-weight: 700; color: #555;
+        text-decoration: none; padding: .25rem .55rem; border-radius: 999px;
+    }
+    #tc-root .tc-subnav a:hover { background: #f3f3f3; color: #212121; }
+    #tc-root .tc-subnav a.tc-ir { color: var(--primary, #0a6b1a); }
+    #tc-root .tc-painel {
+        background: #fafafa; border: 1px solid #e6e6e6; border-radius: 10px; padding: .75rem .9rem;
+    }
+    #tc-root .tc-hint {
+        font-size: .8rem; color: #5c6570;
+        border-left: 3px solid #E53935; padding: .4rem .7rem; background: #fff;
+    }
+    #tc-root .tc-bola {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 1.72rem; height: 1.72rem; border-radius: 50%;
+        font-size: .68rem; font-weight: 800; line-height: 1;
+        margin: .08rem; border: 1px solid rgba(0,0,0,.18);
+        box-shadow: inset 0 -1px 0 rgba(0,0,0,.12);
+    }
+    #tc-root .tc-bola.tc-mes { width: auto; min-width: 1.9rem; padding: 0 .35rem; border-radius: 999px; }
+    #tc-root .tc-scroll { overflow-x: auto; }
+    #tc-root table.tc-tab { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    #tc-root table.tc-tab th, #tc-root table.tc-tab td {
+        border: 1px solid #e4e4e4; text-align: center; vertical-align: middle; padding: .28rem .35rem;
+    }
+    #tc-root table.tc-tab thead th {
+        background: var(--primary, #c08b00); color: #fff; font-weight: 700;
+        font-size: .72rem; white-space: nowrap;
+    }
+    #tc-root th.ai-sort { cursor: pointer; user-select: none; }
+    #tc-root th.ai-sort:hover { filter: brightness(.92); }
+    #tc-root th.ai-sort .ai-sort-ind { font-size: .65rem; margin-left: .2rem; opacity: .7; }
+    #tc-root th.ai-sort.ai-sort-asc .ai-sort-ind,
+    #tc-root th.ai-sort.ai-sort-desc .ai-sort-ind { opacity: 1; }
+    #tc-root table.tc-tab tbody tr:nth-child(odd) td.tc-zebra { background: #fff; }
+    #tc-root table.tc-tab tbody tr:nth-child(even) td.tc-zebra { background: var(--tc-linha); }
+    #tc-root table.tc-tab tbody tr:hover td.tc-zebra { background: #e8e8e8; }
+    #tc-root table.tc-tab tfoot td { background: #f7f4ea; font-weight: 700; }
+    #tc-root .tc-cor-h { color: #fff; font-weight: 800; min-width: 3.2rem; }
+    #tc-root .tc-cor-h.tc-escuro { color: #212121; }
+    #tc-root .tc-qtd { font-weight: 800; font-variant-numeric: tabular-nums; }
+    #tc-root .tc-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .85rem; }
+    #tc-root .tc-card { background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; padding: .75rem .85rem; }
+    #tc-root .tc-card h3 { font-size: .95rem; margin: 0 0 .45rem; display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
+    #tc-root .tc-bar { height: .55rem; border-radius: 999px; background: #eee; overflow: hidden; min-width: 4.5rem; }
+    #tc-root .tc-bar > span { display: block; height: 100%; border-radius: 999px; }
+    #tc-root .tc-mini td { font-size: .78rem; }
+    #tc-root .tc-kpi { background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; padding: .55rem .75rem; height: 100%; }
+    #tc-root .tc-kpi .lbl { font-size: .68rem; font-weight: 700; color: #6c757d; text-transform: uppercase; }
+    #tc-root .tc-kpi .val { font-size: 1.15rem; font-weight: 800; }
+    #tc-root #tcApostaSaida:empty { display: none; }
+</style>
+
+<div class="container-fluid py-3" id="tc-root" data-api="{{ api_base }}">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+        <div>
+            <h1 class="h4 mb-1"><i class="fas fa-palette text-danger"></i> {{ page_title }}</h1>
+            <p class="text-muted small mb-0">{{ page_subtitle }} — {{ modality_nome }}</p>
+        </div>
+        <span class="badge bg-light text-dark border" id="tcFaixa">—</span>
+    </div>
+
+    <nav class="tc-subnav d-flex flex-wrap gap-1">
+        <a class="tc-ir" href="/simulador-globo/">Simulador de sorteios</a>
+        <a href="#tc-tabela">Tabela</a>
+        <a href="#tc-frequencia">Frequência</a>
+        <a href="#tc-intervalos">Intervalos</a>
+        <a href="#tc-mes">Mês</a>
+        <a href="#tc-aposta">Aposta</a>
+    </nav>
+
+    <div class="tc-painel mb-3">
+        <div class="d-flex flex-wrap gap-3 align-items-end">
+            <label class="small fw-bold mb-0">Concursos
+                <span class="d-flex align-items-center gap-1 mt-1">
+                    <select id="tcDe" class="form-select form-select-sm" style="width:7rem"></select>
+                    <span class="text-muted">a</span>
+                    <select id="tcAte" class="form-select form-select-sm" style="width:7rem"></select>
+                    <button type="button" class="btn btn-sm btn-primary" id="tcOk">OK</button>
+                </span>
+            </label>
+            <div class="btn-group btn-group-sm" id="tcJanelas">
+                <button type="button" class="btn btn-outline-secondary" data-n="10">10</button>
+                <button type="button" class="btn btn-outline-secondary" data-n="30">30</button>
+                <button type="button" class="btn btn-outline-secondary" data-n="50">50</button>
+                <button type="button" class="btn btn-outline-secondary" data-n="100">100</button>
+                <button type="button" class="btn btn-outline-secondary" data-n="0">Todos</button>
+            </div>
+            <label class="small fw-bold mb-0">Modelo
+                <select id="tcModelo" class="form-select form-select-sm mt-1">
+                    <option value="crescente">Crescente</option>
+                    <option value="sorteio">Ordem do sorteio</option>
+                    <option value="detalhado">Detalhado</option>
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <p class="tc-hint mb-3" id="tcNota">A cor da bola é o algarismo final. As 7 dezenas e o mês são contados à parte.</p>
+
+    <section id="tc-tabela" class="mb-4">
+        <h2 class="h6">Dezenas sorteadas e quantidade por cor</h2>
+        <div class="tc-scroll" id="tcTabela"><p class="text-muted small">Carregando…</p></div>
+    </section>
+
+    <section id="tc-frequencia" class="mb-4">
+        <h2 class="h6">Frequência por grupo de cores</h2>
+        <p class="small text-muted">Quantas vezes cada cor saiu 0, 1, 2, 3 ou 4 vezes nas 7 dezenas da janela.</p>
+        <div class="tc-cards" id="tcGrupos"></div>
+    </section>
+
+    <section id="tc-intervalos" class="mb-4">
+        <h2 class="h6">Repetição entre concursos e intervalo de cada cor</h2>
+        <div class="row g-2 mb-3" id="tcRepKpi"></div>
+        <div class="tc-scroll" id="tcIntervalos"></div>
+    </section>
+
+    <section id="tc-mes" class="mb-4">
+        <h2 class="h6">Mês da Sorte</h2>
+        <p class="small text-muted">O mês de 01 a 12 usa o mesmo algarismo final e não entra na conta das 7 dezenas.</p>
+        <div class="tc-scroll" id="tcMeses"></div>
+    </section>
+
+    <section id="tc-aposta" class="mb-4">
+        <h2 class="h6">Distribuição de cores numa aposta</h2>
+        <p class="small text-muted">Digite 7 dezenas para ver como as cores se distribuem nesta combinação, ao lado da média da janela. Não é uma sugestão de jogo.</p>
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+            <input id="tcAposta" class="form-control form-control-sm" style="max-width:22rem"
+                   placeholder="01 11 21 06 12 10 20" autocomplete="off">
+            <button type="button" class="btn btn-sm btn-outline-primary" id="tcConferir">Conferir cores</button>
+        </div>
+        <div id="tcApostaSaida"></div>
+    </section>
+</div>
+<script>
+    window.__TC_API__ = {{ api_base | tojson }};
+</script>
+<script src="/analise/tabela-cores/static/tabela_cores.js?v=3"></script>
+{% endblock %}

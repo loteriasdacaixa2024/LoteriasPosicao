@@ -23,27 +23,27 @@ ORDEM_MODALIDADES = (
 )
 
 MESES = (
-    (1, "Janeiro", "Jan", "#1565C0"),
-    (2, "Fevereiro", "Fev", "#6A1B9A"),
-    (3, "Março", "Mar", "#2E7D32"),
-    (4, "Abril", "Abr", "#EF6C00"),
-    (5, "Maio", "Mai", "#AD1457"),
-    (6, "Junho", "Jun", "#00838F"),
-    (7, "Julho", "Jul", "#F9A825"),
-    (8, "Agosto", "Ago", "#4E342E"),
-    (9, "Setembro", "Set", "#37474F"),
-    (10, "Outubro", "Out", "#C62828"),
-    (11, "Novembro", "Nov", "#4527A0"),
-    (12, "Dezembro", "Dez", "#1B5E20"),
+    (1, "Janeiro", "Jan"),
+    (2, "Fevereiro", "Fev"),
+    (3, "Março", "Mar"),
+    (4, "Abril", "Abr"),
+    (5, "Maio", "Mai"),
+    (6, "Junho", "Jun"),
+    (7, "Julho", "Jul"),
+    (8, "Agosto", "Ago"),
+    (9, "Setembro", "Set"),
+    (10, "Outubro", "Out"),
+    (11, "Novembro", "Nov"),
+    (12, "Dezembro", "Dez"),
 )
 
 NOTAS = {
-    "megasena": "60 bolas e 6 saem. A cor segue o algarismo final — configuração inicial, igual para cada dezena com o mesmo final.",
+    "megasena": "60 bolas e 6 saem. A cor acompanha o algarismo final; o resultado é o número.",
     "lotofacil": "25 bolas e 15 saem. O universo não é múltiplo de 10, então as cores não ficam com a mesma quantidade.",
     "quina": "80 bolas e 5 saem. Cada cor reúne 8 dezenas.",
     "lotomania": "100 bolas, de 00 a 99, e 20 saem. O 00 entra na cor branca.",
     "timemania": "80 bolas e 7 dezenas saem. Em seguida é sorteado 1 Time do Coração entre 80, fora da paleta das dezenas.",
-    "diadesorte": "31 bolas e 7 dezenas saem. O 31 soma mais uma bola vermelha. Depois sai 1 Mês da Sorte entre 12.",
+    "diadesorte": "31 bolas e 7 dezenas saem. Depois sai 1 mês, de 01 a 12, na cor do próprio mês.",
     "duplasena": "50 bolas. Há dois sorteios independentes de 6. O globo é recarregado antes do 2º sorteio, e um número pode sair nos dois.",
     "supersete": "Sete colunas, cada uma com os dígitos 0 a 9. A cor é a do dígito. O mesmo dígito pode sair em colunas diferentes.",
     "maismilionaria": "50 bolas e 6 dezenas saem. Em seguida saem 2 trevos entre 6, num globo separado.",
@@ -118,21 +118,68 @@ def _fase_colunas() -> dict:
     }
 
 
+def _tinta_sobre(hex_cor: str) -> str:
+    h = str(hex_cor or "").lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    try:
+        r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    except ValueError:
+        return "#ffffff"
+    luz = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return "#212121" if luz > 0.62 else "#ffffff"
+
+
+def _paleta_meses() -> Dict[str, str]:
+    """Cor de cada mês. Não usa o algarismo final da dezena."""
+    padrao = {
+        "Janeiro": "#e74c3c", "Fevereiro": "#9b59b6", "Março": "#3498db",
+        "Abril": "#e67e22", "Maio": "#f1c40f", "Junho": "#2ecc71",
+        "Julho": "#1abc9c", "Agosto": "#34495e", "Setembro": "#196f3d",
+        "Outubro": "#d35400", "Novembro": "#8e44ad", "Dezembro": "#c0392b",
+    }
+    try:
+        from services.cores_meses_service import CoresMesesService
+        bruto = CoresMesesService.obter_cores() or {}
+    except Exception:
+        bruto = {}
+    if isinstance(bruto, dict):
+        for nome, cor in bruto.items():
+            if isinstance(cor, str) and cor.startswith("#"):
+                padrao[nome] = cor
+    return padrao
+
+
+def cores_meses_publicas() -> Dict[str, dict]:
+    paleta = _paleta_meses()
+    saida = {}
+    for numero, nome, abrev in MESES:
+        hex_cor = paleta.get(nome) or "#9e9e9e"
+        saida[abrev] = {
+            "numero": numero,
+            "nome": nome,
+            "hex": hex_cor,
+            "texto": _tinta_sobre(hex_cor),
+        }
+    return saida
+
+
 def _fase_meses() -> dict:
     bolas = []
-    for numero, nome, abrev, hex_cor in MESES:
+    for abrev, cor in cores_meses_publicas().items():
         bolas.append({
-            "chave": f"m{numero}",
-            "numero": numero,
+            "chave": f"m{cor['numero']}",
+            "numero": cor["numero"],
             "rotulo": abrev,
-            "nome": nome,
+            "nome": cor["nome"],
             "grupo": "mes",
-            "cor_id": f"mes-{numero}",
-            "cor_nome": nome,
-            "hex": hex_cor,
-            "texto": "#ffffff" if numero != 7 else "#212121",
+            "cor_id": "mes",
+            "cor_nome": cor["nome"],
+            "hex": cor["hex"],
+            "texto": cor["texto"],
             "coluna": None,
         })
+    bolas.sort(key=lambda b: b["numero"])
     return {
         "id": "mes",
         "titulo": "Mês da Sorte",

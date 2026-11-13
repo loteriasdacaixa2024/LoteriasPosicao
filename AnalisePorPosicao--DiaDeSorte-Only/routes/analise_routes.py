@@ -164,12 +164,18 @@ wire_resumos_modalidade(analise_bp, "diadesorte")
 from analise_somas_digitos.app_integration import wire_analise_somas_digitos
 wire_analise_somas_digitos(analise_bp, "diadesorte")
 
+from analise_cores.app_integration import wire_tabela_cores
+wire_tabela_cores(analise_bp, "diadesorte")
+
 from analise_gaps_ciclo.app_integration import wire_analise_gaps_ciclo
 wire_analise_gaps_ciclo(analise_bp, "diadesorte")
 
 # ANALISE_INTELIGENTES_WIRED
 from analise_inteligentes_diadesorte.app_integration import wire_analise_inteligentes
 wire_analise_inteligentes(analise_bp, "diadesorte")
+
+from resultados_sorteio.app_integration import wire_resultados_sorteio
+wire_resultados_sorteio(analise_bp, "diadesorte")
 
 # ANALISE_ESCOLHA_VISUAL_WIRED
 from analise_escolha_visual.app_integration import wire_analise_escolha_visual

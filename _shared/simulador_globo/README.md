@@ -1,12 +1,12 @@
 # Simulador de globo e painel de cores
 
-Módulo compartilhado em `_shared/simulador_globo`. Entra em cada modalidade pelo `extend_simulador_globo_app` e grava o histórico na tabela `simulacao_globo` do SQLite que a aplicação já usa (`instance/*.db`). Não há um segundo banco.
+Módulo em `_shared/simulador_globo`. Nesta fase está ligado só no Dia de Sorte, pelo `extend_simulador_globo_app` em `AnalisePorPosicao--DiaDeSorte-Only/app.py`. O histórico vai para a tabela `simulacao_globo` do `instance/diadesorte.db`. Não há um segundo banco.
 
-A página fica em `/simulador-globo/`, no menu Análise, com três abas: Painel de Cores, Simulador de Sorteios e Histórico.
+A página fica em `/simulador-globo/`, no menu Dados do Dia de Sorte, com três abas: Painel de Cores, Simulador de Sorteios e Histórico. Nesta fase a tela e o menu mostram só o Dia de Sorte: 31 dezenas, 7 números e 1 mês. As regras das outras modalidades continuam no código, cada uma com o próprio globo, e só entram na tela quando o Dia de Sorte estiver validado.
 
 ## Cores
 
-A cor da dezena é o algarismo final. Esta é a configuração inicial, em `cores.py`:
+A cor só acompanha o algarismo final. O resultado do sorteio é o número. A tabela está em `cores.py`:
 
 | Final | Cor |
 | --- | --- |
@@ -21,7 +21,7 @@ A cor da dezena é o algarismo final. Esta é a configuração inicial, em `core
 | 9 | Laranja |
 | 0 | Branca |
 
-A mesma regra vale para 00–99 e para os dígitos do Super Sete. Um ajuste de uma modalidade entra em `OVERRIDES_FINAL`, sem mudar as outras. Lotofácil e Dia de Sorte não ficam com cores iguais, porque o universo não é múltiplo de 10.
+A mesma regra vale para 00–99 e para os dígitos do Super Sete. Um ajuste de uma modalidade entra em `OVERRIDES_FINAL`, sem mudar as outras. Lotofácil e Dia de Sorte não ficam com a mesma quantidade em cada cor, porque o universo não é múltiplo de 10.
 
 ## Sorteio
 
@@ -47,7 +47,7 @@ A simulação é experimental e educativa. Ela não representa o sorteio da Caix
 
 ## Uso
 
-1. Abra a modalidade e, em Análise, Painel de Cores.
+1. No Dia de Sorte, abra Dados e depois Simulador de Sorteios.
 2. No painel, escolha outra modalidade para ver a distribuição. O simulador e o histórico continuam na modalidade da aplicação aberta.
 3. Em Simulador de Sorteios: Preparar Bolas, Iniciar Sorteio, e use Pausar, Continuar, Reiniciar ou Finalizar Sorteio.
 4. Em Histórico, Ver mostra o registro. Rever no globo só anima de novo, sem gravar outro sorteio.

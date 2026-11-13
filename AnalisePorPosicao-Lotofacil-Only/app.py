@@ -23,6 +23,8 @@ from auto_sync import start_auto_sync_once
 from analise_comparar.routes_factory import register_comparar
 from analise_repeticao.routes_factory import register_repeticao
 from menu.app_integration import extend_nav_app
+from simulador_globo.app_integration import extend_simulador_globo_app
+from analise_cores.app_integration import extend_analise_cores_app
 from filtros_posicao.app_integration import register_filtros_posicao
 from posicao_analise.app_integration import extend_posicao_app
 from concentracao_acertos.app_integration import extend_concentracao_app
@@ -54,11 +56,11 @@ def create_app():
 
     # Inicializa o banco de dados com a aplicação
     db.init_app(app)
-    from simulador_globo.app_integration import extend_simulador_globo_app
-    extend_simulador_globo_app(app, 'lotofacil')
     extend_config_app(app)
     cc_extend_app(app, 'lotofacil')
     extend_nav_app(app, 'lotofacil')
+    extend_simulador_globo_app(app, 'lotofacil')
+    extend_analise_cores_app(app)
     extend_posicao_app(app, 'lotofacil')
     extend_concentracao_app(app, 'lotofacil')
     extend_analise_estudos_app(app)
@@ -70,6 +72,8 @@ def create_app():
     extend_analise_gaps_ciclo_app(app)
     extend_analise_inteligentes_app(app)
     extend_resumo_modalidade_app(app)
+    from resultados_sorteio.app_integration import extend_resultados_sorteio_app
+    extend_resultados_sorteio_app(app)
     extend_resumos_modalidade_app(app)
     extend_ciclo_cobertura_app(app, 'lotofacil')
 

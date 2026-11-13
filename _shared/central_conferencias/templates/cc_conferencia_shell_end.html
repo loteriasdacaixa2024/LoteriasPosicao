@@ -47,8 +47,9 @@
 
     <div class="conf-panel conf-panel-wide" id="panel-concursos" style="display:none;">
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header fw-bold text-white" style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));">
-                <i class="fas fa-folder-open me-2"></i>Concursos Disponíveis — {{ cc_cfg.nome }}
+            <div class="card-header fw-bold text-white d-flex align-items-center flex-wrap gap-2" style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));">
+                <span><i class="fas fa-folder-open me-2"></i>Concursos Disponíveis — {{ cc_cfg.nome }}</span>
+                <a class="cc-link-sutil" href="/analise/resultados/">Últimos Resultados</a>
             </div>
             <div class="card-body">
                 <p class="small text-muted mb-3">

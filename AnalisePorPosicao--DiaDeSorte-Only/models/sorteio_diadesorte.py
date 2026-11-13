@@ -61,6 +61,10 @@ class SorteioDiaDeSorte(db.Model):
     # >= 1 = concurso com pelo menos um ganhador na faixa principal.
     ganhadores_7 = db.Column(db.Integer, nullable=True, index=True)
 
+    # Estimativa publicada pela Caixa para o concurso seguinte.
+    estimativa_proximo = db.Column(db.Float, nullable=True)
+    data_proximo = db.Column(db.String(20), nullable=True, default="")
+
     def __repr__(self):
         return f'<SorteioDiaDeSorte {self.concurso}>'
 

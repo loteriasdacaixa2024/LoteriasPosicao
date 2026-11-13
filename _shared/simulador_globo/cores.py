@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Paleta inicial das bolas, pela casa das unidades.
+Cor da bola pela casa das unidades.
 
-A tabela 01–60 do módulo cabe nesta regra (final 1 = vermelha … final 0 = branca).
-A mesma regra vale como hipótese para 00–99 e para os dígitos do Super Sete.
+Final 1 vermelha, 2 amarela, 3 verde, 4 marrom, 5 azul, 6 rosa, 7 preta,
+8 cinza, 9 laranja e 0 branca. O que o sorteio grava é o número.
 Um override por modalidade entra em OVERRIDES_FINAL sem alterar as demais.
 """
 from __future__ import annotations

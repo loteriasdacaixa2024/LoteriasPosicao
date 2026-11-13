@@ -258,6 +258,14 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 "icon_color": "#2e7d32",
             },
             {
+                "title": "Resultados",
+                "desc": "Últimos concursos · dezenas deslocadas",
+                "href": "/analise/resultados/",
+                "icon": "fas fa-trophy",
+                "icon_bg": "#fff3cd",
+                "icon_color": "#996e00",
+            },
+            {
                 "title": "Análises Gerais",
                 "desc": "Classificação · Diferencial Cruzado · Soma dígitos · Dígitos utilizados",
                 "href": "/analise/analises-gerais/",
@@ -272,6 +280,14 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 "icon": "fas fa-calculator",
                 "icon_bg": "#fff8e1",
                 "icon_color": "#c08b00",
+            },
+            {
+                "title": "Tabela de Cores",
+                "desc": "Quantidade por cor · frequência · repetição · intervalo",
+                "href": "/analise/tabela-cores/",
+                "icon": "fas fa-palette",
+                "icon_bg": "#fdecea",
+                "icon_color": "#c62828",
             },
             {
                 "title": "Grades de Dígitos",
@@ -770,17 +786,47 @@ def get_nav_config(modality_key: str) -> dict:
     _inject_posicao_nav(cfg, modality_key)
     _inject_analises_novas_nav(cfg, modality_key)
     _inject_filtros_posicao_nav(cfg)
-    _inject_simulador_globo_nav(cfg)
+    _inject_simulador_globo_nav(cfg, modality_key)
+    _inject_tabela_cores_nav(cfg)
+    _inject_resultados_nav(cfg)
     _ordenar_geradores_elite(cfg)
     return cfg
 
 
-def _inject_simulador_globo_nav(cfg: dict) -> None:
+def _inject_simulador_globo_nav(cfg: dict, modality_key: str) -> None:
     item = {
-        "title": "Painel de Cores",
-        "desc": "Cores das bolas e simulador de globo",
+        "title": "Simulador de Sorteios",
+        "desc": "Globo, ordem do sorteio e histórico",
         "href": "/simulador-globo/",
         "icon": "fas fa-circle-dot",
+        "icon_bg": "#fdecea",
+        "icon_color": "#c62828",
+    }
+    extras = cfg.setdefault("dados_extras", [])
+    if not any(x.get("href") == item["href"] for x in extras):
+        extras.insert(0, item)
+
+
+def _inject_resultados_nav(cfg: dict) -> None:
+    item = {
+        "title": "Resultados",
+        "desc": "Últimos concursos · dezenas deslocadas",
+        "href": "/analise/resultados/",
+        "icon": "fas fa-trophy",
+        "icon_bg": "#fff3cd",
+        "icon_color": "#996e00",
+    }
+    extras = cfg.setdefault("analise_extras", [])
+    if not any(x.get("href") == item["href"] for x in extras):
+        extras.insert(1, item)
+
+
+def _inject_tabela_cores_nav(cfg: dict) -> None:
+    item = {
+        "title": "Tabela de Cores",
+        "desc": "Quantidade por cor · frequência · repetição · intervalo",
+        "href": "/analise/tabela-cores/",
+        "icon": "fas fa-palette",
         "icon_bg": "#fdecea",
         "icon_color": "#c62828",
     }

@@ -25,6 +25,8 @@ from analise_comparar.routes_factory import register_comparar
 from analise_repeticao.routes_factory import register_repeticao
 from filtros_posicao.app_integration import register_filtros_posicao
 from menu.app_integration import extend_nav_app
+from simulador_globo.app_integration import extend_simulador_globo_app
+from analise_cores.app_integration import extend_analise_cores_app
 from posicao_analise.app_integration import extend_posicao_app
 from concentracao_acertos.app_integration import extend_concentracao_app
 from analise_estudos.app_integration import extend_analise_estudos_app
@@ -53,11 +55,11 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     db.init_app(app)
-    from simulador_globo.app_integration import extend_simulador_globo_app
-    extend_simulador_globo_app(app, 'megasena')
     extend_config_app(app)
     cc_extend_app(app, 'megasena')
     extend_nav_app(app, 'megasena')
+    extend_simulador_globo_app(app, 'megasena')
+    extend_analise_cores_app(app)
     extend_posicao_app(app, 'megasena')
     extend_concentracao_app(app, 'megasena')
     extend_analise_estudos_app(app)
@@ -69,6 +71,8 @@ def create_app():
     extend_analise_gaps_ciclo_app(app)
     extend_analise_inteligentes_app(app)
     extend_resumo_modalidade_app(app)
+    from resultados_sorteio.app_integration import extend_resultados_sorteio_app
+    extend_resultados_sorteio_app(app)
     extend_resumos_modalidade_app(app)
     extend_ciclo_cobertura_app(app, 'megasena')
     app.register_blueprint(index_bp)

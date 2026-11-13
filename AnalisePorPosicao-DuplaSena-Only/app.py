@@ -32,6 +32,8 @@ from analise_inteligentes_diadesorte.app_integration import extend_analise_intel
 from analise_somas_digitos.app_integration import extend_analise_somas_digitos_app
 from geradores_elite.comportamento_analise_integration import extend_comportamento_analise_app
 from menu.app_integration import extend_nav_app
+from simulador_globo.app_integration import extend_simulador_globo_app
+from analise_cores.app_integration import extend_analise_cores_app
 from posicao_analise.app_integration import extend_posicao_app
 from resumo_modalidade.app_integration import extend_resumo_modalidade_app
 from resumos_modalidade.app_integration import extend_resumos_modalidade_app
@@ -51,11 +53,11 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     db.init_app(app)
-    from simulador_globo.app_integration import extend_simulador_globo_app
-    extend_simulador_globo_app(app, 'duplasena')
     extend_config_app(app)
     cc_extend_app(app, 'duplasena')
     extend_nav_app(app, 'duplasena')
+    extend_simulador_globo_app(app, 'duplasena')
+    extend_analise_cores_app(app)
     extend_analise_estudos_app(app)
     extend_analise_gaps_ciclo_app(app)
     extend_camadas_linhas_dd_du_app(app)
@@ -66,6 +68,8 @@ def create_app():
     extend_comportamento_analise_app(app)
     extend_posicao_app(app, 'duplasena')
     extend_resumo_modalidade_app(app)
+    from resultados_sorteio.app_integration import extend_resultados_sorteio_app
+    extend_resultados_sorteio_app(app)
     extend_resumos_modalidade_app(app)
     extend_ciclo_cobertura_app(app, 'duplasena')
     app.register_blueprint(index_bp)

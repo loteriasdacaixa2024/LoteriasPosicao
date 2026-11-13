@@ -5,6 +5,7 @@ import importlib
 import json
 import os
 import re
+import threading
 from collections import Counter
 from itertools import combinations
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -134,6 +135,10 @@ def _mes_num(valor) -> Optional[int]:
 
 
 _PRECO_VOLANTE_CACHE: Dict[Tuple[str, int], float] = {}
+_ABS_PASTA_CACHE: Dict[str, Dict[str, Any]] = {}
+_ABS_PASTA_LOCK = threading.Lock()
+_ABS_GUARDAR = 20
+_ABS_POR_PAGINA = 40
 
 
 def _preco_volante(cfg: dict, n_dezenas: int) -> float:
@@ -335,6 +340,88 @@ def _norm_txt(valor) -> str:
     txt = txt.split("/")[0].strip()
     trocas = str.maketrans("áàâãéêíóôõúç", "aaaaeeiooouc")
     return txt.translate(trocas)
+
+
+def _fmt_data_sorteio(valor) -> str:
+    if valor is None:
+        return ""
+    if hasattr(valor, "strftime"):
+        return valor.strftime("%d/%m/%Y")
+    return str(valor)
+
+
+def _mes_do_sorteio(sorteio, cfg: dict):
+    if not cfg.get("has_mes") or sorteio is None:
+        return None
+    if hasattr(sorteio, "mes_abrev"):
+        try:
+            return sorteio.mes_abrev()
+        except Exception:
+            pass
+    return getattr(sorteio, "mes_nome", None) or getattr(sorteio, "mes_num", None)
+
+
+def _existe_combo(qtd: int, hits: int, combo: int, acertos: int) -> bool:
+    """Existe um volante de `combo` dezenas com exatamente `acertos` números sorteados."""
+    misses = qtd - hits
+    faltam = combo - acertos
+    return 0 <= acertos <= hits and 0 <= faltam <= misses
+
+
+def _faixas_marcadas(
+    numeros: List[int],
+    sorteadas_set: Set[int],
+    cfg: dict,
+    mes_ok: bool,
+    extras: Optional[Dict[str, Any]] = None,
+) -> Tuple[str, ...]:
+    """Rótulos de faixa que a aposta atinge, sem calcular prêmio em dinheiro."""
+    extras = extras or {}
+    combo = int(cfg["combo_size"])
+    unicos = sorted(set(int(n) for n in numeros))
+    qtd = len(unicos)
+    if qtd < combo and cfg.get("key") != "lotomania":
+        return ()
+    hits = len(set(unicos) & sorteadas_set)
+    vistos: List[str] = []
+    visto = set()
+
+    def _guarda(rotulo: Optional[str]) -> None:
+        if not rotulo or rotulo == "Mês" or rotulo in visto:
+            return
+        visto.add(rotulo)
+        vistos.append(rotulo)
+
+    if cfg.get("key") == "lotomania":
+        _minimo, rotulo = _faixa_combo(hits, True, cfg)
+        _guarda(rotulo)
+        return tuple(vistos)
+
+    if cfg.get("has_trevos"):
+        trevos_sorte = {int(n) for n in (extras.get("trevos_sorteio") or [])}
+        trevos_ap = {int(n) for n in (extras.get("trevos_aposta") or []) if str(n).strip()}
+        n_trevos = len(trevos_ap & trevos_sorte)
+        for acertos in range(combo, -1, -1):
+            if not _existe_combo(qtd, hits, combo, acertos):
+                continue
+            _guarda(_faixa_maismilionaria(acertos, n_trevos))
+        return tuple(vistos)
+
+    alvos = [("S1", sorteadas_set)] if cfg.get("dois_sorteios") else [("", sorteadas_set)]
+    if cfg.get("dois_sorteios"):
+        s2 = extras.get("sorteio2") or []
+        if s2:
+            alvos.append(("S2", {int(n) for n in s2}))
+    for prefixo, alvo in alvos:
+        acertos_alvo = len(set(unicos) & alvo) if alvo is not sorteadas_set else hits
+        for acertos in range(combo, -1, -1):
+            if not _existe_combo(qtd, acertos_alvo, combo, acertos):
+                continue
+            _minimo, rotulo = _faixa_combo(acertos, mes_ok, cfg)
+            if prefixo and rotulo and rotulo != "Mês":
+                rotulo = f"{prefixo} {rotulo}"
+            _guarda(rotulo)
+    return tuple(vistos)
 
 
 def _time_confere(aposta, sorteio) -> bool:
@@ -1480,50 +1567,103 @@ class ConferenciaApostasFolderService:
             "comparacoes": linhas,
         }
 
-    def frequencia_abs_pasta(self) -> Dict[str, Any]:
-        """Conta o ABS posicional de cada aposta da pasta, do primeiro concurso ao último."""
-        numeros = self._numeros_pastas()
-        if not numeros:
-            return {
-                "sucesso": True,
-                "max_abs": 0,
-                "total_apostas": 0,
-                "total_concursos": 0,
-                "contagem": {"0": 0},
-            }
+    def _assinatura_abs_pasta(self) -> Tuple:
+        partes = []
+        for origem, _numero, caminho in self._arquivos_retroativos():
+            try:
+                st = os.stat(caminho)
+            except OSError:
+                continue
+            partes.append((origem, st.st_mtime_ns, st.st_size))
+        return tuple(partes)
+
+    def _cache_abs_pasta(self) -> Dict[str, Any]:
+        """Uma leitura da pasta serve a frequência e o resumo ABS ≤ 20."""
+        chave = self.cfg["key"]
+        assinatura = self._assinatura_abs_pasta()
+        with _ABS_PASTA_LOCK:
+            atual = _ABS_PASTA_CACHE.get(chave)
+            if atual and atual.get("assinatura") == assinatura:
+                return atual
+            pacote = self._varrer_abs_pasta()
+            pacote["assinatura"] = assinatura
+            _ABS_PASTA_CACHE[chave] = pacote
+            return pacote
+
+    def _varrer_abs_pasta(self) -> Dict[str, Any]:
+        """ABS de cada aposta da pasta. Guarda as linhas com ABS ≤ 20 para o histórico."""
+        arquivos = self._arquivos_retroativos()
+        vazio = {
+            "max_abs": 0,
+            "total_apostas": 0,
+            "total_concursos": 0,
+            "contagem": {},
+            "linhas": [],
+        }
+        if not arquivos:
+            return vazio
+        numeros = sorted({numero for _origem, numero, _caminho in arquivos})
         sorteios = {
             int(s.concurso): s
             for s in self.Sorteo.query.filter(self.Sorteo.concurso.in_(numeros)).all()
         }
-        contagem: Dict[int, int] = {}
-        total_apostas = 0
-        concursos_usados = 0
-        base = self.pasta_base()
-        for numero in numeros:
-            sorteio = sorteios.get(numero)
-            if not sorteio:
+        posicional = _scoring_positional(self.cfg)
+        combo = int(self.combo)
+        tem_mes = bool(self.cfg.get("has_mes"))
+        tem_time = bool(self.cfg.get("has_time"))
+        tem_trevos = bool(self.cfg.get("has_trevos"))
+        dois = bool(self.cfg.get("dois_sorteios"))
+        desenhos: Dict[int, Dict[str, Any]] = {}
+        for numero, sorteio in sorteios.items():
+            dezenas = []
+            for n in _sorteadas(sorteio, self.cfg):
+                try:
+                    dezenas.append(int(n))
+                except (TypeError, ValueError):
+                    continue
+            if not dezenas:
                 continue
-            arquivo = _arquivo_json(os.path.join(base, str(numero)))
-            if not arquivo:
+            item = {
+                "dezenas": dezenas,
+                "comparar": list(dezenas) if posicional else sorted(dezenas),
+                "conjunto": set(dezenas),
+                "data": _fmt_data_sorteio(getattr(sorteio, "data", None)),
+                "mes": _mes_do_sorteio(sorteio, self.cfg),
+            }
+            if dois and hasattr(sorteio, "sorteio2_lista"):
+                item["sorteio2"] = [int(n) for n in sorteio.sorteio2_lista()]
+            if tem_trevos and hasattr(sorteio, "trevos_lista"):
+                item["trevos"] = [int(n) for n in sorteio.trevos_lista()]
+            if tem_time:
+                item["time"] = getattr(sorteio, "time_nome", None) or getattr(sorteio, "time_num", None)
+            desenhos[numero] = item
+
+        contagem: Dict[int, int] = {}
+        linhas: List[Tuple] = []
+        total_apostas = 0
+        concursos_usados: Set[int] = set()
+        for origem, numero, caminho in arquivos:
+            desenho = desenhos.get(numero)
+            if not desenho:
                 continue
             try:
-                with open(arquivo, "r", encoding="utf-8") as f:
-                    dados = json.load(f)
+                apostas = self._ler_apostas_origem(caminho)
             except (OSError, json.JSONDecodeError):
                 continue
-            apostas = dados.get("apostas") if isinstance(dados, dict) else dados
-            if not isinstance(apostas, list):
-                continue
-            sorteadas = sorted(int(n) for n in _sorteadas(sorteio, self.cfg))
-            oficiais = len(sorteadas)
-            if not oficiais:
+            comparar = desenho["comparar"]
+            oficiais = len(comparar)
+            if oficiais <= 0:
                 continue
             usou = False
-            for aposta in apostas:
-                bruto = aposta.get("numeros") if isinstance(aposta, dict) else None
-                if bruto is None:
+            for idx, aposta in enumerate(apostas, 1):
+                if not isinstance(aposta, dict):
                     continue
-                nums = []
+                bruto = aposta.get("numeros")
+                if isinstance(bruto, str):
+                    bruto = re.findall(r"\d+", bruto)
+                if not bruto:
+                    continue
+                nums: List[int] = []
                 for n in bruto:
                     try:
                         nums.append(int(n))
@@ -1531,22 +1671,140 @@ class ConferenciaApostasFolderService:
                         continue
                 if len(nums) < oficiais:
                     continue
-                ordenados = sorted(nums)
+                seq = list(nums[:oficiais]) if posicional else sorted(nums)[:oficiais]
+                deltas = tuple(int(seq[i]) - int(comparar[i]) for i in range(oficiais))
                 soma = 0
-                for i in range(oficiais):
-                    soma += abs(ordenados[i] - sorteadas[i])
+                for delta in deltas:
+                    soma += abs(delta)
                 contagem[soma] = contagem.get(soma, 0) + 1
                 total_apostas += 1
                 usou = True
+                if soma > _ABS_GUARDAR:
+                    continue
+                try:
+                    numero_aposta = int(aposta.get("numero") or idx)
+                except (TypeError, ValueError):
+                    numero_aposta = idx
+                mes_aposta = aposta.get("mes")
+                mes_ok = False
+                if tem_mes:
+                    n_ap = _mes_num(mes_aposta)
+                    n_so = _mes_num(desenho.get("mes"))
+                    mes_ok = n_ap is not None and n_so is not None and n_ap == n_so
+                extras = {}
+                if dois:
+                    extras["sorteio2"] = desenho.get("sorteio2") or []
+                if tem_trevos:
+                    extras["trevos_sorteio"] = desenho.get("trevos") or []
+                    extras["trevos_aposta"] = aposta.get("trevos") or []
+                if posicional:
+                    acertos = sum(1 for i in range(oficiais) if int(seq[i]) == int(comparar[i]))
+                    _minimo, rotulo = _faixa_combo(acertos, True, self.cfg)
+                    faixas = (rotulo,) if rotulo and rotulo != "Mês" else ()
+                else:
+                    faixas = _faixas_marcadas(nums, desenho["conjunto"], self.cfg, mes_ok, extras)
+                time_ok = False
+                if tem_time:
+                    time_ok = _time_confere(
+                        aposta.get("time") or aposta.get("time_coracao"),
+                        desenho.get("time"),
+                    )
+                rotulo_concurso = origem if "/" in origem else str(numero)
+                linhas.append((
+                    soma,
+                    int(numero),
+                    numero_aposta,
+                    desenho["data"],
+                    rotulo_concurso,
+                    mes_aposta,
+                    desenho.get("mes"),
+                    tuple(int(n) for n in seq),
+                    tuple(int(n) for n in comparar),
+                    deltas,
+                    faixas,
+                    mes_ok,
+                    time_ok,
+                ))
             if usou:
-                concursos_usados += 1
+                concursos_usados.add(numero)
+        linhas.sort(key=lambda row: (row[0], -row[1], row[2], row[4]))
         max_abs = max(contagem) if contagem else 0
+        return {
+            "max_abs": max_abs,
+            "total_apostas": total_apostas,
+            "total_concursos": len(concursos_usados),
+            "contagem": contagem,
+            "linhas": linhas,
+        }
+
+    def frequencia_abs_pasta(self) -> Dict[str, Any]:
+        """Conta o ABS posicional de cada aposta da pasta, do primeiro concurso ao último."""
+        pacote = self._cache_abs_pasta()
+        max_abs = int(pacote["max_abs"] or 0)
+        contagem = pacote["contagem"]
         return {
             "sucesso": True,
             "max_abs": max_abs,
-            "total_apostas": total_apostas,
-            "total_concursos": concursos_usados,
-            "contagem": {str(i): contagem.get(i, 0) for i in range(max_abs + 1)},
+            "total_apostas": pacote["total_apostas"],
+            "total_concursos": pacote["total_concursos"],
+            "contagem": {str(i): int(contagem.get(i, 0)) for i in range(max_abs + 1)},
+        }
+
+    def resumo_abs_historico_pasta(self, max_abs: int = _ABS_GUARDAR, pagina: int = 1, por_pagina: int = _ABS_POR_PAGINA) -> Dict[str, Any]:
+        """Página do resumo ABS ≤ 20 de todas as apostas da pasta, melhores primeiro."""
+        try:
+            teto = int(max_abs)
+        except (TypeError, ValueError):
+            teto = _ABS_GUARDAR
+        teto = max(0, min(teto, _ABS_GUARDAR))
+        try:
+            pagina = int(pagina)
+        except (TypeError, ValueError):
+            pagina = 1
+        try:
+            por_pagina = int(por_pagina)
+        except (TypeError, ValueError):
+            por_pagina = _ABS_POR_PAGINA
+        por_pagina = _ABS_POR_PAGINA if por_pagina != _ABS_POR_PAGINA else por_pagina
+        if pagina < 1:
+            pagina = 1
+        pacote = self._cache_abs_pasta()
+        linhas = pacote["linhas"]
+        if teto < _ABS_GUARDAR:
+            linhas = [row for row in linhas if row[0] <= teto]
+        total_filtradas = len(linhas)
+        total_paginas = max(1, (total_filtradas + por_pagina - 1) // por_pagina) if total_filtradas else 1
+        if pagina > total_paginas:
+            pagina = total_paginas
+        inicio = (pagina - 1) * por_pagina
+        fatia = linhas[inicio:inicio + por_pagina]
+        saida = []
+        for row in fatia:
+            saida.append({
+                "abs": row[0],
+                "concurso": row[1],
+                "numero": row[2],
+                "data": row[3],
+                "concurso_label": row[4],
+                "mes": row[5],
+                "mes_sorteado": row[6],
+                "jogados": list(row[7]),
+                "sorteados": list(row[8]),
+                "deltas": list(row[9]),
+                "faixas": list(row[10]),
+                "mes_ok": row[11],
+                "time_ok": row[12],
+            })
+        return {
+            "sucesso": True,
+            "max_abs": teto,
+            "total_apostas_validas": pacote["total_apostas"],
+            "total_apostas_filtradas": total_filtradas,
+            "total_concursos": pacote["total_concursos"],
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "linhas": saida,
         }
 
 

@@ -199,6 +199,16 @@ def register_central_conferencias_extras(bp, modality_key: str) -> None:
         except Exception as e:
             return jsonify({"sucesso": False, "mensagem": str(e)}), 500
 
+    @bp.route("/api/conferencia-apostas/resumo-abs-historico", methods=["GET"])
+    def resumo_abs_historico_pasta():
+        try:
+            max_abs = request.args.get("max_abs", 20, type=int)
+            pagina = request.args.get("pagina", 1, type=int)
+            por_pagina = request.args.get("por_pagina", 40, type=int)
+            return jsonify(_folder().resumo_abs_historico_pasta(max_abs, pagina, por_pagina))
+        except Exception as e:
+            return jsonify({"sucesso": False, "mensagem": str(e)}), 500
+
     @bp.route("/api/conferencia-apostas/processar/<int:concurso>", methods=["POST"])
     def processar_concurso_pasta(concurso):
         try:

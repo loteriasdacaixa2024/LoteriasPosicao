@@ -64,6 +64,19 @@ class ApiDiaDeSorteService:
         return {r[0] for r in db.session.query(SorteioDiaDeSorte.concurso).all()}
 
     @staticmethod
+    def _extrair_proximo(dados: dict):
+        """Estimativa e data que a Caixa publica para o concurso seguinte."""
+        if not isinstance(dados, dict):
+            return None, ""
+        bruto = dados.get("valorEstimadoProximoConcurso")
+        try:
+            estimativa = None if bruto is None or bruto == "" else float(bruto)
+        except (TypeError, ValueError):
+            estimativa = None
+        data = str(dados.get("dataProximoConcurso") or "").strip()
+        return estimativa, data
+
+    @staticmethod
     def _resolver_mes(dados: dict):
         num = dados.get("mesSorte")
         nome = (
@@ -146,11 +159,14 @@ class ApiDiaDeSorteService:
         dz = [int(x) for x in raw[:7]]
         m_num, m_nome = ApiDiaDeSorteService._resolver_mes(dados)
         g7 = extrair_ganhadores_7(dados)
+        estimativa, data_proximo = ApiDiaDeSorteService._extrair_proximo(dados)
         db.session.merge(SorteioDiaDeSorte(
             concurso=concurso, data=dados.get("dataApuracao", "") or dados.get("data", ""),
             d1=dz[0], d2=dz[1], d3=dz[2], d4=dz[3], d5=dz[4], d6=dz[5], d7=dz[6],
             mes_num=m_num, mes_nome=m_nome,
             ganhadores_7=g7,
+            estimativa_proximo=estimativa,
+            data_proximo=data_proximo,
         ))
         try:
             from analise_inteligentes_diadesorte.historico_service import upsert_de_sorteio

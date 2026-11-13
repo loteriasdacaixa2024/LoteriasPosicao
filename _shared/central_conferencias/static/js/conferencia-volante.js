@@ -373,6 +373,14 @@
         return (nums || []).map(pad2).join(' ');
     }
 
+    function estiloCelula(cls) {
+        if (spec().key !== 'diasorte') return '';
+        if (cls.indexOf('is-acerto') >= 0) return 'background:#1F8959;color:#fff;border-color:#176B45;';
+        if (cls.indexOf('is-sorteada') >= 0) return 'background:#ECE5C8;color:#1a0a00;border-color:#D4CBA8;';
+        if (cls.indexOf('is-aposta') >= 0) return 'background:#ECE5C8;color:#5C4E28;border-color:#D4CBA8;';
+        return '';
+    }
+
     function grade(sorteadasSet, apostadasSet, modo) {
         const sp = spec();
         const cols = (sp.max - sp.min + 1) <= 25 ? 5 : 10;
@@ -386,7 +394,7 @@
                 else if (s) cls += ' is-sorteada';
             } else if ((modo === 'aposta' || modo === 'sim') && a && s) cls += ' is-acerto';
             else if ((modo === 'aposta' || modo === 'sim') && a) cls += ' is-aposta';
-            html += `<div class="${cls}">${pad2(n)}</div>`;
+            html += `<div class="${cls}" style="${estiloCelula(cls)}">${pad2(n)}</div>`;
         }
         return `<div class="cr-volante" style="grid-template-columns:repeat(${cols},minmax(0,1fr))" aria-hidden="false">${html}</div>`;
     }
@@ -403,7 +411,8 @@
 
     function linhaTabela(ap, conf, mesOk, idx, selecionada, melhor) {
         const cls = (selecionada ? ' is-sel' : '') + (melhor ? ' is-melhor' : '');
-        return `<tr class="cr-vol-linha${cls}" data-cr-vol-aposta="${idx}">
+        const fundo = melhor && spec().key === 'diasorte' ? ' style="background:#E7F5EE"' : '';
+        return `<tr class="cr-vol-linha${cls}"${fundo} data-cr-vol-aposta="${idx}">
             <td>Aposta ${esc(ap.numero_aposta)}</td>
             <td class="font-monospace">${esc(listaNums(conf.apostadas))}</td>
             <td class="text-center">${conf.acertos}</td>
@@ -564,9 +573,9 @@
                 </div>
             </div>
             <div class="cr-vol-legenda mb-3">
-                <span><i class="cr-vol-swatch is-acerto"></i> Coincidente</span>
-                <span><i class="cr-vol-swatch is-sorteada"></i> Sorteada e não apostada</span>
-                <span><i class="cr-vol-swatch is-aposta"></i> Apostada e não sorteada</span>
+                <span><i class="cr-vol-swatch is-acerto" style="${estiloCelula('is-acerto')}"></i> Coincidente</span>
+                <span><i class="cr-vol-swatch is-sorteada" style="${estiloCelula('is-sorteada')}"></i> Sorteada e não apostada</span>
+                <span><i class="cr-vol-swatch is-aposta" style="${estiloCelula('is-aposta')}"></i> Apostada e não sorteada</span>
                 <span><i class="cr-vol-swatch"></i> Fora dos dois</span>
             </div>
             ${blocoResumo}
