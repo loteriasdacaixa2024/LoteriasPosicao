@@ -1,20 +1,73 @@
-NÃO É PRA VC CODAR NADA  APENAS VAMOS  CONVERSAR
-
-
-Rota: 	https://marciofernandomaia.com.br/centralmodalidades/m/diadesorte/analise/escolha-visual/
-seção: 	2a. Estatísticas Básicas
-
-e 
-
-rota: 	https://marciofernandomaia.com.br/centralmodalidades/m/diadesorte/central-conferencias/#concursos	
-seção: 	Resumo ABS ≤ 20 — histórico de todos os concursos na pasta
-
-e
-
-rota:	https://marciofernandomaia.com.br/centralmodalidades/m/diadesorte/analise/resultados/
-abas: 	Últimos Resultados (so vou consultar) e Resultados Alterados
 
 
 
 
-Agora coloque um link sutil para a rota
+
+Na rota: 
+https://teste.marciofernandomaia.com.br/centralmodalidades/m/diadesorte/analise/escolha-visual/
+Ações. a serem tomadas
+
+Inserir mais uma secçao chamada exatamente igual a 2a. Estatisticas Básicas
+porem com o nome
+2a1. Estatisticas Básicas
+e qual vai  ser as colunas?? as mesmas (Conc.	Data	Sorteio	Pares	Ímpares	Repetidos	Sequências	Finais Iguais	Diagonais)
+o  que vai diferenciar... é  que cada coluna deve fazer exatamente o que for pedir  aqui..
+Conc.				(trazer do mesmo jeito em que tras em 2a. Estatisticas Básicas)
+Data				(trazer do mesmo jeito em que tras em 2a. Estatisticas Básicas)
+Sorteio	Pares		(trazer apenas os pares "não sairam" no ultimo concurso)
+Ímpares	Repetidos	(trazer apenas os impares "não sairam" no ultimo concurso)
+Sequências			(trazer somente as sequencias que "não sairam" no ultimo concurso)
+Finais Iguais		(trazer apenas os  que "não sairam" no ultimo concurso)
+Diagonais			(trazer apenas as que "não sairam" no  ultimo concurso)
+
+
+#	Dezenas	Pares / Ímpares	Observação
+1	06 10 11 22 23 25 29	3 / 4	Repete 06; sequências 10-11 e 22-23
+2	04 09 12 18 21 26 31	4 / 3	Repete 04; sem sequência
+3	02 07 13 19 20 24 28	4 / 3	Repete 19 e 28; sequência 19-20
+4	01 08 10 17 22 25 27	3 / 4	Repete 27; finais iguais 07-17-27 não, mas 08-10 próximos
+5	05 11 14 16 23 24 30	4 / 3	Repete 05 e 16; sequência 23-24
+6	03 10 15 20 22 26 29	4 / 3	Finais iguais 10-20; bem espalhado
+7	06 12 13 19 21 25 28	3 / 4	Repete 06, 19 e 28; sequência 12-13
+8	04 09 18 22 23 27 31	3 / 4	Repete 04 e 27; sequência 22-23
+9	01 07 10 16 17 24 29	3 / 4	Repete 16; sequência 16-17
+10	02 08 11 20 25 26 31	4 / 3	Sequência 25-26; finais iguais 11-31
+
+
+
+------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------
+Nesta rota 
+https://teste.marciofernandomaia.com.br/centralmodalidades/m/diadesorte/geradores-elite/estatisticas-ciclo/
+vc vai acrescenter mais um gerador  mas baseado nesta nova analise  '2a1. Estatisticas Básicas" feita la em 
+https://teste.marciofernandomaia.com.br/centralmodalidades/m/diadesorte/analise/escolha-visual/ que foi adicionada abaixo da 
+2a. Estatísticas Básicas
+
+
+E IMPRESSINDIVEL  QUE O GERADOR EXCLUSIVO  2a1. Estatisticas Básicas siga as regras abaixo
+
+
+Todo as apostas geradas  deve seguir o  comportamento do  dia de sorteios
+Soma			(pegar a media)
+Pares/Impares 	(cada aposta deve ter ou 3p4i ou  vice versa) nunca so impar e nunca so par)
+Sequência		(cada aposta deve ter pelo menos uma sequencia - cheque mais  atrasada)
+Repetição		(cada aposta deve repetir um ou duas  dezenas  do concurso anterior - neste caso cheque  a mais  atrasada0
+Finais			(cada aposta deve ter pelo menos dois finais iguas sendo dupla ou trica)
+Digitos			(cada aposta deve ter o digitos que mais sai)
+Diagonais		(todas as apostas deve ter pelo  menos duas diagonais - duas ou mais quando couber)
+Padrão			(nenhuma aposta deve ter o mesmo padrão - eles deve alternar entre os que mais saem)
+Ciclo			(cada aposta deve ter pelo menos uma dezenas - ou conforme o comportamento recorrente - restante/faltante do  ciclo)
+
+se vc ler "cada aposta" ou "todas as apostas" da na mesma
+---------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------

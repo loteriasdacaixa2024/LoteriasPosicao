@@ -405,6 +405,7 @@ def montar_perfil_completo(
         **base,
         "catalogo": catalogo,
         "caixa_live": caixa_live,
+        "premio_estimado_fmt": (caixa_live or {}).get("valor_estimado_proximo_fmt") or "—",
         "meta_expansao": {
             "versao_catalogo": "1.0",
             "atualizavel_via_json": True,
@@ -419,12 +420,19 @@ def listar_perfis_completos(
 ) -> List[Dict[str, Any]]:
     if refresh_caixa:
         limpar_cache_caixa()
-    return [
-        montar_perfil_completo(
+    want_live = incluir_caixa_live or refresh_caixa
+    keys = list(MODALITIES)
+
+    def _um(k: str) -> Dict[str, Any]:
+        return montar_perfil_completo(
             k,
             buscar_concurso_remoto(k),
-            incluir_caixa_live=incluir_caixa_live or refresh_caixa,
+            incluir_caixa_live=want_live,
         )
-        for k in MODALITIES
-    ]
+
+    if len(keys) <= 1:
+        return [_um(k) for k in keys]
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=len(keys)) as pool:
+        return list(pool.map(_um, keys))
 

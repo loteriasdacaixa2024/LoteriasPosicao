@@ -22,6 +22,10 @@
         a.link-caixa:hover { text-decoration: underline; }
         .hint { color: #94a3b8; font-size: .85rem; }
         .bolao-calc { font-size: .72rem; color: #64748b; display: block; }
+        .table td.premio-estimado {
+            color: #7c2d12; font-weight: 800; white-space: nowrap;
+            font-variant-numeric: tabular-nums; background: #fff7ed;
+        }
         .stat-card { background: #1e293b; border-radius: 10px; padding: 1rem; border: 1px solid #334155; }
         .stat-val { font-size: 1.4rem; font-weight: 800; }
         .accordion-button { background: #1e293b; color: #e2e8f0; font-weight: 700; font-size: .9rem; }
@@ -80,6 +84,7 @@
                             <th>Cotas</th>
                             <th>Concurso site</th>
                             <th>Próximo Concurso</th>
+                            <th>Prêmio estimado</th>
                             <th>API</th>
                             <th>Site</th>
                             <th></th>
@@ -103,6 +108,7 @@
                             <td class="small text-muted">{{ m.bolao.cotas_min }}–{{ m.bolao.cotas_max }}</td>
                             <td class="conc-site">{% if m.concurso_site %}#{{ m.concurso_site }}{% else %}—{% endif %}</td>
                             <td class="conc-app">{% if m.concurso_app %}#{{ m.concurso_app }}{% else %}—{% endif %}</td>
+                            <td class="premio-estimado">{{ m.premio_estimado_fmt or '—' }}</td>
                             <td class="small">{% if m.caixa_live.ok %}<span class="text-success">OK</span>{% else %}<span class="text-warning">—</span>{% endif %}</td>
                             <td><a class="link-caixa" href="{{ m.link_caixa }}" target="_blank" rel="noopener">Abrir</a></td>
                             <td><button class="btn btn-success btn-save-row" onclick="salvarLinha('{{ m.key }}')"><i class="fas fa-save"></i></button></td>
@@ -159,6 +165,44 @@
             row.querySelector('.bolao-cota').textContent = m.bolao_preco_cota_fmt;
             row.querySelector('.conc-site').textContent = m.concurso_site ? '#' + m.concurso_site : '—';
             row.querySelector('.conc-app').textContent = m.concurso_app ? '#' + m.concurso_app : '—';
+            const prem = row.querySelector('.premio-estimado');
+            if (!prem) return;
+            const fmt = textoPremio(m);
+            if (fmt) prem.textContent = fmt;
+        }
+        function textoPremio(m) {
+            if (!m) return '';
+            const live = m.caixa_live && m.caixa_live.valor_estimado_proximo_fmt;
+            if (live) return live;
+            if (m.premio_estimado_fmt && m.premio_estimado_fmt !== '—') return m.premio_estimado_fmt;
+            return '';
+        }
+        function premioVisivel(texto) {
+            const t = (texto || '').trim();
+            return t && t !== '—' && t !== '…';
+        }
+        async function carregarPremios() {
+            const cells = [...document.querySelectorAll('.premio-estimado')];
+            if (!cells.length || cells.every(c => premioVisivel(c.textContent))) return;
+            cells.forEach(c => {
+                if (!premioVisivel(c.textContent)) c.textContent = '…';
+            });
+            try {
+                const r = await fetch('/configuracoes/api/atualizar-caixa', { method: 'POST' });
+                const d = await r.json();
+                if (d.status !== 'success') return;
+                (d.perfis || []).forEach(m => {
+                    const row = document.querySelector(`tr[data-key="${m.key}"]`);
+                    if (!row) return;
+                    atualizarLinha(row, m);
+                    const prem = row.querySelector('.premio-estimado');
+                    if (prem && !premioVisivel(prem.textContent)) prem.textContent = '—';
+                });
+            } catch (e) {
+                cells.forEach(c => {
+                    if (c.textContent.trim() === '…') c.textContent = '—';
+                });
+            }
         }
         async function salvarLinha(key) {
             const row = document.querySelector(`tr[data-key="${key}"]`);
@@ -190,6 +234,7 @@
             const d = await r.json();
             if (d.status === 'success') location.reload();
         });
+        carregarPremios();
     </script>
 </body>
 </html>

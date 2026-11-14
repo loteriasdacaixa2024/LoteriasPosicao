@@ -60,10 +60,17 @@ def _numero_concurso(data: dict) -> int:
 
 
 def _safe_float(val) -> Optional[float]:
-    if val is None:
+    if val is None or val == "":
         return None
-    try:
+    if isinstance(val, (int, float)):
         return float(val)
+    s = str(val).strip().replace("R$", "").replace(" ", "")
+    if not s:
+        return None
+    if "," in s:
+        s = s.replace(".", "").replace(",", ".")
+    try:
+        return float(s)
     except (TypeError, ValueError):
         return None
 
@@ -160,5 +167,12 @@ def limpar_cache(modality_key: Optional[str] = None) -> None:
 
 
 def buscar_todos_ao_vivo() -> Dict[str, Dict[str, Any]]:
+    from concurrent.futures import ThreadPoolExecutor
+
     limpar_cache()
-    return {k: buscar_ao_vivo(k, use_cache=False) for k in MODALITIES}
+    keys = list(MODALITIES)
+    if not keys:
+        return {}
+    with ThreadPoolExecutor(max_workers=len(keys)) as pool:
+        vivos = list(pool.map(lambda k: buscar_ao_vivo(k, use_cache=False), keys))
+    return dict(zip(keys, vivos))

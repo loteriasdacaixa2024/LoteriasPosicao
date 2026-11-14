@@ -411,13 +411,52 @@ def contar_operacional_padrao(
     }
 
 
+# Acima disto a lista materializada derruba o processo (Lotomania: 50 dezenas).
+_MAX_PADROES_TEORICOS = 25000
+
+
+def _contar_padroes_teoricos(
+    tamanho: int,
+    *,
+    min_dezena: int = 1,
+    max_dezena: int = MAX_DEZENA,
+) -> int:
+    """Conta os padrões viáveis sem montar a lista."""
+    disp = disponibilidade_digito_inicial(min_dezena, max_dezena)
+    digitos = sorted(disp.keys())
+    alvo = int(tamanho)
+    if alvo <= 0 or not digitos:
+        return 0
+    dp = [0] * (alvo + 1)
+    dp[0] = 1
+    for dig in digitos:
+        max_n = int(disp.get(dig, 0))
+        ndp = [0] * (alvo + 1)
+        for soma, formas in enumerate(dp):
+            if not formas:
+                continue
+            teto = min(max_n, alvo - soma)
+            for qtd in range(0, teto + 1):
+                ndp[soma + qtd] += formas
+        dp = ndp
+    return int(dp[alvo])
+
+
 def _gerar_padroes_teoricos(
     tamanho: int,
     *,
     min_dezena: int = 1,
     max_dezena: int = MAX_DEZENA,
 ) -> List[str]:
-    """Todos os padrões iniciais viáveis (dígitos não-decrescentes) no universo."""
+    """Todos os padrões iniciais viáveis (dígitos não-decrescentes) no universo.
+
+    Se o universo não cabe na memória, devolve lista vazia. Quem chama
+    continua com os padrões que já saíram nos sorteios.
+    """
+    if _contar_padroes_teoricos(
+        tamanho, min_dezena=min_dezena, max_dezena=max_dezena,
+    ) > _MAX_PADROES_TEORICOS:
+        return []
     disp = disponibilidade_digito_inicial(min_dezena, max_dezena)
     digitos = sorted(disp.keys())
     out: List[str] = []

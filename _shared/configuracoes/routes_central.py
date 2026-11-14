@@ -14,7 +14,7 @@ config_central_bp = Blueprint("config_central", __name__)
 
 @config_central_bp.route("/")
 def config_central_index():
-    perfis = listar_perfis_completos(incluir_caixa_live=False)
+    perfis = listar_perfis_completos(incluir_caixa_live=True)
     modalidades = listar_todas_modalidades()
     return render_template(
         "config_central.html",

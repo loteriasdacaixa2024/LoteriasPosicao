@@ -1,9 +1,9 @@
 {
   "estado": "ok",
   "ok": true,
-  "mensagem": "6 arquivo(s) atualizado(s).",
-  "iniciado_em": "13/11/2026 05:38:27",
-  "terminado_em": "13/11/2026 05:38:37",
+  "mensagem": "8 arquivo(s) atualizado(s).",
+  "iniciado_em": "13/11/2026 17:34:22",
+  "terminado_em": "13/11/2026 17:34:39",
   "arquivos": [
     {
       "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx",
@@ -28,11 +28,21 @@
     {
       "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\MAIS_MILIONARIA.xlsx",
       "bytes": 56190
+    },
+    {
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\DUPLA_SENA.xlsx",
+      "bytes": 293823
+    },
+    {
+      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\TIMEMANIA.xlsx",
+      "bytes": 222202
     }
   ],
-  "erros": [],
-  "pid": 18564,
+  "erros": [
+    "Erro ao baixar Super-Sete. HTTP 404"
+  ],
+  "pid": 5920,
   "python": "D:\\Loterias\\LP-LoteriasPosicao\\VenvLoterias\\Scripts\\python.exe",
   "script": "D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\DownloadResultadosLoteriasCaixa.py",
-  "returncode": 1
+  "returncode": 0
 }
