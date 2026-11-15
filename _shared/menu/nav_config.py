@@ -366,8 +366,8 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
             "items": [
                 {
                     "href": "/geradores-elite/estatisticas-ciclo/",
-                    "title": "Estatísticas e Ciclo",
-                    "desc": "Estatísticas Básicas · ciclo no fim · Panorama (padrão · sequência · soma)",
+                    "title": "Gerador de Apostas — Estatísticas Básicas",
+                    "desc": "Abas 2a e 2a1 · ciclo · Panorama",
                     "icon": "fas fa-chart-pie",
                     "highlight": 1,
                 },
@@ -931,8 +931,8 @@ def _inject_analises_novas_nav(cfg: dict, modality_key: str) -> None:
     if _tem_ciclo_menu(modality_key):
         item_ciclo = {
             "href": "/geradores-elite/estatisticas-ciclo/",
-            "title": "Estatísticas e Ciclo",
-            "desc": "Estatísticas Básicas · ciclo no fim · Panorama (padrão · sequência · soma)",
+            "title": "Gerador de Apostas — Estatísticas Básicas",
+            "desc": "Abas 2a e 2a1 · ciclo · Panorama",
             "icon": "fas fa-chart-pie",
         }
         if not any(x.get("href") == item_ciclo["href"] for x in items):

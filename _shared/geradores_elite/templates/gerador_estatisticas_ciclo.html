@@ -29,7 +29,12 @@
   width: 32px; height: 32px; border-radius: 50%;
   font-size: .75rem; font-weight: 700; margin: 1px;
 }
-#gec-root .gec-ball.pend { background: #d4b31a; color: #171303; }
+#gec-root .gec-ball.pend { background: #d4b31a; color: #171303; box-shadow: 0 0 0 2px #8a7010; }
+#gec-root .gec-fold-btn {
+  border: 0; background: transparent; color: #5c4a08;
+  width: 1.7rem; height: 1.7rem; border-radius: 6px; line-height: 1; padding: 0;
+}
+#gec-root .gec-fold-btn:hover { background: #fcf9e8; }
 #gec-root .gec-ball.comp { background: #e2e8f0; color: #0f172a; }
 #gec-root .gec-ball.saida { background: #198754; color: #fff; }
 #gec-root .gec-card {
@@ -77,6 +82,10 @@
 #gec-root .gec-ciclo-banner.fim { background: #fcf3c8; color: #5c4a08; }
 #gec-root .gec-ciclo-banner.fechado { background: #e8f5e9; color: #1b5e20; }
 #gec-root .gec-chip-seq { background: #fff8e1; border-color: #ead98a; color: #5c4a08; }
+#gec-root .nav-tabs .nav-link { color: #5c4a08; font-weight: 650; }
+#gec-root .nav-tabs .nav-link.active {
+  color: #171303; background: #fcf9e8; border-color: #ead98a #ead98a #fff; font-weight: 700;
+}
 </style>
 
 <div class="container-fluid py-3" id="gec-root"
@@ -92,6 +101,15 @@
     <a class="btn btn-sm btn-outline-secondary" href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}"><i class="fas fa-history"></i> 6 · Panorama Histórico</a>
     <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-bolt"></i> Elite</a>
   </div>
+  <ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item">
+      <button type="button" class="nav-link active" id="gecTab2a" data-gec-aba="2a">2a. Estatísticas Básicas</button>
+    </li>
+    <li class="nav-item">
+      <button type="button" class="nav-link" id="gecTab2a1" data-gec-aba="2a1">2a1. Estatísticas Básicas</button>
+    </li>
+  </ul>
+  <div id="gecAba2a">
   {% include '_diagonais_aposta.html' %}
 
   <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
@@ -232,18 +250,47 @@
         <span class="ms-2">Verifica se alguma aposta já foi o resultado oficial (concurso 1 até o atual)</span>
       </div>
       <div id="gecAlert" class="mt-2"></div>
+      {% include '_panorama_conjunto.html' %}
       <div id="gecResultados" class="mt-3 lista-apostas-grid">
         <p class="text-muted small mb-0" style="grid-column:1/-1;">
           Clique em <strong>Gerar</strong>. No Panorama o ciclo só entra quando faltam poucas dezenas.
         </p>
       </div>
-      {% include '_panorama_conjunto.html' %}
     </div>
+  </div>
+  </div>
+  <div id="gecAba2a1" hidden>
+    {% include 'gerador_2a1_painel.html' %}
   </div>
 </div>
 
 {% if extra_mes %}
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
 {% endif %}
-<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pan2"></script>
+<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pan4"></script>
+<script src="{{ url_for('geradores_elite.static', filename='gerador_2a1.js') }}?v=2a1i"></script>
+<script>
+(function () {
+  const tab2a = document.getElementById('gecTab2a');
+  const tab2a1 = document.getElementById('gecTab2a1');
+  const painel2a = document.getElementById('gecAba2a');
+  const painel2a1 = document.getElementById('gecAba2a1');
+  if (!tab2a || !tab2a1 || !painel2a) return;
+  function mostrar(aba) {
+    const dois = aba === '2a1';
+    painel2a.hidden = dois;
+    if (painel2a1) painel2a1.hidden = !dois;
+    tab2a.classList.toggle('active', !dois);
+    tab2a1.classList.toggle('active', dois);
+    const url = new URL(window.location.href);
+    if (dois) url.searchParams.set('aba', '2a1');
+    else url.searchParams.delete('aba');
+    history.replaceState(null, '', url.pathname + url.search);
+    if (dois && window.g2a1Abrir) window.g2a1Abrir();
+  }
+  tab2a.addEventListener('click', function () { mostrar('2a'); });
+  tab2a1.addEventListener('click', function () { mostrar('2a1'); });
+  if (new URLSearchParams(window.location.search).get('aba') === '2a1') mostrar('2a1');
+})();
+</script>
 {% endblock %}

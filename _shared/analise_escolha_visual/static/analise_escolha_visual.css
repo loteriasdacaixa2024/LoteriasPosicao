@@ -1001,3 +1001,29 @@
     padding: 0 .28rem;
   }
 }
+
+#ev-root .ev-stat-2a1 .ev-basic-table thead th {
+  background: var(--primary, #c08b00);
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .15);
+}
+#ev-root .ev-stat-2a1 .ev-2a1-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: .2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#ev-root .ev-stat-2a1 .ev-2a1-sort:hover { filter: brightness(1.08); }
+#ev-root .ev-stat-2a1 .ev-2a1-ind {
+  font-size: .62rem;
+  opacity: .55;
+}
+#ev-root .ev-stat-2a1 .ev-2a1-sort.is-asc .ev-2a1-ind,
+#ev-root .ev-stat-2a1 .ev-2a1-sort.is-desc .ev-2a1-ind { opacity: 1; }

@@ -17141,3 +17141,417 @@ MemoryError
 127.0.0.1 - - [14/Nov/2026 05:21:13] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
 127.0.0.1 - - [14/Nov/2026 05:41:06] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,6,8,9&concurso=1319 HTTP/1.1" 200 -
 127.0.0.1 - - [14/Nov/2026 05:41:14] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 06:46:09 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Resumo modalidades: http://localhost:5153/analise/resumo-modalidades/
+[URL] Resumos modalidade: http://localhost:5153/analise/resumos-modalidade/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 06:46:28] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 06:49:52] "GET /central-conferencias/ HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 06:51:19 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Resumo modalidades: http://localhost:5153/analise/resumo-modalidades/
+[URL] Resumos modalidade: http://localhost:5153/analise/resumos-modalidade/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 06:51:26] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 06:57:42] "GET /analise/repeticao-concursos/api/backtest HTTP/1.1" 405 -
+
+--- iniciando 2026-11-14 07:09:03 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Resumo modalidades: http://localhost:5153/analise/resumo-modalidades/
+[URL] Resumos modalidade: http://localhost:5153/analise/resumos-modalidade/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 07:09:09] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 07:11:51] "POST /cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 07:11:58] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 07:22:32 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Resumo modalidades: http://localhost:5153/analise/resumo-modalidades/
+[URL] Resumos modalidade: http://localhost:5153/analise/resumos-modalidade/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 07:22:41] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 07:32:58] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,6,7,9&concurso=1310 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 07:33:12] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 07:36:26 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Resumo modalidades: http://localhost:5153/analise/resumo-modalidades/
+[URL] Resumos modalidade: http://localhost:5153/analise/resumos-modalidade/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 07:36:34] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 07:51:39] "GET /geradores-elite/api/escolha-tubular/gerar HTTP/1.1" 405 -
+127.0.0.1 - - [14/Nov/2026 09:02:42] "GET /analise/api/gaps-ciclo HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 10:19:15] "GET /analise/analises-inteligentes/?aba=padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:19:18] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:19:34] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:21:35] "GET /geradores-elite/ciclo-apostas/?modo=operacional&op= HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:21:39] "GET /geradores-elite/api/ciclo-apostas/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:21:43] "GET /geradores-elite/api/ciclo-apostas/recorrencia?n=4 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:21:45] "GET /geradores-elite/api/ciclo-apostas/ritmo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:21:46] "GET /geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:21:47] "GET /geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:30:38] "GET /geradores-elite/comportamento-apostas/?tab=aliadas HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:34:51] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:05:13] "GET /geradores-elite/ciclo-apostas/?modo=estrategia HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:05:49] "GET /geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:05:50] "GET /geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:05:51] "GET /geradores-elite/api/ciclo-apostas/recorrencia?n=4 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:05:52] "GET /geradores-elite/api/ciclo-apostas/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:05:52] "GET /geradores-elite/centralmodalidades/m/diadesorte/api/mes-sorte-opcoes HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 11:05:53] "GET /geradores-elite/api/ciclo-apostas/ritmo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:16:25] "GET /analise/gaps-ciclo/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:23:32] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,5,7,9&concurso=1300 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:23:53] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:38:05] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,5,7,8,9&concurso=1302 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:49:52] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,6,9&concurso=1326 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:50:13] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:52:29] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,6,7,8,9&concurso=1287 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:52:50] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 12:11:03 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Resumo modalidades: http://localhost:5153/analise/resumo-modalidades/
+[URL] Resumos modalidade: http://localhost:5153/analise/resumos-modalidade/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 12:11:09] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 12:18:51 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Resumo modalidades: http://localhost:5153/analise/resumo-modalidades/
+[URL] Resumos modalidade: http://localhost:5153/analise/resumos-modalidade/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 12:18:59] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:20:00] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%201%201%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:22:20] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,4,7,8&concurso=1286 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:22:23] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:23:38] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,7&concurso=1314 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:23:52] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:25:00] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,4,5,6,7,8&concurso=1301 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:25:22] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:27:14] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,6,7,9&concurso=1291 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:27:18] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:27:52] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,7,8&concurso=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:28:06] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:28:54] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,9&concurso=1323 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:29:00] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:30:11] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,4,6,8,9&concurso=1277 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:30:17] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:34:06] "GET /geradores-elite/gerador-elite/?n=6&digitos=1,2,3,5,7,8&concurso=1303 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:35:23] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,4,6,7,9&concurso=1288 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:35:25] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:36:42] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,6,8,9&concurso=1316 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:36:57] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:58:21] "GET /geradores-elite/gerador-digitos-inteligente/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:58:25] "GET /geradores-elite/static/construtor_digitos.js?v=19 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:58:27] "GET /geradores-elite/centralmodalidades/m/diadesorte/api/mes-sorte-opcoes HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 12:58:31] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:58:32] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:26:57] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,5,7,9&concurso=1282 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:27:33] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 13:36:44 ---
+===========================================================
+[OK] Servidor Dia de Sorte rodando na porta 5153
+[URL] Acesse:      http://localhost:5153
+[URL] Análise:     http://localhost:5153/analise/
+[URL] Resumo Geral: http://localhost:5153/analise/resumo-geral/
+[URL] Resumo modalidades: http://localhost:5153/analise/resumo-modalidades/
+[URL] Resumos modalidade: http://localhost:5153/analise/resumos-modalidade/
+[URL] Análise Comp: http://localhost:5153/analise/comportamento/
+[URL] Análise Pos.: http://localhost:5153/analise/por-posicao/
+[URL] Filtros pos.: http://localhost:5153/dados/filtros-posicao/
+[URL] Ciclo Cob.:  http://localhost:5153/analise/ciclo-cobertura/
+[URL] Gaps/Ciclo:  http://localhost:5153/analise/gaps-ciclo/
+[URL] Ciclo->Apostas: http://localhost:5153/geradores-elite/ciclo-apostas/
+[URL] Gaps->Apostas: http://localhost:5153/geradores-elite/gaps-ciclo-apostas/
+[URL] Modelos:     http://localhost:5153/modelos/
+[URL] Conferência: http://localhost:5153/central-conferencias/
+[URL] Desdobramento: http://localhost:5153/desdobramento/
+[URL] Construtor:    http://localhost:5153/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5153
+ * Running on http://10.0.0.10:5153
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 13:36:56] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:47:02] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,6,7,9&concurso=1329 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:47:07] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:50:12] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,3,6,8&concurso=1289 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:50:15] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:02:30] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,4,6,8,9&concurso=1325 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:02:32] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:04:07] "GET /geradores-elite/gerador-elite/?n=5&digitos=0,1,2,6,9&concurso=1292 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:04:13] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:19:11] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,4,5,8&concurso=1306 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:19:14] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:33:16] "GET /geradores-elite/api/gaps-ciclo HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 14:35:53] "GET /geradores-elite/gerador-concentracao/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:35:58] "GET /analise/api/meses-indicados?janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:35:58] "GET /geradores-elite/api/construtor-construcoes/analise-sugestao?quantidade=16&criterio=frequencia HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:42:20] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,4,6,7,9&concurso=1291 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:42:24] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:46:35] "GET /analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:51:48] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%201%201%201%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:52:03] "GET /geradores-elite/static/mes_sorte_select.js?v=2 HTTP/1.1" 304 -
+127.0.0.1 - - [14/Nov/2026 14:52:13] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:52:15] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:52:15] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:52:16] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:52:26] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:52:28] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:04:17] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,6,9&concurso=1294 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:04:25] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:11:14] "GET /analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:11:15] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,6,7,8,9&concurso=1297 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:11:22] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:11:45] "GET /analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:55:42] "GET /geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:55:45] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:55:45] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:55:46] "GET /geradores-elite/api/construtor-construcoes/ciclo-visao HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:55:48] "GET /geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:55:54] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:56:02] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:08:02] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,3,6,9&concurso=1294 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:08:08] "GET /cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:08:14] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:11:45] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:11:46] "GET /configuracoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:15:43] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8&concurso=1317 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:16:12] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:16:48] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,8&concurso=1306 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:16:51] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:20:59] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,4,6,8&concurso=1293 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:21:09] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:39:20] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,6&concurso=1290 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:42:36] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:46:05] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,6,7,8,9&concurso=1312 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:47:30] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:49:52] "GET /analise/analises-inteligentes/?aba=checagem-seq HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:12] "GET /geradores-elite/centralmodalidades/m/diadesorte/api/mes-sorte-opcoes HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 16:50:12] "GET /analise/api/inteligentes/resultados?janela=1&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:12] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:13] "GET /analise/api/somas-digitos/somas?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:14] "GET /analise/api/somas-digitos/somas?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:16] "GET /analise/api/inteligentes/resultados?janela=1&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:19] "POST /analise/api/inteligentes/checagem-sequencias HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:21] "POST /analise/api/inteligentes/checagem-sequencias HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:52:32] "GET /geradores-elite/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:10:24] "GET /analise/api/comportamento HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:16:37] "GET /geradores-elite/gerador-elite/?n=5&digitos=0,1,2,3,4&concurso=1278 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:16:40] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:19:46] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,7&concurso=1313 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:19:57] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:22:53] "GET /geradores-elite/api/conferir-txt-historico HTTP/1.1" 405 -
+127.0.0.1 - - [14/Nov/2026 17:23:56] "GET /geradores-elite/api/posicao HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 17:34:00] "GET /analise/ciclo-cobertura/inteligencia-operacional/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:34:27] "GET /analise/api/ciclo-cobertura/inteligencia-operacional?v=1793664000000 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:55:28] "GET /geradores-elite/gerador-elite/?n=5&digitos=0,1,2,3,9&concurso=1323 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:56:44] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:36:19] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:36:26] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:53:38] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,4,5,7,8&concurso=1299 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:53:51] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:59:22] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:13:35] "GET /geradores-elite/api/ciclo-apostas HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 19:16:59] "GET /analise/api/somas-digitos HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 19:24:01] "GET /analise/ciclo-cobertura/metricas/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:24:26] "GET /analise/api/ciclo-cobertura/metricas-historicas?v=1793664000000 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:31:17] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,6,8&concurso=1296 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:31:20] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:26:15] "GET /analise/analises-gerais/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:30:57] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,4,6,8,9&concurso=1311 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:31:02] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:35:12] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,8,9&concurso=1298 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:35:18] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:37:18] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,3,5,7&concurso=1318 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:37:22] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:33:45] "GET /geradores-elite/api/construtor-construcoes HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 22:04:51] "GET /analise/repeticao-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 22:04:53] "GET /analise/repeticao-concursos/api/analise?modo=volante HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 22:52:22] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,6,8,9&concurso=1319 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 22:52:38] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:13:44] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,6&concurso=1327 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:02:00] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,4,6,8&concurso=1293 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:02:18] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:05:11] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,7,8,9&concurso=1302 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:05:12] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,6,7,9&concurso=1315 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:05:16] "GET /analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:05:17] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:05:18] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:05:21] "GET /analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:05:55] "GET /analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:43:07] "GET /analise/resultados/ HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 07:43:14] "GET /analise/api/resultados-sorteio/ HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:19:42] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,2,3,5,6,7&concurso=1304 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:20:32] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 09:12:06] "GET /geradores-elite/ciclo-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 09:12:11] "GET /geradores-elite/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 09:12:11] "GET /geradores-elite/centralmodalidades/m/diadesorte/api/mes-sorte-opcoes HTTP/1.1" 404 -
+127.0.0.1 - - [15/Nov/2026 09:12:13] "GET /geradores-elite/api/ciclo-apostas/estrategia/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:31:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:31:31] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:31:35] "GET /api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:31:38] "GET /api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:48:11] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,3,6,8&concurso=1289 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:48:26] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -

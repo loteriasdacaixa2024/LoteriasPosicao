@@ -674,7 +674,188 @@
         </div>`).join('');
     }
     renderBasicosTabela();
+    render2a1();
     renderApostas();
+  }
+
+  let sort2a1 = { key: '', dir: 'asc' };
+  let ordemSorteio2a = 'original';
+  let ordemSorteio2a1 = 'original';
+
+  function anteriorPorConcurso(linhas) {
+    const orden = [...(linhas || [])].sort((a, b) => Number(a.concurso) - Number(b.concurso));
+    const prev = new Map();
+    orden.forEach((ln, i) => {
+      prev.set(Number(ln.concurso), i > 0 ? orden[i - 1] : null);
+    });
+    return prev;
+  }
+
+  function semSairam(par) {
+    const fora = [];
+    for (let n = DMIN; n <= DMAX; n += 1) {
+      if ((n % 2 === 0) !== par) continue;
+      fora.push(n);
+    }
+    return fora;
+  }
+
+  function exceto(universo, bloqueados) {
+    const ban = new Set((bloqueados || []).map(Number));
+    return universo.filter((n) => !ban.has(n));
+  }
+
+  function textoGrupos(grupos, sep) {
+    const lista = grupos || [];
+    if (!lista.length) return '—';
+    return lista.map((g) => (g || []).map(fmt).join(sep)).join(' · ');
+  }
+
+  function textoDiags(grupos) {
+    const lista = grupos || [];
+    if (!lista.length) return '—';
+    return lista.map((g) => {
+      const nums = (g.nums || g || []).map(fmt).join('-');
+      return g.dir_sym ? `${g.dir_sym} ${nums}` : nums;
+    }).join(' · ');
+  }
+
+  function chaveData(texto) {
+    const s = String(texto || '');
+    const br = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if (br) return `${br[3]}${br[2]}${br[1]}`;
+    return s;
+  }
+
+  function cmpLista(a, b) {
+    const aa = a || [];
+    const bb = b || [];
+    const n = Math.max(aa.length, bb.length);
+    for (let i = 0; i < n; i += 1) {
+      const av = aa[i];
+      const bv = bb[i];
+      if (av == null && bv == null) return 0;
+      if (av == null) return -1;
+      if (bv == null) return 1;
+      if (av !== bv) return av < bv ? -1 : 1;
+    }
+    return 0;
+  }
+
+  function linhas2a1(linhas) {
+    const prev = anteriorPorConcurso(linhas);
+    const paresU = semSairam(true);
+    const imparesU = semSairam(false);
+    return (linhas || []).map((ln) => {
+      const ant = prev.get(Number(ln.concurso));
+      const antNums = (ant && ant.numeros) || [];
+      let seq = [];
+      let fin = [];
+      let diag = [];
+      if (ant) {
+        seq = (ant.sequencias && ant.sequencias.detalhe && ant.sequencias.detalhe.grupos) || [];
+        fin = (ant.finais && ant.finais.detalhe && ant.finais.detalhe.grupos) || [];
+        diag = (ant.diagonais && ant.diagonais.detalhe && ant.diagonais.detalhe.grupos) || [];
+        if (COM_DIAG && ant.numeros && !diag.length) {
+          diag = (blocoDiag(ant.numeros).detalhe || {}).grupos || [];
+        }
+      }
+      const repetidos = (ln.repetidos && ln.repetidos.dezenas)
+        ? ln.repetidos.dezenas.slice()
+        : (ln.numeros || []).map(Number).filter((n) => antNums.map(Number).includes(n));
+      const sorteio = (ln.numeros || []).map(Number).filter(Number.isFinite);
+      return {
+        concurso: Number(ln.concurso),
+        data: ln.data || '',
+        sorteio,
+        sorteioCrescente: [...sorteio].sort((a, b) => a - b),
+        pares: exceto(exceto(paresU, antNums), sorteio),
+        impares: exceto(exceto(imparesU, antNums), sorteio),
+        repetidos: repetidos.map(Number).filter(Number.isFinite).sort((a, b) => a - b),
+        sequencias: seq,
+        finais: fin,
+        diagonais: diag,
+        seqTxt: textoGrupos(seq, '-'),
+        finTxt: textoGrupos(fin, ','),
+        diagTxt: textoDiags(diag),
+      };
+    });
+  }
+
+  function valorSort2a1(row, key) {
+    if (key === 'concurso') return row.concurso;
+    if (key === 'data') return chaveData(row.data);
+    if (key === 'sorteio') return ordemSorteio2a1 === 'crescente' ? row.sorteioCrescente : row.sorteio;
+    if (key === 'pares') return row.pares;
+    if (key === 'impares') return row.impares;
+    if (key === 'repetidos') return row.repetidos;
+    if (key === 'sequencias') return row.seqTxt;
+    if (key === 'finais') return row.finTxt;
+    if (key === 'diagonais') return row.diagTxt;
+    return '';
+  }
+
+  function comparar2a1(a, b, key) {
+    const va = valorSort2a1(a, key);
+    const vb = valorSort2a1(b, key);
+    if (Array.isArray(va) || Array.isArray(vb)) return cmpLista(va, vb);
+    if (typeof va === 'number' && typeof vb === 'number') return va - vb;
+    return String(va).localeCompare(String(vb), 'pt-BR');
+  }
+
+  function marcarSetas2a1() {
+    document.querySelectorAll('#evStat2a1Head .ev-2a1-sort').forEach((btn) => {
+      const key = btn.getAttribute('data-sort');
+      const ind = btn.querySelector('.ev-2a1-ind');
+      const ativo = sort2a1.key === key;
+      btn.classList.toggle('is-asc', ativo && sort2a1.dir === 'asc');
+      btn.classList.toggle('is-desc', ativo && sort2a1.dir === 'desc');
+      if (ind) ind.textContent = !ativo ? '↕' : (sort2a1.dir === 'asc' ? '▲' : '▼');
+    });
+    const ordemBtn = document.getElementById('evStat2a1Ordem');
+    if (ordemBtn) {
+      ordemBtn.textContent = ordemSorteio2a1 === 'crescente' ? 'Ordem crescente' : 'Ordem do sorteio';
+    }
+  }
+
+  function render2a1() {
+    const tbody = document.getElementById('evStat2a1Tabela');
+    if (!tbody || !payload) return;
+    const nEl = document.getElementById('evStat2a1N');
+    let linhas = linhas2a1(payload.linhas_basicas || []);
+    if (nEl) {
+      nEl.textContent = linhas.length
+        ? `(${linhas.length.toLocaleString('pt-BR')} sorteio${linhas.length === 1 ? '' : 's'})`
+        : '';
+    }
+    if (sort2a1.key) {
+      const dir = sort2a1.dir === 'desc' ? -1 : 1;
+      linhas = linhas.slice().sort((a, b) => dir * comparar2a1(a, b, sort2a1.key));
+    }
+    const focoN = Number(payload.concurso_foco?.concurso);
+    if (!linhas.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Sem sorteios na janela.</td></tr>';
+      marcarSetas2a1();
+      return;
+    }
+    tbody.innerHTML = linhas.map((ln) => {
+      const sorteio = ordemSorteio2a1 === 'crescente' ? ln.sorteioCrescente : ln.sorteio;
+      const isFoco = ln.concurso === focoN;
+      const cel = (txt, cor) => `<td class="ev-basic-nums" style="color:${cor}" title="${txt}">${txt}</td>`;
+      const sorteioTxt = numsLinha(sorteio);
+      return `<tr data-concurso="${ln.concurso}" class="${isFoco ? 'is-foco' : ''}">
+        <td class="ev-basic-conc">${ln.concurso}</td>
+        <td class="ev-basic-data">${ln.data || '—'}</td>
+        <td class="ev-basic-nums" title="${sorteioTxt}">${sorteioTxt}</td>
+        ${cel(numsLinha(ln.pares), CORES.pares)}
+        ${cel(numsLinha(ln.impares), CORES.impares)}
+        ${cel(numsLinha(ln.repetidos), CORES.repetidos)}
+        ${cel(ln.seqTxt, CORES.sequencias)}
+        ${cel(ln.finTxt, CORES.finais)}
+        ${cel(ln.diagTxt, CORES.diagonais)}
+      </tr>`;
+    }).join('');
+    marcarSetas2a1();
   }
 
   function renderBasicosTabela() {
@@ -691,15 +872,24 @@
     if (!tbody) return;
     if (!linhas.length) {
       tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Sem sorteios na janela.</td></tr>';
+      const ordemVazia = document.getElementById('evStat2aOrdem');
+      if (ordemVazia) {
+        ordemVazia.textContent = ordemSorteio2a === 'crescente' ? 'Ordem crescente' : 'Ordem do sorteio';
+      }
       return;
     }
     tbody.innerHTML = linhas.map((ln) => {
       if (COM_DIAG && ln.numeros && !ln.diagonais) ln.diagonais = blocoDiag(ln.numeros);
       const isFoco = Number(ln.concurso) === focoN;
+      const baseSorteio = (ln.numeros || []).map(Number).filter(Number.isFinite);
+      const sorteio = ordemSorteio2a === 'crescente'
+        ? baseSorteio.slice().sort((a, b) => a - b)
+        : baseSorteio;
+      const sorteioTxt = numsLinha(sorteio);
       return `<tr data-concurso="${ln.concurso}" class="${isFoco ? 'is-foco' : ''}">
         <td class="ev-basic-conc">${ln.concurso}</td>
         <td class="ev-basic-data">${ln.data || '—'}</td>
-        <td class="ev-basic-nums" title="${numsLinha(ln.numeros)}">${numsLinha(ln.numeros)}</td>
+        <td class="ev-basic-nums" title="${sorteioTxt}">${sorteioTxt}</td>
         <td class="ev-basic-nums" style="color:${CORES.pares}" title="${celulaGrupo('pares', ln.pares)}">${celulaGrupo('pares', ln.pares)}</td>
         <td class="ev-basic-nums" style="color:${CORES.impares}" title="${celulaGrupo('impares', ln.impares)}">${celulaGrupo('impares', ln.impares)}</td>
         <td class="ev-basic-nums" style="color:${CORES.repetidos}" title="${celulaGrupo('repetidos', ln.repetidos)}">${celulaGrupo('repetidos', ln.repetidos)}</td>
@@ -708,6 +898,10 @@
         <td class="ev-basic-nums" style="color:${CORES.diagonais}" title="${celulaGrupo('diagonais', ln.diagonais)}">${celulaGrupo('diagonais', ln.diagonais)}</td>
       </tr>`;
     }).join('');
+    const ordemBtn = document.getElementById('evStat2aOrdem');
+    if (ordemBtn) {
+      ordemBtn.textContent = ordemSorteio2a === 'crescente' ? 'Ordem crescente' : 'Ordem do sorteio';
+    }
   }
 
   function scrollTabelaFoco() {
@@ -1309,6 +1503,10 @@
       const caminho = caminhoPadrao();
       if (caminho) pathEl.textContent = caminho;
     }
+    document.getElementById('evStat2aOrdem')?.addEventListener('click', () => {
+      ordemSorteio2a = ordemSorteio2a === 'original' ? 'crescente' : 'original';
+      renderBasicosTabela();
+    });
     document.getElementById('evStatBasicosFold')?.addEventListener('click', () => {
       const btn = document.getElementById('evStatBasicosFold');
       const box = document.getElementById('evStatBasicosTabelaBox');
@@ -1317,6 +1515,29 @@
       btn.setAttribute('aria-expanded', open ? 'false' : 'true');
       box.hidden = open;
       if (!open) setTimeout(scrollTabelaFoco, 0);
+    });
+    document.getElementById('evStat2a1Fold')?.addEventListener('click', () => {
+      const btn = document.getElementById('evStat2a1Fold');
+      const box = document.getElementById('evStat2a1TabelaBox');
+      if (!btn || !box) return;
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      box.hidden = open;
+    });
+    document.getElementById('evStat2a1Head')?.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.ev-2a1-sort');
+      if (!btn) return;
+      const key = btn.getAttribute('data-sort');
+      if (sort2a1.key === key) sort2a1.dir = sort2a1.dir === 'asc' ? 'desc' : 'asc';
+      else {
+        sort2a1.key = key;
+        sort2a1.dir = 'asc';
+      }
+      render2a1();
+    });
+    document.getElementById('evStat2a1Ordem')?.addEventListener('click', () => {
+      ordemSorteio2a1 = ordemSorteio2a1 === 'original' ? 'crescente' : 'original';
+      render2a1();
     });
 
     document.getElementById('ev-tab-estatisticas')?.addEventListener('shown.bs.tab', () => {

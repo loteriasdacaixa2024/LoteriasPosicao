@@ -46,15 +46,32 @@
     return nums.length ? nums.map((n) => `<span class="gec-ball comp">${pad(n)}</span>`).join('') : '—';
   }
 
+  const PAINEL = {
+    stats: ['gecStats', 'g2Stats'],
+    ciclo: ['gecCiclo', 'g2CicloPainel'],
+    diags: ['gecDiags', 'g2Diags'],
+    padroes: ['gecPadroes', 'g2Padroes'],
+  };
+
+  function escrever(ids, html) {
+    (ids || []).forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    });
+  }
+
   function bindUltimoOrdem() {
-    document.querySelectorAll('[data-gec-ult-ordem]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        ultimoOrdem = btn.getAttribute('data-gec-ult-ordem') || 'classificado';
-        document.querySelectorAll('[data-gec-ult-ordem]').forEach((b) => {
-          b.classList.toggle('active', b.getAttribute('data-gec-ult-ordem') === ultimoOrdem);
-        });
-        const box = document.getElementById('gecUltimoNums');
-        if (box) box.innerHTML = htmlUltimoBalls(lastUltimo);
+    if (root.dataset.ordemLigada === '1') return;
+    root.dataset.ordemLigada = '1';
+    root.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('[data-gec-ult-ordem]');
+      if (!btn) return;
+      ultimoOrdem = btn.getAttribute('data-gec-ult-ordem') || 'classificado';
+      root.querySelectorAll('[data-gec-ult-ordem]').forEach((b) => {
+        b.classList.toggle('active', b.getAttribute('data-gec-ult-ordem') === ultimoOrdem);
+      });
+      root.querySelectorAll('.gec-ultimo-nums').forEach((box) => {
+        box.innerHTML = htmlUltimoBalls(lastUltimo);
       });
     });
   }
@@ -65,7 +82,7 @@
     const pct = est.pct_com || {};
     const ult = est.ultimo || {};
     lastUltimo = ult;
-    document.getElementById('gecStats').innerHTML = `
+    escrever(PAINEL.stats, `
       <div class="d-flex flex-wrap gap-2 mb-2">
         <span class="gec-chip">Janela: <strong>${est.total_sorteios || '—'}</strong></span>
         <span class="gec-chip">Pares méd. <strong>${m.pares ?? '—'}</strong></span>
@@ -83,9 +100,9 @@
                   data-gec-ult-ordem="sorteio">Ordem de sorteio</button>
         </div>
       </div>
-      <div id="gecUltimoNums">${htmlUltimoBalls(ult)}</div>
+      <div class="gec-ultimo-nums">${htmlUltimoBalls(ult)}</div>
       <p class="small text-muted mb-0 mt-2">% com o grupo na janela — P ${pct.pares ?? '—'} · I ${pct.impares ?? '—'} · R ${pct.repetidos ?? '—'} · S ${pct.sequencias ?? '—'} · F ${pct.finais ?? '—'}</p>
-    `;
+    `);
     bindUltimoOrdem();
   }
 
@@ -94,15 +111,13 @@
     return `${sym} ${d.nums_fmt || (d.nums || []).map(pad).join('-')}`;
   }
 
-  function renderDiags(ctx, payload) {
-    const el = document.getElementById('gecDiags');
-    if (!el) return;
+  function renderDiags(ctx, payload, ids) {
     const info = (payload && payload.diagonais) || (ctx && ctx.diagonais) || {};
     const ultimo = info.ultimo || [];
     const pct = info.janela_pct;
     const com = info.janela_com_diagonal;
     const tot = info.janela_total;
-    el.innerHTML = `
+    escrever(ids || PAINEL.diags, `
       <p class="small mb-1">Último concurso ${info.ultimo_concurso || '—'}</p>
       <div class="mb-2">${ultimo.length
         ? ultimo.map((d) => `<span class="gec-chip gec-chip-diag">${fmtDiag(d)}</span>`).join(' ')
@@ -111,19 +126,17 @@
         Na janela: <strong>${com ?? '—'}</strong> de ${tot ?? '—'} com diagonal
         ${pct != null ? ` (${pct}%)` : ''}.
       </p>
-    `;
+    `);
   }
 
-  function renderPadroes(ctx, payload) {
-    const el = document.getElementById('gecPadroes');
-    if (!el) return;
+  function renderPadroes(ctx, payload, ids) {
     const info = (payload && payload.padroes) || (ctx && ctx.padroes) || {};
     const aba4 = info.fonte_aba4 || '/analise/analises-inteligentes/?aba=padroes-ii';
     const aba7 = info.fonte_aba7 || '/analise/analises-inteligentes/?aba=panorama';
     const falt = info.faltantes || [];
     const inedito = info.inedito || (payload && payload.padrao_inedito);
     const distintos = info.distintos;
-    el.innerHTML = `
+    escrever(ids || PAINEL.padroes, `
       <div class="d-flex flex-wrap gap-2 mb-2">
         <span class="gec-chip">85 padrões: <strong>${info.total ?? '—'}</strong></span>
         <span class="gec-chip">Já saíram <strong>${info.ja_sairam ?? '—'}</strong></span>
@@ -137,7 +150,7 @@
       </p>
       ${inedito ? `<p class="small mb-1"><span class="gec-chip gec-chip-inedito">Padrão inédito nesta geração: <strong>${inedito}</strong></span></p>` : ''}
         ${falt.length ? `<p class="small text-muted mb-0">Ainda não saíram (aba 6): ${falt.slice(0, 8).map((p) => p.padrao || p).join(' · ')}${falt.length > 8 ? ' …' : ''}</p>` : ''}
-    `;
+    `);
   }
 
   function bannerCiclo(info) {
@@ -178,7 +191,7 @@
     const pend = c.dezenas_pendentes || [];
     const saidas = c.dezenas_saidas || [];
     const info = (ctx && ctx.ciclo_panorama) || {};
-    document.getElementById('gecCiclo').innerHTML = `
+    escrever(PAINEL.ciclo, `
       ${bannerCiclo(info)}
       <p class="small mb-2">
         Ciclo <strong>${c.numero_ciclo ?? '—'}</strong>
@@ -192,7 +205,7 @@
       <div class="mb-2">${pend.length ? pend.map((n) => `<span class="gec-ball pend">${pad(n)}</span>`).join('') : '<span class="text-muted">Nenhuma</span>'}</div>
       <p class="small mb-1 text-muted">${saidas.length} já saíram no ciclo</p>
       <div>${saidas.slice(0, 16).map((n) => `<span class="gec-ball saida">${pad(n)}</span>`).join('')}${saidas.length > 16 ? ' <span class="small text-muted">…</span>' : ''}</div>
-    `;
+    `);
   }
 
   function renderApostas(payload) {
@@ -240,19 +253,26 @@
       return `<div class="gec-card${ap.ja_sorteada ? ' gec-ja-saiu' : ''}${ap.padrao_inedito ? ' gec-inedito' : ''}">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <strong>${String(i + 1).padStart(2, '0')}</strong>
-          ${EXTRA_MES ? `<span class="mes-badge${mesCls}">${ap.mes_abrev || ap.mes_nome || ''}</span>` : ''}
+          <span class="d-flex align-items-center gap-1">
+            ${EXTRA_MES ? `<span class="mes-badge${mesCls}">${ap.mes_abrev || ap.mes_nome || ''}</span>` : ''}
+            <button type="button" class="gec-fold-btn" data-fold aria-expanded="false" title="Mostrar detalhes">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </span>
         </div>
         <div class="mb-1">${balls(ap.dezenas, ap.obrigatorias)}</div>
-        <div class="d-flex flex-wrap gap-1">
-          ${padChip}
-          ${seqChip}
-          ${stChip}
-          <span class="gec-chip">${ap.pares}P/${ap.impares}I</span>
-          <span class="gec-chip">Σ ${ap.soma}</span>
-          <span class="gec-chip">Seq ${seq}</span>
-          <span class="gec-chip">Fin ${fin}</span>
-          ${diags}
-          ${ja}
+        <div class="gec-detalhe d-none">
+          <div class="d-flex flex-wrap gap-1">
+            ${padChip}
+            ${seqChip}
+            ${stChip}
+            <span class="gec-chip">${ap.pares}P/${ap.impares}I</span>
+            <span class="gec-chip">Σ ${ap.soma}</span>
+            <span class="gec-chip">Seq ${seq}</span>
+            <span class="gec-chip">Fin ${fin}</span>
+            ${diags}
+            ${ja}
+          </div>
         </div>
       </div>`;
     }).join('');
@@ -295,8 +315,8 @@
     } else {
       alertBox('success', `${msg} Nenhuma destas apostas saiu no histórico oficial.`);
     }
-    renderDiags(null, payload);
-    renderPadroes(null, payload);
+    renderDiags(null, payload, ['gecDiags']);
+    renderPadroes(null, payload, ['gecPadroes']);
     if (window.__renderPanoramaConjunto) {
       const ult = ((payload.estatisticas || {}).ultimo) || {};
       window.__renderPanoramaConjunto(apostas, {
@@ -316,10 +336,9 @@
       renderDiags(ctx);
       renderPadroes(ctx);
     } catch (err) {
-      document.getElementById('gecStats').innerHTML = `<div class="alert alert-danger py-2 small mb-0">${err.message}</div>`;
-      document.getElementById('gecCiclo').innerHTML = '';
-      const d = document.getElementById('gecDiags');
-      if (d) d.innerHTML = '';
+      escrever(PAINEL.stats, `<div class="alert alert-danger py-2 small mb-0">${err.message}</div>`);
+      escrever(PAINEL.ciclo, '');
+      escrever(PAINEL.diags, '');
     }
   }
 
@@ -448,6 +467,19 @@
   document.getElementById('gecBtnManual').addEventListener('click', () => enviarTubular(MANUAL_URL, false));
   document.getElementById('gecBtnVolantes').addEventListener('click', () => enviarTubular(VOLANTES_URL, true));
   document.getElementById('gecBtnJaSaiu').addEventListener('click', jaSaiu);
+  document.getElementById('gecResultados')?.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-fold]');
+    if (!btn) return;
+    const card = btn.closest('.gec-card');
+    const det = card && card.querySelector('.gec-detalhe');
+    if (!det) return;
+    const aberto = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', aberto ? 'false' : 'true');
+    btn.title = aberto ? 'Mostrar detalhes' : 'Ocultar detalhes';
+    det.classList.toggle('d-none', aberto);
+    const icon = btn.querySelector('i');
+    if (icon) icon.className = aberto ? 'fas fa-chevron-right' : 'fas fa-chevron-down';
+  });
 
   if (EXTRA_MES && window.MesSorteSelect) {
     MesSorteSelect.fillFromApi(document.getElementById('gecMes'), '/geradores-elite', { defaultPrefer: 'atrasado' }).catch(() => {});

@@ -2,7 +2,7 @@
 """Rotas — Gerador Elite Estatísticas e Ciclo."""
 from __future__ import annotations
 
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, redirect, render_template, request
 
 from .service import (
     contexto_estatisticas_ciclo,
@@ -31,8 +31,8 @@ def register_gerador_estatisticas_ciclo(bp: Blueprint, modality_key: str, modali
             "gerador_estatisticas_ciclo.html",
             modality_key=modality_key,
             modality_nome=modality_nome,
-            page_title="Estatísticas e Ciclo",
-            page_subtitle="Estatísticas Básicas · ciclo no fim · Panorama (padrão · sequência · soma)",
+            page_title="Gerador de Apostas — Estatísticas Básicas",
+            page_subtitle="Aba 2a com as regras atuais. Aba 2a1 lê o concurso anterior, o ciclo e o Panorama.",
             api_base="/geradores-elite/api/estatisticas-ciclo",
             ctx=ctx if ctx.get("sucesso") else {},
             meses_cores=meses_cores,
@@ -94,3 +94,53 @@ def register_gerador_estatisticas_ciclo(bp: Blueprint, modality_key: str, modali
             return jsonify({"sucesso": True, "txt": txt, "filename": "apostas_estatisticas_ciclo.txt"})
         except Exception as e:
             return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+
+def register_gerador_2a1(bp: Blueprint, modality_key: str, modality_nome: str) -> None:
+    """Mesma aba 2a1 nas modalidades que já têm Estatísticas e Ciclo."""
+    if not tem_gerador_estatisticas_ciclo(modality_key):
+        return
+
+    @bp.route("/estatisticas-2a1/")
+    def estatisticas_2a1_page():
+        return redirect("/geradores-elite/estatisticas-ciclo/?aba=2a1")
+
+    @bp.route("/api/estatisticas-2a1/contexto")
+    def api_estatisticas_2a1_contexto():
+        from .service_2a1 import contexto_2a1
+        out = contexto_2a1(modality_key)
+        return jsonify(out), (200 if out.get("sucesso") else 400)
+
+    @bp.route("/api/estatisticas-2a1/gerar", methods=["POST"])
+    def api_estatisticas_2a1_gerar():
+        from .service_2a1 import gerar_2a1
+        data = request.get_json(silent=True) or {}
+        try:
+            out = gerar_2a1(
+                modality_key,
+                quantidade=int(data.get("quantidade") or 10),
+                repetidos=str(data.get("repetidos") or "1-2"),
+                mes_valor=data.get("mes_num") if data.get("mes_num") not in (None, "", 0, "0") else None,
+            )
+        except Exception as e:
+            return jsonify({"sucesso": False, "erro": str(e)}), 500
+        return jsonify(out), (200 if out.get("sucesso") else 400)
+
+    @bp.route("/api/estatisticas-2a1/export-txt", methods=["POST"])
+    def api_estatisticas_2a1_export():
+        data = request.get_json(silent=True) or {}
+        apostas = data.get("apostas") or []
+        if not apostas:
+            return jsonify({"sucesso": False, "erro": "Nenhuma aposta para exportar."}), 400
+        linhas = []
+        for ap in apostas:
+            nums = ap.get("dezenas") or []
+            txt = " ".join(f"{int(n):02d}" for n in nums)
+            if ap.get("mes_abrev"):
+                txt += " " + str(ap.get("mes_abrev"))
+            linhas.append(txt)
+        return jsonify({
+            "sucesso": True,
+            "txt": "\n".join(linhas) + ("\n" if linhas else ""),
+            "filename": "apostas_2a1.txt",
+        })

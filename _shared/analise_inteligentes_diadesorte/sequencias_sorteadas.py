@@ -297,3 +297,101 @@ def montar_sequencias_sorteadas(svc, *, base: str = "geral") -> Dict[str, Any]:
     out["cache_hit"] = False
     out["elapsed_ms"] = int((time.perf_counter() - t0) * 1000)
     return out
+
+
+def _grupos_combos(
+    padrao: str,
+    *,
+    min_dezena: int,
+    max_dezena: int,
+) -> Optional[List[List[Tuple[int, ...]]]]:
+    digs = [int(x) for x in _norm_padrao(padrao).split() if x.strip().isdigit()]
+    if not digs:
+        return None
+    need = Counter(digs)
+    pools = pool_por_digito_universo(min_dezena, max_dezena)
+    for dig, qtd in need.items():
+        if len(pools.get(dig) or []) < qtd:
+            return None
+    return [list(combinations(pools[d], need[d])) for d in sorted(need.keys())]
+
+
+def _unrank_soma(
+    combos: Sequence[Sequence[Tuple[int, ...]]],
+    grupos: Sequence[Sequence[int]],
+    soma_alvo: int,
+    offset: int,
+    suffix: Sequence[Counter],
+) -> Optional[List[int]]:
+    """Combinação na posição `offset` (0-based) entre as apostas com esta soma."""
+    escolhidos: List[Tuple[int, ...]] = []
+    prefixo = 0
+    off = int(offset)
+    ultimo = len(grupos) - 1
+    for gi, grupo in enumerate(grupos):
+        found = False
+        for r, gs in enumerate(grupo):
+            parcial = prefixo + int(gs)
+            need = int(soma_alvo) - parcial
+            if gi == ultimo:
+                count = 1 if need == 0 else 0
+            else:
+                count = int(suffix[gi + 1].get(need) or 0)
+            if count <= 0:
+                continue
+            if off < count:
+                escolhidos.append(combos[gi][r])
+                prefixo = parcial
+                found = True
+                break
+            off -= count
+        if not found:
+            return None
+    return sorted(int(x) for part in escolhidos for x in part)
+
+
+def dezenas_na_sequencia(
+    padrao: str,
+    sequencia_n: int,
+    faixa: Optional[Dict[str, Any]],
+    *,
+    min_dezena: int = 1,
+    max_dezena: int = 31,
+) -> Optional[List[int]]:
+    """Inverso de mapa_sequencia_no_padrao: Nº da coluna Sequência → dezenas.
+
+    A posição usa a média atual do padrão. Não materializa o produto inteiro.
+    """
+    try:
+        n = int(sequencia_n)
+    except (TypeError, ValueError):
+        return None
+    if n < 1:
+        return None
+    combos = _grupos_combos(padrao, min_dezena=min_dezena, max_dezena=max_dezena)
+    if not combos:
+        return None
+    grupos = [[sum(c) for c in g] for g in combos]
+    suffix = _sufixos_por_soma(grupos)
+    hist = suffix[0]
+    media = None if not faixa else faixa.get("media")
+
+    def _ad(soma: int) -> int:
+        if media is None:
+            return 99999
+        return abs(int(soma) - int(media))
+
+    somas_ord = sorted(hist.keys(), key=lambda s: (_ad(int(s)), int(s)))
+    restante = n
+    soma_alvo: Optional[int] = None
+    offset: Optional[int] = None
+    for s in somas_ord:
+        qtd = int(hist[s])
+        if restante <= qtd:
+            soma_alvo = int(s)
+            offset = restante - 1
+            break
+        restante -= qtd
+    if soma_alvo is None or offset is None:
+        return None
+    return _unrank_soma(combos, grupos, soma_alvo, offset, suffix)

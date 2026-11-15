@@ -53,7 +53,16 @@ def _page_context(modality_key: str) -> dict:
         "dezena_max": ui["dezena_max"],
         "sorteadas": ui["sorteadas"],
         "extra_mes": bool(ui.get("extra_mes")),
+        "tem_gerador_2a1": _tem_gerador_2a1(modality_key),
     }
+
+
+def _tem_gerador_2a1(modality_key: str) -> bool:
+    try:
+        from geradores_elite.estatisticas_ciclo.service import tem_gerador_estatisticas_ciclo
+        return bool(tem_gerador_estatisticas_ciclo(modality_key))
+    except Exception:
+        return False
 
 
 def register_analise_escolha_visual(analise_bp: Blueprint, modality_key: str) -> None:

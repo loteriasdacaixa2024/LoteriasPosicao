@@ -1,7 +1,36 @@
 {# Panorama do conjunto gerado — tabela única após gerar apostas. #}
 <style>
 .pan-conj-table { font-size: .8rem; }
-.pan-conj-table th { white-space: nowrap; }
+.pan-conj-table thead th {
+    background: var(--primary, #c08b00) !important;
+    color: #fff !important;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+.pan-conj-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: .2rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.pan-conj-sort:hover { filter: brightness(1.12); }
+.pan-conj-ind { font-size: .62rem; opacity: .55; }
+.pan-conj-sort.is-asc .pan-conj-ind,
+.pan-conj-sort.is-desc .pan-conj-ind { opacity: 1; }
+.pan-conj-pad-extra {
+    margin-top: .15rem;
+    font-size: .68rem;
+    line-height: 1.25;
+    color: #5c4a08;
+    white-space: nowrap;
+}
 .pan-conj-ok { color: #198754; font-weight: 700; }
 .pan-conj-at { color: #b8860b; font-weight: 700; }
 .pan-conj-pad-link {
@@ -43,7 +72,7 @@
         <p class="small text-muted mb-2" id="panoramaConjuntoLegenda" data-pan="legenda">—</p>
         <div class="table-responsive">
             <table class="table table-sm table-bordered mb-2 pan-conj-table" id="tblPanoramaConjunto">
-                <thead class="table-light" id="theadPanoramaConjunto" data-pan="thead"></thead>
+                <thead id="theadPanoramaConjunto" data-pan="thead"></thead>
                 <tbody id="tbodyPanoramaConjunto" data-pan="tbody"></tbody>
             </table>
         </div>
@@ -123,6 +152,10 @@
             padrao: (a && typeof a === 'object')
                 ? String(a.padrao_gaps || (Array.isArray(a.ciclos) ? a.ciclos.join(' ') : '') || '')
                 : '',
+            n_padrao: (a && typeof a === 'object') ? a.n_padrao : null,
+            sequencia_n: (a && typeof a === 'object') ? a.sequencia_n : null,
+            sequencia_proxima: !!(a && a.sequencia_proxima),
+            semente: (a && typeof a === 'object' && a.semente) ? a.semente : null,
         })).filter((a) => a.dezenas.length);
         if (!lista.length) {
             box.classList.add('d-none');
@@ -149,22 +182,24 @@
         const rodape = box.querySelector('[data-pan="rodape"]');
         const semCor = !!c.semCor;
         const linhaSorteio = !!c.linhaSorteio;
+        const th = (rotulo, chave) =>
+            `<th><button type="button" class="pan-conj-sort" data-pan-sort="${chave}">${rotulo} <span class="pan-conj-ind">↕</span></button></th>`;
         if (thead) {
             thead.innerHTML = linhaSorteio
                 ? `<tr>
-                    <th>Data</th><th>Mês</th><th>Soma</th><th>P/I</th><th>Seq</th>
-                    <th>Rep. ${nUlt}</th><th>Finais</th><th>Dígitos</th>
-                    ${showDiag ? '<th>Diagonal</th>' : ''}
-                    ${showPadrao ? '<th>Padrão</th>' : ''}
+                    ${th('Data', 'data')}${th('Mês', 'mes')}${th('Soma', 'soma')}${th('P/I', 'pi')}${th('Seq', 'seq')}
+                    ${th('Rep. ' + nUlt, 'rep')}${th('Finais', 'finais')}${th('Dígitos', 'digitos')}
+                    ${showDiag ? th('Diagonal', 'diagonal') : ''}
+                    ${showPadrao ? th('Padrão', 'padrao') : ''}
                 </tr>`
                 : `<tr>
-                    <th>#</th>
-                    ${showGaps ? '<th>Gaps</th>' : ''}
-                    ${showRegua ? '<th>Régua</th>' : ''}
-                    <th>Aposta</th><th>Soma</th><th>P/I</th><th>Seq</th>
-                    <th>Rep. ${nUlt}</th><th>Finais</th><th>Dígitos</th>
-                    ${showDiag ? '<th>Diagonal</th>' : ''}
-                    ${showPadrao ? '<th>Padrão</th>' : ''}
+                    ${th('#', 'num')}
+                    ${showGaps ? th('Gaps', 'gaps') : ''}
+                    ${showRegua ? th('Régua', 'regua') : ''}
+                    ${th('Aposta', 'aposta')}${th('Soma', 'soma')}${th('P/I', 'pi')}${th('Seq', 'seq')}
+                    ${th('Rep. ' + nUlt, 'rep')}${th('Finais', 'finais')}${th('Dígitos', 'digitos')}
+                    ${showDiag ? th('Diagonal', 'diagonal') : ''}
+                    ${showPadrao ? th('Padrão', 'padrao') : ''}
                 </tr>`;
         }
         const freq = {};
@@ -202,7 +237,7 @@
                 ? junta(diags.map((d) => marca(d.dir_sym, d.nums_fmt)))
                 : 'nenhuma';
             const colDiag = showDiag
-                ? `<td class="${semCor || !ehDs ? '' : (diags.length ? 'pan-conj-ok' : 'pan-conj-at')}">${diagTxt}</td>`
+                ? `<td class="${semCor || !ehDs ? '' : (diags.length ? 'pan-conj-ok' : 'pan-conj-at')}" data-pan-col="diagonal" data-pan-val="${diags.length}">${diagTxt}</td>`
                 : '';
             const padrao = showPadrao ? padraoInicial(dz) : '';
             const padUrl = padrao
@@ -211,7 +246,9 @@
             const digSet = new Set();
             dz.forEach((n) => String(pad(n)).split('').forEach((ch) => digSet.add(ch)));
             const nDig = digSet.size;
-            const digOk = hist.digitos == null || nDig === Number(hist.digitos);
+            const digOk = hist.digitos != null
+                ? nDig === Number(hist.digitos)
+                : (dz.length === 7 ? nDig === 7 : true);
             const paresOk = hist.pares == null || pares === Number(hist.pares);
             const faixa = hist.soma_faixa;
             const tamOficial = c.sorteadas != null ? Number(c.sorteadas) : null;
@@ -236,28 +273,37 @@
             const apostaEdit = linhaSorteio
                 ? ''
                 : `<input class="pan-conj-edit" data-pan-i="${i}" value="${dz.map(pad).join(' ')}" inputmode="numeric" autocomplete="off" aria-label="Aposta ${a.numero || (i + 1)}" title="Edite as dezenas de ${pad(dmin)} a ${pad(dmax)}. Soma, repetidas, finais, diagonal e padrão acompanham.">`;
+            const nPad = a.n_padrao != null && a.n_padrao !== '' ? a.n_padrao : null;
+            const seqGerada = a.sequencia_n != null && a.sequencia_n !== ''
+                ? a.sequencia_n
+                : ((a.semente || {}).sequencia_n != null ? a.semente.sequencia_n : null);
+            const seqProxima = !!a.sequencia_proxima || (a.sequencia_n == null && seqGerada != null);
+            const padExtra = `<div class="pan-conj-pad-extra">Nº ${nPad != null ? nPad : '—'} · Sequência ${seqGerada != null ? seqGerada : '—'}${seqProxima ? ' · próxima' : ''}</div>`;
+            const cel = (chave, valor, classe, html, title) =>
+                `<td class="${classe || ''}" data-pan-col="${chave}" data-pan-val="${String(valor == null ? '' : valor).replace(/"/g, '')}"${title ? ` title="${title}"` : ''}>${html}</td>`;
             const inicio = linhaSorteio
-                ? `<td>${c.data || '—'}</td><td>${mesHtml}</td>`
-                : `<td>${a.numero || (i + 1)}</td>${colGaps}${colRegua}<td>${apostaEdit}</td>`;
+                ? `${cel('data', c.data || '', '', c.data || '—')}${cel('mes', c.mes || '', '', mesHtml)}`
+                : `${cel('num', a.numero || (i + 1), '', a.numero || (i + 1))}${colGaps}${colRegua}${cel('aposta', dz[0] || 0, '', apostaEdit)}`;
             return `<tr>
                 ${inicio}
-                <td class="${semCor || !ehDs ? '' : (somaOk ? 'pan-conj-ok' : 'pan-conj-at')}">${soma}</td>
-                <td class="${semCor ? '' : (paresOk ? 'pan-conj-ok' : 'pan-conj-at')}">${pares}P / ${dz.length - pares}I</td>
-                <td class="${semCor ? '' : (seqAt ? 'pan-conj-at' : (seqOk ? 'pan-conj-ok' : ''))}"${seqTitle ? ` title="${seqTitle}"` : ''}>${seqTxt}</td>
-                <td class="${semCor ? '' : (repOk ? 'pan-conj-ok' : 'pan-conj-at')}">${reps.length ? marca(reps.length, reps.map(pad).join(', ')) : '0'}</td>
-                <td class="${semCor ? '' : (finOk ? 'pan-conj-ok' : 'pan-conj-at')}">${finTxt}</td>
-                <td class="${semCor ? '' : (digOk ? 'pan-conj-ok' : 'pan-conj-at')}">${nDig}</td>
+                ${cel('soma', soma, semCor || !ehDs ? '' : (somaOk ? 'pan-conj-ok' : 'pan-conj-at'), soma)}
+                ${cel('pi', pares, semCor ? '' : (paresOk ? 'pan-conj-ok' : 'pan-conj-at'), `${pares}P / ${dz.length - pares}I`)}
+                ${cel('seq', seqs.length, semCor ? '' : (seqAt ? 'pan-conj-at' : (seqOk ? 'pan-conj-ok' : '')), seqTxt, seqTitle)}
+                ${cel('rep', reps.length, semCor ? '' : (repOk ? 'pan-conj-ok' : 'pan-conj-at'), reps.length ? marca(reps.length, reps.map(pad).join(', ')) : '0')}
+                ${cel('finais', finGrupos.length, semCor ? '' : (finOk ? 'pan-conj-ok' : 'pan-conj-at'), finTxt)}
+                ${cel('digitos', nDig, semCor ? '' : (digOk ? 'pan-conj-ok' : 'pan-conj-at'), nDig)}
                 ${colDiag}
-                ${showPadrao ? `<td><a class="pan-conj-pad-link" href="${padUrl}" target="_blank" rel="noopener" title="Abrir na aba 4 · Padrões II">Padrão ${padrao}</a></td>` : ''}
+                ${showPadrao ? cel('padrao', nPad != null ? nPad : padrao, '', `<a class="pan-conj-pad-link" href="${padUrl}" target="_blank" rel="noopener" title="Abrir na aba 4 · Padrões II">Padrão ${padrao}</a>${padExtra}`) : ''}
             </tr>`;
         }).join('');
         if (tbody) {
             tbody.innerHTML = rows;
             if (!linhaSorteio) {
-                window.__panConjEstado = { lista, cfg: c };
+                box.__panConjEstado = { lista, cfg: c };
+                window.__panConjEstado = box.__panConjEstado;
                 tbody.querySelectorAll('.pan-conj-edit').forEach((inp) => {
                     inp.addEventListener('change', () => {
-                        const estado = window.__panConjEstado;
+                        const estado = box.__panConjEstado;
                         if (!estado || !estado.lista) return;
                         const idx = Number(inp.dataset.panI);
                         const item = estado.lista[idx];
@@ -315,5 +361,41 @@
         }
         box.classList.remove('d-none');
     };
+    if (!window.__panConjSortLigado) {
+        window.__panConjSortLigado = true;
+        document.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('[data-pan-sort]');
+            if (!btn) return;
+            const table = btn.closest('table');
+            const tbody = table && table.querySelector('[data-pan="tbody"]');
+            if (!tbody) return;
+            const chave = btn.getAttribute('data-pan-sort');
+            const dir = table.dataset.sortKey === chave && table.dataset.sortDir !== 'desc' ? 'desc' : 'asc';
+            table.dataset.sortKey = chave;
+            table.dataset.sortDir = dir;
+            const linhas = Array.from(tbody.querySelectorAll('tr'));
+            linhas.sort((a, b) => {
+                const ea = a.querySelector(`[data-pan-col="${chave}"]`);
+                const eb = b.querySelector(`[data-pan-col="${chave}"]`);
+                const sa = ea ? (ea.getAttribute('data-pan-val') || '') : '';
+                const sb = eb ? (eb.getAttribute('data-pan-val') || '') : '';
+                const na = parseFloat(sa);
+                const nb = parseFloat(sb);
+                const cmp = sa !== '' && sb !== '' && !Number.isNaN(na) && !Number.isNaN(nb)
+                    ? na - nb
+                    : String(sa).localeCompare(String(sb), 'pt');
+                return dir === 'asc' ? cmp : -cmp;
+            });
+            linhas.forEach((tr) => tbody.appendChild(tr));
+            table.querySelectorAll('[data-pan-sort]').forEach((b) => {
+                b.classList.remove('is-asc', 'is-desc');
+                const ind = b.querySelector('.pan-conj-ind');
+                if (ind) ind.textContent = '↕';
+            });
+            btn.classList.add(dir === 'asc' ? 'is-asc' : 'is-desc');
+            const ind = btn.querySelector('.pan-conj-ind');
+            if (ind) ind.textContent = dir === 'asc' ? '↑' : '↓';
+        });
+    }
 })();
 </script>

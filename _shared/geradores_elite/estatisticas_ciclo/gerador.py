@@ -503,6 +503,99 @@ def expandir_aposta(
     return chosen
 
 
+def _contar_digitos(nums: Sequence[int]) -> int:
+    """Dígitos distintos usados nas dezenas, no mesmo critério da tabela."""
+    chars: Set[str] = set()
+    for n in nums:
+        chars.update(f"{int(n):02d}")
+    return len(chars)
+
+
+def _polir_comportamento(
+    jogo: Sequence[int],
+    *,
+    ultimo: Sequence[int],
+    travadas: Sequence[int],
+    dmin: int,
+    dmax: int,
+    querer_digitos: int = 7,
+) -> List[int]:
+    """Aproxima a aposta do que os sorteios reais fazem.
+
+    Mantém as dezenas travadas (pendentes do ciclo). Quando sobra casa,
+    garante repetir o último sorteio, ter ao menos uma diagonal e, se
+    couber, caminhar para a quantidade de dígitos que mais sai.
+    """
+    atual = sorted({int(x) for x in jogo})
+    trav = {int(x) for x in travadas}
+    ult_set = {int(x) for x in ultimo if int(dmin) <= int(x) <= int(dmax)}
+
+    def trocar(base: Sequence[int], sai: int, entra: int) -> List[int]:
+        return sorted([n for n in base if n != sai] + [int(entra)])
+
+    def livres(base: Sequence[int], *, proteger_repetida: bool) -> List[int]:
+        out = []
+        reps = [n for n in base if n in ult_set]
+        for n in base:
+            if n in trav:
+                continue
+            if proteger_repetida and n in ult_set and len(reps) <= 1:
+                continue
+            out.append(n)
+        return out
+
+    if ult_set and not any(n in ult_set for n in atual):
+        for entra in sorted(ult_set):
+            if entra in atual:
+                continue
+            saidas = [n for n in livres(atual, proteger_repetida=False) if n // 10 == entra // 10]
+            if not saidas:
+                saidas = livres(atual, proteger_repetida=False)
+            if not saidas:
+                break
+            atual = trocar(atual, saidas[0], entra)
+            break
+
+    if not _diagonais_da_aposta(atual, dmin, dmax):
+        universo = [n for n in range(int(dmin), int(dmax) + 1) if n not in atual]
+        achou: Optional[List[int]] = None
+        for sai in livres(atual, proteger_repetida=True):
+            for entra in [n for n in universo if n // 10 == sai // 10][:16]:
+                trial = trocar(atual, sai, entra)
+                if not _diagonais_da_aposta(trial, dmin, dmax):
+                    continue
+                if ult_set and not any(n in ult_set for n in trial):
+                    continue
+                achou = trial
+                break
+            if achou:
+                break
+        if achou:
+            atual = achou
+
+    alvo_dig = int(querer_digitos or 0)
+    if alvo_dig and _contar_digitos(atual) != alvo_dig:
+        universo = [n for n in range(int(dmin), int(dmax) + 1) if n not in atual]
+        melhor = atual
+        melhor_dist = abs(_contar_digitos(atual) - alvo_dig)
+        for sai in livres(atual, proteger_repetida=True)[:8]:
+            for entra in [n for n in universo if n // 10 == sai // 10][:10]:
+                trial = trocar(atual, sai, entra)
+                if ult_set and not any(n in ult_set for n in trial):
+                    continue
+                if not _diagonais_da_aposta(trial, dmin, dmax):
+                    continue
+                dist = abs(_contar_digitos(trial) - alvo_dig)
+                if dist < melhor_dist:
+                    melhor, melhor_dist = trial, dist
+                    if dist == 0:
+                        break
+            if melhor_dist == 0:
+                break
+        atual = melhor
+    return atual
+
+
 def _finais(nums: Sequence[int]) -> List[List[int]]:
     by: Dict[int, List[int]] = defaultdict(list)
     for n in nums:
@@ -640,7 +733,7 @@ def _score_jogo(
     if alvo["rep_min"] <= len(reps) <= alvo["rep_max"]:
         pts += 5
     elif len(reps) == 0:
-        pts += 1
+        pts -= 8
     if sg:
         maior = max(len(g) for g in sg)
         # 5 seguidas: 5 em 1.328 concursos. 4 seguidas: 32. Par e trinca seguem válidos.
@@ -933,7 +1026,6 @@ def gerar_apostas_de_contexto(
                     key = tuple(jogo)
                     pad_real = _padrao_de(jogo)
                     break
-        vistos_final.add(key)
         info_cat = next(
             (p for p in catalogo if _norm_padrao(p.get("padrao") or "") == pad_real),
             {},
@@ -942,6 +1034,24 @@ def gerar_apostas_de_contexto(
         inedito = freq_real <= 0 or str(info_cat.get("status") or "") == "faltante"
         if i < len(metas_usadas) and metas_usadas[i].get("inedito"):
             inedito = True
+        travadas = [n for n in jogo if n in pends]
+        polido = _polir_comportamento(
+            jogo, ultimo=ultimo_nums, travadas=travadas,
+            dmin=dmin, dmax=dmax, querer_digitos=7,
+        )
+        if (
+            polido
+            and len(polido) == len(jogo)
+            and _padrao_de(polido) == pad_real
+            and set(travadas).issubset(set(polido))
+            and (not ultimo_set or any(n in ultimo_set for n in polido) or not [n for n in jogo if n not in pends])
+            and _diagonais_da_aposta(polido, dmin, dmax)
+            and frozenset(polido) not in hist
+        ):
+            jogo = polido
+            key = tuple(jogo)
+            pad_real = _padrao_de(jogo)
+        vistos_final.add(key)
         obr = sorted(n for n in jogo if n in pends)
         union_pend.update(obr)
         det = conjuntos_concurso(jogo, ultimo_nums or None)
@@ -1001,6 +1111,36 @@ def gerar_apostas_de_contexto(
                 union_pend = set()
                 for a in apostas_out:
                     union_pend.update(a["obrigatorias"])
+
+    freq_map: Dict[str, int] = {}
+    for p in catalogo:
+        pad = _norm_padrao(p.get("padrao") or "")
+        if pad:
+            freq_map[pad] = max(freq_map.get(pad, 0), int(p.get("frequencia") or 0))
+    n_map = {p: i + 1 for i, p in enumerate(sorted(freq_map, key=lambda x: (-freq_map[x], x)))}
+    try:
+        from analise_inteligentes_diadesorte.sequencias_sorteadas import mapa_sequencia_no_padrao
+    except Exception:
+        mapa_sequencia_no_padrao = None
+    por_pad: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for ap in apostas_out:
+        ap["n_padrao"] = n_map.get(str(ap.get("padrao_inicial") or ""))
+        por_pad[str(ap.get("padrao_inicial") or "")].append(ap)
+    if mapa_sequencia_no_padrao:
+        for pad, grupo in por_pad.items():
+            if not pad:
+                continue
+            try:
+                mapa_seq = mapa_sequencia_no_padrao(
+                    pad, [g["dezenas"] for g in grupo], None,
+                    min_dezena=dmin, max_dezena=dmax,
+                )
+            except Exception:
+                mapa_seq = {}
+            for ap in grupo:
+                nseq = mapa_seq.get(tuple(sorted(int(x) for x in ap["dezenas"])))
+                if nseq:
+                    ap["sequencia_n"] = int(nseq)
 
     cobertos = sorted(union_pend)
     faltou = [n for n in pends if n not in union_pend]

@@ -27,8 +27,9 @@ from .gerador import (
     _norm_padrao,
     _perfil_alvo,
     _resumo_diagonais_janela,
+    _contar_digitos,
+    _polir_comportamento,
     expandir_aposta,
-    substituir_bloqueadas,
 )
 
 # Poucas pendentes = ciclo no fim. 0 = fechado (próximo sorteio reabre).
@@ -60,6 +61,54 @@ def _dezenas_da_linha(row: Dict[str, Any]) -> Tuple[int, ...]:
     fmt = str(row.get("dezenas_fmt") or "").replace("-", " ")
     nums = [int(x) for x in fmt.split() if x.isdigit()]
     return tuple(sorted(nums)) if nums else ()
+
+
+def _preencher_sequencia(
+    apostas: List[Dict[str, Any]],
+    faixas: Dict[str, Any],
+    dmin: int,
+    dmax: int,
+) -> None:
+    """Nº da sequência desta aposta no padrão, o mesmo da coluna Sequência."""
+    try:
+        from analise_inteligentes_diadesorte.sequencias_sorteadas import mapa_sequencia_no_padrao
+    except Exception:
+        return
+    grupos: Dict[str, List[Dict[str, Any]]] = {}
+    for ap in apostas:
+        grupos.setdefault(str(ap.get("padrao_inicial") or ""), []).append(ap)
+    for pad, grupo in grupos.items():
+        if not pad:
+            continue
+        try:
+            mapa = mapa_sequencia_no_padrao(
+                pad,
+                [g.get("dezenas") or [] for g in grupo],
+                faixas.get(pad),
+                min_dezena=dmin,
+                max_dezena=dmax,
+            )
+        except Exception:
+            mapa = {}
+        for ap in grupo:
+            chave = tuple(sorted(int(x) for x in (ap.get("dezenas") or [])))
+            n = mapa.get(chave)
+            if n:
+                ap["sequencia_n"] = int(n)
+                ap["sequencia_proxima"] = False
+            else:
+                semente = (ap.get("semente") or {}).get("sequencia_n")
+                if semente:
+                    ap["sequencia_n"] = semente
+                    ap["sequencia_proxima"] = True
+
+
+def _padrao_aceita_todas(padrao: str, pendentes: Sequence[int]) -> bool:
+    """O padrão tem casa na dezena de cada pendente."""
+    digs = [int(x) for x in str(_norm_padrao(padrao)).split() if str(x).isdigit()]
+    need = Counter(digs)
+    precisa = Counter(int(n) // 10 for n in pendentes)
+    return all(need.get(decada, 0) >= qtd for decada, qtd in precisa.items())
 
 
 def _pendentes_compativeis(
@@ -224,6 +273,15 @@ def gerar_apostas_panorama(
     if not linhas:
         return {"sucesso": False, "erro": "Sem sequências sorteadas para semear o Panorama."}
 
+    exigir_cada = 0 < len(pends) < k
+    linhas_seed = linhas
+    if exigir_cada:
+        compativeis = [
+            row for row in linhas
+            if _padrao_aceita_todas(row.get("padrao") or "", pends)
+        ]
+        if compativeis:
+            linhas_seed = compativeis
     faixas = _faixas_por_padrao(linhas)
     ja_saiu: Set[Tuple[int, ...]] = set()
     for row in linhas:
@@ -237,10 +295,11 @@ def gerar_apostas_panorama(
             continue
 
     sementes = (
-        _sementes_ponderadas(linhas, qtd, rng)
+        _sementes_ponderadas(linhas_seed, max(qtd * 4, qtd), rng)
         if ponderar
-        else _sementes_distintas(linhas, qtd, rng)
+        else _sementes_distintas(linhas_seed, max(qtd * 4, qtd), rng)
     )
+    meta_digitos = (qtd // 2) + 1
     usados: Set[Tuple[int, ...]] = set()
     apostas_out: List[Dict[str, Any]] = []
 
@@ -251,7 +310,11 @@ def gerar_apostas_panorama(
         faixa = faixas.get(pad)
         status_alvo = str(seed_row.get("status_media") or "dentro")
         locked: List[int] = []
-        if ciclo_ligado:
+        if exigir_cada:
+            if not _padrao_aceita_todas(pad, pends):
+                continue
+            locked = list(pends)
+        elif ciclo_ligado:
             locked = _pendentes_compativeis(pends, pad, k=k, rng=rng)
         jogo: List[int] = []
         melhor: List[int] = []
@@ -265,14 +328,14 @@ def gerar_apostas_panorama(
                 k=k,
                 dmin=dmin,
                 dmax=dmax,
-                pendentes=pends if ciclo_ligado else [],
+                pendentes=pends if (ciclo_ligado or exigir_cada) else [],
                 ultimo_set=ultimo_set,
                 alvo=alvo,
                 atrasos=atrasos,
                 freq20=freq20,
                 persistentes=persistentes,
                 rng=rng,
-                max_pendentes=len(locked) if ciclo_ligado else 0,
+                max_pendentes=len(locked) if (ciclo_ligado or exigir_cada) else 0,
                 proibidos=usados,
             )
             if not cand:
@@ -305,8 +368,17 @@ def gerar_apostas_panorama(
         if not jogo:
             continue
         nucleo = list(jogo)
-        if descartar_ja_sorteadas:
-            jogo = substituir_bloqueadas(jogo, ultimo_nums, dmin, dmax)
+        com_sete = sum(1 for a in apostas_out if int(a.get("n_digitos") or 0) == 7)
+        querer_7 = 7 if com_sete < meta_digitos else 0
+        travadas = sorted(set(locked) | {n for n in jogo if n in set(pends)})
+        jogo = _polir_comportamento(
+            jogo,
+            ultimo=ultimo_nums,
+            travadas=travadas,
+            dmin=dmin,
+            dmax=dmax,
+            querer_digitos=querer_7 or 7,
+        )
         if len(jogo) < k_saida_n:
             jogo = expandir_aposta(
                 jogo, k_saida_n, dmin, dmax,
@@ -315,8 +387,18 @@ def gerar_apostas_panorama(
             )
         if len(jogo) != k_saida_n:
             continue
+        if exigir_cada and not set(pends).issubset(set(jogo)):
+            continue
+        if not any(n in ultimo_set for n in jogo):
+            continue
+        if not _diagonais_da_aposta(jogo, dmin, dmax):
+            continue
+        if querer_7 and _contar_digitos(jogo) != 7:
+            continue
         chave = tuple(jogo)
         if chave in usados:
+            continue
+        if descartar_ja_sorteadas and (chave in ja_saiu or (hist and frozenset(jogo) in hist)):
             continue
         usados.add(chave)
         det = conjuntos_concurso(jogo, ultimo_nums or None)
@@ -328,8 +410,8 @@ def gerar_apostas_panorama(
         pad_real = _norm_padrao(" ".join(str(n // 10) for n in jogo))
         apostas_out.append({
             "dezenas": list(jogo),
-            "obrigatorias": sorted(n for n in jogo if n in set(pends)) if ciclo_ligado else [],
-            "complemento": sorted(n for n in jogo if n not in set(pends)) if ciclo_ligado else list(jogo),
+            "obrigatorias": sorted(n for n in jogo if n in set(pends)),
+            "complemento": sorted(n for n in jogo if n not in set(pends)),
             "pares": det["basicos"]["pares"]["quantidade"],
             "impares": det["basicos"]["impares"]["quantidade"],
             "repetidos": det["basicos"]["repetidos"]["dezenas"],
@@ -338,6 +420,9 @@ def gerar_apostas_panorama(
             "soma": det["soma"],
             "diagonais": _diagonais_da_aposta(jogo, dmin, dmax),
             "padrao_inicial": pad_real,
+            "n_padrao": seed_row.get("n_padrao"),
+            "jogos_possiveis": seed_row.get("jogos_possiveis"),
+            "n_digitos": _contar_digitos(jogo),
             "padrao_inedito": False,
             "padrao_freq": int(seed_row.get("frequencia") or 0),
             "padrao_descricao": seed_row.get("descricao") or "",
@@ -353,6 +438,11 @@ def gerar_apostas_panorama(
             "status_media_label": cls.get("status_media_label"),
             "soma_media": (faixa or {}).get("media"),
         })
+        if len(apostas_out) >= qtd:
+            break
+
+    _preencher_sequencia(apostas_out, faixas, dmin, dmax)
+    apostas_out = apostas_out[:qtd]
 
     union_pend: Set[int] = set()
     for a in apostas_out:

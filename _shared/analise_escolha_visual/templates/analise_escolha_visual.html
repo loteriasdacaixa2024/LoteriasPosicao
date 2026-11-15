@@ -21,7 +21,7 @@
   body.is-embed #evStatContent > section:nth-child(n+3) { display: none !important; }
 </style>
 {% endif %}
-<link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css?v=stat2l">
+<link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css?v=stat2a1c">
 <div class="container-fluid py-3" id="ev-root"
      data-api="{{ api_base }}"
      data-modality-nome="{{ modality_nome }}"
@@ -270,6 +270,10 @@
                                 <span class="ev-stat-fold-n" id="evStatBasicosN"></span>
                             </button>
                             <div class="ev-xls-side">
+                                <button type="button" class="btn btn-sm ev-xls-btn" id="evStat2aOrdem"
+                                        title="Alterna a coluna Sorteio entre a ordem do sorteio e a ordem crescente">
+                                    Ordem do sorteio
+                                </button>
                                 <button type="button" class="btn btn-sm ev-xls-btn" id="evStatBasicosXls" disabled
                                         title="Baixar a tabela em Excel (.xlsx), com as colunas formatadas">
                                     <i class="fas fa-file-excel" aria-hidden="true"></i> Baixar Excel
@@ -296,6 +300,51 @@
                                         </tr>
                                     </thead>
                                     <tbody id="evStatBasicosTabela"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ev-stat-2a ev-stat-2a1 mt-3">
+                        <div class="ev-stat-2a-head">
+                            <button type="button" class="ev-stat-fold-btn" id="evStat2a1Fold"
+                                    aria-expanded="false" aria-controls="evStat2a1TabelaBox">
+                                <i class="fas fa-chevron-right ev-stat-fold-ico" aria-hidden="true"></i>
+                                <span>2a1. Estatísticas Básicas</span>
+                                <span class="ev-stat-fold-n" id="evStat2a1N"></span>
+                            </button>
+                            <div class="ev-xls-side">
+                                <button type="button" class="btn btn-sm ev-xls-btn" id="evStat2a1Ordem"
+                                        title="Alterna a coluna Sorteio entre a ordem do sorteio e a ordem crescente">
+                                    Ordem do sorteio
+                                </button>
+                                {% if tem_gerador_2a1 %}
+                                <a class="small" href="/geradores-elite/estatisticas-ciclo/?aba=2a1">Abrir gerador 2a1</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div id="evStat2a1TabelaBox" class="ev-stat-fold-body" hidden>
+                            <p class="small text-muted mb-2">
+                                Cada linha usa só o concurso imediatamente anterior.
+                                Pares e ímpares são os que não saíram nele e também não saíram neste concurso — os que a 2a já mostra ficam de fora.
+                                Repetidos seguem a 2a: o gerador não usa esses números.
+                                Sequências, finais e diagonais são as combinações daquele concurso anterior, que o gerador não copia.
+                            </p>
+                            <div class="table-responsive ev-basic-table-wrap">
+                                <table class="table table-sm table-bordered ev-basic-table mb-0">
+                                    <thead id="evStat2a1Head">
+                                        <tr>
+                                            <th><button type="button" class="ev-2a1-sort" data-sort="concurso">Conc. <span class="ev-2a1-ind">↕</span></button></th>
+                                            <th><button type="button" class="ev-2a1-sort" data-sort="data">Data <span class="ev-2a1-ind">↕</span></button></th>
+                                            <th><button type="button" class="ev-2a1-sort" data-sort="sorteio">Sorteio <span class="ev-2a1-ind">↕</span></button></th>
+                                            <th><button type="button" class="ev-2a1-sort" data-sort="pares">Pares <span class="ev-2a1-ind">↕</span></button></th>
+                                            <th><button type="button" class="ev-2a1-sort" data-sort="impares">Ímpares <span class="ev-2a1-ind">↕</span></button></th>
+                                            <th><button type="button" class="ev-2a1-sort" data-sort="repetidos">Repetidos <span class="ev-2a1-ind">↕</span></button></th>
+                                            <th><button type="button" class="ev-2a1-sort" data-sort="sequencias">Sequências <span class="ev-2a1-ind">↕</span></button></th>
+                                            <th><button type="button" class="ev-2a1-sort" data-sort="finais">Finais Iguais <span class="ev-2a1-ind">↕</span></button></th>
+                                            <th><button type="button" class="ev-2a1-sort" data-sort="diagonais">Diagonais <span class="ev-2a1-ind">↕</span></button></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="evStat2a1Tabela"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -466,7 +515,7 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visual.js"></script>
-<script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=stat2n"></script>
+<script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=stat2a1c"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visualizacao.js?v=tub1"></script>
 <script src="/analise/api/inteligentes/assets/tubular.js?v=20261025v1"></script>
 {% endblock %}

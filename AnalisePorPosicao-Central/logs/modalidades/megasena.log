@@ -19248,3 +19248,432 @@ Press CTRL+C to quit
 127.0.0.1 - - [14/Nov/2026 05:14:53] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
 127.0.0.1 - - [14/Nov/2026 05:14:55] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
 127.0.0.1 - - [14/Nov/2026 05:16:45] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 06:45:59 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 06:46:24] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 06:51:16 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 06:51:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 06:51:30] "GET /geradores-elite/gerador-elite/?n=6&digitos=2,3,4,5,7,8&concurso=3061 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 06:51:41] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 06:53:33] "GET /geradores-elite/gerador-elite/?n=9&digitos=0,1,2,3,4,5,6,7,9&concurso=3070 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 06:55:38] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5&concurso=3036 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 06:55:51] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 06:57:42] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,4,5,6,7&concurso=3027 HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 07:08:56 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 07:09:06] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 07:11:58] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 07:22:24 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 07:22:35] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 07:36:18 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 07:36:31] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 07:58:58] "GET /analise/resultados/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 07:59:17] "GET /analise/api/resultados-sorteio/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 08:13:30] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%204%204%204%204 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 08:17:19] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%202%203%204%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 08:43:56] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%202%203%203%203%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:09:08] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%201%203%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:11:48] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:12:11] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:42:29] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,7,9&concurso=3085 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:42:32] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:43:44] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,5,7,9&concurso=3085 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:45:52] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%202%203%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:47:55] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=2%202%202%203%204%204 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:50:00] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:50:29] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:52:00] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 09:52:02] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:01:26] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,5,6,7,9&concurso=3035 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:01:28] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:03:31] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5&concurso=3042 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:09:05] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,4,5,6,9&concurso=3040 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:09:18] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:23:28] "GET /geradores-elite/gerador-elite/?n=6&digitos=1,2,4,5,8,9&concurso=3026 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:23:36] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:34:50] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,3,4,5&concurso=3037 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:35:13] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:35:58] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,5,6,9&concurso=3023 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:36:02] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%201%202%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:36:03] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:38:29] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:42:14] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,3,4,5,8,9&concurso=3050 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:42:19] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:44:20] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,4,5,6,7&concurso=3043 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:44:22] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:46:25] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,3,5,9&concurso=3053 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:46:27] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:48:30] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,2,3,4,5,6,7,9&concurso=3048 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:48:49] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:50:37] "GET /geradores-elite/gerador-elite/?n=5&digitos=0,1,2,5,6&concurso=3028 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:50:40] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 10:54:47] "GET /geradores-elite/gerador-gc/?digitos=2,3,4,5,7,9&concurso=3045 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:03:07] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,4,5,7,8&concurso=3064 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:03:36] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:11:11] "GET /analise/somas-digitos/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:11:12] "GET /geradores-elite/escolha-tubular-apostas/?aba=diagonais HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:11:20] "GET /analise/somas-digitos/static/analise_somas_digitos.js?v=20261029ordem HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:11:41] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:17:28] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%203%203%204%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:21:45] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,9&concurso=3070 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:22:21] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:22:52] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:22:59] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:24:49] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,6,7,8&concurso=3060 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:24:55] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:26:09] "GET /geradores-elite/gerador-gc/?digitos=0,1,3,5,8&concurso=3065 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:26:26] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:45:44] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,6,8,9&concurso=3066 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:45:51] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:49:13] "GET /geradores-elite/gerador-concentracao/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 11:49:14] "GET /geradores-elite/api/construtor-construcoes/analise-sugestao?quantidade=20&criterio=frequencia HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 12:10:58 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 12:11:06] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 12:18:40 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 12:18:54] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:19:58] "GET /analise/analises-inteligentes/?aba=padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:21:08] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,4,5,6,8&concurso=3047 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:21:15] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:27:17] "GET /geradores-elite/ciclo-apostas/?modo=estrategia HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:27:26] "GET /geradores-elite/api/ciclo-apostas/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:27:27] "GET /geradores-elite/api/ciclo-apostas/recorrencia?n=4 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:27:30] "GET /geradores-elite/api/ciclo-apostas/estrategia/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:27:33] "GET /geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:38:04] "GET /analise/analises-inteligentes/?aba=padroes-ii HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:43:11] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:43:11] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:53:03] "GET /geradores-elite/gerador-digitos-inteligente/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:53:10] "GET /geradores-elite/static/construtor_digitos.js?v=19 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:53:19] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:53:20] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 12:53:20] "POST /geradores-elite/api/construtor-construcoes/digitos/diagnosticar HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:08:11] "GET /geradores-elite/gerador-elite/?n=4&digitos=1,2,4,5&concurso=3071 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:08:18] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:15:54] "GET /geradores-elite/gerador-gc/?digitos=0,1,4,5,7,8&concurso=3044 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:16:01] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:17:13] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,4,5,6,8&concurso=3057 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:19:28] "GET /geradores-elite/gerador-gc/?digitos=0,1,3,4,6,7,8&concurso=3052 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:19:29] "GET /geradores-elite/gerador-gc/?digitos=0,1,3,4,5,7,9&concurso=3068 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:19:33] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:19:51] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:19:58] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:27:36] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:33:25] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+
+--- iniciando 2026-11-14 13:36:31 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [14/Nov/2026 13:36:48] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:53:21] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,7,8&concurso=3022 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:53:26] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:55:24] "GET /geradores-elite/gerador-gc/?digitos=1,2,4,5&concurso=3071 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 13:55:32] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:28:24] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,4,5,7,8&concurso=3054 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:28:28] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:36:43] "GET /analise/api/somas-digitos HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 14:52:49] "GET /geradores-elite/gerador-gc/?digitos=1,2,3,4,5,6&concurso=3041 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 14:53:15] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:02:55] "GET /dados/filtros-posicao/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:03:15] "GET /geradores-elite/escolha-tubular-apostas/?aba=diagonais&padroes=0%201%202%203%204%205|1%202%203%203%204%205|0%200%201%202%203%205|1%202%203%204%204%205|0%200%201%202%203%204 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:03:39] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:10:12] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=2%202%202%203%203%203 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:11:14] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=2%202%203%203%203%206 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:13:24] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%202%202%203%203%206 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:14:31] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=2%203%203%203%203%206 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:16:14] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%202%203%203%203%206 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:16:55] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:17:38] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:19:42] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=2%202%203%203%203%203 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:21:52] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:22:03] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:24:24] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:26:23] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:27:29] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:28:55] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:28:56] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:29:23] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:29:38] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:29:46] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:30:02] "GET /geradores-elite/comparador-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:30:44] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 15:30:50] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:01:54] "GET /geradores-elite/gerador-gc/?digitos=0,2,3,4,5,6,7,9&concurso=3048 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:01:57] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:07:02] "GET /geradores-elite/api/engine-final/backtest HTTP/1.1" 405 -
+127.0.0.1 - - [14/Nov/2026 16:26:16] "GET /geradores-elite/escolha-tubular-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:39:20] "GET /analise/comparar-concursos/?concurso_a=3084&concurso_b=3085&modo=volante HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:40:53] "GET /geradores-elite/construtor-construcoes/?origem=recorrencia&dezenas=1,8,11,15,19,21,26,32,33,35,45,47,48,50,53,56&faltantes=1,8,11,15,19,21,26,32,33,35,45,47,48,50,53,56 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:48:08] "GET /geradores-elite/estatisticas-ciclo/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:48:11] "GET /geradores-elite/static/gerador_2a1.js?v=2a1i HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:48:14] "GET /geradores-elite/static/gerador_estatisticas_ciclo.js?v=pan4 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:48:26] "GET /geradores-elite/api/estatisticas-ciclo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:28] "GET /analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:29] "GET /analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:29] "GET /analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:30] "GET /analise/comparar-concursos/api/comparar?modo=volante&concurso_a=3084&concurso_b=3085 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:32] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:34] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:36] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:38] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:40] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:42] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:44] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:47] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:48] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:50] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:55] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:58] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:50:59] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:51:03] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:51:12] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:51:13] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:51:16] "GET /analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:58:50] "GET /geradores-elite/comportamento-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:58:52] "GET /geradores-elite/engine-final/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:59:00] "GET /geradores-elite/static/engine_final.js?v=leitura6 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 16:59:08] "GET /geradores-elite/api/inteligente/concursos?limit=120 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:02:19] "GET /geradores-elite/static/comportamento_bases_resumo.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:02:19] "GET /geradores-elite/static/comportamento_col_concurso.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:02:20] "GET /geradores-elite/static/panorama_modos.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:02:20] "GET /geradores-elite/static/tres_fontes.js?v=20261022v2 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:02:21] "GET /geradores-elite/api/comportamento/analise?janela=10&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:02:22] "GET /geradores-elite/api/comportamento/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:15:32] "GET /geradores-elite/api/inteligente HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 17:30:35] "GET /geradores-elite/api/escolha-tubular HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 17:32:57] "GET /analise/api/comportamento HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:37:04] "GET /analise/ciclo-cobertura/metricas/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 17:37:19] "GET /analise/api/ciclo-cobertura/metricas-historicas?v=1793664000000 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:06:28] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,7,8&concurso=3032 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:07:00] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:09:21] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%202%202%202%204%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:11:23] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%202%202%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:12:29] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%203%203%203%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:13:05] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:13:22] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:17:53] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:17:59] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:18:26] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:18:29] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:25:03] "GET /desdobramento/api/desdobramentos HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:48:29] "GET /geradores-elite/gerador-elite/?n=8&digitos=0,1,2,3,5,6,7,8&concurso=3060 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:48:37] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:49:35] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,4,5,7&concurso=3067 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:49:39] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:50:45] "GET /geradores-elite/gerador-gc/?digitos=0,1,3,4,5,8,9&concurso=3050 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:50:53] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:54:53] "GET /geradores-elite/gerador-elite/?n=8&digitos=1,2,3,4,5,6,8,9&concurso=3039 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:54:56] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 18:55:06] "GET /geradores-elite/construtor-construcoes/?origem=recorrencia&dezenas= HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:06:28] "GET /geradores-elite/api/gaps-ciclo HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 19:28:11] "GET /analise/ciclo-cobertura/inicial-ciclo/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:28:14] "GET /analise/gaps-ciclo/static/inicial_ciclo.js?v=ic1 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:28:22] "GET /analise/api/gaps-ciclo/projetar?janela=10&base=geral&inicial=1&perfil=ultimo HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:40:27] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%202%202%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:40:29] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%202%202%202%203%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:40:37] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:47:04] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:47:07] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:47:19] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:47:21] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:48:46] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%203%203%204%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:51:26] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 19:51:35] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:24:24] "GET /geradores-elite/ciclo-apostas/?modo=estrategia&diags=0 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:26:16] "GET /geradores-elite/gerador-elite/?n=6&digitos=1,2,3,4,5,6&concurso=3041 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:26:16] "GET /geradores-elite/gerador-elite/?n=6&digitos=2,3,4,5,7,8&concurso=3061 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:26:16] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5&concurso=3036 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:28:04] "GET /geradores-elite/api/ciclo-apostas/ritmo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:28:05] "GET /geradores-elite/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:28:08] "GET /geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:33:08] "GET /analise/analises-gerais/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:33:11] "GET /analise/analises-gerais/static/analise_estudos.js?v=20261029ordem HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:33:12] "GET /geradores-elite/static/comportamento_col_concurso.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 20:33:13] "GET /analise/api/analises-gerais/classificacao-numeros?base=geral&janela=10 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:15:14] "GET /analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:15:16] "GET /analise/resumos-modalidade/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:15:18] "GET /analise/tabela-cores/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:15:20] "GET /simulador-globo/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:15:21] "GET /analise/resultados/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:25:55] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%202%202%203%204%204 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:28:45] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:28:47] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:30:32] "GET /geradores-elite/api/construtor-construcoes HTTP/1.1" 404 -
+127.0.0.1 - - [14/Nov/2026 21:40:20] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%202%203%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:43:32] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%202%202%203%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:44:06] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:44:07] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:46:57] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%202%202%205%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:47:46] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 21:49:25] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 22:38:58] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,4,5,6&concurso=3056 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 22:39:06] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 22:56:42] "GET /analise/tabela-cores/static/tabela_cores.js?v=3 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:03:52] "GET /simulador-globo/static/vendor/three.min.js?v=1 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:03:55] "GET /simulador-globo/static/simulador.js?v=14 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:03:57] "GET /simulador-globo/static/globo.js?v=7 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:03:58] "GET /simulador-globo/static/globo.css?v=13 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:06:13] "GET /api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:06:14] "GET /configuracoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:19:50] "GET /geradores-elite/gerador-elite/?n=6&digitos=1,2,3,4,5,6&concurso=3046 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:25:10] "GET /geradores-elite/gerador-gc/?digitos=1,2,3,4,5,6&concurso=3046 HTTP/1.1" 200 -
+127.0.0.1 - - [14/Nov/2026 23:25:14] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:00:33] "GET /geradores-elite/api/conferir-txt-historico HTTP/1.1" 405 -
+127.0.0.1 - - [15/Nov/2026 08:07:53] "GET /geradores-elite/api/ciclo-apostas HTTP/1.1" 404 -
+127.0.0.1 - - [15/Nov/2026 08:42:32] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%201%204%204%205 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:42:33] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%201%203%204%204 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:42:35] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:42:39] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:42:40] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:49:50] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:49:54] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:50:01] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 08:56:26] "GET /desdobramento/api/desdobrar HTTP/1.1" 405 -
+127.0.0.1 - - [15/Nov/2026 08:59:28] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%201%203%206 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 09:03:21] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 09:03:28] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 09:49:51] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%201%201%203%204 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 09:54:04] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 09:54:04] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:05:18] "GET /analise/por-posicao/ HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:06:09] "GET /analise/api/por-posicao/concursos HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:06:10] "GET /analise/api/por-posicao/3085 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:08:18] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,4,6,7&concurso=3084 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:08:22] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:44:11] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%201%202%203%203 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:48:49] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:48:56] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:50:44] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%201%201%202%202 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:53:52] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 10:57:41] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%201%202%203%204 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:01:06] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:08:29] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7&concurso=3043 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:08:29] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%202%202%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:08:36] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:12:05] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:33:48] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=2%202%202%203%204%205 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:40:10] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:40:11] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:51:45] "GET /geradores-elite/construtor-construcoes/?dezenas= HTTP/1.1" 200 -
