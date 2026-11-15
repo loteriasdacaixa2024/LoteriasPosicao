@@ -18383,3 +18383,43 @@ Press CTRL+C to quit
 127.0.0.1 - - [15/Nov/2026 10:38:30] "GET /geradores-elite/apostas-inteligentes/ HTTP/1.1" 200 -
 127.0.0.1 - - [15/Nov/2026 10:38:40] "GET /geradores-elite/api/inteligente/concursos?limit=150 HTTP/1.1" 200 -
 127.0.0.1 - - [15/Nov/2026 10:38:47] "GET /geradores-elite/api/inteligente/analise HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:58:00] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%203%203%204%204 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:59:39] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:00:12] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:00:33] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-15 12:04:21 ---
+===========================================================
+[OK] Servidor Dupla Sena rodando na porta 5158
+[URL] Acesse:      http://localhost:5158
+[URL] Análise:     http://localhost:5158/analise/
+[URL] Modelos:     http://localhost:5158/modelos/
+[URL] Conferência: http://localhost:5158/central-conferencias/
+[URL] Desdobramento: http://localhost:5158/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5158
+ * Running on http://10.0.0.10:5158
+Press CTRL+C to quit
+127.0.0.1 - - [15/Nov/2026 12:04:38] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-15 12:19:31 ---
+===========================================================
+[OK] Servidor Dupla Sena rodando na porta 5158
+[URL] Acesse:      http://localhost:5158
+[URL] Análise:     http://localhost:5158/analise/
+[URL] Modelos:     http://localhost:5158/modelos/
+[URL] Conferência: http://localhost:5158/central-conferencias/
+[URL] Desdobramento: http://localhost:5158/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5158
+ * Running on http://10.0.0.10:5158
+Press CTRL+C to quit
+127.0.0.1 - - [15/Nov/2026 12:19:38] "GET / HTTP/1.1" 200 -

@@ -18657,3 +18657,44 @@ Press CTRL+C to quit
 127.0.0.1 - - [15/Nov/2026 11:27:17] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%205%205%206%207 HTTP/1.1" 200 -
 127.0.0.1 - - [15/Nov/2026 11:31:58] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
 127.0.0.1 - - [15/Nov/2026 11:31:59] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:57:56] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%207%207%207 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:59:44] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:00:25] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:02:47] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:02:52] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-15 12:04:19 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [15/Nov/2026 12:04:37] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:18:00] "GET /geradores-elite/gerador-elite/?n=6&digitos=0,1,2,5,6,9&concurso=7145 HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:18:09] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+
+--- iniciando 2026-11-15 12:19:25 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [15/Nov/2026 12:19:37] "GET / HTTP/1.1" 200 -

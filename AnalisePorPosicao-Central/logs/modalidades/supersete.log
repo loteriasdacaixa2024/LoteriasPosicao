@@ -18127,3 +18127,42 @@ Press CTRL+C to quit
 127.0.0.1 - - [15/Nov/2026 09:09:30] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,5,6,7,9&concurso=886 HTTP/1.1" 200 -
 127.0.0.1 - - [15/Nov/2026 09:09:40] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
 127.0.0.1 - - [15/Nov/2026 09:19:28] "GET /analise/api/concentracao-acertos HTTP/1.1" 404 -
+127.0.0.1 - - [15/Nov/2026 11:59:38] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:00:04] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-15 12:04:18 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [15/Nov/2026 12:04:35] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:04:35] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-15 12:19:23 ---
+===========================================================
+[OK] Servidor Super Sete rodando em DESENVOLVIMENTO na porta 5160
+[URL] Acesse:      http://localhost:5160
+[URL] Análise:     http://localhost:5160/analise/
+[URL] Modelos:     http://localhost:5160/modelos/
+[URL] Conferência: http://localhost:5160/central-conferencias/
+[URL] Construtor:    http://localhost:5160/geradores-elite/construtor-construcoes/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5160
+ * Running on http://10.0.0.10:5160
+Press CTRL+C to quit
+127.0.0.1 - - [15/Nov/2026 12:19:37] "GET / HTTP/1.1" 200 -

@@ -34,33 +34,68 @@
                 <label>Qtd. ajustes
                     <select id="rsQtd" class="form-select form-select-sm"></select>
                 </label>
-                <label class="rs-aj-lab" data-i="0">Ajuste 1
-                    <select class="form-select form-select-sm rs-offset"></select>
-                </label>
-                <label class="rs-aj-lab" data-i="1">Ajuste 2
-                    <select class="form-select form-select-sm rs-offset"></select>
-                </label>
-                <label class="rs-aj-lab" data-i="2">Ajuste 3
-                    <select class="form-select form-select-sm rs-offset"></select>
-                </label>
-                <label class="rs-aj-lab" data-i="3">Ajuste 4
-                    <select class="form-select form-select-sm rs-offset"></select>
-                </label>
+                <div class="rs-aj-lab" data-i="0">
+                    <div class="rs-aj-top">
+                        <span>Ajuste 1</span>
+                        <button type="button" class="rs-aj-btn rs-excluir" data-act="excluir" title="Excluir este ajuste" aria-label="Excluir ajuste 1">
+                            <i class="fas fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <select class="form-select form-select-sm rs-offset" aria-label="Valor do ajuste 1"></select>
+                </div>
+                <div class="rs-aj-lab" data-i="1">
+                    <div class="rs-aj-top">
+                        <span>Ajuste 2</span>
+                        <button type="button" class="rs-aj-btn rs-excluir" data-act="excluir" title="Excluir este ajuste" aria-label="Excluir ajuste 2">
+                            <i class="fas fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <select class="form-select form-select-sm rs-offset" aria-label="Valor do ajuste 2"></select>
+                </div>
+                <div class="rs-aj-lab" data-i="2">
+                    <div class="rs-aj-top">
+                        <span>Ajuste 3</span>
+                        <button type="button" class="rs-aj-btn rs-excluir" data-act="excluir" title="Excluir este ajuste" aria-label="Excluir ajuste 3">
+                            <i class="fas fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <select class="form-select form-select-sm rs-offset" aria-label="Valor do ajuste 3"></select>
+                </div>
+                <div class="rs-aj-lab" data-i="3">
+                    <div class="rs-aj-top">
+                        <span>Ajuste 4</span>
+                        <button type="button" class="rs-aj-btn rs-excluir" data-act="excluir" title="Excluir este ajuste" aria-label="Excluir ajuste 4">
+                            <i class="fas fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <select class="form-select form-select-sm rs-offset" aria-label="Valor do ajuste 4"></select>
+                </div>
             </div>
-            <button type="button" class="btn rs-load" id="rsCarregar">
-                <i class="fas fa-sync-alt"></i> Carregar resultados
-            </button>
+            <div class="rs-config-actions">
+                <button type="button" class="btn rs-criar" id="rsCriar">
+                    <i class="fas fa-plus" aria-hidden="true"></i> Novo ajuste
+                </button>
+                <button type="button" class="btn rs-load" id="rsCarregar" title="Consultar os resultados com a configuração atual">
+                    <i class="fas fa-sync-alt" aria-hidden="true"></i> Carregar resultados
+                </button>
+                <label class="rs-baixar-escolha">Baixar ajuste
+                    <select id="rsBaixarQual" class="form-select form-select-sm" aria-label="Ajuste para download"></select>
+                </label>
+                <button type="button" class="btn rs-load" id="rsBaixarBtn">
+                    <i class="fas fa-download" aria-hidden="true"></i> Baixar
+                </button>
+            </div>
         </div>
         <div class="rs-status" id="rsStatus"></div>
         <div class="table-responsive rs-table-wrap">
             <table class="table table-sm rs-table mb-0">
                 <thead>
                     <tr>
-                        <th>Concurso</th>
-                        <th>Data</th>
-                        <th>Dezenas originais</th>
-                        <th class="rs-col-mes">Mês</th>
-                        <th id="rsThAjustes">Ajustes</th>
+                        <th><button type="button" class="rs-sort" data-sort="concurso" title="Ordenar por concurso">Concurso <span class="rs-seta" aria-hidden="true"></span></button></th>
+                        <th><button type="button" class="rs-sort" data-sort="data" title="Ordenar por data">Data <span class="rs-seta" aria-hidden="true"></span></button></th>
+                        <th><button type="button" class="rs-sort" data-sort="dezenas" title="Ordenar por dezenas">Dezenas originais <span class="rs-seta" aria-hidden="true"></span></button></th>
+                        <th class="rs-col-mes"><button type="button" class="rs-sort" data-sort="mes" title="Ordenar por mês">Mês <span class="rs-seta" aria-hidden="true"></span></button></th>
+                        <th><button type="button" class="rs-sort" data-sort="ajustes" title="Ordenar pelos ajustes"><span id="rsThAjustes">Ajustes</span> <span class="rs-seta" aria-hidden="true"></span></button></th>
                     </tr>
                 </thead>
                 <tbody id="rsBody"></tbody>
@@ -186,7 +221,8 @@
         gap: .55rem;
         margin-bottom: .7rem;
     }
-    #rs-root .rs-config-grid label {
+    #rs-root .rs-config-grid label,
+    #rs-root .rs-config-grid .rs-aj-lab {
         background: #fff;
         border: 1px solid rgba(192, 139, 0, .2);
         border-radius: 10px;
@@ -197,14 +233,66 @@
         color: #8a8175;
         text-transform: uppercase;
     }
-    #rs-root .rs-load {
-        background: #c08b00;
-        color: #fff;
+    #rs-root .rs-aj-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .25rem;
+        margin-bottom: .25rem;
+    }
+    #rs-root .rs-aj-lab { cursor: pointer; }
+    #rs-root .rs-aj-lab.is-sel {
+        border-color: #c08b00;
+        box-shadow: 0 0 0 2px rgba(192, 139, 0, .35);
+    }
+    #rs-root .rs-aj-btn {
+        border: 0;
+        background: transparent;
+        color: #8a8175;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 6px;
+        padding: 0;
+        line-height: 1;
+        font-size: .72rem;
+    }
+    #rs-root .rs-aj-btn:hover { background: rgba(192, 139, 0, .16); color: #6b5710; }
+    #rs-root .rs-aj-btn:disabled { opacity: .35; pointer-events: none; }
+    #rs-root .rs-config-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+    #rs-root .rs-load,
+    #rs-root .rs-criar {
         font-weight: 700;
         border-radius: 999px;
         padding: .4rem .9rem;
     }
+    #rs-root .rs-load { background: #c08b00; color: #fff; }
     #rs-root .rs-load:hover { background: #996e00; color: #fff; }
+    #rs-root .rs-criar {
+        background: #fff;
+        color: #6b5710;
+        border: 1px solid rgba(192, 139, 0, .45);
+    }
+    #rs-root .rs-criar:hover { background: #fff3cc; color: #6b5710; }
+    #rs-root .rs-criar:disabled { opacity: .45; }
+    #rs-root .rs-baixar-escolha {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: .15rem;
+        min-width: 11rem;
+        margin: 0;
+        font-size: .68rem;
+        font-weight: 800;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+        color: #8a8175;
+    }
+    #rs-root .rs-baixar-escolha select {
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 700;
+        color: #1a0a00;
+    }
     #rs-root .rs-status {
         text-align: center;
         border: 1px solid rgba(192, 139, 0, .25);
@@ -225,11 +313,42 @@
         position: sticky; top: 0; z-index: 1;
         background: #c08b00; color: #fff;
         text-align: center; vertical-align: middle;
+        padding: 0;
     }
+    #rs-root .rs-sort {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .35rem;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+        padding: .45rem .35rem;
+        cursor: pointer;
+    }
+    #rs-root .rs-sort:hover { background: rgba(255, 255, 255, .14); }
+    #rs-root .rs-seta { font-size: .62rem; opacity: .7; }
+    #rs-root .rs-sort.is-on .rs-seta { opacity: 1; }
     #rs-root .rs-table td { text-align: center; vertical-align: middle; background: #fffef8; }
     #rs-root .rs-table th.rs-col-mes,
-    #rs-root .rs-table td.rs-col-mes { text-align: left; padding-left: .85rem; }
-    #rs-root .rs-col-mes .mes-pill { min-width: 2.5rem; text-align: center; }
+    #rs-root .rs-table td.rs-col-mes { text-align: center; }
+    #rsAlterados .rs-col-mes .mes-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 3.6rem;
+        padding: .32rem .95rem;
+        border-radius: 999px;
+        font-size: .8rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: .02em;
+        text-transform: none;
+        white-space: nowrap;
+    }
     #rs-root .rs-table tbody tr:nth-child(even) td { background: #fffaf0; }
     #rs-root .rs-aj-linha { display: flex; justify-content: center; gap: .22rem; margin: .18rem 0; }
     #rs-root .rs-pager { display: flex; justify-content: center; gap: .35rem; margin-top: .75rem; flex-wrap: wrap; }
@@ -258,10 +377,11 @@
     const API = root.dataset.api;
     const POR_CARDS = 12;
     const POR_ALT = 20;
-    const AJUSTES_PADRAO = [-1, 1, -2, 2];
+    const AJUSTES_PADRAO = [1, 1, -2, 2];
     let pacote = null;
     let pagCards = 1;
     let pagAlt = 1;
+    let ordem = { col: 'concurso', dir: 'desc' };
 
     function pad(n) {
         const w = Number(pacote && pacote.pad) || 2;
@@ -287,15 +407,27 @@
     }
     function sinal(n) { return n > 0 ? `+${n}` : String(n); }
 
+    const MES_NOME = {
+        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+        5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro',
+    };
     const MES_ABREV = {
         Janeiro: 'Jan', Fevereiro: 'Fev', Março: 'Mar', Abril: 'Abr',
         Maio: 'Mai', Junho: 'Jun', Julho: 'Jul', Agosto: 'Ago',
         Setembro: 'Set', Outubro: 'Out', Novembro: 'Nov', Dezembro: 'Dez',
     };
+    function mesOficial(ln) {
+        const num = Number(ln && ln.mes_num) || 0;
+        const nome = (ln && ln.mes_nome) || (num >= 1 && num <= 12 ? MES_NOME[num] : '');
+        if (!nome) return null;
+        const abrev = MES_ABREV[nome] || (num >= 1 && num <= 12 ? MES_ABREV[MES_NOME[num]] : String(nome).slice(0, 3));
+        return { nome: nome, abrev: abrev };
+    }
     function mesHtml(ln) {
-        if (!ln.mes_nome) return '—';
-        const abrev = MES_ABREV[ln.mes_nome] || String(ln.mes_nome).slice(0, 3);
-        return `<span class="mes-pill mes-nome-${esc(ln.mes_nome)}">${esc(abrev)}</span>`;
+        const mes = mesOficial(ln);
+        if (!mes) return '—';
+        return `<span class="mes-pill mes-nome-${esc(mes.nome)}">${esc(mes.abrev)}</span>`;
     }
     function premioHtml(ln) {
         const g = ln.ganhadores_7;
@@ -369,16 +501,206 @@
         document.querySelectorAll('.rs-aj-lab').forEach((lab) => {
             lab.hidden = Number(lab.dataset.i) >= qtd;
         });
+        atualizarAcoes();
+    }
+    function atualizarAcoes() {
+        const qtd = Number(document.getElementById('rsQtd').value) || 1;
+        const criar = document.getElementById('rsCriar');
+        if (criar) {
+            criar.disabled = qtd >= 4;
+            criar.title = qtd >= 4 ? 'Limite de 4 ajustes' : 'Adicionar ajuste';
+        }
+        document.querySelectorAll('.rs-excluir').forEach((btn) => {
+            btn.disabled = qtd <= 1;
+            btn.title = qtd <= 1 ? 'Mantenha ao menos um ajuste' : 'Excluir este ajuste';
+        });
+        atualizarListaDownload();
+    }
+    function marcarSelecionado() {
+        const sel = document.getElementById('rsBaixarQual');
+        const atual = sel ? sel.value : '0';
+        document.querySelectorAll('.rs-aj-lab').forEach((lab) => {
+            lab.classList.toggle('is-sel', !lab.hidden && lab.dataset.i === atual);
+        });
+    }
+    function atualizarListaDownload() {
+        const sel = document.getElementById('rsBaixarQual');
+        if (!sel) return;
+        const anterior = sel.value;
+        const qtd = Number(document.getElementById('rsQtd').value) || 1;
+        const offsets = [...document.querySelectorAll('.rs-offset')].slice(0, qtd);
+        sel.innerHTML = offsets.map((el, i) => {
+            const v = Number(el.value);
+            return `<option value="${i}">Ajuste ${i + 1} (${sinal(v)})</option>`;
+        }).join('');
+        if ([...sel.options].some((o) => o.value === anterior)) sel.value = anterior;
+        marcarSelecionado();
+    }
+    function selecionarDownload(indice) {
+        const sel = document.getElementById('rsBaixarQual');
+        if (!sel) return;
+        const valor = String(indice);
+        if ([...sel.options].some((o) => o.value === valor)) sel.value = valor;
+        marcarSelecionado();
+    }
+    function lerOffsets() {
+        return [...document.querySelectorAll('.rs-offset')].map((el) => el.value);
+    }
+    function gravarOffsets(valores) {
+        document.querySelectorAll('.rs-offset').forEach((el, i) => {
+            if (i < valores.length) el.value = String(valores[i]);
+        });
+    }
+    function definirQtd(n) {
+        document.getElementById('rsQtd').value = String(Math.max(1, Math.min(4, n)));
+        syncAjustes();
+    }
+    function criarAjuste() {
+        const qtd = Number(document.getElementById('rsQtd').value) || 1;
+        if (qtd >= 4) return;
+        definirQtd(qtd + 1);
+        if (pacote && !document.getElementById('rsAlterados').hidden) {
+            pagAlt = 1;
+            renderAlterados();
+        }
+    }
+    function excluirAjuste(indice) {
+        const qtd = Number(document.getElementById('rsQtd').value) || 1;
+        if (qtd <= 1 || indice < 0 || indice >= qtd) return;
+        const ativos = lerOffsets().slice(0, qtd);
+        ativos.splice(indice, 1);
+        gravarOffsets(ativos);
+        const escolha = document.getElementById('rsBaixarQual');
+        if (escolha) {
+            const atual = Number(escolha.value);
+            if (atual === indice) escolha.value = '0';
+            else if (atual > indice) escolha.value = String(atual - 1);
+        }
+        definirQtd(ativos.length);
+        if (pacote && !document.getElementById('rsAlterados').hidden) {
+            pagAlt = 1;
+            renderAlterados();
+        }
+    }
+    function csvCell(v) {
+        const s = String(v == null ? '' : v);
+        if (/[;"\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+        return s;
+    }
+    function seloArquivo() {
+        const d = new Date();
+        const p = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+    }
+    function baixarAjuste(indice) {
+        if (!pacote || !pacote.linhas) {
+            document.getElementById('rsStatus').textContent = 'Aguarde o carregamento dos concursos para baixar o ajuste.';
+            return;
+        }
+        const sel = document.querySelectorAll('.rs-offset')[indice];
+        if (!sel) return;
+        const off = Number(sel.value);
+        const linhas = linhasOrdenadas();
+        const temMes = !!pacote.tem_mes;
+        const temSegundo = linhas.some((ln) => (ln.segundo || []).length);
+        const head = ['concurso', 'data', 'dezenas_originais'];
+        if (temMes) head.push('mes');
+        head.push('dezenas_ajuste');
+        if (temSegundo) head.push('dezenas_segundo', 'dezenas_segundo_ajuste');
+        const rows = [head];
+        linhas.forEach((ln) => {
+            const row = [ln.concurso, ln.data || '', (ln.dezenas || []).map(pad).join('-')];
+            if (temMes) {
+                const mes = mesOficial(ln);
+                row.push(mes ? mes.abrev : '');
+            }
+            row.push(deslocar(ln.dezenas || [], off).map(pad).join('-'));
+            if (temSegundo) {
+                const segundo = ln.segundo || [];
+                row.push(segundo.map(pad).join('-'));
+                row.push(segundo.length ? deslocar(segundo, off).map(pad).join('-') : '');
+            }
+            rows.push(row);
+        });
+        const csv = '\ufeff' + rows.map((r) => r.map(csvCell).join(';')).join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const link = document.createElement('a');
+        const sinalArq = off > 0 ? `+${off}` : String(off);
+        link.href = URL.createObjectURL(blob);
+        link.download = `resultados_alterados_ajuste${indice + 1}_${sinalArq}_${seloArquivo()}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        const url = link.href;
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+    function dataKey(valor) {
+        const m = String(valor || '').match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (!m) return 0;
+        return Number(m[3] + m[2] + m[1]);
+    }
+    function cmpArr(a, b) {
+        const aa = a || [];
+        const bb = b || [];
+        const n = Math.max(aa.length, bb.length);
+        for (let i = 0; i < n; i++) {
+            const d = (Number(aa[i]) || 0) - (Number(bb[i]) || 0);
+            if (d) return d;
+        }
+        return aa.length - bb.length;
+    }
+    function mesNum(ln) {
+        const n = Number(ln && ln.mes_num) || 0;
+        if (n >= 1 && n <= 12) return n;
+        const oficial = mesOficial(ln);
+        if (!oficial) return 0;
+        for (const [k, nome] of Object.entries(MES_NOME)) {
+            if (nome === oficial.nome) return Number(k);
+        }
+        return 0;
+    }
+    function linhasOrdenadas() {
+        const linhas = ((pacote && pacote.linhas) || []).slice();
+        const offsets = offsetsAtivos();
+        const dir = ordem.dir === 'asc' ? 1 : -1;
+        linhas.sort((a, b) => {
+            let c = 0;
+            if (ordem.col === 'concurso') c = Number(a.concurso) - Number(b.concurso);
+            else if (ordem.col === 'data') c = dataKey(a.data) - dataKey(b.data);
+            else if (ordem.col === 'dezenas') c = cmpArr(a.dezenas, b.dezenas);
+            else if (ordem.col === 'mes') c = mesNum(a) - mesNum(b);
+            else if (ordem.col === 'ajustes') {
+                for (const off of offsets) {
+                    c = cmpArr(deslocar(a.dezenas || [], off), deslocar(b.dezenas || [], off));
+                    if (c) break;
+                }
+            }
+            if (c) return c * dir;
+            return Number(b.concurso) - Number(a.concurso);
+        });
+        return linhas;
+    }
+    function pintarSetas() {
+        document.querySelectorAll('.rs-sort').forEach((btn) => {
+            const seta = btn.querySelector('.rs-seta');
+            const on = btn.dataset.sort === ordem.col;
+            btn.classList.toggle('is-on', on);
+            if (seta) seta.textContent = on ? (ordem.dir === 'asc' ? '▲' : '▼') : '↕';
+        });
     }
     function renderAlterados() {
-        const linhas = (pacote && pacote.linhas) || [];
+        if (!pacote) {
+            pintarSetas();
+            return;
+        }
+        const total = (pacote.linhas || []).length;
+        const linhas = linhasOrdenadas();
         const offsets = offsetsAtivos();
         const th = document.getElementById('rsThAjustes');
         th.textContent = offsets.map((off, i) => `Ajuste ${i + 1} (${sinal(off)})`).join(' | ') || 'Ajustes';
         document.querySelectorAll('.rs-col-mes').forEach((el) => { el.hidden = !pacote.tem_mes; });
-        const ultimo = pacote && pacote.ultimo;
         document.getElementById('rsStatus').textContent =
-            `${linhas.length.toLocaleString('pt-BR')} concursos carregados | Último: ${ultimo || '—'}`;
+            `${total.toLocaleString('pt-BR')} concursos carregados | Último: ${pacote.ultimo || '—'}`;
         const ini = (pagAlt - 1) * POR_ALT;
         const fatia = linhas.slice(ini, ini + POR_ALT);
         document.getElementById('rsBody').innerHTML = fatia.map((ln) => {
@@ -402,11 +724,12 @@
             </tr>`;
         }).join('');
         pager('rsPagerAlt', pagAlt, linhas.length, (n) => { pagAlt = n; renderAlterados(); });
+        pintarSetas();
     }
 
     function preencherAjustes() {
         const qtd = document.getElementById('rsQtd');
-        qtd.innerHTML = [1, 2, 3, 4].map((n) => `<option value="${n}"${n === 4 ? ' selected' : ''}>${n}</option>`).join('');
+        qtd.innerHTML = [1, 2, 3, 4].map((n) => `<option value="${n}"${n === 1 ? ' selected' : ''}>${n}</option>`).join('');
         document.querySelectorAll('.rs-offset').forEach((sel, i) => {
             const opts = [];
             for (let n = -9; n <= 9; n++) {
@@ -415,9 +738,15 @@
                 opts.push(`<option value="${n}"${on ? ' selected' : ''}>${sinal(n)}</option>`);
             }
             sel.innerHTML = opts.join('');
+            sel.addEventListener('change', () => {
+                const lab = sel.closest('.rs-aj-lab');
+                if (lab) selecionarDownload(Number(lab.dataset.i));
+                atualizarListaDownload();
+            });
         });
         qtd.addEventListener('change', syncAjustes);
         syncAjustes();
+        pintarSetas();
     }
 
     document.querySelectorAll('.rs-tab').forEach((btn) => {
@@ -436,8 +765,8 @@
     function restaurarAjustes() {
         const qtd = document.getElementById('rsQtd');
         qtd.value = '1';
-        document.querySelectorAll('.rs-offset').forEach((sel) => {
-            sel.value = '-1';
+        document.querySelectorAll('.rs-offset').forEach((sel, i) => {
+            sel.value = String(AJUSTES_PADRAO[i]);
         });
         syncAjustes();
     }
@@ -474,6 +803,32 @@
     document.getElementById('rsCarregar').addEventListener('click', () => {
         pagAlt = 1;
         renderAlterados();
+    });
+    document.getElementById('rsCriar').addEventListener('click', criarAjuste);
+    document.getElementById('rsBaixarBtn').addEventListener('click', () => {
+        baixarAjuste(Number(document.getElementById('rsBaixarQual').value));
+    });
+    document.getElementById('rsBaixarQual').addEventListener('change', marcarSelecionado);
+    document.getElementById('rsAlterados').addEventListener('click', (ev) => {
+        const sortBtn = ev.target.closest('.rs-sort');
+        if (sortBtn) {
+            const col = sortBtn.dataset.sort;
+            if (ordem.col === col) ordem.dir = ordem.dir === 'asc' ? 'desc' : 'asc';
+            else ordem = { col: col, dir: 'asc' };
+            pagAlt = 1;
+            renderAlterados();
+            return;
+        }
+        const btn = ev.target.closest('[data-act]');
+        if (btn && !btn.disabled) {
+            const labBtn = btn.closest('.rs-aj-lab');
+            if (btn.dataset.act === 'excluir') excluirAjuste(Number(labBtn && labBtn.dataset.i));
+            return;
+        }
+        if (ev.target.closest('select, button, a, option')) return;
+        const lab = ev.target.closest('.rs-aj-lab');
+        if (!lab || lab.hidden) return;
+        selecionarDownload(Number(lab.dataset.i));
     });
     document.getElementById('rsReset').addEventListener('click', () => {
         pagAlt = 1;

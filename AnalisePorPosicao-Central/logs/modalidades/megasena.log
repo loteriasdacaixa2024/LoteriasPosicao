@@ -19677,3 +19677,42 @@ Press CTRL+C to quit
 127.0.0.1 - - [15/Nov/2026 11:40:10] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
 127.0.0.1 - - [15/Nov/2026 11:40:11] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
 127.0.0.1 - - [15/Nov/2026 11:51:45] "GET /geradores-elite/construtor-construcoes/?dezenas= HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 11:59:34] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:00:09] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-15 12:04:20 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [15/Nov/2026 12:04:37] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [15/Nov/2026 12:17:49] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%202%203%204%205 HTTP/1.1" 200 -
+
+--- iniciando 2026-11-15 12:19:27 ---
+===========================================================
+[OK] Servidor Mega Sena rodando na porta 5156
+[URL] Acesse:      http://localhost:5156
+[URL] Análise:     http://localhost:5156/analise/
+[URL] Modelos:     http://localhost:5156/modelos/
+[URL] Conferência: http://localhost:5156/central-conferencias/
+[URL] Des2:        http://localhost:5156/des2/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5156
+ * Running on http://10.0.0.10:5156
+Press CTRL+C to quit
+127.0.0.1 - - [15/Nov/2026 12:19:37] "GET / HTTP/1.1" 200 -
