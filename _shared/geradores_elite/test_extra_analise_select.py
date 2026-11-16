@@ -27,6 +27,8 @@ class TestExtraAnaliseSelect(unittest.TestCase):
         self.assertEqual(vals[-1], "aleatorio")
         self.assertEqual(out["atrasado"]["time_num"], 36)
         self.assertEqual(out["frequente"]["time_num"], 55)
+        fixos = [o["value"] for o in out["opcoes"] if o.get("criterio") == "fixo"]
+        self.assertEqual(fixos, ["1", "36", "55"])
         lote = resolver_time_para_lote("frequente", 3, opcoes_payload=out)
         self.assertEqual([t["time_num"] for t in lote], [55, 55, 55])
         alea = resolver_time_para_lote("aleatorio", 80, opcoes_payload=out)
@@ -45,6 +47,10 @@ class TestExtraAnaliseSelect(unittest.TestCase):
         self.assertTrue(out["sucesso"])
         self.assertEqual(out["frequente"]["trevos"], [1, 2])
         self.assertEqual(out["atrasado"]["trevos"], [3, 4])
+        fixos = [o["label"] for o in out["opcoes"] if o.get("criterio") == "fixo"]
+        self.assertEqual(len(fixos), 15)
+        self.assertIn("03 04", fixos)
+        self.assertIn("01 02", fixos)
         lote = resolver_trevos_para_lote("atrasado", 2, opcoes_payload=out)
         self.assertEqual(lote, [[3, 4], [3, 4]])
         alea = resolver_trevos_para_lote("aleatorio", 15, opcoes_payload=out)

@@ -27,7 +27,8 @@
 
   function linhaTxt(ap) {
     const nums = (ap.dezenas || []).map(pad).join(' ');
-    return ap.mes_abrev ? `${nums} ${ap.mes_abrev}` : nums;
+    const extra = ap.mes_abrev || ap.time_nome || ap.trevos_label || '';
+    return extra ? `${nums} ${extra}` : nums;
   }
 
   function renderLista(payload) {
@@ -53,6 +54,8 @@
           return `<span class="g2-ball ${cls}"${titulo}>${pad(n)}</span>`;
         }).join('')}
           ${ap.mes_abrev ? `<span class="g2-chip">${ap.mes_abrev}</span>` : ''}
+          ${ap.time_nome ? `<span class="g2-chip">${ap.time_nome}</span>` : ''}
+          ${ap.trevos_label ? `<span class="g2-chip">${ap.trevos_label}</span>` : ''}
         </div>
         ${ap.ja_sorteada ? `<p class="small mb-1" style="color:#9f1239;">Já saiu · conc. ${ap.concurso_historico || '?'}${ap.data_historico ? ' · ' + ap.data_historico : ''}</p>` : ''}
         <div class="g2-detalhe d-none">
@@ -78,8 +81,11 @@
           repetidos: document.getElementById('g2Rep').value,
           mes_num: (function () {
             const mesEl = document.getElementById('g2Mes');
-            if (!mesEl) return '';
-            return (window.MesSorteSelect && MesSorteSelect.payloadFromSelect(mesEl)) || mesEl.value || '';
+            const extraEl = document.getElementById('g2Time') || document.getElementById('g2Trevo');
+            if (mesEl) {
+              return (window.MesSorteSelect && MesSorteSelect.payloadFromSelect(mesEl)) || mesEl.value || '';
+            }
+            return (extraEl && extraEl.value) || '';
           })(),
         }),
       });
@@ -228,6 +234,12 @@
     const mesEl = document.getElementById('g2Mes');
     if (mesEl && window.MesSorteSelect) {
       MesSorteSelect.fillFromApi(mesEl, '/geradores-elite', { defaultPrefer: 'atrasado' }).catch(() => {});
+    }
+    if (window.ExtraAnaliseSelect) {
+      const timeEl = document.getElementById('g2Time');
+      const trevoEl = document.getElementById('g2Trevo');
+      if (timeEl) ExtraAnaliseSelect.fillFromApi(timeEl, 'time').catch(() => {});
+      if (trevoEl) ExtraAnaliseSelect.fillFromApi(trevoEl, 'trevo').catch(() => {});
     }
   }
   window.g2a1Abrir = abrir;

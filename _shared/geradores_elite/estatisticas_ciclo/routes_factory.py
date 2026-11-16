@@ -20,6 +20,8 @@ def register_gerador_estatisticas_ciclo(bp: Blueprint, modality_key: str, modali
     def estatisticas_ciclo_page():
         ctx = contexto_estatisticas_ciclo(modality_key)
         extra_mes = bool(ctx.get("extra_mes"))
+        extra_time = bool(ctx.get("extra_time"))
+        extra_trevo = bool(ctx.get("extra_trevo"))
         meses_cores = {}
         if extra_mes:
             try:
@@ -41,6 +43,8 @@ def register_gerador_estatisticas_ciclo(bp: Blueprint, modality_key: str, modali
             padroes_url="/analise/analises-inteligentes/?aba=padroes-ii",
             panorama_url="/analise/analises-inteligentes/?aba=panorama",
             extra_mes=extra_mes,
+            extra_time=extra_time,
+            extra_trevo=extra_trevo,
         )
 
     @bp.route("/api/estatisticas-ciclo/contexto")
@@ -138,6 +142,10 @@ def register_gerador_2a1(bp: Blueprint, modality_key: str, modality_nome: str) -
             txt = " ".join(f"{int(n):02d}" for n in nums)
             if ap.get("mes_abrev"):
                 txt += " " + str(ap.get("mes_abrev"))
+            elif ap.get("time_nome"):
+                txt += " " + str(ap.get("time_nome"))
+            elif ap.get("trevos_label"):
+                txt += " " + str(ap.get("trevos_label"))
             linhas.append(txt)
         return jsonify({
             "sucesso": True,

@@ -5373,6 +5373,14 @@
     }
   };
 
+  TubularApp.prototype._extraOpcoesUrl = function (tail) {
+    const path = (typeof location !== 'undefined' && location.pathname) || '';
+    const token = 'geradores-elite';
+    const at = path.indexOf('/' + token);
+    const root = at >= 0 ? path.slice(0, at + token.length + 1) : '';
+    return root + '/' + String(tail || '').replace(/^\/+/, '');
+  };
+
   TubularApp.prototype._openCmpMesModal = async function () {
     const ov = this.root.querySelector('#tbCmpMesOverlay');
     const sel = this.root.querySelector('#tbCmpMesSelect');
@@ -5383,7 +5391,7 @@
 
     if (kind === 'time') {
       try {
-        const r = await fetch('/geradores-elite/api/time-coracao-opcoes');
+        const r = await fetch(this._extraOpcoesUrl('api/time-coracao-opcoes'));
         const j = await r.json();
         if (!j || !j.sucesso) throw new Error((j && j.erro) || 'Falha');
         this._extraOpcoes = j;
@@ -5394,7 +5402,7 @@
       }
     } else if (kind === 'trevo') {
       try {
-        const r = await fetch('/geradores-elite/api/trevos-opcoes');
+        const r = await fetch(this._extraOpcoesUrl('api/trevos-opcoes'));
         const j = await r.json();
         if (!j || !j.sucesso) throw new Error((j && j.erro) || 'Falha');
         this._extraOpcoes = j;

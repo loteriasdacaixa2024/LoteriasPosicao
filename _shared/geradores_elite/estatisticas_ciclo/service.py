@@ -24,22 +24,86 @@ def tem_gerador_estatisticas_ciclo(modality_key: str) -> bool:
         return key == "diadesorte"
 
 
-def _extra_mes(modality_key: str) -> bool:
+def _extra_flags(modality_key: str) -> Dict[str, bool]:
+    extra = None
     try:
         from geradores_elite.modality_config import MODALITIES
-        return (MODALITIES.get(modality_key) or {}).get("extra") == "mes"
+        extra = (MODALITIES.get(modality_key) or {}).get("extra")
     except Exception:
-        return (modality_key or "").strip().lower() == "diadesorte"
+        extra = "mes" if (modality_key or "").strip().lower() == "diadesorte" else None
+    return {
+        "extra_mes": extra == "mes",
+        "extra_time": extra == "time",
+        "extra_trevo": extra == "trevo",
+    }
+
+
+def anexar_extra_apostas(out: Dict[str, Any], modality_key: str, valor: Optional[Any]) -> None:
+    """Grava mês, time ou trevos em cada aposta, no mesmo critério do select."""
+    apostas = list(out.get("apostas") or [])
+    if not apostas:
+        return
+    flags = _extra_flags(modality_key)
+    n = len(apostas)
+    bruto = valor if valor not in (None, "", 0, "0") else "atrasado"
+    try:
+        if flags["extra_mes"]:
+            meses = resolver_meses_para_lote(bruto, n)
+            if len(meses) < n:
+                meses = (meses + [meses[-1] if meses else 6])[:n]
+                while len(meses) < n:
+                    meses.append(6)
+            for i, ap in enumerate(apostas):
+                mn = int(meses[i])
+                ap["mes_num"] = mn
+                ap["mes_nome"] = MESES_NOME.get(mn, f"Mês {mn}")
+                ap["mes_abrev"] = MESES_ABREV.get(mn, str(mn))
+                ap["extras"] = {"tipo": "mes", "num": mn, "label": ap["mes_nome"]}
+        elif flags["extra_time"]:
+            from geradores_elite.extra_analise_select import (
+                opcoes_time_coracao,
+                resolver_time_para_lote,
+            )
+            payload = opcoes_time_coracao()
+            itens = resolver_time_para_lote(bruto, n, opcoes_payload=payload)
+            for i, ap in enumerate(apostas):
+                it = itens[i] if i < len(itens) else {"time_num": 1, "time_nome": "Time 1"}
+                ap["time_num"] = int(it.get("time_num") or 1)
+                ap["time_nome"] = it.get("time_nome") or f"Time {ap['time_num']}"
+                ap["extras"] = {"tipo": "time", "num": ap["time_num"], "label": ap["time_nome"]}
+        elif flags["extra_trevo"]:
+            from geradores_elite.extra_analise_select import (
+                opcoes_trevos,
+                resolver_trevos_para_lote,
+            )
+            payload = opcoes_trevos()
+            pares = resolver_trevos_para_lote(bruto, n, opcoes_payload=payload)
+            for i, ap in enumerate(apostas):
+                par = list(pares[i] if i < len(pares) else (pares[-1] if pares else [1, 2]))
+                ap["trevos"] = par
+                ap["trevos_label"] = " ".join(f"{int(x):02d}" for x in par)
+                ap["extras"] = {"tipo": "trevo", "numeros": par, "label": ap["trevos_label"]}
+    except Exception:
+        return
+
+
+def aba_panorama_num(modality_key: str) -> int:
+    """Número da aba Panorama Histórico na análise real."""
+    if (modality_key or "").strip().lower() in ("diadesorte", "supersete"):
+        return 7
+    return 6
 
 
 def _carregar_padroes(modality_key: str) -> Dict[str, Any]:
-    """Catálogo das abas 4 (Padrões II) e 7 (Panorama Histórico)."""
+    """Catálogo das abas 4 (Padrões II) e do Panorama Histórico."""
     vazio = {
+        "ok": False,
         "catalogo": [],
         "total": 0,
         "ja_sairam": 0,
         "faltam_sair": 0,
         "faltantes": [],
+        "aba_panorama": aba_panorama_num(modality_key),
         "fonte_aba4": "/analise/analises-inteligentes/?aba=padroes-ii",
         "fonte_aba7": "/analise/analises-inteligentes/?aba=panorama",
     }
@@ -51,6 +115,7 @@ def _carregar_padroes(modality_key: str) -> Dict[str, Any]:
         padroes = list(cat.get("padroes") or [])
         faltantes = [p for p in padroes if _eh_faltante(p)]
         return {
+            "ok": True,
             "catalogo": padroes,
             "total": int(cat.get("total_padroes") or len(padroes)),
             "ja_sairam": int(cat.get("total_padroes_com_frequencia") or (len(padroes) - len(faltantes))),
@@ -63,11 +128,30 @@ def _carregar_padroes(modality_key: str) -> Dict[str, Any]:
                 }
                 for p in faltantes[:20]
             ],
+            "aba_panorama": aba_panorama_num(modality_key),
             "fonte_aba4": "/analise/analises-inteligentes/?aba=padroes-ii",
             "fonte_aba7": "/analise/analises-inteligentes/?aba=panorama",
         }
     except Exception:
         return vazio
+
+
+def _padroes_para_tela(modality_key: str) -> Dict[str, Any]:
+    """Resumo da análise real, sem o catálogo completo."""
+    info = _carregar_padroes(modality_key)
+    tela = {
+        "aba_panorama": info.get("aba_panorama") or aba_panorama_num(modality_key),
+        "fonte_aba4": info.get("fonte_aba4"),
+        "fonte_aba7": info.get("fonte_aba7"),
+    }
+    if info.get("ok"):
+        tela.update({
+            "total": info.get("total"),
+            "ja_sairam": info.get("ja_sairam"),
+            "faltam_sair": info.get("faltam_sair"),
+            "faltantes": info.get("faltantes") or [],
+        })
+    return tela
 
 
 def contexto_estatisticas_ciclo(modality_key: str = "diadesorte") -> Dict[str, Any]:
@@ -107,7 +191,7 @@ def contexto_estatisticas_ciclo(modality_key: str = "diadesorte") -> Dict[str, A
         "dezena_max": int(ciclo.get("dezena_max") or ui.get("dezena_max") or 31),
         "sorteadas": int(ui.get("sorteadas") or 7),
         "pad_width": int(ui.get("pad_width") or 2),
-        "extra_mes": _extra_mes(modality_key),
+        **_extra_flags(modality_key),
         "ciclo": {
             "numero_ciclo": ciclo.get("numero_ciclo"),
             "concurso_inicio": ciclo.get("concurso_inicio"),
@@ -129,10 +213,7 @@ def contexto_estatisticas_ciclo(modality_key: str = "diadesorte") -> Dict[str, A
         },
         "linhas_basicas": linhas,
         "diagonais": _resumo_diagonais_ctx(linhas, int(ciclo.get("dezena_min") or 1), int(ciclo.get("dezena_max") or 31)),
-        "padroes": {
-            "fonte_aba4": "/analise/analises-inteligentes/?aba=padroes-ii",
-            "fonte_aba7": "/analise/analises-inteligentes/?aba=panorama",
-        },
+        "padroes": _padroes_para_tela(modality_key),
         "ciclo_panorama": resumo_ciclo_panorama(len(pendentes), int(ui.get("sorteadas") or 7)),
         "fontes": {
             "estatisticas_basicas": "/analise/escolha-visual/",
@@ -179,24 +260,7 @@ def gerar_apostas_estatisticas_ciclo(
     if not out.get("sucesso"):
         return out
 
-    if ctx.get("extra_mes"):
-        n = len(out["apostas"])
-        meses = resolver_meses_para_lote(mes_valor or "atrasado", n)
-        if len(meses) < n:
-            meses = (meses + [meses[-1] if meses else 6])[:n]
-            while len(meses) < n:
-                meses.append(6)
-
-        for i, ap in enumerate(out["apostas"]):
-            mn = int(meses[i])
-            ap["mes_num"] = mn
-            ap["mes_nome"] = MESES_NOME.get(mn, f"Mês {mn}")
-            ap["mes_abrev"] = MESES_ABREV.get(mn, str(mn))
-            ap["extras"] = {
-                "tipo": "mes",
-                "num": mn,
-                "label": ap["mes_nome"],
-            }
+    anexar_extra_apostas(out, modality_key, mes_valor)
 
     out.update({
         "ciclo": ciclo,
@@ -215,6 +279,7 @@ def gerar_apostas_estatisticas_ciclo(
             "distintos": out.get("padroes_distintos"),
             "usados": out.get("padroes_usados"),
             "faltantes": info_pad.get("faltantes"),
+            "aba_panorama": info_pad.get("aba_panorama"),
             "fonte_aba4": info_pad.get("fonte_aba4"),
             "fonte_aba7": info_pad.get("fonte_aba7"),
         },
@@ -231,6 +296,7 @@ def _anexar_meses(out: Dict[str, Any], ctx: Dict[str, Any], mes_valor: Optional[
     if not out.get("sucesso"):
         return out
     if not ctx.get("extra_mes"):
+        anexar_extra_apostas(out, str(ctx.get("modality_key") or ""), mes_valor)
         est = ctx.get("estatisticas") or {}
         out.update({
             "ciclo": ctx.get("ciclo"),
@@ -320,6 +386,7 @@ def gerar_apostas_estatisticas_ciclo_panorama(
             "distintos": out.get("padroes_distintos"),
             "usados": out.get("padroes_usados"),
             "faltantes": info_pad.get("faltantes"),
+            "aba_panorama": info_pad.get("aba_panorama"),
             "fonte_aba4": info_pad.get("fonte_aba4"),
             "fonte_aba7": info_pad.get("fonte_aba7"),
         }

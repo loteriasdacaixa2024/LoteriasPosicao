@@ -2,6 +2,9 @@
 {% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
 
 {% block content %}
+{% set aba_panorama = 7 if modality_key in ('diadesorte', 'supersete') else 6 %}
+{% set extra_time = extra_time|default(modality_key == 'timemania', true) %}
+{% set extra_trevo = extra_trevo|default(modality_key == 'maismilionaria', true) %}
 <style>
 #gec-root .page-links a {
   border-color: var(--primary); color: var(--primary);
@@ -66,6 +69,8 @@
 #gec-root .gec-chip-diag { background: #eef6ff; border-color: #bfd7f2; color: #1e4b7b; }
 #gec-root .gec-chip-warn { background: #fff1f2; border-color: #fecdd3; color: #9f1239; }
 #gec-root .gec-chip-inedito { background: #d4b31a; border-color: #b89a18; color: #171303; }
+#gec-root a.gec-chip-link { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+#gec-root a.gec-chip-link:hover { color: var(--primary-xdark, #5c4a08); }
 #gec-root .gec-card.gec-ja-saiu { border-color: #fecdd3; border-left-color: #e11d48; background: #fff7f8; }
 #gec-root .gec-card.gec-inedito { border-left-color: #d4b31a; }
 #gec-root [data-gec-ult-ordem].active {
@@ -92,13 +97,15 @@
      data-api="{{ api_base }}"
      data-modality="{{ modality_key }}"
      data-extra-mes="{{ '1' if extra_mes else '0' }}"
+     data-extra-time="{{ '1' if extra_time else '0' }}"
+     data-extra-trevo="{{ '1' if extra_trevo else '0' }}"
      data-manual="/geradores-elite/escolha-tubular-apostas/?aba=manual"
      data-volantes="/geradores-elite/escolha-tubular-apostas/?aba=volantes">
   <div class="d-flex flex-wrap gap-2 mb-3 page-links">
     <a class="btn btn-sm btn-outline-secondary" href="{{ escolha_url }}"><i class="fas fa-arrow-left"></i> Estatísticas Básicas</a>
     <a class="btn btn-sm btn-outline-secondary" href="{{ ciclo_url }}"><i class="fas fa-arrow-left"></i> Progresso do Ciclo</a>
     <a class="btn btn-sm btn-outline-secondary" href="{{ padroes_url }}"><i class="fas fa-th-list"></i> 4 · Padrões II</a>
-    <a class="btn btn-sm btn-outline-secondary" href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}"><i class="fas fa-history"></i> 6 · Panorama Histórico</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}"><i class="fas fa-history"></i> {{ aba_panorama }} · Panorama Histórico</a>
     <a class="btn btn-sm btn-outline-secondary" href="/geradores-elite/"><i class="fas fa-bolt"></i> Elite</a>
   </div>
   <ul class="nav nav-tabs mb-3" role="tablist">
@@ -125,12 +132,12 @@
         ·
         <a href="{{ padroes_url }}">aba 4 · Padrões II</a>
         ·
-        <a href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}">aba 6 · Panorama (padrão · sequência · soma)</a>
+        <a href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}">aba {{ aba_panorama }} · Panorama (padrão · sequência · soma)</a>
       </p>
       <p class="gec-regra mb-0" id="gecRegraPanorama">
         <strong>Como o Panorama gera:</strong>
         sorteia um <strong>padrão</strong>, um <strong>Nº de sequência</strong> e um <strong>status de soma</strong>
-        (dentro / próxima / fora da média) na tabela da aba 6.
+        (dentro / próxima / fora da média) na tabela da aba {{ aba_panorama }}.
         Monta apostas inéditas nesse formato.
         <strong>Ciclo no começo</strong> (muitas pendentes) = só aleatório.
         <strong>Ciclo no fim</strong> (poucas pendentes) = aí o ciclo entra e tenta encaixar as que faltam.
@@ -141,7 +148,7 @@
         o ciclo não manda no formato da aposta. Ele só diz quais dezenas ainda não saíram;
         a análise diz como o jogo deve ficar.
         Cada aposta usa um <strong>padrão inicial diferente</strong> (85 da aba 4).
-        Pelo menos uma usa um padrão que <strong>ainda não saiu</strong> (lista da aba 6).
+        Pelo menos uma usa um padrão que <strong>ainda não saiu</strong> (lista da aba {{ aba_panorama }}).
         Não há volantes iguais no lote.
       </p>
     </div>
@@ -182,7 +189,7 @@
 
   <div class="card shadow-sm mb-3">
     <div class="card-header fw-bold small" style="background:var(--accent-light,#fcf9e8);">
-      <i class="fas fa-th-list me-1"></i> Padrões iniciais — abas 4 e 6
+      <i class="fas fa-th-list me-1"></i> Padrões iniciais — abas 4 e {{ aba_panorama }}
     </div>
     <div class="card-body py-2" id="gecPadroes">
       <p class="text-muted small mb-0">Carregando…</p>
@@ -212,9 +219,58 @@
           <input type="number" class="form-control form-control-sm" id="gecQtd" value="10" min="1" max="200">
         </div>
         {% if extra_mes %}
-        <div class="col-12 col-md-4">
-          <label class="form-label small mb-0">Mês da Sorte</label>
-          <select class="form-select form-select-sm" id="gecMes"></select>
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-0" for="gecMes">Mês da Sorte</label>
+          <select class="form-select form-select-sm" id="gecMes">
+            <option value="atrasado" selected>+ Atrasado</option>
+            <option value="frequente">+ Frequente</option>
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+            <option value="aleatorio">+ Aleatório</option>
+          </select>
+        </div>
+        {% elif extra_time %}
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-0" for="gecTime">Time do Coração</label>
+          <select class="form-select form-select-sm" id="gecTime">
+            <option value="atrasado" selected>+ Atrasado</option>
+            <option value="frequente">+ Frequente</option>
+            <option value="aleatorio">+ Aleatório</option>
+          </select>
+        </div>
+        {% elif extra_trevo %}
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-0" for="gecTrevo">Trevos</label>
+          <select class="form-select form-select-sm" id="gecTrevo">
+            <option value="atrasado" selected>+ Atrasado</option>
+            <option value="frequente">+ Frequente</option>
+            <option value="01-02">01 02</option>
+            <option value="01-03">01 03</option>
+            <option value="01-04">01 04</option>
+            <option value="01-05">01 05</option>
+            <option value="01-06">01 06</option>
+            <option value="02-03">02 03</option>
+            <option value="02-04">02 04</option>
+            <option value="02-05">02 05</option>
+            <option value="02-06">02 06</option>
+            <option value="03-04">03 04</option>
+            <option value="03-05">03 05</option>
+            <option value="03-06">03 06</option>
+            <option value="04-05">04 05</option>
+            <option value="04-06">04 06</option>
+            <option value="05-06">05 06</option>
+            <option value="aleatorio">+ Aleatório</option>
+          </select>
         </div>
         {% endif %}
         <div class="col-12 d-flex flex-wrap gap-2 align-items-center mt-1">
@@ -265,10 +321,13 @@
 </div>
 
 {% if extra_mes %}
-<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=3"></script>
 {% endif %}
-<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pan4"></script>
-<script src="{{ url_for('geradores_elite.static', filename='gerador_2a1.js') }}?v=2a1i"></script>
+{% if extra_time or extra_trevo %}
+<script src="{{ url_for('geradores_elite.static', filename='extra_analise_select.js') }}?v=1"></script>
+{% endif %}
+<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pan8"></script>
+<script src="{{ url_for('geradores_elite.static', filename='gerador_2a1.js') }}?v=2a1j"></script>
 <script>
 (function () {
   const tab2a = document.getElementById('gecTab2a');

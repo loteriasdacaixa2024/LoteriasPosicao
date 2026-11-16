@@ -15,7 +15,16 @@
 #g2a1 .g2-fold-btn:hover { background: #fcf9e8; }
 #g2a1 .g2-card {
   border: 1px solid #e5e7eb; border-left: 3px solid var(--primary, #c08b00);
-  border-radius: 10px; padding: .7rem .8rem; background: #fff;
+  border-radius: 10px; padding: .7rem .8rem; background: #fff; margin-bottom: 0;
+}
+#g2a1 #g2Lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  #g2a1 #g2Lista { grid-template-columns: 1fr; }
 }
 #g2a1 .g2-chip {
   display: inline-block; font-size: .72rem; font-weight: 650;
@@ -81,7 +90,7 @@
 
   <div class="card shadow-sm mb-3">
     <div class="card-header fw-bold small" style="background:var(--accent-light,#fcf9e8);">
-      <i class="fas fa-th-list me-1"></i> Padrões iniciais — abas 4 e 6
+      <i class="fas fa-th-list me-1"></i> Padrões iniciais — abas 4 e {{ aba_panorama|default(7 if modality_key in ('diadesorte', 'supersete') else 6) }}
     </div>
     <div class="card-body py-2" id="g2Padroes">
       <p class="text-muted small mb-0">Carregando…</p>
@@ -93,11 +102,67 @@
       Gerar apostas
     </div>
     <div class="card-body">
+      <p class="text-muted small mb-2">Usa os números e a sequência dos padrões do <a href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}#aiPanSeqTitulo">Panorama Histórico</a> para gerar as apostas.</p>
       <div class="row g-2 align-items-end">
         <div class="col-6 col-md-2">
           <label class="form-label small mb-0" for="g2Qtd">Apostas</label>
           <input type="number" class="form-control form-control-sm" id="g2Qtd" value="10" min="1" max="30">
         </div>
+        {% if extra_mes %}
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-0" for="g2Mes">Mês da Sorte</label>
+          <select class="form-select form-select-sm" id="g2Mes">
+            <option value="atrasado" selected>+ Atrasado</option>
+            <option value="frequente">+ Frequente</option>
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+            <option value="aleatorio">+ Aleatório</option>
+          </select>
+        </div>
+        {% elif extra_time %}
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-0" for="g2Time">Time do Coração</label>
+          <select class="form-select form-select-sm" id="g2Time">
+            <option value="atrasado" selected>+ Atrasado</option>
+            <option value="frequente">+ Frequente</option>
+            <option value="aleatorio">+ Aleatório</option>
+          </select>
+        </div>
+        {% elif extra_trevo %}
+        <div class="col-6 col-md-4">
+          <label class="form-label small mb-0" for="g2Trevo">Trevos</label>
+          <select class="form-select form-select-sm" id="g2Trevo">
+            <option value="atrasado" selected>+ Atrasado</option>
+            <option value="frequente">+ Frequente</option>
+            <option value="01-02">01 02</option>
+            <option value="01-03">01 03</option>
+            <option value="01-04">01 04</option>
+            <option value="01-05">01 05</option>
+            <option value="01-06">01 06</option>
+            <option value="02-03">02 03</option>
+            <option value="02-04">02 04</option>
+            <option value="02-05">02 05</option>
+            <option value="02-06">02 06</option>
+            <option value="03-04">03 04</option>
+            <option value="03-05">03 05</option>
+            <option value="03-06">03 06</option>
+            <option value="04-05">04 05</option>
+            <option value="04-06">04 06</option>
+            <option value="05-06">05 06</option>
+            <option value="aleatorio">+ Aleatório</option>
+          </select>
+        </div>
+        {% endif %}
         <div class="col-12 col-md-4">
           <span class="g2-rep-aviso">Em Nenhum, os pares e ímpares que acabaram de sair não voltam.</span>
           <label class="form-label small mb-0" for="g2Rep">Repetidos do concurso anterior</label>
@@ -108,12 +173,6 @@
             <option value="0" selected>Nenhum</option>
           </select>
         </div>
-        {% if extra_mes %}
-        <div class="col-12 col-md-3">
-          <label class="form-label small mb-0" for="g2Mes">Mês da Sorte</label>
-          <select class="form-select form-select-sm" id="g2Mes"></select>
-        </div>
-        {% endif %}
         <div class="col-12 d-flex flex-wrap gap-2 mt-1">
           <button type="button" class="btn fw-bold" id="g2Gerar" style="background:var(--primary,#c08b00);color:#fff;">
             <i class="fas fa-bolt"></i> Gerar

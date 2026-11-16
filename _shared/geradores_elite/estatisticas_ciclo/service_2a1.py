@@ -93,6 +93,8 @@ def contexto_2a1(modality_key: str = "diadesorte") -> Dict[str, Any]:
         "dezena_max": ctx["dezena_max"],
         "sorteadas": ctx["sorteadas"],
         "extra_mes": ctx.get("extra_mes"),
+        "extra_time": ctx.get("extra_time"),
+        "extra_trevo": ctx.get("extra_trevo"),
         "ciclo": {
             "numero_ciclo": ciclo.get("numero_ciclo"),
             "concurso_atual": ciclo.get("concurso_atual"),
@@ -178,8 +180,8 @@ def gerar_2a1(
     )
     if not out.get("sucesso"):
         return out
-    if ctx.get("extra_mes"):
-        _anexar_meses(out, mes_valor)
+    from .service import anexar_extra_apostas
+    anexar_extra_apostas(out, modality_key, mes_valor)
     for ap in out.get("apostas") or []:
         chave = frozenset(int(n) for n in (ap.get("dezenas") or []))
         ocor = list(mapa_hist.get(chave) or [])

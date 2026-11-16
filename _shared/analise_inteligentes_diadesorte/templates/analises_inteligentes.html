@@ -107,6 +107,19 @@
   }
   #ai-root .ai-table td { text-align:center; vertical-align:middle; }
   #ai-root .ai-table td.td-left { text-align:left !important; }
+  /* Bloco no centro da célula: números pela direita, texto/padrão pela esquerda. */
+  #ai-root table.ai-table td.ai-td-padrao-bloco {
+    text-align: center !important;
+  }
+  #ai-root table.ai-table td.ai-td-padrao-bloco > .ai-col-alinha {
+    display: inline-block;
+    vertical-align: middle;
+    box-sizing: border-box;
+    font-variant-numeric: tabular-nums;
+    max-width: 100%;
+  }
+  #ai-root table.ai-table td.ai-td-padrao-bloco > .ai-bloco-dir { text-align: right !important; }
+  #ai-root table.ai-table td.ai-td-padrao-bloco > .ai-bloco-esq { text-align: left !important; }
   /* Dezenas: uma linha, largura um pouco menor para liberar espaço aos dígitos */
   #ai-root .ai-table th.col-dezenas,
   #ai-root .ai-table td.td-dezenas {
@@ -489,7 +502,7 @@
     min-width: 0;
     max-width: none;
     white-space: nowrap;
-    text-align: left !important;
+    text-align: center !important;
     padding-left: .28rem;
     padding-right: .28rem;
   }
@@ -516,8 +529,11 @@
     justify-self: center;
   }
   #ai-root td.td-diag .ai-diag-slot {
+    display: inline-block;
     white-space: nowrap;
     min-height: 1em;
+    min-width: 4.5rem;
+    text-align: left;
   }
   #ai-root td.td-diag .ai-diag-dir {
     display: inline-block;
@@ -623,7 +639,7 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
-  #ai-root #aiTabelaPadroesII td.td-dist .ai-col-alinha { min-width: 7.4rem; }
+  #ai-root #aiTabelaPadroesII td.td-dist .ai-col-alinha { min-width: 7.4rem; text-align: left; }
   #ai-root #aiTabelaPadroesII td.td-jogos .ai-col-alinha { min-width: 4.8rem; }
   #ai-root #aiTabelaPadroesII td.td-freq .ai-col-alinha { min-width: 6.2rem; }
   #ai-root #aiTabelaPadroesII td.td-condiag .ai-col-alinha { min-width: 2.4rem; }
@@ -952,7 +968,7 @@
     font-size: .82rem;
   }
   #ai-root #aiTabelaCheq td.td-soma {
-    text-align: left !important;
+    text-align: center !important;
     white-space: nowrap;
     padding-left: .4rem;
   }
@@ -962,6 +978,7 @@
     justify-content: flex-start;
     gap: .18rem;
     white-space: nowrap;
+    min-width: 11.5rem;
   }
   #ai-root #aiTabelaCheq td.td-soma .ai-col-alinha {
     display: inline-block;
@@ -1342,20 +1359,38 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
-  #ai-root #aiTabelaPanResumo td.td-res-n .ai-col-alinha { min-width: 1.5rem; }
-  #ai-root #aiTabelaPanResumo td.td-res-pad .ai-col-alinha { min-width: 5.2rem; }
+  #ai-root #aiTabelaPanResumo td.td-res-n .ai-col-alinha { min-width: 2.2rem; }
+  #ai-root #aiTabelaPanResumo td.td-res-pad .ai-col-alinha { text-align: left; }
+  #ai-root #aiTabelaPanResumo td.td-res-pad .ai-col-alinha { min-width: 7.6rem; }
   #ai-root #aiTabelaPanResumo td.td-res-jogos .ai-col-alinha,
   #ai-root #aiTabelaPanResumo td.td-res-valido .ai-col-alinha,
   #ai-root #aiTabelaPanResumo td.td-res-rest .ai-col-alinha,
   #ai-root #aiTabelaPanResumo td.td-res-seq .ai-col-alinha,
-  #ai-root #aiTabelaPanResumo td.td-res-aposta .ai-col-alinha { min-width: 3.6rem; }
-  #ai-root #aiTabelaPanResumo td.td-res-soma .ai-col-alinha { min-width: 2rem; }
-  #ai-root #aiTabelaPanResumo td.td-res-dig .ai-col-alinha { min-width: 6.8rem; }
+  #ai-root #aiTabelaPanResumo td.td-res-aposta .ai-col-alinha { min-width: 5.8rem; }
+  #ai-root #aiTabelaPanResumo td.td-res-soma .ai-col-alinha { min-width: 2.8rem; }
+  #ai-root #aiTabelaPanResumo td.td-res-dig {
+    text-align: right !important;
+  }
+  #ai-root #aiTabelaPanResumo td.td-res-dig .ai-col-alinha {
+    display: inline !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    text-align: right !important;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  #ai-root #aiTabelaPanSeq td.td-diag,
+  #ai-root #aiTabelaPanResumo td.td-diag {
+    text-align: right !important;
+  }
+  #ai-root #aiTabelaPanSeq td.td-diag .ai-col-alinha,
   #ai-root #aiTabelaPanResumo td.td-diag .ai-col-alinha {
-    display: inline-flex;
-    align-items: center;
-    width: auto;
-    min-width: 0;
+    display: inline !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    text-align: right !important;
     white-space: nowrap;
     font-size: .72rem;
   }
@@ -1371,33 +1406,54 @@
   #ai-root #aiTabelaPanSeq td.td-pan-seqn,
   #ai-root #aiTabelaPanSeq th.col-pan-soma,
   #ai-root #aiTabelaPanSeq td.td-pan-soma,
-  #ai-root #aiTabelaPanSeq th.col-pan-status,
-  #ai-root #aiTabelaPanSeq td.td-pan-status {
+  #ai-root #aiTabelaPanSeq th.col-pan-status {
     text-align: center !important;
   }
+  #ai-root #aiTabelaPanSeq td.td-pan-status {
+    text-align: right !important;
+  }
   #ai-root #aiTabelaPanSeq td.td-pan-pad .ai-col-alinha,
+  #ai-root #aiTabelaPanSeq td.td-pan-jogos .ai-col-alinha,
   #ai-root #aiTabelaPanSeq td.td-pan-seqn .ai-col-alinha,
-  #ai-root #aiTabelaPanSeq td.td-pan-soma .ai-col-alinha,
-  #ai-root #aiTabelaPanSeq td.td-pan-status .ai-col-alinha {
+  #ai-root #aiTabelaPanSeq td.td-pan-soma .ai-col-alinha {
     display: inline-block;
-    text-align: left;
     font-variant-numeric: tabular-nums;
   }
+  #ai-root #aiTabelaPanSeq td.td-pan-pad .ai-col-alinha { text-align: left; }
+  #ai-root #aiTabelaPanSeq td.td-pan-status .ai-col-alinha {
+    display: inline !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    text-align: right !important;
+    white-space: nowrap;
+  }
+  #ai-root #aiTabelaPanSeq td.td-pan-jogos .ai-col-alinha,
+  #ai-root #aiTabelaPanSeq td.td-pan-seqn .ai-col-alinha,
+  #ai-root #aiTabelaPanSeq td.td-pan-soma .ai-col-alinha { text-align: right; }
   #ai-root #aiTabelaPanSeq td.td-pan-npad,
   #ai-root #aiTabelaPanSeq td.td-pan-jogos {
     font-variant-numeric: tabular-nums;
   }
   #ai-root #aiTabelaPanSeq td.td-pan-pad .ai-col-alinha { min-width: 7.6rem; }
-  #ai-root #aiTabelaPanSeq td.td-pan-seqn .ai-col-alinha { min-width: 4.2rem; }
-  #ai-root #aiTabelaPanSeq td.td-pan-soma .ai-col-alinha { min-width: 2.4rem; }
-  #ai-root #aiTabelaPanSeq td.td-pan-status .ai-col-alinha { min-width: 8.2rem; }
+  #ai-root #aiTabelaPanSeq td.td-pan-jogos .ai-col-alinha { min-width: 5.8rem; }
+  #ai-root #aiTabelaPanSeq td.td-pan-seqn .ai-col-alinha { min-width: 5.2rem; }
+  #ai-root #aiTabelaPanSeq td.td-pan-soma .ai-col-alinha { min-width: 2.8rem; }
+  #ai-root #aiTabelaPanSeq td.td-pan-dez {
+    text-align: center !important;
+  }
   #ai-root #aiTabelaPanSeq .ai-pan-dez {
-    width: 12.5rem;
+    display: inline-block;
+    width: 22ch;
+    max-width: 100%;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
     font-size: .75rem;
+    letter-spacing: 0;
+    text-align: center;
     border: 1px solid rgba(0,0,0,.15);
     border-radius: 4px;
-    padding: .05rem .3rem;
+    padding: .05rem .2rem;
     background: #fff;
   }
   /* Coluna observada: o que a tabela está medindo (sequência ou padrão). */
@@ -2503,10 +2559,10 @@
 
 {% block scripts %}
 {% if extra_mes %}
-<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=3"></script>
 {% endif %}
 {% if modality_key == 'supersete' %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20261025v1"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20261115v1"></script>
 {% endif %}
 <script>
 (function () {
@@ -2843,6 +2899,84 @@
     renderPager('aiPagerRes', 'res', metaRes);
     renderPager('aiPagerPad', 'pad', metaPad);
     atualizarIndicadoresSort();
+  }
+
+  function tipoColunaAi(header) {
+    const h = String(header || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    if (!h || /selecionar|marcar/.test(h)) return 'pular';
+    if (/^(ações|acao|gerar)$/.test(h) || h.indexOf('gerar apostas') === 0) return 'pular';
+    if (/dezena|d[ií]gito|diag|data|^padr[aã]o\b|distribui|descri|status|faixa|hora|situa|m[eê]s|prefix|sugest|b\+m|par\/|n[aã]o sa|aposta$/.test(h)) return 'esq';
+    return 'dir';
+  }
+
+  function padronizarTabelasAi(root) {
+    (root || document).querySelectorAll('table.ai-table').forEach((table) => {
+      const heads = Array.from(table.querySelectorAll('thead th')).map((th) => th.innerText || '');
+      const porCol = new Map();
+      table.querySelectorAll('tbody td').forEach((td) => {
+        if (td.colSpan > 1) return;
+        const idx = td.cellIndex;
+        if (td.dataset.aiAlinhado === '1') {
+          const span = td.querySelector(':scope > .ai-bloco-dir, :scope > .ai-bloco-esq');
+          if (span) {
+            const arr = porCol.get(idx) || [];
+            arr.push(span);
+            porCol.set(idx, arr);
+          }
+          return;
+        }
+        if (td.querySelector('input, button, select, textarea, .ai-pan-casas, .ai-pan-dez, .nao-sairam-cell') || td.classList.contains('td-diag') || td.classList.contains('td-pan-status') || td.classList.contains('td-res-dig')) {
+          td.dataset.aiAlinhado = '1';
+          return;
+        }
+        const tipo = tipoColunaAi(heads[idx] || '');
+        if (tipo === 'pular') {
+          td.dataset.aiAlinhado = '1';
+          return;
+        }
+        let span = td.querySelector(':scope > .ai-col-alinha');
+        if (!span) {
+          span = document.createElement('span');
+          span.className = 'ai-col-alinha';
+          while (td.firstChild) span.appendChild(td.firstChild);
+          td.appendChild(span);
+        }
+        span.classList.add('ai-col-alinha', tipo === 'esq' ? 'ai-bloco-esq' : 'ai-bloco-dir');
+        span.classList.remove(tipo === 'esq' ? 'ai-bloco-dir' : 'ai-bloco-esq');
+        td.classList.add('ai-td-padrao-bloco');
+        td.classList.remove('text-start');
+        td.dataset.aiAlinhado = '1';
+        const arr = porCol.get(idx) || [];
+        arr.push(span);
+        porCol.set(idx, arr);
+      });
+      porCol.forEach((spans) => {
+        let max = 0;
+        spans.forEach((s) => {
+          s.style.width = 'auto';
+          max = Math.max(max, s.scrollWidth);
+        });
+        if (!max) return;
+        const w = max + 'px';
+        spans.forEach((s) => { s.style.width = w; });
+      });
+    });
+  }
+
+  function instalarAlinhamentoTabelas() {
+    const root = document.getElementById('ai-root');
+    if (!root || root.dataset.aiAlinhaObs === '1') return;
+    root.dataset.aiAlinhaObs = '1';
+    let timer = 0;
+    const obs = new MutationObserver(() => {
+      if (timer) return;
+      timer = setTimeout(() => {
+        timer = 0;
+        padronizarTabelasAi(root);
+      }, 60);
+    });
+    obs.observe(root, { childList: true, subtree: true });
+    padronizarTabelasAi(root);
   }
 
   async function carregarResultados() {
@@ -3395,7 +3529,7 @@
         const diags = (typeof diagsDaAposta === 'function')
           ? diagsDaAposta({ dezenas: infoR.dez, dezenas_fmt: r.dezenas_fmt })
           : [];
-        const diagHtml = (typeof htmlDiagTexto === 'function') ? htmlDiagTexto(diags) : '—';
+        const diagHtml = (typeof htmlDiagTexto === 'function') ? htmlDiagTexto(diags, { lado: 'dir' }) : '—';
         const ult = ultimo && Number(r.concurso) === Number(ultimo) ? ' class="tr-padrao-ultimo"' : '';
         const aposta = infoR.aposta;
         const bloco = (cls, html) => `<td class="${cls}"><span class="ai-col-alinha">${html}</span></td>`;
@@ -3468,7 +3602,7 @@
           <td class="td-pan-jogos"><span class="ai-col-alinha">${jogos}</span></td>
           <td class="td-pan-seqn ai-col-medida"><span class="ai-col-alinha">${seq}</span></td>
           <td class="td-pan-dez"><input class="ai-pan-dez" data-concurso="${esc(r.concurso)}" value="${esc(r.dezenas_fmt || '')}" inputmode="numeric" autocomplete="off" title="Edite as dezenas de 01 a 31. Padrão, soma, status e diagonais acompanham."></td>
-          <td class="td-diag"><span class="ai-col-alinha">${(typeof htmlDiagTexto === 'function') ? htmlDiagTexto(diagsDaAposta(r)) : '—'}</span></td>
+          <td class="td-diag"><span class="ai-col-alinha">${(typeof htmlDiagTexto === 'function') ? htmlDiagTexto(diagsDaAposta(r), { lado: 'dir' }) : '—'}</span></td>
           <td class="td-pan-soma"><span class="ai-col-alinha">${esc(r.soma != null ? r.soma : '—')}</span></td>
           <td class="td-pan-status"><span class="ai-col-alinha">${statusPill(r.status_media, r.status_media_label)}</span></td>
         </tr>`;
@@ -4398,20 +4532,36 @@
     return `Dif ${fmtVol(dif)} = Freq. ${fmtVol(freq)} − Con/Diag ${fmtVol(n)}. É quantas vezes este padrão saiu sem diagonal.`;
   }
 
-  function htmlDiagTexto(list) {
+  function htmlDiagTexto(list, opts) {
+    if (opts && opts.lado === 'dir') {
+      const itens = (list || []).slice(0, 3).map((d) => {
+        const nums = String((d && d.nums_fmt) || '').trim();
+        const dir = String((d && d.dir_sym) || '').trim();
+        if (!nums) return '';
+        return `${dir ? `<span class="ai-diag-dir">${esc(dir)}</span>` : ''}${esc(nums)}`;
+      }).filter(Boolean);
+      if (!itens.length) return '<span class="text-muted">—</span>';
+      return itens.join('<span class="ai-diag-sep"> | </span>');
+    }
+    const esquerda = !!(opts && opts.lado === 'esq');
     const arr = (list || []).slice(0, 3);
-    if (!arr.length) return '<span class="text-muted">—</span>';
     const slots = ['', '', ''];
-    arr.forEach((d, i) => {
-      const nums = String((d && d.nums_fmt) || '').trim();
-      const dir = String((d && d.dir_sym) || '').trim();
-      slots[3 - arr.length + i] = nums
-        ? `${dir ? `<span class="ai-diag-dir">${esc(dir)}</span>` : ''}${esc(nums)}`
-        : '';
-    });
+    if (!arr.length) {
+      if (!esquerda) return '<span class="text-muted">—</span>';
+      return '<span class="ai-diag-slot ai-diag-nada"><span class="text-muted">—</span></span>';
+    } else {
+      arr.forEach((d, i) => {
+        const nums = String((d && d.nums_fmt) || '').trim();
+        const dir = String((d && d.dir_sym) || '').trim();
+        const idx = esquerda ? i : (3 - arr.length + i);
+        slots[idx] = nums
+          ? `${dir ? `<span class="ai-diag-dir">${esc(dir)}</span>` : ''}${esc(nums)}`
+          : '';
+      });
+    }
     return slots.map((s, i) => {
       const sep = (i > 0)
-        ? `<span class="ai-diag-sep">${(slots[i - 1] && s) ? '|' : ''}</span>`
+        ? `<span class="ai-diag-sep">${(slots[i - 1] && s && arr.length) ? '|' : ''}</span>`
         : '';
       return `${sep}<span class="ai-diag-slot">${s}</span>`;
     }).join('');
@@ -6973,6 +7123,7 @@
     iniciarAbaChecagem();
     receberAcertosGrade();
   }
+  instalarAlinhamentoTabelas();
   carregarResultados().then(() => {
     if (aba0 === 'combinacoes') COMB_SKIP_NEXT_AUTO = true;
     if (aba0 && aba0 !== 'resultados' && aba0 !== 'checagem-seq') goAba(aba0);
@@ -6992,7 +7143,23 @@
       if (pad) abrirJogosPadrao(pad);
       else goAba('padroes-ii');
     }
-    if (aba0 === 'panorama') carregarHistoricoCompleto();
+    if (aba0 === 'panorama') {
+      const hashId = (location.hash || '').replace(/^#/, '');
+      const querSecao = /^[A-Za-z][\w-]*$/.test(hashId);
+      const rolarSecao = () => {
+        if (!querSecao) return;
+        const alvo = document.getElementById(hashId);
+        if (!alvo || !alvo.closest('#tab-panorama')) return;
+        const nav = document.querySelector('.navbar-main');
+        const folga = (nav ? nav.offsetHeight : 62) + 10;
+        const y = alvo.getBoundingClientRect().top + window.pageYOffset - folga;
+        window.scrollTo(0, Math.max(0, y));
+      };
+      carregarHistoricoCompleto().then(() => {
+        rolarSecao();
+        setTimeout(rolarSecao, 350);
+      });
+    }
     if (aba0 === 'recorrencia') carregarRecorrencia();
   });
   bindCheqDrop();

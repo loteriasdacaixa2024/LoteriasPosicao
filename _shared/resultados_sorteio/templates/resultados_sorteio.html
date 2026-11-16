@@ -78,11 +78,9 @@
                 <button type="button" class="btn rs-load" id="rsCarregar" title="Consultar os resultados com a configuração atual">
                     <i class="fas fa-sync-alt" aria-hidden="true"></i> Carregar resultados
                 </button>
-                <label class="rs-baixar-escolha">Baixar ajuste
-                    <select id="rsBaixarQual" class="form-select form-select-sm" aria-label="Ajuste para download"></select>
-                </label>
-                <button type="button" class="btn rs-load" id="rsBaixarBtn">
-                    <i class="fas fa-download" aria-hidden="true"></i> Baixar
+                <p class="rs-baixar-hint">Na tabela, marque em cada concurso o ajuste 1, o ajuste 2 ou os dois. O download leva só o que estiver marcado.</p>
+                <button type="button" class="btn rs-load" id="rsBaixarBtn" disabled>
+                    <i class="fas fa-download" aria-hidden="true"></i> Baixar selecionados
                 </button>
             </div>
         </div>
@@ -91,6 +89,7 @@
             <table class="table table-sm rs-table mb-0">
                 <thead>
                     <tr>
+                        <th class="rs-col-marca"><input type="checkbox" id="rsMarcaTodos" title="Marcar todos os ajustes de todos os concursos" aria-label="Marcar todos os ajustes de todos os concursos"></th>
                         <th><button type="button" class="rs-sort" data-sort="concurso" title="Ordenar por concurso">Concurso <span class="rs-seta" aria-hidden="true"></span></button></th>
                         <th><button type="button" class="rs-sort" data-sort="data" title="Ordenar por data">Data <span class="rs-seta" aria-hidden="true"></span></button></th>
                         <th><button type="button" class="rs-sort" data-sort="dezenas" title="Ordenar por dezenas">Dezenas originais <span class="rs-seta" aria-hidden="true"></span></button></th>
@@ -240,7 +239,6 @@
         gap: .25rem;
         margin-bottom: .25rem;
     }
-    #rs-root .rs-aj-lab { cursor: pointer; }
     #rs-root .rs-aj-lab.is-sel {
         border-color: #c08b00;
         box-shadow: 0 0 0 2px rgba(192, 139, 0, .35);
@@ -274,24 +272,59 @@
     }
     #rs-root .rs-criar:hover { background: #fff3cc; color: #6b5710; }
     #rs-root .rs-criar:disabled { opacity: .45; }
-    #rs-root .rs-baixar-escolha {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        gap: .15rem;
-        min-width: 11rem;
+    #rs-root .rs-config-actions { align-items: center; }
+    #rs-root .rs-baixar-hint {
+        flex: 1 1 100%;
         margin: 0;
-        font-size: .68rem;
-        font-weight: 800;
-        letter-spacing: .03em;
-        text-transform: uppercase;
-        color: #8a8175;
-    }
-    #rs-root .rs-baixar-escolha select {
+        font-size: .78rem;
+        font-weight: 600;
+        line-height: 1.35;
+        color: #6b5710;
         text-transform: none;
         letter-spacing: 0;
-        font-weight: 700;
-        color: #1a0a00;
+    }
+    #rs-root #rsBaixarBtn:disabled { opacity: .45; }
+    #rs-root .rs-col-marca { width: 2.4rem; }
+    #rs-root .rs-table thead th.rs-col-marca { padding: .4rem .15rem; }
+    #rs-root .rs-linha,
+    #rs-root .rs-cel,
+    #rs-root #rsMarcaTodos {
+        width: 1.05rem;
+        height: 1.05rem;
+        margin: 0;
+        accent-color: #c08b00;
+        cursor: pointer;
+    }
+    #rs-root thead #rsMarcaTodos { accent-color: #fff8e6; }
+    #rs-root .rs-aj-pick {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .4rem;
+        margin: .22rem 0;
+    }
+    #rs-root .rs-pick {
+        display: inline-flex;
+        align-items: center;
+        gap: .28rem;
+        margin: 0;
+        padding: .12rem .35rem;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid rgba(192, 139, 0, .35);
+        font-size: .68rem;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: none;
+        color: #6b5710;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    #rs-root .rs-pick:has(input:checked) {
+        background: #fff3cc;
+        color: #6b5710;
+        border-color: #c08b00;
+        box-shadow: 0 0 0 2px rgba(192, 139, 0, .28);
     }
     #rs-root .rs-status {
         text-align: center;
@@ -382,6 +415,7 @@
     let pagCards = 1;
     let pagAlt = 1;
     let ordem = { col: 'concurso', dir: 'desc' };
+    const escolhas = new Set();
 
     function pad(n) {
         const w = Number(pacote && pacote.pad) || 2;
@@ -514,34 +548,78 @@
             btn.disabled = qtd <= 1;
             btn.title = qtd <= 1 ? 'Mantenha ao menos um ajuste' : 'Excluir este ajuste';
         });
-        atualizarListaDownload();
     }
-    function marcarSelecionado() {
-        const sel = document.getElementById('rsBaixarQual');
-        const atual = sel ? sel.value : '0';
-        document.querySelectorAll('.rs-aj-lab').forEach((lab) => {
-            lab.classList.toggle('is-sel', !lab.hidden && lab.dataset.i === atual);
+    function chaveEscolha(concurso, indice) {
+        return String(concurso) + ':' + String(indice);
+    }
+    function qtdAjustes() {
+        return Number(document.getElementById('rsQtd').value) || 1;
+    }
+    function marcasAtivas() {
+        const qtd = qtdAjustes();
+        let n = 0;
+        escolhas.forEach((k) => {
+            if (Number(k.split(':')[1]) < qtd) n += 1;
         });
+        return n;
     }
-    function atualizarListaDownload() {
-        const sel = document.getElementById('rsBaixarQual');
-        if (!sel) return;
-        const anterior = sel.value;
-        const qtd = Number(document.getElementById('rsQtd').value) || 1;
-        const offsets = [...document.querySelectorAll('.rs-offset')].slice(0, qtd);
-        sel.innerHTML = offsets.map((el, i) => {
-            const v = Number(el.value);
-            return `<option value="${i}">Ajuste ${i + 1} (${sinal(v)})</option>`;
-        }).join('');
-        if ([...sel.options].some((o) => o.value === anterior)) sel.value = anterior;
-        marcarSelecionado();
+    function definirEscolha(concurso, indice, marcado) {
+        const k = chaveEscolha(concurso, indice);
+        if (marcado) escolhas.add(k);
+        else escolhas.delete(k);
     }
-    function selecionarDownload(indice) {
-        const sel = document.getElementById('rsBaixarQual');
-        if (!sel) return;
-        const valor = String(indice);
-        if ([...sel.options].some((o) => o.value === valor)) sel.value = valor;
-        marcarSelecionado();
+    function definirAjustesDoConcurso(concurso, marcado) {
+        const qtd = qtdAjustes();
+        for (let i = 0; i < qtd; i++) definirEscolha(concurso, i, marcado);
+    }
+    function sincronizarMarcas() {
+        const qtd = qtdAjustes();
+        document.querySelectorAll('.rs-cel').forEach((el) => {
+            el.checked = escolhas.has(chaveEscolha(el.dataset.concurso, el.dataset.i));
+        });
+        document.querySelectorAll('.rs-linha').forEach((el) => {
+            let n = 0;
+            for (let i = 0; i < qtd; i++) {
+                if (escolhas.has(chaveEscolha(el.dataset.concurso, i))) n += 1;
+            }
+            el.checked = qtd > 0 && n === qtd;
+            el.indeterminate = n > 0 && n < qtd;
+        });
+        const todos = document.getElementById('rsMarcaTodos');
+        const linhas = (pacote && pacote.linhas) || [];
+        if (todos) {
+            let cheios = 0;
+            let parciais = 0;
+            linhas.forEach((ln) => {
+                let n = 0;
+                for (let i = 0; i < qtd; i++) {
+                    if (escolhas.has(chaveEscolha(ln.concurso, i))) n += 1;
+                }
+                if (qtd && n === qtd) cheios += 1;
+                else if (n) parciais += 1;
+            });
+            todos.checked = linhas.length > 0 && cheios === linhas.length;
+            todos.indeterminate = !todos.checked && (cheios > 0 || parciais > 0);
+        }
+        const btn = document.getElementById('rsBaixarBtn');
+        if (btn) btn.disabled = marcasAtivas() === 0;
+        const st = document.getElementById('rsStatus');
+        if (st && pacote) {
+            const total = (pacote.linhas || []).length;
+            st.textContent = `${total.toLocaleString('pt-BR')} concursos carregados | Último: ${pacote.ultimo || '—'} | ${marcasAtivas()} marcado(s) para download`;
+        }
+    }
+    function remapEscolhas(indiceRemovido) {
+        const novo = new Set();
+        escolhas.forEach((k) => {
+            const partes = k.split(':');
+            const i = Number(partes[1]);
+            if (i === indiceRemovido) return;
+            const ni = i > indiceRemovido ? i - 1 : i;
+            novo.add(chaveEscolha(partes[0], ni));
+        });
+        escolhas.clear();
+        novo.forEach((k) => escolhas.add(k));
     }
     function lerOffsets() {
         return [...document.querySelectorAll('.rs-offset')].map((el) => el.value);
@@ -570,69 +648,84 @@
         const ativos = lerOffsets().slice(0, qtd);
         ativos.splice(indice, 1);
         gravarOffsets(ativos);
-        const escolha = document.getElementById('rsBaixarQual');
-        if (escolha) {
-            const atual = Number(escolha.value);
-            if (atual === indice) escolha.value = '0';
-            else if (atual > indice) escolha.value = String(atual - 1);
-        }
+        remapEscolhas(indice);
         definirQtd(ativos.length);
         if (pacote && !document.getElementById('rsAlterados').hidden) {
             pagAlt = 1;
             renderAlterados();
         }
     }
-    function csvCell(v) {
-        const s = String(v == null ? '' : v);
-        if (/[;"\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-        return s;
-    }
     function seloArquivo() {
         const d = new Date();
         const p = (n) => String(n).padStart(2, '0');
         return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
     }
-    function baixarAjuste(indice) {
-        if (!pacote || !pacote.linhas) {
-            document.getElementById('rsStatus').textContent = 'Aguarde o carregamento dos concursos para baixar o ajuste.';
-            return;
-        }
-        const sel = document.querySelectorAll('.rs-offset')[indice];
-        if (!sel) return;
-        const off = Number(sel.value);
-        const linhas = linhasOrdenadas();
-        const temMes = !!pacote.tem_mes;
-        const temSegundo = linhas.some((ln) => (ln.segundo || []).length);
-        const head = ['concurso', 'data', 'dezenas_originais'];
-        if (temMes) head.push('mes');
-        head.push('dezenas_ajuste');
-        if (temSegundo) head.push('dezenas_segundo', 'dezenas_segundo_ajuste');
-        const rows = [head];
-        linhas.forEach((ln) => {
-            const row = [ln.concurso, ln.data || '', (ln.dezenas || []).map(pad).join('-')];
-            if (temMes) {
-                const mes = mesOficial(ln);
-                row.push(mes ? mes.abrev : '');
-            }
-            row.push(deslocar(ln.dezenas || [], off).map(pad).join('-'));
-            if (temSegundo) {
-                const segundo = ln.segundo || [];
-                row.push(segundo.map(pad).join('-'));
-                row.push(segundo.length ? deslocar(segundo, off).map(pad).join('-') : '');
-            }
-            rows.push(row);
-        });
-        const csv = '\ufeff' + rows.map((r) => r.map(csvCell).join(';')).join('\r\n');
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    function dispararDownload(texto, nome) {
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
         const link = document.createElement('a');
-        const sinalArq = off > 0 ? `+${off}` : String(off);
         link.href = URL.createObjectURL(blob);
-        link.download = `resultados_alterados_ajuste${indice + 1}_${sinalArq}_${seloArquivo()}.csv`;
+        link.download = nome;
         document.body.appendChild(link);
         link.click();
         const url = link.href;
         link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+    function linhaAposta(nums, mesAbrev) {
+        const dezenas = (nums || []).map(pad).join(' ');
+        const corpo = mesAbrev ? `${dezenas} ${mesAbrev}` : dezenas;
+        return `(${corpo})`;
+    }
+    function baixarSelecionados() {
+        if (!pacote || !pacote.linhas) {
+            document.getElementById('rsStatus').textContent = 'Aguarde o carregamento dos concursos para baixar.';
+            return;
+        }
+        const qtd = qtdAjustes();
+        const offsets = offsetsAtivos();
+        const porConcurso = new Map();
+        escolhas.forEach((k) => {
+            const partes = k.split(':');
+            const indice = Number(partes[1]);
+            if (indice >= qtd) return;
+            if (!porConcurso.has(partes[0])) porConcurso.set(partes[0], []);
+            porConcurso.get(partes[0]).push(indice);
+        });
+        if (!porConcurso.size) {
+            document.getElementById('rsStatus').textContent = 'Marque, no concurso, o ajuste 1, o ajuste 2 ou os dois.';
+            return;
+        }
+        const ordemConc = linhasOrdenadas().filter((ln) => porConcurso.has(String(ln.concurso)));
+        const temMes = !!pacote.tem_mes;
+        const linhasArq = [];
+        let itens = 0;
+        ordemConc.forEach((ln) => {
+            const indices = porConcurso.get(String(ln.concurso)).slice().sort((a, b) => a - b);
+            const mes = temMes ? mesOficial(ln) : null;
+            indices.forEach((indice) => {
+                linhasArq.push(linhaAposta(deslocar(ln.dezenas || [], offsets[indice]), mes ? mes.abrev : ''));
+                itens += 1;
+            });
+        });
+        const texto = linhasArq.join('\r\n') + (linhasArq.length ? '\r\n' : '');
+        const concursos = ordemConc.map((ln) => ln.concurso);
+        let nome;
+        if (concursos.length === 1) {
+            const inds = porConcurso.get(String(concursos[0])).slice().sort((a, b) => a - b);
+            const parte = inds.map((i) => {
+                const off = offsets[i];
+                return `ajuste${i + 1}_${off > 0 ? '+' + off : off}`;
+            }).join('_');
+            nome = `resultados_concurso${concursos[0]}_${parte}_${seloArquivo()}.txt`;
+        } else {
+            nome = `resultados_alterados_${itens}itens_${seloArquivo()}.txt`;
+        }
+        dispararDownload(texto, nome);
+        const onde = concursos.length === 1
+            ? `concurso ${concursos[0]}`
+            : `${concursos.length} concursos`;
+        document.getElementById('rsStatus').textContent =
+            `Download de ${itens} item(ns) do ${onde}.`;
     }
     function dataKey(valor) {
         const m = String(valor || '').match(/(\d{2})\/(\d{2})\/(\d{4})/);
@@ -700,12 +793,19 @@
         th.textContent = offsets.map((off, i) => `Ajuste ${i + 1} (${sinal(off)})`).join(' | ') || 'Ajustes';
         document.querySelectorAll('.rs-col-mes').forEach((el) => { el.hidden = !pacote.tem_mes; });
         document.getElementById('rsStatus').textContent =
-            `${total.toLocaleString('pt-BR')} concursos carregados | Último: ${pacote.ultimo || '—'}`;
+            `${total.toLocaleString('pt-BR')} concursos carregados | Último: ${pacote.ultimo || '—'} | ${marcasAtivas()} marcado(s) para download`;
         const ini = (pagAlt - 1) * POR_ALT;
         const fatia = linhas.slice(ini, ini + POR_ALT);
         document.getElementById('rsBody').innerHTML = fatia.map((ln) => {
-            const linhasAj = offsets.map((off) => {
-                const principal = `<div class="rs-aj-linha">${bolas(deslocar(ln.dezenas, off), 'rs-bola-cinza')}</div>`;
+            const linhasAj = offsets.map((off, i) => {
+                const marcado = escolhas.has(chaveEscolha(ln.concurso, i)) ? ' checked' : '';
+                const principal = `<div class="rs-aj-pick">
+                    <label class="rs-pick">
+                        <input type="checkbox" class="rs-cel" data-concurso="${ln.concurso}" data-i="${i}"${marcado}>
+                        <span>Ajuste ${i + 1}</span>
+                    </label>
+                    <div class="rs-bolas">${bolas(deslocar(ln.dezenas, off), 'rs-bola-cinza')}</div>
+                </div>`;
                 const segundo = (ln.segundo || []).length
                     ? `<div class="rs-aj-linha">${bolas(deslocar(ln.segundo, off), 'rs-bola-cinza')}</div>`
                     : '';
@@ -716,6 +816,7 @@
                 : '';
             const mes = pacote.tem_mes ? `<td class="rs-col-mes">${mesHtml(ln)}</td>` : '';
             return `<tr>
+                <td class="rs-col-marca"><input type="checkbox" class="rs-linha" data-concurso="${ln.concurso}" title="Marcar todos os ajustes do concurso ${ln.concurso}" aria-label="Marcar todos os ajustes do concurso ${ln.concurso}"></td>
                 <td class="fw-bold">${ln.concurso}</td>
                 <td>${esc(ln.data)}</td>
                 <td><div class="rs-bolas">${bolas(ln.dezenas, 'rs-bola-ouro')}</div>${origem2}</td>
@@ -725,6 +826,7 @@
         }).join('');
         pager('rsPagerAlt', pagAlt, linhas.length, (n) => { pagAlt = n; renderAlterados(); });
         pintarSetas();
+        sincronizarMarcas();
     }
 
     function preencherAjustes() {
@@ -738,11 +840,6 @@
                 opts.push(`<option value="${n}"${on ? ' selected' : ''}>${sinal(n)}</option>`);
             }
             sel.innerHTML = opts.join('');
-            sel.addEventListener('change', () => {
-                const lab = sel.closest('.rs-aj-lab');
-                if (lab) selecionarDownload(Number(lab.dataset.i));
-                atualizarListaDownload();
-            });
         });
         qtd.addEventListener('change', syncAjustes);
         syncAjustes();
@@ -768,6 +865,7 @@
         document.querySelectorAll('.rs-offset').forEach((sel, i) => {
             sel.value = String(AJUSTES_PADRAO[i]);
         });
+        escolhas.clear();
         syncAjustes();
     }
     function mostrarAba(aba) {
@@ -805,10 +903,25 @@
         renderAlterados();
     });
     document.getElementById('rsCriar').addEventListener('click', criarAjuste);
-    document.getElementById('rsBaixarBtn').addEventListener('click', () => {
-        baixarAjuste(Number(document.getElementById('rsBaixarQual').value));
+    document.getElementById('rsBaixarBtn').addEventListener('click', baixarSelecionados);
+    document.getElementById('rsMarcaTodos').addEventListener('change', () => {
+        const marcar = document.getElementById('rsMarcaTodos').checked;
+        ((pacote && pacote.linhas) || []).forEach((ln) => definirAjustesDoConcurso(ln.concurso, marcar));
+        sincronizarMarcas();
+        if (pacote && !document.getElementById('rsAlterados').hidden) renderAlterados();
     });
-    document.getElementById('rsBaixarQual').addEventListener('change', marcarSelecionado);
+    document.getElementById('rsBody').addEventListener('change', (ev) => {
+        const cel = ev.target.closest('.rs-cel');
+        if (cel) {
+            definirEscolha(cel.dataset.concurso, cel.dataset.i, cel.checked);
+            sincronizarMarcas();
+            return;
+        }
+        const linha = ev.target.closest('.rs-linha');
+        if (!linha) return;
+        definirAjustesDoConcurso(linha.dataset.concurso, linha.checked);
+        sincronizarMarcas();
+    });
     document.getElementById('rsAlterados').addEventListener('click', (ev) => {
         const sortBtn = ev.target.closest('.rs-sort');
         if (sortBtn) {
@@ -825,10 +938,7 @@
             if (btn.dataset.act === 'excluir') excluirAjuste(Number(labBtn && labBtn.dataset.i));
             return;
         }
-        if (ev.target.closest('select, button, a, option')) return;
-        const lab = ev.target.closest('.rs-aj-lab');
-        if (!lab || lab.hidden) return;
-        selecionarDownload(Number(lab.dataset.i));
+        if (ev.target.closest('select, button, a, option, input, label')) return;
     });
     document.getElementById('rsReset').addEventListener('click', () => {
         pagAlt = 1;

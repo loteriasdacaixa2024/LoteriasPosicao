@@ -1,6 +1,12 @@
 {# Panorama do conjunto gerado — tabela única após gerar apostas. #}
 <style>
-.pan-conj-table { font-size: .8rem; }
+.pan-conj-table { font-size: .78rem; width: 100%; }
+.pan-conj-table th,
+.pan-conj-table td {
+    padding: .28rem .45rem;
+    vertical-align: middle;
+    white-space: nowrap;
+}
 .pan-conj-table thead th {
     background: var(--primary, #c08b00) !important;
     color: #fff !important;
@@ -25,11 +31,22 @@
 .pan-conj-sort.is-asc .pan-conj-ind,
 .pan-conj-sort.is-desc .pan-conj-ind { opacity: 1; }
 .pan-conj-pad-extra {
-    margin-top: .15rem;
+    display: inline;
+    margin-left: .35rem;
     font-size: .68rem;
-    line-height: 1.25;
+    line-height: 1.2;
     color: #5c4a08;
     white-space: nowrap;
+}
+.pan-conj-table td[data-pan-col="padrao"] {
+    white-space: nowrap;
+}
+.pan-conj-table td[data-pan-col="num"],
+.pan-conj-table td[data-pan-col="soma"],
+.pan-conj-table td[data-pan-col="pi"],
+.pan-conj-table td[data-pan-col="digitos"] {
+    width: 1%;
+    text-align: center;
 }
 .pan-conj-ok { color: #198754; font-weight: 700; }
 .pan-conj-at { color: #b8860b; font-weight: 700; }
@@ -47,9 +64,9 @@
     border-bottom-style: solid;
 }
 .pan-conj-edit {
-    width: 100%;
+    width: 11rem;
     min-width: 11rem;
-    max-width: 22rem;
+    max-width: 11rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -59,6 +76,50 @@
     padding: .05rem .3rem;
     background: #fff;
 }
+.pan-conj-casas {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 2px;
+    vertical-align: middle;
+}
+.pan-conj-casa {
+    display: inline-flex;
+    align-items: stretch;
+    width: 2.35rem;
+    flex: 0 0 2.35rem;
+    box-sizing: border-box;
+    border: 1px solid #e4dcc8;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+}
+.pan-conj-num {
+    width: 1.55rem;
+    border: 0;
+    background: transparent;
+    text-align: center;
+    font-weight: 700;
+    font-size: .72rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    padding: 0;
+    color: inherit;
+}
+.pan-conj-num:focus { outline: none; background: #fff8e6; }
+.pan-conj-spin {
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #efe8d8;
+}
+.pan-conj-step {
+    border: 0;
+    background: #f7f3ea;
+    color: #664a00;
+    font-size: .45rem;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+}
+.pan-conj-step:hover { background: #efe4c4; }
 .pan-conj-par { display: inline-block; white-space: nowrap; margin: 0 .35rem .12rem 0; }
 .pan-conj-k { font-weight: 800; }
 .pan-conj-v { font-weight: 400; }
@@ -136,6 +197,135 @@
         out.sort((a, b) => a - b);
         return out;
     }
+    function limitesPan(cfg) {
+        return {
+            min: cfg && cfg.dezena_min != null ? Number(cfg.dezena_min) : 1,
+            max: cfg && cfg.dezena_max != null ? Number(cfg.dezena_max) : 31,
+        };
+    }
+    function nCasasPan(cfg, item) {
+        const n = Number(cfg && cfg.sorteadas);
+        if (n > 0) return n;
+        return (item && item.dezenas && item.dezenas.length) || 7;
+    }
+    function slotsPan(item, n) {
+        const slots = ((item && item.dezenas) || []).slice(0, n).map(Number);
+        while (slots.length < n) slots.push(null);
+        return slots;
+    }
+    function proximaCasaPan(slots, index, atual, delta, lim) {
+        let v = atual == null ? (delta > 0 ? lim.min - 1 : lim.max + 1) : Number(atual);
+        const span = lim.max - lim.min + 1;
+        for (let step = 0; step < span; step += 1) {
+            v += delta;
+            if (v > lim.max || v < lim.min) return null;
+            if (!slots.some((n, j) => j !== index && Number(n) === v)) return v;
+        }
+        return null;
+    }
+    function htmlCasasPan(dz, i, n, pad) {
+        const slots = dz.slice(0, n);
+        while (slots.length < n) slots.push(null);
+        return `<div class="pan-conj-casas">${slots.map((v, si) => {
+            const val = v == null ? '' : pad(v);
+            return `<span class="pan-conj-casa">
+                <input class="pan-conj-num" data-pan-i="${i}" data-pan-slot="${si}" value="${val}" inputmode="numeric" maxlength="2" autocomplete="off" aria-label="Dezena ${si + 1} da aposta ${i + 1}" title="Dezena ${si + 1}. Soma, diagonal e padrão acompanham na hora.">
+                <span class="pan-conj-spin">
+                    <button type="button" class="pan-conj-step" data-pan-i="${i}" data-pan-slot="${si}" data-delta="1" tabindex="-1" aria-label="Aumentar dezena ${si + 1}">▲</button>
+                    <button type="button" class="pan-conj-step" data-pan-i="${i}" data-pan-slot="${si}" data-delta="-1" tabindex="-1" aria-label="Diminuir dezena ${si + 1}">▼</button>
+                </span>
+            </span>`;
+        }).join('')}</div>`;
+    }
+    function aplicarCasaPan(box, idx, slot, valor) {
+        const estado = box && box.__panConjEstado;
+        if (!estado || !estado.lista) return;
+        const item = estado.lista[idx];
+        if (!item) return;
+        const lim = limitesPan(estado.cfg);
+        const n = nCasasPan(estado.cfg, item);
+        const slots = slotsPan(item, n);
+        const texto = String(valor == null ? '' : valor).replace(/\D/g, '');
+        if (!texto) {
+            window.__renderPanoramaConjunto(estado.lista, estado.cfg);
+            return;
+        }
+        let num = parseInt(texto, 10);
+        if (!Number.isFinite(num)) {
+            window.__renderPanoramaConjunto(estado.lista, estado.cfg);
+            return;
+        }
+        num = Math.min(lim.max, Math.max(lim.min, num));
+        if (slots.some((v, j) => j !== slot && Number(v) === num)) {
+            window.__renderPanoramaConjunto(estado.lista, estado.cfg);
+            return;
+        }
+        slots[slot] = num;
+        const nums = slots.filter((v) => v != null).sort((a, b) => a - b);
+        if (nums.length !== n) {
+            window.__renderPanoramaConjunto(estado.lista, estado.cfg);
+            return;
+        }
+        item.dezenas = nums;
+        if (item.fonte && typeof item.fonte === 'object') item.fonte.dezenas = nums.slice();
+        if (estado.cfg && typeof estado.cfg.onEditar === 'function') {
+            try { estado.cfg.onEditar(idx, nums.slice()); } catch (_) { /* a tabela segue com o número novo */ }
+        }
+        window.__renderPanoramaConjunto(estado.lista, estado.cfg);
+    }
+    function ligarCasasPan(box) {
+        if (!box || box.dataset.panCasas === '1') return;
+        box.dataset.panCasas = '1';
+        box.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('.pan-conj-step');
+            if (!btn || !box.contains(btn)) return;
+            const estado = box.__panConjEstado;
+            if (!estado) return;
+            ev.preventDefault();
+            const idx = Number(btn.dataset.panI);
+            const slot = Number(btn.dataset.panSlot);
+            const item = estado.lista && estado.lista[idx];
+            if (!item) return;
+            const lim = limitesPan(estado.cfg);
+            const slots = slotsPan(item, nCasasPan(estado.cfg, item));
+            const next = proximaCasaPan(slots, slot, slots[slot], Number(btn.dataset.delta) || 0, lim);
+            if (next == null) return;
+            aplicarCasaPan(box, idx, slot, next);
+        });
+        box.addEventListener('keydown', (ev) => {
+            const inp = ev.target.closest('.pan-conj-num');
+            if (!inp || !box.contains(inp) || (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown')) return;
+            const estado = box.__panConjEstado;
+            if (!estado) return;
+            ev.preventDefault();
+            const idx = Number(inp.dataset.panI);
+            const slot = Number(inp.dataset.panSlot);
+            const item = estado.lista && estado.lista[idx];
+            if (!item) return;
+            const lim = limitesPan(estado.cfg);
+            const slots = slotsPan(item, nCasasPan(estado.cfg, item));
+            const next = proximaCasaPan(slots, slot, slots[slot], ev.key === 'ArrowUp' ? 1 : -1, lim);
+            if (next == null) return;
+            aplicarCasaPan(box, idx, slot, next);
+        });
+        box.addEventListener('input', (ev) => {
+            const inp = ev.target.closest('.pan-conj-num');
+            if (!inp || !box.contains(inp)) return;
+            const estado = box.__panConjEstado;
+            if (!estado) return;
+            const digitos = String(inp.value || '').replace(/\D/g, '').slice(0, 2);
+            if (inp.value !== digitos) inp.value = digitos;
+            if (digitos.length < 2) return;
+            aplicarCasaPan(box, Number(inp.dataset.panI), Number(inp.dataset.panSlot), digitos);
+        });
+        box.addEventListener('change', (ev) => {
+            const inp = ev.target.closest('.pan-conj-num');
+            if (!inp || !box.contains(inp)) return;
+            const estado = box.__panConjEstado;
+            if (!estado) return;
+            aplicarCasaPan(box, Number(inp.dataset.panI), Number(inp.dataset.panSlot), inp.value);
+        });
+    }
 
     window.__renderPanoramaConjunto = function (apostas, cfg) {
         const c = cfg || {};
@@ -148,6 +338,9 @@
         const lista = (apostas || []).map((a, i) => ({
             numero: (a && typeof a === 'object') ? (a.numero || a.id || a.linha || (i + 1)) : (i + 1),
             dezenas: numsDe(a),
+            fonte: (a && typeof a === 'object' && !Array.isArray(a))
+                ? ((a.fonte && typeof a.fonte === 'object') ? a.fonte : a)
+                : null,
             origem: (a && typeof a === 'object' && a.origem) ? String(a.origem) : '',
             padrao: (a && typeof a === 'object')
                 ? String(a.padrao_gaps || (Array.isArray(a.ciclos) ? a.ciclos.join(' ') : '') || '')
@@ -161,6 +354,7 @@
             box.classList.add('d-none');
             return;
         }
+        if (!(Number(c.sorteadas) > 0)) c.sorteadas = lista[0].dezenas.length;
         const padW = c.pad != null ? c.pad : 2;
         const pad = (n) => padN(n, padW);
         const ultimo = c.ultimo || window.__PAN_CONJ_ULTIMO || {};
@@ -270,15 +464,16 @@
             const mesHtml = c.mes
                 ? `<span class="${c.mesClasse || 'mes-badge'}">${c.mes}</span>`
                 : '—';
+            const nCasas = nCasasPan(c, a);
             const apostaEdit = linhaSorteio
                 ? ''
-                : `<input class="pan-conj-edit" data-pan-i="${i}" value="${dz.map(pad).join(' ')}" inputmode="numeric" autocomplete="off" aria-label="Aposta ${a.numero || (i + 1)}" title="Edite as dezenas de ${pad(dmin)} a ${pad(dmax)}. Soma, repetidas, finais, diagonal e padrão acompanham.">`;
+                : htmlCasasPan(dz, i, nCasas, pad);
             const nPad = a.n_padrao != null && a.n_padrao !== '' ? a.n_padrao : null;
             const seqGerada = a.sequencia_n != null && a.sequencia_n !== ''
                 ? a.sequencia_n
                 : ((a.semente || {}).sequencia_n != null ? a.semente.sequencia_n : null);
             const seqProxima = !!a.sequencia_proxima || (a.sequencia_n == null && seqGerada != null);
-            const padExtra = `<div class="pan-conj-pad-extra">Nº ${nPad != null ? nPad : '—'} · Sequência ${seqGerada != null ? seqGerada : '—'}${seqProxima ? ' · próxima' : ''}</div>`;
+            const padExtra = `<span class="pan-conj-pad-extra">· Nº ${nPad != null ? nPad : '—'} · Sequência ${seqGerada != null ? seqGerada : '—'}${seqProxima ? ' · próxima' : ''}</span>`;
             const cel = (chave, valor, classe, html, title) =>
                 `<td class="${classe || ''}" data-pan-col="${chave}" data-pan-val="${String(valor == null ? '' : valor).replace(/"/g, '')}"${title ? ` title="${title}"` : ''}>${html}</td>`;
             const inicio = linhaSorteio
@@ -301,24 +496,7 @@
             if (!linhaSorteio) {
                 box.__panConjEstado = { lista, cfg: c };
                 window.__panConjEstado = box.__panConjEstado;
-                tbody.querySelectorAll('.pan-conj-edit').forEach((inp) => {
-                    inp.addEventListener('change', () => {
-                        const estado = box.__panConjEstado;
-                        if (!estado || !estado.lista) return;
-                        const idx = Number(inp.dataset.panI);
-                        const item = estado.lista[idx];
-                        if (!item) return;
-                        const lo = c.dezena_min != null ? Number(c.dezena_min) : 1;
-                        const hi = c.dezena_max != null ? Number(c.dezena_max) : 31;
-                        const nums = lerDezenasEdit(inp.value, lo, hi);
-                        if (!nums.length) {
-                            inp.value = (item.dezenas || []).map(pad).join(' ');
-                            return;
-                        }
-                        item.dezenas = nums;
-                        window.__renderPanoramaConjunto(estado.lista, estado.cfg);
-                    });
-                });
+                ligarCasasPan(box);
             }
         }
         if (leg && c.ocultarLegenda) {

@@ -15,6 +15,11 @@ from analise_escolha_visual.enriquecimento.regras_2a1 import (
     montar_restricoes,
     viola_restricoes,
 )
+try:
+    from .gerador import _ajustar_seq_e_finais, _forma_seq_finais
+except ImportError:
+    from gerador import _ajustar_seq_e_finais, _forma_seq_finais
+
 from analise_inteligentes_diadesorte.analise_sequencias import (
     classificar_faixa_sequencia,
     limites_faixa,
@@ -176,6 +181,7 @@ def _escolher_padroes(
     qtd: int,
     rng: random.Random,
     obrigatorias: Sequence[int] = (),
+    limite_distintos: Optional[int] = None,
 ) -> List[Dict[str, Any]]:
     ok = []
     for raw in catalogo:
@@ -197,7 +203,8 @@ def _escolher_padroes(
     ocorridos.sort(key=lambda p: -int(p["frequencia"]))
     bolsa = list(ocorridos)
     escolhidos: List[Dict[str, Any]] = []
-    alvo = max(1, min(int(qtd), len(ok) or 1))
+    teto = int(limite_distintos) if limite_distintos else int(qtd)
+    alvo = max(1, min(teto, len(ok) or 1))
     while bolsa and len(escolhidos) < alvo:
         pesos = [max(1, int(p["frequencia"])) for p in bolsa]
         i = rng.choices(range(len(bolsa)), weights=pesos, k=1)[0]
@@ -210,6 +217,8 @@ def _escolher_padroes(
             escolhidos.append(dict(faltantes[0]))
     if not escolhidos:
         return []
+    if limite_distintos:
+        return escolhidos
     lote: List[Dict[str, Any]] = []
     i = 0
     while len(lote) < int(qtd):
@@ -359,9 +368,7 @@ def gerar_lote_2a1(
     perfis = _contagens_faixa(linhas_panorama)
     ciclo_fim = 0 < len(pends) <= max(10, k)
     pend_set = {n for n in pends if n in allowed}
-    pend_exigidas = set(pend_set) if 0 < len(pend_set) < k else (
-        set(pend_set) if (ciclo_fim and len(pend_set) <= k) else set()
-    )
+    pend_exigidas = set(pend_set) if 0 < len(pend_set) <= k else set()
     freq_n: Dict[str, int] = {}
     for raw in catalogo:
         p = _norm_padrao(str(raw.get("padrao") or ""))
@@ -373,6 +380,7 @@ def gerar_lote_2a1(
     }
     lote = _escolher_padroes(
         catalogo, allowed, k, qtd, rng, obrigatorias=sorted(pend_exigidas),
+        limite_distintos=10**6,
     )
     if not lote:
         return {
@@ -410,7 +418,16 @@ def gerar_lote_2a1(
         if atual is None or conc >= atual[0]:
             recente_seq[pad] = (conc, seq)
 
-    for spec in lote:
+    falhos: Set[str] = set()
+    cursor = 0
+    guard = 0
+    while len(apostas) < qtd and guard < max(qtd * 8, len(lote)):
+        guard += 1
+        vivos = [p for p in lote if p["padrao"] not in falhos]
+        if not vivos:
+            break
+        spec = vivos[cursor % len(vivos)]
+        cursor += 1
         pad = spec["padrao"]
         perfil = perfis.get(pad) or {"counts": Counter(), "ns": [], "media": None, "somas": []}
         faixa_soma = calcular_faixa_soma(perfil.get("somas") or [], fonte="historico")
@@ -434,7 +451,7 @@ def gerar_lote_2a1(
                 faixas_por_n.setdefault(n, nome)
         tentativas = 0
         for seq_n in ordem:
-            if tentativas >= 180:
+            if tentativas >= 480:
                 break
             if seq_n in vistos_local or (pad, seq_n) in usados_seq:
                 continue
@@ -463,6 +480,33 @@ def gerar_lote_2a1(
                 continue
             if not _diagonais_da_aposta(dez, dmin, dmax):
                 continue
+
+            def _aceita_forma(trial: Sequence[int]) -> bool:
+                if len(trial) != k or padrao_inicial(trial) != pad:
+                    return False
+                tchave = tuple(trial)
+                if tchave in usados_dez or tchave in ja_saiu:
+                    return False
+                if any(n not in allowed for n in trial):
+                    return False
+                if pend_exigidas and not pend_exigidas.issubset(set(trial)):
+                    return False
+                treps = sum(1 for n in trial if n in ult_set)
+                if not (rep_min <= treps <= rep_max) and not (folga_zero and treps == 0):
+                    return False
+                if viola_restricoes(trial, restr, dmin=dmin, dmax=dmax, cols=cols):
+                    return False
+                return bool(_diagonais_da_aposta(trial, dmin, dmax))
+
+            if not _forma_seq_finais(dez):
+                dez = _ajustar_seq_e_finais(
+                    dez, dmin=dmin, dmax=dmax,
+                    travadas=sorted(pend_exigidas),
+                    aceitar=_aceita_forma,
+                )
+                if not _forma_seq_finais(dez) and any(n not in pend_exigidas for n in dez):
+                    continue
+                reps = sum(1 for n in dez if n in ult_set)
             cls = classificar_soma(sum(dez), faixa_soma)
             seq_rec = (recente_seq.get(pad) or (0, 0))[1] or None
             pts = _score(
@@ -495,6 +539,7 @@ def gerar_lote_2a1(
             ):
                 break
         if not melhor:
+            falhos.add(pad)
             avisos.append(f"Padrão {pad} não produziu aposta dentro das restrições.")
             continue
         _pts, dez, seq_n, nome_faixa, cls = melhor

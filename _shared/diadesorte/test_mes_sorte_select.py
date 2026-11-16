@@ -122,10 +122,8 @@ class TestMesSorteSelect(unittest.TestCase):
         self.assertEqual(vals[0], "atrasado")
         self.assertEqual(vals[1], "frequente")
         self.assertEqual(vals[-1], "aleatorio")
-        # Janeiro e Novembro não aparecem como fixos (já estão em especiais)
         fixos = {o["mes_num"] for o in self.payload["opcoes"] if o["criterio"] == "fixo"}
-        self.assertNotIn(1, fixos)
-        self.assertNotIn(11, fixos)
+        self.assertEqual(fixos, set(range(1, 13)))
 
 
 if __name__ == "__main__":

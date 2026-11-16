@@ -6,7 +6,10 @@
 
   const API = (root.dataset.api || '/geradores-elite/api/estatisticas-ciclo').replace(/\/$/, '');
   const MODALITY = root.dataset.modality || 'diadesorte';
+  const ABA_PAN = (MODALITY === 'diadesorte' || MODALITY === 'supersete') ? 7 : 6;
   const EXTRA_MES = root.dataset.extraMes === '1';
+  const EXTRA_TIME = root.dataset.extraTime === '1';
+  const EXTRA_TREVO = root.dataset.extraTrevo === '1';
   const MANUAL_URL = root.dataset.manual || '/geradores-elite/escolha-tubular-apostas/?aba=manual';
   const VOLANTES_URL = root.dataset.volantes || '/geradores-elite/escolha-tubular-apostas/?aba=volantes';
   const MANUAL_KEY = 'tb_manual10_import';
@@ -18,6 +21,25 @@
 
   function pad(n) {
     return String(n).padStart(2, '0');
+  }
+
+  function comPrefixo(path) {
+    const raw = String(path || '');
+    const baseEl = document.querySelector('base');
+    if (!baseEl || !baseEl.href) return raw;
+    const baseUrl = new URL(baseEl.href, window.location.origin);
+    const basePath = baseUrl.pathname.replace(/\/$/, '');
+    if (!basePath) return raw;
+    let url;
+    try {
+      url = new URL(raw, baseUrl);
+    } catch (_) {
+      return raw;
+    }
+    const pathPart = url.pathname || '/';
+    const tail = url.search + url.hash;
+    if (pathPart === basePath || pathPart.startsWith(basePath + '/')) return pathPart + tail;
+    return basePath + (pathPart.startsWith('/') ? pathPart : '/' + pathPart) + tail;
   }
 
   function balls(nums, obr) {
@@ -131,25 +153,29 @@
 
   function renderPadroes(ctx, payload, ids) {
     const info = (payload && payload.padroes) || (ctx && ctx.padroes) || {};
-    const aba4 = info.fonte_aba4 || '/analise/analises-inteligentes/?aba=padroes-ii';
-    const aba7 = info.fonte_aba7 || '/analise/analises-inteligentes/?aba=panorama';
+    const aba4 = comPrefixo(info.fonte_aba4 || '/analise/analises-inteligentes/?aba=padroes-ii');
+    const abaPan = comPrefixo(info.fonte_aba7 || '/analise/analises-inteligentes/?aba=panorama');
+    const aba7 = `${abaPan}#aiPanSeqTitulo`;
+    const nPan = info.aba_panorama || ABA_PAN;
+    const jaUrl = `${abaPan}#aiPanHistTituloJa`;
+    const faltUrl = `${abaPan}#aiPanHistTituloFalt`;
     const falt = info.faltantes || [];
     const inedito = info.inedito || (payload && payload.padrao_inedito);
     const distintos = info.distintos;
     escrever(ids || PAINEL.padroes, `
       <div class="d-flex flex-wrap gap-2 mb-2">
-        <span class="gec-chip">85 padrões: <strong>${info.total ?? '—'}</strong></span>
-        <span class="gec-chip">Já saíram <strong>${info.ja_sairam ?? '—'}</strong></span>
-        <span class="gec-chip gec-chip-inedito">Faltam sair <strong>${info.faltam_sair ?? '—'}</strong></span>
+        <a class="gec-chip gec-chip-link" href="${aba4}" title="Abrir a análise real — aba 4 · Padrões II">85 padrões: <strong>${info.total ?? '—'}</strong></a>
+        <a class="gec-chip gec-chip-link" href="${jaUrl}" title="Abrir a análise real — padrões que já saíram">Já saíram <strong>${info.ja_sairam ?? '—'}</strong></a>
+        <a class="gec-chip gec-chip-link gec-chip-inedito" href="${faltUrl}" title="Abrir a análise real — padrões que faltam sair">Faltam sair <strong>${info.faltam_sair ?? '—'}</strong></a>
         ${distintos != null ? `<span class="gec-chip">Nesta geração: <strong>${distintos}</strong> distintos</span>` : ''}
       </div>
       <p class="small mb-1">
         <a href="${aba4}">Aba 4 · Padrões II</a>
         ·
-        <a href="${aba7}">Aba 6 · Panorama Histórico</a>
+        <a href="${aba7}">Aba ${nPan} · Panorama Histórico</a>
       </p>
       ${inedito ? `<p class="small mb-1"><span class="gec-chip gec-chip-inedito">Padrão inédito nesta geração: <strong>${inedito}</strong></span></p>` : ''}
-        ${falt.length ? `<p class="small text-muted mb-0">Ainda não saíram (aba 6): ${falt.slice(0, 8).map((p) => p.padrao || p).join(' · ')}${falt.length > 8 ? ' …' : ''}</p>` : ''}
+        ${falt.length ? `<p class="small text-muted mb-0">Ainda não saíram (aba ${nPan}): ${falt.slice(0, 8).map((p) => p.padrao || p).join(' · ')}${falt.length > 8 ? ' …' : ''}</p>` : ''}
     `);
   }
 
@@ -242,10 +268,10 @@
         : '';
       const seed = ap.semente || {};
       const padChip = ap.padrao_inicial
-        ? `<span class="gec-chip${ap.padrao_inedito ? ' gec-chip-inedito' : ''}" title="${ap.padrao_inedito ? 'Padrão que ainda não saiu (aba 6)' : 'Padrão inicial (aba 4)'}">Padrão ${ap.padrao_inicial}${ap.padrao_descricao ? ' · ' + ap.padrao_descricao : ''}${ap.padrao_inedito ? ' · ainda não saiu' : ''}</span>`
+        ? `<span class="gec-chip${ap.padrao_inedito ? ' gec-chip-inedito' : ''}" title="${ap.padrao_inedito ? 'Padrão que ainda não saiu (aba ' + ABA_PAN + ')' : 'Padrão inicial (aba 4)'}">Padrão ${ap.padrao_inicial}${ap.padrao_descricao ? ' · ' + ap.padrao_descricao : ''}${ap.padrao_inedito ? ' · ainda não saiu' : ''}</span>`
         : '';
       const seqChip = seed.sequencia_n
-        ? `<span class="gec-chip gec-chip-seq" title="Nº da sequência sorteada (aba 6)">Nº ${seed.sequencia_n}${seed.concurso ? ' · conc. ' + seed.concurso : ''}</span>`
+        ? `<span class="gec-chip gec-chip-seq" title="Nº da sequência sorteada (aba ${ABA_PAN})">Nº ${seed.sequencia_n}${seed.concurso ? ' · conc. ' + seed.concurso : ''}</span>`
         : '';
       const stChip = ap.status_media_label
         ? `<span class="gec-chip">${ap.status_media_label}${ap.soma_media != null ? ' · méd. ' + ap.soma_media : ''}</span>`
@@ -255,6 +281,8 @@
           <strong>${String(i + 1).padStart(2, '0')}</strong>
           <span class="d-flex align-items-center gap-1">
             ${EXTRA_MES ? `<span class="mes-badge${mesCls}">${ap.mes_abrev || ap.mes_nome || ''}</span>` : ''}
+            ${ap.time_nome ? `<span class="gec-chip">${ap.time_nome}</span>` : ''}
+            ${ap.trevos_label ? `<span class="gec-chip">${ap.trevos_label}</span>` : ''}
             <button type="button" class="gec-fold-btn" data-fold aria-expanded="false" title="Mostrar detalhes">
               <i class="fas fa-chevron-right"></i>
             </button>
@@ -326,6 +354,21 @@
     }
   }
 
+  async function completarPadroes(ctx) {
+    const info = (ctx && ctx.padroes) || {};
+    if (info.total != null && info.ja_sairam != null && info.faltam_sair != null) return;
+    try {
+      const r = await fetch(comPrefixo('/analise/api/inteligentes/catalogo-padroes?base=geral'));
+      const cat = await r.json();
+      if (!cat || !cat.sucesso) return;
+      ctx.padroes = Object.assign({}, info, {
+        total: cat.total_padroes,
+        ja_sairam: cat.total_padroes_com_frequencia,
+        faltam_sair: cat.total_padroes_faltantes,
+      });
+    } catch (_) { /* a tela fica com traço se a análise não responder */ }
+  }
+
   async function carregar() {
     try {
       const r = await fetch(`${API}/contexto`);
@@ -334,6 +377,7 @@
       renderStats(ctx);
       renderCiclo(ctx);
       renderDiags(ctx);
+      await completarPadroes(ctx);
       renderPadroes(ctx);
     } catch (err) {
       escrever(PAINEL.stats, `<div class="alert alert-danger py-2 small mb-0">${err.message}</div>`);
@@ -348,9 +392,10 @@
     document.getElementById('gecBadge').textContent = 'Gerando…';
     try {
       const mesEl = EXTRA_MES ? document.getElementById('gecMes') : null;
+      const extraEl = document.getElementById('gecTime') || document.getElementById('gecTrevo');
       const mes = (window.MesSorteSelect && mesEl)
         ? MesSorteSelect.payloadFromSelect(mesEl)
-        : (mesEl && mesEl.value);
+        : ((mesEl && mesEl.value) || (extraEl && extraEl.value) || '');
       const r = await fetch(`${API}/gerar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -374,7 +419,8 @@
   function textoApostas() {
     return lastApostas.map((ap) => {
       const dez = (ap.dezenas || []).map(pad).join(' ');
-      return `${dez} ${ap.mes_abrev || ''}`.trim();
+      const extra = ap.mes_abrev || ap.time_nome || ap.trevos_label || '';
+      return `${dez} ${extra}`.trim();
     }).join('\n');
   }
 
@@ -483,6 +529,14 @@
 
   if (EXTRA_MES && window.MesSorteSelect) {
     MesSorteSelect.fillFromApi(document.getElementById('gecMes'), '/geradores-elite', { defaultPrefer: 'atrasado' }).catch(() => {});
+  }
+  if (window.ExtraAnaliseSelect) {
+    if (EXTRA_TIME) {
+      ExtraAnaliseSelect.fillFromApi(document.getElementById('gecTime'), 'time').catch(() => {});
+    }
+    if (EXTRA_TREVO) {
+      ExtraAnaliseSelect.fillFromApi(document.getElementById('gecTrevo'), 'trevo').catch(() => {});
+    }
   }
   carregar();
 })();

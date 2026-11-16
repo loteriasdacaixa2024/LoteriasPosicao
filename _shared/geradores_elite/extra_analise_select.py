@@ -102,10 +102,6 @@ def montar_opcoes_time_coracao(times_stats: Sequence[Dict[str, Any]]) -> Dict[st
         return {"sucesso": False, "erro": "Sem estatística de times.", "opcoes": []}
     atrasado = _pick_max(stats, "atraso", "time_num")
     frequente = _pick_max(stats, "freq", "time_num")
-    excluir = {
-        int(atrasado.get("time_num") or 0),
-        int(frequente.get("time_num") or 0),
-    }
     opcoes: List[Dict[str, Any]] = [
         {
             "value": "atrasado",
@@ -124,8 +120,6 @@ def montar_opcoes_time_coracao(times_stats: Sequence[Dict[str, Any]]) -> Dict[st
     ]
     for t in stats:
         tn = int(t.get("time_num") or 0)
-        if tn in excluir:
-            continue
         opcoes.append({
             "value": str(tn),
             "label": t.get("time_nome") or f"Time {tn}",
@@ -263,7 +257,6 @@ def montar_opcoes_trevos(trevos_stats: Sequence[Dict[str, Any]]) -> Dict[str, An
     ]
     atrasado_par = _par_por_criterio(stats, "atraso")
     frequente_par = _par_por_criterio(stats, "freq")
-    excluir = {_fmt_par(atrasado_par), _fmt_par(frequente_par)}
     atrasado = {"trevos": atrasado_par, "label": _fmt_par(atrasado_par)}
     frequente = {"trevos": frequente_par, "label": _fmt_par(frequente_par)}
     opcoes: List[Dict[str, Any]] = [
@@ -282,8 +275,6 @@ def montar_opcoes_trevos(trevos_stats: Sequence[Dict[str, Any]]) -> Dict[str, An
     ]
     for par in _pares_trevos():
         key = _fmt_par(par)
-        if key in excluir:
-            continue
         opcoes.append({
             "value": key.replace(" ", "-"),
             "label": key,

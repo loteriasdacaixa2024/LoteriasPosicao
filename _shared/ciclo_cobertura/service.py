@@ -45,6 +45,28 @@ def classificar_historico(modality_key: str) -> List[dict]:
     return historico
 
 
+def _pool_novas(historico: List[dict], n_min: int) -> tuple:
+    """União dos dois últimos. Se não alcançar n_min, completa com as novas mais recentes do ciclo."""
+    if len(historico) < 2:
+        return [], "uniao_dois_ultimos"
+    c_ant, c_ult = historico[-2], historico[-1]
+    pool = set(c_ant["novas"]) | set(c_ult["novas"])
+    if len(pool) >= n_min:
+        return sorted(pool), "uniao_dois_ultimos"
+    ciclo = c_ult["ciclo_num"]
+    for h in reversed(historico[:-2]):
+        if h["ciclo_num"] != ciclo:
+            break
+        pool.update(h["novas"])
+        if len(pool) >= n_min:
+            return sorted(pool), "novas_recentes_do_ciclo"
+    for h in reversed(historico[:-2]):
+        pool.update(h["novas"])
+        if len(pool) >= n_min:
+            break
+    return sorted(pool), "novas_recentes_do_ciclo"
+
+
 def contexto_dois_ultimos(modality_key: str) -> Dict[str, Any]:
     """
     Pool dinâmico = UNIÃO das Novas e UNIÃO das Repetidas dos dois últimos
@@ -64,7 +86,7 @@ def contexto_dois_ultimos(modality_key: str) -> Dict[str, Any]:
         }
 
     c_ant, c_ult = historico[-2], historico[-1]
-    pool_novas = sorted(set(c_ant["novas"]) | set(c_ult["novas"]))
+    pool_novas, fonte_novas = _pool_novas(historico, spec.novas_fixas)
     pool_repetidas = sorted(set(c_ant["repetidas"]) | set(c_ult["repetidas"]))
 
     # Métricas auxiliares
@@ -124,7 +146,7 @@ def contexto_dois_ultimos(modality_key: str) -> Dict[str, Any]:
         "pool": {
             "novas": pool_novas,
             "repetidas": pool_repetidas,
-            "fonte": "uniao_dois_ultimos",
+            "fonte": fonte_novas,
             "prioridade": None,
         },
         "pool_ok": (

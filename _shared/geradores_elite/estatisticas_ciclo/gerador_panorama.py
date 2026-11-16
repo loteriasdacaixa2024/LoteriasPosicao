@@ -27,7 +27,9 @@ from .gerador import (
     _norm_padrao,
     _perfil_alvo,
     _resumo_diagonais_janela,
+    _ajustar_seq_e_finais,
     _contar_digitos,
+    _forma_seq_finais,
     _polir_comportamento,
     expandir_aposta,
 )
@@ -273,7 +275,7 @@ def gerar_apostas_panorama(
     if not linhas:
         return {"sucesso": False, "erro": "Sem sequências sorteadas para semear o Panorama."}
 
-    exigir_cada = 0 < len(pends) < k
+    exigir_cada = 0 < len(pends) <= k
     linhas_seed = linhas
     if exigir_cada:
         compativeis = [
@@ -295,9 +297,9 @@ def gerar_apostas_panorama(
             continue
 
     sementes = (
-        _sementes_ponderadas(linhas_seed, max(qtd * 4, qtd), rng)
+        _sementes_ponderadas(linhas_seed, max(qtd * 16, 80), rng)
         if ponderar
-        else _sementes_distintas(linhas_seed, max(qtd * 4, qtd), rng)
+        else _sementes_distintas(linhas_seed, max(qtd * 16, 80), rng)
     )
     meta_digitos = (qtd // 2) + 1
     usados: Set[Tuple[int, ...]] = set()
@@ -386,6 +388,31 @@ def gerar_apostas_panorama(
                 rng,
             )
         if len(jogo) != k_saida_n:
+            continue
+        travadas_forma = list(pends) if 0 < len(pends) <= k else list(locked)
+
+        def _aceita_forma(trial: Sequence[int]) -> bool:
+            if len(trial) != k_saida_n:
+                return False
+            if not any(n in ultimo_set for n in trial):
+                return False
+            if not _diagonais_da_aposta(trial, dmin, dmax):
+                return False
+            if querer_7 and _contar_digitos(trial) != 7:
+                return False
+            tchave = tuple(trial)
+            if tchave in usados:
+                return False
+            if descartar_ja_sorteadas and (tchave in ja_saiu or (hist and frozenset(trial) in hist)):
+                return False
+            return True
+
+        jogo = _ajustar_seq_e_finais(
+            jogo, dmin=dmin, dmax=dmax, travadas=travadas_forma, aceitar=_aceita_forma,
+        )
+        if len(jogo) != k_saida_n:
+            continue
+        if not _forma_seq_finais(jogo) and any(n not in set(travadas_forma) for n in jogo):
             continue
         if exigir_cada and not set(pends).issubset(set(jogo)):
             continue

@@ -18,7 +18,7 @@ from __future__ import annotations
 import math
 import random
 from collections import Counter, defaultdict
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 
 from analise_escolha_visual.enriquecimento.motor import conjuntos_concurso
 
@@ -424,6 +424,66 @@ def _maior_sequencia(nums: Sequence[int]) -> int:
     if not grupos:
         return 0
     return max(len(g) for g in grupos)
+
+
+def _tem_final_igual(nums: Sequence[int]) -> bool:
+    fins: Dict[int, int] = defaultdict(int)
+    for n in nums:
+        fins[int(n) % 10] += 1
+    return any(q >= 2 for q in fins.values())
+
+
+def _forma_seq_finais(nums: Sequence[int]) -> bool:
+    """Uma a três sequências e ao menos um final repetido."""
+    return _tem_final_igual(nums) and 1 <= len(_seqs(nums)) <= 3
+
+
+def _ajustar_seq_e_finais(
+    jogo: Sequence[int],
+    *,
+    dmin: int,
+    dmax: int,
+    travadas: Sequence[int] = (),
+    aceitar: Optional[Callable[[Sequence[int]], bool]] = None,
+) -> List[int]:
+    """Troca dezenas livres, na mesma dezena, até haver final igual e 1 a 3 sequências."""
+    atual = sorted({int(x) for x in jogo if int(dmin) <= int(x) <= int(dmax)})
+    trav = {int(x) for x in travadas}
+
+    def ok(trial: Sequence[int]) -> bool:
+        return _forma_seq_finais(trial) and (aceitar is None or aceitar(trial))
+
+    if ok(atual):
+        return atual
+
+    def livres(base: Sequence[int]) -> List[int]:
+        return [n for n in base if n not in trav]
+
+    def opcoes(sai: int, base: Sequence[int]) -> List[int]:
+        dec = int(sai) // 10
+        lo = max(int(dmin), dec * 10)
+        hi = min(int(dmax), dec * 10 + 9)
+        ocup = set(base)
+        return [n for n in range(lo, hi + 1) if n not in ocup]
+
+    for sai in livres(atual):
+        for entra in opcoes(sai, atual):
+            trial = sorted([n for n in atual if n != sai] + [entra])
+            if ok(trial):
+                return trial
+    vistos = 0
+    for sai1 in livres(atual):
+        for entra1 in opcoes(sai1, atual):
+            meio = sorted([n for n in atual if n != sai1] + [entra1])
+            for sai2 in livres(meio):
+                for entra2 in opcoes(sai2, meio)[:6]:
+                    trial = sorted([n for n in meio if n != sai2] + [entra2])
+                    vistos += 1
+                    if ok(trial):
+                        return trial
+                    if vistos >= 240:
+                        return atual
+    return atual
 
 
 def _comprimento_ao_entrar(n: int, chosen: Sequence[int]) -> int:
@@ -1049,6 +1109,23 @@ def gerar_apostas_de_contexto(
             and frozenset(polido) not in hist
         ):
             jogo = polido
+            key = tuple(jogo)
+            pad_real = _padrao_de(jogo)
+
+        def _aceita_forma(trial: Sequence[int]) -> bool:
+            return (
+                len(trial) == k
+                and _padrao_de(trial) == pad_real
+                and set(travadas).issubset(set(trial))
+                and frozenset(trial) not in hist
+                and bool(_diagonais_da_aposta(trial, dmin, dmax))
+            )
+
+        ajustado = _ajustar_seq_e_finais(
+            jogo, dmin=dmin, dmax=dmax, travadas=travadas, aceitar=_aceita_forma,
+        )
+        if _forma_seq_finais(ajustado) and _aceita_forma(ajustado):
+            jogo = ajustado
             key = tuple(jogo)
             pad_real = _padrao_de(jogo)
         vistos_final.add(key)

@@ -19,13 +19,48 @@
     return '';
   }
 
+  // Caminho montado em partes: o proxy público altera textos fixos de URL no arquivo.
+  function apiPath(tail) {
+    return '/' + String(tail || '').replace(/^\/+/, '');
+  }
+
+  function rootBeforeToken(path, token) {
+    const src = String(path || '');
+    const at = src.indexOf('/' + token);
+    if (at < 0) return '';
+    return src.slice(0, at + token.length + 1);
+  }
+
   function opcoesUrl(apiBase) {
     if (global.__MES_SORTE_API__) return String(global.__MES_SORTE_API__);
+    const token = 'geradores-elite';
+    const tail = 'api/mes-sorte-opcoes';
+    const fromPage = (typeof location !== 'undefined')
+      ? rootBeforeToken(location.pathname, token)
+      : '';
+    if (fromPage) return fromPage.replace(/\/$/, '') + apiPath(tail);
     const base = apiBaseFrom(apiBase);
-    const m = base.match(/^(.*\/geradores-elite)/);
-    if (m) return m[1] + '/api/mes-sorte-opcoes';
-    if (base.includes('/api/')) return base.replace(/\/api\/.*/, '/api/mes-sorte-opcoes');
-    return '/geradores-elite/api/mes-sorte-opcoes';
+    const fromBase = rootBeforeToken(base, token);
+    if (fromBase) return fromBase.replace(/\/$/, '') + apiPath(tail);
+    const cut = String(base).indexOf('/' + 'api/');
+    if (cut >= 0) return String(base).slice(0, cut).replace(/\/$/, '') + apiPath(tail);
+    return apiPath(tail);
+  }
+
+  function fallbackData() {
+    const nomes = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+    ];
+    const opcoes = [
+      { value: 'atrasado', label: '+ Atrasado', criterio: 'atrasado' },
+      { value: 'frequente', label: '+ Frequente', criterio: 'frequente' },
+    ];
+    nomes.forEach((nome, i) => {
+      opcoes.push({ value: String(i + 1), label: nome, mes_num: i + 1, criterio: 'fixo' });
+    });
+    opcoes.push({ value: 'aleatorio', label: '+ Aleatório', criterio: 'aleatorio' });
+    return { sucesso: true, default: 'atrasado', opcoes: opcoes };
   }
 
   async function load(apiBase) {
@@ -163,9 +198,16 @@
   }
 
   async function fillFromApi(selectEl, apiBase, opts) {
-    const data = await load(apiBase);
-    fill(selectEl, data, opts || {});
-    return data;
+    const options = opts || {};
+    if (selectEl && !selectEl.options.length) fill(selectEl, fallbackData(), options);
+    try {
+      const data = await load(apiBase);
+      fill(selectEl, data, options);
+      return data;
+    } catch (e) {
+      if (selectEl && !selectEl.options.length) fill(selectEl, fallbackData(), options);
+      throw e;
+    }
   }
 
   async function resolveFromSelectAsync(selectEl, apiBase) {

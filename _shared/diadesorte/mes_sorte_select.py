@@ -117,13 +117,12 @@ def montar_opcoes_mes_sorte(meses_stats: Sequence[Dict[str, Any]]) -> Dict[str, 
     Ordem do select (modelo de referência):
       1) + Atrasado (Nome)
       2) + Frequente (Nome)
-      3) meses restantes (1–12, excluindo os dois acima)
+      3) os 12 meses, inclusive os que já aparecem nos critérios acima
       4) + Aleatório
     """
     stats = list(meses_stats) if meses_stats else [_item(m) for m in range(1, 13)]
     atrasado = _pick_max(stats, "atraso")
     frequente = _pick_max(stats, "freq")
-    excluir = {int(atrasado["mes_num"]), int(frequente["mes_num"])}
 
     opcoes: List[Dict[str, Any]] = [
         {
@@ -141,8 +140,6 @@ def montar_opcoes_mes_sorte(meses_stats: Sequence[Dict[str, Any]]) -> Dict[str, 
     ]
     for m in stats:
         mn = int(m["mes_num"])
-        if mn in excluir:
-            continue
         opcoes.append({
             "value": str(mn),
             "label": m.get("mes_nome") or MESES_NOME.get(mn, str(mn)),

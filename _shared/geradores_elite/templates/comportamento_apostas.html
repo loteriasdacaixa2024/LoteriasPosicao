@@ -277,6 +277,14 @@
         .comp-tabela { font-size: .72rem; }
         .comp-tabela th, .comp-tabela td { padding: .2rem .25rem; }
         .lista-apostas-grid .aposta-item { padding: .5rem !important; }
+        #listaApostas.lista-apostas-grid,
+        #listaApostas.lista-apostas-grid.lista-apostas-hibrido {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        @media (max-width: 700px) {
+            #listaApostas.lista-apostas-grid,
+            #listaApostas.lista-apostas-grid.lista-apostas-hibrido { grid-template-columns: 1fr; }
+        }
         .dez-ball { margin: 1px !important; }
         .btn-group-sm > .btn, .btn-sm { font-size: .78rem; }
         .card-header { font-size: .88rem; }

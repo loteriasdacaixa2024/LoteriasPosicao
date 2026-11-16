@@ -293,14 +293,14 @@
               </select>
             </div>
             {% if has_mes %}
-            <div class="col-6 col-md-2">
+            <div class="col-12 col-md-3">
               <label class="form-label small mb-0">Mês da Sorte <i class="fas fa-info-circle cc-i" title="Mês exportado junto com cada aposta no TXT (padrão Dia de Sorte)."></i></label>
               <select id="cc-mes" class="form-select form-select-sm cc-mes-sorte">
                 <option value="">Carregando…</option>
               </select>
             </div>
             {% endif %}
-            <div class="col-12 col-md-6 d-flex flex-wrap gap-3 align-items-center">
+            <div class="col-12 d-flex flex-wrap gap-3 align-items-center">
               <div class="form-check form-check-inline mb-0">
                 <input class="form-check-input" type="checkbox" id="cc-f-faixa">
                 <label class="form-check-label small" for="cc-f-faixa">Faixas</label>
@@ -367,7 +367,7 @@
               </select>
             </div>
             {% if has_mes %}
-            <div class="col-6 col-md-2">
+            <div class="col-12 col-md-3">
               <label class="form-label small mb-0">Mês da Sorte</label>
               <select id="cr-mes" class="form-select form-select-sm cc-mes-sorte">
                 <option value="">Carregando…</option>
@@ -428,7 +428,7 @@
               </select>
             </div>
             {% if has_mes %}
-            <div class="col-6 col-md-2">
+            <div class="col-12 col-md-3">
               <label class="form-label small mb-0">Mês da Sorte</label>
               <select id="co-mes" class="form-select form-select-sm cc-mes-sorte">
                 <option value="">Carregando…</option>
@@ -499,7 +499,7 @@
               </select>
             </div>
             {% if has_mes %}
-            <div class="col-6 col-md-2">
+            <div class="col-12 col-md-3">
               <label class="form-label small mb-0">Mês da Sorte</label>
               <select id="cf-mes" class="form-select form-select-sm cc-mes-sorte">
                 <option value="">Carregando…</option>
@@ -610,7 +610,7 @@
               </select>
             </div>
             {% if has_mes %}
-            <div class="col-6 col-md-2">
+            <div class="col-12 col-md-3">
               <label class="form-label small mb-0">Mês da Sorte</label>
               <select id="ce-mes" class="form-select form-select-sm cc-mes-sorte">
                 <option value="">Carregando…</option>
@@ -699,7 +699,7 @@
   {% include '_panorama_conjunto.html' %}
 </div>
 {% if has_mes %}
-<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=2"></script>
+<script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=3"></script>
 {% endif %}
 <script>
 (function(){
@@ -905,6 +905,9 @@
           <div class="fw-bold mb-1">Pool união</div>
           <div>Novas ${balls(c.pool.novas,'nova')}</div>
           <div class="mt-1">Rep. ${balls(c.pool.repetidas,'rep')}</div>
+          ${c.pool && c.pool.fonte && c.pool.fonte !== 'uniao_dois_ultimos'
+            ? '<div class="text-muted mt-1">Os 2 últimos não trouxeram novas suficientes; o pool usa as novas mais recentes do ciclo.</div>'
+            : ''}
           <div class="text-muted mt-2">Apto 2+1: <strong>${c.pool_ok?'sim':'não'}</strong></div>
         </div></div></div>
       </div>`;
