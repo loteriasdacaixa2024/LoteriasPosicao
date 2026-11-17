@@ -21,7 +21,7 @@
   body.is-embed #evStatContent > section:nth-child(n+3) { display: none !important; }
 </style>
 {% endif %}
-<link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css?v=stat2a1c">
+<link rel="stylesheet" href="/analise/escolha-visual/static/analise_escolha_visual.css?v=abas2a">
 <div class="container-fluid py-3" id="ev-root"
      data-api="{{ api_base }}"
      data-modality-nome="{{ modality_nome }}"
@@ -261,7 +261,7 @@
                 <section class="mb-4">
                     <h6 class="ev-stat-section-title"><i class="fas fa-list"></i> 2. Estatísticas Básicas — concurso <span id="evStatConcTitulo">—</span></h6>
                     <div class="row g-2" id="evStatBasicos"></div>
-                    <div class="ev-stat-2a mt-3">
+                    <div class="ev-stat-2a mt-3" id="ev-secao-2a">
                         <div class="ev-stat-2a-head">
                             <button type="button" class="ev-stat-fold-btn" id="evStatBasicosFold"
                                     aria-expanded="false" aria-controls="evStatBasicosTabelaBox">
@@ -270,20 +270,25 @@
                                 <span class="ev-stat-fold-n" id="evStatBasicosN"></span>
                             </button>
                             <div class="ev-xls-side">
-                                <button type="button" class="btn btn-sm ev-xls-btn" id="evStat2aOrdem"
-                                        title="Alterna a coluna Sorteio entre a ordem do sorteio e a ordem crescente">
-                                    Ordem do sorteio
-                                </button>
-                                <button type="button" class="btn btn-sm ev-xls-btn" id="evStatBasicosXls" disabled
-                                        title="Baixar a tabela em Excel (.xlsx), com as colunas formatadas">
-                                    <i class="fas fa-file-excel" aria-hidden="true"></i> Baixar Excel
-                                </button>
+                                <div class="ev-xls-actions">
+                                    <button type="button" class="btn btn-sm ev-xls-btn" id="evStat2aOrdem"
+                                            title="Alterna a coluna Sorteio entre a ordem do sorteio e a ordem crescente">
+                                        Ordem do sorteio
+                                    </button>
+                                    <button type="button" class="btn btn-sm ev-xls-btn" id="evStatBasicosXls" disabled
+                                            title="Baixar as seções 2a e 2a1 no mesmo Excel">
+                                        <i class="fas fa-file-excel" aria-hidden="true"></i> Baixar Excel
+                                    </button>
+                                    {% if tem_gerador_2a1 %}
+                                    <a class="ev-gerador-link" href="/geradores-elite/estatisticas-ciclo/">Abrir gerador 2a</a>
+                                    {% endif %}
+                                </div>
                                 <span class="ev-stat-2a-path" id="evStatBasicosPath"
                                       title="Pasta do acervo em que o Excel desta modalidade é gravado">{{ download_relativo|default('', true) }}</span>
                             </div>
                         </div>
                         <div id="evStatBasicosTabelaBox" class="ev-stat-fold-body" hidden>
-                            <p class="small text-muted mb-2">Todos os sorteios da janela — não depende do concurso selecionado acima.</p>
+                            <p class="small text-muted mb-2">Todos os sorteios da janela. Em Pares e Ímpares, a quantidade e as dezenas que saíram ficam na mesma linha.</p>
                             <div class="table-responsive ev-basic-table-wrap">
                                 <table class="table table-sm table-bordered ev-basic-table mb-0">
                                     <thead>
@@ -304,7 +309,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="ev-stat-2a ev-stat-2a1 mt-3">
+                    <div class="ev-stat-2a ev-stat-2a1 mt-3" id="ev-secao-2a1">
                         <div class="ev-stat-2a-head">
                             <button type="button" class="ev-stat-fold-btn" id="evStat2a1Fold"
                                     aria-expanded="false" aria-controls="evStat2a1TabelaBox">
@@ -313,21 +318,27 @@
                                 <span class="ev-stat-fold-n" id="evStat2a1N"></span>
                             </button>
                             <div class="ev-xls-side">
-                                <button type="button" class="btn btn-sm ev-xls-btn" id="evStat2a1Ordem"
-                                        title="Alterna a coluna Sorteio entre a ordem do sorteio e a ordem crescente">
-                                    Ordem do sorteio
-                                </button>
-                                {% if tem_gerador_2a1 %}
-                                <a class="small" href="/geradores-elite/estatisticas-ciclo/?aba=2a1">Abrir gerador 2a1</a>
-                                {% endif %}
+                                <div class="ev-xls-actions">
+                                    <button type="button" class="btn btn-sm ev-xls-btn" id="evStat2a1Ordem"
+                                            title="Alterna a coluna Sorteio entre a ordem do sorteio e a ordem crescente">
+                                        Ordem do sorteio
+                                    </button>
+                                    <button type="button" class="btn btn-sm ev-xls-btn" id="evStat2a1Xls" disabled
+                                            title="Baixar as seções 2a e 2a1 no mesmo Excel">
+                                        <i class="fas fa-file-excel" aria-hidden="true"></i> Baixar Excel
+                                    </button>
+                                    {% if tem_gerador_2a1 %}
+                                    <a class="ev-gerador-link" href="/geradores-elite/estatisticas-ciclo/?aba=2a1">Abrir gerador 2a1</a>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                         <div id="evStat2a1TabelaBox" class="ev-stat-fold-body" hidden>
                             <p class="small text-muted mb-2">
-                                Cada linha usa só o concurso imediatamente anterior.
-                                Pares e ímpares são os que não saíram nele e também não saíram neste concurso — os que a 2a já mostra ficam de fora.
-                                Repetidos seguem a 2a: o gerador não usa esses números.
-                                Sequências, finais e diagonais são as combinações daquele concurso anterior, que o gerador não copia.
+                                Pares e ímpares listam as dezenas deste concurso.
+                                A quantidade e as dezenas ficam na mesma linha.
+                                Repetidos são as dezenas deste concurso que também estão no anterior.
+                                Sequências, finais e diagonais vêm do concurso imediatamente anterior.
                             </p>
                             <div class="table-responsive ev-basic-table-wrap">
                                 <table class="table table-sm table-bordered ev-basic-table mb-0">
@@ -515,7 +526,7 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visual.js"></script>
-<script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=stat2a1c"></script>
+<script src="/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=abas2b"></script>
 <script src="/analise/escolha-visual/static/analise_escolha_visualizacao.js?v=tub1"></script>
 <script src="/analise/api/inteligentes/assets/tubular.js?v=20261115v1"></script>
 {% endblock %}

@@ -52,6 +52,42 @@
 @media (prefers-reduced-motion: reduce) {
   #g2a1 .g2-rep-aviso { animation: none; }
 }
+#g2a1 .g2-cruz {
+  border: 1px solid rgba(192,139,0,.28);
+  border-radius: 10px;
+  background: #fff8e1;
+  padding: .7rem .85rem .85rem;
+}
+#g2a1 .g2-cruz-card {
+  border: 1px solid rgba(192,139,0,.28);
+  border-radius: 8px;
+  background: #fff8e1;
+  padding: .5rem .6rem;
+  height: 100%;
+}
+#g2a1 .g2-cruz-card.is-ultimo {
+  box-shadow: inset 3px 0 0 var(--primary, #c08b00);
+}
+#g2a1 .g2-cruz-card .val { font-size: .88rem; font-weight: 800; }
+#g2a1 .g2-cruz-jogos {
+  font-size: .66rem;
+  font-weight: 650;
+  color: #8a7a3a;
+  line-height: 1.2;
+  margin: .08rem 0 .22rem;
+}
+#g2a1 .g2-cruz-card .lbl {
+  font-size: .68rem; font-weight: 700; color: #6c757d; text-transform: uppercase;
+}
+#g2a1 .g2-diag-chip {
+  display: inline-flex; align-items: center; gap: .2rem;
+  font-size: .68rem; font-weight: 700; padding: .08rem .35rem;
+  border-radius: 999px; background: #fcf9e8; border: 1px solid #eed877;
+  color: #715f0e; margin: 1px 2px 1px 0; white-space: nowrap;
+}
+#g2a1 .g2-posto {
+  font-weight: 800; color: #5c4a08;
+}
 </style>
 
 <div id="g2a1" data-api="/geradores-elite/api/estatisticas-2a1" data-autoload="0">
@@ -102,7 +138,7 @@
       Gerar apostas
     </div>
     <div class="card-body">
-      <p class="text-muted small mb-2">Usa os números e a sequência dos padrões do <a href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}#aiPanSeqTitulo">Panorama Histórico</a> para gerar as apostas.</p>
+      <p class="text-muted small mb-2">Cada aposta segue um dos cinco padrões e a sequência dele no <a href="{{ panorama_url|default('/analise/analises-inteligentes/?aba=panorama') }}#aiPanSeqTitulo">Panorama Histórico</a>. As dezenas saem da lista que não saiu no último concurso. As que faltam no ciclo vêm primeiro, olhando as atrasadas. O select escolhe quantas dezenas daquele concurso voltam. Sequências, finais e diagonais dele ficam de fora.</p>
       <div class="row g-2 align-items-end">
         <div class="col-6 col-md-2">
           <label class="form-label small mb-0" for="g2Qtd">Apostas</label>

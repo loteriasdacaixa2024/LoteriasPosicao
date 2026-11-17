@@ -1,123 +1,15 @@
-# PROMPT PROFISSIONAL — MELHORIAS NA ABA RESULTADOS ALTERADOS
+na rota 
+https://teste.marciofernandomaia.com.br/centralmodalidades/m/diadesorte/geradores-elite/comparador-apostas/#manual
+temos  tres informações..
 
-**Rota:** `http://127.0.0.1:5166/analise/resultados/`
+1 Escolha Visual — Apostas para comparar Abrir original ↗
+2 Checagem de Sequências Abrir original ↗
+3 Seção 10 — Manual Abrir original ↗
 
-**Aba:** Resultados Alterados
 
-## 1. Objetivo
+em relação  a adicionar mais  a 4 ou 5 o que  vc poderia  fazer se for  usar a rota:
+https://marciofernandomaia.com.br/centralmodalidades/m/diadesorte/analise/gaps-ciclo/
 
-Implementar melhorias na aba **Resultados Alterados**, aprimorando os critérios de carregamento, o gerenciamento dos ajustes por meio de operações CRUD, a funcionalidade de download e a apresentação visual da coluna Mês.
+Gaps pq como vc pode ver no print...  as  diferenças não são muito  grandes..
+então  queria compor  apostas parecidas com este estilo  então  colocaria  as  minhas apostas la  para comprar.. 
 
-Antes de qualquer implementação, faça uma análise da estrutura atual do projeto, identificando os componentes, rotas, serviços, banco de dados e funcionalidades já existentes que estão relacionados a essa aba.
-
-## 2. Critérios iniciais de carregamento
-
-Ao acessar a aba **Resultados Alterados**, os campos de configuração deverão carregar automaticamente com os seguintes valores:
-
-| Parâmetro | Valor inicial |
-|---|---:|
-| QTD. AJUSTES | 1 |
-| AJUSTE 1 | +1 |
-
-**Regras:**
-- A quantidade inicial de ajustes deverá ser 1.
-- O primeiro ajuste deverá assumir automaticamente o valor `+1`.
-- Esses valores deverão estar preenchidos na interface ao abrir a aba.
-- O usuário deverá continuar podendo alterar os parâmetros conforme as funcionalidades disponíveis.
-
-## 3. Gerenciamento dos ajustes — CRUD
-
-Implementar na interface botões de ação para permitir o gerenciamento dos ajustes.
-
-Disponibilizar as seguintes operações:
-
-- **Criar:** permitir adicionar novos ajustes.
-- **Consultar:** visualizar os ajustes cadastrados e suas respectivas configurações.
-- **Atualizar:** permitir modificar ajustes existentes.
-- **Excluir:** permitir remover ajustes que não sejam mais necessários.
-
-### Download dos ajustes
-
-Disponibilizar uma funcionalidade de download para que o usuário possa baixar individualmente o ajuste desejado.
-
-**Requisitos:**
-- O usuário deverá escolher qual ajuste deseja baixar.
-- O download deverá respeitar exatamente a configuração do ajuste selecionado.
-- Não deverá ser obrigatório baixar todos os ajustes simultaneamente.
-- Preservar o formato e a estrutura de exportação já utilizados pelo sistema, caso existam.
-
-## 4. Coluna Mês — Apresentação visual
-
-Na coluna **Mês**, deverá ser exibido o mês efetivamente sorteado em cada concurso.
-
-Não utilizar um mês fixo ou um mês derivado dos parâmetros de ajustes.
-
-O valor apresentado deverá corresponder ao resultado oficial do respectivo concurso.
-
-### Padronização visual
-
-Configurar a apresentação da coluna Mês tomando como referência a imagem de exemplo fornecida (**Figura 1**).
-
-**Atenção especial:**
-- Utilizar o modelo visual de CARD apresentado na Figura 1.
-- Reproduzir a identificação visual dos meses.
-- As cores específicas de cada mês já estão configuradas no projeto.
-- Reaproveitar obrigatoriamente as cores e configurações existentes.
-- Não criar uma nova paleta de cores.
-- Não modificar as cores que já estão ajustadas.
-- A Figura 1 deverá servir como referência para o formato visual do CARD, e não como autorização para alterar a identidade visual existente.
-
-## 5. Regras de preservação do sistema
-
-- Não modificar funcionalidades que já estejam funcionando corretamente.
-- Não alterar outras abas ou rotas.
-- Não criar menus ou seções adicionais desnecessárias.
-- Reaproveitar componentes, funções, serviços e estruturas existentes sempre que possível.
-- Evitar duplicação de código.
-- Preservar a identidade visual atual da aplicação.
-- Garantir compatibilidade com os dados históricos já armazenados.
-- Não alterar regras de cálculo ou geração dos resultados sem necessidade diretamente relacionada a esta solicitação.
-
-## 6. Validações obrigatórias
-
-Após a implementação, verificar:
-
-1. Se a aba carrega automaticamente com `QTD. AJUSTES = 1`.
-2. Se o campo `AJUSTE 1` carrega com `+1`.
-3. Se todas as operações CRUD funcionam corretamente.
-4. Se é possível baixar individualmente o ajuste selecionado.
-5. Se o mês apresentado corresponde ao mês sorteado oficialmente.
-6. Se os CARDS dos meses respeitam o padrão da Figura 1.
-7. Se as cores existentes de cada mês foram preservadas.
-8. Se as demais funcionalidades da aplicação continuam funcionando normalmente.
-
-## 7. Procedimento de execução
-
-**ETAPA 1 — ANÁLISE**
-
-Faça primeiro uma auditoria técnica da implementação atual. Identifique o que já existe, o que precisa ser aproveitado e quais alterações serão necessárias.
-
-**Não escreva código e não modifique nenhum arquivo nesta primeira etapa.**
-
-Apresente um diagnóstico objetivo, indicando:
-- Arquivos envolvidos.
-- Componentes e funções que serão aproveitados.
-- Alterações necessárias.
-- Possíveis impactos em funcionalidades existentes.
-- Estratégia de implementação.
-
-**ETAPA 2 — APROVAÇÃO**
-
-Aguarde minha autorização expressa antes de iniciar qualquer alteração no código.
-
-**ETAPA 3 — IMPLEMENTAÇÃO**
-
-Somente após minha aprovação, implemente as melhorias solicitadas, respeitando integralmente os requisitos deste documento.
-
-**ETAPA 4 — TESTES**
-
-Execute os testes necessários e apresente um relatório final com as funcionalidades implementadas e os resultados das validações.
-
----
-
-**ORIENTAÇÃO FINAL:** O sistema já está em funcionamento. A solicitação consiste exclusivamente em aprimorar a aba Resultados Alterados, sem reconstruir funcionalidades existentes, sem descaracterizar a interface e sem provocar regressões em outras partes da aplicação.

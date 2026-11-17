@@ -1114,6 +1114,7 @@ class AnaliseInteligentesService:
                 "n_com_diagonal": r.get("n_com_diagonal") or 0,
                 "pct_com_diagonal": r.get("pct_com_diagonal") or 0,
                 "top_diagonais": r.get("top_diagonais") or [],
+                "jogos_possiveis": int(r.get("jogos_possiveis") or 0),
                 "eh_padrao_ultimo_concurso": r.get("eh_padrao_ultimo_concurso"),
             }
 

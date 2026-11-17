@@ -46,10 +46,9 @@
   {% endif %}
 
   <div class="g2-note mb-3" id="g2Regras">
-    Pares e ímpares disponíveis são os que não saíram no concurso anterior.
-    O número identificado como repetido fica de fora.
-    Sequência, final igual e diagonal do concurso anterior não são copiados.
-    A quantidade de repetidos (0, 1 ou 2) é outra escolha: ela conta dezenas do concurso anterior que não estão nessa proibição.
+    Pares e ímpares disponíveis são as dezenas que não saíram no último concurso.
+    O gerador usa só essa lista. As que faltam no ciclo vêm primeiro, com preferência para as mais atrasadas.
+    Repetidos e sequências daquele concurso ficam de fora.
   </div>
 
   <div class="row g-3 mb-3">
@@ -81,14 +80,8 @@
           <label class="form-label small mb-0" for="g2Qtd">Apostas</label>
           <input type="number" class="form-control form-control-sm" id="g2Qtd" value="8" min="1" max="30">
         </div>
-        <div class="col-6 col-md-3">
-          <label class="form-label small mb-0" for="g2Rep">Repetidos do concurso anterior</label>
-          <select class="form-select form-select-sm" id="g2Rep">
-            <option value="1-2" selected>1 ou 2</option>
-            <option value="1">Somente 1</option>
-            <option value="2">Somente 2</option>
-            <option value="0">Nenhum</option>
-          </select>
+        <div class="col-12 col-md-4">
+          <p class="small mb-0">Somente as dezenas que não saíram. As que faltam no ciclo vêm primeiro, olhando as atrasadas. Repetidos e sequências ficam de fora.</p>
         </div>
         <div class="col-12 col-md-3">
           <label class="form-label small mb-0" for="g2Mes">Mês da Sorte</label>
@@ -124,5 +117,5 @@
     </div>
   </div>
 </div>
-<script src="{{ url_for('geradores_elite.static', filename='gerador_2a1.js') }}?v=2a1b"></script>
+<script src="{{ url_for('geradores_elite.static', filename='gerador_2a1.js') }}?v=2a1pool"></script>
 {% endblock %}

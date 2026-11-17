@@ -1,17 +1,14 @@
 {
-  "estado": "ok",
-  "ok": true,
-  "mensagem": "1 arquivo(s) atualizado(s).",
-  "iniciado_em": "16/11/2026 06:34:04",
-  "terminado_em": "16/11/2026 06:34:11",
-  "arquivos": [
-    {
-      "arquivo": "\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\downloads\\LOTOFACIL.xlsx",
-      "bytes": 388017
-    }
+  "estado": "erro",
+  "ok": false,
+  "mensagem": "Falha no download: Processo encerrou com código 1.",
+  "iniciado_em": "17/11/2026 17:39:26",
+  "terminado_em": "17/11/2026 17:39:29",
+  "arquivos": [],
+  "erros": [
+    "Processo encerrou com código 1."
   ],
-  "erros": [],
-  "pid": 10360,
+  "pid": 13320,
   "python": "D:\\Loterias\\LP-LoteriasPosicao\\VenvLoterias\\Scripts\\python.exe",
   "script": "D:\\Loterias\\LP-LoteriasPosicao\\DownloadTodosResultadosLoterias\\DownloadResultadosLoteriasCaixa.py",
   "returncode": 1

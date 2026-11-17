@@ -571,6 +571,40 @@
   }
   #ai-root .ai-cruz-diag-card.is-ativo {
     box-shadow: inset 3px 0 0 #198754, 0 0 0 1px rgba(25,135,84,.25);
+    background: #eefaf3;
+    border-color: #198754;
+  }
+  #ai-root button.ai-cruz-diag-card {
+    display: block;
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    appearance: none;
+  }
+  #ai-root button.ai-cruz-diag-card:hover {
+    border-color: #198754;
+  }
+  #ai-root button.ai-cruz-diag-card:focus-visible {
+    outline: 2px solid #198754;
+    outline-offset: 2px;
+  }
+  #ai-root button.ai-cruz-diag-card .val code {
+    color: #0d6efd;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  #ai-root .ai-cruz-jogos {
+    font-size: .66rem;
+    font-weight: 650;
+    color: #8a7a3a;
+    line-height: 1.2;
+    margin: .08rem 0 .22rem;
+  }
+  #ai-root #aiTabelaPadroesII tr.tr-cruz-foco > td {
+    background: rgba(25,135,84,.16) !important;
   }
   #ai-root .ai-diag-chip {
     display: inline-flex;
@@ -721,6 +755,22 @@
   }
   #ai-root .ai-collapse-toggle.is-open .ai-chevron { transform: rotate(90deg); }
   #ai-root .btn-ai { font-size:.72rem; font-weight:700; padding:.2rem .45rem; }
+  #ai-root .ai-xls-sutil {
+    border: 1px solid #e4d7a8;
+    background: transparent;
+    color: #8a7340;
+    font-size: .72rem;
+    font-weight: 650;
+    line-height: 1.2;
+    padding: .18rem .5rem;
+    border-radius: .25rem;
+  }
+  #ai-root .ai-xls-sutil:hover:not(:disabled) {
+    background: #fcf9e8;
+    color: #5c4a08;
+    border-color: #c08b00;
+  }
+  #ai-root .ai-xls-sutil:disabled { opacity: .4; }
   #ai-root .mes-pill {
     display:inline-block; min-width:2.4rem; padding:.15rem .4rem; border-radius:6px;
     font-weight:800; font-size:.75rem; color:#fff !important;
@@ -1696,6 +1746,10 @@
         </select>
         <button type="button" class="btn btn-sm btn-primary" id="aiBtnCarregar"><i class="fas fa-sync"></i> Recarregar</button>
         <button type="button" class="btn btn-sm btn-outline-success" id="aiBtnExportCsv"><i class="fas fa-file-csv"></i> CSV</button>
+        <button type="button" class="ai-xls-sutil" id="aiBtnExportXls" disabled
+                title="Baixa a tabela inteira, todos os concursos, em Excel">
+          <i class="fas fa-file-excel" aria-hidden="true"></i> Excel
+        </button>
         <span class="small text-muted" id="aiRangeLbl">Carregando todos os concursos…</span>
       </div>
       <div id="aiResPainelInfo" class="d-none mb-2">
@@ -1872,6 +1926,7 @@
         </div>
         <p class="small text-muted mb-2 mb-md-1">
           Padrão inicial (dezena alta/média/baixa) cruzado com as diagonais ↘↗ que saíram no mesmo concurso.
+          Clique num card para mostrar só esse padrão na tabela.
           Use <strong>Gerar na Seção 13</strong> para plantar a diagonal e completar no padrão.
         </p>
         <div class="row g-2" id="aiPadIICruzCards"></div>
@@ -2589,6 +2644,7 @@
   let CAT_PAD_II = [];
   let PAD_II_SEL = new Set();
   let PAD_II_BUSCA = '';
+  let PAD_II_CRUZ_FOCO = '';
   let RESUMO_PAD = [];
   let RESUMO_PAD_META = null;
   let CRUZ_DIAG = null;
@@ -2646,6 +2702,20 @@
     return String(txt || '').split(/[,;\s]+/).map(x => x.trim()).filter(x => /^[0-9]$/.test(x));
   }
   function fmtVol(n) { return Number(n || 0).toLocaleString('pt-BR'); }
+  function jogosDoPadrao(p) {
+    const direto = Number(p && p.jogos_possiveis);
+    if (Number.isFinite(direto) && direto > 0) return direto;
+    const pad = normalizarPadrao(p && p.padrao);
+    const cat = (CAT_PAD_II || []).find((x) => normalizarPadrao(x.padrao) === pad);
+    const n = Number(cat && cat.jogos_possiveis);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+  function htmlApostasCard(p) {
+    const n = jogosDoPadrao(p);
+    if (!n) return '';
+    const txt = `${fmtVol(n)} apostas`;
+    return `<div class="ai-cruz-jogos" title="${esc(txt)} possíveis neste padrão">${esc(txt)}</div>`;
+  }
   /** pageSize 0 = Todos (exibe todos os registros do filtro atual). */
   function tamanhoPaginaJogos(totalHint) {
     const n = Number(JOGOS_PAD.pageSize);
@@ -2893,6 +2963,8 @@
     const concs = CACHE.map(x => +x.concurso).filter(Number.isFinite);
     const prim = concs.length ? Math.min(...concs) : null;
     const ult = concs.length ? Math.max(...concs) : null;
+    const btnXls = document.getElementById('aiBtnExportXls');
+    if (btnXls) btnXls.disabled = !CACHE.length;
     document.getElementById('aiLblUltimo').textContent = ult != null ? `Concursos ${prim} → ${ult} (${CACHE.length})` : 'Sem dados';
     const rangeLbl = document.getElementById('aiRangeLbl');
     if (rangeLbl) rangeLbl.textContent = ult != null ? `Todos no banco: ${prim} → ${ult} (${CACHE.length} concursos)` : 'Sem dados';
@@ -3097,6 +3169,121 @@
     a.href = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'}));
     a.download = 'analises_inteligentes_diadesorte.csv';
     a.click();
+  }
+
+  function exportXls() {
+    const linhas = ordenarLinhas(CACHE, SORT.res.key, SORT.res.dir);
+    if (!linhas.length) return;
+    const cols = [
+      { titulo: 'Concurso', num: true },
+      { titulo: 'Data' },
+      { titulo: 'Dezenas' },
+    ];
+    if (EXTRA_MES) cols.push({ titulo: 'Mês' });
+    cols.push(
+      { titulo: 'Dígitos (I|F)' },
+      { titulo: 'Dígitos Ord.' },
+      { titulo: 'Qtd', num: true },
+      { titulo: 'Soma', num: true },
+      { titulo: 'Volume', num: true },
+    );
+    const concs = linhas.map((l) => +l.concurso).filter(Number.isFinite);
+    const prim = concs.length ? Math.min(...concs) : '—';
+    const ult = concs.length ? Math.max(...concs) : '—';
+    const titulo = `Análises Inteligentes — ${MODALITY_NOME}`;
+    const sub = `Todos os concursos · ${prim} a ${ult} · ${linhas.length.toLocaleString('pt-BR')} linhas`;
+    const valores = linhas.map((l) => {
+      const row = [l.concurso, l.data || '—', l.dezenas_fmt || '—'];
+      if (EXTRA_MES) row.push(l.mes_abrev || l.mes_nome || '—');
+      row.push(
+        l.digitos_fmt || '—',
+        l.digitos_ordenados_fmt || ((l.digitos_ordenados || []).join(' ')) || '—',
+        l.qtd_digitos,
+        l.soma,
+        l.volume_combinacoes,
+      );
+      return row;
+    });
+    const larguras = cols.map((col, i) => {
+      let max = col.titulo.length;
+      valores.forEach((row) => { max = Math.max(max, String(row[i] == null ? '' : row[i]).length); });
+      return Math.min(280, Math.max(54, Math.ceil(max * 6.2 + 16)));
+    });
+    const borda = '#E4D7A8';
+    const styles = ''
+      + '<Style ss:ID="titulo"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/>'
+      + '<Font ss:FontName="Calibri" ss:Size="16" ss:Bold="1" ss:Color="#1A0A00"/>'
+      + '<Interior ss:Color="#F4E4B3" ss:Pattern="Solid"/></Style>'
+      + '<Style ss:ID="sub"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/>'
+      + '<Font ss:FontName="Calibri" ss:Size="11" ss:Italic="1" ss:Color="#5C4A08"/>'
+      + '<Interior ss:Color="#FCF9E8" ss:Pattern="Solid"/></Style>'
+      + '<Style ss:ID="cab"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>'
+      + '<Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/>'
+      + `<Interior ss:Color="#887211" ss:Pattern="Solid"/>`
+      + `<Borders>`
+      + `<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + `<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + `<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + `<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + '</Borders></Style>'
+      + '<Style ss:ID="txt"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/>'
+      + '<Font ss:FontName="Calibri" ss:Size="10" ss:Color="#1A0A00"/>'
+      + `<Borders>`
+      + `<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + `<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + `<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + `<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + '</Borders></Style>'
+      + '<Style ss:ID="num"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/>'
+      + '<Font ss:FontName="Calibri" ss:Size="10" ss:Color="#1A0A00"/>'
+      + `<Borders>`
+      + `<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + `<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + `<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + `<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
+      + '</Borders></Style>';
+    const span = cols.length - 1;
+    const linhaTitulo = `<Row ss:Height="24"><Cell ss:StyleID="titulo" ss:MergeAcross="${span}"><Data ss:Type="String">${esc(titulo)}</Data></Cell></Row>`;
+    const linhaSub = `<Row ss:Height="18"><Cell ss:StyleID="sub" ss:MergeAcross="${span}"><Data ss:Type="String">${esc(sub)}</Data></Cell></Row>`;
+    const linhaCab = `<Row ss:Height="22">${cols.map((col) =>
+      `<Cell ss:StyleID="cab"><Data ss:Type="String">${esc(col.titulo)}</Data></Cell>`
+    ).join('')}</Row>`;
+    const corpo = valores.map((row) => {
+      const cells = row.map((val, i) => {
+        const num = cols[i].num && Number.isFinite(Number(val));
+        const tipo = num ? 'Number' : 'String';
+        const texto = num ? String(Number(val)) : (val == null || val === '' ? '—' : String(val));
+        return `<Cell ss:StyleID="${num ? 'num' : 'txt'}"><Data ss:Type="${tipo}">${esc(texto)}</Data></Cell>`;
+      }).join('');
+      return `<Row>${cells}</Row>`;
+    }).join('');
+    const ultima = valores.length + 3;
+    const xml = '<?xml version="1.0" encoding="UTF-8"?>'
+      + '<?mso-application progid="Excel.Sheet"?>'
+      + '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"'
+      + ' xmlns:o="urn:schemas-microsoft-com:office:office"'
+      + ' xmlns:x="urn:schemas-microsoft-com:office:excel"'
+      + ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+      + '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">'
+      + `<Title>${esc(titulo)}</Title>`
+      + '</DocumentProperties>'
+      + `<Styles>${styles}</Styles>`
+      + '<Worksheet ss:Name="Concursos"><Table>'
+      + larguras.map((w) => `<Column ss:AutoFitWidth="0" ss:Width="${w}"/>`).join('')
+      + linhaTitulo + linhaSub + linhaCab + corpo
+      + '</Table>'
+      + `<AutoFilter x:Range="R3C1:R${ultima}C${cols.length}" xmlns="urn:schemas-microsoft-com:office:excel"></AutoFilter>`
+      + '<WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">'
+      + '<FreezePanes/><FrozenNoSplit/>'
+      + '<SplitHorizontal>3</SplitHorizontal><TopRowBottomPane>3</TopRowBottomPane><ActivePane>2</ActivePane>'
+      + '</WorksheetOptions></Worksheet></Workbook>';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\uFEFF', xml], { type: 'application/vnd.ms-excel;charset=utf-8' }));
+    a.download = `Analises_Inteligentes_${String(MODALITY_KEY || 'modalidade').replace(/[^\w-]+/g, '_')}.xls`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   }
 
   function goAba(nome) {
@@ -4212,6 +4399,7 @@
     const raw = String(input?.value || '').trim();
     if (!raw) {
       PAD_II_BUSCA = '';
+      PAD_II_CRUZ_FOCO = '';
       setBuscaPadIIMsg('');
       renderPadroesII();
       if (RESUMO_PAD.length) renderResumoOperacionalPadroes();
@@ -4223,14 +4411,38 @@
       return;
     }
     PAD_II_BUSCA = raw;
+    const norm = normalizarPadrao(raw);
+    const dig = digitosPadrao(raw);
+    const exato = hits.filter((p) => normalizarPadrao(p.padrao) === norm || (dig && digitosPadrao(p.padrao) === dig));
+    PAD_II_CRUZ_FOCO = exato.length === 1 ? normalizarPadrao(exato[0].padrao) : '';
     setBuscaPadIIMsg('');
     renderPadroesII();
     if (RESUMO_PAD.length) renderResumoOperacionalPadroes();
+  }
+  function focarPadraoCruzamento(padrao) {
+    const pad = normalizarPadrao(padrao);
+    if (!pad) return;
+    PAD_II_CRUZ_FOCO = pad;
+    const input = document.getElementById('aiBuscaPadII');
+    if (input) input.value = pad;
+    const filtro = document.getElementById('aiFiltroStatusPadII');
+    if (filtro) filtro.value = '';
+    const soDiag = document.getElementById('aiPadIISoDiag');
+    if (soDiag) soDiag.checked = false;
+    PAD_II_BUSCA = pad;
+    setBuscaPadIIMsg('');
+    renderPadroesII();
+    if (RESUMO_PAD.length) renderResumoOperacionalPadroes();
+    requestAnimationFrame(() => {
+      const tr = document.querySelector('#aiTabelaPadroesII tbody tr.tr-cruz-foco');
+      if (tr) tr.scrollIntoView({ block: 'nearest' });
+    });
   }
   function resetarPesquisaPadII() {
     const input = document.getElementById('aiBuscaPadII');
     if (input) input.value = '';
     PAD_II_BUSCA = '';
+    PAD_II_CRUZ_FOCO = '';
     setBuscaPadIIMsg('');
     renderPadroesII();
     if (RESUMO_PAD.length) renderResumoOperacionalPadroes();
@@ -4727,15 +4939,22 @@
           : (PAD_II_CRUZ_MODO === 'sel' ? 'Selecione padrões na tabela para cruzar com as diagonais.' : 'Nenhum padrão neste recorte.');
         wrap.innerHTML = `<div class="col-12 small text-muted">${msg}</div>`;
       } else {
-        wrap.innerHTML = lista.slice(0, 5).map((p) => `
+        wrap.innerHTML = lista.slice(0, 5).map((p) => {
+          const isAtivo = normalizarPadrao(p.padrao) === normalizarPadrao(PAD_II_CRUZ_FOCO);
+          return `
           <div class="col-md">
-            <div class="ai-cruz-diag-card${p.eh_padrao_ultimo_concurso ? ' is-ultimo' : ''}">
-              <div class="lbl">${esc(p.descricao || '')} · ${fmtVol(p.frequencia)}×</div>
+            <button type="button" class="ai-cruz-diag-card${p.eh_padrao_ultimo_concurso ? ' is-ultimo' : ''}${isAtivo ? ' is-ativo' : ''}"
+                    data-act="focar-padrao-cruz" data-padrao="${esc(p.padrao)}"
+                    aria-pressed="${isAtivo ? 'true' : 'false'}"
+                    title="Mostrar só o padrão ${esc(p.padrao)} na tabela">
+              <div class="lbl">${esc(p.descricao || '')} · ${fmtVol(p.frequencia)}×${isAtivo ? ' · selecionado' : ''}</div>
               <div class="val"><code>${esc(p.padrao)}</code></div>
+              ${htmlApostasCard(p)}
               <div class="small text-muted mb-1">${fmtVol(p.n_com_diagonal || 0)} concursos com diagonal${p.pct_com_diagonal ? ` (${esc(p.pct_com_diagonal)}%)` : ''}</div>
               <div>${htmlDiagChips(p.top_diagonais)}</div>
-            </div>
-          </div>`).join('');
+            </button>
+          </div>`;
+        }).join('');
       }
     }
     if (link) {
@@ -4803,9 +5022,11 @@
     const topSet = new Set((window.__AI_TOP_PAD || []).map(t => t.padrao));
     tbody.innerHTML = rows.map((p) => {
       const checked = PAD_II_SEL.has(p.padrao) ? 'checked' : '';
+      const focoCruz = normalizarPadrao(PAD_II_CRUZ_FOCO);
       const cls = [
         p.eh_padrao_ultimo_concurso ? 'tr-padrao-ultimo' : '',
         topSet.has(p.padrao) ? 'tr-top-freq' : '',
+        focoCruz && normalizarPadrao(p.padrao) === focoCruz ? 'tr-cruz-foco' : '',
       ].filter(Boolean).join(' ');
       const atraso = p.atraso == null ? '—' : String(p.atraso);
       const jogosLink = `<a href="#" class="fw-bold text-decoration-underline" data-act="ver-jogos-padrao" data-padrao="${esc(p.padrao)}" title="Ver as ${fmtVol(p.jogos_possiveis)} apostas possíveis (só dentro da média)">${fmtVol(p.jogos_possiveis)}</a>`;
@@ -5547,6 +5768,7 @@
                  title="Abrir apostas deste padrão">
               <div class="lbl">${esc(p.descricao || '')} · ${fmtVol(p.frequencia)}×${isAtivo ? ' · atual' : ''}</div>
               <div class="val"><code>${esc(p.padrao)}</code></div>
+              ${htmlApostasCard(p)}
               <div class="small text-muted mb-1">${fmtVol(p.n_com_diagonal || 0)} concursos com diagonal${p.pct_com_diagonal ? ` (${esc(p.pct_com_diagonal)}%)` : ''}</div>
               <div>${htmlDiagChips(p.top_diagonais)}</div>
             </div>
@@ -5716,6 +5938,7 @@
     goAba('padroes-ii');
     const focar = () => {
       PAD_II_BUSCA = pad;
+      PAD_II_CRUZ_FOCO = pad;
       setBuscaPadIIMsg('');
       renderPadroesII();
       if (RESUMO_PAD.length) renderResumoOperacionalPadroes();
@@ -6391,6 +6614,7 @@
   // events
   document.getElementById('aiBtnCarregar').addEventListener('click', carregarResultados);
   document.getElementById('aiBtnExportCsv').addEventListener('click', exportCsv);
+  document.getElementById('aiBtnExportXls')?.addEventListener('click', exportXls);
   document.getElementById('aiPageSize').addEventListener('change', () => {
     PAGE.res = 1; PAGE.pad = 1;
     renderResultados(CACHE, { keepCache: true });
@@ -6984,6 +7208,12 @@
       ev.preventDefault();
       const pad = btn.dataset.padrao || '';
       if (pad) abrirPadraoNaAba4(pad);
+      return;
+    }
+    if (act === 'focar-padrao-cruz') {
+      ev.preventDefault();
+      const pad = btn.dataset.padrao || '';
+      if (pad) focarPadraoCruzamento(pad);
       return;
     }
     if (act === 'ver-recorrencia') {

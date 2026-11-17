@@ -81,14 +81,15 @@ def montar_linha_2a1(
     ant = _ints(anterior)
     ant_set = set(ant)
     agora_set = set(agora)
-    # O que saiu no anterior e o que a 2a mostra neste concurso ficam de fora.
+    # Pares e ímpares são os que não saíram neste concurso.
+    # Sequências, finais e diagonais do anterior não retiram número desta lista.
     pares = [
         n for n in range(int(dmin), int(dmax) + 1)
-        if n % 2 == 0 and n not in ant_set and n not in agora_set
+        if n % 2 == 0 and n not in agora_set
     ]
     impares = [
         n for n in range(int(dmin), int(dmax) + 1)
-        if n % 2 != 0 and n not in ant_set and n not in agora_set
+        if n % 2 != 0 and n not in agora_set
     ]
     repetidos = sorted(n for n in agora if n in ant_set)
     seqs: List[List[int]] = []
@@ -118,7 +119,7 @@ def montar_restricoes(
     cols: int = 10,
 ) -> Dict[str, Any]:
     """Restrições da próxima aposta. `ultimo` é o concurso imediatamente anterior."""
-    base = montar_linha_2a1([], ultimo, dmin=dmin, dmax=dmax, cols=cols)
+    base = montar_linha_2a1(ultimo, penultimo, dmin=dmin, dmax=dmax, cols=cols)
     ult = _ints(ultimo)
     ant = set(_ints(penultimo))
     banidos = sorted(n for n in ult if n in ant)

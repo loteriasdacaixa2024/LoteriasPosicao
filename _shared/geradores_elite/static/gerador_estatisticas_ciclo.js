@@ -18,6 +18,7 @@
   let ultimoOrdem = 'classificado';
   let lastUltimo = null;
   let modoGeracao = 'panorama';
+  let JOGOS_POR_PADRAO = {};
 
   function pad(n) {
     return String(n).padStart(2, '0');
@@ -72,8 +73,15 @@
     stats: ['gecStats', 'g2Stats'],
     ciclo: ['gecCiclo', 'g2CicloPainel'],
     diags: ['gecDiags', 'g2Diags'],
-    padroes: ['gecPadroes', 'g2Padroes'],
   };
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
 
   function escrever(ids, html) {
     (ids || []).forEach((id) => {
@@ -151,32 +159,109 @@
     `);
   }
 
-  function renderPadroes(ctx, payload, ids) {
-    const info = (payload && payload.padroes) || (ctx && ctx.padroes) || {};
-    const aba4 = comPrefixo(info.fonte_aba4 || '/analise/analises-inteligentes/?aba=padroes-ii');
-    const abaPan = comPrefixo(info.fonte_aba7 || '/analise/analises-inteligentes/?aba=panorama');
-    const aba7 = `${abaPan}#aiPanSeqTitulo`;
-    const nPan = info.aba_panorama || ABA_PAN;
-    const jaUrl = `${abaPan}#aiPanHistTituloJa`;
-    const faltUrl = `${abaPan}#aiPanHistTituloFalt`;
-    const falt = info.faltantes || [];
-    const inedito = info.inedito || (payload && payload.padrao_inedito);
-    const distintos = info.distintos;
-    escrever(ids || PAINEL.padroes, `
-      <div class="d-flex flex-wrap gap-2 mb-2">
-        <a class="gec-chip gec-chip-link" href="${aba4}" title="Abrir a análise real — aba 4 · Padrões II">85 padrões: <strong>${info.total ?? '—'}</strong></a>
-        <a class="gec-chip gec-chip-link" href="${jaUrl}" title="Abrir a análise real — padrões que já saíram">Já saíram <strong>${info.ja_sairam ?? '—'}</strong></a>
-        <a class="gec-chip gec-chip-link gec-chip-inedito" href="${faltUrl}" title="Abrir a análise real — padrões que faltam sair">Faltam sair <strong>${info.faltam_sair ?? '—'}</strong></a>
-        ${distintos != null ? `<span class="gec-chip">Nesta geração: <strong>${distintos}</strong> distintos</span>` : ''}
-      </div>
-      <p class="small mb-1">
-        <a href="${aba4}">Aba 4 · Padrões II</a>
-        ·
-        <a href="${aba7}">Aba ${nPan} · Panorama Histórico</a>
-      </p>
-      ${inedito ? `<p class="small mb-1"><span class="gec-chip gec-chip-inedito">Padrão inédito nesta geração: <strong>${inedito}</strong></span></p>` : ''}
-        ${falt.length ? `<p class="small text-muted mb-0">Ainda não saíram (aba ${nPan}): ${falt.slice(0, 8).map((p) => p.padrao || p).join(' · ')}${falt.length > 8 ? ' …' : ''}</p>` : ''}
-    `);
+  function normPad(p) {
+    return String(p || '').replace(/,/g, ' ').trim().split(/\s+/).filter(Boolean).join(' ');
+  }
+
+  function fmtVol(n) {
+    return Number(n || 0).toLocaleString('pt-BR');
+  }
+
+  function jogosDoCard(p) {
+    const direto = Number(p && p.jogos_possiveis);
+    if (Number.isFinite(direto) && direto > 0) return direto;
+    const n = Number(JOGOS_POR_PADRAO[normPad(p && p.padrao)]);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function chipsDiagCruz(list, chipClass) {
+    const html = (list || []).map((d) => {
+      const title = `${d.tipo || ''} · ${d.vezes || 0}×`;
+      return `<span class="${chipClass}" title="${escHtml(title)}">${escHtml(d.dir_sym || '')} ${escHtml(d.nums_fmt || '')} <span class="text-muted">${escHtml(d.vezes)}×</span></span>`;
+    }).join('');
+    return html || '<span class="small text-muted">sem diagonal neste recorte</span>';
+  }
+
+  function htmlCardsCruz(lista, prefix) {
+    return lista.map((p, i) => {
+      const freq = Number(p.frequencia) || 0;
+      const nDiag = Number(p.n_com_diagonal);
+      const temDiag = Number.isFinite(nDiag);
+      const dif = temDiag ? Math.max(0, freq - nDiag) : null;
+      const diagLinha = temDiag
+        ? `${nDiag} concursos com diagonal${p.pct_com_diagonal ? ` (${escHtml(p.pct_com_diagonal)}%)` : ''}${dif != null ? ` · Con/Diag ${nDiag} · Dif ${dif}` : ''}`
+        : 'sem contagem de diagonal';
+      const ultimo = p.eh_padrao_ultimo_concurso ? ' is-ultimo' : '';
+      const tituloUlt = p.eh_padrao_ultimo_concurso ? ' title="Padrão do último resultado"' : '';
+      const jogos = jogosDoCard(p);
+      const jogosHtml = jogos
+        ? `<div class="${prefix}-cruz-jogos">${fmtVol(jogos)} apostas</div>`
+        : '';
+      const posto = prefix === 'g2' ? `<span class="g2-posto">${i + 1}º</span> · ` : '';
+      return `<div class="col-md">
+        <div class="${prefix}-cruz-card${ultimo}"${tituloUlt}>
+          <div class="lbl">${posto}${escHtml(p.descricao || '')} · ${escHtml(freq)}×</div>
+          <div class="val"><code>${escHtml(p.padrao || '')}</code></div>
+          ${jogosHtml}
+          <div class="small text-muted mb-1">${diagLinha}</div>
+          <div>${chipsDiagCruz(p.top_diagonais, prefix === 'g2' ? 'g2-diag-chip' : 'gec-diag-chip')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function dadosCruz(ctx) {
+    const info = (ctx && ctx.padroes) || {};
+    const cruz = info.cruzamento_diagonais || {};
+    return {
+      info,
+      cruz,
+      lista: (cruz.mais_saem || []).slice(0, 5),
+      fonte: comPrefixo(info.fonte_aba4 || '/analise/analises-inteligentes/?aba=padroes-ii'),
+      meta: cruz.n_concursos
+        ? `${cruz.n_com_diagonal} / ${cruz.n_concursos} concursos com diagonal (${cruz.pct_com_diagonal}%)`
+        : '',
+    };
+  }
+
+  function renderCruz2a(ctx) {
+    const box = document.getElementById('gecCruz');
+    if (!box) return;
+    const d = dadosCruz(ctx);
+    if (!d.lista.length) {
+      box.innerHTML = `<p class="small text-muted mb-0">Cruzamento · diagonais × padrões ainda não carregou. <a href="${d.fonte}">Abrir a aba 4</a>.</p>`;
+      return;
+    }
+    box.innerHTML = `
+      <div class="gec-cruz">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <strong class="small mb-0">Cruzamento · diagonais × padrões</strong>
+          <span class="small text-muted">${escHtml(d.meta)}</span>
+          <span class="small text-muted ms-auto">Somente para constar</span>
+        </div>
+        <p class="small text-muted mb-2">Os cinco que mais saem na aba 4, na mesma ordem. A geração desta aba não usa este bloco.</p>
+        <div class="row g-2">${htmlCardsCruz(d.lista, 'gec')}</div>
+      </div>`;
+  }
+
+  function renderCinco2a1(ctx) {
+    const box = document.getElementById('g2Padroes');
+    if (!box) return;
+    const d = dadosCruz(ctx);
+    if (!d.lista.length) {
+      box.innerHTML = `<p class="small text-muted mb-0">A análise ainda não devolveu os cinco padrões do cruzamento. <a href="${d.fonte}">Abrir a aba 4</a>.</p>`;
+      return;
+    }
+    box.innerHTML = `
+      <div class="g2-cruz">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <strong class="small mb-0">Cruzamento · diagonais × padrões</strong>
+          <span class="small text-muted">${escHtml(d.meta)}</span>
+          <a class="small ms-auto" href="${d.fonte}">Mesma lista da aba 4</a>
+        </div>
+        <p class="small text-muted mb-2">Os cinco que mais saem na análise inteligente, na mesma ordem. Padrão sem ocorrência não entra.</p>
+        <div class="row g-2">${htmlCardsCruz(d.lista, 'g2')}</div>
+      </div>`;
   }
 
   function bannerCiclo(info) {
@@ -344,7 +429,6 @@
       alertBox('success', `${msg} Nenhuma destas apostas saiu no histórico oficial.`);
     }
     renderDiags(null, payload, ['gecDiags']);
-    renderPadroes(null, payload, ['gecPadroes']);
     if (window.__renderPanoramaConjunto) {
       const ult = ((payload.estatisticas || {}).ultimo) || {};
       window.__renderPanoramaConjunto(apostas, {
@@ -354,17 +438,43 @@
     }
   }
 
+  function guardarJogosCatalogo(cat) {
+    const mapa = {};
+    (cat.padroes || []).forEach((row) => {
+      const k = normPad(row && row.padrao);
+      const n = Number(row && row.jogos_possiveis);
+      if (k && Number.isFinite(n) && n > 0) mapa[k] = n;
+    });
+    if (Object.keys(mapa).length) JOGOS_POR_PADRAO = mapa;
+    return mapa;
+  }
+
+  function aplicarJogosNoCruz(cruz, mapa) {
+    if (!cruz || !Array.isArray(cruz.mais_saem)) return cruz;
+    cruz.mais_saem = cruz.mais_saem.map((p) => {
+      if (Number(p && p.jogos_possiveis) > 0) return p;
+      const n = mapa[normPad(p && p.padrao)];
+      return n ? Object.assign({}, p, { jogos_possiveis: n }) : p;
+    });
+    return cruz;
+  }
+
   async function completarPadroes(ctx) {
     const info = (ctx && ctx.padroes) || {};
-    if (info.total != null && info.ja_sairam != null && info.faltam_sair != null) return;
+    const temCruz = info.cruzamento_diagonais && (info.cruzamento_diagonais.mais_saem || []).length;
+    const faltaJogos = ((info.cruzamento_diagonais || {}).mais_saem || []).some((p) => !(Number(p.jogos_possiveis) > 0));
+    if (info.total != null && info.ja_sairam != null && info.faltam_sair != null && temCruz && !faltaJogos) return;
     try {
       const r = await fetch(comPrefixo('/analise/api/inteligentes/catalogo-padroes?base=geral'));
       const cat = await r.json();
       if (!cat || !cat.sucesso) return;
+      const mapa = guardarJogosCatalogo(cat);
+      const cruz = aplicarJogosNoCruz(cat.cruzamento_diagonais || info.cruzamento_diagonais || null, mapa);
       ctx.padroes = Object.assign({}, info, {
         total: cat.total_padroes,
         ja_sairam: cat.total_padroes_com_frequencia,
         faltam_sair: cat.total_padroes_faltantes,
+        cruzamento_diagonais: cruz,
       });
     } catch (_) { /* a tela fica com traço se a análise não responder */ }
   }
@@ -378,11 +488,13 @@
       renderCiclo(ctx);
       renderDiags(ctx);
       await completarPadroes(ctx);
-      renderPadroes(ctx);
+      renderCruz2a(ctx);
+      renderCinco2a1(ctx);
     } catch (err) {
       escrever(PAINEL.stats, `<div class="alert alert-danger py-2 small mb-0">${err.message}</div>`);
       escrever(PAINEL.ciclo, '');
       escrever(PAINEL.diags, '');
+      escrever(['g2Padroes'], `<p class="text-danger small mb-0">${escHtml(err.message)}</p>`);
     }
   }
 

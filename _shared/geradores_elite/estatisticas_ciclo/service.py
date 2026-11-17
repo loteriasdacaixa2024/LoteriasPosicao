@@ -131,6 +131,7 @@ def _carregar_padroes(modality_key: str) -> Dict[str, Any]:
             "aba_panorama": aba_panorama_num(modality_key),
             "fonte_aba4": "/analise/analises-inteligentes/?aba=padroes-ii",
             "fonte_aba7": "/analise/analises-inteligentes/?aba=panorama",
+            "cruzamento_diagonais": cat.get("cruzamento_diagonais") or {},
         }
     except Exception:
         return vazio
@@ -145,11 +146,18 @@ def _padroes_para_tela(modality_key: str) -> Dict[str, Any]:
         "fonte_aba7": info.get("fonte_aba7"),
     }
     if info.get("ok"):
+        cruz = info.get("cruzamento_diagonais") or {}
         tela.update({
             "total": info.get("total"),
             "ja_sairam": info.get("ja_sairam"),
             "faltam_sair": info.get("faltam_sair"),
             "faltantes": info.get("faltantes") or [],
+            "cruzamento_diagonais": {
+                "n_concursos": cruz.get("n_concursos") or 0,
+                "n_com_diagonal": cruz.get("n_com_diagonal") or 0,
+                "pct_com_diagonal": cruz.get("pct_com_diagonal") or 0,
+                "mais_saem": list(cruz.get("mais_saem") or [])[:5],
+            },
         })
     return tela
 

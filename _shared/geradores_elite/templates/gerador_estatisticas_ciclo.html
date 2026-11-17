@@ -91,6 +91,38 @@
 #gec-root .nav-tabs .nav-link.active {
   color: #171303; background: #fcf9e8; border-color: #ead98a #ead98a #fff; font-weight: 700;
 }
+#gec-root .gec-cruz {
+  border: 1px solid rgba(192,139,0,.28);
+  border-radius: 10px;
+  background: #fff8e1;
+  padding: .7rem .85rem .85rem;
+}
+#gec-root .gec-cruz-card {
+  border: 1px solid rgba(192,139,0,.28);
+  border-radius: 8px;
+  background: #fff8e1;
+  padding: .5rem .6rem;
+  height: 100%;
+}
+#gec-root .gec-cruz-card.is-ultimo { box-shadow: inset 3px 0 0 var(--primary, #c08b00); }
+#gec-root .gec-cruz-card .val { font-size: .88rem; font-weight: 800; }
+#gec-root .gec-cruz-card .lbl {
+  font-size: .68rem; font-weight: 700; color: #6c757d; text-transform: uppercase;
+}
+#gec-root .gec-cruz-jogos,
+#gec-root .g2-cruz-jogos {
+  font-size: .66rem;
+  font-weight: 650;
+  color: #8a7a3a;
+  line-height: 1.2;
+  margin: .08rem 0 .22rem;
+}
+#gec-root .gec-diag-chip {
+  display: inline-flex; align-items: center; gap: .2rem;
+  font-size: .68rem; font-weight: 700; padding: .08rem .35rem;
+  border-radius: 999px; background: #fcf9e8; border: 1px solid #eed877;
+  color: #715f0e; margin: 1px 2px 1px 0; white-space: nowrap;
+}
 </style>
 
 <div class="container-fluid py-3" id="gec-root"
@@ -187,13 +219,8 @@
     </div>
   </div>
 
-  <div class="card shadow-sm mb-3">
-    <div class="card-header fw-bold small" style="background:var(--accent-light,#fcf9e8);">
-      <i class="fas fa-th-list me-1"></i> Padrões iniciais — abas 4 e {{ aba_panorama }}
-    </div>
-    <div class="card-body py-2" id="gecPadroes">
-      <p class="text-muted small mb-0">Carregando…</p>
-    </div>
+  <div class="mb-3" id="gecCruz">
+    <p class="text-muted small mb-0">Carregando cruzamento…</p>
   </div>
 
   <div class="card shadow-sm mb-3 border-top border-4" style="border-color:var(--accent)!important;">
@@ -326,8 +353,8 @@
 {% if extra_time or extra_trevo %}
 <script src="{{ url_for('geradores_elite.static', filename='extra_analise_select.js') }}?v=1"></script>
 {% endif %}
-<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=pan8"></script>
-<script src="{{ url_for('geradores_elite.static', filename='gerador_2a1.js') }}?v=2a1j"></script>
+<script src="{{ url_for('geradores_elite.static', filename='gerador_estatisticas_ciclo.js') }}?v=cruz2b"></script>
+<script src="{{ url_for('geradores_elite.static', filename='gerador_2a1.js') }}?v=2a1rep"></script>
 <script>
 (function () {
   const tab2a = document.getElementById('gecTab2a');

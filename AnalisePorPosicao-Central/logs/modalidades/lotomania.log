@@ -18076,3 +18076,274 @@ Press CTRL+C to quit
 127.0.0.1 - - [16/Nov/2026 06:35:29] "POST /modelos/api/backtesting HTTP/1.1" 200 -
 127.0.0.1 - - [16/Nov/2026 12:47:00] "POST /modelos/api/backtesting HTTP/1.1" 200 -
 127.0.0.1 - - [16/Nov/2026 12:47:09] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-16 15:05:33 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.1.218:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 15:05:40] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 15:09:28] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 15:09:34] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 16:29:29] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 16:29:54] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-16 16:57:21 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 16:57:34] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-16 17:27:09 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 17:27:24] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-16 17:40:21 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 17:40:34] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-16 17:42:42 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 17:42:57] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 18:17:37] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2979 HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 18:18:01] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 18:32:44] "GET /analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 18:53:56] "GET /geradores-elite/api/concentracao/gerar HTTP/1.1" 405 -
+127.0.0.1 - - [16/Nov/2026 18:59:19] "GET /analise/api/por-posicao/concursos HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 19:04:37] "GET /analise/api/resumo-geral/gerar HTTP/1.1" 405 -
+
+--- iniciando 2026-11-16 19:08:23 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 19:08:34] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-16 19:21:21 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 19:21:35] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-16 19:53:27 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 19:53:41] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-16 20:04:38 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 20:04:59] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-16 20:37:15 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [16/Nov/2026 20:37:25] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Nov/2026 21:53:24] "GET /analise/api/gaps-ciclo HTTP/1.1" 404 -
+127.0.0.1 - - [16/Nov/2026 21:58:07] "GET /geradores-elite/api/comportamento HTTP/1.1" 404 -
+127.0.0.1 - - [16/Nov/2026 22:03:09] "GET /geradores-elite/api/conferir-txt-historico HTTP/1.1" 405 -
+127.0.0.1 - - [16/Nov/2026 22:07:11] "GET /geradores-elite/api/ciclo-apostas HTTP/1.1" 404 -
+127.0.0.1 - - [17/Nov/2026 05:59:49] "GET /geradores-elite/api/construtor-construcoes/ciclo?tipo= HTTP/1.1" 200 -
+
+--- iniciando 2026-11-17 06:15:50 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+[API Caixa] Lotomania 3000/3000...127.0.0.1 - - [17/Nov/2026 06:16:16] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 06:16:16] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 06:16:16] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 06:16:17] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-17 06:22:10 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [17/Nov/2026 06:22:25] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-17 06:27:58 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [17/Nov/2026 06:28:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 11:00:48] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 11:00:56] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 12:15:55] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 12:15:58] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 12:50:25] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 12:50:28] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 16:13:44] "GET /geradores-elite/ HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 16:14:00] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 16:14:14] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 16:53:59] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 16:54:05] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 16:56:23] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 16:56:30] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 17:14:39] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2979 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 17:14:44] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+
+--- iniciando 2026-11-17 17:39:05 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [17/Nov/2026 17:39:19] "GET / HTTP/1.1" 200 -

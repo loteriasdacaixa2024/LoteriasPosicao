@@ -200,6 +200,17 @@
 #ev-root .ev-stat-2a {
   margin-top: .85rem;
 }
+#ev-root .ev-pi-linha {
+  white-space: nowrap;
+}
+#ev-root .ev-pi-qtd {
+  color: #111;
+  font-weight: 800;
+}
+#ev-secao-2a,
+#ev-secao-2a1 {
+  scroll-margin-top: 4.5rem;
+}
 #ev-root .ev-stat-2a-head {
   display: flex;
   flex-wrap: wrap;
@@ -232,6 +243,24 @@
   margin-left: auto;
   min-width: 0;
   max-width: 100%;
+}
+#ev-root .ev-xls-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  flex-wrap: nowrap;
+}
+#ev-root .ev-gerador-link {
+  color: var(--primary-xdark, #664a00);
+  font-size: .75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+}
+#ev-root .ev-gerador-link:hover {
+  color: var(--primary, #c08b00);
+  text-decoration: underline;
 }
 #ev-root .ev-stat-fold-btn {
   display: inline-flex;

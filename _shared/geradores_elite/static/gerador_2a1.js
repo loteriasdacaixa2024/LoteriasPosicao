@@ -46,6 +46,7 @@
             <i class="fas fa-chevron-right"></i>
           </button>
         </div>
+        <p class="small mb-1"><span class="g2-chip">${ap.posto ? `${ap.posto}º · ` : ''}${ap.padrao || '—'}${ap.descricao ? ` · ${ap.descricao}` : ''}</span></p>
         <div class="mb-1">${(ap.dezenas || []).map((n) => {
           const pend = (ap.pendentes || []).indexOf(n) >= 0;
           const rep = !pend && (ap.repetidos || []).indexOf(n) >= 0;
@@ -78,7 +79,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           quantidade: parseInt(document.getElementById('g2Qtd').value, 10) || 10,
-          repetidos: document.getElementById('g2Rep').value,
+          repetidos: (document.getElementById('g2Rep') || {}).value || '0',
           mes_num: (function () {
             const mesEl = document.getElementById('g2Mes');
             const extraEl = document.getElementById('g2Time') || document.getElementById('g2Trevo');

@@ -26,15 +26,26 @@ from analise_inteligentes_diadesorte.soma_media import calcular_faixa_soma  # no
 
 
 class TestLinha2A1(unittest.TestCase):
-    def test_pares_e_impares_excluem_o_anterior_e_o_proprio_concurso(self):
-        # 1347 tirou 02 e 14. A 2a mostra esses dois. A 2a1 mostra só o que falta.
+    def test_pares_e_impares_sao_os_que_nao_sairam_neste_concurso(self):
         anterior = [16, 6, 19, 27, 4, 5, 28]
         atual = [5, 9, 15, 2, 14, 25, 7]
         linha = montar_linha_2a1(atual, anterior)
-        self.assertEqual(linha["pares"], [8, 10, 12, 18, 20, 22, 24, 26, 30])
-        for n in (2, 4, 6, 14, 16, 28):
-            self.assertNotIn(n, linha["pares"])
-        self.assertEqual(linha["impares"], [1, 3, 11, 13, 17, 21, 23, 29, 31])
+        self.assertEqual(linha["pares"], [4, 6, 8, 10, 12, 16, 18, 20, 22, 24, 26, 28, 30])
+        self.assertEqual(linha["impares"], [1, 3, 11, 13, 17, 19, 21, 23, 27, 29, 31])
+
+    def test_concurso_1348_mantem_par_e_impar_que_so_sairam_antes(self):
+        # 25 02 23 18 11 01 07. 05, 09, 14 e 15 não saíram neste sorteio.
+        atual = [25, 2, 23, 18, 11, 1, 7]
+        anterior = [5, 9, 14, 15, 4, 8, 20]
+        linha = montar_linha_2a1(atual, anterior)
+        self.assertEqual(
+            linha["pares"],
+            [4, 6, 8, 10, 12, 14, 16, 20, 22, 24, 26, 28, 30],
+        )
+        self.assertEqual(
+            linha["impares"],
+            [3, 5, 9, 13, 15, 17, 19, 21, 27, 29, 31],
+        )
 
     def test_repetidos_continuam_os_do_proprio_concurso(self):
         linha = montar_linha_2a1([6, 8, 10, 12, 14, 18, 20], [4, 6, 9, 16, 27, 28, 5])

@@ -50,8 +50,8 @@ class ExportEstatisticasTest(unittest.TestCase):
     def test_planilha_preserva_colunas_da_secao(self):
         blob = exp.bytes_modalidade("Dia de Sorte", [_linha()], 2)
         wb = load_workbook(BytesIO(blob))
-        ws = wb.active
-        self.assertEqual(ws.title, "Dia de Sorte")
+        self.assertEqual(wb.sheetnames, ["2a.", "2a1."])
+        ws = wb["2a."]
         self.assertEqual(
             [ws.cell(1, c).value for c in range(1, 10)],
             ["Conc.", "Data", "Sorteio", "Pares", "Ímpares", "Repetidos", "Sequências", "Finais Iguais", "Diagonais"],
@@ -70,6 +70,37 @@ class ExportEstatisticasTest(unittest.TestCase):
         self.assertEqual(ws["I2"].value, "—")
         self.assertEqual(ws.freeze_panes, "A2")
         self.assertIsNotNone(ws.auto_filter.ref)
+        w1 = wb["2a1."]
+        self.assertEqual(
+            [w1.cell(1, c).value for c in range(1, 10)],
+            ["Conc.", "Data", "Sorteio", "Pares", "Ímpares", "Repetidos", "Sequências", "Finais Iguais", "Diagonais"],
+        )
+        self.assertEqual(w1["A2"].value, 10)
+        self.assertEqual(w1["C2"].value, "01 02 03 04 05 06 07")
+        self.assertEqual(w1["D2"].value, "12 | 08 10 12 14 16 18 20 22 24 26 28 30")
+        self.assertEqual(w1["E2"].value, "12 | 09 11 13 15 17 19 21 23 25 27 29 31")
+        self.assertEqual(w1["F2"].value, "—")
+        self.assertEqual(w1["G2"].value, "—")
+        self.assertEqual(w1["I2"].value, "—")
+
+    def test_aba_2a1_traz_o_concurso_anterior(self):
+        anterior = _linha()
+        anterior["concurso"] = 9
+        anterior["numeros"] = [8, 9, 10]
+        anterior["sequencias"] = {"detalhe": {"grupos": [[8, 9, 10]]}}
+        anterior["finais"] = {"detalhe": {"grupos": [[8, 18]]}}
+        anterior["diagonais"] = {"detalhe": {"grupos": [{"dir_sym": "↘", "nums": [8, 9]}]}}
+        atual = _linha()
+        atual["repetidos"] = {"dezenas": [8]}
+        blob = exp.bytes_modalidade("Dia de Sorte", [atual, anterior], 2, dmin=1, dmax=31)
+        w1 = load_workbook(BytesIO(blob))["2a1."]
+        self.assertEqual(w1["A2"].value, 10)
+        self.assertEqual(w1["F2"].value, "08")
+        self.assertEqual(w1["G2"].value, "08-09-10")
+        self.assertEqual(w1["H2"].value, "08,18")
+        self.assertEqual(w1["I2"].value, "↘ 08-09")
+        self.assertEqual(w1["A3"].value, 9)
+        self.assertEqual(w1["G3"].value, "—")
 
     def test_diagonais_do_concurso_1332(self):
         from analise_escolha_visual.enriquecimento.motor import linhas_basicas

@@ -48,6 +48,22 @@
     width: 1%;
     text-align: center;
 }
+.pan-conj-table td[data-pan-col="seqjogos"] {
+    width: 1%;
+    text-align: right;
+}
+.pan-seqjogos {
+    display: inline-grid;
+    grid-template-columns: 3ch .9ch 8ch;
+    align-items: baseline;
+    column-gap: .15ch;
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 700;
+}
+.pan-seqjogos-num { text-align: right; }
+.pan-seqjogos-seq { text-align: left; }
+.pan-seqjogos-bar { text-align: center; }
 .pan-conj-ok { color: #198754; font-weight: 700; }
 .pan-conj-at { color: #b8860b; font-weight: 700; }
 .pan-conj-pad-link {
@@ -347,6 +363,7 @@
                 : '',
             n_padrao: (a && typeof a === 'object') ? a.n_padrao : null,
             sequencia_n: (a && typeof a === 'object') ? a.sequencia_n : null,
+            jogos_possiveis: (a && typeof a === 'object') ? a.jogos_possiveis : null,
             sequencia_proxima: !!(a && a.sequencia_proxima),
             semente: (a && typeof a === 'object' && a.semente) ? a.semente : null,
         })).filter((a) => a.dezenas.length);
@@ -376,8 +393,14 @@
         const rodape = box.querySelector('[data-pan="rodape"]');
         const semCor = !!c.semCor;
         const linhaSorteio = !!c.linhaSorteio;
-        const th = (rotulo, chave) =>
-            `<th><button type="button" class="pan-conj-sort" data-pan-sort="${chave}">${rotulo} <span class="pan-conj-ind">↕</span></button></th>`;
+        const showSeqJogos = !linhaSorteio && lista.some((a) => {
+            const seq = a.sequencia_n != null && a.sequencia_n !== ''
+                ? a.sequencia_n
+                : ((a.semente || {}).sequencia_n);
+            return seq != null && seq !== '';
+        });
+        const th = (rotulo, chave, title) =>
+            `<th><button type="button" class="pan-conj-sort" data-pan-sort="${chave}"${title ? ` title="${title}"` : ''}>${rotulo} <span class="pan-conj-ind">↕</span></button></th>`;
         if (thead) {
             thead.innerHTML = linhaSorteio
                 ? `<tr>
@@ -394,6 +417,7 @@
                     ${th('Rep. ' + nUlt, 'rep')}${th('Finais', 'finais')}${th('Dígitos', 'digitos')}
                     ${showDiag ? th('Diagonal', 'diagonal') : ''}
                     ${showPadrao ? th('Padrão', 'padrao') : ''}
+                    ${showSeqJogos ? th('Nº | Seq', 'seqjogos', 'Número do padrão | sequência válida desta aposta.') : ''}
                 </tr>`;
         }
         const freq = {};
@@ -473,9 +497,21 @@
                 ? a.sequencia_n
                 : ((a.semente || {}).sequencia_n != null ? a.semente.sequencia_n : null);
             const seqProxima = !!a.sequencia_proxima || (a.sequencia_n == null && seqGerada != null);
-            const padExtra = `<span class="pan-conj-pad-extra">· Nº ${nPad != null ? nPad : '—'} · Sequência ${seqGerada != null ? seqGerada : '—'}${seqProxima ? ' · próxima' : ''}</span>`;
+            const padExtra = nPad != null
+                ? `<span class="pan-conj-pad-extra">· Nº ${nPad}</span>`
+                : '';
+            const fmtMilhar = (n) => {
+                const v = Number(n);
+                if (!Number.isFinite(v) || v <= 0) return '—';
+                return Math.trunc(v).toLocaleString('pt-BR');
+            };
+            const seqJogosTxt = `<span class="pan-seqjogos"><span class="pan-seqjogos-num">${fmtMilhar(nPad)}</span><span class="pan-seqjogos-bar">|</span><span class="pan-seqjogos-seq">${fmtMilhar(seqGerada)}</span></span>`;
+            const ordemSeq = (nPad != null ? Number(nPad) : 0) * 1000000 + (seqGerada != null ? Number(seqGerada) : 0);
             const cel = (chave, valor, classe, html, title) =>
                 `<td class="${classe || ''}" data-pan-col="${chave}" data-pan-val="${String(valor == null ? '' : valor).replace(/"/g, '')}"${title ? ` title="${title}"` : ''}>${html}</td>`;
+            const colSeqJogos = showSeqJogos
+                ? cel('seqjogos', ordemSeq, '', seqJogosTxt, `Padrão Nº ${fmtMilhar(nPad)} | sequência ${fmtMilhar(seqGerada)}${seqProxima ? ' · próxima' : ''}`)
+                : '';
             const inicio = linhaSorteio
                 ? `${cel('data', c.data || '', '', c.data || '—')}${cel('mes', c.mes || '', '', mesHtml)}`
                 : `${cel('num', a.numero || (i + 1), '', a.numero || (i + 1))}${colGaps}${colRegua}${cel('aposta', dz[0] || 0, '', apostaEdit)}`;
@@ -489,6 +525,7 @@
                 ${cel('digitos', nDig, semCor ? '' : (digOk ? 'pan-conj-ok' : 'pan-conj-at'), nDig)}
                 ${colDiag}
                 ${showPadrao ? cel('padrao', nPad != null ? nPad : padrao, '', `<a class="pan-conj-pad-link" href="${padUrl}" target="_blank" rel="noopener" title="Abrir na aba 4 · Padrões II">Padrão ${padrao}</a>${padExtra}`) : ''}
+                ${colSeqJogos}
             </tr>`;
         }).join('');
         if (tbody) {

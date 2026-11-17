@@ -16,15 +16,18 @@ from analise_escolha_visual.enriquecimento.regras_2a1 import (
     viola_restricoes,
 )
 try:
-    from .gerador import _ajustar_seq_e_finais, _forma_seq_finais
+    from .gerador import _ajustar_seq_e_finais, _atrasos, _forma_seq_finais
 except ImportError:
-    from gerador import _ajustar_seq_e_finais, _forma_seq_finais
+    from gerador import _ajustar_seq_e_finais, _atrasos, _forma_seq_finais
 
 from analise_inteligentes_diadesorte.analise_sequencias import (
     classificar_faixa_sequencia,
     limites_faixa,
 )
-from analise_inteligentes_diadesorte.sequencias_sorteadas import dezenas_na_sequencia
+from analise_inteligentes_diadesorte.sequencias_sorteadas import (
+    dezenas_na_sequencia,
+    mapa_sequencia_no_padrao,
+)
 from analise_inteligentes_diadesorte.service import padrao_inicial
 from analise_inteligentes_diadesorte.soma_media import calcular_faixa_soma, classificar_soma
 
@@ -147,23 +150,167 @@ def _pool_permitido(
     k: int,
     rep_max: int,
 ) -> Tuple[Set[int], bool]:
-    """O único corte duro de identidade é o repetido proibido.
+    """Dezenas que não saíram no último concurso.
 
-    Pendentes e repetidos permitidos não bastam quando o ciclo está no fim:
-    uma aposta de k dezenas com no máximo rep_max repetidos precisa de
-    números que não saíram no concurso anterior, mesmo que já tenham saído
-    do ciclo.
+    Com repetição pedida, também entram as dezenas daquele concurso que a
+    análise deixa repetir. Pendente do ciclo só entra se estiver nessa lista.
     """
-    ban = set(_ints(restr.get("repetidos_proibidos")))
+    del pendentes, k
     ultimo = set(_ints(restr.get("ultimo")))
-    allowed = {n for n in range(int(dmin), int(dmax) + 1) if n not in ban}
-    fora = {
-        int(n)
-        for n in pendentes
-        if int(dmin) <= int(n) <= int(dmax) and int(n) not in ultimo and int(n) not in ban
+    disponiveis = set(_ints(restr.get("pares_disponiveis"))) | set(_ints(restr.get("impares_disponiveis")))
+    if not disponiveis:
+        disponiveis = {n for n in range(int(dmin), int(dmax) + 1) if n not in ultimo}
+    allowed = {
+        int(n) for n in disponiveis
+        if int(n) not in ultimo and int(dmin) <= int(n) <= int(dmax)
     }
-    ampliado = len(fora) < max(0, int(k) - int(rep_max))
-    return allowed, ampliado
+    if int(rep_max) > 0:
+        for n in _ints(restr.get("pode_repetir")):
+            if int(dmin) <= int(n) <= int(dmax):
+                allowed.add(int(n))
+    return allowed, False
+
+
+def _encaixar_no_pool(
+    dezenas: Sequence[int],
+    allowed: Set[int],
+    pendentes: Set[int],
+    atrasos: Dict[int, int],
+    dmin: int,
+    dmax: int,
+) -> Optional[List[int]]:
+    """Mantém o padrão e troca o que saiu por dezena que não saiu.
+
+    Na mesma casa, a pendente do ciclo vem na frente. Depois, a mais atrasada.
+    """
+    atual = [int(n) for n in dezenas]
+    ocup = set(atual)
+
+    def escolher(dec: int) -> Optional[int]:
+        lo = max(int(dmin), dec * 10)
+        hi = min(int(dmax), dec * 10 + 9)
+        cand = [x for x in range(lo, hi + 1) if x not in ocup and x in allowed]
+        if not cand:
+            return None
+        cand.sort(key=lambda x: (0 if x in pendentes else 1, -int(atrasos.get(x, 0)), x))
+        return cand[0]
+
+    for i, n in enumerate(list(atual)):
+        if n in allowed:
+            continue
+        novo = escolher(n // 10)
+        if novo is None:
+            return None
+        ocup.discard(n)
+        ocup.add(novo)
+        atual[i] = novo
+
+    for p in sorted(pendentes):
+        if p in ocup or p not in allowed:
+            continue
+        dec = p // 10
+        for i, n in enumerate(atual):
+            if n // 10 == dec and n not in pendentes:
+                ocup.discard(n)
+                ocup.add(p)
+                atual[i] = p
+                break
+    return sorted(atual)
+
+
+def _ajustar_repetidos(
+    dezenas: Sequence[int],
+    allowed: Set[int],
+    ultimo: Set[int],
+    pode: Set[int],
+    rep_min: int,
+    rep_max: int,
+    pendentes: Set[int],
+    atrasos: Dict[int, int],
+    dmin: int,
+    dmax: int,
+    *,
+    folga_zero: bool,
+) -> Optional[List[int]]:
+    """Leva a aposta à quantidade pedida, trocando só dentro da mesma casa."""
+    atual = [int(n) for n in dezenas]
+    if any(n not in allowed for n in atual):
+        return None
+
+    def nreps(nums: Sequence[int]) -> List[int]:
+        return [n for n in nums if n in ultimo]
+
+    if int(rep_max) <= 0:
+        return None if nreps(atual) else sorted(atual)
+
+    for _ in range(12):
+        reps = nreps(atual)
+        if int(rep_min) <= len(reps) <= int(rep_max):
+            return sorted(atual)
+        ocup = set(atual)
+        if len(reps) > int(rep_max):
+            extras = sorted(
+                reps,
+                key=lambda n: (0 if n in pendentes else 1, int(atrasos.get(n, 0)), n),
+            )
+            trocou = False
+            for sai in extras:
+                lo = max(int(dmin), (sai // 10) * 10)
+                hi = min(int(dmax), (sai // 10) * 10 + 9)
+                cand = [
+                    x for x in range(lo, hi + 1)
+                    if x not in ocup and x in allowed and x not in ultimo
+                ]
+                if not cand:
+                    continue
+                cand.sort(key=lambda x: (0 if x in pendentes else 1, -int(atrasos.get(x, 0)), x))
+                novo = cand[0]
+                atual = [novo if n == sai else n for n in atual]
+                trocou = True
+                break
+            if not trocou:
+                return None
+            continue
+        livres = sorted(
+            [n for n in atual if n not in ultimo],
+            key=lambda n: (0 if n not in pendentes else 1, int(atrasos.get(n, 0)), n),
+        )
+        trocou = False
+        for sai in livres:
+            lo = max(int(dmin), (sai // 10) * 10)
+            hi = min(int(dmax), (sai // 10) * 10 + 9)
+            cand = [x for x in range(lo, hi + 1) if x not in ocup and x in pode]
+            if not cand:
+                continue
+            cand.sort(key=lambda x: (0 if x in pendentes else 1, -int(atrasos.get(x, 0)), x))
+            novo = cand[0]
+            atual = [novo if n == sai else n for n in atual]
+            trocou = True
+            break
+        if not trocou:
+            if folga_zero and not nreps(atual):
+                return sorted(atual)
+            return None
+    return None
+
+
+def _identidade_valida(
+    dezenas: Sequence[int],
+    faixa: Optional[Dict[str, Any]],
+    *,
+    dmin: int,
+    dmax: int,
+) -> Tuple[str, Optional[int]]:
+    """O inverso do resultado real: a aposta pronta revela o padrão e a sequência válida."""
+    dez = tuple(sorted(int(x) for x in dezenas))
+    pad = padrao_inicial(list(dez))
+    if not pad:
+        return "", None
+    mapa = mapa_sequencia_no_padrao(
+        pad, [dez], faixa, min_dezena=int(dmin), max_dezena=int(dmax),
+    )
+    seq = mapa.get(dez)
+    return pad, (int(seq) if seq else None)
 
 
 def _padrao_aceita_obrigatorias(pad: str, obrigatorias: Sequence[int]) -> bool:
@@ -227,6 +374,124 @@ def _escolher_padroes(
     return lote
 
 
+_PESOS_POSTO = (3, 2, 2, 2, 1)
+
+
+def cotas_relevancia(qtd: int, n_padroes: int) -> List[int]:
+    """Maiores sobras com pesos 3, 2, 2, 2, 1. Dez apostas viram 3, 2, 2, 2, 1."""
+    n = max(0, int(qtd))
+    k = max(0, min(len(_PESOS_POSTO), int(n_padroes)))
+    if n <= 0 or k <= 0:
+        return []
+    pesos = _PESOS_POSTO[:k]
+    total = sum(pesos)
+    numeradores = [n * p for p in pesos]
+    cotas = [num // total for num in numeradores]
+    resto = n - sum(cotas)
+    sobras = [num % total for num in numeradores]
+    for i in sorted(range(k), key=lambda ix: (-sobras[ix], ix)):
+        if resto <= 0:
+            break
+        cotas[i] += 1
+        resto -= 1
+    return cotas
+
+
+def fila_intercalada(cotas: Sequence[int]) -> List[int]:
+    """Percorre os postos e só emite quem ainda tem cota."""
+    rest = [max(0, int(c)) for c in cotas]
+    ordem: List[int] = []
+    while any(r > 0 for r in rest):
+        for i, r in enumerate(rest):
+            if r > 0:
+                ordem.append(i)
+                rest[i] -= 1
+    return ordem
+
+
+def _resolver_cinco(
+    catalogo: Sequence[Dict[str, Any]],
+    fonte: Sequence[Dict[str, Any]],
+    pool: Set[int],
+    k: int,
+    obrigatorias: Sequence[int] = (),
+) -> List[Dict[str, Any]]:
+    """Mantém a ordem da análise. Padrão sem ocorrência não entra."""
+    por: Dict[str, Dict[str, Any]] = {}
+    for raw in catalogo:
+        pad = _norm_padrao(str(raw.get("padrao") or ""))
+        if pad and pad not in por:
+            por[pad] = raw
+    out: List[Dict[str, Any]] = []
+    vistos: Set[str] = set()
+    for card in fonte:
+        if len(out) >= 5:
+            break
+        pad = _norm_padrao(str(card.get("padrao") or ""))
+        if not pad or pad in vistos:
+            continue
+        raw = por.get(pad) or card
+        freq = int(raw.get("frequencia") or 0)
+        jogos = int(raw.get("jogos_possiveis") or card.get("jogos_possiveis") or 0)
+        if freq <= 0 or jogos <= 0:
+            continue
+        if not _padrao_cabe(pad, list(pool), k):
+            continue
+        if not _padrao_aceita_obrigatorias(pad, obrigatorias):
+            continue
+        item = dict(raw)
+        item["padrao"] = pad
+        item["frequencia"] = freq
+        item["jogos_possiveis"] = jogos
+        item["descricao"] = card.get("descricao") or raw.get("descricao") or ""
+        item["top_diagonais"] = list(card.get("top_diagonais") or raw.get("top_diagonais") or [])
+        item["posto"] = len(out) + 1
+        vistos.add(pad)
+        out.append(item)
+    return out
+
+
+def _proximo_vivo(
+    cinco: Sequence[Dict[str, Any]],
+    padrao_morto: str,
+    falhos: Set[str],
+) -> Optional[Dict[str, Any]]:
+    pads = [p["padrao"] for p in cinco]
+    try:
+        inicio = pads.index(padrao_morto)
+    except ValueError:
+        inicio = -1
+    for passo in range(1, len(cinco) + 1):
+        cand = cinco[(inicio + passo) % len(cinco)]
+        if cand["padrao"] not in falhos:
+            return cand
+    return None
+
+
+def _casa_diagonal_padrao(
+    dezenas: Sequence[int],
+    tops: Sequence[Dict[str, Any]],
+    dmin: int,
+    dmax: int,
+) -> bool:
+    alvos = list(tops or [])
+    if not alvos:
+        return False
+    runs = _diagonais_da_aposta(dezenas, dmin, dmax)
+    if not runs:
+        return False
+    chaves = {str(r.get("key") or "") for r in runs}
+    conjuntos = [set(_ints(r.get("nums") or [])) for r in runs]
+    for alvo in alvos:
+        chave = str(alvo.get("key") or "")
+        if chave and chave in chaves:
+            return True
+        nums = set(_ints(alvo.get("nums") or []))
+        if len(nums) >= 2 and any(nums.issubset(grupo) for grupo in conjuntos):
+            return True
+    return False
+
+
 def _score(
     dez: Sequence[int],
     *,
@@ -237,6 +502,7 @@ def _score(
     seq_n: int,
     seq_recente: Optional[int],
     ciclo_fim: bool,
+    atrasos: Optional[Dict[int, int]] = None,
 ) -> float:
     reps = [n for n in dez if n in ultimo]
     pts = 0.0
@@ -244,7 +510,12 @@ def _score(
         pts += 6
     elif len(reps) == 0:
         pts += 1
-    pts += 0.4 * sum(1 for n in dez if n in pendentes)
+    pts += 4.0 * sum(1 for n in dez if n in pendentes)
+    if atrasos:
+        atraso_pend = sum(min(int(atrasos.get(n, 0)), 40) for n in dez if n in pendentes)
+        atraso_resto = sum(min(int(atrasos.get(n, 0)), 40) for n in dez if n not in pendentes)
+        pts += min(10.0, atraso_pend * 0.2)
+        pts += min(4.0, atraso_resto * 0.05)
     if status == "dentro":
         pts += 5
     elif status == "proxima":
@@ -292,6 +563,7 @@ def _justificativa(
     restr: Dict[str, Any],
     pendentes_usados: Sequence[int],
     pool_ampliado: bool,
+    diagonal_padrao: bool = False,
 ) -> str:
     ult_set = set(ultimo)
     reps = [n for n in dez if n in ult_set]
@@ -306,6 +578,11 @@ def _justificativa(
         f"Padrão {padrao}" + (f" ({descricao})" if descricao else "") + f", {jogos} jogos possíveis.",
         f"{origem.capitalize()}. Sequência {seq_n} na faixa {faixa_nome}, perto do centro do que esse padrão já mostrou.",
         f"Soma {sum(dez)}" + (f", média {media}" if media is not None else "") + (f", {soma_txt}." if soma_txt else "."),
+        (
+            "Usa só dezenas que não saíram no último concurso."
+            if not reps
+            else "O restante da aposta não saiu no último concurso."
+        ),
         "Repetidos em relação ao concurso anterior: "
         + (" ".join(f"{n:02d}" for n in reps) if reps else "nenhum")
         + f" ({len(reps)}).",
@@ -323,8 +600,10 @@ def _justificativa(
         )
     if pool_ampliado:
         partes.append(
-            "As pendentes do ciclo não bastavam para a aposta. O complemento usou dezenas que não saíram no concurso anterior."
+            "As pendentes do ciclo que não saíram entram primeiro. O complemento usa as mais atrasadas dessa mesma lista."
         )
+    if diagonal_padrao:
+        partes.append("Inclui uma diagonal que a análise já registrou junto com este padrão.")
     return " ".join(partes)
 
 
@@ -342,6 +621,7 @@ def gerar_lote_2a1(
     dezena_max: int = 31,
     k: int = 7,
     cols: int = 10,
+    padroes_cruzamento: Optional[Sequence[Dict[str, Any]]] = None,
     rng: Optional[random.Random] = None,
 ) -> Dict[str, Any]:
     rng = rng or random.Random()
@@ -354,9 +634,21 @@ def gerar_lote_2a1(
 
     restr = montar_restricoes(ult, penultimo, dmin=dmin, dmax=dmax, cols=cols)
     pends = [n for n in _ints(pendentes) if dmin <= n <= dmax]
-    rep_min, rep_max, folga_zero = faixa_repetidos(repetidos)
+    modo_rep = str(repetidos or "0")
+    rep_min, rep_max, folga_zero = faixa_repetidos(modo_rep)
     allowed, ampliado = _pool_permitido(
         restr, pends, dmin=dmin, dmax=dmax, k=k, rep_max=rep_max,
+    )
+    atrasos = _atrasos(
+        [
+            {
+                "concurso": row.get("concurso") or 0,
+                "numeros": row.get("numeros") or row.get("dezenas") or [],
+            }
+            for row in linhas_panorama
+        ],
+        dmin,
+        dmax,
     )
     if len(allowed) < k:
         return {
@@ -368,26 +660,40 @@ def gerar_lote_2a1(
     perfis = _contagens_faixa(linhas_panorama)
     ciclo_fim = 0 < len(pends) <= max(10, k)
     pend_set = {n for n in pends if n in allowed}
-    pend_exigidas = set(pend_set) if 0 < len(pend_set) <= k else set()
+    # Prioridade no placar. Não tira um dos cinco padrões só porque a pendente é de outra dezena.
+    pend_exigidas: Set[int] = set()
     freq_n: Dict[str, int] = {}
     for raw in catalogo:
         p = _norm_padrao(str(raw.get("padrao") or ""))
         if p:
             freq_n[p] = int(raw.get("frequencia") or 0)
+    jogos_n: Dict[str, int] = {}
+    for raw in catalogo:
+        p = _norm_padrao(str(raw.get("padrao") or ""))
+        if p:
+            jogos_n[p] = int(raw.get("jogos_possiveis") or 0)
     n_por_padrao = {
         p: i + 1
-        for i, p in enumerate(sorted(freq_n, key=lambda x: (-freq_n[x], x)))
+        for i, p in enumerate(
+            sorted(freq_n, key=lambda x: (-freq_n[x], -jogos_n.get(x, 0), x))
+        )
     }
-    lote = _escolher_padroes(
-        catalogo, allowed, k, qtd, rng, obrigatorias=sorted(pend_exigidas),
-        limite_distintos=10**6,
+    fonte = list(catalogo if padroes_cruzamento is None else padroes_cruzamento)
+    cinco = _resolver_cinco(
+        catalogo, fonte, allowed, k, obrigatorias=sorted(pend_exigidas),
     )
-    if not lote:
+    if not cinco:
         return {
             "sucesso": False,
-            "erro": "Nenhum padrão do Panorama cabe nas dezenas permitidas.",
+            "erro": (
+                "A análise não devolveu os cinco padrões do cruzamento."
+                if not fonte
+                else "Nenhum dos cinco padrões do cruzamento cabe nas dezenas permitidas."
+            ),
             "restricoes": restr,
         }
+    cotas = cotas_relevancia(qtd, len(cinco))
+    fila = [cinco[ix] for ix in fila_intercalada(cotas)]
 
     ja_saiu: Set[Tuple[int, ...]] = set()
     for item in historico or []:
@@ -405,6 +711,16 @@ def gerar_lote_2a1(
     usados_dez: Set[Tuple[int, ...]] = set()
     apostas: List[Dict[str, Any]] = []
     avisos: List[str] = []
+    if padroes_cruzamento is not None:
+        ficaram = {p["padrao"] for p in cinco}
+        vistos_aviso: Set[str] = set()
+        for card in list(padroes_cruzamento)[:5]:
+            p = _norm_padrao(str(card.get("padrao") or ""))
+            if not p or p in vistos_aviso:
+                continue
+            vistos_aviso.add(p)
+            if p not in ficaram:
+                avisos.append(f"Padrão {p} ficou de fora: não cabe nas dezenas permitidas.")
 
     recente_seq: Dict[str, Tuple[int, int]] = {}
     for row in linhas_panorama:
@@ -419,16 +735,27 @@ def gerar_lote_2a1(
             recente_seq[pad] = (conc, seq)
 
     falhos: Set[str] = set()
-    cursor = 0
+    i = 0
     guard = 0
-    while len(apostas) < qtd and guard < max(qtd * 8, len(lote)):
+    limite = max(qtd * (len(cinco) + 2), len(fila) + 5)
+
+    def _repassar(pad_morto: str) -> bool:
+        sub = _proximo_vivo(cinco, pad_morto, falhos)
+        if not sub:
+            return False
+        for j in range(i, len(fila)):
+            if fila[j].get("padrao") == pad_morto:
+                fila[j] = sub
+        return True
+
+    while i < len(fila) and len(apostas) < qtd and guard < limite:
         guard += 1
-        vivos = [p for p in lote if p["padrao"] not in falhos]
-        if not vivos:
-            break
-        spec = vivos[cursor % len(vivos)]
-        cursor += 1
+        spec = fila[i]
         pad = spec["padrao"]
+        if pad in falhos:
+            if not _repassar(pad):
+                break
+            continue
         perfil = perfis.get(pad) or {"counts": Counter(), "ns": [], "media": None, "somas": []}
         faixa_soma = calcular_faixa_soma(perfil.get("somas") or [], fonte="historico")
         if faixa_soma is None and perfil.get("media") is not None:
@@ -443,7 +770,7 @@ def gerar_lote_2a1(
             if extra == faixa:
                 continue
             ordem.extend(_ordem_na_faixa(int(spec["jogos_possiveis"]), extra, perfil["ns"]))
-        melhor: Optional[Tuple[float, List[int], int, str, Dict[str, Any]]] = None
+        melhor: Optional[Tuple[float, List[int], int, str, Dict[str, Any], bool]] = None
         vistos_local: Set[int] = set()
         faixas_por_n = {}
         for nome in _FAIXAS:
@@ -463,6 +790,17 @@ def gerar_lote_2a1(
             if not dez or len(dez) != k:
                 continue
             if padrao_inicial(dez) != pad:
+                continue
+            dez = _encaixar_no_pool(dez, allowed, pend_set, atrasos, dmin, dmax)
+            if not dez or len(dez) != k or padrao_inicial(dez) != pad:
+                continue
+            pode_rep = {int(n) for n in _ints(restr.get("pode_repetir"))}
+            dez = _ajustar_repetidos(
+                dez, allowed, ult_set, pode_rep,
+                rep_min, rep_max, pend_set, atrasos, dmin, dmax,
+                folga_zero=folga_zero,
+            )
+            if not dez or len(dez) != k or padrao_inicial(dez) != pad:
                 continue
             chave = tuple(dez)
             if chave in usados_dez or chave in ja_saiu:
@@ -518,6 +856,7 @@ def gerar_lote_2a1(
                 seq_n=seq_n,
                 seq_recente=seq_rec,
                 ciclo_fim=ciclo_fim,
+                atrasos=atrasos,
             )
             nd = _n_digitos(dez)
             ndiag = len(_diagonais_da_aposta(dez, dmin, dmax))
@@ -528,12 +867,18 @@ def gerar_lote_2a1(
                 pts -= 4
             if 2 <= ndiag <= 3:
                 pts += 6
+            casa = _casa_diagonal_padrao(dez, spec.get("top_diagonais") or [], dmin, dmax)
+            if casa:
+                pts += 5
             nome_faixa = faixas_por_n.get(seq_n) or faixa
             if melhor is None or pts > melhor[0]:
-                melhor = (pts, list(dez), int(seq_n), nome_faixa, cls)
+                melhor = (pts, list(dez), int(seq_n), nome_faixa, cls, casa)
+            n_pend_melhor = sum(1 for n in melhor[1] if n in pend_set) if melhor else 0
+            precisa_pend = min(2, len(pend_set)) if pend_set else 0
             if (
                 melhor
-                and melhor[0] >= 20
+                and melhor[0] >= 24
+                and n_pend_melhor >= precisa_pend
                 and (ja7 > qtd // 2 or _n_digitos(melhor[1]) == 7)
                 and rep_min <= sum(1 for n in melhor[1] if n in ult_set) <= rep_max
             ):
@@ -541,8 +886,19 @@ def gerar_lote_2a1(
         if not melhor:
             falhos.add(pad)
             avisos.append(f"Padrão {pad} não produziu aposta dentro das restrições.")
+            if not _repassar(pad):
+                break
             continue
-        _pts, dez, seq_n, nome_faixa, cls = melhor
+        _pts, dez, seq_semente, nome_faixa, cls, casa_diag = melhor
+        pad_real, seq_real = _identidade_valida(
+            dez, faixa_soma, dmin=dmin, dmax=dmax,
+        )
+        if pad_real:
+            pad = pad_real
+        seq_n = int(seq_real) if seq_real else int(seq_semente)
+        nome_faixa = classificar_faixa_sequencia(
+            seq_n, int(spec.get("jogos_possiveis") or 0),
+        ) or nome_faixa
         chave = tuple(dez)
         usados_dez.add(chave)
         usados_seq.add((pad, seq_n))
@@ -552,6 +908,7 @@ def gerar_lote_2a1(
             "dezenas": list(dez),
             "padrao": pad,
             "padrao_inicial": pad,
+            "posto": int(spec.get("posto") or 0),
             "n_padrao": n_por_padrao.get(pad),
             "descricao": spec.get("descricao") or "",
             "frequencia": int(spec.get("frequencia") or 0),
@@ -565,6 +922,7 @@ def gerar_lote_2a1(
             "media_soma": cls.get("media"),
             "repetidos": sorted(n for n in dez if n in ult_set),
             "pendentes": pend_usados,
+            "diagonal_padrao": bool(casa_diag),
             "justificativa": _justificativa(
                 padrao=pad,
                 descricao=str(spec.get("descricao") or ""),
@@ -579,8 +937,10 @@ def gerar_lote_2a1(
                 restr=restr,
                 pendentes_usados=pend_usados,
                 pool_ampliado=ampliado,
+                diagonal_padrao=bool(casa_diag),
             ),
         })
+        i += 1
 
     if not apostas:
         return {
@@ -598,5 +958,15 @@ def gerar_lote_2a1(
         "pool_ampliado": ampliado,
         "avisos": avisos,
         "ciclo_fim": ciclo_fim,
-        "repetidos_modo": str(repetidos or "1-2"),
+        "repetidos_modo": modo_rep,
+        "padroes_cinco": [
+            {
+                "posto": int(p.get("posto") or ix + 1),
+                "padrao": p.get("padrao"),
+                "descricao": p.get("descricao") or "",
+                "frequencia": int(p.get("frequencia") or 0),
+                "cota": int(cotas[ix]) if ix < len(cotas) else 0,
+            }
+            for ix, p in enumerate(cinco)
+        ],
     }

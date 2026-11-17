@@ -104,6 +104,7 @@
       preencherSelect();
       renderTudo();
       content.style.display = 'block';
+      rolarSecaoPedida();
     } catch (err) {
       content.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
     } finally {
@@ -362,6 +363,30 @@
     return lista.map(fmt).join(' ');
   }
 
+  function contagemParImpar(sorteio) {
+    const set = new Set((sorteio || []).map(Number).filter(Number.isFinite));
+    const c = { paresSairam: 0, paresFora: 0, imparesSairam: 0, imparesFora: 0 };
+    for (let n = DMIN; n <= DMAX; n += 1) {
+      const par = n % 2 === 0;
+      const saiu = set.has(n);
+      if (par && saiu) c.paresSairam += 1;
+      else if (par) c.paresFora += 1;
+      else if (saiu) c.imparesSairam += 1;
+      else c.imparesFora += 1;
+    }
+    return c;
+  }
+
+  function htmlParImpar(qtd, lista, cor) {
+    const n = String(Math.max(0, Number(qtd) || 0)).padStart(2, '0');
+    const nums = !lista || lista === '—' ? '' : String(lista);
+    const txt = nums ? `${n} | ${nums}` : n;
+    const corpo = nums
+      ? `<span class="ev-pi-qtd">${n} |</span> ${nums}`
+      : `<span class="ev-pi-qtd">${n}</span>`;
+    return `<td class="ev-basic-nums ev-pi-linha" style="color:${cor}" title="${txt}">${corpo}</td>`;
+  }
+
   function celulaGrupo(k, b) {
     const bloco = b || {};
     if (k === 'sequencias') {
@@ -450,14 +475,21 @@
       .replace(/"/g, '&quot;');
   }
 
+  function botoesXls() {
+    return ['evStatBasicosXls', 'evStat2a1Xls']
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+  }
+
   function atualizarBotaoXls(qtd) {
-    const btn = document.getElementById('evStatBasicosXls');
-    if (!btn) return;
     const n = Number(qtd) || 0;
-    btn.disabled = n < 1;
-    btn.title = n
-      ? `Baixar ${n.toLocaleString('pt-BR')} linha(s) em Excel (.xlsx), com as colunas formatadas`
+    const titulo = n
+      ? `Baixar ${n.toLocaleString('pt-BR')} linha(s) das seções 2a e 2a1 no mesmo Excel`
       : 'Sem sorteios para exportar';
+    botoesXls().forEach((btn) => {
+      btn.disabled = n < 1;
+      btn.title = titulo;
+    });
   }
 
   function nomeArquivoXls(nome) {
@@ -468,6 +500,73 @@
       .trim()
       .replace(/[\s-]+/g, '_');
     return `${base || 'Modalidade'}_Estatisticas_Basicas.xls`;
+  }
+
+  function celulaQtdLista(qtd, lista) {
+    const n = String(Math.max(0, Number(qtd) || 0)).padStart(2, '0');
+    const nums = !lista || lista === '—' ? '' : String(lista);
+    return nums ? `${n} | ${nums}` : n;
+  }
+
+  function valores2a(linhas) {
+    return linhas.map((ln) => [
+      ln.concurso,
+      ln.data || '—',
+      numsLinha(ln.numeros),
+      celulaGrupo('pares', ln.pares),
+      celulaGrupo('impares', ln.impares),
+      celulaGrupo('repetidos', ln.repetidos),
+      celulaGrupo('sequencias', ln.sequencias),
+      celulaGrupo('finais', ln.finais),
+      celulaGrupo('diagonais', ln.diagonais),
+    ]);
+  }
+
+  function valores2a1Planilha(linhas) {
+    return linhas2a1(linhas).map((ln) => {
+      const q = contagemParImpar(ln.sorteio);
+      return [
+        ln.concurso,
+        ln.data || '—',
+        numsLinha(ln.sorteio),
+        celulaQtdLista(q.paresFora, numsLinha(ln.pares)),
+        celulaQtdLista(q.imparesFora, numsLinha(ln.impares)),
+        numsLinha(ln.repetidos),
+        ln.seqTxt,
+        ln.finTxt,
+        ln.diagTxt,
+      ];
+    });
+  }
+
+  function abaXml(nome, cols, valores) {
+    const larguras = cols.map((col, i) => {
+      let max = col.titulo.length;
+      valores.forEach((row) => { max = Math.max(max, String(row[i] == null ? '' : row[i]).length); });
+      return Math.min(420, Math.max(62, Math.ceil(max * 6.5 + 18)));
+    });
+    const header = `<Row ss:Height="22">${cols.map((col, i) =>
+      `<Cell ss:StyleID="h${i}"><Data ss:Type="String">${xmlEsc(col.titulo)}</Data></Cell>`
+    ).join('')}</Row>`;
+    const body = valores.map((row) => {
+      const cells = row.map((val, i) => {
+        const num = i === 0 && Number.isFinite(Number(val));
+        const tipo = num ? 'Number' : 'String';
+        const texto = num ? String(Number(val)) : (val == null || val === '' ? '—' : val);
+        return `<Cell ss:StyleID="c${i}"><Data ss:Type="${tipo}">${xmlEsc(texto)}</Data></Cell>`;
+      }).join('');
+      return `<Row>${cells}</Row>`;
+    }).join('');
+    const ultima = valores.length + 1;
+    return `<Worksheet ss:Name="${xmlEsc(nome)}"><Table>`
+      + larguras.map((w) => `<Column ss:AutoFitWidth="0" ss:Width="${w}"/>`).join('')
+      + header + body
+      + '</Table>'
+      + `<AutoFilter x:Range="R1C1:R${ultima}C9" xmlns="urn:schemas-microsoft-com:office:excel"></AutoFilter>`
+      + '<WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">'
+      + '<FreezePanes/><FrozenNoSplit/>'
+      + '<SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane><ActivePane>2</ActivePane>'
+      + '</WorksheetOptions></Worksheet>';
   }
 
   function baixarBasicosXls() {
@@ -492,22 +591,6 @@
       { id: 'finais', titulo: 'Finais Iguais', fundo: finais, fonte: fonteLegivel(finais) },
       { id: 'diagonais', titulo: 'Diagonais', fundo: CORES.diagonais, fonte: '#FFFFFF' },
     ];
-    const valores = linhas.map((ln) => [
-      ln.concurso,
-      ln.data || '—',
-      numsLinha(ln.numeros),
-      celulaGrupo('pares', ln.pares),
-      celulaGrupo('impares', ln.impares),
-      celulaGrupo('repetidos', ln.repetidos),
-      celulaGrupo('sequencias', ln.sequencias),
-      celulaGrupo('finais', ln.finais),
-      celulaGrupo('diagonais', ln.diagonais),
-    ]);
-    const larguras = cols.map((col, i) => {
-      let max = col.titulo.length;
-      valores.forEach((row) => { max = Math.max(max, String(row[i] == null ? '' : row[i]).length); });
-      return Math.min(420, Math.max(62, Math.ceil(max * 6.5 + 18)));
-    });
     const borda = misturarBranco(primary, 0.62);
     let styles = '<Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="11"/></Style>';
     cols.forEach((col, i) => {
@@ -531,19 +614,6 @@
         + `<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="${borda}"/>`
         + `</Borders></Style>`;
     });
-    const header = `<Row ss:Height="22">${cols.map((col, i) =>
-      `<Cell ss:StyleID="h${i}"><Data ss:Type="String">${xmlEsc(col.titulo)}</Data></Cell>`
-    ).join('')}</Row>`;
-    const body = valores.map((row) => {
-      const cells = row.map((val, i) => {
-        const num = i === 0 && Number.isFinite(Number(val));
-        const tipo = num ? 'Number' : 'String';
-        const texto = num ? String(Number(val)) : (val == null || val === '' ? '—' : val);
-        return `<Cell ss:StyleID="c${i}"><Data ss:Type="${tipo}">${xmlEsc(texto)}</Data></Cell>`;
-      }).join('');
-      return `<Row>${cells}</Row>`;
-    }).join('');
-    const ultima = valores.length + 1;
     const xml = '<?xml version="1.0" encoding="UTF-8"?>'
       + '<?mso-application progid="Excel.Sheet"?>'
       + '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"'
@@ -554,15 +624,9 @@
       + `<Title>${xmlEsc('Estatísticas Básicas — ' + MODALIDADE)}</Title>`
       + '</DocumentProperties>'
       + `<Styles>${styles}</Styles>`
-      + '<Worksheet ss:Name="Estatisticas Basicas"><Table>'
-      + larguras.map((w) => `<Column ss:AutoFitWidth="0" ss:Width="${w}"/>`).join('')
-      + header + body
-      + '</Table>'
-      + `<AutoFilter x:Range="R1C1:R${ultima}C9" xmlns="urn:schemas-microsoft-com:office:excel"></AutoFilter>`
-      + '<WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">'
-      + '<FreezePanes/><FrozenNoSplit/>'
-      + '<SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane><ActivePane>2</ActivePane>'
-      + '</WorksheetOptions></Worksheet></Workbook>';
+      + abaXml('2a.', cols, valores2a(linhas))
+      + abaXml('2a1.', cols, valores2a1Planilha(linhas))
+      + '</Workbook>';
     const blob = new Blob(['\uFEFF', xml], { type: 'application/vnd.ms-excel;charset=utf-8' });
     const a = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -592,25 +656,29 @@
     setTimeout(() => URL.revokeObjectURL(url), 1500);
   }
 
-  async function baixarBasicosServidor() {
+  async function baixarBasicosServidor(ev) {
     const linhas = (payload && payload.linhas_basicas) || [];
     if (!linhas.length) return;
-    const btn = document.getElementById('evStatBasicosXls');
-    const original = btn ? btn.innerHTML : '';
+    const clicado = ev && ev.currentTarget;
+    const botoes = botoesXls();
+    const originais = botoes.map((btn) => btn.innerHTML);
     const f = filtros();
     const qs = new URLSearchParams({
       ordem: f.ordem || 'desc',
       limite: '0',
       base: 'geral',
     });
-    if (btn) {
+    botoes.forEach((btn) => {
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Gerando…';
-    }
+      if (btn === clicado) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Gerando…';
+      }
+    });
     try {
       const r = await fetch(`${API}/basicas.xlsx?${qs}`);
       const ctype = r.headers.get('content-type') || '';
-      if (!r.ok) {
+      const abas = r.headers.get('X-Estatisticas-Abas') || '';
+      if (!r.ok || !abas.includes('2a1')) {
         let msg = '';
         if (ctype.includes('json')) {
           try {
@@ -640,10 +708,8 @@
     } catch (_) {
       baixarBasicosXls();
     } finally {
-      if (btn) {
-        btn.innerHTML = original;
-        atualizarBotaoXls((payload && payload.linhas_basicas || []).length);
-      }
+      botoes.forEach((btn, i) => { btn.innerHTML = originais[i]; });
+      atualizarBotaoXls((payload && payload.linhas_basicas || []).length);
     }
   }
 
@@ -769,8 +835,8 @@
         data: ln.data || '',
         sorteio,
         sorteioCrescente: [...sorteio].sort((a, b) => a - b),
-        pares: exceto(exceto(paresU, antNums), sorteio),
-        impares: exceto(exceto(imparesU, antNums), sorteio),
+        pares: exceto(paresU, sorteio),
+        impares: exceto(imparesU, sorteio),
         repetidos: repetidos.map(Number).filter(Number.isFinite).sort((a, b) => a - b),
         sequencias: seq,
         finais: fin,
@@ -843,12 +909,13 @@
       const isFoco = ln.concurso === focoN;
       const cel = (txt, cor) => `<td class="ev-basic-nums" style="color:${cor}" title="${txt}">${txt}</td>`;
       const sorteioTxt = numsLinha(sorteio);
+      const q = contagemParImpar(ln.sorteio);
       return `<tr data-concurso="${ln.concurso}" class="${isFoco ? 'is-foco' : ''}">
         <td class="ev-basic-conc">${ln.concurso}</td>
         <td class="ev-basic-data">${ln.data || '—'}</td>
         <td class="ev-basic-nums" title="${sorteioTxt}">${sorteioTxt}</td>
-        ${cel(numsLinha(ln.pares), CORES.pares)}
-        ${cel(numsLinha(ln.impares), CORES.impares)}
+        ${htmlParImpar(q.paresFora, numsLinha(ln.pares), CORES.pares)}
+        ${htmlParImpar(q.imparesFora, numsLinha(ln.impares), CORES.impares)}
         ${cel(numsLinha(ln.repetidos), CORES.repetidos)}
         ${cel(ln.seqTxt, CORES.sequencias)}
         ${cel(ln.finTxt, CORES.finais)}
@@ -886,12 +953,15 @@
         ? baseSorteio.slice().sort((a, b) => a - b)
         : baseSorteio;
       const sorteioTxt = numsLinha(sorteio);
+      const q = contagemParImpar(baseSorteio);
+      const paresTxt = celulaGrupo('pares', ln.pares);
+      const imparesTxt = celulaGrupo('impares', ln.impares);
       return `<tr data-concurso="${ln.concurso}" class="${isFoco ? 'is-foco' : ''}">
         <td class="ev-basic-conc">${ln.concurso}</td>
         <td class="ev-basic-data">${ln.data || '—'}</td>
         <td class="ev-basic-nums" title="${sorteioTxt}">${sorteioTxt}</td>
-        <td class="ev-basic-nums" style="color:${CORES.pares}" title="${celulaGrupo('pares', ln.pares)}">${celulaGrupo('pares', ln.pares)}</td>
-        <td class="ev-basic-nums" style="color:${CORES.impares}" title="${celulaGrupo('impares', ln.impares)}">${celulaGrupo('impares', ln.impares)}</td>
+        ${htmlParImpar(q.paresSairam, paresTxt, CORES.pares)}
+        ${htmlParImpar(q.imparesSairam, imparesTxt, CORES.impares)}
         <td class="ev-basic-nums" style="color:${CORES.repetidos}" title="${celulaGrupo('repetidos', ln.repetidos)}">${celulaGrupo('repetidos', ln.repetidos)}</td>
         <td class="ev-basic-nums" style="color:${CORES.sequencias}" title="${celulaGrupo('sequencias', ln.sequencias)}">${celulaGrupo('sequencias', ln.sequencias)}</td>
         <td class="ev-basic-nums" style="color:${CORES.finais}" title="${celulaGrupo('finais', ln.finais)}">${celulaGrupo('finais', ln.finais)}</td>
@@ -1487,6 +1557,41 @@
     renderApostas();
   }
 
+  function secaoDaUrl() {
+    const qs = new URLSearchParams(window.location.search);
+    const secao = String(qs.get('secao') || '').toLowerCase();
+    const aba = String(qs.get('aba') || '').toLowerCase();
+    if (secao === '2a' || secao === '2a1') return secao;
+    if (aba === '2a' || aba === '2a1') return aba;
+    return '';
+  }
+
+  let secaoPedida = '';
+  let secaoRolada = false;
+
+  function expandirSecao(secao) {
+    const dois = secao === '2a1';
+    const btn = document.getElementById(dois ? 'evStat2a1Fold' : 'evStatBasicosFold');
+    const box = document.getElementById(dois ? 'evStat2a1TabelaBox' : 'evStatBasicosTabelaBox');
+    if (!btn || !box) return null;
+    btn.setAttribute('aria-expanded', 'true');
+    box.hidden = false;
+    return document.getElementById(dois ? 'ev-secao-2a1' : 'ev-secao-2a') || btn;
+  }
+
+  function rolarSecaoPedida() {
+    if (!secaoPedida || secaoRolada || !payload) return;
+    const alvo = expandirSecao(secaoPedida);
+    if (!alvo) return;
+    const pane = alvo.closest('.tab-pane');
+    if (pane && !pane.classList.contains('active') && !pane.classList.contains('show')) return;
+    secaoRolada = true;
+    setTimeout(() => {
+      try { alvo.scrollIntoView({ block: 'start' }); } catch (_) { /* ignore */ }
+      if (secaoPedida === '2a') scrollTabelaFoco();
+    }, 80);
+  }
+
   function init() {
     document.getElementById('evStatPrev')?.addEventListener('click', () => nav(-1));
     document.getElementById('evStatNext')?.addEventListener('click', () => nav(1));
@@ -1498,6 +1603,7 @@
       carregarEnriquecimento(conc);
     });
     document.getElementById('evStatBasicosXls')?.addEventListener('click', baixarBasicosServidor);
+    document.getElementById('evStat2a1Xls')?.addEventListener('click', baixarBasicosServidor);
     const pathEl = document.getElementById('evStatBasicosPath');
     if (pathEl && !pathEl.textContent.trim()) {
       const caminho = caminhoPadrao();
@@ -1541,8 +1647,12 @@
     });
 
     document.getElementById('ev-tab-estatisticas')?.addEventListener('shown.bs.tab', () => {
+      if (secaoPedida) expandirSecao(secaoPedida);
       if (dirty || !payload) carregarEnriquecimento(null);
-      else renderCharts();
+      else {
+        renderCharts();
+        rolarSecaoPedida();
+      }
     });
 
     ['evSelectOrdem', 'evSelectLimite'].forEach((id) => {
@@ -1560,13 +1670,16 @@
     bindApostas();
 
     const qsPagina = new URLSearchParams(window.location.search);
-    if (qsPagina.get('aba') === 'estatisticas' || qsPagina.get('embed') === '1') {
+    secaoPedida = secaoDaUrl();
+    if (secaoPedida || qsPagina.get('aba') === 'estatisticas' || qsPagina.get('embed') === '1') {
+      if (secaoPedida) expandirSecao(secaoPedida);
       const tabBtn = document.getElementById('ev-tab-estatisticas');
       if (tabBtn && window.bootstrap && bootstrap.Tab) {
         bootstrap.Tab.getOrCreateInstance(tabBtn).show();
       } else if (tabBtn) {
         tabBtn.click();
       }
+      rolarSecaoPedida();
     }
   }
 

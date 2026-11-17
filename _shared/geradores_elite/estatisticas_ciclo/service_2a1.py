@@ -164,8 +164,10 @@ def gerar_2a1(
         historico = set()
 
     ciclo = ctx.get("ciclo") or {}
+    mais_saem = list((cat.get("cruzamento_diagonais") or {}).get("mais_saem") or [])
     out = gerar_lote_2a1(
         catalogo=list(cat.get("padroes") or []),
+        padroes_cruzamento=mais_saem,
         linhas_panorama=list(seq.get("linhas") or []),
         ultimo=ultimo,
         penultimo=penultimo,

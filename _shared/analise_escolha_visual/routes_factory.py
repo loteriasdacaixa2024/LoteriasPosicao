@@ -148,6 +148,7 @@ def register_analise_escolha_visual(analise_bp: Blueprint, modality_key: str) ->
             max_age=0,
         )
         resp.headers["Cache-Control"] = "no-store"
+        resp.headers["X-Estatisticas-Abas"] = "2a,2a1"
         if res.get("mensagem"):
             resp.headers["X-Estatisticas-Aviso"] = quote(res["mensagem"])
         if res.get("caminho"):

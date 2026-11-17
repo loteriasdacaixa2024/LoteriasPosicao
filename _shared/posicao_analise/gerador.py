@@ -101,7 +101,7 @@ def carregar_plugins_ctx(
 
         if tem_gerador_comportamento(modality_key):
             comp_svc = get_comportamento_service(modality_key)
-            comp = comp_svc.analisar(janela=10, base_estatistica="geral")
+            comp = comp_svc.montar_contexto(janela=10, base_estatistica="geral")
             ctx["comportamento"] = comp
             alvos = (comp.get("criterios_sugeridos") or {}).get("alvos") or {}
             ctx["comp_alvos"] = alvos

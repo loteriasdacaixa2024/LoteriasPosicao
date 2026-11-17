@@ -536,28 +536,169 @@ def _xlsx_bytes(abas: Sequence[dict]) -> bytes:
     return bio.getvalue()
 
 
-def _aba_basicos(titulo: str, linhas: Sequence[dict], pad: int) -> dict:
+def _aba_de_corpo(titulo: str, corpo: Sequence[Sequence[Any]]) -> dict:
     cores = [fundo for _chave, _nome, fundo, _negrito in COLUNAS]
-    cab = [nome for _chave, nome, _fundo, _negrito in COLUNAS]
-    larguras = [float(len(nome)) for nome in cab]
-    corpo = [cab]
-    for linha in linhas:
-        valores = linha_valores(linha, pad)
-        for i, valor in enumerate(valores):
+    cab = list(corpo[0]) if corpo else [nome for _chave, nome, _fundo, _negrito in COLUNAS]
+    larguras = [float(len(str(nome))) for nome in cab]
+    for linha in list(corpo)[1:]:
+        for i, valor in enumerate(linha):
             tamanho = len(str(valor))
-            if tamanho > larguras[i]:
+            if i < len(larguras) and tamanho > larguras[i]:
                 larguras[i] = float(tamanho)
-        corpo.append(valores)
     return {
         "nome": titulo,
-        "linhas": corpo,
+        "linhas": list(corpo),
         "larguras": [min(62.0, max(12.0, largura + 2)) for largura in larguras],
         "cores": cores,
     }
 
 
-def bytes_modalidade(nome: str, linhas: Sequence[dict], pad: int) -> bytes:
-    return _xlsx_bytes([_aba_basicos(nome_planilha(nome, set()), linhas, pad)])
+def _aba_basicos(titulo: str, linhas: Sequence[dict], pad: int) -> dict:
+    cab = [nome for _chave, nome, _fundo, _negrito in COLUNAS]
+    corpo = [cab]
+    for linha in linhas:
+        corpo.append(linha_valores(linha, pad))
+    return _aba_de_corpo(titulo, corpo)
+
+
+def _qtd_lista(qtd: int, nums: Sequence[int], pad: int) -> str:
+    n = f"{max(0, int(qtd)):02d}"
+    texto = _nums(nums, pad)
+    if texto == "—":
+        return n
+    return f"{n} | {texto}"
+
+
+def _texto_diags_2a1(bloco: Optional[dict], pad: int) -> str:
+    """Mesmo texto da seção 2a1: símbolo e dezenas separados por espaço."""
+    detalhe = (bloco or {}).get("detalhe") or {}
+    partes: List[str] = []
+    for grupo in detalhe.get("grupos") or []:
+        if isinstance(grupo, dict):
+            bruto = grupo.get("nums") or []
+            sym = str(grupo.get("dir_sym") or "").strip()
+        else:
+            bruto = grupo
+            sym = ""
+        nums = []
+        for item in bruto:
+            try:
+                nums.append(_fmt(int(item), pad))
+            except (TypeError, ValueError):
+                continue
+        if not nums:
+            continue
+        texto = "-".join(nums)
+        partes.append(f"{sym} {texto}".strip() if sym else texto)
+    return " · ".join(partes) if partes else "—"
+
+
+def _ints(arr: Optional[Sequence[Any]]) -> List[int]:
+    lista: List[int] = []
+    for item in arr or []:
+        try:
+            lista.append(int(item))
+        except (TypeError, ValueError):
+            continue
+    return lista
+
+
+def _anterior_por_concurso(linhas: Sequence[dict]) -> Dict[int, Optional[dict]]:
+    ordenadas = sorted(linhas, key=lambda ln: int(ln.get("concurso") or 0))
+    anterior: Dict[int, Optional[dict]] = {}
+    previa: Optional[dict] = None
+    for ln in ordenadas:
+        try:
+            conc = int(ln.get("concurso"))
+        except (TypeError, ValueError):
+            continue
+        anterior[conc] = previa
+        previa = ln
+    return anterior
+
+
+def valores_2a1(
+    linhas: Sequence[dict],
+    pad: int,
+    dmin: int = 1,
+    dmax: int = 31,
+) -> List[List[Any]]:
+    """Colunas da seção 2a1, na mesma ordem das linhas da 2a.
+
+    Pares e ímpares são as dezenas da faixa que não saíram neste concurso.
+    Repetidos são as deste concurso que também estão no anterior.
+    Sequências, finais e diagonais vêm do concurso imediatamente anterior.
+    """
+    previo = _anterior_por_concurso(linhas)
+    try:
+        ini = int(dmin)
+        fim = int(dmax)
+    except (TypeError, ValueError):
+        ini, fim = 1, 31
+    if fim < ini:
+        ini, fim = fim, ini
+    pares_u = [n for n in range(ini, fim + 1) if n % 2 == 0]
+    impares_u = [n for n in range(ini, fim + 1) if n % 2 == 1]
+    saida: List[List[Any]] = []
+    for ln in linhas:
+        sorteio = _ints(ln.get("numeros"))
+        ban = set(sorteio)
+        try:
+            conc: Any = int(ln.get("concurso"))
+        except (TypeError, ValueError):
+            conc = ln.get("concurso") if ln.get("concurso") not in (None, "") else "—"
+        ant = previo.get(conc) if isinstance(conc, int) else None
+        pares = [n for n in pares_u if n not in ban]
+        impares = [n for n in impares_u if n not in ban]
+        pares_fora = sum(1 for n in range(ini, fim + 1) if n % 2 == 0 and n not in ban)
+        impares_fora = sum(1 for n in range(ini, fim + 1) if n % 2 == 1 and n not in ban)
+        bloco_rep = ln.get("repetidos") if isinstance(ln.get("repetidos"), dict) else {}
+        if isinstance(bloco_rep, dict) and "dezenas" in bloco_rep:
+            repetidos = sorted(_ints(bloco_rep.get("dezenas")))
+        elif ant:
+            ant_nums = set(_ints(ant.get("numeros")))
+            repetidos = sorted(n for n in sorteio if n in ant_nums)
+        else:
+            repetidos = []
+        if ant:
+            seq = _celula_grupo("sequencias", ant.get("sequencias"), pad)
+            fin = _celula_grupo("finais", ant.get("finais"), pad)
+            diag = _texto_diags_2a1(ant.get("diagonais"), pad)
+        else:
+            seq = fin = diag = "—"
+        saida.append([
+            conc,
+            valor_data(ln.get("data")),
+            _nums(sorteio, pad),
+            _qtd_lista(pares_fora, pares, pad),
+            _qtd_lista(impares_fora, impares, pad),
+            _nums(repetidos, pad),
+            seq,
+            fin,
+            diag,
+        ])
+    return saida
+
+
+def _aba_2a1(titulo: str, linhas: Sequence[dict], pad: int, dmin: int, dmax: int) -> dict:
+    cab = [nome for _chave, nome, _fundo, _negrito in COLUNAS]
+    return _aba_de_corpo(titulo, [cab, *valores_2a1(linhas, pad, dmin, dmax)])
+
+
+def bytes_modalidade(
+    nome: str,
+    linhas: Sequence[dict],
+    pad: int,
+    *,
+    dmin: int = 1,
+    dmax: int = 31,
+) -> bytes:
+    """Um arquivo com a seção 2a e a seção 2a1. O nome da modalidade não vira aba."""
+    del nome
+    return _xlsx_bytes([
+        _aba_basicos("2a.", linhas, pad),
+        _aba_2a1("2a1.", linhas, pad, dmin, dmax),
+    ])
 
 
 def bytes_consolidado(folhas: Sequence[dict], pendencias: Sequence[dict]) -> bytes:
@@ -626,7 +767,15 @@ def preparar_download_modalidade(
         pad = int(out.get("pad_width") or 2)
     except (TypeError, ValueError):
         pad = 2
-    conteudo = bytes_modalidade(nome, linhas, pad)
+    from analise_estudos.specs import get_estudos_config
+
+    cfg = get_estudos_config(modality_key)
+    try:
+        dmin = int(cfg.get("dezena_min") or 1)
+        dmax = int(cfg.get("dezena_max") or 31)
+    except (TypeError, ValueError):
+        dmin, dmax = 1, 31
+    conteudo = bytes_modalidade(nome, linhas, pad, dmin=dmin, dmax=dmax)
     destino = caminho_modalidade_disco(
         modality_key, limite=limite_n, ordem=ordem_n, base=base_n,
     )
