@@ -657,6 +657,13 @@
     body.is-embed .tabela-scroll {
         max-height: var(--cmp-table-max, 70vh);
     }
+    @media (min-width: 1200px) {
+        body.is-embed .table-responsive,
+        body.is-embed .tabela-scroll {
+            max-height: none;
+            overflow: visible;
+        }
+    }
 
     table.tabela-ordenavel thead th.ordem-col {
         cursor: pointer;

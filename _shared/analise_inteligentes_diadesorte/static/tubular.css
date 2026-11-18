@@ -642,6 +642,21 @@
 #ai-tubular-root .tb-ultimo-ref {
   line-height: 1.15;
   white-space: nowrap;
+  text-align: center;
+}
+#ai-tubular-root .tb-ultimo-ref .small {
+  display: inline;
+  margin-left: .15rem;
+  font-size: .6rem;
+  font-weight: 600;
+  color: #6c757d;
+}
+@media (min-width: 1200px) {
+  #ai-tubular-root .tb-s10-board .table-responsive,
+  #ai-tubular-root .tb-s11-fit {
+    max-height: none !important;
+    overflow: visible !important;
+  }
 }
 #ai-tubular-root .tb-pos-box-ro {
   justify-content: center;

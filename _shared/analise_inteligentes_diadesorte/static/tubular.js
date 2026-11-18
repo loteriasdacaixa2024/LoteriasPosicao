@@ -1900,11 +1900,12 @@
     if (lbl) {
       lbl.textContent = `Último resultado — concurso ${c.contest} (ordem crescente · histórico tubular)`;
     }
-    tbody.innerHTML = `<tr class="tb-row-ultimo" title="Resultado oficial do concurso ${esc(c.contest)} — dezenas alinhadas às apostas">
+    const dataCheia10 = String(c.date || '').trim();
+    const dataCurta10 = dataCheia10.replace(/^(\d{2}\/\d{2})\/\d{2,4}$/, '$1');
+    tbody.innerHTML = `<tr class="tb-row-ultimo" title="Resultado oficial do concurso ${esc(c.contest)}${dataCheia10 ? ' ' + esc(dataCheia10) : ''} — dezenas alinhadas às apostas">
       <td class="tb-sel-td" aria-hidden="true"></td>
       <td class="tb-ultimo-ref">
-        <strong>${esc(c.contest)}</strong>
-        <div class="small text-muted">${esc(c.date)}</div>
+        <strong>${esc(c.contest)}</strong>${dataCurta10 ? ` <span class="small">${esc(dataCurta10)}</span>` : ''}
       </td>
       <td class="text-nowrap">${this._ultimoDezenasHtml(nums, an.sequences, rept.list)}</td>
       ${mesTd}
@@ -1928,7 +1929,7 @@
     const lbl = this.root.querySelector(lblSel);
     if (!tbody) return;
     const L = limitsFrom(this.root);
-    const nCols = 2 + L.sorteadas + (this.extraMes ? 1 : 0) + 10;
+    const nCols = 1 + L.sorteadas + (this.extraMes ? 1 : 0) + 10;
     if (!this.data.length) {
       tbody.innerHTML = `<tr><td colspan="${nCols}" class="text-muted">Carregando histórico tubular…</td></tr>`;
       if (lbl) lbl.textContent = 'Último resultado (referência)';
@@ -1960,9 +1961,10 @@
     if (lbl) {
       lbl.textContent = `Último resultado — concurso ${c.contest} (ordem crescente · histórico tubular)`;
     }
-    tbody.innerHTML = `<tr class="tb-row-ultimo">
-      <td><strong>${esc(c.contest)}</strong></td>
-      <td class="small">${esc(c.date)}</td>
+    const dataCheia11 = String(c.date || '').trim();
+    const dataCurta11 = dataCheia11.replace(/^(\d{2}\/\d{2})\/\d{2,4}$/, '$1');
+    tbody.innerHTML = `<tr class="tb-row-ultimo" title="Resultado oficial do concurso ${esc(c.contest)}${dataCheia11 ? ' ' + esc(dataCheia11) : ''}">
+      <td class="tb-ultimo-ref"><strong>${esc(c.contest)}</strong>${dataCurta11 ? ` <span class="small">${esc(dataCurta11)}</span>` : ''}</td>
       ${tds}${pad}
       ${mesTd}
       <td title="${esc(an.sequencesInfo.quais)}">${seqEmoji.text}</td>

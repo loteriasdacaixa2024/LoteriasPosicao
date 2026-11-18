@@ -571,6 +571,31 @@ def _contar_digitos(nums: Sequence[int]) -> int:
     return len(chars)
 
 
+def _digitos_que_mais_saem(linhas: Sequence[Dict[str, Any]], fallback: int = 7) -> int:
+    """Quantidade de dígitos distintos que mais aparece nos sorteios desta modalidade.
+
+    No Dia de Sorte o histórico cai em 7. Quina, Mega-Sena e as outras usam o próprio modo.
+    """
+    from collections import Counter
+
+    cont: Counter = Counter()
+    for row in linhas or []:
+        nums = [int(x) for x in (row.get("numeros") or row.get("dezenas") or []) if str(x).lstrip("-").isdigit()]
+        if nums:
+            cont[_contar_digitos(nums)] += 1
+    if not cont:
+        return int(fallback)
+    return int(cont.most_common(1)[0][0])
+
+
+def _limite_sequencia(k: int) -> int:
+    """Sequência seguida que quase não sai. No Dia de Sorte (7) o corte continua 5."""
+    n = int(k or 7)
+    if n <= 10:
+        return 5
+    return max(6, (n + 1) // 2)
+
+
 def _polir_comportamento(
     jogo: Sequence[int],
     *,
@@ -1068,6 +1093,7 @@ def gerar_apostas_de_contexto(
             metas_usadas[i]["padrao"] = _padrao_de(jogos[i])
 
     union_pend = set()
+    alvo_digitos = _digitos_que_mais_saem(linhas_basicas)
     apostas_out: List[Dict[str, Any]] = []
     vistos_final: Set[Tuple[int, ...]] = set()
     for i, jogo in enumerate(jogos):
@@ -1097,7 +1123,7 @@ def gerar_apostas_de_contexto(
         travadas = [n for n in jogo if n in pends]
         polido = _polir_comportamento(
             jogo, ultimo=ultimo_nums, travadas=travadas,
-            dmin=dmin, dmax=dmax, querer_digitos=7,
+            dmin=dmin, dmax=dmax, querer_digitos=alvo_digitos,
         )
         if (
             polido

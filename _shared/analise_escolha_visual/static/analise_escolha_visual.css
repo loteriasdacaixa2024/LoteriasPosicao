@@ -369,6 +369,12 @@
 #ev-root .ev-ap-wrap {
   max-height: none;
 }
+@media (min-width: 1200px) {
+  #ev-root .ev-ap-wrap {
+    max-height: none;
+    overflow: visible;
+  }
+}
 #ev-root .ev-ap-drop {
   border: 1px dashed var(--primary, #c08b00);
   border-radius: 8px;
@@ -387,11 +393,15 @@
 }
 #ev-root .ev-ultimo-ref {
   line-height: 1.15;
+  white-space: nowrap;
   text-align: center;
 }
 #ev-root .ev-ultimo-ref .small {
+  display: inline;
+  margin-left: .15rem;
   font-weight: 600;
-  font-size: .68rem;
+  font-size: .6rem;
+  color: #6c757d;
 }
 #ev-root .ev-ap-casas {
   display: flex;

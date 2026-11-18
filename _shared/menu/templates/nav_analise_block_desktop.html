@@ -7,7 +7,7 @@
                             <span class="dd-desc">{{ nav_cfg.sniper.desc }}</span>
                         </span>
                     </a>
-                    {% for extra in nav_cfg.analise_extras %}
+                    {% for extra in nav_cfg.analise_extras if extra.href != '/analise/resultados/' %}
                     <a class="dd-link" href="{{ extra.href }}">
                         <span class="dd-icon" style="background:{{ extra.icon_bg }};color:{{ extra.icon_color }};">
                             <i class="{{ extra.icon }}"></i>

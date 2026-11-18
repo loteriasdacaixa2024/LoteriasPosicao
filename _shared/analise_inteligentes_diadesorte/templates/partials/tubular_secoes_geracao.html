@@ -143,12 +143,11 @@
             </details>
 
             <div class="small fw-bold text-muted mb-1" id="tbUltimo11Lbl">Último resultado (referência — mesma prévia da Seção 10)</div>
-            <div class="table-responsive mb-3">
+            <div class="table-responsive tb-s11-fit mb-3">
               <table class="table table-sm table-bordered tb-table" id="tbUltimo11">
                 <thead>
                   <tr>
                     <th>Concurso</th>
-                    <th>Data</th>
                     {% for i in range(1, sorteadas + 1) %}
                     <th class="tb-dez-h{% if i == 1 %} tb-dez-h-first{% endif %}{% if i == sorteadas %} tb-dez-h-last{% endif %}">{{ i }}º</th>
                     {% endfor %}
@@ -166,7 +165,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><td colspan="{{ 2 + sorteadas + (1 if extra_mes else 0) + 10 }}" class="text-muted">Carregando histórico tubular…</td></tr>
+                  <tr><td colspan="{{ 1 + sorteadas + (1 if extra_mes else 0) + 10 }}" class="text-muted">Carregando histórico tubular…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -311,7 +310,7 @@
                 </button>
               </div>
             </div>
-            <div class="table-responsive">
+            <div class="table-responsive tb-s11-fit">
               <table class="table table-sm table-bordered tb-table" id="tbManual11">
                 <thead>
                   <tr>

@@ -48,6 +48,13 @@
     flex-shrink: 0;
   }
   #cmp-root .cmp-nome { min-width: 0; }
+  #cmp-root .cmp-links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .75rem;
+    flex-shrink: 0;
+  }
   #cmp-root .cmp-open {
     white-space: nowrap;
     font-size: .82rem;
@@ -56,6 +63,19 @@
     text-decoration: none;
   }
   #cmp-root .cmp-open:hover { text-decoration: underline; }
+  #cmp-root .cmp-gerador-link {
+    align-self: center;
+    margin-left: .2rem;
+    font-size: .75rem;
+    font-weight: 600;
+    color: #8a7340;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  #cmp-root .cmp-gerador-link:hover {
+    color: #664a00;
+    text-decoration: underline;
+  }
   #cmp-root .cmp-body[hidden] { display: none !important; }
   #cmp-root .cmp-frame {
     width: 100%;
@@ -65,23 +85,172 @@
     background: #fffdf5;
     display: block;
   }
+  #cmp-root .cmp-gaps {
+    padding: .85rem .9rem 1rem;
+    background: #fffdf8;
+  }
+  #cmp-root .cmp-gaps-drop {
+    border: 1px dashed #d4b31a;
+    border-radius: 10px;
+    background: #fff;
+    color: #6b5a2e;
+    text-align: center;
+    padding: .7rem .8rem;
+    margin-bottom: .55rem;
+    font-size: .85rem;
+    font-weight: 700;
+  }
+  #cmp-root .cmp-gaps-drop.is-over {
+    background: #fff4c2;
+    border-color: #9a7414;
+  }
+  #cmp-root .cmp-gaps textarea {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .82rem;
+  }
+  #cmp-root .cmp-gaps-table {
+    font-size: .82rem;
+    margin-bottom: 0;
+  }
+  #cmp-root .cmp-gaps-table thead th {
+    background: #c08b00;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  #cmp-root .cmp-gaps-table td { text-align: center; vertical-align: middle; }
+  #cmp-root .cmp-gaps-toks {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 3px;
+  }
+  #cmp-root .cmp-gaps-tok,
+  #cmp-root .cmp-gaps-gap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.9rem;
+    height: 1.45rem;
+    padding: 0 .2rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  #cmp-root .cmp-gaps-tok {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+  }
+  #cmp-root .cmp-gaps-gap {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+  }
+  #cmp-root .cmp-gaps-gap.is-sort {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #3730a3;
+  }
+  #cmp-root .cmp-gaps-scroll {
+    max-height: 28rem;
+    overflow: auto;
+    border: 1px solid #efe4c0;
+    border-radius: 10px;
+  }
+  @media (min-width: 1200px) {
+    #cmp-root .cmp-gaps-scroll {
+      max-height: none;
+      overflow: visible;
+    }
+  }
+  #cmp-root .cmp-gaps-acoes {
+    justify-content: center;
+  }
+  #cmp-root .cmp-ultimo-ref {
+    line-height: 1.15;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+  }
+  #cmp-root .cmp-ultimo-ref .small {
+    display: inline;
+    margin-left: .15rem;
+    color: #6c757d;
+    font-size: .6rem;
+    font-weight: 600;
+  }
+  #cmp-root .cmp-jasaiu {
+    border-radius: 8px;
+    padding: .55rem .75rem;
+    font-size: .8rem;
+    text-align: left;
+  }
+  #cmp-root .cmp-jasaiu.ok {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  #cmp-root .cmp-jasaiu.hit {
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #fdba74;
+  }
+  #cmp-root .cmp-jasaiu ul { margin: .35rem 0 0; }
+  #cmp-root .cmp-badge-saiu {
+    display: inline-block;
+    margin-left: .35rem;
+    padding: .08rem .4rem;
+    border-radius: 999px;
+    background: #f59e0b;
+    color: #1a0a00;
+    font-size: .65rem;
+    font-weight: 800;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  #cmp-root tr.cmp-row-ultimo td {
+    background-color: #e7f6ec !important;
+    --bs-table-bg: #e7f6ec;
+  }
+  #cmp-root tr.cmp-row-ultimo {
+    outline: 2px solid rgba(25, 135, 84, 0.35);
+  }
+  #cmp-root tr.cmp-row-ultimo .cmp-gaps-tok,
+  #cmp-root tr.cmp-row-ultimo .cmp-gaps-gap {
+    background: #e7f6ec;
+    border-color: #b7e4c7;
+  }
+  #cmp-root tr.cmp-row-ultimo .cmp-gaps-gap.is-sort {
+    background: #d8f3e4;
+    border-color: #b7e4c7;
+    color: #1b4332;
+  }
+  #cmp-root tr.cmp-row-saiu { background: #fff7ed; }
+  #cmp-root tr.cmp-row-saiu td:first-child { box-shadow: inset 3px 0 0 #f59e0b; }
 </style>
 
 <div class="container-fluid py-3" id="cmp-root">
   <h1 class="h4 mb-1"><span class="cmp-rank me-1">5</span> Comparador de Apostas</h1>
   <p class="cmp-lead small mb-3">
-    As três análises continuam nos lugares de origem. Aqui elas ficam juntas para gerar, conferir e registrar.
-    A seta abre a análise; o link da direita abre a tela original.
+    Cada tela continua no lugar de origem. Aqui elas ficam juntas para gerar, conferir e registrar.
+    A seta abre a tela aqui dentro. Abrir original abre a tela de origem.
+    No Gaps, a seta abre a conferência do espaçamento: cole, arraste ou envie as apostas.
+    Quando o item tem gerador, o atalho fica junto dos botões.
   </p>
 
-  <section class="cmp-item" id="cmp-escolha" data-src="/analise/escolha-visual/?aba=estatisticas&amp;embed=1">
+  <section class="cmp-item" id="cmp-escolha" data-src="/analise/escolha-visual/?aba=estatisticas&amp;embed=1&amp;v=20261117v3">
     <div class="cmp-head">
       <button type="button" class="cmp-toggle" aria-expanded="false" aria-controls="cmp-escolha-body">
         <i class="fas fa-chevron-right cmp-chev" aria-hidden="true"></i>
         <span class="cmp-rank">1</span>
         <span class="cmp-nome">Escolha Visual — Apostas para comparar</span>
       </button>
-      <a class="cmp-open" href="/analise/escolha-visual/?aba=estatisticas">Abrir original ↗</a>
+      <span class="cmp-links">
+        <a class="cmp-open" href="/analise/escolha-visual/?aba=estatisticas">Abrir original ↗</a>
+      </span>
     </div>
     <div class="cmp-body" id="cmp-escolha-body" hidden>
       <iframe class="cmp-frame" title="Escolha Visual — Apostas para comparar"></iframe>
@@ -95,7 +264,9 @@
         <span class="cmp-rank">2</span>
         <span class="cmp-nome">Checagem de Sequências</span>
       </button>
-      <a class="cmp-open" href="/analise/analises-inteligentes/?aba=checagem-seq">Abrir original ↗</a>
+      <span class="cmp-links">
+        <a class="cmp-open" href="/analise/analises-inteligentes/?aba=checagem-seq">Abrir original ↗</a>
+      </span>
     </div>
     <div class="cmp-body" id="cmp-checagem-body" hidden>
       <iframe class="cmp-frame" title="Checagem de Sequências"></iframe>
@@ -109,10 +280,82 @@
         <span class="cmp-rank">3</span>
         <span class="cmp-nome">Seção 10 — Manual</span>
       </button>
-      <a class="cmp-open" href="/geradores-elite/escolha-tubular-apostas/?aba=manual">Abrir original ↗</a>
+      <span class="cmp-links">
+        <a class="cmp-open" href="/geradores-elite/escolha-tubular-apostas/?aba=manual">Abrir original ↗</a>
+      </span>
     </div>
     <div class="cmp-body" id="cmp-manual-body" hidden>
       <iframe class="cmp-frame" title="Seção 10 — Manual"></iframe>
+    </div>
+  </section>
+
+  <section class="cmp-item" id="cmp-gaps">
+    <div class="cmp-head">
+      <button type="button" class="cmp-toggle" aria-expanded="false" aria-controls="cmp-gaps-body">
+        <i class="fas fa-chevron-right cmp-chev" aria-hidden="true"></i>
+        <span class="cmp-rank">4</span>
+        <span class="cmp-nome">Gaps — espaçamento das apostas</span>
+      </button>
+      <span class="cmp-links">
+        <a class="cmp-open" href="/analise/gaps-ciclo/">Abrir original ↗</a>
+      </span>
+    </div>
+    <div class="cmp-body" id="cmp-gaps-body" hidden>
+      <div class="cmp-gaps" id="cmpGaps"
+           data-min="{{ dezena_min|default(1) }}" data-max="{{ dezena_max|default(31) }}"
+           data-pick="{{ sorteadas|default(7) }}" data-pad="{{ pad_width|default(2) }}">
+        <p class="small text-muted mb-2">
+          Uma aposta por linha, na ordem em que você quer ler o sorteio.
+          Cole no campo, arraste um TXT/CSV ou envie o arquivo.
+          A ordem digitada mede o gap de sorteio. Os mesmos números ordenados medem o gap classificado.
+        </p>
+        <div class="cmp-gaps-drop" id="cmpGapsDrop" tabindex="0">Arraste TXT/CSV aqui · ou cole abaixo</div>
+        <textarea id="cmpGapsTexto" class="form-control form-control-sm mb-2" rows="6" spellcheck="false"
+                  placeholder="23 04 08 26 01 12 25&#10;02 19 20 10 25 07 18"></textarea>
+        <div class="d-flex flex-wrap gap-2 mb-2 cmp-gaps-acoes">
+          <label class="btn btn-sm btn-outline-secondary mb-0">
+            Enviar arquivo
+            <input type="file" id="cmpGapsArquivo" accept=".txt,.csv,text/plain" hidden>
+          </label>
+          <button type="button" class="btn btn-sm btn-success" id="cmpGapsVer">
+            <i class="fas fa-check me-1"></i>Verificar espaçamento
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="cmpGapsExport">
+            <i class="fas fa-file-export me-1"></i>Exportar
+          </button>
+          <button type="button" class="btn btn-sm btn-warning" id="cmpGapsJa"
+                  title="Compara cada aposta com todos os resultados oficiais, do concurso 1 até o atual">
+            <i class="fas fa-history me-1"></i>Já saiu?
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="cmpGapsJaLimpar">Limpar verif.</button>
+          <button type="button" class="btn btn-sm btn-outline-danger" id="cmpGapsLimpar"
+                  title="Limpa o texto colado e as apostas verificadas">Limpar</button>
+          <a class="cmp-gerador-link" href="/geradores-elite/gaps-ciclo-apostas/">Abrir gerador</a>
+        </div>
+        <div class="small text-muted mb-2 text-center" id="cmpGapsJaInfo">Verifica se alguma aposta já foi o resultado oficial (concurso 1 até o atual)</div>
+        <div id="cmpGapsJaBox" class="cmp-jasaiu d-none mb-2" role="status"></div>
+        <p class="small text-danger mb-2 d-none" id="cmpGapsAviso"></p>
+        <div class="small fw-bold text-muted mb-1" id="cmpGapsUltimoLbl">Último resultado</div>
+        <div class="cmp-gaps-scroll">
+          <table class="table table-sm table-bordered cmp-gaps-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ordem de sorteio</th>
+                <th>Gaps sorteio</th>
+                <th>Classificado</th>
+                <th>Gaps classificado</th>
+              </tr>
+            </thead>
+            <tbody id="cmpGapsUltimo">
+              <tr><td colspan="5" class="text-muted">Carregando último resultado…</td></tr>
+            </tbody>
+            <tbody id="cmpGapsTabela">
+              <tr><td colspan="5" class="text-muted">Nenhuma aposta verificada.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </section>
 </div>
@@ -224,6 +467,317 @@
   const chave = (location.hash || '').replace('#', '');
   const inicial = document.getElementById('cmp-' + chave);
   if (inicial) abrir(inicial);
+
+  const gapsBox = document.getElementById('cmpGaps');
+  if (gapsBox) {
+    const DMIN = parseInt(gapsBox.dataset.min || '1', 10);
+    const DMAX = parseInt(gapsBox.dataset.max || '31', 10);
+    const PICK = parseInt(gapsBox.dataset.pick || '7', 10);
+    const PAD = Math.max(1, parseInt(gapsBox.dataset.pad || '2', 10));
+    const LIMITE = 200;
+    const texto = document.getElementById('cmpGapsTexto');
+    const aviso = document.getElementById('cmpGapsAviso');
+    const tbody = document.getElementById('cmpGapsTabela');
+    const ultimoBody = document.getElementById('cmpGapsUltimo');
+    const ultimoLbl = document.getElementById('cmpGapsUltimoLbl');
+    const jaBox = document.getElementById('cmpGapsJaBox');
+    const jaInfo = document.getElementById('cmpGapsJaInfo');
+    let apostasAtuais = [];
+    let jaAtivo = false;
+    let historico = null;
+
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function padNum(n) {
+      const v = Number(n);
+      const sinal = v < 0 ? '-' : '';
+      return sinal + String(Math.abs(v)).padStart(PAD, '0');
+    }
+
+    function chips(arr, classe) {
+      if (!arr.length) return '—';
+      return `<span class="cmp-gaps-toks">${arr.map((n) =>
+        `<span class="${classe}">${esc(padNum(n))}</span>`
+      ).join('')}</span>`;
+    }
+
+    function gapsDe(nums) {
+      const out = [];
+      for (let i = 1; i < nums.length; i += 1) out.push(nums[i] - nums[i - 1]);
+      return out;
+    }
+
+    function chave(nums) {
+      return nums.slice().sort((a, b) => a - b).join(',');
+    }
+
+    function linhaDe(nums) {
+      const classificado = nums.slice().sort((a, b) => a - b);
+      return {
+        ordem: nums.slice(),
+        gapsOrdem: gapsDe(nums),
+        classificado: classificado,
+        gapsClass: gapsDe(classificado),
+      };
+    }
+
+    function ocorrencias(ln) {
+      if (!jaAtivo || !historico) return [];
+      return historico.get(chave(ln.classificado)) || [];
+    }
+
+    function pintarTabela() {
+      if (!tbody) return;
+      if (!apostasAtuais.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-muted">Nenhuma aposta verificada.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = apostasAtuais.map((ln, i) => {
+        const oc = ocorrencias(ln);
+        const badge = oc.length
+          ? `<span class="cmp-badge-saiu" title="Resultado oficial">já saiu #${esc(oc[0].concurso)}</span>`
+          : '';
+        return `<tr class="${oc.length ? 'cmp-row-saiu' : ''}">
+          <td>${i + 1}${badge}</td>
+          <td>${chips(ln.ordem, 'cmp-gaps-tok')}</td>
+          <td>${chips(ln.gapsOrdem, 'cmp-gaps-gap is-sort')}</td>
+          <td>${chips(ln.classificado, 'cmp-gaps-tok')}</td>
+          <td>${chips(ln.gapsClass, 'cmp-gaps-gap')}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function pintarJaBox() {
+      if (!jaBox || !jaInfo) return;
+      if (!jaAtivo) {
+        jaBox.className = 'cmp-jasaiu d-none mb-2';
+        jaBox.innerHTML = '';
+        jaInfo.textContent = 'Verifica se alguma aposta já foi o resultado oficial (concurso 1 até o atual)';
+        return;
+      }
+      const hits = apostasAtuais.map((ln, i) => ({ i: i + 1, ln: ln, oc: ocorrencias(ln) })).filter((h) => h.oc.length);
+      const faixa = historico && historico.faixa ? historico.faixa : 'o histórico oficial';
+      jaBox.classList.remove('d-none', 'ok', 'hit');
+      if (!hits.length) {
+        jaBox.classList.add('ok');
+        jaBox.innerHTML = `<strong>Nenhuma aposta saiu como resultado oficial</strong> — conferido em ${esc(faixa)}.`;
+        jaInfo.textContent = `Nenhuma das ${apostasAtuais.length} aposta(s) saiu · ${faixa}`;
+        return;
+      }
+      jaBox.classList.add('hit');
+      jaBox.innerHTML = `<strong>${hits.length} aposta(s) já saíram</strong> — conferido em ${esc(faixa)}.`
+        + '<ul>' + hits.map((h) => {
+          const dez = h.ln.classificado.map(padNum).join(' ');
+          const quando = h.oc.map((o) => `#${o.concurso}${o.data ? ' (' + o.data + ')' : ''}`).join(', ');
+          return `<li>Aposta ${h.i} — <span class="font-monospace">${esc(dez)}</span> → ${esc(quando)}</li>`;
+        }).join('') + '</ul>';
+      jaInfo.textContent = `${hits.length} de ${apostasAtuais.length} já saíram · ${faixa}`;
+    }
+
+    function lerLinha(linha) {
+      const nums = [];
+      const re = /\d{1,2}/g;
+      let m;
+      while ((m = re.exec(linha))) {
+        const n = parseInt(m[0], 10);
+        if (n < DMIN || n > DMAX) continue;
+        nums.push(n);
+      }
+      return nums;
+    }
+
+    function verificar() {
+      const bruto = String(texto ? texto.value : '').split(/\r?\n/);
+      const linhas = [];
+      const erros = [];
+      bruto.forEach((linha, i) => {
+        if (!String(linha).trim()) return;
+        if (linhas.length >= LIMITE) return;
+        const nums = lerLinha(linha);
+        const unicos = new Set(nums);
+        if (nums.length !== unicos.size) {
+          erros.push(`Linha ${i + 1}: há dezena repetida.`);
+          return;
+        }
+        if (nums.length !== PICK) {
+          erros.push(`Linha ${i + 1}: precisa de ${PICK} dezenas entre ${padNum(DMIN)} e ${padNum(DMAX)}.`);
+          return;
+        }
+        linhas.push(linhaDe(nums));
+      });
+      const sobrou = bruto.filter((l) => String(l).trim()).length - linhas.length - erros.length;
+      if (sobrou > 0) erros.push(`Mostrei as primeiras ${LIMITE} apostas.`);
+      if (aviso) {
+        aviso.textContent = erros.join(' ');
+        aviso.classList.toggle('d-none', !erros.length);
+      }
+      apostasAtuais = linhas;
+      pintarTabela();
+      pintarJaBox();
+    }
+
+    function pintarUltimo(s) {
+      if (!ultimoBody) return;
+      if (!s || !Array.isArray(s.numeros) || s.numeros.length !== PICK) {
+        ultimoBody.innerHTML = '<tr><td colspan="5" class="text-muted">Último resultado indisponível.</td></tr>';
+        if (ultimoLbl) ultimoLbl.textContent = 'Último resultado';
+        return;
+      }
+      const ordem = s.numeros.map(Number);
+      const classificado = (s.numeros_ordenados || ordem.slice().sort((a, b) => a - b)).map(Number);
+      const ln = {
+        ordem: ordem,
+        gapsOrdem: gapsDe(ordem),
+        classificado: classificado,
+        gapsClass: gapsDe(classificado),
+      };
+      const dataCheia = String(s.data || '').trim();
+      const dataCurta = dataCheia.replace(/^(\d{2}\/\d{2})\/\d{2,4}$/, '$1');
+      if (ultimoLbl) {
+        ultimoLbl.textContent = `Último resultado — concurso ${s.concurso}`;
+      }
+      ultimoBody.innerHTML = `<tr class="cmp-row-ultimo" title="Resultado oficial do concurso ${esc(s.concurso)}${dataCheia ? ' ' + esc(dataCheia) : ''}">
+        <td class="cmp-ultimo-ref"><strong>${esc(s.concurso)}</strong>${dataCurta ? ` <span class="small">${esc(dataCurta)}</span>` : ''}</td>
+        <td>${chips(ln.ordem, 'cmp-gaps-tok')}</td>
+        <td>${chips(ln.gapsOrdem, 'cmp-gaps-gap is-sort')}</td>
+        <td>${chips(ln.classificado, 'cmp-gaps-tok')}</td>
+        <td>${chips(ln.gapsClass, 'cmp-gaps-gap')}</td>
+      </tr>`;
+    }
+
+    function carregarUltimo() {
+      fetch('/analise/api/escolha-visual/sorteios?ordem=desc&limite=1&base=geral')
+        .then((r) => r.json())
+        .then((data) => {
+          const lista = data && data.sorteios;
+          pintarUltimo(data && data.sucesso && lista && lista[0]);
+        })
+        .catch(() => pintarUltimo(null));
+    }
+
+    function carregarHistorico() {
+      if (historico) return Promise.resolve(historico);
+      return fetch('/analise/api/escolha-visual/sorteios?ordem=asc&limite=0&base=geral')
+        .then((r) => r.json())
+        .then((data) => {
+          const lista = (data && data.sorteios) || [];
+          const map = new Map();
+          lista.forEach((s) => {
+            const nums = (s.numeros_ordenados || s.numeros || []).map(Number);
+            if (nums.length !== PICK) return;
+            const k = nums.slice().sort((a, b) => a - b).join(',');
+            const arr = map.get(k) || [];
+            arr.push({ concurso: s.concurso, data: s.data || '' });
+            map.set(k, arr);
+          });
+          const primeiro = lista.length ? lista[0].concurso : '—';
+          const ultimo = lista.length ? lista[lista.length - 1].concurso : '—';
+          map.faixa = `concursos ${primeiro}–${ultimo} (${lista.length})`;
+          historico = map;
+          return map;
+        });
+    }
+
+    function exportar() {
+      if (!apostasAtuais.length) {
+        window.alert('Verifique as apostas antes de exportar.');
+        return;
+      }
+      const linhas = apostasAtuais.map((ln) => ln.ordem.map(padNum).join(' '));
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([linhas.join('\n') + '\n'], { type: 'text/plain' }));
+      a.download = 'gaps_apostas.txt';
+      a.click();
+    }
+
+    function limparVerif() {
+      jaAtivo = false;
+      pintarTabela();
+      pintarJaBox();
+    }
+
+    function lerArquivo(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function () {
+        if (texto) texto.value = String(reader.result || '');
+        verificar();
+      };
+      reader.readAsText(file);
+    }
+
+    function ligarDrop(el) {
+      if (!el) return;
+      ['dragenter', 'dragover'].forEach((nome) => {
+        el.addEventListener(nome, (ev) => {
+          ev.preventDefault();
+          el.classList.add('is-over');
+        });
+      });
+      ['dragleave', 'drop'].forEach((nome) => {
+        el.addEventListener(nome, (ev) => {
+          ev.preventDefault();
+          el.classList.remove('is-over');
+        });
+      });
+      el.addEventListener('drop', (ev) => {
+        const file = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+        if (file) {
+          lerArquivo(file);
+          return;
+        }
+        const colado = ev.dataTransfer ? ev.dataTransfer.getData('text') : '';
+        if (texto && colado) texto.value = colado;
+        verificar();
+      });
+    }
+
+    document.getElementById('cmpGapsVer')?.addEventListener('click', verificar);
+    document.getElementById('cmpGapsExport')?.addEventListener('click', exportar);
+    document.getElementById('cmpGapsJa')?.addEventListener('click', () => {
+      if (!apostasAtuais.length) {
+        window.alert('Verifique as apostas antes de conferir se já saíram.');
+        return;
+      }
+      const btn = document.getElementById('cmpGapsJa');
+      if (btn) btn.disabled = true;
+      carregarHistorico().then(() => {
+        jaAtivo = true;
+        pintarTabela();
+        pintarJaBox();
+      }).catch(() => {
+        window.alert('Não foi possível carregar o histórico de concursos.');
+      }).finally(() => {
+        if (btn) btn.disabled = false;
+      });
+    });
+    document.getElementById('cmpGapsJaLimpar')?.addEventListener('click', limparVerif);
+    document.getElementById('cmpGapsLimpar')?.addEventListener('click', () => {
+      if (texto) texto.value = '';
+      apostasAtuais = [];
+      jaAtivo = false;
+      if (aviso) {
+        aviso.textContent = '';
+        aviso.classList.add('d-none');
+      }
+      pintarTabela();
+      pintarJaBox();
+    });
+    carregarUltimo();
+    document.getElementById('cmpGapsArquivo')?.addEventListener('change', (ev) => {
+      const input = ev.currentTarget;
+      const file = input.files && input.files[0];
+      input.value = '';
+      lerArquivo(file);
+    });
+    ligarDrop(document.getElementById('cmpGapsDrop'));
+    ligarDrop(texto);
+  }
 })();
 </script>
 {% endblock %}

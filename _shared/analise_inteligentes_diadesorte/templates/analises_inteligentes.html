@@ -1114,6 +1114,12 @@
     overflow-x: auto;
     overflow-y: hidden;
   }
+  @media (min-width: 1200px) {
+    #ai-root .ai-cheq-wrap {
+      max-height: none;
+      overflow: visible;
+    }
+  }
   #ai-root #aiTabelaCheq th:nth-child(2),
   #ai-root #aiTabelaCheq td:nth-child(2) {
     width: 1%;
@@ -2601,7 +2607,7 @@
   </div>
 </div>
 {% if modality_key == 'supersete' %}
-<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20261001v1">
+<link rel="stylesheet" href="/analise/api/inteligentes/assets/tubular.css?v=20261117v1">
 <style>
   {% if extra_mes %}
   {% for nome, cor in (meses_cores or {}).items() %}
@@ -2617,7 +2623,7 @@
 <script src="{{ url_for('geradores_elite.static', filename='mes_sorte_select.js') }}?v=3"></script>
 {% endif %}
 {% if modality_key == 'supersete' %}
-<script src="/analise/api/inteligentes/assets/tubular.js?v=20261115v1"></script>
+<script src="/analise/api/inteligentes/assets/tubular.js?v=20261117v1"></script>
 {% endif %}
 <script>
 (function () {

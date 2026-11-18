@@ -1342,9 +1342,11 @@
     const ref = referenciaReal();
     const mesReal = EXTRA_MES ? `<td class="ev-ap-mes-td">${ref ? mesLeitura(ref) : ''}</td>` : '';
     const cols = colunasAposta();
+    const dataCheia = ref ? String(ref.data || '').trim() : '';
+    const dataCurta = dataCheia.replace(/^(\d{2}\/\d{2})\/\d{2,4}$/, '$1');
     const real = ref
       ? `<tr class="ev-ap-real">
-          <td class="ev-basic-conc ev-ultimo-ref"><strong>${escHtml(ref.concurso)}</strong>${ref.data ? `<div class="small text-muted">${escHtml(ref.data)}</div>` : ''}</td>
+          <td class="ev-basic-conc ev-ultimo-ref" title="${escHtml(ref.concurso)}${dataCheia ? ' ' + escHtml(dataCheia) : ''}"><strong>${escHtml(ref.concurso)}</strong>${dataCurta ? ` <span class="small">${escHtml(dataCurta)}</span>` : ''}</td>
           <td class="ev-ap-dezenas">${casasLeitura(ref.numeros)}</td>
           ${mesReal}
           ${CHAVES_APOSTA.map((k) => `<td class="ev-basic-nums" style="color:${CORES[k]}">${escHtml(celulaGrupo(k, ref[k]))}</td>`).join('')}

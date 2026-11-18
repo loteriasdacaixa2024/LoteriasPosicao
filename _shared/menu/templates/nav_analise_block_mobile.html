@@ -2,7 +2,7 @@
             <i class="{{ nav_cfg.sniper.icon }}"></i>
             <span class="mobile-link-label">{{ nav_cfg.sniper.title }}{% if nav_cfg.sniper.desc %}<span class="mobile-link-sub"> - {{ nav_cfg.sniper.desc }}</span>{% endif %}</span>
         </a>
-        {% for extra in nav_cfg.analise_extras %}
+        {% for extra in nav_cfg.analise_extras if extra.href != '/analise/resultados/' %}
         <a class="mobile-link" href="{{ extra.href }}" onclick="closeMobileNav()">
             <i class="{{ extra.icon }}"></i>
             <span class="mobile-link-label">{{ extra.title }}{% if extra.desc %}<span class="mobile-link-sub"> - {{ extra.desc }}</span>{% endif %}</span>

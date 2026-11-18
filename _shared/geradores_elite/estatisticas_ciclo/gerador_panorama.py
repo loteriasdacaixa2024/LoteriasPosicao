@@ -29,6 +29,8 @@ from .gerador import (
     _resumo_diagonais_janela,
     _ajustar_seq_e_finais,
     _contar_digitos,
+    _digitos_que_mais_saem,
+    _limite_sequencia,
     _forma_seq_finais,
     _polir_comportamento,
     expandir_aposta,
@@ -302,6 +304,7 @@ def gerar_apostas_panorama(
         else _sementes_distintas(linhas_seed, max(qtd * 16, 80), rng)
     )
     meta_digitos = (qtd // 2) + 1
+    alvo_digitos = _digitos_que_mais_saem(linhas_basicas)
     usados: Set[Tuple[int, ...]] = set()
     apostas_out: List[Dict[str, Any]] = []
 
@@ -348,7 +351,7 @@ def gerar_apostas_panorama(
             if descartar_ja_sorteadas and (chave in ja_saiu or (hist and frozenset(cand) in hist)):
                 continue
             # 5 dezenas seguidas saíram 5 vezes em 1.328 concursos.
-            if _maior_sequencia(cand) >= 5:
+            if _maior_sequencia(cand) >= _limite_sequencia(k):
                 if not reserva_longa:
                     reserva_longa = cand
                 continue
@@ -370,8 +373,8 @@ def gerar_apostas_panorama(
         if not jogo:
             continue
         nucleo = list(jogo)
-        com_sete = sum(1 for a in apostas_out if int(a.get("n_digitos") or 0) == 7)
-        querer_7 = 7 if com_sete < meta_digitos else 0
+        com_alvo = sum(1 for a in apostas_out if int(a.get("n_digitos") or 0) == alvo_digitos)
+        querer_dig = alvo_digitos if com_alvo < meta_digitos else 0
         travadas = sorted(set(locked) | {n for n in jogo if n in set(pends)})
         jogo = _polir_comportamento(
             jogo,
@@ -379,7 +382,7 @@ def gerar_apostas_panorama(
             travadas=travadas,
             dmin=dmin,
             dmax=dmax,
-            querer_digitos=querer_7 or 7,
+            querer_digitos=querer_dig or alvo_digitos,
         )
         if len(jogo) < k_saida_n:
             jogo = expandir_aposta(
@@ -398,7 +401,7 @@ def gerar_apostas_panorama(
                 return False
             if not _diagonais_da_aposta(trial, dmin, dmax):
                 return False
-            if querer_7 and _contar_digitos(trial) != 7:
+            if querer_dig and _contar_digitos(trial) != alvo_digitos:
                 return False
             tchave = tuple(trial)
             if tchave in usados:
@@ -420,7 +423,7 @@ def gerar_apostas_panorama(
             continue
         if not _diagonais_da_aposta(jogo, dmin, dmax):
             continue
-        if querer_7 and _contar_digitos(jogo) != 7:
+        if querer_dig and _contar_digitos(jogo) != alvo_digitos:
             continue
         chave = tuple(jogo)
         if chave in usados:

@@ -18145,3 +18145,140 @@ Press CTRL+C to quit
 127.0.0.1 - - [17/Nov/2026 17:39:23] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [17/Nov/2026 17:40:07] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%201%202%202%204%205%205%206%206 HTTP/1.1" 200 -
 127.0.0.1 - - [17/Nov/2026 18:04:53] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5&concurso=2447 HTTP/1.1" 200 -
+
+--- iniciando 2026-11-17 19:24:44 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [17/Nov/2026 19:24:52] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 19:24:52] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-17 19:49:07 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [17/Nov/2026 19:49:30] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-17 19:59:39 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [17/Nov/2026 19:59:46] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 20:01:26] "GET /central-conferencias/api/conferir HTTP/1.1" 405 -
+127.0.0.1 - - [17/Nov/2026 20:11:13] "GET /desdobramento/api/desdobramentos HTTP/1.1" 200 -
+
+--- iniciando 2026-11-17 20:20:43 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [17/Nov/2026 20:20:50] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-17 20:47:35 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [17/Nov/2026 20:47:47] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 20:55:59] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%202%202%202%203%203%203%203%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 20:56:33] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 20:56:38] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 20:56:40] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 20:56:44] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 21:15:19] "GET /geradores-elite/comparador-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 22:46:25] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%201%201%202%203%205%205%205%206 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 22:46:52] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 22:46:54] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 22:46:59] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 23:02:37] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 23:03:10] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 23:10:06] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%202%202%203%203%203%205%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 23:10:12] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 00:02:24] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%202%202%203%204%204%204%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 00:02:36] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 00:36:53] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%202%202%202%203%203%203%205%206 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 00:37:34] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 00:55:06] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%201%202%204%204%205%207%207%207 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 01:11:35] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 01:12:19] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 01:49:39] "GET /geradores-elite/api/construtor-construcoes/ciclo?tipo= HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 02:23:11] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%203%203%203%203%204%204%205%205%207 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 02:23:29] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 04:01:21] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 04:01:27] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 04:23:57] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 04:24:21] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 04:27:31] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 04:27:35] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-18 04:31:02 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://192.168.11.212:5159
+Press CTRL+C to quit
+[API Caixa] Timemania 2469/2469...127.0.0.1 - - [18/Nov/2026 04:31:21] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 04:31:21] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 04:31:22] "GET / HTTP/1.1" 200 -

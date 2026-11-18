@@ -1841,11 +1841,17 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
     if tem_gerador_escolha_tubular(modality_key):
         @bp.route("/comparador-apostas/")
         def comparador_apostas_page():
+            from analise_estudos.specs import get_estudos_config
+            est = get_estudos_config(modality_key)
             return render_template(
                 "comparador_apostas.html",
                 modality_key=modality_key,
                 modality_nome=cfg["nome"],
                 page_title="Comparador de Apostas",
+                dezena_min=int(est["dezena_min"]),
+                dezena_max=int(est["dezena_max"]),
+                sorteadas=int(est["sorteadas"]),
+                pad_width=int(est.get("pad_width") or 2),
             )
 
     return bp

@@ -16,9 +16,9 @@ from analise_escolha_visual.enriquecimento.regras_2a1 import (
     viola_restricoes,
 )
 try:
-    from .gerador import _ajustar_seq_e_finais, _atrasos, _forma_seq_finais
+    from .gerador import _ajustar_seq_e_finais, _atrasos, _digitos_que_mais_saem, _forma_seq_finais
 except ImportError:
-    from gerador import _ajustar_seq_e_finais, _atrasos, _forma_seq_finais
+    from gerador import _ajustar_seq_e_finais, _atrasos, _digitos_que_mais_saem, _forma_seq_finais
 
 from analise_inteligentes_diadesorte.analise_sequencias import (
     classificar_faixa_sequencia,
@@ -626,6 +626,7 @@ def gerar_lote_2a1(
 ) -> Dict[str, Any]:
     rng = rng or random.Random()
     dmin, dmax = int(dezena_min), int(dezena_max)
+    alvo_digitos = _digitos_que_mais_saem(linhas_panorama)
     k = int(k)
     qtd = max(1, min(30, int(quantidade or 10)))
     ult = _ints(ultimo)
@@ -860,10 +861,10 @@ def gerar_lote_2a1(
             )
             nd = _n_digitos(dez)
             ndiag = len(_diagonais_da_aposta(dez, dmin, dmax))
-            ja7 = sum(1 for a in apostas if _n_digitos(a.get("dezenas") or []) == 7)
-            if nd == 7:
+            ja_alvo = sum(1 for a in apostas if _n_digitos(a.get("dezenas") or []) == alvo_digitos)
+            if nd == alvo_digitos:
                 pts += 14
-            elif ja7 <= len(apostas) // 2:
+            elif ja_alvo <= len(apostas) // 2:
                 pts -= 4
             if 2 <= ndiag <= 3:
                 pts += 6
@@ -879,7 +880,7 @@ def gerar_lote_2a1(
                 melhor
                 and melhor[0] >= 24
                 and n_pend_melhor >= precisa_pend
-                and (ja7 > qtd // 2 or _n_digitos(melhor[1]) == 7)
+                and (ja_alvo > qtd // 2 or _n_digitos(melhor[1]) == alvo_digitos)
                 and rep_min <= sum(1 for n in melhor[1] if n in ult_set) <= rep_max
             ):
                 break

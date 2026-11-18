@@ -258,14 +258,6 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                 "icon_color": "#2e7d32",
             },
             {
-                "title": "Resultados",
-                "desc": "Últimos concursos · dezenas deslocadas",
-                "href": "/analise/resultados/",
-                "icon": "fas fa-trophy",
-                "icon_bg": "#fff3cd",
-                "icon_color": "#996e00",
-            },
-            {
                 "title": "Análises Gerais",
                 "desc": "Classificação · Diferencial Cruzado · Soma dígitos · Dígitos utilizados",
                 "href": "/analise/analises-gerais/",
@@ -788,7 +780,6 @@ def get_nav_config(modality_key: str) -> dict:
     _inject_filtros_posicao_nav(cfg)
     _inject_simulador_globo_nav(cfg, modality_key)
     _inject_tabela_cores_nav(cfg)
-    _inject_resultados_nav(cfg)
     _ordenar_geradores_elite(cfg)
     return cfg
 
@@ -805,20 +796,6 @@ def _inject_simulador_globo_nav(cfg: dict, modality_key: str) -> None:
     extras = cfg.setdefault("dados_extras", [])
     if not any(x.get("href") == item["href"] for x in extras):
         extras.insert(0, item)
-
-
-def _inject_resultados_nav(cfg: dict) -> None:
-    item = {
-        "title": "Resultados",
-        "desc": "Últimos concursos · dezenas deslocadas",
-        "href": "/analise/resultados/",
-        "icon": "fas fa-trophy",
-        "icon_bg": "#fff3cd",
-        "icon_color": "#996e00",
-    }
-    extras = cfg.setdefault("analise_extras", [])
-    if not any(x.get("href") == item["href"] for x in extras):
-        extras.insert(1, item)
 
 
 def _inject_tabela_cores_nav(cfg: dict) -> None:
