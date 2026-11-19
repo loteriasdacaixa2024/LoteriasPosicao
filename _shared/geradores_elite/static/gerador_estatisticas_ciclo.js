@@ -184,26 +184,27 @@
 
   function htmlCardsCruz(lista, prefix) {
     return lista.map((p, i) => {
-      const freq = Number(p.frequencia) || 0;
-      const nDiag = Number(p.n_com_diagonal);
-      const temDiag = Number.isFinite(nDiag);
-      const dif = temDiag ? Math.max(0, freq - nDiag) : null;
-      const diagLinha = temDiag
-        ? `${nDiag} concursos com diagonal${p.pct_com_diagonal ? ` (${escHtml(p.pct_com_diagonal)}%)` : ''}${dif != null ? ` · Con/Diag ${nDiag} · Dif ${dif}` : ''}`
-        : 'sem contagem de diagonal';
+      const num = i + 1;
+      const cada = (p && p.cada_concursos != null && p.cada_concursos !== '') ? p.cada_concursos : null;
+      const nDiag = Number(p.n_com_diagonal) || 0;
+      const pctBruto = p && p.pct_com_diagonal;
+      const pct = pctBruto != null && pctBruto !== '' ? `${escHtml(pctBruto)}%` : '';
+      const diagTxt = pct ? `${fmtVol(nDiag)} - ${pct} com diagonais` : `${fmtVol(nDiag)} com diagonais`;
       const ultimo = p.eh_padrao_ultimo_concurso ? ' is-ultimo' : '';
       const tituloUlt = p.eh_padrao_ultimo_concurso ? ' title="Padrão do último resultado"' : '';
       const jogos = jogosDoCard(p);
-      const jogosHtml = jogos
-        ? `<div class="${prefix}-cruz-jogos">${fmtVol(jogos)} apostas</div>`
-        : '';
-      const posto = prefix === 'g2' ? `<span class="g2-posto">${i + 1}º</span> · ` : '';
+      const jogosTxt = jogos ? fmtVol(jogos) : '—';
       return `<div class="col-md">
         <div class="${prefix}-cruz-card${ultimo}"${tituloUlt}>
-          <div class="lbl">${posto}${escHtml(p.descricao || '')} · ${escHtml(freq)}×</div>
-          <div class="val"><code>${escHtml(p.padrao || '')}</code></div>
-          ${jogosHtml}
-          <div class="small text-muted mb-1">${diagLinha}</div>
+          <div class="cruz-linha">
+            <span class="cruz-num" title="${num}º card desta fila">${num}º</span>
+            <code>${escHtml(p.padrao || '')}</code>
+            <span class="cruz-sep">|</span>
+            <span class="cruz-cada" title="Média histórica entre saídas seguidas. Não prevê o próximo concurso.">${cada == null ? '—' : escHtml(cada)}</span>
+            <span class="cruz-sep">|</span>
+            <span class="cruz-jogos" title="${escHtml(jogosTxt)} apostas possíveis neste padrão">${escHtml(jogosTxt)}</span>
+          </div>
+          <div class="cruz-diag-resumo">${diagTxt}</div>
           <div>${chipsDiagCruz(p.top_diagonais, prefix === 'g2' ? 'g2-diag-chip' : 'gec-diag-chip')}</div>
         </div>
       </div>`;

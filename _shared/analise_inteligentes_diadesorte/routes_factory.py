@@ -19,6 +19,12 @@ def _page_context(modality_key: str) -> dict:
     dmin = int(mod.get("dezena_min", 1))
     dmax = int(mod.get("dezena_max", 31))
     sorteadas = int(mod.get("sorteadas", mod.get("pick_default", 7)))
+    volante_cols = 10
+    try:
+        from analise_estudos.specs import get_estudos_config
+        volante_cols = max(1, int(get_estudos_config(modality_key).get("volante_cols") or 10))
+    except Exception:
+        volante_cols = 10
     nao_sairam_qtd = max(0, dmax - dmin + 1 - sorteadas)
     extra_mes = (mod.get("extra") == "mes") or (modality_key == "diadesorte")
     meses_cores = {}
@@ -54,6 +60,7 @@ def _page_context(modality_key: str) -> dict:
         "extra_mes": bool(extra_mes),
         "dezena_min": dmin,
         "dezena_max": dmax,
+        "volante_cols": volante_cols,
         "sorteadas": sorteadas,
         "nao_sairam_qtd": nao_sairam_qtd,
     }

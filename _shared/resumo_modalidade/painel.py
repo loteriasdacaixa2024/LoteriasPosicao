@@ -6,7 +6,12 @@ import statistics
 from collections import Counter
 from typing import Any, Dict, List, Optional, Sequence
 
-from analise_gaps_ciclo.core import analisar_regua_combinacoes, gaps_de, padrao_gaps
+from analise_gaps_ciclo.core import (
+    analisar_regua_combinacoes,
+    gaps_de,
+    gaps_sequencia,
+    padrao_gaps,
+)
 from dd_du.core import decompor_lista
 from linhas_universo.core import classificar_dezenas
 from resumo_modalidade.specs import ResumoSpec
@@ -45,7 +50,11 @@ def _item(
     historico: str,
     uso: str,
     fonte: str,
+    *,
+    tipo: str = "info",
+    regra: str = "",
 ) -> Dict[str, str]:
+    """Uma análise. `regra` vazia significa que ela não manda o que seguir."""
     labels = {
         "geracao": "Geração",
         "filtro": "Filtro",
@@ -59,11 +68,37 @@ def _item(
         "uso": uso,
         "uso_label": labels.get(uso, uso),
         "fonte": fonte,
+        "tipo": tipo,
+        "regra": (regra or "").strip(),
     }
 
 
 def _cat(cid: str, titulo: str, itens: List[Dict[str, str]]) -> Dict[str, Any]:
     return {"id": cid, "titulo": titulo, "itens": [i for i in itens if i]}
+
+
+def _projetar(categorias: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+    """Checklist e regras nascem das análises. Sem segunda lista escrita à mão."""
+    checklist: List[Dict[str, Any]] = []
+    regras: List[Dict[str, Any]] = []
+    for cat in categorias:
+        for item in cat["itens"]:
+            checklist.append({
+                "criterio": item["criterio"],
+                "ref": item["historico"],
+                "uso": item.get("regra") or item.get("uso_label") or "",
+                "tipo": item.get("tipo") or "info",
+            })
+            texto = str(item.get("regra") or "").strip()
+            if not texto:
+                continue
+            regras.append({
+                "n": len(regras) + 1,
+                "tipo": item.get("tipo") or "info",
+                "texto": texto,
+                "criterio": item["criterio"],
+            })
+    return {"checklist": checklist, "regras": regras}
 
 
 def _comportamento(modality_key: str):
@@ -82,12 +117,23 @@ def montar_painel(
     """Consolida o DNA já calculado com gaps, régua, linhas, DD/DU e indicadores do gerador."""
     n_s = spec.sorteadas
     draws = []
+    ordens = []
     for s in sorteios:
         dz = sorted(int(x) for x in s["dezenas"])[:n_s]
-        if dz:
-            draws.append(dz)
+        if not dz:
+            continue
+        draws.append(dz)
+        od = [int(x) for x in (s.get("ordem") or []) if x is not None][:n_s]
+        ordens.append(od)
     if not draws:
-        return {"concurso": None, "categorias": [], "geracao": [], "ausentes": []}
+        return {
+            "concurso": None,
+            "categorias": [],
+            "geracao": [],
+            "ausentes": [],
+            "checklist": [],
+            "regras": [],
+        }
 
     ult = draws[-1]
     prev = draws[-2] if len(draws) > 1 else []
@@ -107,6 +153,8 @@ def montar_painel(
     m3_c: Counter = Counter()
     fb_c: Counter = Counter()
     diag_com = 0
+    gap_ord_vals: Counter = Counter()
+    gap_ord_padroes: Counter = Counter()
 
     diagonais_fn = None
     try:
@@ -115,12 +163,17 @@ def montar_painel(
     except Exception:
         diagonais_fn = None
 
-    for dz in draws:
+    for dz, od in zip(draws, ordens):
         gs = gaps_de(dz)
         if gs:
             gap_medios.append(sum(gs) / len(gs))
             gap_vals.update(int(g) for g in gs)
             gap_padroes[padrao_gaps(gs)] += 1
+        if len(od) >= 2:
+            gs_o = gaps_sequencia(od)
+            if gs_o:
+                gap_ord_vals.update(int(g) for g in gs_o)
+                gap_ord_padroes[padrao_gaps(gs_o)] += 1
         amplitudes.append((max(dz) - min(dz)) if dz else 0)
         cl = classificar_dezenas(dz)
         qtd_linhas[cl["qtd_linhas"]] += 1
@@ -222,6 +275,79 @@ def montar_painel(
     m3_ult = sum(1 for d in ult if sp and d in sp.multiplos_3) if sp else None
     fb_ult = sum(1 for d in ult if sp and d in sp.fibonacci) if sp else None
 
+    pct_seq = float(seq.get("pct_com_pelo_menos_uma") or 0)
+    if pct_seq >= 55:
+        seq_tipo = "frequente"
+        seq_regra = (
+            f"Inclua pelo menos 1 sequência ({pct_seq}% dos concursos). "
+            f"Quantidade mais comum: {seq.get('qtd_mais_freq')}."
+        )
+    else:
+        seq_tipo = "nao_confirmado"
+        seq_regra = f"Hipótese de sequência em todo concurso não confirmada ({pct_seq}%)."
+    pct_fin = float(fin.get("pct_pelo_menos_um") or 0)
+    if pct_fin >= 55:
+        fin_tipo = "frequente"
+        fin_regra = f"Repita pelo menos um final. Isso ocorre em {pct_fin}% dos concursos."
+    else:
+        fin_tipo = "nao_confirmado"
+        fin_regra = f"Hipótese de finais iguais em todo concurso não confirmada ({pct_fin}%)."
+    novas = ciclo.get("novas") or {}
+    pct_novas = float(novas.get("pct_1_ou_2") or 0)
+    if pct_novas < 55:
+        novas_tipo = "nao_confirmado"
+        novas_regra = (
+            f"Não force 1 ou 2 dezenas novas em todo concurso ({pct_novas}%). "
+            f"A quantidade mais comum é {novas.get('moda')} ({novas.get('moda_pct')}%)."
+        )
+    else:
+        novas_tipo = "frequente"
+        novas_regra = (
+            f"A quantidade mais comum de dezenas novas é {novas.get('moda')} "
+            f"({novas.get('moda_pct')}%). 1 ou 2 novas em {pct_novas}%."
+        )
+    mf = (analise.get("padrao_inicial") or {}).get("mais_freq") or {}
+    hip = (analise.get("padrao_inicial") or {}).get("hipotese") or {}
+    if mf and hip.get("padrao") and hip.get("confirmado_lider"):
+        pad_tipo = "frequente"
+        pad_hist = (
+            f"O padrão inicial mais frequente é {mf.get('valor')} ({mf.get('pct')}% dos concursos)."
+        )
+        pad_regra = f"O padrão inicial mais frequente é {hip.get('padrao')} ({mf.get('pct')}%)."
+    elif mf and hip.get("padrao"):
+        pad_tipo = "nao_confirmado"
+        pad_hist = (
+            f"O padrão inicial mais frequente é {mf.get('valor')} ({mf.get('pct')}%). "
+            f"A hipótese {hip.get('padrao')} fica em {hip.get('pct')}%."
+        )
+        pad_regra = (
+            f"Não use {hip.get('padrao')} como padrão obrigatório ({hip.get('pct')}%). "
+            f"O mais frequente é {mf.get('valor')} ({mf.get('pct')}%)."
+        )
+    elif mf:
+        pad_tipo = "tendencia"
+        pad_hist = (
+            f"O padrão inicial mais frequente é {mf.get('valor')} ({mf.get('pct')}% dos concursos)."
+        )
+        pad_regra = (
+            f"Use {mf.get('valor')} como referência de padrão inicial, não como regra rígida "
+            f"({mf.get('pct')}%)."
+        )
+    else:
+        pad_tipo, pad_hist, pad_regra = "info", "—", ""
+    temporal = analise.get("temporal") or {}
+    if temporal.get("confirmado"):
+        per_tipo = "tendencia"
+        per_hist = "Há desvio pontual de periodicidade no histórico. Não trate como ciclo rígido."
+    else:
+        per_tipo = "nao_confirmado"
+        per_hist = "Repetir o mesmo evento a cada 2, 3 ou 4 concursos não se confirma no histórico."
+    n_ord = sum(1 for od in ordens if len(od) >= 2)
+    tem_ordem = n_ord >= max(1, int(0.8 * n))
+    gap_ord_moda, gap_ord_q = _moda(gap_ord_vals) if tem_ordem else (None, 0)
+    pad_ord, pad_ord_q = _moda(gap_ord_padroes) if tem_ordem else (None, 0)
+    pct_diag = _pct(diag_com, n) if diagonais_fn is not None else None
+
     dist_itens = [
         _item(
             "Faixas B/M/A",
@@ -232,6 +358,12 @@ def montar_painel(
             ),
             "filtro",
             "Resumo Geral · DNA (faixas da modalidade)",
+            tipo="frequente" if top_bma else "info",
+            regra=(
+                f"Use a distribuição {top_bma.get('dist')} ({top_bma.get('pct')}%) "
+                "ou as duas seguintes do ranking. Não zere uma faixa."
+                if top_bma else ""
+            ),
         ),
         _item(
             "Linhas (blocos de 10)",
@@ -240,8 +372,19 @@ def montar_painel(
             + ((" · " + " · ".join(linhas_medias[:4])) if linhas_medias else ""),
             "disponivel",
             "/analise/linhas-dd-du/ · linhas_universo.core",
+            tipo="frequente",
+            regra=f"A quantidade de linhas mais comum é {moda_ql}. Use como referência de ocupação do volante.",
         ),
     ]
+
+    def _grupo(nome: str, counter: Counter, fonte: str) -> Dict[str, str]:
+        mv, mq = _moda(counter)
+        frase = f"Quantidade mais comum de {nome.lower()}: {mv} ({_pct(mq, n)}% dos concursos)."
+        return _item(
+            nome, "", frase, "geracao", fonte,
+            tipo="frequente",
+            regra=frase,
+        )
 
     par_itens = [
         _item(
@@ -250,41 +393,15 @@ def montar_painel(
             f"O mais comum é {pi.get('moda')} ({pi.get('moda_pct')}%). Média {pi.get('media_pares')} pares e {pi.get('media_impares')} ímpares.",
             "geracao",
             "Resumo Geral · DNA e Comportamento (PA/IM)",
+            tipo="frequente",
+            regra=f"Fique perto de {pi.get('moda')}.",
         ),
     ]
     if sp is not None and pr_ult is not None:
-        mv, mq = _moda(pr_c)
-        par_itens.append(_item(
-            "Primos",
-            "",
-            f"Quantidade mais comum: {mv} ({_pct(mq, n)}% dos concursos).",
-            "geracao",
-            "Comportamento → Apostas (indicador PR)",
-        ))
-        mv, mq = _moda(mo_c)
-        par_itens.append(_item(
-            "Moldura",
-            "",
-            f"Quantidade mais comum: {mv} ({_pct(mq, n)}% dos concursos).",
-            "geracao",
-            "Comportamento → Apostas (indicador MO)",
-        ))
-        mv, mq = _moda(m3_c)
-        par_itens.append(_item(
-            "Múltiplos de 3",
-            "",
-            f"Quantidade mais comum: {mv} ({_pct(mq, n)}% dos concursos).",
-            "geracao",
-            "Comportamento → Apostas (indicador M3)",
-        ))
-        mv, mq = _moda(fb_c)
-        par_itens.append(_item(
-            "Fibonacci",
-            "",
-            f"Quantidade mais comum: {mv} ({_pct(mq, n)}% dos concursos).",
-            "geracao",
-            "Comportamento → Apostas (indicador FB)",
-        ))
+        par_itens.append(_grupo("Primos", pr_c, "Comportamento → Apostas (indicador PR)"))
+        par_itens.append(_grupo("Moldura", mo_c, "Comportamento → Apostas (indicador MO)"))
+        par_itens.append(_grupo("Múltiplos de 3", m3_c, "Comportamento → Apostas (indicador M3)"))
+        par_itens.append(_grupo("Fibonacci", fb_c, "Comportamento → Apostas (indicador FB)"))
 
     rep_itens = [
         _item(
@@ -293,19 +410,51 @@ def montar_painel(
             f"O mais comum é repetir {rep.get('moda')} dezena(s) ({rep.get('moda_pct')}%). 1 ou 2 repetidas em {rep.get('pct_1_ou_2')}% dos concursos. Média {rep.get('media')}.",
             "geracao",
             "Resumo Geral · DNA e Comportamento (RT)",
+            tipo="frequente",
+            regra=(
+                f"Leve {rep.get('moda')} dezena(s) do concurso anterior. "
+                f"1 ou 2 repetidas ocorrem em {rep.get('pct_1_ou_2')}% dos concursos."
+            ),
         ),
     ]
 
+    pct_gap = _pct(gap_moda_q, sum(gap_vals.values()))
+    pct_pad = _pct(pad_moda_q, n)
+    gaps_txt = (
+        f"O gap mais comum é {gap_moda} ({pct_gap}% dos intervalos). "
+        f"Padrão de gaps mais frequente: «{pad_moda}» ({pct_pad}% dos concursos)."
+    )
+    if pct_pad >= 5:
+        gaps_regra = (
+            f"Na leitura classificada, o gap de referência é {gap_moda} ({pct_gap}% dos intervalos) "
+            f"e o padrão «{pad_moda}» ({pct_pad}%)."
+        )
+        gaps_tipo = "frequente"
+    else:
+        gaps_regra = (
+            f"Na leitura classificada, o gap mais comum é {gap_moda} ({pct_gap}% dos intervalos). "
+            f"O padrão completo mais visto, «{pad_moda}», aparece em {pct_pad}% e não vira regra."
+        )
+        gaps_tipo = "info"
+    partes_faixa = str(faixa_gap).split("–")
+    if len(partes_faixa) == 2 and partes_faixa[0] == partes_faixa[1]:
+        media_regra = (
+            f"A média dos gaps do jogo deve ficar perto de {partes_faixa[0]} "
+            f"(média histórica {hist_gap_medio})."
+        )
+    else:
+        media_regra = (
+            f"A média dos gaps do jogo deve ficar em {faixa_gap} (média histórica {hist_gap_medio})."
+        )
     gaps_itens = [
         _item(
             "Gaps (classificado)",
             "",
-            (
-                f"O gap mais comum é {gap_moda} ({_pct(gap_moda_q, sum(gap_vals.values()))}% dos intervalos). "
-                f"Padrão de gaps mais frequente: «{pad_moda}» ({_pct(pad_moda_q, n)}% dos concursos)."
-            ),
+            gaps_txt,
             "geracao",
             "Gaps e Régua · gaps_de (leitura classificada)",
+            tipo=gaps_tipo,
+            regra=gaps_regra,
         ),
         _item(
             "Média dos gaps",
@@ -313,16 +462,47 @@ def montar_painel(
             f"A média dos gaps costuma ficar em {hist_gap_medio}. Faixa habitual (percentis 20–80): {faixa_gap}.",
             "geracao",
             "Mesma série de gaps_de",
+            tipo="frequente",
+            regra=media_regra,
         ),
     ]
+    if tem_ordem and gap_ord_moda is not None:
+        pct_salto = _pct(gap_ord_q, sum(gap_ord_vals.values()))
+        pct_ord = _pct(pad_ord_q, n_ord)
+        ordem_txt = (
+            f"Na ordem de sorteio, o salto mais comum é {int(gap_ord_moda):+d} "
+            f"({pct_salto}% dos intervalos). "
+            f"Padrão mais frequente: «{pad_ord}» ({pct_ord}% dos concursos)."
+        )
+        if pct_salto >= 15:
+            ordem_tipo = "info"
+            ordem_regra = ordem_txt
+        else:
+            ordem_tipo = "nao_confirmado"
+            ordem_regra = (
+                f"Na ordem de sorteio, nenhum salto domina "
+                f"(o mais comum, {int(gap_ord_moda):+d}, aparece em {pct_salto}% dos intervalos). "
+                "Não use essa leitura como filtro."
+            )
+        gaps_itens.append(_item(
+            "Gaps (ordem de sorteio)",
+            "",
+            ordem_txt,
+            "disponivel",
+            "Gaps e Régua · gaps_sequencia",
+            tipo=ordem_tipo,
+            regra=ordem_regra,
+        ))
 
     regua_itens = [
         _item(
             "Régua (deslocamento)",
             "",
-            reg_hist,
+            f"{reg_hist}. No último concurso: {reg_atual}.",
             "geracao",
             "Gaps e Régua · analisar_regua_combinacoes",
+            tipo="frequente",
+            regra=f"Monte cada posição ordenada perto da referência da régua ({refs_txt}).",
         ),
     ]
 
@@ -333,15 +513,23 @@ def montar_painel(
             f"Pelo menos uma sequência em {seq.get('pct_com_pelo_menos_uma')}% dos concursos. Quantidade mais comum: {seq.get('qtd_mais_freq')}. Tamanho mais comum: {seq.get('tamanho_mais_freq')}.",
             "geracao",
             "Resumo Geral · DNA e Comportamento (SQ)",
+            tipo=seq_tipo,
+            regra=seq_regra,
         ),
     ]
-    if diagonais_fn is not None and diag_com >= 0:
+    if pct_diag is not None:
         seq_itens.append(_item(
             "Diagonais do volante",
             "",
-            f"Aparecem em {_pct(diag_com, n)}% dos concursos.",
+            f"Aparecem em {pct_diag}% dos concursos.",
             "disponivel",
             "Estatísticas do Ciclo · diagonais_na_aposta",
+            tipo="frequente" if pct_diag >= 55 else "info",
+            regra=(
+                f"Diagonais aparecem em {pct_diag}% dos concursos."
+                if pct_diag >= 55
+                else f"Não exija diagonal em todo jogo. Elas aparecem em {pct_diag}% dos concursos."
+            ),
         ))
 
     fin_itens = [
@@ -351,6 +539,8 @@ def montar_painel(
             f"Pelo menos um final repetido em {fin.get('pct_pelo_menos_um')}% dos concursos.",
             "filtro",
             "Resumo Geral · DNA (finais repetidos)",
+            tipo=fin_tipo,
+            regra=fin_regra,
         ),
         _item(
             "Distribuição dos finais",
@@ -358,37 +548,91 @@ def montar_painel(
             f"A quantidade mais comum de finais distintos é {du_moda} ({_pct(du_q, n)}% dos concursos).",
             "disponivel",
             "DD × DU · dígito da unidade",
+            tipo="frequente",
+            regra=f"A quantidade mais comum de finais distintos é {du_moda}.",
         ),
     ]
 
+    ciclo_txt = (
+        f"O ciclo costuma fechar em {ciclo.get('duracao_media')} concursos "
+        f"(mínimo {ciclo.get('min')} · máximo {ciclo.get('max')} · {ciclo.get('completos')} ciclos fechados)."
+    )
     ciclo_itens = [
         _item(
             "Ciclo de cobertura",
             "",
-            (
-                f"O ciclo costuma fechar em {ciclo.get('duracao_media')} concursos "
-                f"(mínimo {ciclo.get('min')} · máximo {ciclo.get('max')} · {ciclo.get('completos')} ciclos fechados)."
-            ),
+            ciclo_txt,
             "geracao",
             "Resumo Geral · ciclo do universo; Ciclo — Apostas e Estatísticas do Ciclo",
+            tipo="info",
+            regra=ciclo_txt,
         ),
     ]
-    novas = analise.get("ciclo", {}).get("novas") or {}
+    if atual_c:
+        pend = atual_c.get("pendentes") or []
+        pend_txt = (
+            f"Ciclo {atual_c.get('numero')} · {atual_c.get('concursos')} concursos · "
+            f"{atual_c.get('pct')}% do universo · {atual_c.get('pendentes_qtd')} pendentes"
+            + (f": {', '.join(pend)}." if pend else ".")
+        )
+        ciclo_itens.append(_item(
+            "Dezenas pendentes do ciclo",
+            "",
+            pend_txt,
+            "geracao",
+            "Resumo Geral · ciclo aberto",
+            tipo="info",
+            regra=(
+                f"O ciclo atual ainda não sorteou: {', '.join(pend)}."
+                if pend else "O ciclo atual não tem dezena pendente."
+            ),
+        ))
     ciclo_itens.append(_item(
         "Dezenas novas no ciclo",
         "",
-        f"A quantidade mais comum de dezenas novas é {novas.get('moda')} ({novas.get('moda_pct')}%). 1 ou 2 novas em {novas.get('pct_1_ou_2')}% — não é regra da maioria.",
+        f"A quantidade mais comum de dezenas novas é {novas.get('moda')} ({novas.get('moda_pct')}%). 1 ou 2 novas em {novas.get('pct_1_ou_2')}%.",
         "info",
-        "Resumo Geral · DNA (hipótese 1–2 novas não é regra rígida)",
+        "Resumo Geral · DNA (dezenas novas no ciclo)",
+        tipo=novas_tipo,
+        regra=novas_regra,
     ))
+    fech = ciclo.get("fechamento_1a5") or {}
+    if fech.get("n"):
+        fech_txt = (
+            f"Com 1 a 5 dezenas pendentes, a média de dezenas novas é {fech.get('media')}."
+        )
+        ciclo_itens.append(_item(
+            "Perto do fechamento do ciclo",
+            "",
+            fech_txt,
+            "info",
+            "Resumo Geral · concursos com 1 a 5 pendentes",
+            tipo="info",
+            regra=fech_txt + " Não force dezena nova só porque o ciclo está no fim.",
+        ))
 
+    quentes_txt = "As que mais aparecem: " + " ".join(_fmt2(r["dezena"]) for r in quentes) + "."
+    atras_txt = "As que há mais concursos não saem: " + " ".join(
+        f"{_fmt2(r['dezena'])} ({r['atraso']})" for r in atrasadas
+    ) + "."
     freq_itens = [
         _item(
             "Mais frequentes no histórico",
             "",
-            "As que mais aparecem: " + " ".join(_fmt2(r["dezena"]) for r in quentes) + ".",
+            quentes_txt,
             "info",
             "Resumo Geral · contagem por dezena em todos os concursos",
+            tipo="info",
+            regra=quentes_txt + " Filtro de construção, não previsão.",
+        ),
+        _item(
+            "Mais atrasadas",
+            "",
+            atras_txt,
+            "disponivel",
+            "Resumo Geral · atraso por dezena",
+            tipo="info",
+            regra=atras_txt + " Filtro de construção, não previsão.",
         ),
     ]
 
@@ -399,6 +643,8 @@ def montar_painel(
             f"Média {soma.get('media')}. Faixa habitual {soma.get('recomendavel')}. Núcleo {soma.get('nucleo')}.",
             "filtro",
             "Resumo Geral · DNA (percentis 20–80)",
+            tipo="frequente",
+            regra=f"Mire a soma entre {soma.get('recomendavel')}. Núcleo {soma.get('nucleo')}.",
         ),
         _item(
             "Amplitude (máx − mín)",
@@ -406,10 +652,11 @@ def montar_painel(
             f"Média {amp_media}. Faixa habitual {amp_faixa}.",
             "disponivel",
             "Enriquecimento da Escolha Visual (conjuntos_concurso.amplitude); nenhum gerador filtra por ela",
+            tipo="info",
+            regra=f"A amplitude (maior menos menor) costuma ficar em {amp_faixa}.",
         ),
     ]
 
-    mf = (analise.get("padrao_inicial") or {}).get("mais_freq") or {}
     dd_itens = [
         _item(
             "DD distintos (dezena)",
@@ -417,6 +664,8 @@ def montar_painel(
             f"A quantidade mais comum de DD distintos é {dd_moda} ({_pct(dd_q, n)}% dos concursos).",
             "disponivel",
             "/analise/linhas-dd-du/ · dd_du.core.decompor_lista",
+            tipo="frequente",
+            regra=f"A quantidade mais comum de dígitos da dezena distintos é {dd_moda}.",
         ),
         _item(
             "DU distintos (unidade)",
@@ -424,16 +673,17 @@ def montar_painel(
             f"A quantidade mais comum de DU distintos é {du_moda} ({_pct(du_q, n)}% dos concursos).",
             "disponivel",
             "/analise/linhas-dd-du/ · mesmo decompor_lista",
+            tipo="frequente",
+            regra=f"A quantidade mais comum de dígitos da unidade distintos é {du_moda}.",
         ),
         _item(
             "Padrão inicial",
             "",
-            (
-                f"O padrão inicial mais frequente é {mf.get('valor')} ({mf.get('pct')}% dos concursos)."
-                if mf else "—"
-            ),
+            pad_hist,
             "geracao",
             "Análises Inteligentes · aba 4 (Padrões II) e aba Panorama",
+            tipo=pad_tipo,
+            regra=pad_regra,
         ),
     ]
 
@@ -442,24 +692,51 @@ def montar_painel(
     if meses:
         mes_c = Counter(meses)
         mes_moda, mes_q = _moda(mes_c)
+        nomes_mes: Dict[int, str] = {}
+        ultimo_mes: Dict[int, int] = {}
+        for i, s in enumerate(sorteios):
+            bruto = s.get("mes_num")
+            if not bruto:
+                continue
+            m = int(bruto)
+            ultimo_mes[m] = i
+            if s.get("mes_nome"):
+                nomes_mes[m] = str(s["mes_nome"])
+        atraso_mes = sorted(
+            ((len(sorteios) - 1 - idx, m) for m, idx in ultimo_mes.items()),
+            reverse=True,
+        )
+        if atraso_mes:
+            atr_n, atr_m = atraso_mes[0]
+            nome_atr = nomes_mes.get(atr_m) or str(atr_m)
+        else:
+            atr_n, nome_atr = 0, "—"
+        nome_moda = nomes_mes.get(int(mes_moda)) or str(mes_moda)
+        mes_hist = (
+            f"Mês mais frequente: {nome_moda} ({_pct(mes_q, len(meses))}% dos concursos com mês). "
+            f"Mês mais atrasado: {nome_atr}, há {atr_n} concursos."
+        )
         outros.append(_item(
             "Mês da Sorte",
             "",
-            f"Mês mais frequente no histórico: {mes_moda} ({_pct(mes_q, len(meses))}% dos concursos com mês).",
+            mes_hist,
             "geracao",
             "Comportamento → Apostas (MS)",
+            tipo="tendencia",
+            regra=mes_hist,
         ))
-    temporal = analise.get("temporal") or {}
     outros.append(_item(
         "Periodicidade (lags 1–6)",
         "",
-        (
-            "Há desvio pontual de periodicidade no histórico — não trate como ciclo rígido."
-            if temporal.get("confirmado")
-            else "Repetir o mesmo evento a cada 2, 3 ou 4 concursos não se confirma no histórico."
-        ),
+        per_hist,
         "info",
         "Resumo Geral · DNA temporal",
+        tipo=per_tipo,
+        regra=(
+            per_hist
+            if temporal.get("confirmado")
+            else "Não monte a aposta em cima de periodicidade a cada 2, 3 ou 4 concursos. O histórico não confirma."
+        ),
     ))
 
     categorias = [
@@ -482,6 +759,7 @@ def montar_painel(
         for item in cat["itens"]:
             if item["uso"] in ("geracao", "filtro", "disponivel"):
                 geracao.append({**item, "categoria": cat["titulo"]})
+    projetado = _projetar(categorias)
 
     ausentes = [
         {
@@ -504,4 +782,6 @@ def montar_painel(
         "categorias": categorias,
         "geracao": geracao,
         "ausentes": ausentes,
+        "checklist": projetado["checklist"],
+        "regras": projetado["regras"],
     }

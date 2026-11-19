@@ -112,13 +112,22 @@ def _carregar_sorteios(spec: ResumoSpec) -> List[Dict[str, Any]]:
         dez = _dezenas_row(s)
         if not dez:
             continue
-        out.append({
+        item = {
             "concurso": int(s.concurso),
             "data": getattr(s, "data", "") or "",
             "dezenas": dez,
             "mes_num": getattr(s, "mes_num", None),
             "mes_nome": getattr(s, "mes_nome", None) or "",
-        })
+        }
+        if hasattr(s, "dezenas_ordem_lista"):
+            try:
+                bruto = s.dezenas_ordem_lista()
+                ordem = [int(x) for x in bruto if x is not None]
+            except Exception:
+                ordem = []
+            if ordem:
+                item["ordem"] = ordem
+        out.append(item)
     return out
 
 
@@ -409,47 +418,6 @@ class ResumoModalidadeService:
                 ult_novas = list(dets[-1].get("novas_lista") or [])
                 break
 
-        if ult_seq_txt:
-            neste_seq = f"{len(ult_seq)} · {', '.join(ult_seq_txt)}"
-        else:
-            neste_seq = "nenhuma"
-        neste_rep = (
-            f"{len(ult_rep_nums)} · {_fmt_lista(ult_rep_nums)}"
-            if ult_rep_nums else "0"
-        )
-        neste_pi = (
-            f"{ult_p}P / {n_s - ult_p}I · "
-            f"P {_fmt_lista(ult_pares) or '—'} · I {_fmt_lista(ult_impares) or '—'}"
-        )
-        neste_bma = ult_bma + " · " + " · ".join(
-            f"{c} {_fmt_lista(ult_por_faixa[c]) or '—'}" for c in faixa_codigos
-        )
-        if ult_fin_grupos:
-            neste_fin = "; ".join(
-                f"final {g['final']}: {', '.join(g['dezenas'])}" for g in ult_fin_grupos
-            )
-        else:
-            neste_fin = "todos distintos"
-        if p20 <= ult_soma <= p80:
-            neste_soma = f"{ult_soma} · na faixa operacional {p20}–{p80}"
-        elif p10 <= ult_soma <= p90:
-            neste_soma = f"{ult_soma} · no núcleo {p10}–{p90}"
-        else:
-            neste_soma = f"{ult_soma} · fora do núcleo {p10}–{p90}"
-        neste_pad = f"{ult_padrao} · {ult_bma}"
-        if ciclo_atual:
-            neste_ciclo = (
-                f"ciclo {ciclo_atual['numero']} · {ciclo_atual['concursos']} conc. · "
-                f"{ciclo_atual['pct']}% · {ciclo_atual['pendentes_qtd']} pendentes"
-                + (f" ({', '.join(ciclo_atual['pendentes'])})" if ciclo_atual["pendentes"] else "")
-            )
-        else:
-            neste_ciclo = "—"
-        neste_novas = (
-            f"{len(ult_novas)} · {_fmt_lista(ult_novas)}" if ult_novas else "0"
-        )
-
-        moda_bma = bma_rows[0] if bma_rows else None
         faixas_out = {
             c: {
                 "label": faixa_labels[c],
@@ -457,218 +425,6 @@ class ResumoModalidadeService:
             }
             for c in faixa_codigos
         }
-
-        checklist = [
-            {
-                "criterio": "Sequências",
-                "ref": (
-                    f"≥1 em {pct_seq}% · moda {moda_seq} ({moda_seq_pct}%)"
-                    + (f" · tamanho {moda_tam}" if moda_tam else "")
-                ),
-                "neste": neste_seq,
-                "uso": "Coloque pelo menos um par consecutivo. 3 sequências é raro.",
-                "tipo": "frequente" if pct_seq >= 55 else "atencao",
-            },
-            {
-                "criterio": "Repetição do anterior",
-                "ref": (
-                    f"moda {moda_rep} ({moda_rep_pct}%) · 1 ou 2 em {pct_rep_1ou2}% "
-                    f"· média {round(statistics.mean(reps_ant), 2) if reps_ant else 0}"
-                ),
-                "neste": neste_rep,
-                "uso": "Leve 1 ou 2 dezenas do último concurso. 4+ é exceção.",
-                "tipo": "frequente" if pct_rep_1ou2 >= 55 else "atencao",
-            },
-            {
-                "criterio": "Pares / ímpares",
-                "ref": (
-                    f"{moda_pi_v[0]}P / {moda_pi_v[1]}I ({moda_pi_pct}%) · "
-                    f"média {media_pares}P e {media_impares}I"
-                ),
-                "neste": neste_pi,
-                "uso": (
-                    f"Fique perto de {moda_pi_v[0]}P / {moda_pi_v[1]}I no {spec.nome}."
-                    if moda_pi_v else f"Equilibre pares e ímpares nas {n_s} dezenas do {spec.nome}."
-                ),
-                "tipo": "frequente",
-            },
-            {
-                "criterio": "Faixas " + " / ".join(faixa_codigos),
-                "ref": (
-                    f"top {moda_bma['dist']} ({moda_bma['pct']}%) · "
-                    f"média {' + '.join(f'{medias_f[c]}{c}' for c in faixa_codigos)}"
-                    if moda_bma else "—"
-                ),
-                "neste": neste_bma,
-                "uso": "Não zere nenhuma faixa. Prefira a distribuição mais frequente do ranking.",
-                "tipo": "frequente",
-            },
-            {
-                "criterio": "Finais repetidos",
-                "ref": f"≥1 final repetido em {pct_final}%",
-                "neste": neste_fin,
-                "uso": "Repita pelo menos um final (ex.: 03 e 13).",
-                "tipo": "frequente" if pct_final >= 55 else "atencao",
-            },
-            {
-                "criterio": "Soma",
-                "ref": (
-                    f"média {round(statistics.mean(somas), 2)} · "
-                    f"mire {p20}–{p80} · núcleo {p10}–{p90}"
-                ),
-                "neste": neste_soma,
-                "uso": f"Mire {p20}–{p80} (percentis 20–80). Núcleo {p10}–{p90}.",
-                "tipo": "frequente",
-            },
-            {
-                "criterio": "Padrão inicial",
-                "ref": (
-                    f"{moda_ini['valor']} ({moda_ini['pct']}%)"
-                    if moda_ini else "—"
-                ),
-                "neste": neste_pad,
-                "uso": (
-                    (
-                        f"{hip} é o 3º ({_pct(hip_q, n)}%) — não é o mais frequente."
-                        if (moda_ini or {}).get("valor") != hip
-                        else "Padrão líder confirmado."
-                    )
-                    if hip else "Use o padrão inicial mais frequente como referência, não como regra."
-                ),
-                "tipo": "tendencia",
-            },
-            {
-                "criterio": "Ciclo (universo)",
-                "ref": (
-                    f"fecha em {round(statistics.mean(duracoes), 1)} concursos "
-                    f"(mín {min(duracoes)} · máx {max(duracoes)} · {len(completos)} ciclos)"
-                    if duracoes else "—"
-                ),
-                "neste": neste_ciclo,
-                "uso": (
-                    f"O ciclo costuma fechar em {round(statistics.mean(duracoes), 1)} concursos."
-                    if duracoes else "Sem ciclos completos no histórico."
-                ),
-                "tipo": "info",
-            },
-            {
-                "criterio": "Dezenas novas no ciclo",
-                "ref": (
-                    f"moda {_moda(novas_c)[0]} ({_moda(novas_c)[2]}%) · "
-                    f"1 ou 2 em {pct_novas_1ou2}%"
-                ),
-                "neste": neste_novas,
-                "uso": "Não force 1–2 novas em todo concurso. No fim do ciclo a moda é 0.",
-                "tipo": "atencao" if pct_novas_1ou2 < 55 else "frequente",
-            },
-        ]
-
-        regras = []
-        if pct_seq >= 55:
-            regras.append({
-                "n": 1, "tipo": "frequente",
-                "texto": f"Inclua pelo menos 1 sequência de 2 dezenas ({pct_seq}% dos concursos).",
-            })
-        else:
-            regras.append({
-                "n": 1, "tipo": "nao_confirmado",
-                "texto": f"Hipótese 'sempre tem sequência' não confirmada ({pct_seq}%).",
-            })
-        regras.append({
-            "n": 2, "tipo": "frequente",
-            "texto": (
-                f"Leve 1 ou 2 dezenas do concurso anterior ({pct_rep_1ou2}%). "
-                f"Moda {moda_rep} ({moda_rep_pct}%)."
-            ),
-        })
-        regras.append({
-            "n": 3, "tipo": "frequente" if pct_final >= 55 else "nao_confirmado",
-            "texto": (
-                f"A maioria dos concursos ({pct_final}%) tem pelo menos dois números com o mesmo final."
-                if pct_final >= 55
-                else f"Hipótese 'sempre há finais iguais' não confirmada como maioria ({pct_final}%)."
-            ),
-        })
-        regras.append({
-            "n": 4, "tipo": "frequente",
-            "texto": (
-                f"Par/ímpar de referência: {moda_pi_v[0]}P / {moda_pi_v[1]}I ({moda_pi_pct}%). "
-                f"Ímpares puxam um pouco (média {media_impares} vs {media_pares})."
-            ),
-        })
-        regras.append({
-            "n": 5, "tipo": "frequente",
-            "texto": (
-                f"Faixas: use {moda_bma['dist']} ({moda_bma['pct']}%) ou as duas seguintes do ranking. "
-                "Não zere uma faixa."
-            ) if moda_bma else "Faixas indisponíveis.",
-        })
-        regras.append({
-            "n": 6, "tipo": "frequente",
-            "texto": (
-                f"Soma entre {p20} e {p80}. Média {round(statistics.mean(somas), 1)}. "
-                f"Mínimo histórico {min(somas)} e máximo {max(somas)} são exceções."
-            ),
-        })
-        if hip and moda_ini and moda_ini["valor"] == hip:
-            regras.append({
-                "n": 7, "tipo": "frequente",
-                "texto": f"Padrão inicial mais frequente confirmado: {hip} ({moda_ini['pct']}%).",
-            })
-        elif hip:
-            regras.append({
-                "n": 7, "tipo": "nao_confirmado",
-                "texto": (
-                    f"Hipótese '{hip}' como mais frequente não confirmada "
-                    f"({_pct(hip_q, n)}%). Líder: {(moda_ini or {}).get('valor')} "
-                    f"({(moda_ini or {}).get('pct')}%)."
-                ),
-            })
-        elif moda_ini:
-            regras.append({
-                "n": 7, "tipo": "tendencia",
-                "texto": (
-                    f"Padrão inicial mais frequente no {spec.nome}: "
-                    f"{moda_ini['valor']} ({moda_ini['pct']}%)."
-                ),
-            })
-        regras.append({
-            "n": 8, "tipo": "info",
-            "texto": (
-                f"Ciclo fecha em média {round(statistics.mean(duracoes), 1)} concursos "
-                f"(mín {min(duracoes)}, máx {max(duracoes)})."
-                if duracoes else "Sem ciclos completos."
-            ),
-        })
-        regras.append({
-            "n": 9, "tipo": "nao_confirmado" if pct_novas_1ou2 < 55 else "frequente",
-            "texto": (
-                f"Hipótese '1 ou 2 dezenas novas por concurso' não confirmada no ciclo inteiro "
-                f"({pct_novas_1ou2}%). Moda {_moda(novas_c)[0]} novas ({_moda(novas_c)[2]}%)."
-            ),
-        })
-        if novas_fech:
-            regras.append({
-                "n": 10, "tipo": "info",
-                "texto": (
-                    f"Perto do fechamento (1–5 pendentes): média {round(statistics.mean(novas_fech), 2)} "
-                    f"dezenas novas; 0 novas em {_pct(novas_fech_c.get(0, 0), len(novas_fech))}%."
-                ),
-            })
-        if temporal_confirmados:
-            regras.append({
-                "n": 11, "tipo": "tendencia",
-                "texto": "Há desvio pontual de periodicidade (ver seção temporal) — não trate como ciclo rígido.",
-            })
-        else:
-            regras.append({
-                "n": 11, "tipo": "nao_confirmado",
-                "texto": "Periodicidade a cada 2, 3 ou 4 concursos não confirmada (lags 1–6, desvio < 8 pp).",
-            })
-        regras.append({
-            "n": 12, "tipo": "limite",
-            "texto": "Frequência histórica é filtro de construção, não previsão do próximo resultado.",
-        })
 
         inicio_ciclo = []
         for pos in (1, 2, 3):
@@ -826,8 +582,6 @@ class ResumoModalidadeService:
                 "confirmados": temporal_confirmados,
                 "confirmado": bool(temporal_confirmados),
             },
-            "checklist": checklist,
-            "regras": regras,
             "dezenas": {
                 "universo": list(range(spec.dezena_min, spec.dezena_max + 1)),
                 "stats": [
@@ -843,6 +597,8 @@ class ResumoModalidadeService:
         }
         from resumo_modalidade.painel import montar_painel
         payload["painel"] = montar_painel(spec, sorteios, payload)
+        payload["checklist"] = payload["painel"].get("checklist") or []
+        payload["regras"] = payload["painel"].get("regras") or []
         return payload
 
     @classmethod

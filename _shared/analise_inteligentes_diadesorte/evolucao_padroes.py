@@ -25,8 +25,8 @@ from analise_inteligentes_diadesorte.service import (
 _CACHE: Dict[Tuple[Any, ...], Dict[str, Any]] = {}
 
 
-def _fmt_diagonais(dezenas, *, dmin: int, dmax: int) -> Tuple[str, List[Dict[str, Any]]]:
-    runs = diagonais_na_aposta(dezenas, dmin=dmin, dmax=dmax, cols=10)
+def _fmt_diagonais(dezenas, *, dmin: int, dmax: int, cols: int = 10) -> Tuple[str, List[Dict[str, Any]]]:
+    runs = diagonais_na_aposta(dezenas, dmin=dmin, dmax=dmax, cols=cols)
     if not runs:
         return "Nenhuma", []
     compacto = [
@@ -87,6 +87,7 @@ def montar_evolucao(svc, *, base: str = "geral") -> Dict[str, Any]:
     dmin = int(lim["min_dezena"])
     dmax = int(lim["max_dezena"])
     k = int(lim["tamanho_jogo"])
+    cols = int(svc._volante_cols()) if hasattr(svc, "_volante_cols") else 10
 
     dados = svc.listar_resultados(janela=0, base=base)
     linhas_src = list(dados.get("linhas") or [])
@@ -101,6 +102,7 @@ def montar_evolucao(svc, *, base: str = "geral") -> Dict[str, Any]:
         dmin,
         dmax,
         k,
+        cols,
     )
     hit = _CACHE.get(cache_key)
     if hit:
@@ -157,7 +159,7 @@ def montar_evolucao(svc, *, base: str = "geral") -> Dict[str, Any]:
         aposta_n = indice_aposta_no_padrao(
             dez, pad, min_dezena=dmin, max_dezena=dmax,
         ) if (dez and pad) else None
-        diag_fmt, diags = _fmt_diagonais(dez, dmin=dmin, dmax=dmax) if dez else ("Nenhuma", [])
+        diag_fmt, diags = _fmt_diagonais(dez, dmin=dmin, dmax=dmax, cols=cols) if dez else ("Nenhuma", [])
         n_pad = n_por_padrao.get(pad)
         linhas.append({
             "concurso": r["concurso"],

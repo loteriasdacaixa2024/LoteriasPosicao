@@ -771,21 +771,6 @@
     return universo.filter((n) => !ban.has(n));
   }
 
-  function textoGrupos(grupos, sep) {
-    const lista = grupos || [];
-    if (!lista.length) return '—';
-    return lista.map((g) => (g || []).map(fmt).join(sep)).join(' · ');
-  }
-
-  function textoDiags(grupos) {
-    const lista = grupos || [];
-    if (!lista.length) return '—';
-    return lista.map((g) => {
-      const nums = (g.nums || g || []).map(fmt).join('-');
-      return g.dir_sym ? `${g.dir_sym} ${nums}` : nums;
-    }).join(' · ');
-  }
-
   function chaveData(texto) {
     const s = String(texto || '');
     const br = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
@@ -815,17 +800,13 @@
     return (linhas || []).map((ln) => {
       const ant = prev.get(Number(ln.concurso));
       const antNums = (ant && ant.numeros) || [];
-      let seq = [];
-      let fin = [];
-      let diag = [];
-      if (ant) {
-        seq = (ant.sequencias && ant.sequencias.detalhe && ant.sequencias.detalhe.grupos) || [];
-        fin = (ant.finais && ant.finais.detalhe && ant.finais.detalhe.grupos) || [];
-        diag = (ant.diagonais && ant.diagonais.detalhe && ant.diagonais.detalhe.grupos) || [];
-        if (COM_DIAG && ant.numeros && !diag.length) {
-          diag = (blocoDiag(ant.numeros).detalhe || {}).grupos || [];
-        }
+      let diagBloco = ln.diagonais;
+      if (COM_DIAG && ln.numeros && !(diagBloco && diagBloco.detalhe && (diagBloco.detalhe.grupos || []).length)) {
+        diagBloco = blocoDiag(ln.numeros);
       }
+      const seq = (ln.sequencias && ln.sequencias.detalhe && ln.sequencias.detalhe.grupos) || [];
+      const fin = (ln.finais && ln.finais.detalhe && ln.finais.detalhe.grupos) || [];
+      const diag = (diagBloco && diagBloco.detalhe && diagBloco.detalhe.grupos) || [];
       const repetidos = (ln.repetidos && ln.repetidos.dezenas)
         ? ln.repetidos.dezenas.slice()
         : (ln.numeros || []).map(Number).filter((n) => antNums.map(Number).includes(n));
@@ -841,9 +822,9 @@
         sequencias: seq,
         finais: fin,
         diagonais: diag,
-        seqTxt: textoGrupos(seq, '-'),
-        finTxt: textoGrupos(fin, ','),
-        diagTxt: textoDiags(diag),
+        seqTxt: celulaGrupo('sequencias', ln.sequencias),
+        finTxt: celulaGrupo('finais', ln.finais),
+        diagTxt: celulaGrupo('diagonais', diagBloco),
       };
     });
   }

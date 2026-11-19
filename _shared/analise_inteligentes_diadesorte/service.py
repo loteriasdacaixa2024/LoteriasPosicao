@@ -475,6 +475,18 @@ def _gerar_padroes_teoricos(
     return out
 
 
+def _media_intervalo(concursos: Sequence[int]) -> Optional[int]:
+    """Mesma média da coluna «a cada X concursos»: espaço entre saídas seguidas."""
+    occ = sorted({int(c) for c in concursos if c})
+    if len(occ) < 2:
+        return None
+    gaps = [int(occ[i]) - int(occ[i - 1]) for i in range(1, len(occ))]
+    gaps = [g for g in gaps if g > 0]
+    if not gaps:
+        return None
+    return int(sum(gaps) / len(gaps) + 0.5)
+
+
 def status_padrao(frequencia: int, atraso: Optional[int], atraso_mediano: float) -> str:
     if int(frequencia) <= 0:
         return "faltante"
@@ -730,6 +742,14 @@ class AnaliseInteligentesService:
             "tamanho_jogo": tamanho,
             "pad": pad,
         }
+
+    @classmethod
+    def _volante_cols(cls) -> int:
+        try:
+            from analise_estudos.specs import get_estudos_config
+            return max(1, int(get_estudos_config(cls.modality_key).get("volante_cols") or 10))
+        except Exception:
+            return 10
 
     @classmethod
     def perfil_do_concurso(cls, concurso: int, base: str = "geral") -> Optional[Dict[str, Any]]:
@@ -1059,6 +1079,7 @@ class AnaliseInteligentesService:
                 "padrao": p,
                 "descricao": descricao_bma_do_padrao(p),
                 "jogos_possiveis": jogos,
+                "cada_concursos": _media_intervalo(ocorrencias.get(p) or []),
                 "frequencia": freq,
                 "percentual_concursos": round(100.0 * freq / max(1, total_sorteios), 2),
                 "atraso": atraso,
@@ -1069,7 +1090,7 @@ class AnaliseInteligentesService:
                 "soma_faixa": faixa,
             })
 
-        cruz = cruzar_linhas(linhas, dmin=dmin, dmax=dmax, cols=10, top_n=3)
+        cruz = cruzar_linhas(linhas, dmin=dmin, dmax=dmax, cols=cls._volante_cols(), top_n=3)
         por_diag = cruz.get("por_padrao") or {}
         for r in catalogo:
             info = por_diag.get(r["padrao"]) or {}
@@ -1115,6 +1136,7 @@ class AnaliseInteligentesService:
                 "pct_com_diagonal": r.get("pct_com_diagonal") or 0,
                 "top_diagonais": r.get("top_diagonais") or [],
                 "jogos_possiveis": int(r.get("jogos_possiveis") or 0),
+                "cada_concursos": r.get("cada_concursos"),
                 "eh_padrao_ultimo_concurso": r.get("eh_padrao_ultimo_concurso"),
             }
 

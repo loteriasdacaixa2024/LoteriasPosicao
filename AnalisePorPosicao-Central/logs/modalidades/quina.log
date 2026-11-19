@@ -19563,3 +19563,224 @@ Press CTRL+C to quit
 127.0.0.1 - - [18/Nov/2026 04:31:14] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [18/Nov/2026 04:31:15] "GET / HTTP/1.1" 200 -
 127.0.0.1 - - [18/Nov/2026 04:31:16] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-18 04:59:43 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://192.168.11.212:5155
+Press CTRL+C to quit
+127.0.0.1 - - [18/Nov/2026 04:59:55] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-18 05:36:05 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://192.168.11.212:5155
+Press CTRL+C to quit
+127.0.0.1 - - [18/Nov/2026 05:36:25] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 05:36:25] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-18 06:01:45 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://192.168.11.212:5155
+Press CTRL+C to quit
+127.0.0.1 - - [18/Nov/2026 06:02:37] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 06:02:37] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-18 06:30:22 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [18/Nov/2026 06:30:35] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 13:38:07] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 13:38:14] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 16:21:17] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 16:21:44] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 16:56:29] "GET /analise/escolha-visual/?aba=estatisticas HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 16:56:36] "GET /analise/escolha-visual/static/analise_escolha_estatisticas.js?v=20261118v1 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 16:56:51] "GET /analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:09:21] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:09:28] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:10:22] "GET /geradores-elite/gerador-gc/?digitos=0,1,2,3,5,6,8,9&concurso=7160 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:42:34] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:42:50] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:46:26] "GET /geradores-elite/gerador-gc/?digitos=0,1,4,5,6,8&concurso=7154 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:46:27] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%204%204%204 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:46:35] "POST /geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:46:48] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:49:16] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 17:49:16] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:13:24] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%201%201%204 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:13:32] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:13:41] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:13:41] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:13:52] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:13:54] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-18 18:15:15 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [18/Nov/2026 18:15:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:27:21] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=3%204%205%205%208 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:27:28] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:27:32] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:27:44] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-18 18:29:40 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [18/Nov/2026 18:29:51] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-18 18:38:19 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://10.0.0.10:5155
+Press CTRL+C to quit
+127.0.0.1 - - [18/Nov/2026 18:38:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:41:11] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=3%205%205%205%205 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:43:38] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:43:40] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:55:05] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%203%205%205%208 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:55:27] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 18:56:13] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:06:51] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:07:22] "GET /analise/analises-inteligentes/?aba=padroes-ii HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:07:25] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:07:28] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:07:37] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:07:38] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:09:06] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:16:45] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:20:55] "GET /analise/analises-inteligentes/ HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:27:45] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:28:14] "GET /analise/escolha-visual/?aba=estatisticas HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:28:15] "GET /analise/escolha-visual/static/analise_escolha_visual.css?v=20261117v2 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:28:15] "GET /analise/api/inteligentes/assets/tubular.css?v=20261001v1 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:28:15] "GET /analise/escolha-visual/static/analise_escolha_visual.js HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:28:15] "GET /analise/escolha-visual/static/analise_escolha_estatisticas.js?v=20261118v1 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:28:15] "GET /analise/escolha-visual/static/analise_escolha_visualizacao.js?v=tub1 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:28:15] "GET /analise/api/inteligentes/assets/tubular.js?v=20261115v1 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:28:17] "GET /analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:28:22] "GET /analise/api/escolha-visual/enriquecimento?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 19:42:29] "GET /analise/analises-inteligentes/?aba=padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:02:09] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:02:39] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:03:20] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:03:32] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:12:49] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:13:24] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:15:43] "GET /geradores-elite/gerador-elite/?n=6&digitos=1,2,3,4,6,7&concurso=7115 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:15:48] "POST /geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:18:39] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:18:50] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:20:43] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:20:54] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:25:03] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:25:12] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:25:29] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%201%203%204 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:26:17] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:26:31] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:28:20] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:28:50] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:30:24] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:30:39] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:47:05] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=1%203%203%206%207 HTTP/1.1" 200 -
+127.0.0.1 - - [18/Nov/2026 20:48:42] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+
+--- iniciando 2026-11-19 05:26:36 ---
+===========================================================
+[OK] Servidor Quina rodando na porta 5155
+[URL] Acesse:      http://localhost:5155
+[URL] Análise:     http://localhost:5155/analise/
+[URL] Modelos:     http://localhost:5155/modelos/
+[URL] Conferência: http://localhost:5155/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5155
+ * Running on http://192.168.11.212:5155
+Press CTRL+C to quit
+[API Caixa] Quina 7171/7171...127.0.0.1 - - [19/Nov/2026 05:27:00] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 05:34:53] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 05:35:02] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 05:35:03] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 05:35:12] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 05:35:46] "POST /modelos/api/backtesting HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 05:36:00] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -

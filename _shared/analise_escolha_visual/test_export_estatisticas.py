@@ -80,10 +80,11 @@ class ExportEstatisticasTest(unittest.TestCase):
         self.assertEqual(w1["D2"].value, "12 | 08 10 12 14 16 18 20 22 24 26 28 30")
         self.assertEqual(w1["E2"].value, "12 | 09 11 13 15 17 19 21 23 25 27 29 31")
         self.assertEqual(w1["F2"].value, "—")
-        self.assertEqual(w1["G2"].value, "—")
+        self.assertEqual(w1["G2"].value, "01-02-03-04-05-06-07")
+        self.assertEqual(w1["H2"].value, "—")
         self.assertEqual(w1["I2"].value, "—")
 
-    def test_aba_2a1_traz_o_concurso_anterior(self):
+    def test_aba_2a1_repete_o_retrato_do_proprio_concurso(self):
         anterior = _linha()
         anterior["concurso"] = 9
         anterior["numeros"] = [8, 9, 10]
@@ -96,11 +97,13 @@ class ExportEstatisticasTest(unittest.TestCase):
         w1 = load_workbook(BytesIO(blob))["2a1."]
         self.assertEqual(w1["A2"].value, 10)
         self.assertEqual(w1["F2"].value, "08")
-        self.assertEqual(w1["G2"].value, "08-09-10")
-        self.assertEqual(w1["H2"].value, "08,18")
-        self.assertEqual(w1["I2"].value, "↘ 08-09")
+        self.assertEqual(w1["G2"].value, "01-02-03-04-05-06-07")
+        self.assertEqual(w1["H2"].value, "—")
+        self.assertEqual(w1["I2"].value, "—")
         self.assertEqual(w1["A3"].value, 9)
-        self.assertEqual(w1["G3"].value, "—")
+        self.assertEqual(w1["G3"].value, "08-09-10")
+        self.assertEqual(w1["H3"].value, "08,18")
+        self.assertEqual(w1["I3"].value, "↘ | 08-09")
 
     def test_diagonais_do_concurso_1332(self):
         from analise_escolha_visual.enriquecimento.motor import linhas_basicas

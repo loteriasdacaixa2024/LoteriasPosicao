@@ -76,7 +76,12 @@ def montar_linha_2a1(
     dmax: int = 31,
     cols: int = 10,
 ) -> Dict[str, Any]:
-    """Uma linha da tabela 2A1, sempre em relação ao concurso imediatamente anterior."""
+    """Uma linha da tabela 2A1.
+
+    Pares e ímpares são as dezenas que não saíram neste concurso.
+    Repetidos cruzam este concurso com o anterior.
+    Sequências, finais e diagonais são as deste próprio concurso.
+    """
     agora = _ints(atual)
     ant = _ints(anterior)
     ant_set = set(ant)
@@ -92,14 +97,10 @@ def montar_linha_2a1(
         if n % 2 != 0 and n not in agora_set
     ]
     repetidos = sorted(n for n in agora if n in ant_set)
-    seqs: List[List[int]] = []
-    finais: List[List[int]] = []
-    diags: List[Dict[str, Any]] = []
-    if ant:
-        det = _detalhe(ant, dmin=dmin, dmax=dmax, cols=cols)
-        seqs = _grupos(det, "sequencias")
-        finais = _grupos(det, "finais")
-        diags = _diagonais(det)
+    det = _detalhe(agora, dmin=dmin, dmax=dmax, cols=cols) if agora else {}
+    seqs = _grupos(det, "sequencias") if det else []
+    finais = _grupos(det, "finais") if det else []
+    diags = _diagonais(det) if det else []
     return {
         "pares": pares,
         "impares": impares,

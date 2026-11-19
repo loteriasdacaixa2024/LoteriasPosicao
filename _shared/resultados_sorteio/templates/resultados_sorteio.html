@@ -674,7 +674,7 @@
     function linhaAposta(nums, mesAbrev) {
         const dezenas = (nums || []).map(pad).join(' ');
         const corpo = mesAbrev ? `${dezenas} ${mesAbrev}` : dezenas;
-        return `(${corpo})`;
+        return corpo;
     }
     function baixarSelecionados() {
         if (!pacote || !pacote.linhas) {

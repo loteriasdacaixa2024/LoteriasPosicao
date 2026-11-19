@@ -51,12 +51,12 @@ class TestLinha2A1(unittest.TestCase):
         linha = montar_linha_2a1([6, 8, 10, 12, 14, 18, 20], [4, 6, 9, 16, 27, 28, 5])
         self.assertEqual(linha["repetidos"], [6])
 
-    def test_sequencia_final_e_diagonal_vem_do_anterior(self):
+    def test_sequencia_final_e_diagonal_sao_do_proprio_concurso(self):
         anterior = [4, 5, 6, 9, 16, 27, 28]
         linha = montar_linha_2a1([1, 2, 3, 8, 10, 12, 14], anterior)
-        self.assertIn([4, 5, 6], linha["sequencias"])
-        self.assertIn([27, 28], linha["sequencias"])
-        self.assertIn([6, 16], linha["finais"])
+        self.assertIn([1, 2, 3], linha["sequencias"])
+        self.assertNotIn([4, 5, 6], linha["sequencias"])
+        self.assertIn([2, 12], linha["finais"])
 
     def test_gerador_bloqueia_repetido_e_sequencia_exata(self):
         restr = montar_restricoes([4, 5, 6, 9, 16, 27, 28], [6, 8, 10, 12, 14, 18, 20])

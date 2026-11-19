@@ -2,7 +2,12 @@
 {% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
 {% block content %}
 <style>
-    #rg-root { max-width: 1180px; }
+    .page-content:has(#rg-root) {
+        max-width: none;
+        padding-left: clamp(1rem, 2vw, 2.25rem);
+        padding-right: clamp(1rem, 2vw, 2.25rem);
+    }
+    #rg-root { max-width: none; width: 100%; }
     #rg-root .rg-kpi {
         background: var(--surface, #fff);
         border: 1px solid rgba(192,139,0,.22);
@@ -222,7 +227,7 @@
     {% endif %}
 
     <h2 class="mb-2">Checklist operacional</h2>
-    <p class="small text-muted mb-2">Costumes da modalidade no histórico inteiro.</p>
+    <p class="small text-muted mb-2">Uma linha por análise do resumo. O texto é a conclusão dessa análise.</p>
     <div class="table-responsive">
         <table class="table table-sm rg-table align-middle">
             <thead>
@@ -243,7 +248,8 @@
     </div>
 
     <div class="rg-section">
-        <h2>14 regras para montar a aposta</h2>
+        <h2>{{ data.regras|length }} regras para montar a aposta</h2>
+        <p class="small text-muted mb-2">Cada regra sai de uma análise. Análise sem conclusão operacional não entra nesta lista.</p>
         <ol class="mb-0 ps-3">
             {% for r in data.regras %}
             <li class="mb-2">
@@ -252,10 +258,11 @@
                     {% elif r.tipo == 'nao_confirmado' %}bg-danger
                     {% elif r.tipo == 'atencao' or r.tipo == 'tendencia' %}bg-warning text-dark
                     {% else %}bg-secondary{% endif %}">{{ r.tipo.replace('_', ' ') }}</span>
-                {{ r.texto }}
+                {% if r.criterio %}<strong>{{ r.criterio }}.</strong> {% endif %}{{ r.texto }}
             </li>
             {% endfor %}
         </ol>
+        <p class="rg-hint mt-3 mb-0">Frequência histórica é filtro de construção, não previsão do próximo resultado.</p>
     </div>
 
     <div class="rg-section">

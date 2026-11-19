@@ -92,6 +92,115 @@
     text-transform: none;
     opacity: .92;
   }
+  #ai-root #tab-padroes-ii .ai-pad-ii-tabela {
+    overflow: visible;
+  }
+  #ai-root #aiTabelaPadroesII {
+    width: 100%;
+    margin-bottom: 0;
+  }
+  #ai-root #aiTabelaPadroesII thead th.col-cada {
+    background: #e8a06a;
+    color: #3d2208;
+    white-space: normal;
+    line-height: 1.15;
+    font-size: .68rem;
+    max-width: 6.6rem;
+  }
+  #ai-root #aiTabelaPadroesII thead th.col-cada .ai-th-sub {
+    display: block;
+    font-size: .58rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  #ai-root #aiTabelaPadroesII td.td-cada {
+    background: #fff4e8;
+    color: #9a3412;
+    font-weight: 700;
+    font-size: .72rem;
+    white-space: nowrap;
+  }
+  #ai-root .ai-cruz-linha {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: nowrap;
+    gap: .28rem;
+    white-space: nowrap;
+    font-size: .74rem;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+  #ai-root .ai-cruz-linha code {
+    font-size: .74rem;
+    font-weight: 800;
+    color: #0d6efd;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  #ai-root .ai-cruz-num {
+    color: #3d2208;
+    font-weight: 800;
+  }
+  #ai-root .ai-cruz-sep {
+    color: #b7a56a;
+    font-weight: 700;
+  }
+  #ai-root .ai-cruz-cada {
+    margin: 0;
+    font-size: .74rem;
+    font-weight: 800;
+    color: #c45c12;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  #ai-root .ai-cruz-diag-resumo {
+    margin: .12rem 0 .2rem;
+    font-size: .62rem;
+    line-height: 1.15;
+    color: #6c757d;
+    white-space: nowrap;
+  }
+  #ai-root .ai-pad-sugestao {
+    border: 1px solid #e8a06a;
+    border-left: 4px solid #e07a2f;
+    background: #fff6ee;
+    color: #6b3a12;
+    border-radius: 8px;
+    padding: .4rem .7rem;
+    font-size: .8rem;
+  }
+  #ai-root .ai-sug-tag {
+    display: inline-block;
+    margin-left: .3rem;
+    padding: 0 .35rem;
+    border-radius: 999px;
+    background: #e8a06a;
+    color: #3d2208;
+    font-size: .62rem;
+    font-weight: 800;
+    vertical-align: middle;
+  }
+  #ai-root #aiTabelaPadroesII tr.tr-sugerido > td:first-child {
+    box-shadow: inset 3px 0 0 #e07a2f;
+  }
+  #ai-root button.ai-cruz-diag-card.is-sugerido {
+    background: #fff1e4;
+    border: 2px solid #e07a2f;
+    box-shadow: inset 4px 0 0 #e07a2f;
+  }
+  #ai-root .ai-card-reforcar {
+    display: inline-block;
+    margin: 0 0 .35rem;
+    padding: .12rem .5rem;
+    border-radius: 999px;
+    background: #e07a2f;
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .01em;
+    text-transform: none;
+  }
   #ai-root .ai-rec-bar-track { background: rgba(192,139,0,.15); border-radius: 4px; height: .55rem; min-width: 5rem; }
   #ai-root .ai-rec-bar { background: var(--primary, #c08b00); height: 100%; border-radius: 4px; }
   #ai-root #aiRecDetalhe {
@@ -597,11 +706,11 @@
     text-underline-offset: 2px;
   }
   #ai-root .ai-cruz-jogos {
-    font-size: .66rem;
-    font-weight: 650;
-    color: #8a7a3a;
-    line-height: 1.2;
-    margin: .08rem 0 .22rem;
+    margin: 0;
+    font-size: .74rem;
+    font-weight: 800;
+    color: #6b5710;
+    line-height: 1.15;
   }
   #ai-root #aiTabelaPadroesII tr.tr-cruz-foco > td {
     background: rgba(25,135,84,.16) !important;
@@ -1181,10 +1290,18 @@
     gap: .35rem .5rem;
     margin-top: .45rem;
   }
-  #ai-root .ai-aposta-pager .ai-page-input {
+  #ai-root .ai-aposta-pager .ai-page-input,
+  #ai-root #aiJogosPadPageNum {
     width: 4.2rem;
     font-size: .78rem;
     text-align: center;
+  }
+  #ai-root .ai-page-ate {
+    font-size: .68rem;
+    font-weight: 500;
+    color: #8a8178;
+    white-space: nowrap;
+    line-height: 1;
   }
   #ai-root #aiJogosPadTotal.badge-dentro-aposta {
     background: #1b5e20 !important;
@@ -1687,7 +1804,8 @@
      data-modality-key="{{ modality_key }}"
      data-modality-nome="{{ modality_nome }}"
      data-dezena-min="{{ dezena_min }}"
-     data-dezena-max="{{ dezena_max }}">
+     data-dezena-max="{{ dezena_max }}"
+     data-volante-cols="{{ volante_cols|default(5 if modality_key == 'lotofacil' else 10) }}">
 
   <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
@@ -1937,7 +2055,8 @@
         </p>
         <div class="row g-2" id="aiPadIICruzCards"></div>
       </div>
-      <div class="table-responsive">
+      <div id="aiPadIISugestao" class="ai-pad-sugestao mb-2" hidden></div>
+      <div class="ai-pad-ii-tabela">
         <table class="table table-sm table-bordered ai-table" id="aiTabelaPadroesII">
           <thead>
             <tr>
@@ -1949,6 +2068,7 @@
               <th class="ai-sort col-dist" data-sort="descricao" data-table="p2">Distribuição <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-jogos" data-sort="jogos_possiveis" data-table="p2">Jogos <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-freq" data-sort="frequencia" data-table="p2">Freq. <span class="ai-sort-ind">⇅</span></th>
+              <th class="ai-sort col-cada" data-sort="cada_concursos" data-table="p2" title="Média histórica do espaço entre uma saída deste padrão e a próxima. É o que já aconteceu, não uma previsão do próximo concurso.">Frequência <span class="ai-th-sub">a cada X concursos</span><span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-condiag" data-sort="n_com_diagonal" data-table="p2" title="Quantos concursos deste padrão saíram com pelo menos uma diagonal no volante. Ex.: 40 de 55. Não diz quais diagonais — isso fica na coluna Diag.">Con/Diag <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-dif" data-sort="dif_diagonal" data-table="p2" title="Freq. menos Con/Diag. É quantas vezes o padrão saiu sem diagonal. Ex.: Freq. 55 e Con/Diag 40 → Dif 15.">Dif <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-diag" data-sort="diag_top" data-table="p2" title="Até 3 diagonais que mais saíram junto com este padrão. ↘ desce para a direita; ↗ desce para a esquerda. Os números são as dezenas (ex.: 14-25). O | separa uma diagonal da outra. O vazio à esquerda é lugar reservado para caber 3. Con/Diag, ao lado, conta quantas vezes o padrão saiu com alguma diagonal.">Diag <span class="ai-sort-ind">⇅</span></th>
@@ -2200,16 +2320,13 @@
         <select id="aiJogosPadPageSize" class="form-select form-select-sm" style="width:auto">
           <option value="50">50 / pág.</option>
           <option value="100" selected>100 / pág.</option>
-          <option value="250">250 / pág.</option>
-          <option value="500">500 / pág.</option>
-          <option value="1000">1000 / pág.</option>
-          <option value="0">Todos</option>
         </select>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadFirst" disabled title="Primeira página">«</button>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadPrev" disabled>‹</button>
         <label class="small text-muted mb-0 d-inline-flex align-items-center gap-1">
           Pág.
           <input type="number" min="1" class="form-control form-control-sm ai-page-input" id="aiJogosPadPageNum" disabled>
+          <span class="ai-page-ate" id="aiJogosPadPageAte" hidden></span>
         </label>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadNext" disabled>›</button>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="aiJogosPadLast" disabled title="Última página">»</button>
@@ -2670,6 +2787,9 @@
 
   let ULTIMO_RESULTADO = null;
   let MAPA_CONCURSOS = null;
+  let MAPA_VER = 0;
+  let JOGOS_ORD = null;
+  let JOGOS_RENDER_TOKEN = 0;
   let FOCO_CONCURSO = null;
   let JOGOS_PAD = {
     padrao: '', total: 0, offset: 0, pageSize: 100,
@@ -2716,22 +2836,36 @@
     const n = Number(cat && cat.jogos_possiveis);
     return Number.isFinite(n) && n > 0 ? n : 0;
   }
-  function htmlApostasCard(p) {
-    const n = jogosDoPadrao(p);
-    if (!n) return '';
-    const txt = `${fmtVol(n)} apostas`;
-    return `<div class="ai-cruz-jogos" title="${esc(txt)} possíveis neste padrão">${esc(txt)}</div>`;
+  function cadaDoCard(p) {
+    if (p && p.cada_concursos != null && p.cada_concursos !== '') return p.cada_concursos;
+    const pad = normalizarPadrao(p && p.padrao);
+    const cat = (CAT_PAD_II || []).find((x) => normalizarPadrao(x.padrao) === pad);
+    return cat && cat.cada_concursos != null && cat.cada_concursos !== '' ? cat.cada_concursos : null;
   }
-  /** pageSize 0 = Todos (exibe todos os registros do filtro atual). */
-  function tamanhoPaginaJogos(totalHint) {
+  function htmlMioloCardCruz(p, indice) {
+    const num = Number(indice) + 1;
+    const cada = cadaDoCard(p);
+    const jogos = jogosDoPadrao(p);
+    const jogosTxt = jogos ? fmtVol(jogos) : '—';
+    const nDiag = fmtVol((p && p.n_com_diagonal) || 0);
+    const pctBruto = p && p.pct_com_diagonal;
+    const pct = pctBruto != null && pctBruto !== '' ? `${esc(pctBruto)}%` : '';
+    const diagTxt = pct ? `${nDiag} - ${pct} com diagonais` : `${nDiag} com diagonais`;
+    return `<div class="ai-cruz-linha">
+      <span class="ai-cruz-num" title="${num}º card desta fila">${num}º</span>
+      <code>${esc(p.padrao)}</code>
+      <span class="ai-cruz-sep">|</span>
+      <span class="ai-cruz-cada" title="Média histórica entre saídas seguidas. Não prevê o próximo concurso.">${cada == null ? '—' : esc(cada)}</span>
+      <span class="ai-cruz-sep">|</span>
+      <span class="ai-cruz-jogos" title="${esc(jogosTxt)} apostas possíveis neste padrão">${esc(jogosTxt)}</span>
+    </div>
+    <div class="ai-cruz-diag-resumo">${diagTxt}</div>`;
+  }
+  /** Acima de 100 linhas a tabela trava o navegador e a paginação deixa de responder. */
+  function tamanhoPaginaJogos() {
     const n = Number(JOGOS_PAD.pageSize);
-    if (!n || n <= 0) {
-      const tot = totalHint != null
-        ? Number(totalHint)
-        : (Number(JOGOS_PAD.total) || (JOGOS_PAD.all || []).length || 0);
-      return Math.max(1, tot || 1);
-    }
-    return n;
+    if (!n || n <= 0) return 100;
+    return Math.min(100, n);
   }
   function mesBadge(l) {
     const nome = (l.mes_nome || l.mes_abrev || '').replace(/\s+/g, '');
@@ -2923,7 +3057,7 @@
       CACHE = linhas;
       PAGE.res = 1;
       PAGE.pad = 1;
-      MAPA_CONCURSOS = null;
+      invalidarMapaConcursos();
     }
     const linhasRes = ordenarLinhas(CACHE, SORT.res.key, SORT.res.dir);
     const linhasPad = ordenarLinhas(CACHE, SORT.pad.key, SORT.pad.dir);
@@ -3173,7 +3307,7 @@
     });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'}));
-    a.download = 'analises_inteligentes_diadesorte.csv';
+    a.download = `analises_inteligentes_${String(MODALITY_KEY || 'modalidade').replace(/[^\w-]+/g, '_')}.csv`;
     a.click();
   }
 
@@ -4617,11 +4751,66 @@
     if (!MAPA_CONCURSOS) MAPA_CONCURSOS = mapaConcursosPorDezenas();
     return MAPA_CONCURSOS;
   }
+  function invalidarMapaConcursos() {
+    MAPA_CONCURSOS = null;
+    MAPA_VER += 1;
+    JOGOS_ORD = null;
+    JOGOS_PAD._cont = null;
+    JOGOS_PAD._saidaVer = -1;
+  }
+  function marcarSaidasJogos() {
+    const all = JOGOS_PAD.all || [];
+    if (JOGOS_PAD._saidaVer === MAPA_VER && JOGOS_PAD._saidaN === all.length) return;
+    const map = getMapaConcursos();
+    for (let i = 0; i < all.length; i += 1) {
+      const j = all[i];
+      const k = chaveDezenas((j.dezenas && j.dezenas.length) ? j.dezenas : j.dezenas_fmt);
+      j._conc = (k && map.get(k)) || null;
+    }
+    JOGOS_PAD._saidaVer = MAPA_VER;
+    JOGOS_PAD._saidaN = all.length;
+    JOGOS_PAD._cont = null;
+  }
   function concursoDoJogo(j) {
+    if (!j) return null;
+    if (JOGOS_PAD._saidaVer === MAPA_VER && Object.prototype.hasOwnProperty.call(j, '_conc')) {
+      return j._conc || null;
+    }
     const k = chaveDezenas((j.dezenas && j.dezenas.length) ? j.dezenas : j.dezenas_fmt);
     if (!k) return null;
     const conc = getMapaConcursos().get(k);
     return conc || null;
+  }
+  function contagensJogosPad() {
+    const all = JOGOS_PAD.all || [];
+    const gen = `${MAPA_VER}|${JOGOS_PAD.padrao}|${all.length}`;
+    if (JOGOS_PAD._cont && JOGOS_PAD._cont.gen === gen) return JOGOS_PAD._cont;
+    marcarSaidasJogos();
+    let dentro = 0;
+    let proxima = 0;
+    let fora = 0;
+    let ja = 0;
+    let novos = 0;
+    for (let i = 0; i < all.length; i += 1) {
+      const j = all[i];
+      const st = j.status_media || 'fora';
+      if (st === 'dentro') {
+        dentro += 1;
+        if (j._conc) ja += 1;
+        else novos += 1;
+      } else if (st === 'proxima') proxima += 1;
+      else fora += 1;
+    }
+    const rs = JOGOS_PAD.resumo_status || {};
+    JOGOS_PAD._cont = {
+      gen,
+      dentro: rs.dentro != null ? (Number(rs.dentro) || 0) : dentro,
+      proxima: rs.proxima != null ? (Number(rs.proxima) || 0) : proxima,
+      fora: rs.fora != null ? (Number(rs.fora) || 0) : fora,
+      ja,
+      novos,
+    };
+    return JOGOS_PAD._cont;
   }
   function jogoJaSaiu(j) {
     return !!concursoDoJogo(j);
@@ -4630,10 +4819,10 @@
     return (JOGOS_PAD.all || []).filter(j => (j.status_media || 'fora') === 'dentro');
   }
   function contarDentroJaSairam() {
-    return jogosDentroMedia().filter(jogoJaSaiu).length;
+    return contagensJogosPad().ja;
   }
   function contarDentroNovos() {
-    return jogosDentroMedia().filter(j => !jogoJaSaiu(j)).length;
+    return contagensJogosPad().novos;
   }
   function irParaConcurso(conc) {
     const n = +conc;
@@ -4807,7 +4996,15 @@
 
   /* Geometria de diagonais no volante (espelho de diagonais_volante.py) — página atual. */
   const _AI_DIAG = (() => {
-    const rows = [[1, 10], [11, 20], [21, 30], [31, 31]];
+    const dmin = parseInt(root.dataset.dezenaMin || '1', 10) || 1;
+    const dmax = parseInt(root.dataset.dezenaMax || '31', 10) || 31;
+    const step = Math.max(1, parseInt(root.dataset.volanteCols || '10', 10) || 10);
+    const rows = [];
+    if (dmin === 1 && dmax === 31 && step === 10) {
+      rows.push([1, 10], [11, 20], [21, 30], [31, 31]);
+    } else {
+      for (let n = dmin; n <= dmax; n += step) rows.push([n, Math.min(dmax, n + step - 1)]);
+    }
     const pmap = {};
     rows.forEach((ab, r) => {
       for (let n = ab[0]; n <= ab[1]; n++) pmap[n] = [r, n - ab[0]];
@@ -4941,22 +5138,21 @@
     if (wrap) {
       if (!lista.length) {
         const msg = !CRUZ_DIAG
-          ? 'Reinicie o servidor do Dia de Sorte (porta 5153) para carregar o cruzamento com diagonais.'
+          ? `Reinicie o servidor de ${esc(MODALITY_NOME)} para carregar o cruzamento com diagonais.`
           : (PAD_II_CRUZ_MODO === 'sel' ? 'Selecione padrões na tabela para cruzar com as diagonais.' : 'Nenhum padrão neste recorte.');
         wrap.innerHTML = `<div class="col-12 small text-muted">${msg}</div>`;
       } else {
-        wrap.innerHTML = lista.slice(0, 5).map((p) => {
+        wrap.innerHTML = lista.slice(0, 5).map((p, i) => {
           const isAtivo = normalizarPadrao(p.padrao) === normalizarPadrao(PAD_II_CRUZ_FOCO);
+          const reforca = PAD_II_SUGESTAO && normalizarPadrao(p.padrao) === PAD_II_SUGESTAO;
           return `
           <div class="col-md">
-            <button type="button" class="ai-cruz-diag-card${p.eh_padrao_ultimo_concurso ? ' is-ultimo' : ''}${isAtivo ? ' is-ativo' : ''}"
+            <button type="button" class="ai-cruz-diag-card${p.eh_padrao_ultimo_concurso ? ' is-ultimo' : ''}${isAtivo ? ' is-ativo' : ''}${reforca ? ' is-sugerido' : ''}"
                     data-act="focar-padrao-cruz" data-padrao="${esc(p.padrao)}"
                     aria-pressed="${isAtivo ? 'true' : 'false'}"
-                    title="Mostrar só o padrão ${esc(p.padrao)} na tabela">
-              <div class="lbl">${esc(p.descricao || '')} · ${fmtVol(p.frequencia)}×${isAtivo ? ' · selecionado' : ''}</div>
-              <div class="val"><code>${esc(p.padrao)}</code></div>
-              ${htmlApostasCard(p)}
-              <div class="small text-muted mb-1">${fmtVol(p.n_com_diagonal || 0)} concursos com diagonal${p.pct_com_diagonal ? ` (${esc(p.pct_com_diagonal)}%)` : ''}</div>
+                    title="${reforca ? 'Reforçar as apostas neste padrão' : 'Mostrar só o padrão ' + esc(p.padrao) + ' na tabela'}">
+              ${reforca ? '<div class="ai-card-reforcar">Reforçar</div>' : ''}
+              ${htmlMioloCardCruz(p, i)}
               <div>${htmlDiagChips(p.top_diagonais)}</div>
             </button>
           </div>`;
@@ -5000,6 +5196,135 @@
     });
   }
 
+  let PAD_II_SUGESTAO = '';
+  let PAD_II_SUGESTAO_FONTE = '';
+  let PAD_II_CICLO = null;
+
+  function textoCada(n) {
+    if (n == null || n === '') return '—';
+    return String(n);
+  }
+
+  function tituloCada(p) {
+    const n = p && p.cada_concursos;
+    if (n == null || n === '') {
+      const freq = Number(p && p.frequencia) || 0;
+      if (freq <= 0) return 'Este padrão ainda não saiu no histórico.';
+      return 'Saiu uma vez: ainda não há espaço entre duas saídas.';
+    }
+    return `A cada ${n} concursos. Média histórica entre uma saída e a próxima. Não prevê o próximo concurso.`;
+  }
+
+  function cadaConcursosDe(intervalos) {
+    const xs = (intervalos || []).map(Number).filter((n) => Number.isFinite(n) && n > 0);
+    if (!xs.length) return null;
+    const media = xs.reduce((s, n) => s + n, 0) / xs.length;
+    return Math.round(media);
+  }
+
+  function aplicarCadaConcursos() {
+    const mapa = new Map();
+    (EVO.padroes || []).forEach((p) => {
+      mapa.set(normalizarPadrao(p.padrao), cadaConcursosDe(p.intervalos));
+    });
+    const gravar = (p) => {
+      if (!p) return;
+      const cada = mapa.get(normalizarPadrao(p.padrao));
+      p.cada_concursos = cada == null ? null : cada;
+    };
+    (CAT_PAD_II || []).forEach(gravar);
+    (window.__AI_TOP_PAD || []).forEach(gravar);
+    if (CRUZ_DIAG) {
+      (CRUZ_DIAG.mais_saem || []).forEach(gravar);
+      (CRUZ_DIAG.ja_sairam_com_diagonal || []).forEach(gravar);
+    }
+  }
+
+  function contagemDoPadrao(padrao) {
+    const slots = {};
+    String(padrao || '').split(/\s+/).filter(Boolean).forEach((dig) => {
+      slots[dig] = (slots[dig] || 0) + 1;
+    });
+    return slots;
+  }
+
+  function padraoCabeNoCiclo(padrao, pendentes) {
+    const slots = contagemDoPadrao(padrao);
+    const precisa = {};
+    (pendentes || []).forEach((n) => {
+      const v = Number(n);
+      if (!Number.isFinite(v)) return;
+      const dig = String(Math.floor(v / 10));
+      precisa[dig] = (precisa[dig] || 0) + 1;
+    });
+    return Object.keys(precisa).every((dig) => (slots[dig] || 0) >= precisa[dig]);
+  }
+
+  function cincoQueMaisSaem() {
+    atribuirNumeroEstavelPadII(CAT_PAD_II);
+    const por = new Map((CAT_PAD_II || []).map((p) => [normalizarPadrao(p.padrao), p]));
+    return ((CRUZ_DIAG && CRUZ_DIAG.mais_saem) || []).slice(0, 5).map((card) => por.get(normalizarPadrao(card.padrao)) || card);
+  }
+
+  async function carregarCicloSugestao() {
+    if (PAD_II_CICLO && PAD_II_CICLO.ok) return PAD_II_CICLO;
+    const base = String(API || '').replace(/\/api\/inteligentes\/?$/, '');
+    try {
+      const r = await fetch(`${base}/api/ciclo-cobertura/ciclo-atual`);
+      const d = await r.json();
+      const dados = d.dados || {};
+      PAD_II_CICLO = {
+        ok: !!d.sucesso,
+        pendentes: dados.dezenas_pendentes || [],
+        numero: dados.numero_ciclo,
+        concurso: dados.concurso_atual,
+      };
+    } catch (_) {
+      PAD_II_CICLO = { ok: false, pendentes: [], numero: null, concurso: null };
+    }
+    return PAD_II_CICLO;
+  }
+
+  function melhorQueCabe(lista) {
+    let melhor = null;
+    (lista || []).forEach((p) => {
+      const cada = Number(p.cada_concursos);
+      const atraso = Number(p.atraso);
+      const passou = Number.isFinite(cada) && Number.isFinite(atraso) && atraso >= cada;
+      const folga = Number.isFinite(cada) && Number.isFinite(atraso) ? atraso - cada : -9999;
+      const freq = Number(p.frequencia) || 0;
+      const n = Number(p.n_padrao) || 999;
+      const cand = { p, passou, folga, freq, n };
+      if (!melhor) {
+        melhor = cand;
+        return;
+      }
+      if (passou !== melhor.passou) {
+        if (passou) melhor = cand;
+        return;
+      }
+      if (folga > melhor.folga || (folga === melhor.folga && freq > melhor.freq) || (folga === melhor.folga && freq === melhor.freq && n < melhor.n)) {
+        melhor = cand;
+      }
+    });
+    return melhor;
+  }
+
+  function escolherSugestaoAposUltimo() {
+    atribuirNumeroEstavelPadII(CAT_PAD_II);
+    const pendentes = (PAD_II_CICLO && PAD_II_CICLO.pendentes) || [];
+    const cinco = cincoQueMaisSaem().filter((p) => padraoCabeNoCiclo(p.padrao, pendentes));
+    let melhor = melhorQueCabe(cinco);
+    let fonte = 'cinco';
+    if (!melhor) {
+      const resto = (CAT_PAD_II || []).filter((p) => padraoCabeNoCiclo(p.padrao, pendentes));
+      melhor = melhorQueCabe(resto);
+      fonte = 'catalogo';
+    }
+    PAD_II_SUGESTAO = melhor ? normalizarPadrao(melhor.p.padrao) : '';
+    PAD_II_SUGESTAO_FONTE = melhor ? fonte : '';
+  }
+
   function renderPadroesII() {
     const tbody = document.querySelector('#aiTabelaPadroesII tbody');
     const info = document.getElementById('aiPadIIInfo');
@@ -5033,6 +5358,7 @@
         p.eh_padrao_ultimo_concurso ? 'tr-padrao-ultimo' : '',
         topSet.has(p.padrao) ? 'tr-top-freq' : '',
         focoCruz && normalizarPadrao(p.padrao) === focoCruz ? 'tr-cruz-foco' : '',
+        PAD_II_SUGESTAO && normalizarPadrao(p.padrao) === PAD_II_SUGESTAO ? 'tr-sugerido' : '',
       ].filter(Boolean).join(' ');
       const atraso = p.atraso == null ? '—' : String(p.atraso);
       const jogosLink = `<a href="#" class="fw-bold text-decoration-underline" data-act="ver-jogos-padrao" data-padrao="${esc(p.padrao)}" title="Ver as ${fmtVol(p.jogos_possiveis)} apostas possíveis (só dentro da média)">${fmtVol(p.jogos_possiveis)}</a>`;
@@ -5053,10 +5379,11 @@
       return `<tr class="${cls}" data-padrao="${esc(p.padrao)}"${p.eh_padrao_ultimo_concurso ? ' title="Padrão do último resultado (vencedor)"' : ''}>
         <td><input type="checkbox" class="form-check-input ai-pad-ii-chk" data-padrao="${esc(p.padrao)}" ${checked}></td>
         <td class="text-center td-npad">${p.n_padrao != null ? esc(p.n_padrao) : '—'}</td>
-        <td class="td-padrao"><code>${esc(p.padrao)}</code></td>
+        <td class="td-padrao"><code>${esc(p.padrao)}</code>${PAD_II_SUGESTAO && normalizarPadrao(p.padrao) === PAD_II_SUGESTAO ? ' <span class="ai-sug-tag">reforçar</span>' : ''}</td>
         <td class="td-dist"><span class="ai-col-alinha">${esc(p.descricao)}</span></td>
         <td class="td-jogos"><span class="ai-col-alinha">${jogosLink}</span></td>
         <td class="td-freq"><span class="ai-col-alinha">${esc(p.frequencia)}</span></td>
+        <td class="td-cada" title="${esc(tituloCada(p))}"><span class="ai-col-alinha">${textoCada(p.cada_concursos)}</span></td>
         <td class="td-condiag">${condiagCell}</td>
         <td class="td-dif">${difCell}</td>
         <td class="td-diag">${diagCell}</td>
@@ -5065,9 +5392,31 @@
         <td class="td-ja-saiu">${p.ja_sairam_dentro == null ? '—' : `<span class="ai-col-alinha">${fmtVol(p.ja_sairam_dentro)}</span>`}</td>
         <td>${statusBadge(p.status)}</td>
       </tr>`;
-    }).join('') || '<tr><td colspan="13" class="text-muted">Nenhum padrão com os filtros.</td></tr>';
+    }).join('') || '<tr><td colspan="14" class="text-muted">Nenhum padrão com os filtros.</td></tr>';
     if (info) info.textContent = `Exibindo ${rows.length} de ${CAT_PAD_II.length} padrões`;
+    pintarSugestaoPadII();
     atualizarSelPadII();
+  }
+
+  function pintarSugestaoPadII() {
+    const el = document.getElementById('aiPadIISugestao');
+    if (!el) return;
+    const p = (CAT_PAD_II || []).find((x) => normalizarPadrao(x.padrao) === PAD_II_SUGESTAO);
+    const ciclo = PAD_II_CICLO || {};
+    const faltam = (ciclo.pendentes || []).map((n) => String(n).padStart(2, '0'));
+    if (!p) {
+      el.hidden = !ciclo.ok;
+      el.innerHTML = ciclo.ok
+        ? `Ciclo ${esc(ciclo.numero == null ? '—' : ciclo.numero)}: nenhum padrão cabe nas dezenas que ainda faltam${faltam.length ? ` (${esc(faltam.join(' '))})` : ''}.`
+        : '';
+      return;
+    }
+    el.hidden = false;
+    const faltaTxt = faltam.length ? `ainda falta ${esc(faltam.join(' '))}` : 'não há dezena pendente';
+    const onde = PAD_II_SUGESTAO_FONTE === 'catalogo'
+      ? 'Nenhum dos cinco cabe nas que faltam. Nos 85, reforçar o padrão'
+      : 'Entre os cinco que mais saem, reforçar o padrão';
+    el.innerHTML = `Ciclo <strong>${esc(ciclo.numero == null ? '—' : ciclo.numero)}</strong> ${faltaTxt}. ${onde} <strong>${esc(p.n_padrao)}</strong> — <code>${esc(p.padrao)}</code> <span class="ai-sug-tag">reforçar</span>. Atraso ${esc(p.atraso)} numa média de ${esc(p.cada_concursos)}.`;
   }
 
   function pctResumoPad(r, univ) {
@@ -5452,7 +5801,12 @@
     const info = document.getElementById('aiEvoInfo');
     if (EVO.carregando) return;
     if (EVO.carregado && !force) {
+      aplicarCadaConcursos();
+      await carregarCicloSugestao();
+      escolherSugestaoAposUltimo();
       renderEvolucaoPadroes();
+      if (document.getElementById('aiTabelaPadroesII')) renderPadroesII();
+      if (document.getElementById('aiPadIICruzCards')) renderCruzamentoPadII();
       return;
     }
     EVO.carregando = true;
@@ -5467,7 +5821,12 @@
       EVO.meta = d;
       EVO.carregado = true;
       EVO.page = 1;
+      aplicarCadaConcursos();
+      await carregarCicloSugestao();
+      escolherSugestaoAposUltimo();
       renderEvolucaoPadroes();
+      if (document.getElementById('aiTabelaPadroesII')) renderPadroesII();
+      if (document.getElementById('aiPadIICruzCards')) renderCruzamentoPadII();
     } catch (e) {
       if (info) info.textContent = e.message || String(e);
       const tbody = document.querySelector('#aiTabelaEvoHist tbody');
@@ -5478,9 +5837,11 @@
   }
 
   function contarStatus(st) {
-    const rs = JOGOS_PAD.resumo_status || {};
-    if (rs && rs[st] != null) return Number(rs[st]) || 0;
-    return (JOGOS_PAD.all || []).filter(j => (j.status_media || 'fora') === st).length;
+    const c = contagensJogosPad();
+    if (st === 'dentro') return c.dentro;
+    if (st === 'proxima') return c.proxima;
+    if (st === 'fora') return c.fora;
+    return 0;
   }
   function atualizarNavJogosPad() {
     const total = Number(JOGOS_PAD.total) || 0;
@@ -5505,6 +5866,17 @@
       pageNum.disabled = !hasPad || total === 0;
       pageNum.max = pages;
       pageNum.value = total ? page : '';
+    }
+    const pageAte = document.getElementById('aiJogosPadPageAte');
+    if (pageAte) {
+      if (hasPad && total) {
+        pageAte.hidden = false;
+        pageAte.textContent = `/ ${fmtVol(pages)}`;
+        pageAte.title = `Até a página ${fmtVol(pages)}`;
+      } else {
+        pageAte.hidden = true;
+        pageAte.textContent = '';
+      }
     }
     const filtro = JOGOS_PAD.filtroMedia || 'dentro_novos';
     const info = document.getElementById('aiJogosPadInfo');
@@ -5635,9 +6007,12 @@
     const sk = SORT.jogos || { key: 'distancia', dir: 'asc' };
     const dir = sk.dir === 'asc' ? 1 : -1;
     const busca = JOGOS_PAD.buscaDezenas || [];
+    const ordemKey = `${MAPA_VER}|${JOGOS_PAD.padrao}|${JOGOS_PAD.filtroMedia}|${busca.join(',')}|${sk.key}|${sk.dir}|${(JOGOS_PAD.all || []).length}`;
+    if (JOGOS_ORD && JOGOS_ORD.key === ordemKey) return JOGOS_ORD.rows;
+    marcarSaidasJogos();
     const base = jogosFiltradosPorMedia();
     const filtrados = busca.length ? base.filter(j => jogoTemDezenasBusca(j, busca)) : base;
-    return [...filtrados].sort((a, b) => {
+    const rows = [...filtrados].sort((a, b) => {
       if (sk.key === 'concurso') {
         return dir * ((concursoDoJogo(a) || 0) - (concursoDoJogo(b) || 0));
       }
@@ -5672,6 +6047,8 @@
       }
       return dir * ((+ka || 0) - (+kb || 0));
     });
+    JOGOS_ORD = { key: ordemKey, rows };
+    return rows;
   }
 
   function aplicarPaginaJogos() {
@@ -5680,12 +6057,11 @@
     if (sizeEl) {
       const raw = sizeEl.value;
       const parsed = (raw === '' || raw == null) ? 100 : +raw;
-      JOGOS_PAD.pageSize = Number.isFinite(parsed) ? parsed : 100;
+      JOGOS_PAD.pageSize = Number.isFinite(parsed) && parsed > 0 ? Math.min(100, parsed) : 100;
     } else {
       JOGOS_PAD.pageSize = 100;
     }
     JOGOS_PAD.filtroMedia = filtroEl ? (filtroEl.value || 'dentro_novos') : (JOGOS_PAD.filtroMedia || 'dentro_novos');
-    MAPA_CONCURSOS = null; // reconstrói mapa com CACHE atual
     const ordered = linhasOrdenadasJogos();
     JOGOS_PAD.total = ordered.length;
     const size = tamanhoPaginaJogos(ordered.length);
@@ -5764,7 +6140,7 @@
         ? 'Carregue a aba 4 · Padrões II uma vez para popular o cruzamento, ou reinicie o servidor.'
         : 'Sem dados de cruzamento para este padrão.'}</div>`;
     } else {
-      wrap.innerHTML = lista.slice(0, 5).map((p) => {
+      wrap.innerHTML = lista.slice(0, 5).map((p, i) => {
         const isAtivo = normalizarPadrao(p.padrao) === padAtual;
         const isUlt = !!p.eh_padrao_ultimo_concurso;
         return `
@@ -5772,10 +6148,7 @@
             <div class="ai-cruz-diag-card${isUlt ? ' is-ultimo' : ''}${isAtivo ? ' is-ativo' : ''}"
                  role="button" tabindex="0" data-act="ver-jogos-padrao" data-padrao="${esc(p.padrao)}"
                  title="Abrir apostas deste padrão">
-              <div class="lbl">${esc(p.descricao || '')} · ${fmtVol(p.frequencia)}×${isAtivo ? ' · atual' : ''}</div>
-              <div class="val"><code>${esc(p.padrao)}</code></div>
-              ${htmlApostasCard(p)}
-              <div class="small text-muted mb-1">${fmtVol(p.n_com_diagonal || 0)} concursos com diagonal${p.pct_com_diagonal ? ` (${esc(p.pct_com_diagonal)}%)` : ''}</div>
+              ${htmlMioloCardCruz(p, i)}
               <div>${htmlDiagChips(p.top_diagonais)}</div>
             </div>
           </div>`;
@@ -5808,7 +6181,17 @@
       ? '<span class="text-muted">—</span>'
       : `<span class="ai-col-alinha" title="${esc(dicaDif(meta.dif_diagonal, meta.frequencia, meta.n_com_diagonal))}">${fmtVol(meta.dif_diagonal)}</span>`;
     const baseNum = Number(JOGOS_PAD.offset) || 0;
-    tbody.innerHTML = rows.map((j, i) => {
+    const token = ++JOGOS_RENDER_TOKEN;
+    atualizarNavJogosPad();
+    atualizarKpisMedia();
+    renderBarrasUltimo();
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="10" class="text-muted">${(JOGOS_PAD.buscaDezenas || []).length
+        ? `Nenhuma aposta com ${(JOGOS_PAD.buscaDezenas || []).map(fmtDez2).join(' ')} neste filtro.`
+        : 'Sem jogos nesta página.'}</td></tr>`;
+      return;
+    }
+    const htmlLinha = (j, i) => {
       const key = j.dezenas_fmt;
       const checked = JOGOS_PAD.sel.has(key) ? 'checked' : '';
       const isWin = ehJogoVencedor(j);
@@ -5849,12 +6232,11 @@
         <td>${statusPill(st, j.status_media_label)}</td>
         <td class="td-conc-jogo">${concHtml}</td>
       </tr>`;
-    }).join('') || `<tr><td colspan="10" class="text-muted">${(JOGOS_PAD.buscaDezenas || []).length
-      ? `Nenhuma aposta com ${(JOGOS_PAD.buscaDezenas || []).map(fmtDez2).join(' ')} neste filtro.`
-      : 'Sem jogos nesta página.'}</td></tr>`;
-    atualizarNavJogosPad();
-    atualizarKpisMedia();
-    renderBarrasUltimo();
+    };
+    if (token !== JOGOS_RENDER_TOKEN) return;
+    let html = '';
+    for (let i = 0; i < rows.length; i += 1) html += htmlLinha(rows[i], i);
+    tbody.innerHTML = html;
     scrollLinhaVencedora(tbody);
   }
 
@@ -5877,7 +6259,7 @@
     if (!ULTIMO_RESULTADO || !CRUZ_DIAG || !(CAT_PAD_II || []).length) {
       await carregarPadroesII();
     }
-    MAPA_CONCURSOS = null;
+    invalidarMapaConcursos();
     const same = JOGOS_PAD.padrao === p && (JOGOS_PAD.all || []).length;
     if (same && offset != null) {
       const aviso = document.getElementById('aiJogosPadAvisoVazio');
@@ -5915,7 +6297,7 @@
       if (hint) {
         const nDentro = (d.resumo_status && d.resumo_status.dentro) || 0;
         // Contagens de já saíram dependem do CACHE de resultados
-        MAPA_CONCURSOS = null;
+        invalidarMapaConcursos();
         const nJa = (d.jogos || []).filter(j => (j.status_media || 'fora') === 'dentro' && jogoJaSaiu(j)).length;
         const nNovos = Math.max(0, nDentro - nJa);
         hint.innerHTML = `Padrão <code>${esc(d.padrao)}</code> (${esc(d.descricao || '')})${mediaTxt}.
@@ -6528,6 +6910,16 @@
     });
   }
 
+  function agendarAplicarPaginaJogos() {
+    JOGOS_RENDER_TOKEN += 1;
+    if (JOGOS_PAD._agendar) return;
+    JOGOS_PAD._agendar = true;
+    setTimeout(() => {
+      JOGOS_PAD._agendar = false;
+      aplicarPaginaJogos();
+    }, 0);
+  }
+
   function irParaPaginaJogos(page) {
     const size = tamanhoPaginaJogos();
     const total = Number(JOGOS_PAD.total) || 0;
@@ -6536,7 +6928,7 @@
     if (p < 1) p = 1;
     if (p > pages) p = pages;
     JOGOS_PAD.offset = (p - 1) * size;
-    aplicarPaginaJogos();
+    agendarAplicarPaginaJogos();
   }
 
   async function copiarApostasPadrao() {
@@ -6972,12 +7364,12 @@
   document.getElementById('aiJogosPadPrev')?.addEventListener('click', () => {
     const size = tamanhoPaginaJogos();
     JOGOS_PAD.offset = Math.max(0, (JOGOS_PAD.offset || 0) - size);
-    aplicarPaginaJogos();
+    agendarAplicarPaginaJogos();
   });
   document.getElementById('aiJogosPadNext')?.addEventListener('click', () => {
     const size = tamanhoPaginaJogos();
     JOGOS_PAD.offset = (JOGOS_PAD.offset || 0) + size;
-    aplicarPaginaJogos();
+    agendarAplicarPaginaJogos();
   });
   document.getElementById('aiJogosPadFirst')?.addEventListener('click', () => irParaPaginaJogos(1));
   document.getElementById('aiJogosPadLast')?.addEventListener('click', () => {
@@ -6997,14 +7389,15 @@
   });
   document.getElementById('aiJogosPadPageSize')?.addEventListener('change', () => {
     JOGOS_PAD.offset = 0;
-    aplicarPaginaJogos();
+    agendarAplicarPaginaJogos();
   });
   document.getElementById('aiJogosPadExportTxt')?.addEventListener('click', () => exportJogosPadrao('txt'));
   document.getElementById('aiJogosPadExportCsv')?.addEventListener('click', () => exportJogosPadrao('csv'));
   document.getElementById('aiJogosPadExportXlsx')?.addEventListener('click', () => exportJogosPadrao('xlsx'));
   document.getElementById('aiJogosPadFiltroMedia')?.addEventListener('change', () => {
     JOGOS_PAD.offset = 0;
-    aplicarPaginaJogos();
+    JOGOS_ORD = null;
+    agendarAplicarPaginaJogos();
   });
   document.getElementById('aiJogosPadBuscaDez')?.addEventListener('input', () => syncBuscaDezenas());
   document.getElementById('aiJogosPadBuscaDez')?.addEventListener('keydown', (ev) => {

@@ -569,30 +569,6 @@ def _qtd_lista(qtd: int, nums: Sequence[int], pad: int) -> str:
     return f"{n} | {texto}"
 
 
-def _texto_diags_2a1(bloco: Optional[dict], pad: int) -> str:
-    """Mesmo texto da seção 2a1: símbolo e dezenas separados por espaço."""
-    detalhe = (bloco or {}).get("detalhe") or {}
-    partes: List[str] = []
-    for grupo in detalhe.get("grupos") or []:
-        if isinstance(grupo, dict):
-            bruto = grupo.get("nums") or []
-            sym = str(grupo.get("dir_sym") or "").strip()
-        else:
-            bruto = grupo
-            sym = ""
-        nums = []
-        for item in bruto:
-            try:
-                nums.append(_fmt(int(item), pad))
-            except (TypeError, ValueError):
-                continue
-        if not nums:
-            continue
-        texto = "-".join(nums)
-        partes.append(f"{sym} {texto}".strip() if sym else texto)
-    return " · ".join(partes) if partes else "—"
-
-
 def _ints(arr: Optional[Sequence[Any]]) -> List[int]:
     lista: List[int] = []
     for item in arr or []:
@@ -627,7 +603,7 @@ def valores_2a1(
 
     Pares e ímpares são as dezenas da faixa que não saíram neste concurso.
     Repetidos são as deste concurso que também estão no anterior.
-    Sequências, finais e diagonais vêm do concurso imediatamente anterior.
+    Sequências, finais e diagonais são as deste concurso, as mesmas da seção 2a.
     """
     previo = _anterior_por_concurso(linhas)
     try:
@@ -660,12 +636,9 @@ def valores_2a1(
             repetidos = sorted(n for n in sorteio if n in ant_nums)
         else:
             repetidos = []
-        if ant:
-            seq = _celula_grupo("sequencias", ant.get("sequencias"), pad)
-            fin = _celula_grupo("finais", ant.get("finais"), pad)
-            diag = _texto_diags_2a1(ant.get("diagonais"), pad)
-        else:
-            seq = fin = diag = "—"
+        seq = _celula_grupo("sequencias", ln.get("sequencias"), pad)
+        fin = _celula_grupo("finais", ln.get("finais"), pad)
+        diag = _celula_grupo("diagonais", ln.get("diagonais"), pad)
         saida.append([
             conc,
             valor_data(ln.get("data")),
