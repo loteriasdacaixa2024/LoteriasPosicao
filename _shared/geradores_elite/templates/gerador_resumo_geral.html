@@ -1,0 +1,620 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
+{% block content %}
+<style>
+  {% if meses_cores %}
+  {% for nome, cor in meses_cores.items() %}
+  .mes-nome-{{ nome }} { background-color: {{ cor }} !important; color: #fff !important; }
+  {% endfor %}
+  {% endif %}
+  #rga-root .rga-topo {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+  }
+  #rga-root .rga-reset {
+    width: 1.8rem;
+    height: 1.8rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #8a8175;
+    font-size: .85rem;
+    padding: 0;
+    line-height: 1;
+  }
+  #rga-root .rga-reset:hover { background: rgba(192, 139, 0, .16); color: #6b5710; }
+  #rga-root h2 {
+    display: inline-block;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--primary-xdark, #664a00);
+    border-bottom: 3px solid #e6b325;
+    padding-bottom: .12rem;
+    margin-bottom: .45rem;
+  }
+  #rga-root .rga-hint {
+    font-size: .8rem; color: #6c757d;
+    border-left: 3px solid var(--accent, #e6a800);
+    padding: .4rem .7rem; background: var(--accent-light, #fffaf0);
+  }
+  #rga-root .rga-box {
+    border: 1px solid rgba(192,139,0,.22);
+    border-radius: 10px; background: #fff; padding: .85rem 1rem; height: 100%;
+  }
+  #rga-root .rga-box h3 {
+    font-size: .92rem; font-weight: 800; margin: 0 0 .6rem;
+    color: var(--primary-xdark, #664a00);
+  }
+  #rga-root .form-check-input:checked {
+    background-color: var(--primary, #c08b00) !important;
+    border-color: var(--primary, #c08b00) !important;
+  }
+  #rga-root .rga-ball {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--primary, #c08b00); color: #fff;
+    font-weight: 800; font-size: .75rem; margin: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  #rga-root .rga-aposta {
+    border: 1px solid #e5e7eb; border-radius: 10px; padding: .7rem .9rem;
+    margin-bottom: .55rem; background: #fff;
+    border-left: 5px solid var(--primary, #c08b00);
+  }
+  #rga-root details > summary { cursor: pointer; font-weight: 700; color: var(--primary-xdark, #664a00); }
+  #rga-root .rga-painel {
+    display: flex; flex-wrap: wrap; gap: .85rem 1.1rem; align-items: flex-start;
+    margin-top: .45rem; padding-top: .65rem;
+    border-top: 4px solid var(--primary, #c08b00);
+  }
+  #rga-root .rga-volante {
+    display: grid; grid-template-columns: repeat(10, 1.55rem); gap: 2px;
+    background: #fff9e6; border: 2px solid #e8d48a; border-radius: 8px; padding: .3rem;
+  }
+  #rga-root .rga-cel {
+    width: 1.55rem; height: 1.55rem; padding: 0;
+    border: 1px solid #ccc; border-radius: 3px; background: #fff; color: #666;
+    font-size: .62rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  #rga-root .rga-cel.is-on {
+    background: var(--primary, #c08b00); border-color: var(--primary-dark, #996e00); color: #fff;
+  }
+  #rga-root .rga-itens {
+    display: grid;
+    grid-template-columns: max-content 1.4rem minmax(0, 1fr);
+    align-items: baseline;
+    list-style: none;
+    margin: 0;
+    padding: .05rem 0 .05rem .9rem;
+    border-left: 3px solid var(--primary, #c08b00);
+    flex: 1 1 22rem;
+    min-width: min(100%, 18rem);
+    row-gap: .18rem;
+  }
+  #rga-root .rga-itens li {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+    column-gap: .35rem;
+    line-height: 1.35;
+  }
+  #rga-root .rga-crit {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-weight: 800;
+    font-size: .8rem;
+    color: #3f3214;
+    white-space: nowrap;
+  }
+  #rga-root .rga-sep {
+    justify-self: center;
+    color: var(--primary, #c08b00);
+    font-weight: 700;
+    font-size: .9rem;
+    line-height: 1;
+  }
+  #rga-root .rga-val {
+    font-family: Consolas, "Cascadia Mono", ui-monospace, monospace;
+    font-weight: 400;
+    font-size: .8rem;
+    color: #1c1917;
+    font-variant-numeric: tabular-nums;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  #rga-root .rga-p {
+    font-weight: 800;
+    font-size: 1.15em;
+  }
+  #rga-root .rga-val.rga-mes {
+    justify-self: start;
+    align-self: center;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: .72rem;
+    padding: .05rem .42rem;
+    border-radius: 6px;
+    line-height: 1.35;
+  }
+  #rga-root .rga-itens li.is-nao .rga-crit,
+  #rga-root .rga-itens li.is-nao .rga-val { color: #9a3412; }
+  #rga-root .rga-itens li.is-nao .rga-sep { color: #c2410c; }
+  #rga-root .rga-itens li.rga-div {
+    grid-column: 1 / -1;
+    height: 3px;
+    margin: .2rem 0;
+    padding: 0;
+    background: #e6b325;
+  }
+  @supports not (grid-template-columns: subgrid) {
+    #rga-root .rga-itens { display: block; }
+    #rga-root .rga-itens li {
+      display: grid;
+      grid-template-columns: 13rem 1.4rem minmax(0, 1fr);
+      grid-column: auto;
+      margin-bottom: .18rem;
+    }
+  }
+</style>
+<div class="container-fluid py-3" id="rga-root">
+  <div class="rga-topo">
+    <h2>Resumo Geral → Apostas</h2>
+    <button type="button" class="rga-reset" id="rga-resetar" title="Resetar" aria-label="Resetar">
+      <i class="fas fa-rotate-right" aria-hidden="true"></i>
+    </button>
+  </div>
+  <p class="rga-hint">Frequência histórica é filtro de construção, não previsão do próximo resultado. Corte elimina. Ponto só entra na nota. O que o resumo marca como informativo ou não confirmado não filtra.</p>
+
+  {% if not tela.sucesso %}
+  <p class="text-danger mt-3">{{ tela.erro or 'Não foi possível ler o Resumo Geral.' }}</p>
+  {% else %}
+  <div class="row g-3 mt-2">
+    <div class="col-lg-4">
+      <div class="rga-box">
+        <h3>Corte</h3>
+        {% for c in tela.criterios if c.papel == 'corte' %}
+        <div class="form-check">
+          <input class="form-check-input rga-c" type="checkbox" value="{{ c.criterio }}" id="c{{ loop.index }}" {% if c.ligado %}checked{% endif %}>
+          <label class="form-check-label" for="c{{ loop.index }}">{{ c.criterio }}</label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="rga-box">
+        <h3>Pontuação</h3>
+        {% for c in tela.criterios if c.papel == 'ponto' %}
+        <div class="form-check">
+          <input class="form-check-input rga-c" type="checkbox" value="{{ c.criterio }}" id="p{{ loop.index }}" {% if c.ligado %}checked{% endif %}>
+          <label class="form-check-label" for="p{{ loop.index }}">{{ c.criterio }}</label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="rga-box">
+        <h3>Só no checklist</h3>
+        <ul class="small mb-0 ps-3">
+          {% for c in tela.criterios if c.papel == 'exibe' %}
+          <li>{{ c.criterio }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex flex-wrap gap-2 align-items-center mt-3">
+    <label class="small mb-0">Dezenas
+      <input id="rga-dez" type="number" min="{{ tela.dezenas_min or 7 }}" max="{{ tela.dezenas_max or 15 }}" value="{{ tela.dezenas_padrao or 7 }}" class="form-control form-control-sm" style="width:4.5rem" title="De {{ tela.dezenas_min or 7 }} a {{ tela.dezenas_max or 15 }}">
+    </label>
+    <label class="small mb-0">Quantidade
+      <input id="rga-qtd" type="number" min="1" max="{{ tela.quantidade_max or 500 }}" value="10" class="form-control form-control-sm" style="width:5.5rem">
+    </label>
+    <button type="button" class="btn fw-bold" id="rga-gerar"
+            style="background:var(--primary);border-color:var(--primary);color:#fff;">
+      <i class="fas fa-bolt"></i> Gerar
+    </button>
+    <button type="button" class="btn btn-outline-secondary" id="rga-copiar" disabled>
+      <i class="fas fa-copy"></i> Copiar
+    </button>
+    <label class="small mb-0 d-inline-flex align-items-center gap-1" id="rga-todas-wrap" hidden>
+      <input type="checkbox" class="form-check-input m-0" id="rga-todas" checked>
+      Todas <span id="rga-sel-info" class="text-muted"></span>
+    </label>
+    <button type="button" class="btn btn-outline-secondary" id="rga-txt" disabled>
+      <i class="fas fa-download"></i> Exportar TXT
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-success" id="rga-manual" disabled
+            title="Envia as apostas para a Seção 10 Manual">
+      Enviar para Manual
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="rga-volantes" disabled
+            title="Pré-visualizar estas apostas nos volantes da Seção 12">
+      Visualizar nos Volantes
+    </button>
+    <button type="button" class="btn btn-sm btn-warning" id="rga-jasaiu" disabled
+            title="Compara cada aposta com todos os resultados oficiais, do concurso 1 até o atual">
+      <i class="fas fa-history me-1"></i>Já saiu?
+    </button>
+    <span class="badge" id="rga-badge" style="background:var(--accent);color:#171303;">Aguardando</span>
+  </div>
+  <div id="rga-aviso" class="small text-muted mt-2"></div>
+  <div id="rga-lista" class="mt-3"></div>
+  {% endif %}
+</div>
+<script>
+(function () {
+  const btn = document.getElementById('rga-gerar');
+  const resetBtn = document.getElementById('rga-resetar');
+  const lista = document.getElementById('rga-lista');
+  const aviso = document.getElementById('rga-aviso');
+  const txt = document.getElementById('rga-txt');
+  const copiarBtn = document.getElementById('rga-copiar');
+  const manualBtn = document.getElementById('rga-manual');
+  const volantesBtn = document.getElementById('rga-volantes');
+  const jaSaiuBtn = document.getElementById('rga-jasaiu');
+  const badge = document.getElementById('rga-badge');
+  if (!btn || !lista) return;
+  const todasWrap = document.getElementById('rga-todas-wrap');
+  const todasEl = document.getElementById('rga-todas');
+  const selInfo = document.getElementById('rga-sel-info');
+  function setAcoes(on) {
+    [copiarBtn, txt, manualBtn, volantesBtn, jaSaiuBtn].forEach(function (b) {
+      if (b) b.disabled = !on;
+    });
+    if (todasWrap) todasWrap.hidden = !on;
+  }
+  function selecionadas() {
+    return ultimas.filter(function (_ap, i) {
+      const el = lista.querySelector('.rga-pick[data-i="' + i + '"]');
+      return !!(el && el.checked);
+    });
+  }
+  function syncTodas() {
+    const boxes = [...lista.querySelectorAll('.rga-pick')];
+    const n = boxes.filter(function (b) { return b.checked; }).length;
+    if (todasEl) {
+      todasEl.checked = boxes.length > 0 && n === boxes.length;
+      todasEl.indeterminate = n > 0 && n < boxes.length;
+    }
+    if (selInfo) selInfo.textContent = boxes.length ? (n + ' de ' + boxes.length) : '';
+  }
+  let ultimas = [];
+  let criteriosAtivos = [];
+  let geracao = 0;
+  const dezInput = document.getElementById('rga-dez');
+  const qtdInput = document.getElementById('rga-qtd');
+  const MIN = Number((dezInput && dezInput.min) || 7);
+  const MAX = Number((dezInput && dezInput.max) || 15);
+  const dezPadrao = dezInput ? dezInput.value : String(MIN);
+  const qtdPadrao = qtdInput ? qtdInput.value : '10';
+  const criteriosPadrao = [...document.querySelectorAll('.rga-c')].map(function (el) {
+    return { el: el, on: el.checked };
+  });
+  function resetar() {
+    geracao += 1;
+    criteriosPadrao.forEach(function (c) { c.el.checked = c.on; });
+    if (dezInput) dezInput.value = dezPadrao;
+    if (qtdInput) qtdInput.value = qtdPadrao;
+    ultimas = [];
+    criteriosAtivos = [];
+    lista.innerHTML = '';
+    aviso.textContent = '';
+    if (badge) badge.textContent = 'Aguardando';
+    btn.disabled = false;
+    setAcoes(false);
+    if (todasEl) {
+      todasEl.checked = true;
+      todasEl.indeterminate = false;
+    }
+    if (selInfo) selInfo.textContent = '';
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function pad(n) { return String(Number(n)).padStart(2, '0'); }
+  function htmlBolas(dezenas) {
+    return (dezenas || []).map(function (n) { return '<span class="rga-ball">' + esc(pad(n)) + '</span>'; }).join('');
+  }
+  function htmlCheck(ap) {
+    var ordem = [
+      'Soma',
+      'Padrão',
+      'Sequências',
+      'Finais iguais',
+      'Mês da Sorte',
+      'Pares × ímpares',
+      'Diagonais do volante',
+      'Repetidas do anterior',
+      'Primos',
+      'Moldura',
+      'Fibonacci',
+      'Múltiplos de 3',
+      'Média dos gaps',
+      'Linhas (blocos de 10)',
+      'Distribuição dos finais',
+      'DD distintos (dezena)',
+      'DU distintos (unidade)',
+      'Régua (deslocamento)'
+    ];
+    var pos = {};
+    ordem.forEach(function (nome, i) { pos[nome] = i; });
+    var corte = pos['Repetidas do anterior'];
+    var itens = (ap.checklist || []).filter(function (c) {
+      return (c.status === 'nao' || c.status === 'cumprido')
+        && c.criterio !== 'Faixas B/M/A'
+        && c.criterio !== 'Padrão inicial';
+    })
+    itens.push({
+      criterio: 'Padrão',
+      status: 'cumprido',
+      valor: (ap.dezenas || []).map(function (n) { return String(Math.floor(Number(n) / 10)); }).join(' ') || '—'
+    });
+    function indice(nome) {
+      if (Object.prototype.hasOwnProperty.call(pos, nome)) return pos[nome];
+      return pos['Régua (deslocamento)'] - 0.5;
+    }
+    itens.sort(function (a, b) { return indice(a.criterio) - indice(b.criterio); });
+    var html = '';
+    var linha = false;
+    itens.forEach(function (c) {
+      var idx = indice(c.criterio);
+      if (!linha && idx > corte) {
+        html += '<li class="rga-div" aria-hidden="true"></li>';
+        linha = true;
+      }
+      const cls = c.status === 'nao' ? ' class="is-nao"' : '';
+      let valCls = 'rga-val';
+      if (c.criterio === 'Mês da Sorte' && ap.mes_nome) {
+        valCls += ' rga-mes mes-nome-' + String(ap.mes_nome).replace(/"/g, '');
+      }
+      var valor = esc(c.valor || '—');
+      if (c.criterio === 'Régua (deslocamento)') {
+        valor = valor.replace(/P(\d+)/g, '<span class="rga-p">P$1</span>');
+      }
+      html += '<li' + cls + '>'
+        + '<span class="rga-crit">' + esc(c.criterio) + '</span>'
+        + '<span class="rga-sep" aria-hidden="true">—</span>'
+        + '<span class="' + valCls + '">' + valor + '</span>'
+        + '</li>';
+    });
+    return html;
+  }
+  function htmlVolante(dezenas) {
+    const set = {};
+    (dezenas || []).forEach(function (n) { set[Number(n)] = true; });
+    let html = '';
+    for (let n = 1; n <= 31; n++) {
+      html += '<button type="button" class="rga-cel' + (set[n] ? ' is-on' : '') + '" data-n="' + n + '">' + pad(n) + '</button>';
+    }
+    return html;
+  }
+  function qtdTexto(qtd) {
+    return qtd + ' dezenas' + (qtd > 7 ? ' · bolão' : '');
+  }
+  function cardHtml(ap, i) {
+    const falhas = (ap.falhas || []).map(esc).join(', ');
+    return '<div class="rga-aposta" data-i="' + i + '">'
+      + '<div class="d-flex align-items-center"><label class="mb-0 d-inline-flex align-items-center gap-2"><input type="checkbox" class="form-check-input rga-pick m-0" data-i="' + i + '" checked><strong class="rga-titulo">' + ap.ordem + ' · ' + ap.pontos + ' pts</strong></label></div>'
+      + '<div class="mt-1 rga-bolas">' + htmlBolas(ap.dezenas) + '</div>'
+      + '<div class="small text-muted mt-1 rga-falhas">' + (falhas ? 'Fora: ' + falhas : '') + '</div>'
+      + '<details class="small mt-1"><summary>Checklist</summary><div class="rga-painel">'
+      + '<div><div class="rga-volante"></div>'
+      + '<div class="small mt-1 rga-qtde">' + qtdTexto((ap.dezenas || []).length) + '</div>'
+      + '<div class="small text-muted">Clique para marcar ou tirar. De ' + MIN + ' a ' + MAX + '.</div>'
+      + '<div class="small rga-limite"></div></div>'
+      + '<ul class="rga-itens">' + htmlCheck(ap) + '</ul></div></details></div>';
+  }
+  btn.addEventListener('click', function () {
+    criteriosAtivos = [...document.querySelectorAll('.rga-c:checked')].map(function (el) { return el.value; });
+    const quantidade = Number((qtdInput && qtdInput.value) || 10);
+    let dezenas = Number((dezInput && dezInput.value) || MIN);
+    if (dezenas < MIN) dezenas = MIN;
+    if (dezenas > MAX) dezenas = MAX;
+    if (dezInput) dezInput.value = String(dezenas);
+    const seq = (geracao += 1);
+    btn.disabled = true;
+    if (badge) badge.textContent = 'Gerando…';
+    aviso.textContent = '';
+    lista.innerHTML = '';
+    setAcoes(false);
+    fetch('/geradores-elite/api/resumo-geral-apostas/gerar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ criterios: criteriosAtivos, quantidade: quantidade, dezenas: dezenas })
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (seq !== geracao) return;
+      btn.disabled = false;
+      if (!data.sucesso) {
+        aviso.textContent = data.erro || 'Não foi possível gerar.';
+        if (badge) badge.textContent = 'Erro';
+        return;
+      }
+      ultimas = data.apostas || [];
+      setAcoes(!!ultimas.length);
+      if (badge) badge.textContent = ultimas.length ? (ultimas.length + ' apostas') : 'Sem jogos';
+      aviso.textContent = (data.aviso || '') + ' ' + ultimas.length + ' apostas, ' + (data.examinadas || 0) + ' combinações examinadas.';
+      lista.innerHTML = ultimas.map(cardHtml).join('');
+      syncTodas();
+    }).catch(function () {
+      if (seq !== geracao) return;
+      btn.disabled = false;
+      if (badge) badge.textContent = 'Erro';
+      aviso.textContent = 'Não foi possível gerar.';
+    });
+  });
+  if (resetBtn) resetBtn.addEventListener('click', resetar);
+  lista.addEventListener('toggle', function (ev) {
+    const det = ev.target;
+    if (!det || det.tagName !== 'DETAILS' || !det.open) return;
+    const box = det.querySelector('.rga-volante');
+    if (!box || box.childElementCount) return;
+    const card = det.closest('.rga-aposta');
+    const ap = ultimas[Number(card.getAttribute('data-i'))];
+    if (ap) box.innerHTML = htmlVolante(ap.dezenas);
+  }, true);
+  lista.addEventListener('click', function (ev) {
+    const cel = ev.target.closest ? ev.target.closest('.rga-cel') : null;
+    if (!cel) return;
+    const card = cel.closest('.rga-aposta');
+    const ap = ultimas[Number(card.getAttribute('data-i'))];
+    if (!ap) return;
+    const n = Number(cel.getAttribute('data-n'));
+    const atual = (ap.dezenas || []).map(Number);
+    const tem = atual.indexOf(n) >= 0;
+    const limite = card.querySelector('.rga-limite');
+    let proximo;
+    if (tem) {
+      if (atual.length <= MIN) {
+        limite.textContent = 'Mínimo de 7 dezenas. Marque outra antes de tirar.';
+        return;
+      }
+      proximo = atual.filter(function (x) { return x !== n; });
+    } else {
+      if (atual.length >= MAX) {
+        limite.textContent = 'Máximo de 15 dezenas.';
+        return;
+      }
+      proximo = atual.concat(n).sort(function (a, b) { return a - b; });
+    }
+    limite.textContent = '';
+    ap.dezenas = proximo.map(pad);
+    card.querySelector('.rga-bolas').innerHTML = htmlBolas(ap.dezenas);
+    card.querySelector('.rga-qtde').textContent = qtdTexto(proximo.length);
+    cel.classList.toggle('is-on', !tem);
+    const seq = (ap._seq = (ap._seq || 0) + 1);
+    fetch('/geradores-elite/api/resumo-geral-apostas/avaliar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dezenas: proximo, criterios: criteriosAtivos })
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (ap._seq !== seq) return;
+      if (!data.sucesso) {
+        limite.textContent = data.erro || 'Não foi possível ler o volante.';
+        return;
+      }
+      ap.checklist = data.checklist || [];
+      ap.pontos = data.pontos;
+      ap.falhas = data.falhas || [];
+      ap.dezenas = data.dezenas || ap.dezenas;
+      ap.ja_sorteada = !!data.ja_sorteada;
+      ap.concurso_historico = data.concurso_historico;
+      ap.data_historico = data.data_historico || '';
+      ap.ocorrencias_historico = data.ocorrencias_historico || 0;
+      ap.mes_num = data.mes_num || ap.mes_num || 0;
+      ap.mes_nome = data.mes_nome || ap.mes_nome || '';
+      ap.mes = data.mes || ap.mes || '';
+      card.querySelector('.rga-titulo').textContent = ap.ordem + ' · ' + ap.pontos + ' pts';
+      card.querySelector('.rga-itens').innerHTML = htmlCheck(ap);
+      card.querySelector('.rga-falhas').textContent = ap.falhas.length ? 'Fora: ' + ap.falhas.join(', ') : '';
+      card.querySelector('.rga-bolas').innerHTML = htmlBolas(ap.dezenas);
+    }).catch(function () {
+      if (ap._seq === seq) limite.textContent = 'Não foi possível ler o volante.';
+    });
+  });
+  function textoDe(listaAp) {
+    return listaAp.map(function (ap) {
+      return ((ap.dezenas || []).join(' ') + (ap.mes ? ' ' + ap.mes : '')).trim();
+    }).join('\n');
+  }
+  function exigirSelecao() {
+    const escolhidas = selecionadas();
+    if (!escolhidas.length) {
+      aviso.textContent = 'Marque ao menos uma aposta. Pode ser a 1 e a 6, algumas, ou todas.';
+      return null;
+    }
+    return escolhidas;
+  }
+  lista.addEventListener('change', function (ev) {
+    if (ev.target && ev.target.classList && ev.target.classList.contains('rga-pick')) syncTodas();
+  });
+  if (todasEl) todasEl.addEventListener('change', function () {
+    const marcado = !!todasEl.checked;
+    lista.querySelectorAll('.rga-pick').forEach(function (el) { el.checked = marcado; });
+    syncTodas();
+  });
+  if (copiarBtn) copiarBtn.addEventListener('click', function () {
+    const escolhidas = exigirSelecao();
+    if (!escolhidas) return;
+    const corpo = textoDe(escolhidas);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(corpo).then(function () {
+        aviso.textContent = 'Apostas copiadas.';
+      }).catch(function () {
+        aviso.textContent = 'Não foi possível copiar automaticamente. Use Exportar TXT.';
+      });
+    } else {
+      aviso.textContent = 'Não foi possível copiar automaticamente. Use Exportar TXT.';
+    }
+  });
+  if (txt) txt.addEventListener('click', function () {
+    const escolhidas = exigirSelecao();
+    if (!escolhidas) return;
+    const corpo = textoDe(escolhidas);
+    const blob = new Blob([corpo], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'resumo-geral-apostas.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  function enviar(abrirVolantes) {
+    if (!ultimas.length) {
+      aviso.textContent = 'Gere as apostas antes de enviar.';
+      return;
+    }
+    const escolhidas = exigirSelecao();
+    if (!escolhidas) return;
+    const jogos = escolhidas.map(function (ap) {
+      return {
+        dezenas: (ap.dezenas || []).map(Number),
+        mes_num: ap.mes_num || 0,
+        mes_nome: ap.mes_nome || ''
+      };
+    }).filter(function (j) { return j.dezenas.length; });
+    try {
+      sessionStorage.setItem('tb_manual10_import', JSON.stringify({
+        origem: 'resumo_geral',
+        replace: false,
+        jogos: jogos,
+        abrir_volantes: !!abrirVolantes,
+        aviso: 'Importado de Resumo Geral → Apostas (' + jogos.length + ' apostas).'
+      }));
+    } catch (err) {
+      aviso.textContent = 'Não foi possível preparar o envio.';
+      return;
+    }
+    const url = abrirVolantes
+      ? '/geradores-elite/escolha-tubular-apostas/?aba=volantes'
+      : '/geradores-elite/escolha-tubular-apostas/?aba=manual';
+    const w = window.open(url, '_blank');
+    if (!w) window.location.href = url;
+  }
+  if (manualBtn) manualBtn.addEventListener('click', function () { enviar(false); });
+  if (volantesBtn) volantesBtn.addEventListener('click', function () { enviar(true); });
+  if (jaSaiuBtn) jaSaiuBtn.addEventListener('click', function () {
+    if (!ultimas.length) {
+      aviso.textContent = 'Gere as apostas antes de verificar.';
+      return;
+    }
+    const base = exigirSelecao();
+    if (!base) return;
+    const hits = base.filter(function (a) { return a.ja_sorteada; });
+    if (!hits.length) {
+      aviso.textContent = 'Nenhuma destas apostas saiu no histórico oficial (concurso 1 até o atual).';
+      return;
+    }
+    const linhas = hits.map(function (a) {
+      const extra = (a.ocorrencias_historico || 0) > 1
+        ? ' · ' + a.ocorrencias_historico + ' resultados dentro'
+        : '';
+      return (a.dezenas || []).join(' ')
+        + ' · conc. ' + (a.concurso_historico || '?')
+        + (a.data_historico ? ' · ' + a.data_historico : '')
+        + extra;
+    });
+    aviso.textContent = hits.length + ' aposta(s) já saiu no histórico oficial. ' + linhas.join(' | ');
+  });
+})();
+</script>
+{% endblock %}

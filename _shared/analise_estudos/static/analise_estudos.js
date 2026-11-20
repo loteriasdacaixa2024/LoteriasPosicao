@@ -46,11 +46,23 @@
         ).join('')}</div>`;
     }
 
+    function hrefPublico(href) {
+        if (!href || href.charAt(0) !== '/') return href;
+        const achou = window.location.pathname.match(/^(.*)(\/m\/[^/]+)/);
+        if (!achou) return href;
+        const pub = achou[1];
+        const mod = achou[2];
+        const cheio = pub + mod;
+        if (href.indexOf(cheio + '/') === 0 || href === cheio) return href;
+        if (href.indexOf(mod + '/') === 0 || href === mod) return pub + href;
+        return cheio + href;
+    }
+
     function renderLinks(links) {
         if (!links) return '';
         const items = Object.entries(links)
             .filter(([k, href]) => href && LINK_LABELS[k])
-            .map(([k, href]) => `<a href="${href}" class="me-2">${LINK_LABELS[k]}</a>`);
+            .map(([k, href]) => `<a href="${hrefPublico(href)}" class="me-2">${LINK_LABELS[k]}</a>`);
         if (!items.length) return '';
         return `<div class="mb-3 small estudos-links">${items.join(' · ')}</div>`;
     }

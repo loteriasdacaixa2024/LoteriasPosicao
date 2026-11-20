@@ -28240,3 +28240,771 @@ Press CTRL+C to quit
 10.0.0.52 - - [19/Nov/2026 05:36:04] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
 10.0.0.52 - - [19/Nov/2026 05:36:05] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
 10.0.0.52 - - [19/Nov/2026 05:36:05] "GET /m/diadesorte/geradores-elite/api/estatisticas-ciclo/contexto HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.0.10:8083
+Press CTRL+C to quit
+10.0.0.52 - - [19/Nov/2026 06:07:40] "GET / HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:44] "POST /api/modelos/supersete HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:45] "POST /api/modelos/maismilionaria HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:45] "GET /m/diadesorte/ HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:46] "POST /api/modelos/megasena HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:46] "POST /api/modelos/diadesorte HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:46] "GET /api/componentes/status HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:47] "POST /api/modelos/quina HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:48] "POST /api/modelos/timemania HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:48] "POST /api/modelos/duplasena HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:48] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [19/Nov/2026 06:07:48] "POST /api/modelos/lotofacil HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:49] "POST /api/modelos/lotomania HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:50] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:52] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:52] "GET /m/supersete/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:52] "GET /m/maismilionaria/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:54] "GET /m/diadesorte/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:55] "GET /m/diadesorte/api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:57] "GET /m/diadesorte/api/ranking-uf-pagamentos HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:58] "GET /m/duplasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:58] "GET /m/megasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:59] "GET /m/timemania/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:07:59] "GET /m/lotofacil/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:08:01] "GET /m/lotomania/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:08:01] "GET /m/quina/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:08:03] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:08:04] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [19/Nov/2026 06:08:04] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:08:05] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:19:53] "GET /m/maismilionaria/analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%202%203%204 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:19:57] "GET /m/maismilionaria/analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:19:59] "GET /m/maismilionaria/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:20:00] "GET /m/maismilionaria/analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:20:01] "GET /m/maismilionaria/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:20:41] "GET /m/maismilionaria/analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:21:20] "GET /m/maismilionaria/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:21:20] "GET /m/maismilionaria/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 06:29:59] "GET /m/duplasena/desdobramento/api/desdobramentos HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.1.218:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 08:19:04] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:19:04] "GET /m/diadesorte/cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:19:04] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:19:05] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 08:19:05] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:19:41] "GET /m/diadesorte/analise/api/resumo-geral/concurso?concurso=1 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:20:27] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:20:27] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:20:28] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:20:29] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.1.218:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 08:33:38] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:33:39] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 08:33:39] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 08:33:39] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 09:02:31] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 09:02:31] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 09:02:32] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 09:02:32] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.1.218:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 09:07:49] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 09:07:50] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 09:07:50] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 09:07:50] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.1.218:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 09:27:51] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 09:27:53] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 09:27:53] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 09:27:54] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:25] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:25] "POST /api/modelos/diadesorte HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:26] "POST /api/modelos/maismilionaria HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:26] "POST /api/modelos/supersete HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:26] "POST /api/modelos/megasena HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:26] "GET /api/componentes/status HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:26] "POST /api/modelos/duplasena HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:26] "POST /api/modelos/timemania HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:26] "POST /api/modelos/quina HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:27] "GET /m/maismilionaria/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:27] "POST /api/modelos/lotofacil HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:27] "GET /m/supersete/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:27] "POST /api/modelos/lotomania HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:27] "GET /m/diadesorte/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:28] "GET /m/megasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:28] "GET /m/duplasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:28] "GET /m/timemania/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:30] "GET /m/lotofacil/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:30] "GET /m/quina/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:31] "GET /m/lotomania/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:58] "GET /m/diadesorte/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:10:58] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 10:10:59] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:11:00] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:11:00] "GET /m/diadesorte/api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:11:01] "GET /m/diadesorte/api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:21:11] "GET /m/diadesorte/desdobramento/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:21:12] "GET /m/diadesorte/desdobramento/api/desdobramentos HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:21:12] "GET /m/diadesorte/desdobramento/api/sugestoes-colunas HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:21:12] "GET /m/diadesorte/analise/api/ultimos HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:21:13] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 10:22:33] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:22:35] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:22:35] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:22:35] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 10:24:19] "GET /m/diadesorte/analise/api/resumo-geral/concurso?concurso=1350 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:24:38] "GET /m/diadesorte/analise/api/resumo-geral/concurso?concurso=1351 HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.1.218:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 10:38:34] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:38:36] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 10:38:36] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 10:38:36] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:24:01] "GET /m/diadesorte/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:24:02] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 11:24:02] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:24:03] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:24:03] "GET /m/diadesorte/api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:24:04] "GET /m/diadesorte/api/ranking-uf-pagamentos HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.1.218:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 11:28:02] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:28:03] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 11:28:03] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:28:03] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:51] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:52] "POST /api/modelos/maismilionaria HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:52] "POST /api/modelos/supersete HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:53] "POST /api/modelos/diadesorte HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:53] "POST /api/modelos/megasena HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:53] "GET /api/componentes/status HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:53] "POST /api/modelos/quina HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:54] "POST /api/modelos/duplasena HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:54] "POST /api/modelos/timemania HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:54] "GET /m/maismilionaria/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:54] "POST /api/modelos/lotofacil HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:54] "POST /api/modelos/lotomania HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:55] "GET /m/diadesorte/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:55] "GET /m/supersete/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:56] "GET /m/diadesorte/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:59] "GET /m/diadesorte/cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:56:59] "GET /m/megasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:00] "GET /m/timemania/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:00] "GET /m/duplasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:00] "GET /m/lotofacil/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:00] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 11:57:01] "GET /m/lotomania/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:01] "GET /m/quina/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:01] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:02] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:02] "GET /m/diadesorte/api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:05] "GET /m/diadesorte/api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:06] "GET /m/diadesorte/analise/resultados/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:07] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 11:57:07] "GET /m/diadesorte/analise/api/resultados-sorteio/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:11] "GET /m/diadesorte/central-conferencias/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:11] "GET /m/diadesorte/static/cc/js/conferencia-volante.js?v=15 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:11] "GET /m/diadesorte/static/cc/js/analise-retroativa.js?v=3 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:11] "GET /m/diadesorte/static/cc/js/concursos-disponiveis.js?v=6 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:11] "GET /m/diadesorte/static/cc/js/conversor-apostas.js HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:13] "GET /m/diadesorte/static/cc/js/conferencia-resultados-ui.js?v=38 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:14] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/concursos-disponiveis?escopo=indice HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:14] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 11:57:14] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/concursos-disponiveis?escopo=ultimo HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:18] "POST /m/diadesorte/central-conferencias/api/conferencia-apostas/processar/1351 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:28] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/frequencia-abs HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:57:28] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/resumo-abs-historico?max_abs=20&pagina=1&por_pagina=40 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:58:02] "GET /m/diadesorte/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:58:31] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 11:58:35] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:58:37] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:58:37] "GET /m/diadesorte/api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:58:47] "GET /m/diadesorte/api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:59:22] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:59:22] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 11:59:22] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 11:59:22] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:27] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 12:08:28] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:29] "POST /api/modelos/supersete HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:29] "POST /api/modelos/diadesorte HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:29] "POST /api/modelos/megasena HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:30] "POST /api/modelos/maismilionaria HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:30] "POST /api/modelos/timemania HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:30] "POST /api/modelos/quina HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:31] "POST /api/modelos/duplasena HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:31] "POST /api/modelos/lotofacil HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 12:08:31] "POST /api/modelos/lotomania HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.1.218:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 13:33:02] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:33:03] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 13:33:03] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:33:07] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:33:09] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:33:10] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 13:33:26] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:44:30] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:44:45] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 13:45:28] "GET /m/diadesorte/geradores-elite/estatisticas-ciclo/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:45:32] "GET /m/diadesorte/geradores-elite/static/mes_sorte_select.js?v=3 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:45:32] "GET /m/diadesorte/geradores-elite/static/gerador_2a1.js?v=2a1rep HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:45:43] "GET /m/diadesorte/geradores-elite/static/gerador_estatisticas_ciclo.js?v=cruz2b HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:45:45] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 13:45:45] "GET /m/diadesorte/geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:45:46] "GET /m/diadesorte/geradores-elite/api/estatisticas-ciclo/contexto HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.1.218:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 13:52:17] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:52:18] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 13:52:30] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:53:48] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 13:53:55] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:54:10] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 13:54:14] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 13:54:22] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.1.218:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 14:05:50] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 14:05:50] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 16:47:42] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 16:48:16] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [19/Nov/2026 16:48:17] "GET /m/quina/geradores-elite/gerador-gc/?digitos=0,1,3,5,6,8,9&concurso=7141 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 16:48:31] "POST /m/quina/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 16:49:07] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 16:49:59] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:00] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 16:50:03] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:04] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:05] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:06] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:07] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:08] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:08] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:09] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:09] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:10] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 16:50:18] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:20] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 16:50:21] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:23] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 16:50:24] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:27] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:29] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:30] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:31] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:31] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:33] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 16:50:33] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/avaliar HTTP/1.1" 500 -
+10.0.0.52 - - [19/Nov/2026 16:51:07] "GET /m/megasena/analise/resumo-geral/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 16:51:19] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 16:51:20] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 16:51:23] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 16:54:21] "GET /m/quina/ HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 16:54:43] "GET /m/quina/caixa-excel/premiacao.css?v=20260830e HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.0.10:8083
+Press CTRL+C to quit
+10.0.0.52 - - [19/Nov/2026 17:09:01] "GET /m/duplasena/geradores-elite/gerador-elite/?n=5&digitos=0,2,3,4,9&concurso=3028 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:09:43] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:09:43] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:09:46] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:10:04] "GET /m/quina/geradores-elite/gerador-elite/?n=7&digitos=1,2,3,4,5,7,8&concurso=7149 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:10:05] "GET /m/maismilionaria/analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%202%203%204 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:11:51] "POST /m/duplasena/geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:12:56] "GET /m/maismilionaria/analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.0.10:8083
+Press CTRL+C to quit
+127.0.0.1 - - [19/Nov/2026 17:21:34] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:21:35] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:21:38] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:25:09] "GET /m/duplasena/geradores-elite/ciclo-apostas/?modo=operacional&op=equilibrado HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:27:16] "POST /m/diadesorte/geradores-elite/api/estatisticas-ciclo/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:28:08] "POST /m/diadesorte/geradores-elite/api/estatisticas-ciclo/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:28:37] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:29:00] "POST /m/diadesorte/geradores-elite/api/estatisticas-2a1/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:07] "POST /m/diadesorte/geradores-elite/api/estatisticas-2a1/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:43] "GET /m/diadesorte/geradores-elite/estatisticas-ciclo/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:43] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:29:43] "GET /m/diadesorte/geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:45] "GET /m/diadesorte/geradores-elite/api/estatisticas-ciclo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:51] "GET /m/diadesorte/geradores-elite/ciclo-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:52] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:29:52] "GET /m/diadesorte/geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:52] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:54] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/recorrencia?n=4 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:55] "GET /m/diadesorte/geradores-elite/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:57] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/estrategia/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:58] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/ritmo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:59] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:59] "POST /m/diadesorte/geradores-elite/api/ciclo-apostas/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:29:59] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:30:04] "POST /m/diadesorte/geradores-elite/api/ciclo-apostas/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:30:05] "POST /m/diadesorte/geradores-elite/api/ciclo-apostas/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:32:57] "GET /m/diadesorte/geradores-elite/estatisticas-ciclo/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:32:58] "GET /m/diadesorte/geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:32:58] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:32:59] "GET /m/diadesorte/geradores-elite/api/estatisticas-ciclo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:02] "GET /m/diadesorte/geradores-elite/ciclo-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:02] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:33:02] "GET /m/diadesorte/geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:02] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:03] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/recorrencia?n=4 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:03] "GET /m/diadesorte/geradores-elite/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:05] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/estrategia/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:06] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/ritmo/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:07] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:07] "GET /m/diadesorte/geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:38] "GET /m/diadesorte/geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:38] "GET /m/diadesorte/cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:38] "GET /m/diadesorte/geradores-elite/static/construtor_construcoes.js?v=17 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:38] "GET /m/diadesorte/geradores-elite/static/construtor_dezenas_especial.js?v=1 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:38] "GET /m/diadesorte/geradores-elite/static/construtor_digitos.js?v=19 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:38] "GET /m/diadesorte/geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:38] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:39] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:33:39] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/ciclo-visao HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:39] "GET /m/diadesorte/geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:39] "POST /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:39] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:39] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:39] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:39] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:45] "POST /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:45] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:56] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/analise-sugestao?quantidade=16&criterio=atraso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:33:56] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/ciclo?tipo=faltantes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:34:00] "GET /m/lotofacil/analise/repeticao-concursos/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:25] "POST /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:25] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:29] "GET /m/diadesorte/geradores-elite/comparador-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:29] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=1&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:29] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:34:32] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:34:41] "GET /m/diadesorte/geradores-elite/engine-final/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:42] "GET /m/diadesorte/geradores-elite/static/engine_final.js?v=leitura6 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:42] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:34:42] "GET /m/diadesorte/geradores-elite/api/inteligente/concursos?limit=120 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:42] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:46] "POST /m/diadesorte/geradores-elite/api/engine-final/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:46] "GET /m/diadesorte/geradores-elite/api/inteligente/concursos?limit=120 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:47] "POST /m/diadesorte/geradores-elite/api/engine-final/backtest HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:34:47] "POST /m/diadesorte/geradores-elite/api/engine-final/conferir HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 17:34:47] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:36:26] "POST /m/diadesorte/geradores-elite/api/engine-final/export-txt HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:36:53] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:37:00] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:37:25] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:37:28] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:37:30] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:37:32] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:38:14] "GET /m/lotofacil/geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,9&concurso=3790 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:38:21] "POST /m/lotofacil/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:38:42] "POST /m/diadesorte/geradores-elite/api/engine-final/conferir HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 17:39:02] "POST /m/diadesorte/geradores-elite/api/engine-final/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:02] "GET /m/diadesorte/geradores-elite/api/inteligente/concursos?limit=120 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:02] "POST /m/diadesorte/geradores-elite/api/engine-final/backtest HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:02] "POST /m/diadesorte/geradores-elite/api/engine-final/conferir HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 17:39:03] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:04] "POST /m/diadesorte/geradores-elite/api/engine-final/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:04] "GET /m/diadesorte/geradores-elite/api/inteligente/concursos?limit=120 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:04] "POST /m/diadesorte/geradores-elite/api/engine-final/backtest HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:04] "POST /m/diadesorte/geradores-elite/api/engine-final/conferir HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 17:39:04] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:23] "POST /m/diadesorte/geradores-elite/api/engine-final/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:23] "GET /m/diadesorte/geradores-elite/api/inteligente/concursos?limit=120 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:23] "POST /m/diadesorte/geradores-elite/api/engine-final/backtest HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:23] "POST /m/diadesorte/geradores-elite/api/engine-final/conferir HTTP/1.1" 500 -
+127.0.0.1 - - [19/Nov/2026 17:39:24] "POST /m/diadesorte/geradores-elite/api/engine-final/otimizar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:39:54] "POST /m/diadesorte/geradores-elite/api/engine-final/export-txt HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:40:02] "GET /m/lotomania/geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=2979 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:44:03] "POST /m/lotomania/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:44:07] "GET /m/diadesorte/geradores-elite/gerador-gc/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:44:07] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:44:30] "POST /m/diadesorte/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:51:21] "GET /m/diadesorte/geradores-elite/repeticao-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:51:21] "GET /m/diadesorte/analise/repeticao-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:51:21] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:51:21] "GET /m/diadesorte/analise/repeticao-concursos/api/analise?modo=volante HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:51:23] "POST /m/diadesorte/analise/repeticao-concursos/api/gerar HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:51:34] "POST /m/diadesorte/analise/repeticao-concursos/api/backtest HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:51:35] "POST /m/diadesorte/analise/repeticao-concursos/api/backtest HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:51:39] "GET /m/duplasena/geradores-elite/api/ciclo-apostas/contexto HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:51:42] "GET /m/duplasena/geradores-elite/api/ciclo-apostas/recorrencia?n=4 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:51:43] "GET /m/duplasena/geradores-elite/api/ciclo-apostas/estrategia/contexto HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:51:56] "GET /m/duplasena/geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:51:56] "GET /m/duplasena/geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:52:24] "GET /m/duplasena/geradores-elite/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:52:29] "GET /m/duplasena/geradores-elite/api/ciclo-apostas/fechamento/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:52:32] "GET /m/diadesorte/analise/resultados/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:52:32] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:52:32] "GET /m/diadesorte/analise/api/resultados-sorteio/ HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 17:54:43] "GET /m/duplasena/geradores-elite/api/ciclo-apostas/operacional/contexto HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:19] "GET /m/diadesorte/geradores-elite/comparador-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:19] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=1&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:19] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "GET /m/diadesorte/analise/escolha-visual/?aba=estatisticas&embed=1&v=20261117v3 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "GET /m/diadesorte/analise/escolha-visual/static/analise_escolha_visual.css?v=20261117v2 HTTP/1.1" 304 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "GET /m/diadesorte/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=20261118v1 HTTP/1.1" 304 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "GET /m/diadesorte/analise/api/inteligentes/assets/tubular.css?v=20261001v1 HTTP/1.1" 304 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "GET /m/diadesorte/analise/escolha-visual/static/analise_escolha_visualizacao.js?v=tub1 HTTP/1.1" 304 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "GET /m/diadesorte/analise/api/inteligentes/assets/tubular.js?v=20261115v1 HTTP/1.1" 304 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "GET /m/diadesorte/analise/escolha-visual/static/analise_escolha_visual.js HTTP/1.1" 304 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:59:21] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:22] "GET /m/diadesorte/analise/api/escolha-visual/enriquecimento?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:28] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:59:28] "GET /m/diadesorte/analise/analises-inteligentes/?aba=checagem-seq&embed=1 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:29] "GET /m/diadesorte/geradores-elite/static/mes_sorte_select.js?v=3 HTTP/1.1" 304 -
+127.0.0.1 - - [19/Nov/2026 17:59:29] "GET /m/diadesorte/geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:29] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:59:29] "GET /m/diadesorte/analise/api/inteligentes/resultados?janela=1&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:29] "GET /m/diadesorte/analise/api/somas-digitos/somas?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:29] "GET /m/diadesorte/analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:29] "GET /m/diadesorte/analise/api/inteligentes/resultados?janela=1&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:29] "GET /m/diadesorte/analise/api/somas-digitos/somas?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:30] "POST /m/diadesorte/analise/api/inteligentes/checagem-sequencias HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:30] "POST /m/diadesorte/analise/api/inteligentes/checagem-sequencias HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:31] "POST /m/diadesorte/analise/api/inteligentes/checagem-sequencias HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:32] "POST /m/diadesorte/analise/api/inteligentes/checagem-sequencias HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:34] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:59:34] "GET /m/diadesorte/geradores-elite/escolha-tubular-apostas/?aba=manual&embed=1 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:34] "GET /m/diadesorte/analise/api/inteligentes/assets/tubular.css?v=20261117v1 HTTP/1.1" 304 -
+127.0.0.1 - - [19/Nov/2026 17:59:34] "GET /m/diadesorte/analise/api/inteligentes/assets/tubular.js?v=20261117v1 HTTP/1.1" 304 -
+127.0.0.1 - - [19/Nov/2026 17:59:35] "GET /m/diadesorte/analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:35] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 17:59:35] "GET /m/diadesorte/geradores-elite/api/escolha-tubular/contexto?base=geral&janela=0 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:35] "GET /m/diadesorte/geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:35] "GET /m/diadesorte/analise/api/inteligentes/tubular?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:36] "GET /m/diadesorte/analise/api/inteligentes/recorrencia-padroes?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:36] "GET /m/diadesorte/analise/api/inteligentes/recorrencia-padroes?base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:38] "GET /m/diadesorte/analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:40] "GET /m/diadesorte/analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 17:59:40] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:00:19] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:00:41] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:00:55] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:02:14] "GET /m/diadesorte/analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:02:14] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:02:14] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:02:17] "GET /m/diadesorte/analise/api/escolha-visual/enriquecimento?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:03:37] "GET /m/megasena/geradores-elite/gerador-gc/?digitos=0,1,2,3,4,6,7&concurso=3084 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:03:38] "GET /m/lotofacil/geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,6,7,8,9&concurso=3761 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:03:39] "GET /m/diadesorte/analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:03:40] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:03:40] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:03:40] "GET /m/diadesorte/analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:03:41] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:03:41] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:03:43] "GET /m/diadesorte/analise/api/escolha-visual/enriquecimento?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:03:44] "POST /m/lotofacil/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:03:59] "POST /m/megasena/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:06:35] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:06:35] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:07:10] "GET /m/diadesorte/geradores-elite/gerador-elite/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:07:10] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:07:47] "GET /m/diadesorte/analise/escolha-visual/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:07:47] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:07:47] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:10:55] "GET /m/maismilionaria/analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%203%203%204%205 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:11:23] "GET /m/maismilionaria/analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:11:31] "GET /m/diadesorte/analise/api/escolha-visual/enriquecimento?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:11:39] "GET /m/maismilionaria/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:16:03] "GET /m/duplasena/geradores-elite/gerador-elite/?n=6&digitos=0,1,3,4,5,9&concurso=3020 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:16:49] "POST /m/duplasena/geradores-elite/api/inteligentes/gerar-elite HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:51] "GET /m/diadesorte/central-conferencias/ HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:51] "GET /m/diadesorte/static/cc/js/concursos-disponiveis.js?v=6 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:51] "GET /m/diadesorte/static/cc/js/conferencia-resultados-ui.js?v=38 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:51] "GET /m/diadesorte/static/cc/js/conferencia-volante.js?v=15 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:51] "GET /m/diadesorte/static/cc/js/conversor-apostas.js HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:51] "GET /m/diadesorte/static/cc/js/analise-retroativa.js?v=3 HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:51] "GET /m/diadesorte/central-conferencias/api/proximo-concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:51] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+127.0.0.1 - - [19/Nov/2026 18:22:51] "GET /m/diadesorte/central-conferencias/api/proximo-concurso HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:56] "POST /m/diadesorte/central-conferencias/api/conversor/texto-para-json HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:58] "POST /m/diadesorte/central-conferencias/api/conversor/download/txt HTTP/1.1" 200 -
+127.0.0.1 - - [19/Nov/2026 18:22:59] "POST /m/diadesorte/central-conferencias/api/conversor/download/json HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:31:22] "GET /m/quina/geradores-elite/gerador-gc/?digitos=0,1,3,4,6,8&concurso=7135 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:31:26] "POST /m/quina/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:32:23] "GET /m/megasena/geradores-elite/gerador-gc/?digitos=0,1,2,3,4,7,8&concurso=3032 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:32:26] "POST /m/megasena/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:57:39] "GET /m/diadesorte/geradores-elite/gerador-gc/ HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:58:42] "GET /m/duplasena/analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%201%202%203%205 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:59:05] "GET /m/duplasena/analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:59:13] "GET /m/duplasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:59:14] "GET /m/duplasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:59:25] "GET /m/duplasena/analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 18:59:59] "GET /m/duplasena/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 19:00:15] "GET /m/duplasena/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 19:13:01] "GET /m/duplasena/geradores-elite/gerador-gc/?digitos=1,2,3,4,5,8,9&concurso=3015 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 19:13:07] "POST /m/duplasena/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 19:14:05] "GET /m/megasena/analise/analises-inteligentes/?aba=padroes-ii&padrao=1%201%204%204%205%205 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 19:21:18] "GET /m/maismilionaria/geradores-elite/gerador-gc/?digitos=0,1,3,4,5,7,9&concurso=373 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 19:21:36] "POST /m/maismilionaria/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 19:47:03] "GET /m/lotomania/geradores-elite/gerador-gc/?digitos=0,1,2,3,4,5,7,8,9&concurso=2988 HTTP/1.1" 200 -
+10.0.0.52 - - [19/Nov/2026 19:47:22] "POST /m/lotomania/geradores-elite/api/inteligentes/gerar-gc HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:11] "GET /api/componentes/status HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:11] "POST /api/modelos/maismilionaria HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:11] "POST /api/modelos/diadesorte HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:11] "POST /api/modelos/megasena HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:12] "GET /m/maismilionaria/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:12] "POST /api/modelos/supersete HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:12] "POST /api/modelos/duplasena HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:12] "POST /api/modelos/quina HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:13] "GET /m/diadesorte/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:13] "GET /m/supersete/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:13] "POST /api/modelos/timemania HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:13] "GET /m/diadesorte/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:13] "POST /api/modelos/lotofacil HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:14] "GET /m/megasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:14] "POST /api/modelos/lotomania HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:14] "GET /m/diadesorte/cores-meses.css HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:14] "GET /m/duplasena/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:16] "GET /m/timemania/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:16] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:16] "GET /m/lotofacil/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:17] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:18] "GET /m/diadesorte/api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:18] "GET /m/quina/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:18] "GET /m/lotomania/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:21] "GET /m/diadesorte/api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:24] "GET /m/diadesorte/central-conferencias/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:25] "GET /m/diadesorte/static/cc/js/concursos-disponiveis.js?v=6 HTTP/1.1" 304 -
+127.0.0.1 - - [20/Nov/2026 06:14:25] "GET /m/diadesorte/static/cc/js/conferencia-volante.js?v=15 HTTP/1.1" 304 -
+127.0.0.1 - - [20/Nov/2026 06:14:25] "GET /m/diadesorte/static/cc/js/conferencia-resultados-ui.js?v=38 HTTP/1.1" 304 -
+127.0.0.1 - - [20/Nov/2026 06:14:25] "GET /m/diadesorte/static/cc/js/analise-retroativa.js?v=3 HTTP/1.1" 304 -
+127.0.0.1 - - [20/Nov/2026 06:14:25] "GET /m/diadesorte/static/cc/js/conversor-apostas.js HTTP/1.1" 304 -
+127.0.0.1 - - [20/Nov/2026 06:14:27] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/concursos-disponiveis?escopo=indice HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:27] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/concursos-disponiveis?escopo=ultimo HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:31] "POST /m/diadesorte/central-conferencias/api/conferencia-apostas/processar/1351 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:43] "GET /m/diadesorte/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:44] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:45] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:45] "GET /m/diadesorte/api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:47] "GET /m/diadesorte/api/ranking-uf-pagamentos HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:48] "POST /m/diadesorte/api/sincronizar HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:51] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:53] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:55] "GET /m/diadesorte/api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:14:59] "GET /m/diadesorte/central-conferencias/ HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:15:03] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/concursos-disponiveis?escopo=indice HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:15:03] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/concursos-disponiveis?escopo=ultimo HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:15:06] "POST /m/diadesorte/central-conferencias/api/conferencia-apostas/processar/1352 HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:15:34] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/frequencia-abs HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:15:34] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/resumo-abs-historico?max_abs=20&pagina=1&por_pagina=40 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:27:48] "GET /m/diadesorte/geradores-elite/construtor-construcoes/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:27:52] "GET /m/diadesorte/cores-meses.css HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:27:52] "GET /m/diadesorte/geradores-elite/static/construtor_digitos.js?v=19 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:27:52] "GET /m/diadesorte/geradores-elite/static/construtor_dezenas_especial.js?v=1 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:27:53] "GET /m/diadesorte/geradores-elite/static/construtor_construcoes.js?v=17 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:28:05] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/ciclo-visao HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:28:05] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:28:05] "GET /m/diadesorte/geradores-elite/api/meses-indicados HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:28:05] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:28:05] "GET /m/diadesorte/geradores-elite/api/mes-sorte-opcoes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:28:06] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:28:06] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:28:06] "GET /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:28:07] "POST /m/diadesorte/geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:28:43] "GET /m/diadesorte/central-conferencias/api/conferencia-apostas/concursos-disponiveis?escopo=ultimo HTTP/1.1" 200 -
+127.0.0.1 - - [20/Nov/2026 06:29:32] "POST /m/diadesorte/central-conferencias/api/conferencia-apostas/processar/1352 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:53:45] "GET /m/maismilionaria/geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,4,5,8&concurso=376 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 06:53:46] "GET /m/quina/geradores-elite/gerador-gc/?digitos=0,1,3,7&concurso=7118 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:17] "GET /m/diadesorte/analise/escolha-visual/?aba=estatisticas&secao=2a HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:17] "GET /m/diadesorte/analise/escolha-visual/?aba=estatisticas&secao=2a1 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:19] "GET /m/diadesorte/cores-meses.css HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:21] "GET /m/diadesorte/analise/escolha-visual/static/analise_escolha_estatisticas.js?v=20261118v1 HTTP/1.1" 304 -
+10.0.0.52 - - [20/Nov/2026 07:33:21] "GET /m/diadesorte/analise/api/inteligentes/assets/tubular.js?v=20261115v1 HTTP/1.1" 304 -
+10.0.0.52 - - [20/Nov/2026 07:33:21] "GET /m/diadesorte/analise/api/inteligentes/assets/tubular.css?v=20261001v1 HTTP/1.1" 304 -
+10.0.0.52 - - [20/Nov/2026 07:33:21] "GET /m/diadesorte/analise/escolha-visual/static/analise_escolha_visualizacao.js?v=tub1 HTTP/1.1" 304 -
+10.0.0.52 - - [20/Nov/2026 07:33:21] "GET /m/diadesorte/analise/escolha-visual/static/analise_escolha_visual.js HTTP/1.1" 304 -
+10.0.0.52 - - [20/Nov/2026 07:33:21] "GET /m/diadesorte/analise/escolha-visual/static/analise_escolha_visual.css?v=20261117v2 HTTP/1.1" 304 -
+10.0.0.52 - - [20/Nov/2026 07:33:25] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 07:33:25] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:25] "GET /m/diadesorte/analise/api/escolha-visual/enriquecimento?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:25] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:27] "GET /m/diadesorte/analise/api/escolha-visual/enriquecimento?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:30] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 07:33:47] "GET /m/diadesorte/analise/escolha-visual/?aba=estatisticas&secao=2a HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:49] "GET /m/diadesorte/analise/escolha-visual/?aba=estatisticas&secao=2a HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:50] "GET /m/diadesorte/analise/api/escolha-visual/sorteios?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:33:50] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 07:33:51] "GET /m/diadesorte/analise/api/escolha-visual/enriquecimento?ordem=desc&limite=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:34:00] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:34:00] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 07:34:00] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:34:01] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:37:57] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:37:58] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:37:59] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 07:37:59] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:38:03] "GET /m/diadesorte/analise/resultados/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:38:03] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 07:38:03] "GET /m/diadesorte/analise/api/resultados-sorteio/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:43:04] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:43:05] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 07:43:15] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:46:10] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:46:10] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 07:46:14] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:46:42] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:46:43] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 07:46:43] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:46:43] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 07:58:21] "GET /m/lotomania/analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%201%201%201%201%201%201%201%202%202%202%202%202%203%203%203%203%203%203%204%204%204%204%205%205%205%205%205%205%205%206%207%207%207%207%208%208%208%208%208%208%209%209%209%209 HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.0.10:8083
+Press CTRL+C to quit
+10.0.0.52 - - [20/Nov/2026 08:20:43] "GET /m/duplasena/geradores-elite/apostas-inteligentes/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:20:51] "GET /m/duplasena/geradores-elite/api/inteligente/concursos?limit=150 HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.0.10:8083
+Press CTRL+C to quit
+10.0.0.52 - - [20/Nov/2026 08:21:23] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:21:25] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:21:43] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:24:06] "GET /m/lotomania/analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%200%200%201%201%201%201%201%201%201%202%202%202%202%202%203%203%203%203%203%203%203%204%204%204%204%204%205%205%205%207%207%207%207%208%208%208%208%208%208%209%209%209%209%209 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:24:29] "GET /m/lotomania/analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:25:21] "GET /m/diadesorte/analise/analises-inteligentes/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:25:22] "GET /m/diadesorte/geradores-elite/static/mes_sorte_select.js?v=3 HTTP/1.1" 304 -
+10.0.0.52 - - [20/Nov/2026 08:25:23] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:25:23] "GET /m/diadesorte/analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:25:25] "GET /m/diadesorte/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:25:28] "GET /m/diadesorte/analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:25:34] "GET /m/diadesorte/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:25:36] "GET /m/diadesorte/analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:27:20] "GET /m/lotomania/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 502 -
+10.0.0.52 - - [20/Nov/2026 08:27:21] "GET /m/lotomania/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 502 -
+10.0.0.52 - - [20/Nov/2026 08:27:32] "GET /m/lotomania/analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 502 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.0.10:8083
+Press CTRL+C to quit
+10.0.0.52 - - [20/Nov/2026 08:34:51] "GET /m/diadesorte/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:34:52] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:34:52] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:34:53] "GET /m/diadesorte/api/status-banco HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:34:53] "GET /m/diadesorte/api/premiacao-caixa?all=1 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:34:54] "GET /m/diadesorte/api/ranking-uf-pagamentos HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:07] "GET /m/diadesorte/analise/comparar-concursos/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:08] "GET /m/diadesorte/analise/comparar-concursos/api/concursos?limit=150 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:08] "GET /m/diadesorte/analise/comparar-concursos/api/indicacao-padrao HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:08] "GET /m/diadesorte/analise/comparar-concursos/api/melhores-15 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:09] "GET /m/diadesorte/analise/comparar-concursos/api/comparar?modo=volante&concurso_a=1351&concurso_b=1352 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:10] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=0 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:10] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:10] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=80 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:11] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=160 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:11] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=240 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:11] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=320 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:11] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=400 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:11] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=480 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:11] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=560 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:12] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=640 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:12] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=720 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:12] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=800 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:12] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=880 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:12] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=960 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:12] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=1040 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:12] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=1120 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:12] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=1200 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:12] "GET /m/diadesorte/analise/comparar-concursos/api/historico-indicados?limit=80&offset=1280 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:15] "GET /m/diadesorte/analise/comparar-concursos/api/historico-visual?limit=10 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:15] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:19] "GET /m/diadesorte/analise/repeticao-concursos/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:20] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:20] "GET /m/diadesorte/analise/repeticao-concursos/api/analise?modo=volante HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:24] "GET /m/diadesorte/analise/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:24] "GET /m/diadesorte/analise/api/dados HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:24] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:27] "GET /m/diadesorte/simulador-globo/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:27] "GET /m/diadesorte/simulador-globo/static/simulador.js?v=14 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:27] "GET /m/diadesorte/simulador-globo/static/globo.css?v=13 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:27] "GET /m/diadesorte/simulador-globo/static/globo.js?v=7 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:27] "GET /m/diadesorte/simulador-globo/static/vendor/three.min.js?v=1 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:28] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:37] "GET /m/diadesorte/dados/filtros-posicao/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:37] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:38] "GET /m/diadesorte/dados/filtros-posicao/api?modo=crescente&sorteio=1 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:47] "GET /m/diadesorte/analise/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:47] "GET /m/diadesorte/analise/api/dados HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:47] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:50] "GET /m/diadesorte/analise/resumo-geral/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:51] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:51] "GET /m/diadesorte/analise/api/gaps-ciclo/contexto?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:52] "GET /m/diadesorte/analise/api/resumo-geral/concurso HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:56] "GET /m/diadesorte/analise/resumos-modalidade/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:56] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:58] "GET /m/diadesorte/analise/analises-gerais/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:59] "GET /m/diadesorte/geradores-elite/static/comportamento_col_concurso.js HTTP/1.1" 304 -
+10.0.0.52 - - [20/Nov/2026 08:35:59] "GET /m/diadesorte/analise/analises-gerais/static/analise_estudos.js?v=20261029ordem HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:35:59] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:35:59] "GET /m/diadesorte/analise/api/analises-gerais/classificacao-numeros?base=geral&janela=10 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:36:26] "GET /m/diadesorte/analise/api/analises-gerais/digitos-utilizados?base=geral&janela=10 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:36:30] "GET /m/diadesorte/analise/api/analises-gerais/diferencial-cruzado?base=geral&janela=10 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:36:34] "GET /m/diadesorte/analise/api/analises-gerais/soma-digitos?base=geral&janela=10 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:37:54] "GET /m/diadesorte/desdobramento/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:37:55] "GET /m/diadesorte/desdobramento/api/desdobramentos HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:37:55] "GET /m/diadesorte/desdobramento/api/sugestoes-colunas HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:37:55] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:37:55] "GET /m/diadesorte/analise/api/ultimos HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:40:18] "GET /m/diadesorte/analise/resultados/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:40:19] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:40:19] "GET /m/diadesorte/analise/api/resultados-sorteio/ HTTP/1.1" 200 -
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8083
+ * Running on http://10.0.0.10:8083
+Press CTRL+C to quit
+10.0.0.52 - - [20/Nov/2026 08:46:22] "GET /m/diadesorte/geradores-elite/resumo-geral-apostas/ HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:46:23] "POST /m/diadesorte/cdn-cgi/rum HTTP/1.1" 404 -
+10.0.0.52 - - [20/Nov/2026 08:46:32] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:47:31] "POST /m/diadesorte/geradores-elite/api/resumo-geral-apostas/gerar HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:57:51] "GET /m/quina/analise/analises-inteligentes/?aba=padroes-ii&padrao=2%202%205%205%206 HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:57:58] "GET /m/quina/analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:58:08] "GET /m/quina/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:58:10] "GET /m/quina/analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 08:58:20] "GET /m/quina/analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 09:00:04] "GET /m/quina/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 09:00:12] "GET /m/quina/analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+10.0.0.52 - - [20/Nov/2026 09:00:16] "GET /m/quina/analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -

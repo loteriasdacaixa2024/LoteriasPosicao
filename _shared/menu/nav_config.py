@@ -422,6 +422,12 @@ _OVERRIDES: Dict[str, Dict[str, Any]] = {
                     "icon": "fas fa-ruler-combined",
                 },
                 {
+                    "href": "/geradores-elite/resumo-geral-apostas/",
+                    "title": "Resumo Geral → Apostas",
+                    "desc": "Regras do Resumo Geral · corte, pontuação e checklist",
+                    "icon": "fas fa-clipboard-list",
+                },
+                {
                     "href": "/geradores-elite/gerador-por-posicao/",
                     "title": "Análise por Posição → Apostas",
                     "desc": "Matriz 01–31 · ordem oficial · dígitos e soma",
@@ -824,6 +830,7 @@ _GE_ORDEM = [
     "/geradores-elite/gerador-elite/",
     "/geradores-elite/repeticao-apostas/",
     "/geradores-elite/gaps-ciclo-apostas/",
+    "/geradores-elite/resumo-geral-apostas/",
     "/geradores-elite/gerador-por-posicao/",
     "/geradores-elite/gerador-concentracao/",
     "/geradores-elite/apostas-inteligentes/",

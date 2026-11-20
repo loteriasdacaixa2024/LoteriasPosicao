@@ -215,7 +215,8 @@ def _amostra(spec: ResumoSpec, n: int, rng: random.Random) -> List[int]:
     uni = list(range(spec.dezena_min, spec.dezena_max + 1))
     if spec.motor == "colunas":
         return [rng.randrange(spec.dezena_min, spec.dezena_max + 1) for _ in range(spec.sorteadas)]
-    return sorted(rng.sample(uni, spec.sorteadas))
+    n = max(1, min(int(n), len(uni)))
+    return sorted(rng.sample(uni, n))
 
 
 def _diversos(ranked: List[Dict[str, Any]], quantidade: int, k: int) -> List[Dict[str, Any]]:

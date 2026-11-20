@@ -1,114 +1,111 @@
-RESUMO 1350 (Mostrar sempre o ultimo - disponibilizar  um select para escolher do primeito  ao ultimo)
+# ETAPA 1 — ALINHAMENTO E DIAGNÓSTICO DO NOVO GERADOR INTELIGENTE DE APOSTAS
 
+## Objetivo
 
-Resultado:
-05 31 06 15 22 07 26
+Quero estudar a possibilidade de desenvolver um novo Gerador Inteligente de Apostas para a modalidade Dia de Sorte, integrado ao menu existente **Gerador de Elite**.
 
-Mês:
+A rota que deverá servir como referência para esta análise é:
 
-Dezenas que não sairam:
-12 | 02 04 08 10 12 14 16 18 20 24 28 30
-12 | 01 03 09 11 13 17 19 21 23 25 27 29
-
-
-02 04 06 11 12 22 30 Abr
-01 02 03 13 16 24 30 Nov
-03 09 10 14 18 19 30 Jan
-01 05 09 20 22 23 30 Mar
-04 09 15 16 21 22 30 Out
-03 04 12 14 18 19 30 Jan
-02 11 14 18 19 22 30 Mai
-01 03 04 05 09 18 30 Dez
-05 10 12 21 22 23 30 Dez
-02 06 08 16 19 20 30 Nov
-
-
-Gaps:
-Soma:
-Régua:
-B/M/A:
-Pares:
-Digitos:
-Impares:
-Padrão Inicial:
-Geometria Analítica:
-----------------------------------
-Sequências: 05-06-07
-Repetidos: 05 07 22
-Finais Iguais: 05,15 · 06,26
-Diagonais: ↘ | 15-26 · ↗ | 22-31 · ↗ | 06-15
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Lugar bom para colocar esta analise e usar para gerar apostas
 https://teste.marciofernandomaia.com.br/centralmodalidades/m/diadesorte/analise/resumo-geral/
 
+## IMPORTANTE — NÃO IMPLEMENTAR NADA
 
+Neste primeiro momento, estamos apenas alinhando a proposta e avaliando a arquitetura.
 
-https://marciofernandomaia.com.br/centralmodalidades/m/diadesorte/
-Analisei as 7 posições (P1 a P7), considerando as dezenas de 01 a 31.
+**NÃO AUTORIZO:**
+- Criar ou modificar arquivos.
+- Alterar rotas existentes.
+- Criar novas páginas ou componentes.
+- Modificar banco de dados ou estruturas SQL.
+- Alterar menus ou funcionalidades existentes.
+- Executar migrações.
+- Implementar qualquer código.
 
-O levantamento abaixo identifica quais dezenas ainda não apareceram em cada posição dentro da amostra apresentada.
+Nenhuma alteração deverá ser realizada sem minha autorização expressa.
 
-Importante: consegui identificar 14 linhas completas na imagem. A 15ª está cortada. Portanto, a análise considera somente as 14 linhas legíveis.
-1. Dezenas ausentes por posição
-P1 – Primeira posição
-19 dezenas ausentes
-01 · 03 · 07 · 08 · 09 · 10 · 12 · 13 · 17 · 18 · 19 · 20 · 21 · 26 · 27 · 28 · 29 · 30 · 31
+## 1. Analisar as três referências existentes
 
-P2 – Segunda posição
-20 dezenas ausentes
-01 · 03 · 05 · 10 · 11 · 12 · 13 · 14 · 15 · 16 · 18 · 21 · 22 · 23 · 25 · 26 · 27 · 28 · 29 · 30
+Investigue detalhadamente:
 
-P3 – Terceira posição
-21 dezenas ausentes
-01 · 02 · 03 · 04 · 05 · 07 · 09 · 10 · 11 · 12 · 13 · 14 · 16 · 18 · 24 · 25 · 27 · 28 · 29 · 30 · 31
+1. Critérios disponíveis para geração.
+2. Checklist operacional.
+3. 29 regras para montar a aposta.
 
-P4 – Quarta posição
-18 dezenas ausentes
-01 · 03 · 04 · 05 · 08 · 09 · 11 · 12 · 14 · 16 · 17 · 20 · 21 · 23 · 24 · 29 · 30 · 31
+Identifique a finalidade de cada conjunto, suas dependências, critérios obrigatórios, critérios opcionais e possíveis sobreposições.
 
-P5 – Quinta posição
-20 dezenas ausentes
-02 · 03 · 06 · 07 · 08 · 09 · 16 · 17 · 18 · 19 · 20 · 21 · 23 · 24 · 26 · 27 · 28 · 29 · 30 · 31
+## 2. Proposta de integração
 
-P6 – Sexta posição
-19 dezenas ausentes
-02 · 03 · 04 · 09 · 10 · 11 · 13 · 14 · 15 · 16 · 18 · 19 · 20 · 21 · 26 · 27 · 28 · 30 · 31
+Avalie a possibilidade de utilizar os três conjuntos de informações de maneira integrada:
 
-P7 – Sétima posição
-20 dezenas ausentes
-01 · 02 · 04 · 06 · 08 · 09 · 10 · 11 · 12 · 13 · 14 · 15 · 16 · 17 · 19 · 20 · 23 · 24 · 27 · 30
+- Critérios disponíveis para geração: configuração dos parâmetros.
+- 29 regras: orientação para construção das apostas.
+- Checklist operacional: validação das apostas produzidas.
 
-2. Minha leitura da análise
-Posição	Ausentes	Dezenas que mais repetiram
-P1	19	04 e 05
-P2	20	08, 19 e 31
-P3	21	06, 17, 20 e 23
-P4	18	25
-P5	20	10, 11 e 13
-P6	19	05 e 07
-P7	20	07
+Avalie se essa arquitetura é tecnicamente adequada ou se recomenda outra organização.
 
-3. O que eu recomendo
-Eu não escolheria simplesmente uma dezena ausente ao acaso.
+## 3. Novo Gerador de Elite
 
-Para fazer uma seleção mais consistente, cruzaria três critérios:
-1. Ausência: dezenas que ainda não apareceram naquela posição.
-2. Frequência: dezenas que apareceram poucas vezes.
-3. Recorrência: comportamento das dezenas nos concursos mais recentes.
-Uma dezena ausente na P3, por exemplo, não significa necessariamente que esteja prestes a sair nela.
+Estude a possibilidade de incorporar uma nova funcionalidade ao menu existente Gerador de Elite, sem criar menus desnecessários.
+
+Nome provisório:
+
+**Gerador Inteligente de Apostas**
+
+Avalie funcionalidades como:
+
+- Quantidade de apostas desejadas.
+- Seleção de critérios ativos.
+- Aplicação das regras de montagem.
+- Validação automática pelo checklist.
+- Pontuação individual das apostas.
+- Identificação de critérios atendidos e não atendidos.
+- Eliminação de apostas que violem regras obrigatórias.
+- Visualização dos resultados.
+- Exportação das apostas.
+
+## 4. Diagnóstico técnico
+
+Antes de qualquer implementação, identifique:
+
+- Rotas envolvidas.
+- Arquivos responsáveis pelas três referências.
+- Funções Python já existentes que podem ser reutilizadas.
+- Modelos de dados e tabelas relacionadas.
+- Dependências entre os módulos.
+- Possíveis conflitos com funcionalidades atuais.
+- Possibilidade de reutilização do mecanismo existente de geração de apostas.
+
+Não proponha duplicação de funcionalidades que já estejam implementadas.
+
+## 5. Recomendações
+
+Apresente sua recomendação técnica e funcional, esclarecendo:
+
+1. Qual das três referências deve ser o núcleo do gerador?
+2. Como as outras duas devem participar?
+3. Quais regras devem ser obrigatórias e quais devem ser flexíveis?
+4. Como evitar apostas excessivamente semelhantes?
+5. Como calcular uma pontuação de qualidade?
+6. Como realizar testes retrospectivos (backtesting)?
+7. Como preservar as funcionalidades existentes?
+
+## 6. Formato da resposta
+
+Apresente um relatório dividido em:
+
+- Diagnóstico atual.
+- Análise das três referências.
+- Arquitetura recomendada.
+- Fluxo de funcionamento proposto.
+- Funcionalidades sugeridas.
+- Arquivos e rotas que seriam envolvidos.
+- Riscos e cuidados.
+- Plano de implementação dividido em etapas.
+
+**ENCERRAMENTO OBRIGATÓRIO:**
+
+Ao terminar, aguarde minha avaliação.
+
+Não implemente nada, não altere nenhum arquivo e não avance para a próxima etapa sem minha autorização expressa.
+
+Este trabalho está limitado exclusivamente ao levantamento, diagnóstico, planejamento e alinhamento da proposta.

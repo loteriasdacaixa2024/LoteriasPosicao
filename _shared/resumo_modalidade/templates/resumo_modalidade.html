@@ -45,7 +45,17 @@
         border-radius: 0 8px 8px 0;
     }
     #rg-root .rg-section { margin-top: 1.6rem; }
-    #rg-root h2 { font-size: 1.05rem; font-weight: 800; color: var(--primary-xdark); }
+    #rg-root h2,
+    #rg-root h3.h6 {
+        display: inline-block;
+        font-weight: 800;
+        line-height: 1.2;
+        border-bottom: 3px solid #e6b325;
+        padding-bottom: .12rem;
+        margin-bottom: .55rem;
+    }
+    #rg-root h2 { font-size: 1.05rem; color: var(--primary-xdark); }
+    #rg-root h3.h6 { font-size: .92rem; color: var(--primary-xdark); }
     #rg-root .bar {
         height: 8px; background: #eee; border-radius: 99px; overflow: hidden;
     }
@@ -105,6 +115,76 @@
         font-weight: 400;
         color: #94a3b8;
         text-align: right;
+    }
+    #rg-res-corpo { font-variant-numeric: tabular-nums; }
+    #rg-res-folha { color: #1a1a1a; }
+    #rg-res-folha .rg-res-titulo {
+        display: inline-block;
+        font-weight: 800;
+        font-size: 1.15rem;
+        line-height: 1.2;
+        border-bottom: 3px solid #e6b325;
+        padding-bottom: .15rem;
+        margin: 0 0 .55rem;
+    }
+    #rg-res-folha table {
+        border-collapse: collapse;
+        font-size: .95rem;
+    }
+    #rg-res-folha th {
+        text-align: right;
+        font-weight: 700;
+        vertical-align: top;
+        padding: .32rem .7rem .32rem 0;
+        border-right: 3px solid #e6b325;
+        white-space: nowrap;
+        line-height: 1.35;
+    }
+    #rg-res-folha th.rg-res-quebra {
+        white-space: normal;
+        line-height: 1.25;
+    }
+    #rg-res-folha td {
+        font-weight: 400;
+        text-align: left;
+        vertical-align: top;
+        padding: .32rem 0 .32rem .85rem;
+        line-height: 1.45;
+    }
+    #rg-res-folha .rg-res-linha { display: block; }
+    #rg-res-folha .rg-gap {
+        display: flex;
+        align-items: baseline;
+        gap: .35rem;
+        margin: .05rem 0;
+    }
+    #rg-res-folha .rg-gap .n {
+        display: inline-block;
+        min-width: 2.2rem;
+        text-align: right;
+    }
+    #rg-res-folha .rg-gap .sep { margin: 0 .35rem; }
+    #rg-res-folha .rg-res-titulo-sec {
+        font-size: 1rem;
+        margin-top: 1.15rem;
+    }
+    #rg-res-folha table.rg-aus th { color: var(--primary, #c08b00); }
+    #rg-res-folha .rg-qtd { font-weight: 700; font-size: .9em; color: #1a1a1a; }
+    #rg-res-folha .rg-dez { font-size: .85em; }
+    #rg-res-folha .rg-conta { font-weight: 700; }
+    #rg-res-folha .rg-mes {
+        display: inline-block;
+        padding: .02rem .42rem;
+        border-radius: 4px;
+        color: #fff;
+        font-weight: 700;
+        line-height: 1.35;
+        vertical-align: baseline;
+    }
+    #rg-res-folha .rg-res-nota {
+        font-weight: 400;
+        font-size: .82rem;
+        margin: 0 0 .45rem;
     }
 </style>
 
@@ -438,6 +518,18 @@
         </p>
     </div>
 
+    {% if modality_key == 'diadesorte' %}
+    <div class="rg-section" id="rg-resultados">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <span></span>
+            <label class="small mb-0">Concurso
+                <select id="rg-res-sel" class="form-select form-select-sm d-inline-block" style="width:auto; min-width:7rem"></select>
+            </label>
+        </div>
+        <div id="rg-res-corpo"><p class="text-muted small mb-0">Carregando…</p></div>
+    </div>
+    {% endif %}
+
     <div class="rg-section" id="rg-perfis">
         <h2>Gerar apostas por perfil</h2>
         <p class="small text-muted mb-2">
@@ -569,6 +661,143 @@
         .catch(function () {});
 })();
 </script>
+{% if modality_key == 'diadesorte' %}
+<script>
+(function () {
+    const corpo = document.getElementById('rg-res-corpo');
+    const sel = document.getElementById('rg-res-sel');
+    if (!corpo || !sel) return;
+    let preenchendo = false;
+    function esc(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+    function linha(rotulo, valor, quebra) {
+        return '<tr><th' + (quebra ? ' class="rg-res-quebra"' : '') + '>' + rotulo + '</th><td>' + valor + '</td></tr>';
+    }
+    function mesValor(data) {
+        const nome = data.mes;
+        if (!nome || nome === '—') return esc(nome);
+        const cores = {
+            Jan: '#030303', Fev: '#9b59b6', Mar: '#3498db', Abr: '#e67e22',
+            Mai: '#f1c40f', Jun: '#2ecc71', Jul: '#1abc9c', Ago: '#34495e',
+            Set: '#196f3d', Out: '#d35400', Nov: '#8e44ad', Dez: '#c0392b'
+        };
+        const cor = data.mes_cor || cores[nome] || '';
+        if (!cor) return esc(nome);
+        return '<span class="rg-mes" style="background:' + esc(cor) + '">' + esc(nome) + '</span>';
+    }
+    function qtdLinha(texto) {
+        const s = String(texto == null ? '' : texto);
+        const i = s.indexOf(' | ');
+        if (i < 0) return esc(s);
+        return '<strong class="rg-conta">' + esc(s.slice(0, i)) + '</strong>' + esc(s.slice(i));
+    }
+    function blocoQtd(linhas) {
+        return (linhas || []).map(function (t) {
+            return '<span class="rg-res-linha">' + qtdLinha(t) + '</span>';
+        }).join('');
+    }
+    function bloco(linhas) {
+        return (linhas || []).map(function (t) {
+            return '<span class="rg-res-linha">' + esc(t) + '</span>';
+        }).join('');
+    }
+    function gaps(nums, legenda) {
+        const celulas = (nums || []).map(function (n) {
+            const s = String(n == null ? '' : n).trim();
+            const neg = s.charAt(0) === '-';
+            const abs = neg ? s.slice(1) : s;
+            const corpo = /^\d+$/.test(abs) && abs.length < 2 ? abs.padStart(2, '0') : abs;
+            return '<span class="n">' + esc((neg ? '-' : '') + corpo) + '</span>';
+        }).join('');
+        return '<div class="rg-gap">' + celulas + '<span class="sep">|</span><span>' + esc(legenda) + '</span></div>';
+    }
+    function listaE(nums) {
+        const lista = nums || [];
+        if (!lista.length) return '—';
+        if (lista.length === 1) return esc(lista[0]);
+        if (lista.length === 2) return esc(lista[0]) + ' e ' + esc(lista[1]);
+        return lista.slice(0, -1).map(esc).join(', ') + ' e ' + esc(lista[lista.length - 1]);
+    }
+    function blocoPosicoes(pos) {
+        if (!pos || !(pos.itens || []).length) return '';
+        const aus = pos.itens.map(function (it) {
+            const dezenas = (it.dezenas || []).map(esc).join(' · ');
+            const valor = '<strong class="rg-qtd">' + esc(it.ausentes) + '</strong> | <span class="rg-dez">' + dezenas + '</span>';
+            return linha('P' + it.posicao + ':', valor);
+        }).join('');
+        const lei = pos.itens.map(function (it) {
+            const valor = '<strong class="rg-qtd">' + esc(it.ausentes) + '</strong> | <span class="rg-dez">' + listaE(it.repetidas) + '</span>';
+            return linha('P' + it.posicao + ':', valor);
+        }).join('');
+        return '<div class="rg-res-titulo rg-res-titulo-sec">Dezenas ausentes por posição</div>'
+            + '<p class="rg-res-nota">' + esc(pos.quantidade) + ' concursos anteriores, do ' + esc(pos.de) + ' ao ' + esc(pos.ate) + ', na ordem de sorteio.</p>'
+            + '<table class="rg-aus">' + aus + '</table>'
+            + '<div class="rg-res-titulo rg-res-titulo-sec">Leitura</div>'
+            + '<p class="rg-res-nota">Ausentes e dezenas que mais repetiram na posição.</p>'
+            + '<table class="rg-aus">' + lei + '</table>';
+    }
+    function render(data) {
+        const listas = data.nao_sairam || [];
+        corpo.innerHTML =
+            '<div id="rg-res-folha" class="rg-res-folha">'
+            + '<div class="rg-res-titulo">Resumo dos Resultados</div>'
+            + '<table>'
+            + linha('Resultado:', bloco([data.resultado_ordem, data.resultado_crescente]))
+            + linha('Mês:', mesValor(data))
+            + linha('Dezenas que<br>não saíram:', blocoQtd(listas), true)
+            + linha('Pares:', qtdLinha(data.pares))
+            + linha('Impares:', qtdLinha(data.impares))
+            + linha('Repetido:', esc(data.repetido))
+            + linha('Sequência:', esc(data.sequencia))
+            + linha('Finais iguais:', esc(data.finais))
+            + linha('Diagonais:', esc(data.diagonais))
+            + linha('Gaps:', gaps(data.gaps_classificado, 'Classificado') + gaps(data.gaps_ordem, 'Ordem de Sorteio'))
+            + linha('Soma:', esc(data.soma))
+            + linha('Padrão Inicial:', esc(data.padrao))
+            + linha('Dígitos:', esc(data.digitos))
+            + linha('Geometria Analítica:', esc(data.geometria))
+            + linha('Régua:', esc(data.regua))
+            + '</table>'
+            + blocoPosicoes(data.posicoes)
+            + '</div>';
+    }
+    function carregar(concurso) {
+        const url = concurso
+            ? '/analise/api/resumo-geral/concurso?concurso=' + encodeURIComponent(concurso)
+            : '/analise/api/resumo-geral/concurso';
+        fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+            if (!data.sucesso) {
+                corpo.innerHTML = '<p class="text-muted small mb-0">' + esc(data.erro || 'Não foi possível montar o resumo.') + '</p>';
+                return;
+            }
+            if (sel.options.length === 0 && Array.isArray(data.concursos)) {
+                preenchendo = true;
+                data.concursos.slice().reverse().forEach(function (n) {
+                    const opt = document.createElement('option');
+                    opt.value = String(n);
+                    opt.textContent = String(n);
+                    sel.appendChild(opt);
+                });
+                preenchendo = false;
+            }
+            sel.value = String(data.concurso);
+            render(data);
+        }).catch(function () {
+            corpo.innerHTML = '<p class="text-muted small mb-0">Não foi possível carregar o resumo deste concurso.</p>';
+        });
+    }
+    sel.addEventListener('change', function () {
+        if (preenchendo) return;
+        carregar(sel.value);
+    });
+    carregar();
+})();
+</script>
+{% endif %}
 <script>
 (function () {
     const btn = document.getElementById('rg-gerar');

@@ -1837,6 +1837,55 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
     from analise_gaps_ciclo.routes_factory import register_gerador_gaps_ciclo
     register_gerador_gaps_ciclo(bp, modality_key, cfg["nome"])
 
+    if modality_key == "diadesorte":
+        @bp.route("/resumo-geral-apostas/")
+        def resumo_geral_apostas_page():
+            from diadesorte.meses_cores import obter_meses_cores
+            from resumo_modalidade.gerador_menu import criterios_para_tela
+            return render_template(
+                "gerador_resumo_geral.html",
+                modality_key=modality_key,
+                modality_nome=cfg["nome"],
+                page_title="Resumo Geral → Apostas",
+                tela=criterios_para_tela(modality_key),
+                meses_cores=obter_meses_cores(),
+            )
+
+        @bp.route("/api/resumo-geral-apostas/gerar", methods=["POST"])
+        def api_resumo_geral_apostas_gerar():
+            from resumo_modalidade.gerador_menu import gerar_resumo_geral
+            body = request.get_json(silent=True) or {}
+            try:
+                quantidade = int(body.get("quantidade") or 10)
+            except (TypeError, ValueError):
+                quantidade = 10
+            try:
+                dezenas = int(body.get("dezenas") or 0)
+            except (TypeError, ValueError):
+                dezenas = 0
+            payload = gerar_resumo_geral(
+                modality_key,
+                body.get("criterios") or [],
+                quantidade,
+                dezenas,
+            )
+            status = 200 if payload.get("sucesso") else 400
+            if payload.get("sucesso"):
+                payload = _pipeline_elite(payload, "resumo_geral", body)
+            return jsonify(payload), status
+
+        @bp.route("/api/resumo-geral-apostas/avaliar", methods=["POST"])
+        def api_resumo_geral_apostas_avaliar():
+            from resumo_modalidade.gerador_menu import avaliar_resumo_geral
+            body = request.get_json(silent=True) or {}
+            payload = avaliar_resumo_geral(
+                modality_key,
+                body.get("dezenas") or [],
+                body.get("criterios") or [],
+            )
+            status = 200 if payload.get("sucesso") else 400
+            return jsonify(payload), status
+
     from gerador_escolha_tubular.service import tem_gerador_escolha_tubular
     if tem_gerador_escolha_tubular(modality_key):
         @bp.route("/comparador-apostas/")
