@@ -229,44 +229,47 @@
   }
   #ai-root table.ai-table td.ai-td-padrao-bloco > .ai-bloco-dir { text-align: right !important; }
   #ai-root table.ai-table td.ai-td-padrao-bloco > .ai-bloco-esq { text-align: left !important; }
-  /* Dezenas: uma linha, largura um pouco menor para liberar espaço aos dígitos */
+  /* Dezenas, dígitos e apostas: uma linha, largura pelo conteúdo.
+     Se a modalidade não couber, a tabela rola na horizontal. */
   #ai-root .ai-table th.col-dezenas,
-  #ai-root .ai-table td.td-dezenas {
+  #ai-root .ai-table td.td-dezenas,
+  #ai-root #aiTabelaJogosPadrao th.col-dezenas-centro,
+  #ai-root #aiTabelaJogosPadrao td.td-dezenas-centro {
     white-space: nowrap !important;
-    min-width: 9.2rem;
-    width: 9.2rem;
-    max-width: 11rem;
+    width: 1%;
+    min-width: 0;
+    max-width: none;
     letter-spacing: .01em;
     font-variant-numeric: tabular-nums;
     font-size: .78rem;
+    line-height: 1.2;
   }
-  /* Lotofácil, Lotomania e Timemania: muitas dezenas. Quebram em linhas
-     para a tabela inteira caber na largura, sem cortar número. */
-  #ai-root[data-modality-key="lotofacil"] .ai-table th.col-dezenas,
-  #ai-root[data-modality-key="lotofacil"] .ai-table td.td-dezenas,
-  #ai-root[data-modality-key="lotomania"] .ai-table th.col-dezenas,
-  #ai-root[data-modality-key="lotomania"] .ai-table td.td-dezenas,
-  #ai-root[data-modality-key="timemania"] .ai-table th.col-dezenas,
-  #ai-root[data-modality-key="timemania"] .ai-table td.td-dezenas {
-    white-space: normal !important;
-    width: 11rem;
-    min-width: 11rem;
-    max-width: 11rem;
-    line-height: 1.35;
+  #ai-root #aiTabelaResultados,
+  #ai-root #aiTabelaPadroes,
+  #ai-root #aiTabelaJogosPadrao {
+    table-layout: auto;
+    width: 100%;
   }
-  #ai-root[data-modality-key="lotofacil"] .ai-table td.td-digitos-if,
-  #ai-root[data-modality-key="lotomania"] .ai-table td.td-digitos-if,
-  #ai-root[data-modality-key="timemania"] .ai-table td.td-digitos-if,
-  #ai-root[data-modality-key="lotofacil"] #aiTabelaPadroes td.td-padrao,
-  #ai-root[data-modality-key="lotofacil"] #aiTabelaPadroes td.td-pad-final,
-  #ai-root[data-modality-key="lotomania"] #aiTabelaPadroes td.td-padrao,
-  #ai-root[data-modality-key="lotomania"] #aiTabelaPadroes td.td-pad-final,
-  #ai-root[data-modality-key="timemania"] #aiTabelaPadroes td.td-padrao,
-  #ai-root[data-modality-key="timemania"] #aiTabelaPadroes td.td-pad-final {
-    white-space: normal !important;
-    max-width: 9.5rem;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
+  #ai-root #tab-resultados > .table-responsive,
+  #ai-root #tab-padroes > .table-responsive {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  #ai-root #aiTabelaResultados > thead > tr > th,
+  #ai-root #aiTabelaResultados > tbody > tr > td,
+  #ai-root #aiTabelaPadroes > thead > tr > th,
+  #ai-root #aiTabelaPadroes > tbody > tr > td,
+  #ai-root #aiTabelaJogosPadrao > thead > tr > th,
+  #ai-root #aiTabelaJogosPadrao > tbody > tr > td {
+    padding: 6px 12px;
+    vertical-align: middle;
+  }
+  #ai-root #aiTabelaResultados th:not(.col-dezenas):not(.col-digitos-if):not(.col-digitos-unicos):not(.col-gerar),
+  #ai-root #aiTabelaResultados td:not(.td-dezenas):not(.td-digitos-if):not(.td-digitos-unicos):not(.td-gerar),
+  #ai-root #aiTabelaPadroes th:not(.col-dezenas):not(.col-digitos-unicos):not(.col-pad-final),
+  #ai-root #aiTabelaPadroes td:not(.td-dezenas):not(.td-digitos-unicos):not(.td-pad-final):not(.td-padrao) {
+    width: 1%;
+    white-space: nowrap;
   }
   #ai-root[data-modality-key="lotofacil"] #aiTabelaPanResumo th,
   #ai-root[data-modality-key="lotofacil"] #aiTabelaPanResumo td,
@@ -373,26 +376,10 @@
   #ai-root #aiTabelaPadroes td.td-pad-final .ai-col-alinha {
     display: inline-block;
     text-align: left;
-    min-width: 7.6rem;
+    min-width: 0;
+    white-space: nowrap;
     font-variant-numeric: tabular-nums;
     letter-spacing: .04em;
-  }
-  #ai-root[data-modality-key="lotofacil"] #aiTabelaPadroes td.td-pad-final .ai-col-alinha,
-  #ai-root[data-modality-key="lotomania"] #aiTabelaPadroes td.td-pad-final .ai-col-alinha,
-  #ai-root[data-modality-key="timemania"] #aiTabelaPadroes td.td-pad-final .ai-col-alinha {
-    white-space: normal;
-    max-width: 9.5rem;
-    min-width: 6.2rem;
-  }
-  #ai-root[data-modality-key="lotofacil"] #aiTabelaPadroes td.td-digitos-unicos,
-  #ai-root[data-modality-key="lotomania"] #aiTabelaPadroes td.td-digitos-unicos,
-  #ai-root[data-modality-key="timemania"] #aiTabelaPadroes td.td-digitos-unicos,
-  #ai-root[data-modality-key="lotofacil"] #aiTabelaResultados td.td-digitos-unicos,
-  #ai-root[data-modality-key="lotomania"] #aiTabelaResultados td.td-digitos-unicos,
-  #ai-root[data-modality-key="timemania"] #aiTabelaResultados td.td-digitos-unicos {
-    white-space: normal !important;
-    width: auto;
-    max-width: 8.5rem;
   }
   #ai-root .ai-table th.col-nao-sairam,
   #ai-root .ai-table td.td-nao-sairam {
@@ -407,15 +394,126 @@
     white-space: normal;
   }
   #ai-root .ai-table td.td-gerar .btn-ai { margin-bottom: .15rem; }
-  /* Resultados: os botões cabem na largura da página, sem barra interna. */
+  #ai-root #aiTabelaResultados th.col-gerar,
   #ai-root #aiTabelaResultados td.td-gerar {
-    white-space: normal !important;
+    white-space: nowrap !important;
+    width: 1%;
+    min-width: 0;
+    max-width: none !important;
+    text-align: left !important;
+    overflow: visible;
+    vertical-align: middle;
+  }
+  #ai-root #aiTabelaPadroes td.td-gerar {
+    white-space: nowrap !important;
     max-width: none;
+    width: 1%;
+    text-align: center !important;
+    overflow: visible;
+  }
+  #ai-root #aiTabelaResultados td.td-digitos-unicos,
+  #ai-root #aiTabelaResultados th.col-digitos-unicos {
+    text-align: center !important;
+  }
+  #ai-root #aiTabelaResultados .ai-acoes {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .35rem;
+    min-width: max-content;
+  }
+  #ai-root #aiTabelaResultados .ai-acoes .btn-ai {
+    margin: 0;
+    flex: 0 0 auto;
   }
   #ai-root #aiTabelaPadroes th,
   #ai-root #aiTabelaPadroes td {
     padding-left: .08rem;
     padding-right: .08rem;
+  }
+  #ai-root #aiTabelaPadroes {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 64rem;
+  }
+  #ai-root #tab-padroes > .table-responsive {
+    overflow: auto;
+  }
+  #ai-root #aiTabelaPadroes col.pad-c-conc { width: 6%; }
+  #ai-root #aiTabelaPadroes col.pad-c-data { width: 8%; }
+  #ai-root #aiTabelaPadroes col.pad-c-dez { width: 14%; }
+  #ai-root #aiTabelaPadroes col.pad-c-mes { width: 5%; }
+  #ai-root #aiTabelaPadroes col.pad-c-ini { width: 11%; }
+  #ai-root #aiTabelaPadroes col.pad-c-fin { width: 11%; }
+  #ai-root #aiTabelaPadroes col.pad-c-dig { width: 17%; }
+  #ai-root #aiTabelaPadroes col.pad-c-qtd { width: 4%; }
+  #ai-root #aiTabelaPadroes col.pad-c-soma { width: 5%; }
+  #ai-root #aiTabelaPadroes col.pad-c-pares { width: 7%; }
+  #ai-root #aiTabelaPadroes col.pad-c-nao { width: 8%; }
+  #ai-root #aiTabelaPadroes col.pad-c-gerar { width: 8%; }
+  #ai-root #aiTabelaPadroes th,
+  #ai-root #aiTabelaPadroes td {
+    width: auto !important;
+    max-width: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
+  #ai-root #aiTabelaPadroes th:nth-child(1),
+  #ai-root #aiTabelaPadroes td:nth-child(1),
+  #ai-root #aiTabelaPadroes th.col-pad-final,
+  #ai-root #aiTabelaPadroes td.td-pad-final,
+  #ai-root #aiTabelaPadroes th:nth-last-child(5),
+  #ai-root #aiTabelaPadroes td:nth-last-child(5),
+  #ai-root #aiTabelaPadroes th.col-soma,
+  #ai-root #aiTabelaPadroes td.td-soma,
+  #ai-root #aiTabelaPadroes th:nth-last-child(3),
+  #ai-root #aiTabelaPadroes td:nth-last-child(3) {
+    text-align: center !important;
+  }
+  #ai-root #aiTabelaPadroes td.td-nao-sairam,
+  #ai-root #aiTabelaPadroes td.td-gerar,
+  #ai-root #aiTabelaPadroes th.col-nao-sairam,
+  #ai-root #aiTabelaPadroes th.col-gerar {
+    overflow: visible;
+    text-overflow: clip;
+  }
+  /* Lotofácil (15) e Lotomania (20): mesma grade fixa, com mais espaço
+     para dezenas e padrões. As demais modalidades usam a grade acima. */
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes { min-width: 96rem; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-conc { width: 5%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-data { width: 7%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-dez { width: 24%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-ini,
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-fin { width: 15%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-dig { width: 12%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-qtd { width: 3%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-soma { width: 4%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-pares { width: 5%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-nao { width: 6%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes col.pad-c-gerar { width: 4%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes { min-width: 120rem; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-conc { width: 4%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-data { width: 6%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-dez { width: 26%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-ini,
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-fin { width: 16%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-dig { width: 10%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-qtd { width: 3%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-soma { width: 4%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-pares { width: 5%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-nao { width: 6%; }
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes col.pad-c-gerar { width: 4%; }
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes td.td-dezenas,
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes td.td-padrao,
+  #ai-root[data-sorteadas="15"] #aiTabelaPadroes td.td-pad-final,
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes td.td-dezenas,
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes td.td-padrao,
+  #ai-root[data-sorteadas="20"] #aiTabelaPadroes td.td-pad-final {
+    overflow: visible;
+    text-overflow: clip;
   }
   #ai-root .nav-tabs .nav-link.active {
     font-weight:800; color:var(--primary-xdark); border-bottom-color:var(--primary);
@@ -822,6 +920,9 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: .02em;
   }
+  #ai-root .ai-jogos-table-wrap {
+    overflow-x: auto;
+  }
   #ai-root #aiTabelaJogosPadrao th.col-dezenas-centro { text-align: center !important; }
   #ai-root #aiTabelaJogosPadrao .ai-dez-hit {
     background: #ffe082;
@@ -892,9 +993,19 @@
     font-size:.8rem; color:#6c757d; border-left:3px solid var(--accent,#ffd54f);
     padding:.35rem .65rem; background:var(--accent-light);
   }
+  #ai-root .digitos-linha {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    white-space: nowrap;
+  }
   #ai-root .digitos-chip {
-    display:inline-block; background:#fff8e1; border:1px solid #ffe082;
-    border-radius:6px; padding:.1rem .35rem; font-weight:700; margin:0 1px;
+    display: inline-flex;
+    align-items: center;
+    background:#fff8e1; border:1px solid #ffe082;
+    border-radius:6px; padding:.1rem .35rem; font-weight:700; margin:0;
   }
   #ai-root .btn-dl-sutil {
     border:0; background:transparent; color:#8a6d00; font-size:.68rem;
@@ -1161,6 +1272,12 @@
     gap: 2px;
     vertical-align: middle;
   }
+  #ai-root[data-modality-key="lotomania"] #aiTabelaCheq .ai-pan-casas,
+  #ai-root[data-modality-key="lotofacil"] #aiTabelaCheq .ai-pan-casas {
+    flex-wrap: wrap;
+    max-width: 26rem;
+    row-gap: 3px;
+  }
   #ai-root #aiTabelaCheq .ai-pan-casa {
     display: inline-flex;
     align-items: stretch;
@@ -1386,6 +1503,52 @@
     margin-bottom: .35rem;
     text-align: left;
   }
+  #ai-root .ai-pan-legenda {
+    margin-top: .7rem;
+    width: 100%;
+  }
+  #ai-root .ai-pan-legenda table {
+    width: auto;
+    max-width: 100%;
+    margin: 0;
+    font-size: .78rem;
+  }
+  #ai-root .ai-pan-legenda td {
+    padding: .22rem .5rem !important;
+    white-space: nowrap;
+    text-align: left !important;
+    vertical-align: middle;
+  }
+  #ai-root .ai-pan-legenda td.ai-pan-leg-cor {
+    font-weight: 700;
+  }
+  #ai-root .ai-pan-legenda td.ai-pan-leg-pad {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+  #ai-root .ai-pan-legenda td.ai-pan-leg-pad span {
+    display: inline-block;
+    width: .72em;
+    text-align: center;
+  }
+  #ai-root .ai-pan-leg-u td { background: rgba(196, 163, 90, .16); }
+  #ai-root .ai-pan-leg-p td { background: rgba(109, 143, 191, .16); }
+  #ai-root .ai-pan-leg-a td { background: rgba(125, 154, 120, .16); }
+  #ai-root .ai-pan-leg-u td.ai-pan-leg-cor { color: #8a6420; }
+  #ai-root .ai-pan-leg-p td.ai-pan-leg-cor { color: #2f5f96; }
+  #ai-root .ai-pan-leg-a td.ai-pan-leg-cor { color: #3d6b42; }
+  #ai-root #aiTabelaPanoramaHist tr.tr-pan-ultimo td {
+    box-shadow: inset 3px 0 0 #c4a35a;
+    background: rgba(196, 163, 90, .13);
+  }
+  #ai-root #aiTabelaPanoramaHist tr.tr-pan-penultimo td {
+    box-shadow: inset 3px 0 0 #6d8fbf;
+    background: rgba(109, 143, 191, .12);
+  }
+  #ai-root #aiTabelaPanoramaHist tr.tr-pan-antipenultimo td {
+    box-shadow: inset 3px 0 0 #7d9a78;
+    background: rgba(125, 154, 120, .13);
+  }
   #ai-root #tab-panorama .ai-pan-table-wrap {
     max-height: 70vh;
     overflow-x: hidden;
@@ -1487,7 +1650,7 @@
   }
   #ai-root .ai-jogos-table-wrap {
     max-height: 70vh;
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: auto;
   }
   #ai-root #tab-panorama .ai-pan-table-wrap .ai-table,
@@ -1889,7 +2052,6 @@
               {% if extra_mes %}
               <th class="ai-sort" data-sort="mes_num" data-table="res">Mês <span class="ai-sort-ind">⇅</span></th>
               {% endif %}
-              <th class="ai-sort col-digitos-if" data-sort="digitos_fmt" data-table="res">Dígitos (I\|F) <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-digitos-unicos" data-sort="digitos_ordenados_fmt" data-table="res">Dígitos Ord. <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort" data-sort="qtd_digitos" data-table="res">Qtd <span class="ai-sort-ind">⇅</span></th>
               <th class="ai-sort col-soma" data-sort="soma" data-table="res">Soma <span class="ai-sort-ind">⇅</span></th>
@@ -1958,6 +2120,20 @@
       </p>
       <div class="table-responsive">
         <table class="table table-sm table-bordered ai-table" id="aiTabelaPadroes">
+          <colgroup>
+            <col class="pad-c-conc">
+            <col class="pad-c-data">
+            <col class="pad-c-dez">
+            {% if extra_mes %}<col class="pad-c-mes">{% endif %}
+            <col class="pad-c-ini">
+            <col class="pad-c-fin">
+            <col class="pad-c-dig">
+            <col class="pad-c-qtd">
+            <col class="pad-c-soma">
+            <col class="pad-c-pares">
+            <col class="pad-c-nao">
+            <col class="pad-c-gerar">
+          </colgroup>
           <thead>
             <tr>
               <th class="ai-sort" data-sort="concurso" data-table="pad">Concurso <span class="ai-sort-ind">⇅</span></th>
@@ -2478,6 +2654,7 @@
               </tbody>
             </table>
           </div>
+          <div class="ai-pan-legenda" id="aiPanHistRecentes" hidden></div>
         </div>
       </div>
       <div class="ai-pan-seq" id="aiPanSeqWrap">
@@ -3064,7 +3241,7 @@
     const metaRes = slicePagina(linhasRes, 'res');
     const metaPad = slicePagina(linhasPad, 'pad');
     renderKpis(CACHE);
-    const colRes = EXTRA_MES ? 10 : 9;
+    const colRes = EXTRA_MES ? 9 : 8;
     const colPad = EXTRA_MES ? 12 : 11;
     document.querySelector('#aiTabelaResultados tbody').innerHTML = metaRes.rows.map(l => `
       <tr class="${+l.concurso === FOCO_CONCURSO ? 'tr-concurso-foco' : ''}" data-concurso="${esc(l.concurso)}">
@@ -3072,12 +3249,11 @@
         <td>${esc(l.data)}</td>
         <td class="td-left text-start td-dezenas">${esc(l.dezenas_fmt)}</td>
         ${EXTRA_MES ? `<td>${mesBadge(l)}</td>` : ''}
-        <td class="td-left text-start td-digitos-if">${esc(l.digitos_fmt)}</td>
-        <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
+        <td class="td-left text-start td-digitos-unicos"><span class="digitos-linha">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</span></td>
         <td><strong>${esc(l.qtd_digitos)}</strong></td>
         <td class="td-soma"><strong class="ai-col-alinha">${esc(l.soma)}</strong></td>
         <td class="td-volume"><span class="ai-col-alinha">${fmtVol(l.volume_combinacoes)}</span></td>
-        <td class="text-nowrap td-gerar">${acoesHtml(l)}</td>
+        <td class="text-nowrap td-gerar"><span class="ai-acoes">${acoesHtml(l)}</span></td>
       </tr>`).join('') || `<tr><td colspan="${colRes}" class="text-muted">Sem dados</td></tr>`;
     document.querySelector('#aiTabelaPadroes tbody').innerHTML = metaPad.rows.map(l => {
       const dez = dezenasOrdenadasDe(l);
@@ -3092,7 +3268,7 @@
         ${EXTRA_MES ? `<td>${mesBadge(l)}</td>` : ''}
         <td class="text-nowrap td-padrao"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(pi)}" title="Abrir na aba 4 · Padrões II">${esc(pi)}</a></td>
         <td class="text-nowrap td-pad-final"><span class="ai-col-alinha">${esc(pf)}</span></td>
-        <td class="td-left text-start td-digitos-unicos">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</td>
+        <td class="td-left text-start td-digitos-unicos"><span class="digitos-linha">${(l.digitos_ordenados||[]).map(d=>`<span class="digitos-chip">${esc(d)}</span>`).join('')}</span></td>
         <td>${esc(l.qtd_digitos)}</td>
         <td class="td-soma"><strong class="ai-col-alinha">${esc(l.soma)}</strong></td>
         <td>${esc(l.pares_impares_fmt)}</td>
@@ -3321,7 +3497,6 @@
     ];
     if (EXTRA_MES) cols.push({ titulo: 'Mês' });
     cols.push(
-      { titulo: 'Dígitos (I|F)' },
       { titulo: 'Dígitos Ord.' },
       { titulo: 'Qtd', num: true },
       { titulo: 'Soma', num: true },
@@ -3336,7 +3511,6 @@
       const row = [l.concurso, l.data || '—', l.dezenas_fmt || '—'];
       if (EXTRA_MES) row.push(l.mes_abrev || l.mes_nome || '—');
       row.push(
-        l.digitos_fmt || '—',
         l.digitos_ordenados_fmt || ((l.digitos_ordenados || []).join(' ')) || '—',
         l.qtd_digitos,
         l.soma,
@@ -3556,21 +3730,77 @@
     </tr>`).join('');
   }
 
+  function ultimosTresPanorama() {
+    const top = [];
+    (PAN_HIST.all || []).forEach(it => {
+      const c = Number(it && it.concurso) || 0;
+      if (!c) return;
+      top.push(it);
+    });
+    top.sort((a, b) => Number(b.concurso) - Number(a.concurso));
+    return top.slice(0, 3);
+  }
+
   function renderPanoramaHist() {
     const tb = document.querySelector('#aiTabelaPanoramaHist tbody');
     const info = document.getElementById('aiPanHistInfo');
     if (!tb) return;
+    const recentes = ultimosTresPanorama();
+    const faixas = [
+      { item: recentes[0], cls: 'tr-pan-ultimo', nome: 'último' },
+      { item: recentes[1], cls: 'tr-pan-penultimo', nome: 'penúltimo' },
+      { item: recentes[2], cls: 'tr-pan-antipenultimo', nome: 'antipenúltimo' },
+    ];
+    const classeDoPadrao = new Map();
+    faixas.forEach(f => {
+      if (!f.item) return;
+      const pad = normalizarPadrao(f.item.padrao_inicial);
+      if (pad && !classeDoPadrao.has(pad)) classeDoPadrao.set(pad, f.cls);
+    });
     const itens = filtrarPanoramaHist();
     if (!itens.length) {
       tb.innerHTML = `<tr><td colspan="5" class="text-muted">Nenhum padrão no histórico.</td></tr>`;
     } else {
-      tb.innerHTML = itens.map((it, i) => `<tr>
+      tb.innerHTML = itens.map((it, i) => {
+        const cls = classeDoPadrao.get(normalizarPadrao(it.padrao_inicial)) || '';
+        return `<tr class="${cls}">
         <td class="td-pan-num">${i + 1}</td>
         <td class="td-padrao ai-col-medida"><a href="#" class="ai-pan-link-pad" data-act="ir-padrao-ii" data-padrao="${esc(it.padrao_inicial)}" title="Abrir na aba 4 · Padrões II">${esc(it.padrao_inicial)}</a></td>
         <td class="td-pan-vezes"><span class="ai-col-alinha">${fmtVol(it.vezes_padrao)}</span></td>
         <td class="td-pan-jogos"><span class="ai-col-alinha">${fmtVol(it.jogos_possiveis)}</span></td>
         <td class="td-bma">${esc(it.descricao_bma)}</td>
-      </tr>`).join('');
+      </tr>`;
+      }).join('');
+    }
+    const boxRec = document.getElementById('aiPanHistRecentes');
+    if (boxRec) {
+      const metas = [
+        { palavra: 'dourado', cls: 'ai-pan-leg-u' },
+        { palavra: 'azul', cls: 'ai-pan-leg-p' },
+        { palavra: 'verde', cls: 'ai-pan-leg-a' },
+      ];
+      const linhas = [];
+      faixas.forEach((f, i) => {
+        if (!f.item) return;
+        const pad = normalizarPadrao(f.item.padrao_inicial);
+        if (!pad) return;
+        const meta = metas[i];
+        const conc = f.item.concurso ? fmtVol(f.item.concurso) : '—';
+        const casas = String(pad).split(/\s+/).filter(Boolean).map(d => `<span>${esc(d)}</span>`).join('');
+        linhas.push(`<tr class="${meta.cls}">
+          <td class="ai-pan-leg-cor">${meta.palavra}</td>
+          <td>${f.nome}</td>
+          <td>${conc}</td>
+          <td class="ai-pan-leg-pad">${casas}</td>
+        </tr>`);
+      });
+      if (linhas.length) {
+        boxRec.hidden = false;
+        boxRec.innerHTML = `<table class="table table-sm table-bordered ai-table mb-0"><tbody>${linhas.join('')}</tbody></table>`;
+      } else {
+        boxRec.hidden = true;
+        boxRec.innerHTML = '';
+      }
     }
     const totConc = PAN_HIST.all.length;
     const jaSairam = agregarPadroesJaSairam(PAN_HIST.all).length;
@@ -4910,17 +5140,26 @@
     }
   }
 
+  function numsDiagVista(d) {
+    const bruto = String((d && d.nums_fmt) || '').trim();
+    if (!bruto) return '';
+    if (String((d && d.dir_sym) || '').trim() === '↗' || (d && d.dir) === 'up') {
+      return bruto.split('-').reverse().join('-');
+    }
+    return bruto;
+  }
+
   function htmlDiagChips(list) {
     return (list || []).map((d) => {
       const title = `${d.tipo || ''} · ${d.vezes || 0}×`;
-      return `<span class="ai-diag-chip" title="${esc(title)}">${esc(d.dir_sym || '')} ${esc(d.nums_fmt || '')} <span class="text-muted">${fmtVol(d.vezes)}×</span></span>`;
+      return `<span class="ai-diag-chip" title="${esc(title)}">${esc(d.dir_sym || '')} ${esc(numsDiagVista(d))} <span class="text-muted">${fmtVol(d.vezes)}×</span></span>`;
     }).join('') || '<span class="small text-muted">sem diagonal neste recorte</span>';
   }
 
   function diagDica(list, modo) {
     const bits = (list || []).slice(0, 3).map((d) => {
       const dir = String((d && d.dir_sym) || '').trim();
-      const nums = String((d && d.nums_fmt) || '').trim();
+      const nums = numsDiagVista(d);
       return `${dir} ${nums}`.trim();
     }).filter(Boolean);
     const leitura = bits.length ? bits.join(' | ') + '. ' : '';
@@ -4942,7 +5181,7 @@
   function htmlDiagTexto(list, opts) {
     if (opts && opts.lado === 'dir') {
       const itens = (list || []).slice(0, 3).map((d) => {
-        const nums = String((d && d.nums_fmt) || '').trim();
+        const nums = numsDiagVista(d);
         const dir = String((d && d.dir_sym) || '').trim();
         if (!nums) return '';
         return `${dir ? `<span class="ai-diag-dir">${esc(dir)}</span>` : ''}${esc(nums)}`;
@@ -4958,7 +5197,7 @@
       return '<span class="ai-diag-slot ai-diag-nada"><span class="text-muted">—</span></span>';
     } else {
       arr.forEach((d, i) => {
-        const nums = String((d && d.nums_fmt) || '').trim();
+        const nums = numsDiagVista(d);
         const dir = String((d && d.dir_sym) || '').trim();
         const idx = esquerda ? i : (3 - arr.length + i);
         slots[idx] = nums
@@ -5379,7 +5618,7 @@
       return `<tr class="${cls}" data-padrao="${esc(p.padrao)}"${p.eh_padrao_ultimo_concurso ? ' title="Padrão do último resultado (vencedor)"' : ''}>
         <td><input type="checkbox" class="form-check-input ai-pad-ii-chk" data-padrao="${esc(p.padrao)}" ${checked}></td>
         <td class="text-center td-npad">${p.n_padrao != null ? esc(p.n_padrao) : '—'}</td>
-        <td class="td-padrao"><code>${esc(p.padrao)}</code>${PAD_II_SUGESTAO && normalizarPadrao(p.padrao) === PAD_II_SUGESTAO ? ' <span class="ai-sug-tag">reforçar</span>' : ''}</td>
+        <td class="td-padrao"><code>${esc(p.padrao)}</code></td>
         <td class="td-dist"><span class="ai-col-alinha">${esc(p.descricao)}</span></td>
         <td class="td-jogos"><span class="ai-col-alinha">${jogosLink}</span></td>
         <td class="td-freq"><span class="ai-col-alinha">${esc(p.frequencia)}</span></td>

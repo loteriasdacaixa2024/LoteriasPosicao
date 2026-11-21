@@ -136,9 +136,15 @@
     bindUltimoOrdem();
   }
 
+  function numsDiagVista(d) {
+    const bruto = d.nums_fmt || (d.nums || []).map(pad).join('-');
+    const sobe = d.dir_sym === '↗' || d.dir === 'up';
+    return sobe ? String(bruto).split('-').reverse().join('-') : bruto;
+  }
+
   function fmtDiag(d) {
     const sym = d.dir_sym || (d.dir === 'up' ? '↗' : '↘');
-    return `${sym} ${d.nums_fmt || (d.nums || []).map(pad).join('-')}`;
+    return `${sym} ${numsDiagVista(d)}`;
   }
 
   function renderDiags(ctx, payload, ids) {
@@ -177,7 +183,7 @@
   function chipsDiagCruz(list, chipClass) {
     const html = (list || []).map((d) => {
       const title = `${d.tipo || ''} · ${d.vezes || 0}×`;
-      return `<span class="${chipClass}" title="${escHtml(title)}">${escHtml(d.dir_sym || '')} ${escHtml(d.nums_fmt || '')} <span class="text-muted">${escHtml(d.vezes)}×</span></span>`;
+      return `<span class="${chipClass}" title="${escHtml(title)}">${escHtml(d.dir_sym || '')} ${escHtml(numsDiagVista(d))} <span class="text-muted">${escHtml(d.vezes)}×</span></span>`;
     }).join('');
     return html || '<span class="small text-muted">sem diagonal neste recorte</span>';
   }

@@ -24,6 +24,26 @@
     line-height: 1;
   }
   #rga-root .rga-reset:hover { background: rgba(192, 139, 0, .16); color: #6b5710; }
+  #rga-root .rga-ultimo {
+    display: inline-flex;
+    align-items: center;
+    gap: .28rem;
+    margin-left: .1rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-size: .82rem;
+    letter-spacing: .03em;
+    color: var(--primary-xdark, #664a00);
+    white-space: nowrap;
+  }
+  #rga-root .rga-ultimo[hidden] { display: none; }
+  #rga-root .rga-ultimo .rga-mes {
+    font-size: .72rem;
+    font-weight: 800;
+    padding: .04rem .38rem;
+    border-radius: 6px;
+    letter-spacing: 0;
+  }
   #rga-root h2 {
     display: inline-block;
     font-size: 1.05rem;
@@ -38,44 +58,167 @@
     border-left: 3px solid var(--accent, #e6a800);
     padding: .4rem .7rem; background: var(--accent-light, #fffaf0);
   }
+  #rga-root .rga-cards {
+    display: grid;
+    grid-template-columns: minmax(13rem, 0.72fr) minmax(0, 2.2fr) minmax(18rem, 1.25fr);
+    gap: .75rem 1rem;
+    align-items: stretch;
+    width: 100%;
+    margin-top: .75rem;
+  }
   #rga-root .rga-box {
     border: 1px solid rgba(192,139,0,.22);
-    border-radius: 10px; background: #fff; padding: .85rem 1rem; height: 100%;
+    border-radius: 10px; background: #fff; padding: .7rem .85rem; height: auto;
+    min-width: 0;
+  }
+  #rga-root .rga-checks {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: .85rem;
+    row-gap: .15rem;
+    align-items: start;
+  }
+  #rga-root .rga-checklist {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.1rem;
+    row-gap: .15rem;
+    align-items: start;
+  }
+  #rga-root .rga-checks .form-check { min-width: 0; margin-bottom: 0; }
+  #rga-root .rga-checklist {
+    list-style: disc;
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  #rga-root .rga-checklist li { min-width: 0; }
+  #rga-root .rga-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem .5rem;
+    width: 100%;
+    margin-top: .75rem;
+  }
+  @media (max-width: 1280px) {
+    #rga-root .rga-cards { grid-template-columns: minmax(12rem, 0.7fr) minmax(0, 1.6fr); }
+    #rga-root .rga-cards .rga-box:last-child { grid-column: 1 / -1; }
+    #rga-root .rga-checks { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 760px) {
+    #rga-root .rga-cards { grid-template-columns: 1fr; }
+    #rga-root .rga-cards .rga-box:last-child { grid-column: auto; }
+    #rga-root .rga-checks,
+    #rga-root .rga-checklist { grid-template-columns: 1fr; }
   }
   #rga-root .rga-box h3 {
     font-size: .92rem; font-weight: 800; margin: 0 0 .6rem;
     color: var(--primary-xdark, #664a00);
   }
+  #rga-root .rga-box h3 .rga-peso {
+    font-weight: 500;
+    font-size: .72rem;
+    color: #8a8175;
+    margin-left: .28rem;
+    letter-spacing: 0;
+  }
   #rga-root .form-check-input:checked {
     background-color: var(--primary, #c08b00) !important;
     border-color: var(--primary, #c08b00) !important;
   }
+  #rga-root .rga-bolas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    max-width: 100%;
+  }
   #rga-root .rga-ball {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px; border-radius: 50%;
+    width: 30px; height: 30px; border-radius: 50%;
     background: var(--primary, #c08b00); color: #fff;
-    font-weight: 800; font-size: .75rem; margin: 2px;
+    font-weight: 800; font-size: .72rem; margin: 0; flex: 0 0 auto;
     font-variant-numeric: tabular-nums;
+  }
+  #rga-root #rga-lista {
+    column-count: 2;
+    column-gap: .7rem;
   }
   #rga-root .rga-aposta {
     border: 1px solid #e5e7eb; border-radius: 10px; padding: .7rem .9rem;
-    margin-bottom: .55rem; background: #fff;
+    margin: 0 0 .55rem; background: #fff; min-width: 0;
     border-left: 5px solid var(--primary, #c08b00);
+    break-inside: avoid;
+    width: 100%;
   }
-  #rga-root details > summary { cursor: pointer; font-weight: 700; color: var(--primary-xdark, #664a00); }
+  #rga-root .rga-titulo {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .4rem;
+    font-weight: 400;
+  }
+  #rga-root .rga-ordem,
+  #rga-root .rga-pts-lbl {
+    font-weight: 400;
+    font-size: .95rem;
+    color: #6b6256;
+  }
+  #rga-root .rga-pts-num {
+    font-weight: 800;
+    font-size: 1.45rem;
+    line-height: 1;
+    color: var(--primary-xdark, #664a00);
+    font-variant-numeric: tabular-nums;
+  }
+  #rga-root .rga-pts-num.is-cheia {
+    color: #15803d;
+    animation: rga-pulsa 1.15s ease-in-out infinite;
+  }
+  #rga-root .rga-titulo:has(.is-cheia) .rga-pts-lbl {
+    color: #15803d;
+    font-weight: 800;
+  }
+  #rga-root .rga-aposta:has(.rga-pts-num.is-cheia) {
+    border-left-color: #15803d;
+  }
+  #rga-root .rga-falhas:not(:empty) {
+    font-weight: 800;
+    color: #dc2626;
+  }
+  @keyframes rga-pulsa {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.16); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #rga-root .rga-pts-num.is-cheia { animation: none; }
+  }
+  @media (max-width: 700px) {
+    #rga-root #rga-lista { column-count: 1; }
+  }
+  #rga-root details > summary { cursor: pointer; font-weight: 400; color: #3f3214; }
   #rga-root .rga-painel {
     display: flex; flex-wrap: wrap; gap: .85rem 1.1rem; align-items: flex-start;
     margin-top: .45rem; padding-top: .65rem;
     border-top: 4px solid var(--primary, #c08b00);
   }
   #rga-root .rga-volante {
-    display: grid; grid-template-columns: repeat(10, 1.55rem); gap: 2px;
+    display: grid;
+    grid-template-columns: repeat(var(--rga-cols, 10), 1.45rem);
+    gap: 2px;
+    width: max-content;
+    max-width: 100%;
     background: #fff9e6; border: 2px solid #e8d48a; border-radius: 8px; padding: .3rem;
   }
   #rga-root .rga-cel {
     width: 1.55rem; height: 1.55rem; padding: 0;
     border: 1px solid #ccc; border-radius: 3px; background: #fff; color: #666;
     font-size: .62rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  #rga-root .rga-valor {
+    margin-top: .35rem;
+    font-size: .95rem;
+    font-weight: 800;
+    color: var(--primary-xdark, #664a00);
   }
   #rga-root .rga-cel.is-on {
     background: var(--primary, #c08b00); border-color: var(--primary-dark, #996e00); color: #fff;
@@ -138,8 +281,8 @@
     line-height: 1.35;
   }
   #rga-root .rga-itens li.is-nao .rga-crit,
-  #rga-root .rga-itens li.is-nao .rga-val { color: #9a3412; }
-  #rga-root .rga-itens li.is-nao .rga-sep { color: #c2410c; }
+  #rga-root .rga-itens li.is-nao .rga-val,
+  #rga-root .rga-itens li.is-nao .rga-sep { color: #dc2626; }
   #rga-root .rga-itens li.rga-div {
     grid-column: 1 / -1;
     height: 3px;
@@ -163,27 +306,35 @@
     <button type="button" class="rga-reset" id="rga-resetar" title="Resetar" aria-label="Resetar">
       <i class="fas fa-rotate-right" aria-hidden="true"></i>
     </button>
+    <span class="rga-ultimo" id="rga-ultimo" {% if not ultimo_resultado %}hidden{% endif %}
+          title="Último concurso{% if ultimo_concurso %} {{ ultimo_concurso }}{% endif %}">
+      {% if ultimo_resultado %}{{ ultimo_resultado }}{% endif %}
+      {% if ultimo_mes_abrev %}
+      <span class="rga-mes{% if ultimo_mes_nome %} mes-nome-{{ ultimo_mes_nome }}{% endif %}">{{ ultimo_mes_abrev }}</span>
+      {% endif %}
+    </span>
   </div>
   <p class="rga-hint">Frequência histórica é filtro de construção, não previsão do próximo resultado. Corte elimina. Ponto só entra na nota. O que o resumo marca como informativo ou não confirmado não filtra.</p>
 
   {% if not tela.sucesso %}
   <p class="text-danger mt-3">{{ tela.erro or 'Não foi possível ler o Resumo Geral.' }}</p>
   {% else %}
-  <div class="row g-3 mt-2">
-    <div class="col-lg-4">
-      <div class="rga-box">
-        <h3>Corte</h3>
-        {% for c in tela.criterios if c.papel == 'corte' %}
-        <div class="form-check">
-          <input class="form-check-input rga-c" type="checkbox" value="{{ c.criterio }}" id="c{{ loop.index }}" {% if c.ligado %}checked{% endif %}>
-          <label class="form-check-label" for="c{{ loop.index }}">{{ c.criterio }}</label>
-        </div>
-        {% endfor %}
+  {% set n_corte = tela.criterios | selectattr('papel', 'equalto', 'corte') | list | length %}
+  {% set n_ponto = tela.criterios | selectattr('papel', 'equalto', 'ponto') | list | length %}
+  {% set pts_max = n_corte * 10 + n_ponto * 6 %}
+  <div class="rga-cards">
+    <div class="rga-box">
+      <h3>Corte <span class="rga-peso">({{ n_corte }} × 10 = {{ n_corte * 10 }})</span></h3>
+      {% for c in tela.criterios if c.papel == 'corte' %}
+      <div class="form-check">
+        <input class="form-check-input rga-c" type="checkbox" value="{{ c.criterio }}" id="c{{ loop.index }}" {% if c.ligado %}checked{% endif %}>
+        <label class="form-check-label" for="c{{ loop.index }}">{{ c.criterio }}</label>
       </div>
+      {% endfor %}
     </div>
-    <div class="col-lg-4">
-      <div class="rga-box">
-        <h3>Pontuação</h3>
+    <div class="rga-box">
+      <h3>Pontuação <span class="rga-peso">({{ n_ponto }} × 6 = {{ n_ponto * 6 }})</span></h3>
+      <div class="rga-checks">
         {% for c in tela.criterios if c.papel == 'ponto' %}
         <div class="form-check">
           <input class="form-check-input rga-c" type="checkbox" value="{{ c.criterio }}" id="p{{ loop.index }}" {% if c.ligado %}checked{% endif %}>
@@ -192,18 +343,16 @@
         {% endfor %}
       </div>
     </div>
-    <div class="col-lg-4">
-      <div class="rga-box">
-        <h3>Só no checklist</h3>
-        <ul class="small mb-0 ps-3">
-          {% for c in tela.criterios if c.papel == 'exibe' %}
-          <li>{{ c.criterio }}</li>
-          {% endfor %}
-        </ul>
-      </div>
+    <div class="rga-box">
+      <h3>Só no checklist <span class="rga-peso">(máx {{ pts_max }}) pts</span></h3>
+      <ul class="rga-checklist small mb-0">
+        {% for c in tela.criterios if c.papel == 'exibe' %}
+        <li>{{ c.criterio }}</li>
+        {% endfor %}
+      </ul>
     </div>
   </div>
-  <div class="d-flex flex-wrap gap-2 align-items-center mt-3">
+  <div class="rga-acoes">
     <label class="small mb-0">Dezenas
       <input id="rga-dez" type="number" min="{{ tela.dezenas_min or 7 }}" max="{{ tela.dezenas_max or 15 }}" value="{{ tela.dezenas_padrao or 7 }}" class="form-control form-control-sm" style="width:4.5rem" title="De {{ tela.dezenas_min or 7 }} a {{ tela.dezenas_max or 15 }}">
     </label>
@@ -246,6 +395,29 @@
 (function () {
   const btn = document.getElementById('rga-gerar');
   const resetBtn = document.getElementById('rga-resetar');
+  const ultEl = document.getElementById('rga-ultimo');
+  if (ultEl && ultEl.hidden) {
+    fetch('/geradores-elite/api/construtor-construcoes/ultimo-sorteio')
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.sucesso) return;
+        const nums = (j.dezenas || []).map(function (n) {
+          return String(Number(n)).padStart(2, '0');
+        }).join(' ');
+        if (!nums) return;
+        ultEl.textContent = '';
+        ultEl.appendChild(document.createTextNode(nums + (j.mes_abrev ? ' ' : '')));
+        if (j.mes_abrev) {
+          const mes = document.createElement('span');
+          mes.className = 'rga-mes' + (j.mes_nome ? ' mes-nome-' + j.mes_nome : '');
+          mes.textContent = j.mes_abrev;
+          ultEl.appendChild(mes);
+        }
+        if (j.concurso) ultEl.title = 'Último concurso ' + j.concurso;
+        ultEl.hidden = false;
+      })
+      .catch(function () {});
+  }
   const lista = document.getElementById('rga-lista');
   const aviso = document.getElementById('rga-aviso');
   const txt = document.getElementById('rga-txt');
@@ -286,6 +458,10 @@
   const qtdInput = document.getElementById('rga-qtd');
   const MIN = Number((dezInput && dezInput.min) || 7);
   const MAX = Number((dezInput && dezInput.max) || 15);
+  const UNI_MIN = {{ tela.universo_min|default(1) }};
+  const UNI_MAX = {{ tela.universo_max|default(31) }};
+  const VOLANTE_COLS = {{ tela.volante_cols|default(10) }};
+  const PRECOS = {{ precos_aposta|tojson }};
   const dezPadrao = dezInput ? dezInput.value : String(MIN);
   const qtdPadrao = qtdInput ? qtdInput.value : '10';
   const criteriosPadrao = [...document.querySelectorAll('.rga-c')].map(function (el) {
@@ -384,24 +560,35 @@
     const set = {};
     (dezenas || []).forEach(function (n) { set[Number(n)] = true; });
     let html = '';
-    for (let n = 1; n <= 31; n++) {
+    for (let n = UNI_MIN; n <= UNI_MAX; n++) {
       html += '<button type="button" class="rga-cel' + (set[n] ? ' is-on' : '') + '" data-n="' + n + '">' + pad(n) + '</button>';
     }
     return html;
   }
   function qtdTexto(qtd) {
-    return qtd + ' dezenas' + (qtd > 7 ? ' · bolão' : '');
+    return qtd + ' dezenas' + (qtd > MIN ? ' · bolão' : '');
+  }
+  function valorTexto(qtd) {
+    var v = PRECOS[String(qtd)] || '';
+    return v ? ('Valor da aposta — ' + v) : '';
+  }
+  function tituloHtml(ap) {
+    const cheia = Number(ap.pontos) === 100 ? ' is-cheia' : '';
+    return '<span class="rga-ordem">' + esc(ap.ordem) + '</span>'
+      + '<strong class="rga-pts-num' + cheia + '">' + esc(ap.pontos) + '</strong>'
+      + '<span class="rga-pts-lbl">pts</span>';
   }
   function cardHtml(ap, i) {
     const falhas = (ap.falhas || []).map(esc).join(', ');
     return '<div class="rga-aposta" data-i="' + i + '">'
-      + '<div class="d-flex align-items-center"><label class="mb-0 d-inline-flex align-items-center gap-2"><input type="checkbox" class="form-check-input rga-pick m-0" data-i="' + i + '" checked><strong class="rga-titulo">' + ap.ordem + ' · ' + ap.pontos + ' pts</strong></label></div>'
+      + '<div class="d-flex align-items-center"><label class="mb-0 d-inline-flex align-items-center gap-2"><input type="checkbox" class="form-check-input rga-pick m-0" data-i="' + i + '" checked><span class="rga-titulo">' + tituloHtml(ap) + '</span></label></div>'
       + '<div class="mt-1 rga-bolas">' + htmlBolas(ap.dezenas) + '</div>'
-      + '<div class="small text-muted mt-1 rga-falhas">' + (falhas ? 'Fora: ' + falhas : '') + '</div>'
+      + '<div class="small mt-1 rga-falhas">' + falhas + '</div>'
       + '<details class="small mt-1"><summary>Checklist</summary><div class="rga-painel">'
-      + '<div><div class="rga-volante"></div>'
+      + '<div><div class="rga-volante" style="--rga-cols:' + VOLANTE_COLS + '"></div>'
       + '<div class="small mt-1 rga-qtde">' + qtdTexto((ap.dezenas || []).length) + '</div>'
       + '<div class="small text-muted">Clique para marcar ou tirar. De ' + MIN + ' a ' + MAX + '.</div>'
+      + '<div class="rga-valor">' + esc(valorTexto((ap.dezenas || []).length)) + '</div>'
       + '<div class="small rga-limite"></div></div>'
       + '<ul class="rga-itens">' + htmlCheck(ap) + '</ul></div></details></div>';
   }
@@ -466,13 +653,13 @@
     let proximo;
     if (tem) {
       if (atual.length <= MIN) {
-        limite.textContent = 'Mínimo de 7 dezenas. Marque outra antes de tirar.';
+        limite.textContent = 'Mínimo de ' + MIN + ' dezenas. Marque outra antes de tirar.';
         return;
       }
       proximo = atual.filter(function (x) { return x !== n; });
     } else {
       if (atual.length >= MAX) {
-        limite.textContent = 'Máximo de 15 dezenas.';
+        limite.textContent = 'Máximo de ' + MAX + ' dezenas.';
         return;
       }
       proximo = atual.concat(n).sort(function (a, b) { return a - b; });
@@ -481,12 +668,13 @@
     ap.dezenas = proximo.map(pad);
     card.querySelector('.rga-bolas').innerHTML = htmlBolas(ap.dezenas);
     card.querySelector('.rga-qtde').textContent = qtdTexto(proximo.length);
+    card.querySelector('.rga-valor').textContent = valorTexto(proximo.length);
     cel.classList.toggle('is-on', !tem);
     const seq = (ap._seq = (ap._seq || 0) + 1);
     fetch('/geradores-elite/api/resumo-geral-apostas/avaliar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dezenas: proximo, criterios: criteriosAtivos })
+      body: JSON.stringify({ dezenas: proximo, criterios: criteriosAtivos, mes_num: ap.mes_num || 0 })
     }).then(function (r) { return r.json(); }).then(function (data) {
       if (ap._seq !== seq) return;
       if (!data.sucesso) {
@@ -504,9 +692,9 @@
       ap.mes_num = data.mes_num || ap.mes_num || 0;
       ap.mes_nome = data.mes_nome || ap.mes_nome || '';
       ap.mes = data.mes || ap.mes || '';
-      card.querySelector('.rga-titulo').textContent = ap.ordem + ' · ' + ap.pontos + ' pts';
+      card.querySelector('.rga-titulo').innerHTML = tituloHtml(ap);
       card.querySelector('.rga-itens').innerHTML = htmlCheck(ap);
-      card.querySelector('.rga-falhas').textContent = ap.falhas.length ? 'Fora: ' + ap.falhas.join(', ') : '';
+      card.querySelector('.rga-falhas').textContent = ap.falhas.length ? ap.falhas.join(', ') : '';
       card.querySelector('.rga-bolas').innerHTML = htmlBolas(ap.dezenas);
     }).catch(function () {
       if (ap._seq === seq) limite.textContent = 'Não foi possível ler o volante.';

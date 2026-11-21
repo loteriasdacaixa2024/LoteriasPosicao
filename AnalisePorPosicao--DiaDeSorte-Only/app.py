@@ -100,6 +100,7 @@ def create_app():
         import models.construtor_construcoes
         import models.comportamento_estrategia
         import models.historico_analise_inteligente
+        import geradores_elite.comparador_lote  # noqa: F401 — registra a tabela do lote fixo
         db.create_all()
         for sql in (
             "ALTER TABLE sorteio_diadesorte ADD COLUMN ganhadores_7 INTEGER",

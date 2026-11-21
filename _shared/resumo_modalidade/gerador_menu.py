@@ -30,8 +30,16 @@ _CORTES = {
     "Finais iguais",
 }
 
+# Informação no Resumo; na geração entram só como nota, sem eliminar jogo.
+_PONTO_EXTRA = {
+    "Dezenas pendentes do ciclo",
+    "Mais atrasadas",
+}
+
 
 def _papel(item: Dict[str, Any]) -> str:
+    if item.get("criterio") in _PONTO_EXTRA:
+        return "ponto"
     tipo = item.get("tipo") or "info"
     if tipo in ("info", "nao_confirmado"):
         return "exibe"
@@ -45,6 +53,10 @@ def _papel(item: Dict[str, Any]) -> str:
 
 
 def _ligado_padrao(item: Dict[str, Any], papel: str) -> bool:
+    if item.get("criterio") == "Repetidas do anterior":
+        return False
+    if item.get("criterio") in _PONTO_EXTRA:
+        return True
     if papel == "exibe":
         return False
     if papel == "corte":
@@ -78,7 +90,6 @@ def _ctx(spec: ResumoSpec, data: Dict[str, Any], sorteios: List[Dict[str, Any]])
         if len(dz) == spec.sorteadas:
             draws.append(dz)
     ultimo = draws[-1] if draws else []
-    anterior = draws[-2] if len(draws) > 1 else []
     gap_medios = []
     amps = []
     linhas_c: Dict[int, int] = {}
@@ -127,7 +138,7 @@ def _ctx(spec: ResumoSpec, data: Dict[str, Any], sorteios: List[Dict[str, Any]])
                 break
     return {
         "spec": spec,
-        "prev": set(anterior),
+        "prev": set(ultimo),
         "historico": {frozenset(dz) for dz in draws},
         "pares": int(str(pi.get("moda") or "3P").split("P")[0].strip() or 3),
         "soma_lo": int(soma.get("p20") or 0),
@@ -148,7 +159,36 @@ def _ctx(spec: ResumoSpec, data: Dict[str, Any], sorteios: List[Dict[str, Any]])
         "mes_num": mes_num,
         "mes_nome": mes_nome,
         "grupo_moda": {},
+        "pendentes": _pendentes_ciclo(data),
+        "atrasadas": _atrasadas(data),
     }
+
+
+def _pendentes_ciclo(data: Dict[str, Any]) -> Set[int]:
+    atual = ((data.get("ciclo") or {}).get("atual") or {})
+    bruto = atual.get("pendentes_num") or atual.get("pendentes") or []
+    saida = set()
+    for item in bruto:
+        try:
+            saida.add(int(item))
+        except (TypeError, ValueError):
+            continue
+    return saida
+
+
+def _atrasadas(data: Dict[str, Any], limite: int = 5) -> Set[int]:
+    stats = ((data.get("dezenas") or {}).get("stats") or [])
+    ordem = sorted(
+        stats,
+        key=lambda r: (-int(r.get("atraso") or 0), int(r.get("dezena") or 0)),
+    )
+    saida = set()
+    for r in ordem[:limite]:
+        try:
+            saida.add(int(r["dezena"]))
+        except (TypeError, ValueError, KeyError):
+            continue
+    return saida
 
 
 def _grupo_n(dz: Sequence[int], conjunto: Set[int]) -> int:
@@ -190,7 +230,9 @@ def _cumpre(nome: str, dz: Sequence[int], ctx: Dict[str, Any]) -> Optional[bool]
         refs = ctx["refs"]
         if len(refs) < spec.sorteadas:
             return None
-        perto = sum(1 for i, n in enumerate(sorted(dz)) if abs(int(n) - refs[i]) <= 3)
+        perto = sum(
+            1 for n, ref in zip(sorted(dz), refs) if abs(int(n) - int(ref)) <= 3
+        )
         return perto >= max(3, spec.sorteadas - 3)
     if nome == "Diagonais do volante":
         try:
@@ -216,6 +258,20 @@ def _cumpre(nome: str, dz: Sequence[int], ctx: Dict[str, Any]) -> Optional[bool]
         return ctx["amp_lo"] <= amp <= ctx["amp_hi"]
     if nome == "Mais frequentes no histórico":
         return len(set(dz) & ctx["quentes"]) >= spec.sorteadas // 2
+    if nome == "Dezenas pendentes do ciclo":
+        pend = ctx.get("pendentes") or set()
+        if not pend:
+            return None
+        return len(set(int(n) for n in dz) & set(pend)) >= 1
+    if nome == "Mais atrasadas":
+        atras = ctx.get("atrasadas") or set()
+        if not atras:
+            return None
+        return len(set(int(n) for n in dz) & set(atras)) >= 1
+    if nome == "Mês da Sorte":
+        if "meses_indicados" in ctx:
+            return int(ctx.get("mes_num") or 0) in set(ctx.get("meses_indicados") or [])
+        return bool(ctx.get("mes_nome"))
     sp = ctx.get("sp")
     if sp is None:
         return None
@@ -227,8 +283,6 @@ def _cumpre(nome: str, dz: Sequence[int], ctx: Dict[str, Any]) -> Optional[bool]
         return None
     if nome == "Fibonacci":
         return None
-    if nome == "Mês da Sorte":
-        return bool(ctx.get("mes_nome"))
     return None
 
 
@@ -311,8 +365,8 @@ def _leitura(nome: str, dz: Sequence[int], ctx: Dict[str, Any]) -> str:
         if len(refs) < spec.sorteadas:
             return "—"
         posicoes = [
-            {"posicao": i + 1, "dezena": n, "deslocamento": int(n) - int(refs[i])}
-            for i, n in enumerate(ordenada)
+            {"posicao": i + 1, "dezena": n, "deslocamento": int(n) - int(ref)}
+            for i, (n, ref) in enumerate(zip(ordenada, refs))
         ]
         return _texto_regua(posicoes)
     if nome == "Diagonais do volante":
@@ -334,6 +388,12 @@ def _leitura(nome: str, dz: Sequence[int], ctx: Dict[str, Any]) -> str:
         return str(max(ordenada) - min(ordenada)) if ordenada else "—"
     if nome == "Mais frequentes no histórico":
         hit = [n for n in ordenada if n in (ctx.get("quentes") or set())]
+        return f"{len(hit)} | {' '.join(_fmt(n) for n in hit)}" if hit else "0"
+    if nome == "Dezenas pendentes do ciclo":
+        hit = [n for n in ordenada if n in (ctx.get("pendentes") or set())]
+        return f"{len(hit)} | {' '.join(_fmt(n) for n in hit)}" if hit else "0"
+    if nome == "Mais atrasadas":
+        hit = [n for n in ordenada if n in (ctx.get("atrasadas") or set())]
         return f"{len(hit)} | {' '.join(_fmt(n) for n in hit)}" if hit else "0"
     if nome in ("Primos", "Moldura", "Múltiplos de 3", "Fibonacci"):
         conjunto = (ctx.get("grupos") or {}).get(nome) or set()
@@ -435,6 +495,76 @@ def _montar_pack(modality_key: str) -> Dict[str, Any]:
     return pack
 
 
+def _pool_meses_indicados(modality_key: str) -> Optional[List[int]]:
+    """Meses que não saíram nos últimos 10 concursos. None fora do Dia de Sorte."""
+    if (modality_key or "").strip().lower() != "diadesorte":
+        return None
+    try:
+        from diadesorte.meses_indicados import carregar_meses_indicados
+        from models.sorteio_diadesorte import SorteioDiaDeSorte
+
+        analise = carregar_meses_indicados(SorteioDiaDeSorte)
+    except Exception:
+        return []
+    if not analise.get("sucesso"):
+        return []
+    return [int(n) for n in (analise.get("meses_indicados_nums") or [])]
+
+
+def _distribuir_meses_indicados(
+    pool: Sequence[int],
+    quantidade: int,
+    rng: random.Random,
+    bloco: int = 10,
+) -> List[int]:
+    """Cada bloco de 10 recebe os meses indicados, em ordem aleatória.
+
+    O bloco repete o grupo embaralhado até completar 10. Assim Mai, Ago, Jul
+    e Dez, por exemplo, entram em cada dezena de apostas. O bloco incompleto
+    no fim usa o mesmo grupo.
+    """
+    nums: List[int] = []
+    vistos: Set[int] = set()
+    for bruto in pool or []:
+        try:
+            n = int(bruto)
+        except (TypeError, ValueError):
+            continue
+        if 1 <= n <= 12 and n not in vistos:
+            vistos.add(n)
+            nums.append(n)
+    total = max(0, int(quantidade or 0))
+    if not nums or total <= 0:
+        return []
+    tamanho = max(1, int(bloco or 10))
+    out: List[int] = []
+    while len(out) < total:
+        falta = min(tamanho, total - len(out))
+        pedaco: List[int] = []
+        while len(pedaco) < falta:
+            giro = list(nums)
+            rng.shuffle(giro)
+            pedaco.extend(giro)
+        out.extend(pedaco[:falta])
+    return out
+
+
+def _ctx_com_mes(
+    ctx: Dict[str, Any],
+    mes: Optional[Dict[str, Any]],
+    indicados: Optional[Sequence[int]],
+) -> Dict[str, Any]:
+    if indicados is None and not mes:
+        return ctx
+    novo = dict(ctx)
+    if indicados is not None:
+        novo["meses_indicados"] = {int(n) for n in indicados}
+    if mes:
+        novo["mes_num"] = int(mes["mes_num"])
+        novo["mes_nome"] = mes.get("mes_nome") or ""
+    return novo
+
+
 def _normalizar(dezenas: Sequence[Any], spec: ResumoSpec) -> List[int]:
     saida = []
     vistos = set()
@@ -531,6 +661,9 @@ def criterios_para_tela(modality_key: str) -> Dict[str, Any]:
         "dezenas_max": hi,
         "dezenas_padrao": int(spec.sorteadas),
         "quantidade_max": _QTD_MAX,
+        "universo_min": int(spec.dezena_min),
+        "universo_max": int(spec.dezena_max),
+        "volante_cols": 5 if modality_key == "lotofacil" else 10,
     }
 
 
@@ -569,31 +702,38 @@ def gerar_resumo_geral(
     teto = min(20000, max(4000, qtd * 4))
     tentativas = min(120000, max(25000, qtd * 40))
     universo = list(range(spec.dezena_min, spec.dezena_max + 1))
+    prev = {int(n) for n in (ctx.get("prev") or set())}
+    exige_repetidas = any(c["criterio"] == "Repetidas do anterior" for c in cortes)
+    livre = [n for n in universo if n not in prev] if (prev and not exige_repetidas) else universo
 
     def completar(nucleo: Sequence[int]) -> List[int]:
         base = [int(n) for n in nucleo]
         falta = k - len(base)
         if falta <= 0:
             return sorted(base[:k])
-        resto = [n for n in universo if n not in set(base)]
+        resto = [n for n in livre if n not in set(base)]
         if falta > len(resto):
             return sorted(base)
         return sorted(base + rng.sample(resto, falta))
 
     for _ in range(tentativas):
-        nucleo = _amostra(spec, spec.sorteadas, rng)
+        if len(livre) < spec.sorteadas:
+            break
+        nucleo = sorted(rng.sample(livre, spec.sorteadas))
         if _ja_sorteada(nucleo, pack["historico"], spec.motor):
             continue
-        if any(avalia(c["criterio"], nucleo) is False for c in cortes):
-            continue
         dz = completar(nucleo)
+        if any(avalia(c["criterio"], dz) is False for c in cortes):
+            continue
+        if prev and not exige_repetidas and (set(dz) & prev):
+            continue
         chave = frozenset(dz)
         if chave in vistos:
             continue
         vistos.add(chave)
         pts = 10 * len(cortes)
         for c in pontos:
-            ok = avalia(c["criterio"], nucleo)
+            ok = avalia(c["criterio"], dz)
             if ok is True:
                 pts += 6
         ranked.append({"nums": dz, "pontos": pts})
@@ -623,9 +763,21 @@ def gerar_resumo_geral(
             "sucesso": False,
             "erro": "Nenhuma combinação passou nos cortes marcados. Desmarque um corte e tente de novo.",
         }
+    indicados = _pool_meses_indicados(modality_key)
+    meses_lote = (
+        _distribuir_meses_indicados(indicados, len(escolhidos_jogos), rng)
+        if indicados
+        else []
+    )
+    item_mes = None
+    if meses_lote:
+        from diadesorte.meses_indicados import _item_mes
+        item_mes = _item_mes
     apostas = []
     for i, row in enumerate(escolhidos_jogos, start=1):
-        ficha = _ficha(row["nums"], catalogo, ativos, ctx)
+        mes = item_mes(meses_lote[i - 1]) if item_mes else None
+        ctx_ap = _ctx_com_mes(ctx, mes, indicados)
+        ficha = _ficha(row["nums"], catalogo, ativos, ctx_ap)
         ficha["ordem"] = i
         apostas.append(ficha)
     return {
@@ -645,6 +797,7 @@ def avaliar_resumo_geral(
     modality_key: str,
     dezenas: Sequence[Any],
     ativos: Sequence[str],
+    mes_num: Any = None,
 ) -> Dict[str, Any]:
     pack = _montar_pack(modality_key)
     if pack.get("erro"):
@@ -656,7 +809,17 @@ def avaliar_resumo_geral(
         return {"sucesso": False, "erro": f"Mínimo de {lo} dezenas."}
     if len(dz) > hi:
         return {"sucesso": False, "erro": f"Máximo de {hi} dezenas nesta modalidade."}
-    ficha = _ficha(dz, pack["catalogo"], ativos, pack["ctx"])
+    indicados = _pool_meses_indicados(modality_key)
+    mes = None
+    try:
+        mn = int(mes_num or 0)
+    except (TypeError, ValueError):
+        mn = 0
+    if 1 <= mn <= 12:
+        from diadesorte.meses_indicados import _item_mes
+        mes = _item_mes(mn)
+    ctx_ap = _ctx_com_mes(pack["ctx"], mes, indicados)
+    ficha = _ficha(dz, pack["catalogo"], ativos, ctx_ap)
     ficha["sucesso"] = True
     ficha["bolao"] = len(dz) > spec.sorteadas
     return ficha

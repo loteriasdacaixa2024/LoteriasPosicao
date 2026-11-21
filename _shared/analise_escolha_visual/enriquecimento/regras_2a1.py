@@ -196,7 +196,10 @@ def viola_restricoes(
         for g in _diagonais(det):
             if _chave_diag(g) in proib_diag:
                 sym = g.get("dir_sym") or "↘"
-                return f"repete a diagonal {sym} " + "-".join(f"{n:02d}" for n in g["nums"])
+                seq = list(g["nums"])
+                if sym == "↗" or g.get("dir") == "up":
+                    seq = list(reversed(seq))
+                return f"repete a diagonal {sym} " + "-".join(f"{n:02d}" for n in seq)
     return None
 
 

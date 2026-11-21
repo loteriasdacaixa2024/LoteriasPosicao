@@ -29,7 +29,10 @@ def _resumo_restricoes(restr: Dict[str, Any], concurso: Any, data: str) -> Dict[
         out = []
         for g in grupos or []:
             sym = g.get("dir_sym") or "↘"
-            nums = "-".join(f"{int(n):02d}" for n in (g.get("nums") or []))
+            seq = [int(n) for n in (g.get("nums") or [])]
+            if sym == "↗" or g.get("dir") == "up":
+                seq = list(reversed(seq))
+            nums = "-".join(f"{n:02d}" for n in seq)
             out.append(f"{sym} {nums}")
         return out
 

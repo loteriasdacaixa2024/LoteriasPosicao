@@ -403,7 +403,9 @@
       const grupos = bloco.detalhe?.grupos || [];
       if (!grupos.length) return '—';
       return grupos.map((g) => {
-        const nums = (g.nums || g).map(fmt).join('-');
+        let seq = (g.nums || g).slice();
+        if (g.dir_sym === '↗' || g.dir === 'up') seq = seq.slice().reverse();
+        const nums = seq.map(fmt).join('-');
         return g.dir_sym ? `${g.dir_sym} | ${nums}` : nums;
       }).join(' · ');
     }

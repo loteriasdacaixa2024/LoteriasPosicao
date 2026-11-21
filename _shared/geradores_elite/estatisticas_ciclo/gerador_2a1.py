@@ -543,7 +543,10 @@ def _fmt_diags(grupos: Sequence[Dict[str, Any]]) -> str:
     partes = []
     for g in grupos:
         sym = g.get("dir_sym") or ("↘" if g.get("dir") != "up" else "↗")
-        nums = "-".join(f"{int(n):02d}" for n in (g.get("nums") or []))
+        seq = [int(n) for n in (g.get("nums") or [])]
+        if sym == "↗" or g.get("dir") == "up":
+            seq = list(reversed(seq))
+        nums = "-".join(f"{n:02d}" for n in seq)
         partes.append(f"{sym} {nums}")
     return " · ".join(partes)
 

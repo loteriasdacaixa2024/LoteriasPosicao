@@ -2,11 +2,6 @@
 {% block title %}{{ page_title }} — {{ modality_nome }}{% endblock %}
 {% block content %}
 <style>
-    .page-content:has(#rg-root) {
-        max-width: none;
-        padding-left: clamp(1rem, 2vw, 2.25rem);
-        padding-right: clamp(1rem, 2vw, 2.25rem);
-    }
     #rg-root { max-width: none; width: 100%; }
     #rg-root .rg-kpi {
         background: var(--surface, #fff);
@@ -116,6 +111,7 @@
         color: #94a3b8;
         text-align: right;
     }
+    #rg-resultados { scroll-margin-top: calc(var(--nav-h, 4.25rem) + .75rem); }
     #rg-res-corpo { font-variant-numeric: tabular-nums; }
     #rg-res-folha { color: #1a1a1a; }
     #rg-res-folha .rg-res-titulo {
@@ -700,6 +696,46 @@
             return '<span class="rg-res-linha">' + qtdLinha(t) + '</span>';
         }).join('');
     }
+    function comTotal(dezenas) {
+        const s = String(dezenas || '').trim();
+        if (!s || s.indexOf('|') >= 0) return s;
+        const lista = s.split(/\s+/).filter(Boolean);
+        return String(lista.length).padStart(2, '0') + ' | ' + lista.join(' ');
+    }
+    function linhasNaoSairam(data) {
+        const prontas = data.nao_sairam_linhas;
+        if (Array.isArray(prontas) && prontas.length && prontas[0] && typeof prontas[0] === 'object') {
+            return prontas.map(function (item) {
+                return { rotulo: String(item.rotulo || ''), dezenas: comTotal(item.dezenas) };
+            }).filter(function (item) { return item.rotulo && item.dezenas; });
+        }
+        const grupos = {};
+        (data.nao_sairam || []).forEach(function (t) {
+            const s = String(t || '');
+            const i = s.indexOf('|');
+            const corpo = (i < 0 ? s : s.slice(i + 1)).trim();
+            corpo.split(/\s+/).forEach(function (p) {
+                if (!/^\d+$/.test(p)) return;
+                const n = Number(p);
+                const faixa = Math.floor(n / 10);
+                (grupos[faixa] = grupos[faixa] || []).push(n);
+            });
+        });
+        return Object.keys(grupos).sort(function (a, b) { return Number(a) - Number(b); }).map(function (faixa) {
+            const lista = grupos[faixa].slice().sort(function (a, b) { return a - b; }).map(function (n) {
+                return String(n).padStart(2, '0');
+            });
+            return {
+                rotulo: 'L' + (Number(faixa) + 1),
+                dezenas: String(lista.length).padStart(2, '0') + ' | ' + lista.join(' ')
+            };
+        });
+    }
+    function linhasHtml(data) {
+        return linhasNaoSairam(data).map(function (item) {
+            return linha(esc(item.rotulo), qtdLinha(item.dezenas));
+        }).join('');
+    }
     function bloco(linhas) {
         return (linhas || []).map(function (t) {
             return '<span class="rg-res-linha">' + esc(t) + '</span>';
@@ -749,6 +785,7 @@
             + linha('Resultado:', bloco([data.resultado_ordem, data.resultado_crescente]))
             + linha('Mês:', mesValor(data))
             + linha('Dezenas que<br>não saíram:', blocoQtd(listas), true)
+            + linhasHtml(data)
             + linha('Pares:', qtdLinha(data.pares))
             + linha('Impares:', qtdLinha(data.impares))
             + linha('Repetido:', esc(data.repetido))
@@ -786,14 +823,23 @@
             }
             sel.value = String(data.concurso);
             render(data);
+            abrirResumoDireto();
         }).catch(function () {
             corpo.innerHTML = '<p class="text-muted small mb-0">Não foi possível carregar o resumo deste concurso.</p>';
         });
+    }
+    function abrirResumoDireto() {
+        const hash = (location.hash || '').replace(/^#/, '').toLowerCase();
+        const ver = (new URLSearchParams(location.search).get('ver') || '').toLowerCase();
+        if (hash !== 'rg-resultados' && hash !== 'resumo-dos-resultados' && ver !== 'resultados') return;
+        const alvo = document.getElementById('rg-resultados');
+        if (alvo) alvo.scrollIntoView({ block: 'start' });
     }
     sel.addEventListener('change', function () {
         if (preenchendo) return;
         carregar(sel.value);
     });
+    abrirResumoDireto();
     carregar();
 })();
 </script>

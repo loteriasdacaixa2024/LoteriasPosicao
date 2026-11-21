@@ -108,7 +108,10 @@
         const runs = window.__diagsDaAposta(dz, dmin, dmax);
         if (!runs.length) return '';
         return `<div class="aposta-diag-line" title="Diagonais desta aposta">${
-            runs.map((d) => `<span class="ge-diag-chip">${d.dir_sym} ${d.nums_fmt}</span>`).join('')
+            runs.map((d) => {
+                const vista = d.dir_sym === '↗' ? String(d.nums_fmt).split('-').reverse().join('-') : d.nums_fmt;
+                return `<span class="ge-diag-chip">${d.dir_sym} ${vista}</span>`;
+            }).join('')
         }</div>`;
     };
 })();

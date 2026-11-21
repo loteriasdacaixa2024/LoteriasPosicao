@@ -699,8 +699,64 @@
     .hit-badge-aposta.n-5 { background: #f97316; color: #fff; }
     .hit-badge-aposta.n-6 { background: #eab308; color: #000; }
     .hit-badge-aposta.hit-simples { background: #e2e8f0; color: #475569; }
+
+    #dl-aba-linhas[hidden], #dl-aba-colunas[hidden] { display: none !important; }
+    .dl-abas { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 1rem; }
+    .dl-aba {
+        border: 1px solid #e7e5e4; background: #fff; color: #57534e;
+        border-radius: 999px; padding: .28rem .8rem; font-size: .78rem; font-weight: 700;
+    }
+    .dl-aba.is-on { background: #f5f3ff; border-color: #c7d2fe; color: #3730a3; }
+    .dl-nota { font-size: .78rem; color: #78716c; margin: 0 0 .7rem; }
+    .dl-nota a { color: #6b5710; }
+    .dl-linhas { display: flex; flex-wrap: wrap; gap: .45rem; align-items: flex-start; margin-bottom: .85rem; }
+    .dl-linha {
+        flex: 0 1 auto; width: max-content; max-width: 15.5rem;
+        border: 1px solid #e7e5e4; border-radius: 10px; background: #fff;
+        padding: .4rem .55rem .45rem;
+    }
+    .dl-linha b { display: block; font-size: .72rem; color: #44403c; margin-bottom: .28rem; }
+    .dl-linha b span { color: #78716c; font-weight: 700; }
+    .dl-chips { display: flex; flex-wrap: wrap; gap: .2rem; }
+    .dl-chip {
+        width: 1.55rem; height: 1.55rem; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: #f5f5f4; color: #292524; font-size: .68rem; font-weight: 800;
+    }
+    .dl-card {
+        background: #fff; border: 1px solid #e7e5e4; border-radius: 12px;
+        padding: .7rem .75rem; margin-bottom: .75rem; max-width: 100%;
+    }
+    .dl-card h3 { font-size: .92rem; margin: 0 0 .45rem; color: #292524; }
+    .dl-tabela-wrap { overflow-x: auto; }
+    .dl-tabela { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    .dl-tabela th, .dl-tabela td { padding: .28rem .4rem; border-bottom: 1px solid #f5f5f4; white-space: nowrap; text-align: left; }
+    .dl-tabela th { color: #78716c; font-weight: 700; }
+    .dl-tabela tr { cursor: pointer; }
+    .dl-tabela tr.is-on { background: #f5f3ff; }
+    .dl-tabela td.num, .dl-tabela th.num { text-align: right; }
+    .dl-pad { word-spacing: .55em; }
+    .dl-comb { display: grid; grid-template-columns: 2.2rem 1fr; gap: .15rem .4rem; font-size: .78rem; }
+    .dl-comb span { color: #a8a29e; }
+    .dl-pag { display: flex; align-items: center; gap: .45rem; margin-top: .45rem; font-size: .75rem; color: #57534e; }
+    .dl-pag button, .dl-acoes button {
+        border: 1px solid #e7e5e4; background: #fff; color: #44403c;
+        border-radius: 999px; padding: .22rem .7rem; font-size: .75rem; font-weight: 700;
+    }
+    .dl-acoes { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .4rem; }
+    .dl-editor {
+        width: 100%; height: 8.5rem; resize: vertical; max-height: 16rem;
+        border: 1px solid #e7e5e4; border-radius: 8px; padding: .4rem .5rem;
+        font-family: ui-monospace, monospace; font-size: .75rem; line-height: 1.35;
+    }
+    .dl-status { font-size: .72rem; color: #78716c; margin: .3rem 0 0; }
 </style>
 
+<div class="dl-abas" role="tablist">
+    <button type="button" class="dl-aba is-on" data-dl-aba="colunas">Fechamento</button>
+    <button type="button" class="dl-aba" data-dl-aba="linhas">Linhas do resumo</button>
+</div>
+<div id="dl-aba-colunas">
 <!-- HEADER PRINCIPAL -->
 <div class="page-header text-center">
     <div class="d-flex flex-column align-items-center">
@@ -1049,6 +1105,47 @@
         <div id="lista-historico">
             <div class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Carregando histórico...</div>
         </div>
+    </div>
+</div>
+</div>
+
+<div id="dl-aba-linhas" hidden>
+    <p class="dl-nota" id="dlOrigem">Lendo as linhas do Resumo dos Resultados…</p>
+    <div class="dl-linhas" id="dlLinhas"></div>
+    <div class="dl-card">
+        <h3>Padrões que cabem nestas dezenas</h3>
+        <div class="dl-tabela-wrap">
+            <table class="dl-tabela">
+                <thead>
+                    <tr>
+                        <th class="num">Vezes</th>
+                        <th class="num">Atraso</th>
+                        <th class="num">Apostas</th>
+                        <th>Padrão</th>
+                    </tr>
+                </thead>
+                <tbody id="dlPadroes"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="dl-card">
+        <h3 id="dlCombTitulo">Combinações</h3>
+        <div class="dl-comb" id="dlCombLista"></div>
+        <div class="dl-pag">
+            <button type="button" id="dlPagAnt">Anterior</button>
+            <span id="dlPagInfo"></span>
+            <button type="button" id="dlPagProx">Próxima</button>
+        </div>
+    </div>
+    <div class="dl-card">
+        <h3>Arquivo</h3>
+        <div class="dl-acoes">
+            <button type="button" id="dlPreparar">Preparar este padrão</button>
+            <button type="button" id="dlTxt">Baixar TXT</button>
+            <button type="button" id="dlCsv">Baixar CSV</button>
+        </div>
+        <textarea id="dlEditor" class="dl-editor" spellcheck="false" placeholder="O texto do arquivo aparece aqui. Apague as linhas que não quiser e só então baixe."></textarea>
+        <p class="dl-status" id="dlStatus"></p>
     </div>
 </div>
 
@@ -1816,5 +1913,327 @@ const MAX_DEZENA = 31;
             return dataIso;
         }
     }
+</script>
+<script>
+(function () {
+    const JOGO = 7;
+    const POR_PAGINA = 12;
+    const abas = document.querySelectorAll('.dl-aba');
+    const painelColunas = document.getElementById('dl-aba-colunas');
+    const painelLinhas = document.getElementById('dl-aba-linhas');
+    const origem = document.getElementById('dlOrigem');
+    const boxLinhas = document.getElementById('dlLinhas');
+    const corpo = document.getElementById('dlPadroes');
+    const titulo = document.getElementById('dlCombTitulo');
+    const lista = document.getElementById('dlCombLista');
+    const pagInfo = document.getElementById('dlPagInfo');
+    const editor = document.getElementById('dlEditor');
+    const status = document.getElementById('dlStatus');
+    let grupos = [];
+    let padroes = [];
+    let escolhido = '';
+    let pagina = 0;
+    let cache = null;
+    let editorBase = '';
+    let editorSujo = false;
+    let carregado = false;
+    let escolhaManual = false;
+
+    function comb(n, k) {
+        if (k < 0 || k > n) return 0;
+        let r = 1;
+        for (let i = 1; i <= k; i++) r = r * (n - k + i) / i;
+        return Math.round(r);
+    }
+    function distribuir(qtd, limites, rest) {
+        if (!qtd) return rest === 0 ? [[]] : [];
+        const out = [];
+        const acc = new Array(qtd);
+        function rec(i, falta) {
+            if (i === qtd) {
+                if (falta === 0) out.push(acc.slice());
+                return;
+            }
+            const max = Math.min(limites[i], falta);
+            for (let k = 0; k <= max; k++) {
+                acc[i] = k;
+                rec(i + 1, falta - k);
+            }
+        }
+        rec(0, rest);
+        return out;
+    }
+    function combinacoes(arr, k) {
+        const out = [];
+        const n = arr.length;
+        if (!k) return [[]];
+        if (k > n) return [];
+        const idx = Array.from({ length: k }, function (_, i) { return i; });
+        while (true) {
+            out.push(idx.map(function (i) { return arr[i]; }));
+            let i = k - 1;
+            while (i >= 0 && idx[i] === n - k + i) i--;
+            if (i < 0) break;
+            idx[i] += 1;
+            for (let j = i + 1; j < k; j++) idx[j] = idx[j - 1] + 1;
+        }
+        return out;
+    }
+    function produto(listas) {
+        let acc = [[]];
+        listas.forEach(function (grupo) {
+            const prox = [];
+            acc.forEach(function (pref) {
+                grupo.forEach(function (item) { prox.push(pref.concat(item)); });
+            });
+            acc = prox;
+        });
+        return acc;
+    }
+    function fmt(n) { return String(n).padStart(2, '0'); }
+    function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+        });
+    }
+    function montarPadroes(listaGrupos) {
+        const porDig = {};
+        listaGrupos.forEach(function (g) { porDig[g.digito] = g.nums; });
+        const digitos = Object.keys(porDig).map(Number).sort(function (a, b) { return a - b; });
+        const travados = {};
+        digitos.forEach(function (d) {
+            const n = porDig[d].length;
+            if (n > 0 && n <= 2) travados[d] = n;
+        });
+        let soma = Object.keys(travados).reduce(function (s, d) { return s + travados[d]; }, 0);
+        digitos.slice().some(function (d) {
+            if (soma <= JOGO) return true;
+            if (!travados[d]) return false;
+            const corta = Math.min(travados[d], soma - JOGO);
+            travados[d] -= corta;
+            soma -= corta;
+            if (!travados[d]) delete travados[d];
+            return false;
+        });
+        const livres = digitos.filter(function (d) { return !travados[d] && porDig[d].length; });
+        const dists = distribuir(livres.length, livres.map(function (d) { return porDig[d].length; }), JOGO - soma);
+        return dists.map(function (contagens) {
+            const uso = {};
+            Object.keys(travados).forEach(function (d) { uso[d] = travados[d]; });
+            livres.forEach(function (d, i) { if (contagens[i]) uso[d] = contagens[i]; });
+            const seq = [];
+            digitos.forEach(function (d) {
+                const k = uso[d] || 0;
+                for (let i = 0; i < k; i++) seq.push(d);
+            });
+            if (seq.length !== JOGO) return null;
+            let apostas = 1;
+            Object.keys(uso).forEach(function (d) { apostas *= comb(porDig[d].length, uso[d]); });
+            return { padrao: seq.join(' '), uso: uso, apostas: apostas, vezes: null, atraso: null, travados: travados };
+        }).filter(Boolean);
+    }
+    function fraseTrava(item) {
+        if (!item) return '';
+        return grupos.filter(function (g) { return item.travados[g.digito]; }).map(function (g) {
+            return g.rotulo + ' entra como ' + Array(item.travados[g.digito]).fill(String(g.digito)).join(' ');
+        }).join(' · ');
+    }
+    function ordenar() {
+        padroes.sort(function (a, b) {
+            const va = a.vezes == null ? -1 : a.vezes;
+            const vb = b.vezes == null ? -1 : b.vezes;
+            if (vb !== va) return vb - va;
+            return b.apostas - a.apostas;
+        });
+    }
+    function desenharLinhas() {
+        boxLinhas.innerHTML = grupos.map(function (g) {
+            const chips = g.nums.map(function (n) { return '<span class="dl-chip">' + fmt(n) + '</span>'; }).join('');
+            return '<div class="dl-linha"><b>' + esc(g.rotulo) + ' <span>' + fmt(g.nums.length) + '</span></b><div class="dl-chips">' + chips + '</div></div>';
+        }).join('');
+    }
+    function desenharTabela() {
+        corpo.innerHTML = padroes.map(function (p) {
+            const vezes = p.vezes == null ? '…' : String(p.vezes);
+            const atraso = p.atraso == null ? '—' : String(p.atraso);
+            const marca = p.padrao === escolhido ? ' class="is-on"' : '';
+            return '<tr' + marca + ' data-padrao="' + esc(p.padrao) + '"><td class="num">' + vezes + '</td><td class="num">' + atraso + '</td><td class="num">' + p.apostas + '</td><td><span class="dl-pad">' + esc(p.padrao) + '</span></td></tr>';
+        }).join('');
+    }
+    function itemAtual() {
+        return padroes.filter(function (p) { return p.padrao === escolhido; })[0] || null;
+    }
+    function listaAtual() {
+        const item = itemAtual();
+        if (!item) return [];
+        if (cache && cache.padrao === item.padrao) return cache.lista;
+        const porDig = {};
+        grupos.forEach(function (g) { porDig[g.digito] = g.nums; });
+        const partes = Object.keys(item.uso).map(Number).sort(function (a, b) { return a - b; }).map(function (d) {
+            return combinacoes(porDig[d], item.uso[d]);
+        });
+        cache = { padrao: item.padrao, lista: produto(partes) };
+        return cache.lista;
+    }
+    function desenharPagina() {
+        const item = itemAtual();
+        if (!item) {
+            titulo.textContent = 'Combinações';
+            lista.innerHTML = '';
+            pagInfo.textContent = '';
+            return;
+        }
+        const todas = listaAtual();
+        const paginas = Math.max(1, Math.ceil(todas.length / POR_PAGINA));
+        if (pagina >= paginas) pagina = paginas - 1;
+        if (pagina < 0) pagina = 0;
+        const ini = pagina * POR_PAGINA;
+        const fatia = todas.slice(ini, ini + POR_PAGINA);
+        titulo.textContent = 'Combinações · ' + item.padrao;
+        lista.innerHTML = fatia.map(function (ap, i) {
+            return '<span>' + (ini + i + 1) + '</span><span>' + ap.map(fmt).join(' ') + '</span>';
+        }).join('');
+        pagInfo.textContent = (ini + 1) + '–' + (ini + fatia.length) + ' de ' + todas.length;
+        document.getElementById('dlPagAnt').disabled = pagina <= 0;
+        document.getElementById('dlPagProx').disabled = pagina >= paginas - 1;
+    }
+    function escolher(padrao, manual) {
+        if (manual) escolhaManual = true;
+        if (escolhido === padrao && manual) return;
+        escolhido = padrao;
+        pagina = 0;
+        desenharTabela();
+        desenharPagina();
+    }
+    function textoDoPadrao() {
+        return listaAtual().map(function (ap) { return ap.map(fmt).join(' '); }).join('\n');
+    }
+    function preparar() {
+        const item = itemAtual();
+        if (!item) {
+            status.textContent = 'Escolha um padrão na tabela.';
+            return false;
+        }
+        if (editorSujo && editor.value.trim() && !window.confirm('Substituir o texto que você editou por este padrão?')) return false;
+        editor.value = textoDoPadrao();
+        editorBase = editor.value;
+        editorSujo = false;
+        status.textContent = item.apostas + ' linhas. Pode apagar o que não quiser e baixar em seguida.';
+        return true;
+    }
+    function linhasEditor() {
+        return editor.value.replace(/\r/g, '').split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+    }
+    function baixar(nome, texto) {
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = nome;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+    function nomeArquivo(ext) {
+        const item = itemAtual();
+        const miolo = item ? item.padrao.replace(/\s+/g, '-') : 'linhas';
+        return 'linhas_' + miolo + '.' + ext;
+    }
+    function baixarEditado(tipo) {
+        if (!linhasEditor().length) {
+            if (!preparar()) return;
+            return;
+        }
+        const linhas = linhasEditor();
+        if (tipo === 'csv') {
+            const csv = ['n;aposta'].concat(linhas.map(function (ln, i) { return (i + 1) + ';' + ln; })).join('\n') + '\n';
+            baixar(nomeArquivo('csv'), csv);
+        } else {
+            baixar(nomeArquivo('txt'), linhas.join('\r\n') + '\r\n');
+        }
+        status.textContent = linhas.length + ' linhas baixadas.';
+    }
+    function aplicarHistoria(sorteios) {
+        const freq = {};
+        const ultimo = {};
+        let maxC = 0;
+        (sorteios || []).forEach(function (s) {
+            const c = Number(s.concurso) || 0;
+            if (c > maxC) maxC = c;
+            const nums = (s.numeros_ordenados && s.numeros_ordenados.length ? s.numeros_ordenados : s.numeros) || [];
+            const p = nums.map(function (n) { return String(Math.floor(Number(n) / 10)); }).join(' ');
+            freq[p] = (freq[p] || 0) + 1;
+            if (!ultimo[p] || c > ultimo[p]) ultimo[p] = c;
+        });
+        padroes.forEach(function (p) {
+            p.vezes = freq[p.padrao] || 0;
+            p.atraso = freq[p.padrao] ? maxC - ultimo[p.padrao] : null;
+        });
+        ordenar();
+        if (!escolhaManual && padroes.length) {
+            escolhido = padroes[0].padrao;
+            pagina = 0;
+            cache = null;
+        }
+        desenharTabela();
+        desenharPagina();
+    }
+    function lerGrupos(linhas) {
+        return (linhas || []).map(function (item) {
+            const bruto = String(item.dezenas || '');
+            const corpoTxt = bruto.indexOf('|') >= 0 ? bruto.slice(bruto.indexOf('|') + 1) : bruto;
+            const nums = corpoTxt.trim().split(/\s+/).filter(function (s) { return /^\d+$/.test(s); }).map(Number).sort(function (a, b) { return a - b; });
+            if (!nums.length) return null;
+            return { rotulo: String(item.rotulo || ('L' + (Math.floor(nums[0] / 10) + 1))), digito: Math.floor(nums[0] / 10), nums: nums };
+        }).filter(Boolean);
+    }
+    function carregar() {
+        if (carregado) return;
+        carregado = true;
+        fetch('/analise/api/resumo-geral/concurso').then(function (r) { return r.json(); }).then(function (data) {
+            if (!data.sucesso) {
+                carregado = false;
+                origem.textContent = data.erro || 'Não foi possível ler o resumo.';
+                return;
+            }
+            grupos = lerGrupos(data.nao_sairam_linhas);
+            padroes = montarPadroes(grupos);
+            ordenar();
+            escolhido = padroes.length ? padroes[0].padrao : '';
+            const trava = fraseTrava(padroes[0]);
+            origem.innerHTML = 'Concurso #' + esc(data.concurso) + ' · linhas do <a href="/analise/resumo-geral/#rg-resultados">Resumo dos Resultados</a>.'
+                + (trava ? ' ' + esc(trava) + '.' : '');
+            desenharLinhas();
+            desenharTabela();
+            desenharPagina();
+            return fetch('/analise/api/escolha-visual/sorteios?ordem=asc&limite=0&base=geral').then(function (r) { return r.json(); });
+        }).then(function (hist) {
+            if (hist && hist.sucesso) aplicarHistoria(hist.sorteios || []);
+        }).catch(function () {
+            if (!grupos.length) {
+                carregado = false;
+                origem.textContent = 'Não foi possível ler o resumo.';
+            }
+        });
+    }
+    abas.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const qual = btn.getAttribute('data-dl-aba');
+            abas.forEach(function (b) { b.classList.toggle('is-on', b === btn); });
+            painelColunas.hidden = qual !== 'colunas';
+            painelLinhas.hidden = qual !== 'linhas';
+            if (qual === 'linhas') carregar();
+        });
+    });
+    corpo.addEventListener('click', function (ev) {
+        const tr = ev.target.closest('tr');
+        if (!tr) return;
+        escolher(tr.getAttribute('data-padrao'), true);
+    });
+    document.getElementById('dlPagAnt').addEventListener('click', function () { pagina -= 1; desenharPagina(); });
+    document.getElementById('dlPagProx').addEventListener('click', function () { pagina += 1; desenharPagina(); });
+    document.getElementById('dlPreparar').addEventListener('click', preparar);
+    document.getElementById('dlTxt').addEventListener('click', function () { baixarEditado('txt'); });
+    document.getElementById('dlCsv').addEventListener('click', function () { baixarEditado('csv'); });
+    editor.addEventListener('input', function () { editorSujo = editor.value !== editorBase; });
+})();
 </script>
 {% endblock %}

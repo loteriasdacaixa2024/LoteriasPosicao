@@ -100,6 +100,8 @@ def resumir_forma(nums: Sequence[int], ultimo: Sequence[int]) -> Dict[str, Any]:
     if diags:
         primeiro = diags[0]
         diag_txt = primeiro.get("nums_fmt") or "-".join(f"{int(n):02d}" for n in (primeiro.get("nums") or []))
+        if primeiro.get("dir") == "up" or primeiro.get("dir_sym") == "↗":
+            diag_txt = "-".join(reversed(str(diag_txt).split("-")))
     pini = padrao_inicial(s)
     return {
         "pares": int(b["pares"]["quantidade"]),

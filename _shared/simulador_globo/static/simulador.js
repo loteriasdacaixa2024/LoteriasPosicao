@@ -335,7 +335,8 @@
         if (!runs.length) leg.textContent = "Sem diagonal neste volante.";
         else runs.forEach(function (r) {
             var s = document.createElement("span");
-            s.textContent = (r.dir === "up" ? "↗ " : "↘ ") + r.nums.map(function (n) {
+            var seq = r.dir === "up" ? r.nums.slice().reverse() : r.nums;
+            s.textContent = (r.dir === "up" ? "↗ " : "↘ ") + seq.map(function (n) {
                 return (n < 10 ? "0" : "") + n;
             }).join("-");
             leg.appendChild(s);

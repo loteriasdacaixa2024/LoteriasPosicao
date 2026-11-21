@@ -1860,7 +1860,7 @@
     if (!runs.length) return '—';
     const slots = runs.map((d) => {
       const dir = d.dir_sym || '';
-      const vals = esc(d.nums_fmt || '');
+      const vals = esc(this._diagNumsExibir(d));
       return `${dir ? `<span class="tb-diag-dir">${dir}</span>` : ''}${vals}`;
     });
     return `<span class="tb-diag-row">${slots.map((s, i) => {
@@ -3424,7 +3424,10 @@
       rows.push({
         i,
         n: nums.length,
-        diags: runs.map((r) => (r.nums || []).map(fmt2).join('.')),
+        diags: runs.map((r) => {
+          const seq = r.dir === 'up' ? (r.nums || []).slice().reverse() : (r.nums || []);
+          return seq.map(fmt2).join('.');
+        }),
       });
     });
     if (!rows.length) {
@@ -3505,6 +3508,19 @@
 
   TubularApp.prototype._diagDirSym = function (dir) {
     return dir === 'down' ? '↘' : '↗';
+  };
+
+  TubularApp.prototype._diagNumsExibir = function (s) {
+    const item = s || {};
+    const nums = item.nums || [];
+    const sobe = item.dir === 'up' || item.dir_sym === '↗';
+    if (nums.length) {
+      const seq = sobe ? nums.slice().reverse() : nums.slice();
+      return seq.map(fmt2).join('-');
+    }
+    const bruto = String(item.nums_fmt || '');
+    if (sobe && bruto) return bruto.split('-').reverse().join('-');
+    return bruto;
   };
 
   TubularApp.prototype._diagDirTitle = function (dir) {
@@ -3825,7 +3841,7 @@
     const sym = this._diagDirSym(s.dir);
     const tipo = this._diagTipoLabel(s.len != null ? s.len : s.tipo);
     const tipoCls = 'tb-cmp-diag-tipo tb-cmp-diag-tipo-' + (s.tipo || this._diagTipoKey(s.len || 2));
-    const nums = (s.nums || []).map(fmt2).join('-');
+    const nums = this._diagNumsExibir(s);
     const conc = opts.showContest ? `<td class="tb-cmp-diag-conc">#${esc(String(s.contest))}</td>` : '';
     const idx = opts.rank != null ? `<td>${opts.rank}</td>` : '';
     const last = opts.showLast
@@ -3868,7 +3884,7 @@
       else {
         const bits = runs.slice(0, 8).map((r) => {
           const sym = this._diagDirSym(r.dir);
-          return `<span class="tb-cmp-diag-run" title="${esc(this._diagDirTitle(r.dir))}">${sym} ${r.nums.map(fmt2).join('-')}</span>`;
+          return `<span class="tb-cmp-diag-run" title="${esc(this._diagDirTitle(r.dir))}">${sym} ${this._diagNumsExibir(r)}</span>`;
         });
         now.innerHTML = `Concurso <strong>#${esc(String(ofc.contest))}</strong>: ` + bits.join(' <span class="tb-diag13-sep">|</span> ');
       }
@@ -3884,7 +3900,7 @@
         const sym = this._diagDirSym(s.dir);
         chips.push(`<span class="tb-cmp-diag-top${on ? ' is-now' : ''}" title="${esc(this._diagDirTitle(s.dir))}">
           <span class="tb-cmp-diag-top-n">Top ${i + 1}</span>
-          <span class="tb-cmp-diag-top-seg">${sym} ${s.nums.map(fmt2).join('-')}</span>
+          <span class="tb-cmp-diag-top-seg">${sym} ${this._diagNumsExibir(s)}</span>
           <span class="tb-cmp-diag-top-meta">${s.vezes}× · atraso ${s.atraso}</span>
         </span>`);
       });
@@ -3894,7 +3910,7 @@
         const sym = this._diagDirSym(s.dir);
         chips.push(`<span class="tb-cmp-diag-top tb-cmp-diag-top-trinca${on ? ' is-now' : ''}" title="${esc(this._diagDirTitle(s.dir))}">
           <span class="tb-cmp-diag-top-n">Top trinca</span>
-          <span class="tb-cmp-diag-top-seg">${sym} ${s.nums.map(fmt2).join('-')}</span>
+          <span class="tb-cmp-diag-top-seg">${sym} ${this._diagNumsExibir(s)}</span>
           <span class="tb-cmp-diag-top-meta">${s.vezes}× · atraso ${s.atraso}</span>
         </span>`);
       }
@@ -4052,7 +4068,7 @@
       const on = opts.focusKey && item.key === opts.focusKey ? ' is-focus' : '';
       return `<span class="tb-diag-log-piece${on}" style="width:${ch}" data-diag-nums="${(item.nums || []).join(',')}" data-diag-dir="${esc(item.dir || '')}" data-diag-key="${esc(item.key || '')}">${html}</span>`;
     };
-    const seg = list.map((s) => piece(s, (s.nums || []).map(fmt2).join('-'), segCh + 'ch')).join(sep);
+    const seg = list.map((s) => piece(s, this._diagNumsExibir(s), segCh + 'ch')).join(sep);
     const dir = list.map((s) => piece(s, `<span class="tb-cmp-diag-arrow">${this._diagDirSym(s.dir)}</span>`, '1.7rem')).join('');
     const tipo = list.map((s) => {
       const k = s.tipo || this._diagTipoKey(s.len || 2);
@@ -4178,7 +4194,7 @@
       const pctDupla = n ? (100 * nDupla / n) : 0;
       const pctTrinca = n ? (100 * nTrinca / n) : 0;
       const top = list.slice(0, 3).map((s) => {
-        const seg = (s.nums || []).map(fmt2).join('-');
+        const seg = this._diagNumsExibir(s);
         return `${this._diagDirSym(s.dir)} ${seg} (${s.vezes || 0}× · atr. ${s.vezes ? s.atraso : '—'})`;
       });
       ajuda.innerHTML = `
@@ -4990,7 +5006,7 @@
             const seedMark = d.seed ? ' <span class="tb-diag13-chip-seed" title="Semente da regra">★</span>' : '';
             return `<span class="tb-diag13-chip${d.seed ? ' is-seed' : ''}" title="${esc(this._diagDirTitle(d.dir))}">
               <span class="tb-cmp-diag-arrow">${this._diagDirSym(d.dir)}</span>
-              <span class="tb-align-mono">${(d.nums || []).map(fmt2).join('-')}</span>
+              <span class="tb-align-mono">${this._diagNumsExibir(d)}</span>
               <span class="tb-cmp-diag-tipo tb-cmp-diag-tipo-${k}">${this._diagTipoLabel(d.len || k)}</span>${seedMark}
               <span class="tb-diag13-chip-meta">${d.vezes || 0}× · ${this._diagFmtPct(d.pct || 0)}% · atr. ${d.vezes ? d.atraso : '—'}</span>
             </span>`;
@@ -5058,7 +5074,7 @@
     const sep = '<span class="tb-diag13-sep">|</span>';
     body.innerHTML = list.map((g, i) => {
       const diags = g.diags || [];
-      const seg = diags.map((d) => slot('tb-diag13-slot-seg', (d.nums || []).map(fmt2).join('-'), segCh + 'ch')).join(sep);
+      const seg = diags.map((d) => slot('tb-diag13-slot-seg', this._diagNumsExibir(d), segCh + 'ch')).join(sep);
       const dir = diags.map((d) => slot('tb-diag13-slot-dir', `<span class="tb-cmp-diag-arrow">${this._diagDirSym(d.dir)}</span>`, '1.4rem')).join('');
       const tipo = diags.map((d) => {
         const k = d.tipo || this._diagTipoKey(d.len || 2);

@@ -452,7 +452,7 @@
             const diags = showDiag ? window.__diagsDaAposta(dz, dmin, dmax) : [];
             if (diags.length) comDiagonal += 1;
             const diagTxt = diags.length
-                ? junta(diags.map((d) => marca(d.dir_sym, d.nums_fmt)))
+                ? junta(diags.map((d) => marca(d.dir_sym, d.dir_sym === '↗' ? String(d.nums_fmt).split('-').reverse().join('-') : d.nums_fmt)))
                 : 'nenhuma';
             const colDiag = showDiag
                 ? `<td class="${semCor || !ehDs ? '' : (diags.length ? 'pan-conj-ok' : 'pan-conj-at')}" data-pan-col="diagonal" data-pan-val="${diags.length}">${diagTxt}</td>`

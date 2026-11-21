@@ -288,6 +288,8 @@ def _celula_diagonais(bloco: Optional[dict], pad: int) -> str:
                 continue
         if not nums:
             continue
+        if sym == "↗" or (isinstance(grupo, dict) and grupo.get("dir") == "up"):
+            nums = list(reversed(nums))
         texto = "-".join(nums)
         partes.append(f"{sym} | {texto}".strip() if sym else texto)
     return " · ".join(partes) if partes else "—"

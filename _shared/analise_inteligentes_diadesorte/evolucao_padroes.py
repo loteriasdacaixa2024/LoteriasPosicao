@@ -39,10 +39,14 @@ def _fmt_diagonais(dezenas, *, dmin: int, dmax: int, cols: int = 10) -> Tuple[st
         }
         for r in runs
     ]
-    texto = ", ".join(
-        f"{(r.get('dir_sym') or '').strip()} {r.get('nums_fmt') or ''}".strip()
-        for r in compacto
-    )
+    def _vista(r: Dict[str, Any]) -> str:
+        sym = (r.get("dir_sym") or "").strip()
+        bruto = r.get("nums_fmt") or ""
+        if (sym == "↗" or r.get("dir") == "up") and bruto:
+            bruto = "-".join(reversed(str(bruto).split("-")))
+        return f"{sym} {bruto}".strip()
+
+    texto = ", ".join(_vista(r) for r in compacto)
     return texto or "Nenhuma", compacto
 
 

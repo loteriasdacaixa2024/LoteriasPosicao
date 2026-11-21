@@ -1840,8 +1840,33 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
     if modality_key == "diadesorte":
         @bp.route("/resumo-geral-apostas/")
         def resumo_geral_apostas_page():
+            from configuracoes.regras_modalidade import formatar_brl, get_regras
             from diadesorte.meses_cores import obter_meses_cores
             from resumo_modalidade.gerador_menu import criterios_para_tela
+            precos = {
+                str(n): formatar_brl(valor)
+                for n, valor in (get_regras(modality_key).get("precos_map") or {}).items()
+            }
+            ultimo_resultado = ""
+            ultimo_mes_abrev = ""
+            ultimo_mes_nome = ""
+            ultimo_concurso = None
+            try:
+                from geradores_elite.construtor import get_construtor_service
+                from diadesorte.meses_cores import MESES_NOME
+                svc = get_construtor_service(modality_key)
+                ult = svc.obter_ultimo_sorteio() if svc else None
+                if ult and ult.get("sucesso"):
+                    ultimo_concurso = ult.get("concurso")
+                    ultimo_resultado = " ".join(
+                        f"{int(d):02d}" for d in (ult.get("dezenas") or [])
+                    )
+                    mn = ult.get("mes_num")
+                    ultimo_mes_abrev = (ult.get("mes_abrev") or "").strip()
+                    if mn:
+                        ultimo_mes_nome = MESES_NOME.get(int(mn), "")
+            except Exception:
+                ultimo_resultado = ""
             return render_template(
                 "gerador_resumo_geral.html",
                 modality_key=modality_key,
@@ -1849,6 +1874,11 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 page_title="Resumo Geral → Apostas",
                 tela=criterios_para_tela(modality_key),
                 meses_cores=obter_meses_cores(),
+                precos_aposta=precos,
+                ultimo_resultado=ultimo_resultado,
+                ultimo_mes_abrev=ultimo_mes_abrev,
+                ultimo_mes_nome=ultimo_mes_nome,
+                ultimo_concurso=ultimo_concurso,
             )
 
         @bp.route("/api/resumo-geral-apostas/gerar", methods=["POST"])
@@ -1882,6 +1912,7 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 modality_key,
                 body.get("dezenas") or [],
                 body.get("criterios") or [],
+                body.get("mes_num"),
             )
             status = 200 if payload.get("sucesso") else 400
             return jsonify(payload), status
@@ -1902,5 +1933,46 @@ def build_geradores_elite_blueprint(modality_key: str) -> Blueprint:
                 sorteadas=int(est["sorteadas"]),
                 pad_width=int(est.get("pad_width") or 2),
             )
+
+        @bp.route("/api/comparador-apostas/lote")
+        def api_comparador_lote_estado():
+            from geradores_elite.comparador_lote import estado_lotes
+            payload = estado_lotes(modality_key)
+            status = 200 if payload.get("sucesso") else 400
+            return jsonify(payload), status
+
+        @bp.route("/api/comparador-apostas/lote", methods=["POST"])
+        def api_comparador_lote_guardar():
+            from geradores_elite.comparador_lote import guardar_lote
+            body = request.get_json(silent=True) or {}
+            payload = guardar_lote(
+                modality_key,
+                body.get("texto") or "",
+                body.get("concurso"),
+                body.get("paineis"),
+            )
+            status = 200 if payload.get("sucesso") else 400
+            return jsonify(payload), status
+
+        @bp.route("/api/comparador-apostas/lote/conferir")
+        def api_comparador_lote_conferir():
+            from geradores_elite.comparador_lote import conferir_lote
+            payload = conferir_lote(modality_key, request.args.get("concurso", type=int))
+            status = 200 if payload.get("sucesso") else 400
+            return jsonify(payload), status
+
+        @bp.route("/api/comparador-apostas/lote/<int:concurso>")
+        def api_comparador_lote_ler(concurso):
+            from geradores_elite.comparador_lote import ler_lote
+            payload = ler_lote(modality_key, concurso)
+            status = 200 if payload.get("sucesso") else 400
+            return jsonify(payload), status
+
+        @bp.route("/api/comparador-apostas/lote/<int:concurso>", methods=["DELETE"])
+        def api_comparador_lote_apagar(concurso):
+            from geradores_elite.comparador_lote import apagar_lote
+            payload = apagar_lote(modality_key, concurso)
+            status = 200 if payload.get("sucesso") else 400
+            return jsonify(payload), status
 
     return bp

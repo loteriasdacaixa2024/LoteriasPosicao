@@ -158,13 +158,14 @@
       const bolas = nums.map((n) =>
         `<span class="ev-viz-bola tom-${tomBola(n, antSet)}">${fmt(n, m.pad)}</span>`
       ).join('');
+      const muitas = nums.length >= 12 ? ' ev-viz-muitas' : '';
       return `<div class="ev-viz-row-h">
         <div class="ev-viz-row-meta">
           <strong>#${esc(s.concurso)}</strong>
           <span class="ev-viz-data">${esc(s.data || '')}</span>
           ${badgeMes(s)}
         </div>
-        <div class="ev-viz-bolas-h">${bolas}</div>
+        <div class="ev-viz-bolas-h${muitas}">${bolas}</div>
       </div>`;
     }).join('');
     return `<div class="ev-viz-lista-h">${rows}</div>`;
@@ -179,7 +180,8 @@
       const bolas = nums.map((n) =>
         `<span class="ev-viz-bola tom-${tomBola(n, antSet)}">${fmt(n, m.pad)}</span>`
       ).join('');
-      return `<article class="ev-viz-card-v">
+      const muitas = nums.length >= 12 ? ' ev-viz-muitas' : '';
+      return `<article class="ev-viz-card-v${muitas}">`
         <header class="ev-viz-card-v-head">
           <strong>#${esc(s.concurso)}</strong>
           <span class="ev-viz-data">${esc(dataCurta(s.data))}</span>

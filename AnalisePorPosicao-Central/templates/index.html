@@ -1530,7 +1530,9 @@
         function htmlDiagChips(list) {
             const chips = (list || []).map((d) => {
                 const title = `${d.tipo || ''} · ${d.vezes || 0}×`;
-                return `<span class="cruz-chip" title="${escHtml(title)}">${escHtml(d.dir_sym || '')} ${escHtml(d.nums_fmt || '')} <span>${fmtN(d.vezes)}×</span></span>`;
+                const bruto = String(d.nums_fmt || '');
+                const vista = (d.dir_sym === '↗' || d.dir === 'up') ? bruto.split('-').reverse().join('-') : bruto;
+                return `<span class="cruz-chip" title="${escHtml(title)}">${escHtml(d.dir_sym || '')} ${escHtml(vista)} <span>${fmtN(d.vezes)}×</span></span>`;
             }).join('');
             return chips || '<span class="small text-muted">sem diagonal neste recorte</span>';
         }

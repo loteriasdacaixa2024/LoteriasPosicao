@@ -445,10 +445,20 @@
         montarCols();
         tbody.innerHTML = `<tr><td colspan="${COLS.length}" class="text-muted text-center py-3">Carregando…</td></tr>`;
         try {
-            const r = await fetch(apiPath("/api/premiacao-caixa?all=1"));
-            const d = await r.json();
-            if (d.status !== "success") throw new Error(d.message || "Falha");
-            LINHAS = mapLinhas(d.registros || []);
+            const registros = [];
+            let page = 1;
+            let pages = 1;
+            let d = null;
+            while (page <= pages && page <= 80) {
+                const r = await fetch(apiPath("/api/premiacao-caixa?page=" + page + "&size=200"));
+                if (!r.ok) throw new Error("Falha ao carregar concursos");
+                d = await r.json();
+                if (d.status !== "success") throw new Error(d.message || "Falha");
+                registros.push.apply(registros, d.registros || []);
+                pages = Number(d.pages) || 1;
+                page += 1;
+            }
+            LINHAS = mapLinhas(registros);
             FILTERS = {};
             BUSCA_CONCURSO = "";
             PAGE = 1;

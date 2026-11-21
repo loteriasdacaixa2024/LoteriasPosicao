@@ -14,7 +14,8 @@
 
   function fmtDiag(d) {
     const sym = d.dir_sym || (d.dir === 'up' ? '↗' : '↘');
-    const nums = d.nums_fmt || (d.nums || []).map(pad).join('-');
+    let nums = d.nums_fmt || (d.nums || []).map(pad).join('-');
+    if (sym === '↗' || d.dir === 'up') nums = String(nums).split('-').reverse().join('-');
     return `${sym} ${nums}`;
   }
 

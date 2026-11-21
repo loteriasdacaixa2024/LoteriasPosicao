@@ -34,22 +34,12 @@
 
     .page-content {
         width: 100%;
-        max-width: min(87.5rem, 100%);
-        padding-inline: clamp(0.5rem, 2.5vw, 1.5rem);
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+        padding-inline: clamp(1rem, 2vw, 2.25rem);
         padding-block: clamp(0.75rem, 1.5vw, 1.5rem);
         overflow-x: clip;
-    }
-
-    @media (min-width: 1600px) {
-        .page-content { max-width: 92rem; }
-    }
-
-    @media (min-width: 1920px) {
-        .page-content { max-width: 100rem; }
-    }
-
-    @media (min-width: 2560px) {
-        .page-content { max-width: 112rem; }
     }
 
     /* —— Navbar: hamburger até tablet; desktop a partir de 1200px —— */
@@ -676,6 +666,28 @@
         opacity: .7;
         font-weight: 700;
     }
+    /* Páginas /analise/* — mesmo espaçamento lateral do Resumo Geral. */
+    {% if request is defined and request.path.startswith('/analise') %}
+    body:not(.is-embed) .page-content {
+        max-width: none;
+        padding-left: clamp(1rem, 2vw, 2.25rem);
+        padding-right: clamp(1rem, 2vw, 2.25rem);
+    }
+    body:not(.is-embed) .page-content > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+    body:not(.is-embed) .page-content .card,
+    body:not(.is-embed) .page-content .card-body,
+    body:not(.is-embed) .page-content .card-header {
+        min-width: 0;
+        max-width: 100%;
+    }
+    body:not(.is-embed) .page-content .row > [class*="col"] {
+        min-width: 0;
+    }
+    {% endif %}
+
     table.tabela-ordenavel thead th.ordem-asc .ordem-ind,
     table.tabela-ordenavel thead th.ordem-desc .ordem-ind { opacity: 1; }
 </style>

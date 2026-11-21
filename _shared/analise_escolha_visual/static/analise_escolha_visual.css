@@ -692,12 +692,12 @@
   background: #fff;
   border: 1px solid #e8eaed;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 #ev-root .ev-viz-row-h {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
   gap: .85rem 1.25rem;
@@ -722,8 +722,36 @@
 
 #ev-root .ev-viz-bolas-h {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: .32rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+#ev-root .ev-viz-bolas-h.ev-viz-muitas .ev-viz-bola {
+  width: 28px;
+  height: 28px;
+  font-size: .68rem;
+}
+
+#ev-root .ev-viz-card-v.ev-viz-muitas {
+  width: 148px;
+}
+
+#ev-root .ev-viz-grid-v:has(.ev-viz-muitas) {
+  grid-template-columns: repeat(auto-fill, 148px);
+}
+
+#ev-root .ev-viz-card-v.ev-viz-muitas .ev-viz-bolas-v {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#ev-root .ev-viz-card-v.ev-viz-muitas .ev-viz-bolas-v .ev-viz-bola {
+  width: 28px;
+  height: 22px;
+  font-size: .62rem;
 }
 
 #ev-root .ev-viz-bolas-h .ev-viz-bola {

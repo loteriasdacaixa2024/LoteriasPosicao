@@ -119,7 +119,7 @@ class ExportEstatisticasTest(unittest.TestCase):
             [("↘", [7, 18, 29]), ("↗", [9, 18, 27])],
         )
         texto = exp.linha_valores(linhas[0], 2)[-1]
-        self.assertEqual(texto, "↘ | 07-18-29 · ↗ | 09-18-27")
+        self.assertEqual(texto, "↘ | 07-18-29 · ↗ | 27-18-09")
 
     def test_nome_de_planilha_remove_caracteres_invalidos(self):
         usados = set()

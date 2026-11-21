@@ -37,6 +37,20 @@ def _qtd_linha(qtd: int, nums: Sequence[int]) -> str:
     return f"{n} | {lista}" if lista else n
 
 
+def _linhas_dezenas(nums: Sequence[int]) -> List[Dict[str, str]]:
+    """Agrupa as dezenas que não saíram pela dezena: L1=01–09 … L4=30–31."""
+    grupos: Dict[int, List[int]] = {}
+    for n in sorted(int(x) for x in nums):
+        grupos.setdefault(n // 10, []).append(n)
+    return [
+        {
+            "rotulo": f"L{faixa + 1}",
+            "dezenas": f"{len(grupos[faixa]):02d} | {_juntar(grupos[faixa])}",
+        }
+        for faixa in sorted(grupos)
+    ]
+
+
 def _mes_curto(nome: str) -> str:
     abrev = {
         "janeiro": "Jan", "fevereiro": "Fev", "março": "Mar", "marco": "Mar",
@@ -80,9 +94,11 @@ def _texto_finais(grupos: Sequence[Sequence[int]]) -> str:
 def _texto_diagonais(grupos: Sequence[Dict[str, Any]]) -> str:
     partes = []
     for g in grupos:
-        nums = g.get("nums") or []
+        nums = list(g.get("nums") or [])
         if len(nums) < 2:
             continue
+        if (g.get("dir_sym") or "") == "↗" or g.get("dir") == "up":
+            nums = list(reversed(nums))
         corpo = "-".join(_fmt(n) for n in nums)
         sim = g.get("dir_sym") or ""
         partes.append(f"{sim} | {corpo}" if sim else corpo)
@@ -241,6 +257,9 @@ def retrato_concurso(modality_key: str, concurso: Optional[int] = None) -> Dict[
             _qtd_linha(len(fora.get("pares") or []), fora.get("pares") or []),
             _qtd_linha(len(fora.get("impares") or []), fora.get("impares") or []),
         ],
+        "nao_sairam_linhas": _linhas_dezenas(
+            list(fora.get("pares") or []) + list(fora.get("impares") or [])
+        ),
         "pares": _qtd_linha(len(pares), pares),
         "impares": _qtd_linha(len(impares), impares),
         "repetido": _juntar(fora.get("repetidos") or []) or "—",

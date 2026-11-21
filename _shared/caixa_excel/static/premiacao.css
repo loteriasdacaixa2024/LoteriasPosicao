@@ -300,6 +300,48 @@
 #rankingUfTabela tr.uf-top2 td { background: #f5f5f5; font-weight: 700; }
 #rankingUfTabela tr.uf-top3 td { background: #fff3e0; font-weight: 700; }
 #rankingUfTabela .uf-trophy { margin-right: .35rem; color: #c9a227; }
+/* Lotomania (20), Lotofácil (15) e Dupla Sena (2×6): bolas menores
+   para a sequência inteira caber na largura, sem cortar dezena. */
+.premiacao-muitas #premiacaoCaixaTabela {
+    font-size: .72rem;
+}
+.premiacao-muitas #premiacaoCaixaTabela thead th {
+    padding: .28rem .12rem;
+    font-size: .64rem;
+}
+.premiacao-muitas #premiacaoCaixaTabela td {
+    padding: .22rem .12rem;
+}
+.premiacao-muitas #premiacaoCaixaTabela td.td-bola {
+    padding: .16rem .02rem;
+    min-width: 0;
+}
+.premiacao-muitas #premiacaoCaixaTabela td.td-bola .dez-ball,
+.premiacao-muitas #premiacaoCaixaTabela .dez-ball,
+.premiacao-muitas .ultimo-destaque .dez-ball {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px;
+    font-size: 10px !important;
+}
+.premiacao-muitas #premiacaoCaixaTabela th:nth-child(1),
+.premiacao-muitas #premiacaoCaixaTabela td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+.premiacao-muitas #premiacaoCaixaTabela td:nth-child(1) {
+    background: #fff;
+    box-shadow: 2px 0 0 #f0e2b8;
+}
+.premiacao-muitas #premiacaoCaixaTabela thead th:nth-child(1) {
+    z-index: 4;
+    background: var(--primary);
+}
+.premiacao-muitas #premiacaoCaixaTabela tbody tr:nth-child(even) td:nth-child(1) {
+    background: #fffdf8;
+}
+
 #rankingUfTabela tr.uf-rest { display: none; }
 #rankingUfTabela.uf-expandido tr.uf-rest { display: table-row; }
 .ranking-uf-nota {

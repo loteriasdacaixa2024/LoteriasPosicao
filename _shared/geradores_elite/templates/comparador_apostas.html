@@ -5,6 +5,24 @@
 <style>
   #cmp-root { max-width: none; margin: 0 auto; }
   #cmp-root h1 { font-weight: 800; color: #3d3208; }
+  #cmp-root .cmp-topo {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    margin-bottom: .25rem;
+  }
+  #cmp-root .cmp-reset {
+    width: 1.8rem;
+    height: 1.8rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #8a8175;
+    font-size: .85rem;
+    padding: 0;
+    line-height: 1;
+  }
+  #cmp-root .cmp-reset:hover { background: rgba(192, 139, 0, .16); color: #6b5710; }
   #cmp-root .cmp-lead { color: #6b5a2e; max-width: 46rem; }
   #cmp-root .cmp-item {
     background: #fff;
@@ -119,7 +137,11 @@
     white-space: nowrap;
     vertical-align: middle;
   }
-  #cmp-root .cmp-gaps-table td { text-align: center; vertical-align: middle; }
+  #cmp-root .cmp-gaps-table td {
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
   #cmp-root .cmp-gaps-toks {
     display: inline-flex;
     flex-wrap: nowrap;
@@ -154,6 +176,8 @@
     border-color: #c7d2fe;
     color: #3730a3;
   }
+  #cmp-root .cmp-gaps-eq { background: #dcfce7; color: #166534; font-weight: 700; }
+  #cmp-root .cmp-gaps-diff { background: #ffedd5; color: #9a3412; font-weight: 700; }
   #cmp-root .cmp-gaps-scroll {
     max-height: 28rem;
     overflow: auto;
@@ -224,22 +248,104 @@
     border-color: #b7e4c7;
   }
   #cmp-root tr.cmp-row-ultimo .cmp-gaps-gap.is-sort {
-    background: #d8f3e4;
-    border-color: #b7e4c7;
-    color: #1b4332;
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #3730a3;
   }
   #cmp-root tr.cmp-row-saiu { background: #fff7ed; }
   #cmp-root tr.cmp-row-saiu td:first-child { box-shadow: inset 3px 0 0 #f59e0b; }
+  #cmp-root .cmp-lote {
+    background: #fffdf8;
+    border: 1px solid #efe4c0;
+    border-radius: 12px;
+    padding: .75rem .9rem .85rem;
+    margin-bottom: .9rem;
+  }
+  #cmp-root .cmp-lote-nota { color: #8a7340; }
+  #cmp-root .cmp-lote-espera,
+  #cmp-root .cmp-lote-ok {
+    border-radius: 8px;
+    padding: .55rem .75rem;
+    font-size: .82rem;
+  }
+  #cmp-root .cmp-lote-espera {
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #fdba74;
+  }
+  #cmp-root .cmp-lote-ok {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  #cmp-root .cmp-lote-hit {
+    background: #dcfce7;
+    border-color: #86efac;
+    color: #166534;
+  }
+  #cmp-root tr.cmp-lote-plena td { background: #ecfdf5; }
+  #cmp-root .cmp-lote-fixos { color: #6b5a2e; }
+  #cmp-root .cmp-lote-item {
+    display: inline-flex;
+    align-items: center;
+    gap: .1rem;
+    margin: .1rem .45rem .1rem 0;
+  }
+  #cmp-root .cmp-lote-rotulo { margin-right: .15rem; }
+  #cmp-root .cmp-crud {
+    width: 1.45rem;
+    height: 1.45rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #8a8175;
+    font-size: .68rem;
+    padding: 0;
+    line-height: 1;
+  }
+  #cmp-root .cmp-crud:hover { background: rgba(192, 139, 0, .16); color: #6b5710; }
+  #cmp-root .cmp-crud[data-acao="apagar"]:hover { background: rgba(153, 27, 27, .1); color: #9b1c1c; }
+  #cmp-root .cmp-lote-num {
+    width: 6.5rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  #cmp-root .cmp-lote-painel { margin-top: .8rem; }
+  #cmp-root .cmp-lote-painel h4 {
+    font-size: .82rem;
+    font-weight: 800;
+    color: #3d3208;
+    margin: 0 0 .35rem;
+  }
 </style>
 
 <div class="container-fluid py-3" id="cmp-root">
-  <h1 class="h4 mb-1"><span class="cmp-rank me-1">5</span> Comparador de Apostas</h1>
+  <div class="cmp-topo">
+    <h1 class="h4 mb-0"><span class="cmp-rank me-1">5</span> Comparador de Apostas</h1>
+    <button type="button" class="cmp-reset" id="cmpReset" title="Recarregar" aria-label="Recarregar">
+      <i class="fas fa-rotate-right" aria-hidden="true"></i>
+    </button>
+  </div>
   <p class="cmp-lead small mb-3">
     Cada tela continua no lugar de origem. Aqui elas ficam juntas para gerar, conferir e registrar.
     A seta abre a tela aqui dentro. Abrir original abre a tela de origem.
     No Gaps, a seta abre a conferência do espaçamento: cole, arraste ou envie as apostas.
     Quando o item tem gerador, o atalho fica junto dos botões.
   </p>
+
+  <div class="cmp-lote" id="cmpLote">
+    <p class="small cmp-lote-nota mb-2 text-center" id="cmpLoteInfo">Lendo o último concurso sorteado…</p>
+    <div class="d-flex flex-wrap gap-2 mb-2 cmp-gaps-acoes align-items-center">
+      <label class="small fw-bold mb-0" for="cmpLoteConcurso">Concurso</label>
+      <input type="number" id="cmpLoteConcurso" class="form-control form-control-sm cmp-lote-num" min="1" step="1" inputmode="numeric">
+      <button type="button" class="btn btn-sm btn-primary" id="cmpLoteGuardar">Guardar</button>
+      <button type="button" class="btn btn-sm btn-outline-primary" id="cmpLoteConferir">Conferir</button>
+    </div>
+    <p class="small cmp-lote-nota mb-1 text-center">Os comparadores 1, 2, 3 e 4 entram no concurso confirmado. Cada um fica no próprio grupo.</p>
+    <p class="small text-danger mb-2 d-none text-center" id="cmpLoteAviso"></p>
+    <div class="cmp-lote-fixos small text-center mb-2" id="cmpLoteFixos"></div>
+    <div id="cmpLoteBox" class="d-none"></div>
+  </div>
 
   <section class="cmp-item" id="cmp-escolha" data-src="/analise/escolha-visual/?aba=estatisticas&amp;embed=1&amp;v=20261117v3">
     <div class="cmp-head">
@@ -305,9 +411,10 @@
            data-min="{{ dezena_min|default(1) }}" data-max="{{ dezena_max|default(31) }}"
            data-pick="{{ sorteadas|default(7) }}" data-pad="{{ pad_width|default(2) }}">
         <p class="small text-muted mb-2">
-          Uma aposta por linha, na ordem em que você quer ler o sorteio.
-          Cole no campo, arraste um TXT/CSV ou envie o arquivo.
-          A ordem digitada mede o gap de sorteio. Os mesmos números ordenados medem o gap classificado.
+          Uma aposta por linha. Cole no campo, arraste um TXT/CSV ou envie o arquivo.
+          A coluna Ordem de sorteio embaralha estes números no ritmo de um concurso real, sorteado ao acaso.
+          Os passos grandes da realidade entram quando os números permitem. Classificado continua em ordem crescente.
+          Verificar de novo sorteia outro ritmo. Os gaps do sorteio ficam na cor roxa.
         </p>
         <div class="cmp-gaps-drop" id="cmpGapsDrop" tabindex="0">Arraste TXT/CSV aqui · ou cole abaixo</div>
         <textarea id="cmpGapsTexto" class="form-control form-control-sm mb-2" rows="6" spellcheck="false"
@@ -345,13 +452,14 @@
                 <th>Gaps sorteio</th>
                 <th>Classificado</th>
                 <th>Gaps classificado</th>
+                <th>Confronto</th>
               </tr>
             </thead>
             <tbody id="cmpGapsUltimo">
-              <tr><td colspan="5" class="text-muted">Carregando último resultado…</td></tr>
+              <tr><td colspan="6" class="text-muted">Carregando último resultado…</td></tr>
             </tbody>
             <tbody id="cmpGapsTabela">
-              <tr><td colspan="5" class="text-muted">Nenhuma aposta verificada.</td></tr>
+              <tr><td colspan="6" class="text-muted">Nenhuma aposta verificada.</td></tr>
             </tbody>
           </table>
         </div>
@@ -363,6 +471,9 @@
 <script>
 (function () {
   const pagina = location.pathname + location.search;
+  document.getElementById('cmpReset')?.addEventListener('click', function () {
+    location.reload();
+  });
 
   function ajustarFrame(frame) {
     if (!frame || frame._cmpLock) return;
@@ -485,6 +596,8 @@
     let apostasAtuais = [];
     let jaAtivo = false;
     let historico = null;
+    let padraoReal = null;
+    let padraoCarregando = null;
 
     function esc(v) {
       return String(v == null ? '' : v)
@@ -518,12 +631,105 @@
 
     function linhaDe(nums) {
       const classificado = nums.slice().sort((a, b) => a - b);
+      const gapsOrdem = gapsDe(nums);
+      const gapsClass = gapsDe(classificado);
       return {
         ordem: nums.slice(),
-        gapsOrdem: gapsDe(nums),
+        gapsOrdem: gapsOrdem,
         classificado: classificado,
-        gapsClass: gapsDe(classificado),
+        gapsClass: gapsClass,
+        iguais: gapsOrdem.join(',') === gapsClass.join(','),
       };
+    }
+
+    function montarPadraoReal(lista) {
+      const passos = Math.max(0, PICK - 1);
+      const sequencias = [];
+      (lista || []).forEach((s) => {
+        const nums = (s.numeros || []).map(Number);
+        if (nums.length !== PICK) return;
+        const gaps = gapsDe(nums);
+        if (gaps.length !== passos) return;
+        sequencias.push(gaps);
+      });
+      const largos = sequencias.filter((g) => g.some((n) => Math.abs(n) >= 15));
+      return { sequencias: largos.length ? largos : sequencias };
+    }
+
+    function garantirPadrao() {
+      if (padraoReal) return Promise.resolve(padraoReal);
+      if (padraoCarregando) return padraoCarregando;
+      padraoCarregando = fetch('/analise/api/escolha-visual/sorteios?ordem=asc&limite=0&base=geral')
+        .then((r) => r.json())
+        .then((data) => {
+          padraoReal = montarPadraoReal((data && data.sorteios) || []);
+          return padraoReal;
+        })
+        .finally(() => { padraoCarregando = null; });
+      return padraoCarregando;
+    }
+
+    function melhorOrdem(nums, alvos) {
+      const arr = nums.slice();
+      let melhor = arr.slice();
+      let melhorDist = Infinity;
+      let melhorAcertos = -1;
+      function visitar() {
+        const gaps = gapsDe(arr);
+        let dist = 0;
+        let acertos = 0;
+        for (let i = 0; i < gaps.length; i += 1) {
+          const d = Math.abs(gaps[i] - alvos[i]);
+          dist += d;
+          if (d === 0) acertos += 1;
+        }
+        if (dist < melhorDist || (dist === melhorDist && acertos > melhorAcertos)) {
+          melhorDist = dist;
+          melhorAcertos = acertos;
+          melhor = arr.slice();
+        }
+      }
+      function perm(start) {
+        if (start === arr.length) {
+          visitar();
+          return;
+        }
+        for (let i = start; i < arr.length; i += 1) {
+          const tmp = arr[start];
+          arr[start] = arr[i];
+          arr[i] = tmp;
+          perm(start + 1);
+          arr[i] = arr[start];
+          arr[start] = tmp;
+        }
+      }
+      perm(0);
+      return melhor;
+    }
+
+    function alvoRealAleatorio() {
+      const seqs = padraoReal && padraoReal.sequencias;
+      if (!seqs || !seqs.length) return null;
+      return seqs[Math.floor(Math.random() * seqs.length)];
+    }
+
+    function comOrdemHistorica(ln) {
+      const alvos = alvoRealAleatorio();
+      if (!alvos) return ln;
+      const ordem = melhorOrdem(ln.classificado, alvos);
+      const gapsOrdem = gapsDe(ordem);
+      return {
+        ordem: ordem,
+        gapsOrdem: gapsOrdem,
+        classificado: ln.classificado.slice(),
+        gapsClass: ln.gapsClass.slice(),
+        iguais: gapsOrdem.join(',') === ln.gapsClass.join(','),
+      };
+    }
+
+    function confrontoDe(ln) {
+      const iguais = !!ln.iguais;
+      return `<span class="badge ${iguais ? 'cmp-gaps-eq' : 'cmp-gaps-diff'}">${iguais ? 'iguais' : 'diferem'}</span>`;
     }
 
     function ocorrencias(ln) {
@@ -534,7 +740,7 @@
     function pintarTabela() {
       if (!tbody) return;
       if (!apostasAtuais.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-muted">Nenhuma aposta verificada.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-muted">Nenhuma aposta verificada.</td></tr>';
         return;
       }
       tbody.innerHTML = apostasAtuais.map((ln, i) => {
@@ -548,6 +754,7 @@
           <td>${chips(ln.gapsOrdem, 'cmp-gaps-gap is-sort')}</td>
           <td>${chips(ln.classificado, 'cmp-gaps-tok')}</td>
           <td>${chips(ln.gapsClass, 'cmp-gaps-gap')}</td>
+          <td>${confrontoDe(ln)}</td>
         </tr>`;
       }).join('');
     }
@@ -617,25 +824,34 @@
         aviso.classList.toggle('d-none', !erros.length);
       }
       apostasAtuais = linhas;
-      pintarTabela();
       pintarJaBox();
+      const publicar = () => {
+        apostasAtuais = linhas.map(comOrdemHistorica);
+        pintarTabela();
+      };
+      if (padraoReal) {
+        publicar();
+        return;
+      }
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-muted">Montando a ordem de sorteio pelo histórico…</td></tr>';
+      }
+      garantirPadrao().then(publicar).catch(() => pintarTabela());
     }
 
     function pintarUltimo(s) {
       if (!ultimoBody) return;
       if (!s || !Array.isArray(s.numeros) || s.numeros.length !== PICK) {
-        ultimoBody.innerHTML = '<tr><td colspan="5" class="text-muted">Último resultado indisponível.</td></tr>';
+        ultimoBody.innerHTML = '<tr><td colspan="6" class="text-muted">Último resultado indisponível.</td></tr>';
         if (ultimoLbl) ultimoLbl.textContent = 'Último resultado';
         return;
       }
       const ordem = s.numeros.map(Number);
       const classificado = (s.numeros_ordenados || ordem.slice().sort((a, b) => a - b)).map(Number);
-      const ln = {
-        ordem: ordem,
-        gapsOrdem: gapsDe(ordem),
-        classificado: classificado,
-        gapsClass: gapsDe(classificado),
-      };
+      const ln = linhaDe(ordem);
+      ln.classificado = classificado;
+      ln.gapsClass = gapsDe(classificado);
+      ln.iguais = ln.gapsOrdem.join(',') === ln.gapsClass.join(',');
       const dataCheia = String(s.data || '').trim();
       const dataCurta = dataCheia.replace(/^(\d{2}\/\d{2})\/\d{2,4}$/, '$1');
       if (ultimoLbl) {
@@ -647,6 +863,7 @@
         <td>${chips(ln.gapsOrdem, 'cmp-gaps-gap is-sort')}</td>
         <td>${chips(ln.classificado, 'cmp-gaps-tok')}</td>
         <td>${chips(ln.gapsClass, 'cmp-gaps-gap')}</td>
+        <td>${confrontoDe(ln)}</td>
       </tr>`;
     }
 
@@ -777,6 +994,459 @@
     });
     ligarDrop(document.getElementById('cmpGapsDrop'));
     ligarDrop(texto);
+
+    const loteInfo = document.getElementById('cmpLoteInfo');
+    const loteAviso = document.getElementById('cmpLoteAviso');
+    const loteBox = document.getElementById('cmpLoteBox');
+    const loteFixos = document.getElementById('cmpLoteFixos');
+    const btnGuardar = document.getElementById('cmpLoteGuardar');
+    const btnConferir = document.getElementById('cmpLoteConferir');
+    const campoConcurso = document.getElementById('cmpLoteConcurso');
+    let loteUltimo = null;
+    let loteLotes = [];
+    let loteNumeroTocado = false;
+    let loteGuardado = 0;
+    let lotePaineis = null;
+
+    function avisoLote(msg) {
+      if (!loteAviso) return;
+      loteAviso.textContent = msg || '';
+      loteAviso.classList.toggle('d-none', !msg);
+    }
+
+    function concursoEscolhido() {
+      const n = parseInt(campoConcurso && campoConcurso.value, 10);
+      return Number.isFinite(n) && n >= 1 ? n : null;
+    }
+
+    function loteDo(numero) {
+      return loteLotes.find((l) => Number(l.concurso) === Number(numero)) || null;
+    }
+
+    function aplicarEstado(data) {
+      if (data && data.ultimo) loteUltimo = Number(data.ultimo);
+      if (Array.isArray(data && data.lotes)) loteLotes = data.lotes;
+      const sugerido = data && data.seguinte
+        ? Number(data.seguinte)
+        : (loteUltimo ? loteUltimo + 1 : null);
+      if (campoConcurso && !loteNumeroTocado && sugerido && !String(campoConcurso.value || '').trim()) {
+        campoConcurso.value = sugerido;
+      }
+      const escolhido = concursoEscolhido();
+      const deste = loteDo(escolhido);
+      loteGuardado = deste ? Number(deste.quantidade) || 0 : 0;
+      lotePaineis = deste && deste.paineis ? deste.paineis : null;
+      if (loteInfo && loteUltimo) {
+        let texto = `Último sorteado: #${loteUltimo} → sugerido: #${loteUltimo + 1}. Confirme o número antes de guardar.`;
+        if (deste) texto += ` O ${escolhido} já tem ${resumoPaineis(deste.paineis)}.`;
+        loteInfo.textContent = texto;
+      }
+      if (loteFixos) {
+        loteFixos.innerHTML = loteLotes.length
+          ? 'Guardados: ' + loteLotes.map((l) =>
+              `<span class="cmp-lote-item">
+                <span class="cmp-lote-rotulo">#${esc(l.concurso)} · ${esc(resumoPaineis(l.paineis))}</span>
+                <button type="button" class="cmp-crud" data-acao="ver" data-concurso="${esc(l.concurso)}" title="Ver" aria-label="Ver concurso ${esc(l.concurso)}"><i class="fas fa-eye" aria-hidden="true"></i></button>
+                <button type="button" class="cmp-crud" data-acao="conferir" data-concurso="${esc(l.concurso)}" title="Conferir" aria-label="Conferir concurso ${esc(l.concurso)}"><i class="fas fa-check" aria-hidden="true"></i></button>
+                <button type="button" class="cmp-crud" data-acao="atualizar" data-concurso="${esc(l.concurso)}" title="Atualizar" aria-label="Atualizar concurso ${esc(l.concurso)}"><i class="fas fa-pen" aria-hidden="true"></i></button>
+                <button type="button" class="cmp-crud" data-acao="apagar" data-concurso="${esc(l.concurso)}" title="Apagar" aria-label="Apagar concurso ${esc(l.concurso)}"><i class="fas fa-trash" aria-hidden="true"></i></button>
+              </span>`
+            ).join('')
+          : '';
+      }
+    }
+
+    function numeroPeloUltimo() {
+      return fetch('/analise/api/escolha-visual/sorteios?ordem=desc&limite=1&base=geral')
+        .then((r) => r.json())
+        .then((data) => {
+          const s = data && data.sorteios && data.sorteios[0];
+          const n = s && Number(s.concurso);
+          if (!n) return null;
+          aplicarEstado({ ultimo: n, seguinte: n + 1, lotes: loteLotes });
+          if (loteInfo) {
+            loteInfo.textContent = `Último sorteado: #${n} → sugerido: #${n + 1}. Confirme o número antes de guardar. Reinicie o Dia de Sorte para gravar no banco.`;
+          }
+          return n + 1;
+        });
+    }
+
+    function carregarLote() {
+      return fetch('/geradores-elite/api/comparador-apostas/lote')
+        .then((r) => {
+          if (!r.ok) throw new Error('http');
+          return r.json();
+        })
+        .then((data) => {
+          if (!data || !data.sucesso) {
+            if (loteInfo) loteInfo.textContent = (data && data.erro) || 'Não foi possível ler o concurso seguinte.';
+            return null;
+          }
+          aplicarEstado(data);
+          return data;
+        })
+        .catch(() => numeroPeloUltimo().catch(() => {
+          if (loteInfo) loteInfo.textContent = 'Não foi possível ler o concurso seguinte.';
+          return null;
+        }));
+    }
+
+    function resumoPaineis(p) {
+      const c = p || {};
+      return `1 ${c.escolha || 0} · 2 ${c.checagem || 0} · 3 ${c.manual || 0} · 4 ${c.gaps || 0}`;
+    }
+
+    function docDoFrame(seletor) {
+      const frame = document.querySelector(seletor);
+      if (!frame || !frame.getAttribute('src')) return null;
+      try { return frame.contentDocument; } catch (_) { return null; }
+    }
+
+    function linhasDaTabela(doc, seletorLinha, seletorInput) {
+      if (!doc) return [];
+      const linhas = [];
+      doc.querySelectorAll(seletorLinha).forEach((tr) => {
+        const nums = [];
+        tr.querySelectorAll(seletorInput).forEach((inp) => {
+          const n = parseInt(inp.value, 10);
+          if (n >= DMIN && n <= DMAX) nums.push(n);
+        });
+        if (nums.length === PICK && nums.length === new Set(nums).size) linhas.push(nums.map(padNum).join(' '));
+      });
+      return linhas;
+    }
+
+    function linhasManuais(doc) {
+      if (!doc) return [];
+      const porLinha = new Map();
+      doc.querySelectorAll('#tbManual10Body .tb-manual-input').forEach((inp) => {
+        const col = parseInt(inp.dataset.col, 10);
+        const arr = porLinha.get(inp.dataset.row) || [];
+        const n = parseInt(inp.value, 10);
+        if (!Number.isNaN(col)) arr[col] = n;
+        porLinha.set(inp.dataset.row, arr);
+      });
+      const linhas = [];
+      porLinha.forEach((arr) => {
+        const nums = (arr || []).filter((n) => n >= DMIN && n <= DMAX);
+        if (nums.length === PICK && nums.length === new Set(nums).size) linhas.push(nums.map(padNum).join(' '));
+      });
+      return linhas;
+    }
+
+    function textoApostas(origem) {
+      const linhasFonte = String(origem == null ? '' : origem).split(/\r?\n/);
+      const linhas = [];
+      const erros = [];
+      linhasFonte.forEach((linha, i) => {
+        if (!String(linha).trim()) return;
+        if (linhas.length >= LIMITE) return;
+        const nums = lerLinha(linha);
+        if (nums.length !== new Set(nums).size) {
+          erros.push(`Linha ${i + 1}: há dezena repetida.`);
+          return;
+        }
+        if (nums.length !== PICK) {
+          erros.push(`Linha ${i + 1}: precisa de ${PICK} dezenas entre ${padNum(DMIN)} e ${padNum(DMAX)}.`);
+          return;
+        }
+        linhas.push(nums);
+      });
+      const sobrou = linhasFonte.filter((l) => String(l).trim()).length - linhas.length - erros.length;
+      if (sobrou > 0) erros.push(`O lote aceita no máximo ${LIMITE} apostas.`);
+      return { linhas: linhas, erros: erros };
+    }
+
+    function valorCampo(doc, seletor) {
+      if (!doc) return '';
+      const el = doc.querySelector(seletor);
+      return el ? String(el.value || '') : '';
+    }
+
+    function coletarPaineis() {
+      const escolhaDoc = docDoFrame('#cmp-escolha iframe');
+      const checagemDoc = docDoFrame('#cmp-checagem iframe');
+      const manualDoc = docDoFrame('#cmp-manual iframe');
+      const fontes = [
+        {
+          id: 'escolha',
+          nome: '1 Escolha Visual',
+          aberto: !!escolhaDoc,
+          texto: valorCampo(escolhaDoc, '#evApostasTexto'),
+          tabela: linhasDaTabela(escolhaDoc, '#evApostasTabela tr[data-id]', 'input.ev-ap-num'),
+        },
+        {
+          id: 'checagem',
+          nome: '2 Checagem',
+          aberto: !!checagemDoc,
+          texto: valorCampo(checagemDoc, '#aiCheqTexto'),
+          tabela: [],
+        },
+        {
+          id: 'manual',
+          nome: '3 Manual',
+          aberto: !!manualDoc,
+          texto: valorCampo(manualDoc, '#tbPaste10'),
+          tabela: linhasManuais(manualDoc),
+        },
+        {
+          id: 'gaps',
+          nome: '4 Gaps',
+          aberto: true,
+          texto: texto ? texto.value : '',
+          tabela: [],
+        },
+      ];
+      return fontes.map((fonte) => {
+        const colado = String(fonte.texto || '').trim();
+        const base = colado ? fonte.texto : fonte.tabela.join('\n');
+        const lido = textoApostas(base);
+        return {
+          id: fonte.id,
+          nome: fonte.nome,
+          aberto: fonte.aberto,
+          texto: base,
+          linhas: lido.linhas,
+          erros: lido.erros,
+        };
+      });
+    }
+
+    function pintarConferencia(data) {
+      if (!loteBox) return;
+      loteBox.classList.remove('d-none');
+      if (!data.saiu) {
+        loteBox.innerHTML = `<div class="cmp-lote-espera">${esc(data.mensagem || ('O concurso ' + data.concurso + ' ainda não saiu.'))}</div>`;
+        return;
+      }
+      const res = data.resultado || {};
+      const oficial = new Set((res.classificado || res.ordem || []).map(Number));
+      const mes = res.mes_abrev ? ` ${res.mes_abrev}` : '';
+      const quando = res.data ? ` · ${esc(res.data)}` : '';
+      const grupos = (data.paineis || []).map((painel) => {
+        const corpo = (painel.linhas || []).map((ln, i) => {
+          const toks = (ln.ordem || []).map((n) =>
+            `<span class="cmp-gaps-tok${oficial.has(Number(n)) ? ' cmp-lote-hit' : ''}">${esc(padNum(n))}</span>`
+          ).join('');
+          const plena = Number(ln.acertos) === PICK ? ' class="cmp-lote-plena"' : '';
+          return `<tr${plena}><td>${i + 1}</td><td><span class="cmp-gaps-toks">${toks}</span></td><td><strong>${esc(ln.acertos)}</strong></td></tr>`;
+        }).join('');
+        const vazio = painel.quantidade
+          ? corpo
+          : '<tr><td colspan="3" class="text-muted">Nenhuma aposta guardada neste comparador.</td></tr>';
+        return `<section class="cmp-lote-painel">
+          <h4>${esc(painel.nome)} · ${esc(painel.quantidade)} aposta(s)</h4>
+          <div class="cmp-gaps-scroll">
+            <table class="table table-sm table-bordered cmp-gaps-table">
+              <thead><tr><th>#</th><th>Aposta guardada</th><th>Acertos</th></tr></thead>
+              <tbody>${vazio}</tbody>
+            </table>
+          </div>
+        </section>`;
+      }).join('');
+      loteBox.innerHTML = `
+        <div class="small fw-bold text-muted mb-1">Concurso ${esc(res.concurso)}${quando}${esc(mes)}</div>
+        <div class="cmp-gaps-scroll mb-2">
+          <table class="table table-sm table-bordered cmp-gaps-table mb-0">
+            <tbody>
+              <tr class="cmp-row-ultimo">
+                <td class="cmp-ultimo-ref"><strong>${esc(res.concurso)}</strong></td>
+                <td>${chips(res.ordem || [], 'cmp-gaps-tok')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        ${grupos}`;
+    }
+
+    function pintarGuardado(data) {
+      if (!loteBox) return;
+      loteBox.classList.remove('d-none');
+      const quando = data.atualizado_em ? ` · ${esc(data.atualizado_em)}` : '';
+      const grupos = (data.paineis || []).map((painel) => {
+        const corpo = (painel.linhas || []).map((nums, i) =>
+          `<tr><td>${i + 1}</td><td>${chips(nums, 'cmp-gaps-tok')}</td></tr>`
+        ).join('');
+        const vazio = painel.quantidade
+          ? corpo
+          : '<tr><td colspan="2" class="text-muted">Nenhuma aposta neste comparador.</td></tr>';
+        return `<section class="cmp-lote-painel">
+          <h4>${esc(painel.nome)} · ${esc(painel.quantidade)}</h4>
+          <div class="cmp-gaps-scroll">
+            <table class="table table-sm table-bordered cmp-gaps-table">
+              <thead><tr><th>#</th><th>Aposta guardada</th></tr></thead>
+              <tbody>${vazio}</tbody>
+            </table>
+          </div>
+        </section>`;
+      }).join('');
+      loteBox.innerHTML = `<div class="small fw-bold text-muted mb-1">Guardado · concurso ${esc(data.concurso)}${quando}</div>${grupos}`;
+    }
+
+    function verConcurso(numero) {
+      avisoLote('');
+      return fetch('/geradores-elite/api/comparador-apostas/lote/' + encodeURIComponent(numero))
+        .then((r) => r.text().then((text) => {
+          let data = null;
+          try { data = JSON.parse(text); } catch (_) { data = null; }
+          return { ok: r.ok, data: data };
+        }))
+        .then((res) => {
+          if (!res.ok || !res.data || !res.data.sucesso) {
+            avisoLote((res.data && res.data.erro) || 'Reinicie o Dia de Sorte para ver o que foi guardado.');
+            return;
+          }
+          pintarGuardado(res.data);
+        })
+        .catch(() => avisoLote('Não foi possível ver este concurso.'));
+    }
+
+    function apagarConcurso(numero) {
+      const ja = loteDo(numero);
+      const quanto = ja ? resumoPaineis(ja.paineis) : '';
+      const segue = window.confirm(
+        `Apagar o concurso ${numero}${quanto ? ' (' + quanto + ')' : ''}? Sai só este número.`
+      );
+      if (!segue) return Promise.resolve();
+      avisoLote('');
+      return fetch('/geradores-elite/api/comparador-apostas/lote/' + encodeURIComponent(numero), { method: 'DELETE' })
+        .then((r) => r.text().then((text) => {
+          let data = null;
+          try { data = JSON.parse(text); } catch (_) { data = null; }
+          return { ok: r.ok, data: data };
+        }))
+        .then((res) => {
+          if (!res.ok || !res.data || !res.data.sucesso) {
+            avisoLote((res.data && res.data.erro) || 'Reinicie o Dia de Sorte para apagar o concurso guardado.');
+            return;
+          }
+          aplicarEstado(res.data);
+          if (loteBox) {
+            loteBox.classList.remove('d-none');
+            loteBox.innerHTML = `<div class="cmp-lote-ok">Concurso ${esc(numero)} apagado.</div>`;
+          }
+        })
+        .catch(() => avisoLote('Não foi possível apagar.'));
+    }
+
+    function conferirConcurso(numero) {
+      avisoLote('');
+      return fetch('/geradores-elite/api/comparador-apostas/lote/conferir?concurso=' + encodeURIComponent(numero))
+        .then((r) => r.json().then((data) => ({ ok: r.ok, data: data })))
+        .then((res) => {
+          if (!res.data || !res.data.sucesso) {
+            avisoLote((res.data && res.data.erro) || 'Não foi possível conferir este concurso.');
+            return;
+          }
+          pintarConferencia(res.data);
+        })
+        .catch(() => avisoLote('Não foi possível conferir este concurso.'));
+    }
+
+    function guardarConcurso(numero) {
+      const lidos = coletarPaineis();
+      const erros = lidos.filter((p) => p.erros.length).map((p) => `${p.nome}: ${p.erros.join(' ')}`);
+      if (erros.length) {
+        avisoLote(erros.join(' '));
+        return;
+      }
+      const total = lidos.reduce((s, p) => s + p.linhas.length, 0);
+      if (!total) {
+        avisoLote('Nenhuma aposta nos comparadores 1, 2, 3 e 4. Abra cada um e cole antes de guardar.');
+        return;
+      }
+      const vazios = lidos.filter((p) => !p.linhas.length);
+      if (vazios.length) {
+        const segueVazio = window.confirm(
+          `Sem apostas em: ${vazios.map((p) => p.nome).join(', ')}. Guardar os outros no concurso ${numero}?`
+        );
+        if (!segueVazio) return;
+      }
+      const ja = loteDo(numero);
+      if (ja) {
+        const segue = window.confirm(
+          `O concurso ${numero} já tem apostas guardadas (${resumoPaineis(ja.paineis)}). Substituir só este número?`
+        );
+        if (!segue) return;
+      }
+      const confirma = window.confirm(`Guardar os comparadores 1, 2, 3 e 4 no concurso ${numero}?`);
+      if (!confirma) return;
+      const paineis = {};
+      lidos.forEach((p) => { paineis[p.id] = p.texto; });
+      btnGuardar.disabled = true;
+      fetch('/geradores-elite/api/comparador-apostas/lote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ concurso: numero, paineis: paineis }),
+      })
+        .then((r) => r.json().then((data) => ({ ok: r.ok, data: data })))
+        .then((res) => {
+          if (!res.data || !res.data.sucesso) {
+            avisoLote((res.data && res.data.erro) || 'Não foi possível guardar.');
+            carregarLote();
+            return;
+          }
+          aplicarEstado(res.data);
+          if (loteBox) {
+            loteBox.classList.remove('d-none');
+            loteBox.innerHTML = `<div class="cmp-lote-ok">Concurso ${esc(res.data.concurso)} guardado · ${esc(resumoPaineis(res.data.paineis))}. Cada comparador ficou no próprio grupo.</div>`;
+          }
+        })
+        .catch(() => avisoLote('Não foi possível guardar.'))
+        .finally(() => {
+          if (btnGuardar) btnGuardar.disabled = false;
+        });
+    }
+
+    btnGuardar?.addEventListener('click', () => {
+      avisoLote('');
+      let numero = concursoEscolhido();
+      if (!numero) {
+        const sugerido = loteUltimo ? String(loteUltimo + 1) : '';
+        const resp = window.prompt(
+          `Para qual concurso guardar? Último sorteado: ${loteUltimo || '—'}.`,
+          sugerido
+        );
+        numero = parseInt(resp, 10);
+        if (!Number.isFinite(numero) || numero < 1) return;
+        if (campoConcurso) campoConcurso.value = numero;
+      }
+      guardarConcurso(numero);
+    });
+
+    btnConferir?.addEventListener('click', () => {
+      const numero = concursoEscolhido();
+      if (!numero) {
+        avisoLote('Informe o concurso para conferir.');
+        return;
+      }
+      btnConferir.disabled = true;
+      conferirConcurso(numero).finally(() => {
+        if (btnConferir) btnConferir.disabled = false;
+      });
+    });
+
+    campoConcurso?.addEventListener('input', () => {
+      loteNumeroTocado = true;
+      aplicarEstado({ ultimo: loteUltimo, lotes: loteLotes });
+    });
+
+    loteFixos?.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.cmp-crud');
+      if (!btn) return;
+      const numero = parseInt(btn.dataset.concurso, 10);
+      if (!numero) return;
+      if (campoConcurso) {
+        campoConcurso.value = numero;
+        loteNumeroTocado = true;
+      }
+      if (btn.dataset.acao === 'ver') verConcurso(numero);
+      else if (btn.dataset.acao === 'conferir') conferirConcurso(numero);
+      else if (btn.dataset.acao === 'atualizar') guardarConcurso(numero);
+      else if (btn.dataset.acao === 'apagar') apagarConcurso(numero);
+    });
+
+    carregarLote();
   }
 })();
 </script>

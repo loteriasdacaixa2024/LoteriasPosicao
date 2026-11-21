@@ -864,7 +864,7 @@
                                 <i class="fas fa-sort-amount-down"></i> Nº Ordem
                             </button>
                         </div>
-                        <div class="d-flex flex-wrap gap-2" id="numeros-resultado-${concurso}">
+                        <div class="d-flex flex-wrap gap-2${(_ordemCrescente[concurso] || []).length >= 12 ? ' cr-bolas-muitas' : ''}" id="numeros-resultado-${concurso}">
                             ${_ordemCrescente[concurso].map(n => `
                                 <span class="cr-bola-oficial">${n}</span>`).join('')}
                         </div>

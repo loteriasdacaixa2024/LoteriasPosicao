@@ -279,6 +279,25 @@
 #ai-tubular-root .tb-table {
   font-size: .72rem; margin: 0; white-space: nowrap;
 }
+#ai-tubular-root[data-sorteadas="15"] .number-cell,
+#ai-tubular-root[data-sorteadas="15"] .tb-number,
+#ai-tubular-root[data-sorteadas="20"] .number-cell,
+#ai-tubular-root[data-sorteadas="20"] .tb-number {
+  min-width: 1.22rem;
+  height: 1.22rem;
+  padding: 0;
+  font-size: .62rem;
+}
+#ai-tubular-root[data-sorteadas="15"] td.tb-dez,
+#ai-tubular-root[data-sorteadas="20"] td.tb-dez {
+  padding: .1rem .02rem !important;
+}
+#ai-tubular-root[data-sorteadas="15"] .tb-table thead th.tb-dez-h,
+#ai-tubular-root[data-sorteadas="20"] .tb-table thead th.tb-dez-h {
+  padding-left: .06rem !important;
+  padding-right: .06rem !important;
+  font-size: .6rem;
+}
 #ai-tubular-root .tb-table thead th {
   position: sticky; top: 0; z-index: 3;
   background: var(--primary) !important; color: #fff !important;

@@ -139,7 +139,7 @@
             var bolas = modelo === "crescente" ? linha.crescente : linha.ordem;
             html += "<tr>";
             html += '<td class="tc-zebra">' + linha.concurso + (linha.etiqueta ? " · " + esc(linha.etiqueta) : "") + "</td>";
-            html += '<td class="tc-zebra" style="text-align:left;white-space:nowrap">' + bolas.map(bola).join("") + "</td>";
+            html += '<td class="tc-zebra tc-dezenas">' + bolas.map(bola).join("") + "</td>";
             if (dados.tem_mes !== false) {
                 html += '<td class="tc-zebra">' + (linha.mes ? bola(linha.mes, "tc-mes") : "—") + "</td>";
             }

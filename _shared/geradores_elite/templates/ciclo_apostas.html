@@ -1253,9 +1253,14 @@
       const regra = document.getElementById('ce-regra-ds');
       if(regra && MOD_KEY === 'diadesorte'){
         const tops = (diag.ranking || []).filter(function(s){ return Number(s.len) === 2; }).slice(0, 3);
-        const topTxt = tops.map(function(s){ return (s.dir_sym || '') + ' ' + (s.nums_fmt || ''); }).join(' · ');
+        function vistaDiag(s){
+          const bruto = s.nums_fmt || '';
+          if ((s.dir_sym || '') === '↗' || s.dir === 'up') return String(bruto).split('-').reverse().join('-');
+          return bruto;
+        }
+        const topTxt = tops.map(function(s){ return (s.dir_sym || '') + ' ' + vistaDiag(s); }).join(' · ');
         const tr = diag.top_trinca;
-        const trTxt = tr && tr.nums_fmt ? ((tr.dir_sym || '') + ' ' + tr.nums_fmt) : '';
+        const trTxt = tr && tr.nums_fmt ? ((tr.dir_sym || '') + ' ' + vistaDiag(tr)) : '';
         regra.hidden = false;
         regra.textContent = (diag.leitura || '')
           + (topTxt ? ' Top: ' + topTxt + '.' : '')

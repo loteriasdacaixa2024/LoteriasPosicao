@@ -1,5 +1,5 @@
-<link rel="stylesheet" href="/caixa-excel/premiacao.css?v=20260830e">
-<div class="card border-0 shadow-sm mt-4">
+<link rel="stylesheet" href="/caixa-excel/premiacao.css?v=20261120a">
+<div class="card border-0 shadow-sm mt-4{% if (premiacao_ui.nBolas or 0) >= 12 or premiacao_ui.extra == 'dupla' %} premiacao-muitas{% endif %}">
     <div class="card-header d-flex flex-wrap align-items-center gap-2 fw-bold"
         style="background:linear-gradient(135deg,var(--primary),var(--primary-xdark));color:#fff;">
         <span><i class="fas fa-history me-2"></i>Sorteios e premiação — {{ premiacao_ui.nome }}</span>
@@ -41,7 +41,7 @@
         <span id="premiacaoBuscaMsg" class="small"></span>
         <span class="small text-muted" id="premiacaoCaixaStatus">Histórico completo · filtre coluna a coluna como no Excel.</span>
     </div>
-    <div class="premiacao-wrap">
+    <div class="premiacao-wrap{% if (premiacao_ui.nBolas or 0) >= 12 or premiacao_ui.extra == 'dupla' %} premiacao-muitas{% endif %}">
         <table class="table table-sm table-bordered mb-0" id="premiacaoCaixaTabela">
             <thead>
                 <tr id="premiacaoCaixaHeadRow"></tr>
@@ -81,4 +81,4 @@
     </div>
 </div>
 <script>window.PREMIACAO_UI = {{ premiacao_ui|tojson }};</script>
-<script src="/caixa-excel/premiacao.js?v=20260831s"></script>
+<script src="/caixa-excel/premiacao.js?v=20261120a"></script>
