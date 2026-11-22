@@ -19917,3 +19917,53 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5154
 Press CTRL+C to quit
 127.0.0.1 - - [21/Nov/2026 15:06:42] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-21 16:28:34 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [21/Nov/2026 16:28:55] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 16:35:35] "GET /dados/filtros-posicao/ HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 16:35:41] "GET /analise/ciclo-cobertura/metricas/ HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 17:53:43] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%200%201%201%201%201%201%202%202%202%202%202%202%203%203%203%203%204%204%204%204%205%205%205%205%205%205%206%206%206%206%206%207%207%207%207%207%208%208%208%208%209%209%209%209 HTTP/1.1" 200 -
+
+--- iniciando 2026-11-21 18:18:54 ---
+===========================================================
+[OK] Servidor Lotomania rodando na porta 5154
+[URL] Acesse:      http://localhost:5154
+[URL] Análise:     http://localhost:5154/analise/
+[URL] Modelos:     http://localhost:5154/modelos/
+[URL] Conferência: http://localhost:5154/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5154
+ * Running on http://10.0.0.10:5154
+Press CTRL+C to quit
+127.0.0.1 - - [21/Nov/2026 18:19:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 18:36:16] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 19:08:02] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 19:28:52] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 21:15:34] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%200%201%201%201%201%201%201%201%201%201%202%202%202%202%202%202%202%202%203%203%203%204%204%204%205%205%205%205%205%205%207%207%207%207%207%207%208%208%208%208%208%209%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 21:16:52] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 21:53:03] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%200%201%201%201%201%201%201%202%202%202%202%202%203%203%203%203%203%204%204%204%204%205%205%205%205%205%205%205%206%206%206%206%206%206%207%207%208%208%208%208%208%208%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 21:53:47] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 22:44:03] "GET /dados/filtros-posicao/ HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 22:46:58] "GET /dados/filtros-posicao/api?modo=crescente&sorteio=1 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 23:20:11] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%201%201%201%201%201%201%201%202%202%202%202%202%203%203%203%203%203%203%204%204%204%205%205%205%205%205%205%205%205%206%206%207%207%207%208%208%208%208%208%208%209%209%209%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 01:29:32] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%200%200%200%200%201%201%201%201%201%201%201%201%202%202%202%202%202%202%203%203%203%203%203%203%204%204%204%205%206%206%206%207%207%207%207%207%208%208%208%208%208%208%208%209%209%209%209%209 HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 02:19:27] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 07:33:44] "GET /analise/api/ciclo-cobertura/ciclo-atual HTTP/1.1" 200 -

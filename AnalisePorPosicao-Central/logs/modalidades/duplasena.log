@@ -20645,3 +20645,62 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5158
 Press CTRL+C to quit
 127.0.0.1 - - [21/Nov/2026 15:06:44] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-21 16:28:46 ---
+===========================================================
+[OK] Servidor Dupla Sena rodando na porta 5158
+[URL] Acesse:      http://localhost:5158
+[URL] Análise:     http://localhost:5158/analise/
+[URL] Modelos:     http://localhost:5158/modelos/
+[URL] Conferência: http://localhost:5158/central-conferencias/
+[URL] Desdobramento: http://localhost:5158/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5158
+ * Running on http://10.0.0.10:5158
+Press CTRL+C to quit
+127.0.0.1 - - [21/Nov/2026 16:28:58] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 16:35:36] "GET /geradores-elite/gerador-elite/?n=7&digitos=0,1,2,3,4,6,8&concurso=2976 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 16:35:37] "GET /geradores-elite/gerador-gc/?digitos=1,2,3,4,6,7,9&concurso=3000 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 16:35:39] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%201%203%204%205 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 16:35:42] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%201%202%203%205 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 16:54:35] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=2%202%202%203%203%204 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 17:59:51] "GET /geradores-elite/construtor-construcoes/?origem=recorrencia&dezenas=2,3,4,8,14,27,29,30,32,35,36,37,38,39,42,47&faltantes=2,8,27,30,36,47 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 17:59:53] "GET /geradores-elite/static/construtor_dezenas_especial.js?v=1 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 17:59:53] "GET /geradores-elite/static/construtor_digitos.js?v=19 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 17:59:54] "GET /geradores-elite/static/construtor_construcoes.js?v=17 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 18:00:08] "GET /geradores-elite/api/construtor-construcoes/concursos?limit=150 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 18:00:08] "GET /geradores-elite/api/construtor-construcoes/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 18:00:08] "GET /geradores-elite/api/construtor-construcoes/estatisticas-somas-digitos?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 18:00:09] "GET /geradores-elite/api/construtor-construcoes/ciclo-visao HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 18:00:10] "GET /geradores-elite/api/construtor-construcoes/digitos/sessoes HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 18:00:14] "GET /geradores-elite/api/construtor-construcoes/digitos/guia HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 18:00:16] "POST /geradores-elite/api/construtor-construcoes/digitos/avaliar HTTP/1.1" 200 -
+
+--- iniciando 2026-11-21 18:19:02 ---
+===========================================================
+[OK] Servidor Dupla Sena rodando na porta 5158
+[URL] Acesse:      http://localhost:5158
+[URL] Análise:     http://localhost:5158/analise/
+[URL] Modelos:     http://localhost:5158/modelos/
+[URL] Conferência: http://localhost:5158/central-conferencias/
+[URL] Desdobramento: http://localhost:5158/desdobramento/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5158
+ * Running on http://10.0.0.10:5158
+Press CTRL+C to quit
+127.0.0.1 - - [21/Nov/2026 18:19:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 00:22:02] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%202%202%202%203 HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 00:22:11] "GET /analise/api/inteligentes/resultados?janela=0&base=geral HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 00:22:19] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 00:22:24] "GET /analise/api/inteligentes/catalogo-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 00:22:33] "GET /analise/api/inteligentes/evolucao-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 00:23:10] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -
+127.0.0.1 - - [22/Nov/2026 00:23:41] "GET /analise/api/inteligentes/resumo-operacional-padroes HTTP/1.1" 200 -

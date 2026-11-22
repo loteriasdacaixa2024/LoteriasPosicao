@@ -19553,3 +19553,39 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://10.0.0.10:5159
 Press CTRL+C to quit
 127.0.0.1 - - [21/Nov/2026 15:06:46] "GET / HTTP/1.1" 200 -
+
+--- iniciando 2026-11-21 16:28:48 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [21/Nov/2026 16:28:58] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 16:35:39] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%201%201%202%204%204%204%205%207%208 HTTP/1.1" 200 -
+127.0.0.1 - - [21/Nov/2026 16:35:41] "GET /analise/analises-inteligentes/?aba=padroes-ii&padrao=0%200%201%201%201%202%202%206%207%208 HTTP/1.1" 200 -
+
+--- iniciando 2026-11-21 18:19:05 ---
+===========================================================
+[OK] Servidor Timemania rodando na porta 5159
+[URL] Acesse:      http://localhost:5159
+[URL] Análise:     http://localhost:5159/analise/
+[URL] Modelos:     http://localhost:5159/modelos/
+[URL] Conferência: http://localhost:5159/central-conferencias/
+===========================================================
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5159
+ * Running on http://10.0.0.10:5159
+Press CTRL+C to quit
+127.0.0.1 - - [21/Nov/2026 18:19:13] "GET / HTTP/1.1" 200 -

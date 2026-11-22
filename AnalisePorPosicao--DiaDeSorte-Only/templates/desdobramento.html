@@ -709,37 +709,82 @@
     .dl-aba.is-on { background: #f5f3ff; border-color: #c7d2fe; color: #3730a3; }
     .dl-nota { font-size: .78rem; color: #78716c; margin: 0 0 .7rem; }
     .dl-nota a { color: #6b5710; }
-    .dl-linhas { display: flex; flex-wrap: wrap; gap: .45rem; align-items: flex-start; margin-bottom: .85rem; }
+    .dl-linhas { display: flex; flex-wrap: wrap; gap: .45rem; align-items: flex-start; justify-content: center; margin-bottom: .85rem; }
     .dl-linha {
         flex: 0 1 auto; width: max-content; max-width: 15.5rem;
         border: 1px solid #e7e5e4; border-radius: 10px; background: #fff;
-        padding: .4rem .55rem .45rem;
+        padding: .4rem .55rem .45rem; text-align: center;
     }
-    .dl-linha b { display: block; font-size: .72rem; color: #44403c; margin-bottom: .28rem; }
-    .dl-linha b span { color: #78716c; font-weight: 700; }
-    .dl-chips { display: flex; flex-wrap: wrap; gap: .2rem; }
+    .dl-linha-topo { display: flex; align-items: center; justify-content: center; gap: .35rem; margin-bottom: .28rem; }
+    .dl-nome { font-size: .78rem; font-weight: 800; color: var(--primary-xdark, #664a00); }
+    .dl-qtd {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 1.45rem; height: 1.15rem; padding: 0 .3rem;
+        border-radius: 999px; background: #eee; color: #5c5c5c;
+        font-size: .68rem; font-weight: 800;
+    }
+    .dl-chips { display: flex; flex-wrap: wrap; gap: .2rem; justify-content: center; }
     .dl-chip {
         width: 1.55rem; height: 1.55rem; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
         background: #f5f5f4; color: #292524; font-size: .68rem; font-weight: 800;
     }
+    .dl-chip.is-acerto { background: #198754; color: #fff; }
+    .dl-pag button.dl-conferir {
+        border: 0; background: #198754; color: #fff;
+        border-radius: 999px; padding: .42rem 1rem;
+        font-size: .82rem; font-weight: 800;
+    }
+    .dl-pag button.dl-conferir:hover { background: #146c43; color: #fff; }
+    .dl-pag button.dl-conferir:disabled { opacity: .55; }
+    .dl-confere { margin-top: .7rem; }
+    .dl-confere p { margin: 0 0 .35rem; font-size: .78rem; color: #44403c; }
+    .dl-confere-sorteio, .dl-confere-aposta { display: flex; flex-wrap: wrap; gap: .2rem; align-items: center; margin: .2rem 0 .35rem; }
+    .dl-confere-faixa { font-size: .75rem; color: #44403c; margin: 0; }
     .dl-card {
         background: #fff; border: 1px solid #e7e5e4; border-radius: 12px;
         padding: .7rem .75rem; margin-bottom: .75rem; max-width: 100%;
     }
     .dl-card h3 { font-size: .92rem; margin: 0 0 .45rem; color: #292524; }
     .dl-tabela-wrap { overflow-x: auto; }
-    .dl-tabela { width: 100%; border-collapse: collapse; font-size: .78rem; }
-    .dl-tabela th, .dl-tabela td { padding: .28rem .4rem; border-bottom: 1px solid #f5f5f4; white-space: nowrap; text-align: left; }
-    .dl-tabela th { color: #78716c; font-weight: 700; }
-    .dl-tabela tr { cursor: pointer; }
-    .dl-tabela tr.is-on { background: #f5f3ff; }
-    .dl-tabela td.num, .dl-tabela th.num { text-align: right; }
-    .dl-pad { word-spacing: .55em; }
+    .dl-tabela { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .78rem; margin-bottom: 0; }
+    .dl-tabela thead th,
+    .tabela-scroll > table.dl-tabela thead th {
+        background-color: var(--primary, #c08b00);
+        color: #fff;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+        padding: .4rem .55rem;
+        border: 0;
+        cursor: pointer;
+    }
+    .dl-tabela tbody td {
+        text-align: center;
+        vertical-align: middle;
+        padding: .32rem .55rem;
+        white-space: nowrap;
+        border-bottom: 1px solid #e4e4e4;
+        color: #2d2d2d;
+    }
+    .dl-tabela tbody tr:nth-child(even) { background: #f0f0f0; }
+    .dl-tabela tbody tr:nth-child(odd) { background: #fff; }
+    .dl-tabela tbody tr { cursor: pointer; }
+    .dl-tabela tbody tr:hover { background: #e7e7e7; }
+    .dl-tabela tbody tr.is-on { background: #fff3cd; }
+    .dl-pad { word-spacing: .45em; font-variant-numeric: tabular-nums; }
+    .dl-vista { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0 0 .45rem; }
+    .dl-vista button.is-on { background: #fff3cd; border-color: #e6c35c; color: #664a00; }
+    .dl-usar {
+        border: 1px solid #e7e5e4; background: #fff; color: #44403c;
+        border-radius: 999px; padding: .12rem .55rem; font-size: .68rem; font-weight: 700;
+    }
+    .dl-usar:hover { border-color: #e6c35c; color: #664a00; }
     .dl-comb { display: grid; grid-template-columns: 2.2rem 1fr; gap: .15rem .4rem; font-size: .78rem; }
+    .dl-comb.is-todos { grid-template-columns: 3.2rem auto 1fr; }
     .dl-comb span { color: #a8a29e; }
     .dl-pag { display: flex; align-items: center; gap: .45rem; margin-top: .45rem; font-size: .75rem; color: #57534e; }
-    .dl-pag button, .dl-acoes button {
+    .dl-pag button, .dl-acoes button, .dl-vista button {
         border: 1px solid #e7e5e4; background: #fff; color: #44403c;
         border-radius: 999px; padding: .22rem .7rem; font-size: .75rem; font-weight: 700;
     }
@@ -1115,13 +1160,14 @@
     <div class="dl-card">
         <h3>Padrões que cabem nestas dezenas</h3>
         <div class="dl-tabela-wrap">
-            <table class="dl-tabela">
+            <table class="dl-tabela tabela-ordenavel">
                 <thead>
                     <tr>
-                        <th class="num">Vezes</th>
-                        <th class="num">Atraso</th>
-                        <th class="num">Apostas</th>
-                        <th>Padrão</th>
+                        <th data-tipo="num">Vezes</th>
+                        <th data-tipo="num">Atraso</th>
+                        <th data-tipo="num">Apostas</th>
+                        <th data-tipo="txt">Padrão</th>
+                        <th data-ordem="nao">Arquivo</th>
                     </tr>
                 </thead>
                 <tbody id="dlPadroes"></tbody>
@@ -1129,17 +1175,24 @@
         </div>
     </div>
     <div class="dl-card">
+        <div class="dl-vista">
+            <button type="button" id="dlVerTodos">Todos</button>
+            <button type="button" id="dlVerUm" class="is-on">Este padrão</button>
+        </div>
         <h3 id="dlCombTitulo">Combinações</h3>
         <div class="dl-comb" id="dlCombLista"></div>
         <div class="dl-pag">
             <button type="button" id="dlPagAnt">Anterior</button>
             <span id="dlPagInfo"></span>
             <button type="button" id="dlPagProx">Próxima</button>
+            <button type="button" id="dlConferir" class="dl-conferir" disabled>Conferir no concurso seguinte</button>
         </div>
+        <div id="dlConferirOut"></div>
     </div>
     <div class="dl-card">
         <h3>Arquivo</h3>
         <div class="dl-acoes">
+            <button type="button" id="dlPrepararTodos">Preparar todos</button>
             <button type="button" id="dlPreparar">Preparar este padrão</button>
             <button type="button" id="dlTxt">Baixar TXT</button>
             <button type="button" id="dlCsv">Baixar CSV</button>
@@ -1932,7 +1985,11 @@ const MAX_DEZENA = 31;
     let grupos = [];
     let padroes = [];
     let escolhido = '';
+    let vista = 'um';
+    let concursoBase = 0;
+    let historicoSorteios = [];
     let pagina = 0;
+    let editorModo = 'um';
     let cache = null;
     let editorBase = '';
     let editorSujo = false;
@@ -2049,7 +2106,7 @@ const MAX_DEZENA = 31;
     function desenharLinhas() {
         boxLinhas.innerHTML = grupos.map(function (g) {
             const chips = g.nums.map(function (n) { return '<span class="dl-chip">' + fmt(n) + '</span>'; }).join('');
-            return '<div class="dl-linha"><b>' + esc(g.rotulo) + ' <span>' + fmt(g.nums.length) + '</span></b><div class="dl-chips">' + chips + '</div></div>';
+            return '<div class="dl-linha"><div class="dl-linha-topo"><span class="dl-nome">' + esc(g.rotulo) + '</span><span class="dl-qtd">' + fmt(g.nums.length) + '</span></div><div class="dl-chips">' + chips + '</div></div>';
         }).join('');
     }
     function desenharTabela() {
@@ -2057,14 +2114,19 @@ const MAX_DEZENA = 31;
             const vezes = p.vezes == null ? '…' : String(p.vezes);
             const atraso = p.atraso == null ? '—' : String(p.atraso);
             const marca = p.padrao === escolhido ? ' class="is-on"' : '';
-            return '<tr' + marca + ' data-padrao="' + esc(p.padrao) + '"><td class="num">' + vezes + '</td><td class="num">' + atraso + '</td><td class="num">' + p.apostas + '</td><td><span class="dl-pad">' + esc(p.padrao) + '</span></td></tr>';
+            return '<tr' + marca + ' data-padrao="' + esc(p.padrao) + '"><td>' + vezes + '</td><td>' + atraso + '</td><td>' + p.apostas + '</td><td><span class="dl-pad">' + esc(p.padrao) + '</span></td><td><button type="button" class="dl-usar" data-padrao="' + esc(p.padrao) + '">Este</button></td></tr>';
         }).join('');
     }
     function itemAtual() {
         return padroes.filter(function (p) { return p.padrao === escolhido; })[0] || null;
     }
-    function listaAtual() {
-        const item = itemAtual();
+    function itemPor(padrao) {
+        return padroes.filter(function (p) { return p.padrao === padrao; })[0] || null;
+    }
+    function totalTodos() {
+        return padroes.reduce(function (s, p) { return s + p.apostas; }, 0);
+    }
+    function listaDe(item) {
         if (!item) return [];
         if (cache && cache.padrao === item.padrao) return cache.lista;
         const porDig = {};
@@ -2075,25 +2137,59 @@ const MAX_DEZENA = 31;
         cache = { padrao: item.padrao, lista: produto(partes) };
         return cache.lista;
     }
+    function marcarVista() {
+        const todos = document.getElementById('dlVerTodos');
+        const um = document.getElementById('dlVerUm');
+        if (todos) todos.classList.toggle('is-on', vista === 'todos');
+        if (um) um.classList.toggle('is-on', vista === 'um');
+        if (todos) todos.textContent = 'Todos · ' + totalTodos();
+        if (um) um.textContent = 'Este padrão' + (itemAtual() ? ' · ' + itemAtual().apostas : '');
+    }
     function desenharPagina() {
+        marcarVista();
         const item = itemAtual();
-        if (!item) {
+        lista.classList.toggle('is-todos', vista === 'todos');
+        if (vista === 'um' && !item) {
             titulo.textContent = 'Combinações';
             lista.innerHTML = '';
             pagInfo.textContent = '';
             return;
         }
-        const todas = listaAtual();
-        const paginas = Math.max(1, Math.ceil(todas.length / POR_PAGINA));
+        const total = vista === 'todos' ? totalTodos() : item.apostas;
+        const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
         if (pagina >= paginas) pagina = paginas - 1;
         if (pagina < 0) pagina = 0;
         const ini = pagina * POR_PAGINA;
-        const fatia = todas.slice(ini, ini + POR_PAGINA);
-        titulo.textContent = 'Combinações · ' + item.padrao;
-        lista.innerHTML = fatia.map(function (ap, i) {
-            return '<span>' + (ini + i + 1) + '</span><span>' + ap.map(fmt).join(' ') + '</span>';
-        }).join('');
-        pagInfo.textContent = (ini + 1) + '–' + (ini + fatia.length) + ' de ' + todas.length;
+        let html = '';
+        let mostradas = 0;
+        if (vista === 'todos') {
+            let cursor = 0;
+            const fim = ini + POR_PAGINA;
+            padroes.forEach(function (p) {
+                const comeco = cursor;
+                const limite = cursor + p.apostas;
+                cursor = limite;
+                if (limite <= ini || comeco >= fim) return;
+                const apostas = listaDe(p);
+                const a = Math.max(ini, comeco) - comeco;
+                const b = Math.min(fim, limite) - comeco;
+                for (let i = a; i < b; i++) {
+                    html += '<span>' + (comeco + i + 1) + '</span><span class="dl-pad">' + esc(p.padrao) + '</span><span>' + apostas[i].map(fmt).join(' ') + '</span>';
+                    mostradas += 1;
+                }
+            });
+            titulo.textContent = 'Todos os padrões';
+        } else {
+            const todas = listaDe(item);
+            const fatia = todas.slice(ini, ini + POR_PAGINA);
+            mostradas = fatia.length;
+            html = fatia.map(function (ap, i) {
+                return '<span>' + (ini + i + 1) + '</span><span>' + ap.map(fmt).join(' ') + '</span>';
+            }).join('');
+            titulo.textContent = 'Padrão ' + item.padrao;
+        }
+        lista.innerHTML = html;
+        pagInfo.textContent = total ? ((ini + 1) + '–' + (ini + mostradas) + ' de ' + total) : '0';
         document.getElementById('dlPagAnt').disabled = pagina <= 0;
         document.getElementById('dlPagProx').disabled = pagina >= paginas - 1;
     }
@@ -2105,20 +2201,29 @@ const MAX_DEZENA = 31;
         desenharTabela();
         desenharPagina();
     }
-    function textoDoPadrao() {
-        return listaAtual().map(function (ap) { return ap.map(fmt).join(' '); }).join('\n');
+    function textoDe(item) {
+        return listaDe(item).map(function (ap) { return ap.map(fmt).join(' '); }).join('\n');
     }
-    function preparar() {
-        const item = itemAtual();
-        if (!item) {
+    function textoTodos() {
+        return padroes.map(function (p) {
+            return listaDe(p).map(function (ap) { return p.padrao + ' | ' + ap.map(fmt).join(' '); }).join('\n');
+        }).filter(Boolean).join('\n');
+    }
+    function preparar(qual) {
+        const modo = qual === 'todos' ? 'todos' : 'um';
+        const item = modo === 'um' ? (itemPor(qual) || itemAtual()) : null;
+        if (modo === 'um' && !item) {
             status.textContent = 'Escolha um padrão na tabela.';
             return false;
         }
-        if (editorSujo && editor.value.trim() && !window.confirm('Substituir o texto que você editou por este padrão?')) return false;
-        editor.value = textoDoPadrao();
+        if (editorSujo && editor.value.trim() && !window.confirm('Substituir o texto que você editou?')) return false;
+        editor.value = modo === 'todos' ? textoTodos() : textoDe(item);
         editorBase = editor.value;
         editorSujo = false;
-        status.textContent = item.apostas + ' linhas. Pode apagar o que não quiser e baixar em seguida.';
+        editorModo = modo;
+        if (modo === 'um') escolhido = item.padrao;
+        const n = modo === 'todos' ? totalTodos() : item.apostas;
+        status.textContent = (modo === 'todos' ? 'Todos os padrões, ' : 'Padrão ' + item.padrao + ', ') + n + ' linhas. Pode apagar o que não quiser e baixar em seguida.';
         return true;
     }
     function linhasEditor() {
@@ -2133,25 +2238,111 @@ const MAX_DEZENA = 31;
         URL.revokeObjectURL(a.href);
     }
     function nomeArquivo(ext) {
+        if (editorModo === 'todos') return 'linhas_todos.' + ext;
         const item = itemAtual();
         const miolo = item ? item.padrao.replace(/\s+/g, '-') : 'linhas';
         return 'linhas_' + miolo + '.' + ext;
     }
     function baixarEditado(tipo) {
         if (!linhasEditor().length) {
-            if (!preparar()) return;
+            status.textContent = 'Prepare todos ou um padrão. O texto fica editável antes de baixar.';
             return;
         }
         const linhas = linhasEditor();
+        const comPadrao = linhas.some(function (ln) { return ln.indexOf(' | ') >= 0; });
         if (tipo === 'csv') {
-            const csv = ['n;aposta'].concat(linhas.map(function (ln, i) { return (i + 1) + ';' + ln; })).join('\n') + '\n';
+            const csv = comPadrao
+                ? ['n;padrao;aposta'].concat(linhas.map(function (ln, i) {
+                    const partes = ln.split(' | ');
+                    return (i + 1) + ';' + partes[0] + ';' + partes.slice(1).join(' | ');
+                })).join('\n') + '\n'
+                : ['n;aposta'].concat(linhas.map(function (ln, i) { return (i + 1) + ';' + ln; })).join('\n') + '\n';
             baixar(nomeArquivo('csv'), csv);
         } else {
             baixar(nomeArquivo('txt'), linhas.join('\r\n') + '\r\n');
         }
         status.textContent = linhas.length + ' linhas baixadas.';
     }
+    function nomeBotaoConferir() {
+        const btn = document.getElementById('dlConferir');
+        if (!btn) return;
+        if (!concursoBase || !historicoSorteios.length) {
+            btn.disabled = true;
+            btn.textContent = concursoBase ? ('Conferir no ' + (concursoBase + 1)) : 'Conferir no concurso seguinte';
+            return;
+        }
+        btn.disabled = false;
+        btn.textContent = 'Conferir no ' + (concursoBase + 1);
+    }
+    function apostasConferir() {
+        const linhas = linhasEditor();
+        if (linhas.length) {
+            return {
+                rotulo: 'o texto do arquivo',
+                apostas: linhas.map(function (ln) {
+                    const corpo = ln.indexOf(' | ') >= 0 ? ln.split(' | ').slice(1).join(' ') : ln;
+                    return (corpo.match(/\d{1,2}/g) || []).map(Number).filter(function (n) { return n >= 1 && n <= 31; });
+                }).filter(function (a) { return a.length === JOGO; })
+            };
+        }
+        if (vista === 'todos') {
+            const apostas = [];
+            padroes.forEach(function (p) {
+                listaDe(p).forEach(function (ap) { apostas.push(ap); });
+            });
+            return { rotulo: 'todos os padrões', apostas: apostas };
+        }
+        const item = itemAtual();
+        return { rotulo: item ? ('o padrão ' + item.padrao) : 'o padrão', apostas: item ? listaDe(item) : [] };
+    }
+    function conferir() {
+        const out = document.getElementById('dlConferirOut');
+        const alvo = concursoBase + 1;
+        const s = historicoSorteios.filter(function (x) { return Number(x.concurso) === alvo; })[0];
+        if (!s) {
+            out.innerHTML = '<div class="dl-confere"><p>O concurso ' + alvo + ' ainda não saiu. As linhas saíram do ' + concursoBase + ', no Resumo dos Resultados.</p></div>';
+            return;
+        }
+        const oficiais = ((s.numeros_ordenados && s.numeros_ordenados.length) ? s.numeros_ordenados : s.numeros).map(Number).sort(function (a, b) { return a - b; });
+        const marca = {};
+        oficiais.forEach(function (n) { marca[n] = true; });
+        const pacote = apostasConferir();
+        const contagem = [0, 0, 0, 0, 0, 0, 0, 0];
+        let melhores = [];
+        let topo = -1;
+        pacote.apostas.forEach(function (ap) {
+            let ac = 0;
+            ap.forEach(function (n) { if (marca[n]) ac += 1; });
+            if (ac > 7) ac = 7;
+            contagem[ac] += 1;
+            if (ac > topo) {
+                topo = ac;
+                melhores = [ap];
+            } else if (ac === topo) melhores.push(ap);
+        });
+        const bolas = oficiais.map(function (n) { return '<span class="dl-chip is-acerto">' + fmt(n) + '</span>'; }).join('');
+        const faixas = [];
+        for (let i = 7; i >= 0; i--) {
+            if (!contagem[i]) continue;
+            faixas.push(contagem[i] + ' com ' + i + (i === 1 ? ' acerto' : ' acertos'));
+        }
+        const mostra = melhores.slice(0, 12);
+        const listaMelhor = mostra.map(function (ap) {
+            const chips = ap.map(function (n) {
+                return '<span class="dl-chip' + (marca[n] ? ' is-acerto' : '') + '">' + fmt(n) + '</span>';
+            }).join('');
+            return '<div class="dl-confere-aposta">' + chips + '</div>';
+        }).join('');
+        const resto = melhores.length - mostra.length;
+        out.innerHTML = '<div class="dl-confere">'
+            + '<p>Concurso <strong>' + alvo + '</strong>, o seguinte ao ' + concursoBase + '. Conferidas ' + pacote.apostas.length + ' apostas de ' + esc(pacote.rotulo) + '.</p>'
+            + '<div class="dl-confere-sorteio">' + bolas + '</div>'
+            + '<p class="dl-confere-faixa">' + (faixas.join(' · ') || 'Nenhuma aposta.') + '</p>'
+            + (topo >= 0 ? '<p>Maior acerto: ' + topo + (resto > 0 ? '. Mais ' + resto + ' nesta faixa.' : '.') + '</p>' + listaMelhor : '')
+            + '</div>';
+    }
     function aplicarHistoria(sorteios) {
+        historicoSorteios = sorteios || [];
         const freq = {};
         const ultimo = {};
         let maxC = 0;
@@ -2175,6 +2366,7 @@ const MAX_DEZENA = 31;
         }
         desenharTabela();
         desenharPagina();
+        nomeBotaoConferir();
     }
     function lerGrupos(linhas) {
         return (linhas || []).map(function (item) {
@@ -2194,6 +2386,8 @@ const MAX_DEZENA = 31;
                 origem.textContent = data.erro || 'Não foi possível ler o resumo.';
                 return;
             }
+            concursoBase = Number(data.concurso) || 0;
+            nomeBotaoConferir();
             grupos = lerGrupos(data.nao_sairam_linhas);
             padroes = montarPadroes(grupos);
             ordenar();
@@ -2224,13 +2418,34 @@ const MAX_DEZENA = 31;
         });
     });
     corpo.addEventListener('click', function (ev) {
+        const usar = ev.target.closest('.dl-usar');
+        if (usar) {
+            const padrao = usar.getAttribute('data-padrao');
+            vista = 'um';
+            escolher(padrao, true);
+            preparar(padrao);
+            return;
+        }
         const tr = ev.target.closest('tr');
         if (!tr) return;
+        vista = 'um';
         escolher(tr.getAttribute('data-padrao'), true);
+    });
+    document.getElementById('dlVerTodos').addEventListener('click', function () {
+        vista = 'todos';
+        pagina = 0;
+        desenharPagina();
+    });
+    document.getElementById('dlVerUm').addEventListener('click', function () {
+        vista = 'um';
+        pagina = 0;
+        desenharPagina();
     });
     document.getElementById('dlPagAnt').addEventListener('click', function () { pagina -= 1; desenharPagina(); });
     document.getElementById('dlPagProx').addEventListener('click', function () { pagina += 1; desenharPagina(); });
-    document.getElementById('dlPreparar').addEventListener('click', preparar);
+    document.getElementById('dlConferir').addEventListener('click', conferir);
+    document.getElementById('dlPrepararTodos').addEventListener('click', function () { preparar('todos'); });
+    document.getElementById('dlPreparar').addEventListener('click', function () { preparar(escolhido); });
     document.getElementById('dlTxt').addEventListener('click', function () { baixarEditado('txt'); });
     document.getElementById('dlCsv').addEventListener('click', function () { baixarEditado('csv'); });
     editor.addEventListener('input', function () { editorSujo = editor.value !== editorBase; });
