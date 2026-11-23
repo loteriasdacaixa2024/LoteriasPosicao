@@ -115,6 +115,20 @@ def diag_runs_in_draw(
     return runs
 
 
+_GEOM_VOLANTE: Dict[Tuple[int, int, int], Tuple[List[Dict[str, Any]], Dict[int, Tuple[int, int]]]] = {}
+
+
+def _geom_volante(dmin: int, dmax: int, cols: int):
+    """Linhas e mapa do volante, calculados uma vez por modalidade."""
+    key = (int(dmin), int(dmax), max(1, int(cols)))
+    hit = _GEOM_VOLANTE.get(key)
+    if hit is None:
+        rows = volante_rows(key[0], key[1], key[2])
+        hit = (diag_lines(rows), pos_map(rows))
+        _GEOM_VOLANTE[key] = hit
+    return hit
+
+
 def diagonais_na_aposta(
     dezenas: Sequence[int],
     *,
@@ -126,9 +140,7 @@ def diagonais_na_aposta(
     dez = [int(x) for x in dezenas if str(x).strip() != ""]
     if len(dez) < 2:
         return []
-    rows = volante_rows(dmin, dmax, cols)
-    lines = diag_lines(rows)
-    pmap = pos_map(rows)
+    lines, pmap = _geom_volante(dmin, dmax, cols)
     runs = [
         r for r in diag_runs_in_draw(set(dez), lines, pmap)
         if int(r.get("len") or 0) >= 2
@@ -186,9 +198,7 @@ def cruzar_linhas(
     top_n: int = 3,
 ) -> Dict[str, Any]:
     """Por padrão inicial: quantas vezes saiu com diagonal e quais segmentos mais acompanharam."""
-    rows = volante_rows(dmin, dmax, cols)
-    lines = diag_lines(rows)
-    pmap = pos_map(rows)
+    lines, pmap = _geom_volante(dmin, dmax, cols)
     por: Dict[str, Dict[str, Any]] = {}
     ranking: Counter = Counter()
     meta_global: Dict[str, Dict[str, Any]] = {}
@@ -244,9 +254,7 @@ def resumo_contagem_diagonais(
     teto: int = 4,
 ) -> Dict[str, Any]:
     """Quantas diagonais 2+ cada concurso trouxe, e os segmentos mais frequentes."""
-    rows = volante_rows(dmin, dmax, cols)
-    lines = diag_lines(rows)
-    pmap = pos_map(rows)
+    lines, pmap = _geom_volante(dmin, dmax, cols)
     hist: Counter = Counter()
     ranking: Counter = Counter()
     ranking_trinca: Counter = Counter()

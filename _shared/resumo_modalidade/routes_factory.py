@@ -37,14 +37,16 @@ def register_resumo_modalidade(analise_bp: Blueprint, modality_key: str) -> None
         status = 200 if payload.get("sucesso") else 404
         return jsonify(payload), status
 
-    if modality_key == "diadesorte":
-        @analise_bp.route("/api/resumo-geral/concurso")
-        def api_resumo_geral_concurso():
-            from resumo_modalidade.concurso import retrato_concurso
+    @analise_bp.route("/api/resumo-geral/concurso")
+    def api_resumo_geral_concurso():
+        from resumo_modalidade.concurso import retrato_concurso
 
+        try:
             payload = retrato_concurso(modality_key, request.args.get("concurso", type=int))
-            status = 200 if payload.get("sucesso") else 404
-            return jsonify(payload), status
+        except Exception as exc:
+            payload = {"sucesso": False, "erro": str(exc)}
+        status = 200 if payload.get("sucesso") else 404
+        return jsonify(payload), status
 
     @analise_bp.route("/api/resumo-geral/gerar", methods=["POST"])
     def api_resumo_geral_gerar():

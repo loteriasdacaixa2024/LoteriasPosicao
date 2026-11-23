@@ -1,0 +1,148 @@
+</div>
+
+<div id="dl-aba-linhas" hidden>
+    <p class="dl-nota" id="dlOrigem">Lendo as linhas do Resumo dos Resultados…</p>
+    <div class="dl-linhas" id="dlLinhas"></div>
+    <div class="dl-criterios" id="dlCriterios" hidden>
+        <label><input type="checkbox" id="dlChkAnterior"> Considerar dezenas sorteadas no concurso anterior</label>
+        <span id="dlFaixaAnterior" hidden>
+            <label>Mínimo
+                <select id="dlMinAnterior" class="form-select form-select-sm" title="Mínimo de dezenas do concurso anterior em cada aposta">
+                    <option value="0" selected>0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </label>
+            <label>Máximo
+                <select id="dlMaxAnterior" class="form-select form-select-sm" title="Máximo de dezenas do concurso anterior em cada aposta">
+                    <option value="0">0</option>
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </label>
+        </span>
+        <label><input type="checkbox" id="dlChkZerarL1"> Zerar Linha 1 (usar somente as linhas seguintes)</label>
+        <label><input type="checkbox" id="dlChkPiso"> Definir dezena inicial mínima</label>
+        <label id="dlPisoBox" hidden>A partir de
+            <select id="dlPiso" class="form-select form-select-sm" title="Dezena inicial mínima">
+                <option>10</option><option>11</option><option>12</option><option>13</option><option>14</option>
+                <option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+            </select>
+        </label>
+    </div>
+    <div class="dl-card">
+        <h3>Padrões que cabem nestas dezenas <span class="dl-soma" id="dlSomaPadroes"></span></h3>
+        <div class="dl-tabela-wrap">
+            <table class="dl-tabela tabela-ordenavel">
+                <thead>
+                    <tr>
+                        <th data-tipo="num">Vezes</th>
+                        <th data-tipo="num">Atraso</th>
+                        <th data-tipo="num">Apostas</th>
+                        <th data-tipo="txt">Padrão</th>
+                        <th data-ordem="nao">Arquivo</th>
+                    </tr>
+                </thead>
+                <tbody id="dlPadroes"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="dl-card">
+        <div class="dl-vista">
+            <button type="button" id="dlVerTodos">Todos</button>
+            <button type="button" id="dlVerUm" class="is-on">Este padrão</button>
+        </div>
+        <div class="dl-toolbar" id="dlFiltros">
+            <label class="small text-muted mb-0">Status</label>
+            <select id="dlFiltroStatus" class="form-select form-select-sm" title="Filtro da soma, o mesmo de Apostas por Padrão">
+                <option value="dentro_novos" selected>Dentro da média · ainda não saíram (apostar)</option>
+                <option value="dentro_ja">Dentro da média · já saíram (não apostar)</option>
+                <option value="dentro">Dentro da média · todas</option>
+                <option value="alinhadas">Dentro + próximas</option>
+                <option value="proxima">Só próximas</option>
+                <option value="fora">Fora da faixa</option>
+                <option value="all">Todos do padrão</option>
+            </select>
+            <select id="dlPageSize" class="form-select form-select-sm" title="Quantidade por página">
+                <option value="50">50 / pág.</option>
+                <option value="100" selected>100 / pág.</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="dlPagFirst" title="Primeira página">«</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="dlPagAnt">‹</button>
+            <label class="small text-muted mb-0 d-inline-flex align-items-center gap-1">
+                Pág.
+                <input type="number" min="1" class="form-control form-control-sm dl-page-input" id="dlPagNum">
+                <span id="dlPagAte">/ 1</span>
+            </label>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="dlPagProx">›</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="dlPagLast" title="Última página">»</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="dlMarcarPagina">Marcar página</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="dlMarcarTodas">Marcar todas</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="dlLimparMarcas">Limpar marcas</button>
+            <button type="button" class="btn btn-sm btn-success" id="dlCopiar"><i class="fas fa-copy"></i> Copiar</button>
+            <button type="button" class="btn btn-sm btn-outline-success" id="dlExportTxt"><i class="fas fa-file-export"></i> TXT</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="dlExportCsv"><i class="fas fa-file-csv"></i> CSV</button>
+            <button type="button" class="btn btn-sm btn-outline-success" id="dlExportXls" title="Planilha do filtro atual"><i class="fas fa-file-excel"></i> Excel</button>
+            <select id="dlEscopo" class="form-select form-select-sm" title="O que copiar ou baixar">
+                <option value="auto" selected>Marcadas (ou filtro atual)</option>
+                <option value="all">Todas do filtro</option>
+                <option value="sel">Só marcadas</option>
+                <option value="page">Só página</option>
+            </select>
+            <span class="dl-busca">
+                <input type="search" id="dlBuscaDez" class="form-control form-control-sm" placeholder="06 10 15…" autocomplete="off" spellcheck="false" title="Só ficam as apostas que contêm todas as dezenas digitadas.">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="dlBuscaLimpar" title="Limpar busca"><i class="fas fa-times"></i></button>
+            </span>
+            <label class="small text-muted mb-0">Padrão <select id="dlFiltroPadrao" class="form-select form-select-sm"><option value="">Todos</option></select></label>
+            <label class="small text-muted mb-0">Pares <select id="dlFiltroPares" class="form-select form-select-sm"><option value="">Todos</option></select></label>
+            <label class="small text-muted mb-0">Ímpares <select id="dlFiltroImpares" class="form-select form-select-sm"><option value="">Todos</option></select></label>
+            <label class="small text-muted mb-0">Soma <input id="dlFiltroSomaDe" class="form-control form-control-sm" type="number" min="0" max="250" style="width:4.2rem" placeholder="de"></label>
+            <label class="small text-muted mb-0">até <input id="dlFiltroSomaAte" class="form-control form-control-sm" type="number" min="0" max="250" style="width:4.2rem"></label>
+            <label class="small text-muted mb-0">Sequência <select id="dlFiltroSeq" class="form-select form-select-sm"><option value="">Todas</option><option value="com">Com</option><option value="sem">Sem</option></select></label>
+            <label class="small text-muted mb-0">Finais <select id="dlFiltroFinais" class="form-select form-select-sm"><option value="">Todas</option><option value="com">Com</option><option value="sem">Sem</option></select></label>
+            <label class="small text-muted mb-0">Diagonal <select id="dlFiltroDiag" class="form-select form-select-sm"><option value="">Todas</option><option value="com">Com</option><option value="sem">Sem</option></select></label>
+            <button type="button" id="dlConferir" class="dl-conferir" disabled>Conferir no concurso seguinte</button>
+        </div>
+        <div id="dlUltimo" class="dl-ultimo"></div>
+        <h3 id="dlCombTitulo">Combinações</h3>
+        <div class="dl-tabela-wrap">
+            <table class="dl-tabela dl-apostas" id="dlApostas">
+                <thead id="dlApostasHead">
+                    <tr>
+                        <th data-ordem="nao"><input type="checkbox" id="dlChkPagina" title="Marcar ou limpar esta página"></th>
+                        <th data-campo="n">#</th>
+                        <th data-campo="padrao">Padrão</th>
+                        <th data-campo="aposta">Aposta</th>
+                        <th data-campo="pares">Pares</th>
+                        <th data-campo="impares">Ímpares</th>
+                        <th data-campo="seq">Sequências</th>
+                        <th data-campo="finais">Finais iguais</th>
+                        <th data-campo="diag">Diagonais</th>
+                        <th data-campo="soma">Soma</th>
+                        <th data-campo="digitos">Dígitos</th>
+                        <th data-campo="qtd">Qtd</th>
+                        <th data-campo="status">Status</th>
+                        <th data-ordem="nao">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="dlCombLista"></tbody>
+            </table>
+        </div>
+        <p class="small text-muted mb-0" id="dlPagInfo"></p>
+        <div id="dlConferirOut"></div>
+    </div>
+    <div class="dl-card">
+        <h3>Arquivo</h3>
+        <div class="dl-acoes">
+            <button type="button" id="dlPrepararTodos">Preparar todos</button>
+            <button type="button" id="dlPreparar">Preparar este padrão</button>
+            <button type="button" id="dlTxt">Baixar TXT</button>
+            <button type="button" id="dlCsv">Baixar CSV</button>
+        </div>
+        <textarea id="dlEditor" class="dl-editor" spellcheck="false" placeholder="O texto do arquivo aparece aqui. Apague as linhas que não quiser e só então baixe."></textarea>
+        <p class="dl-status" id="dlStatus"></p>
+    </div>
+</div>
+

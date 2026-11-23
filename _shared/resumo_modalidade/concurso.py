@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Retrato de um concurso do Dia de Sorte, na ordem do Resumo dos Resultados.
+"""Retrato de um concurso, na ordem do Resumo dos Resultados.
 
 Reusa 2a, 2a1, gaps, régua, faixas e geometria. Não recalcula essas regras.
+Cada modalidade entra com o próprio volante: dezenas, mês, trevos, time ou 2º sorteio.
 """
 from __future__ import annotations
 
@@ -9,7 +10,7 @@ import time
 from collections import Counter
 from typing import Any, Dict, List, Optional, Sequence
 
-_CACHE: Dict[str, Any] = {"t": 0.0, "rows": None}
+_CACHE: Dict[str, Dict[str, Any]] = {}
 _CACHE_S = 45.0
 _AMOSTRA_POS = 14
 _NOME_POS = (
@@ -23,29 +24,29 @@ _NOME_POS = (
 )
 
 
-def _fmt(n: int) -> str:
-    return f"{int(n):02d}"
+def _fmt(n: int, pad: int = 2) -> str:
+    return f"{int(n):0{int(pad)}d}"
 
 
-def _juntar(nums: Sequence[int], sep: str = " ") -> str:
-    return sep.join(_fmt(n) for n in nums)
+def _juntar(nums: Sequence[int], sep: str = " ", pad: int = 2) -> str:
+    return sep.join(_fmt(n, pad) for n in nums)
 
 
-def _qtd_linha(qtd: int, nums: Sequence[int]) -> str:
-    lista = _juntar(nums)
+def _qtd_linha(qtd: int, nums: Sequence[int], pad: int = 2) -> str:
+    lista = _juntar(nums, pad=pad)
     n = str(max(0, int(qtd)))
     return f"{n} | {lista}" if lista else n
 
 
-def _linhas_dezenas(nums: Sequence[int]) -> List[Dict[str, str]]:
-    """Agrupa as dezenas que não saíram pela dezena: L1=01–09 … L4=30–31."""
+def _linhas_dezenas(nums: Sequence[int], pad: int = 2) -> List[Dict[str, str]]:
+    """Agrupa o que não saiu pela dezena inicial: L1=00–09 ou 01–09, e assim por diante."""
     grupos: Dict[int, List[int]] = {}
     for n in sorted(int(x) for x in nums):
         grupos.setdefault(n // 10, []).append(n)
     return [
         {
             "rotulo": f"L{faixa + 1}",
-            "dezenas": f"{len(grupos[faixa]):02d} | {_juntar(grupos[faixa])}",
+            "dezenas": f"{len(grupos[faixa]):02d} | {_juntar(grupos[faixa], pad=pad)}",
         }
         for faixa in sorted(grupos)
     ]
@@ -66,8 +67,9 @@ def _mes_curto(nome: str) -> str:
 
 def _linhas_sorteio(modality_key: str) -> List[Dict[str, Any]]:
     agora = time.time()
-    if _CACHE["rows"] is not None and agora - float(_CACHE["t"]) < _CACHE_S:
-        return _CACHE["rows"]
+    guardado = _CACHE.get(modality_key)
+    if guardado and agora - float(guardado["t"]) < _CACHE_S:
+        return guardado["rows"]
     from analise_escolha_visual.service import AnaliseEscolhaVisualService
 
     lista = AnaliseEscolhaVisualService.listar_sorteios(
@@ -76,22 +78,21 @@ def _linhas_sorteio(modality_key: str) -> List[Dict[str, Any]]:
     if not lista.get("sucesso"):
         raise RuntimeError(lista.get("erro") or "Sem sorteios.")
     rows = list(lista.get("sorteios") or [])
-    _CACHE["t"] = agora
-    _CACHE["rows"] = rows
+    _CACHE[modality_key] = {"t": agora, "rows": rows}
     return rows
 
 
-def _texto_sequencias(grupos: Sequence[Sequence[int]]) -> str:
-    partes = [" ".join(_fmt(n) for n in g) for g in grupos if len(g) >= 2]
+def _texto_sequencias(grupos: Sequence[Sequence[int]], pad: int = 2) -> str:
+    partes = [" ".join(_fmt(n, pad) for n in g) for g in grupos if len(g) >= 2]
     return " · ".join(partes) if partes else "—"
 
 
-def _texto_finais(grupos: Sequence[Sequence[int]]) -> str:
-    partes = [",".join(_fmt(n) for n in g) for g in grupos if len(g) >= 2]
+def _texto_finais(grupos: Sequence[Sequence[int]], pad: int = 2) -> str:
+    partes = [",".join(_fmt(n, pad) for n in g) for g in grupos if len(g) >= 2]
     return " · ".join(partes) if partes else "—"
 
 
-def _texto_diagonais(grupos: Sequence[Dict[str, Any]]) -> str:
+def _texto_diagonais(grupos: Sequence[Dict[str, Any]], pad: int = 2) -> str:
     partes = []
     for g in grupos:
         nums = list(g.get("nums") or [])
@@ -99,29 +100,29 @@ def _texto_diagonais(grupos: Sequence[Dict[str, Any]]) -> str:
             continue
         if (g.get("dir_sym") or "") == "↗" or g.get("dir") == "up":
             nums = list(reversed(nums))
-        corpo = "-".join(_fmt(n) for n in nums)
+        corpo = "-".join(_fmt(n, pad) for n in nums)
         sim = g.get("dir_sym") or ""
         partes.append(f"{sim} | {corpo}" if sim else corpo)
     return " · ".join(partes) if partes else "—"
 
 
-def _texto_regua(posicoes: Sequence[Dict[str, Any]]) -> str:
+def _texto_regua(posicoes: Sequence[Dict[str, Any]], pad: int = 2) -> str:
     if not posicoes:
         return "—"
     return " · ".join(
-        f"P{p['posicao']} {_fmt(p['dezena'])} {int(p['deslocamento']):+d}"
+        f"P{p['posicao']} {_fmt(p['dezena'], pad)} {int(p['deslocamento']):+d}"
         for p in posicoes
         if p.get("dezena") is not None and p.get("deslocamento") is not None
     ) or "—"
 
 
-def _texto_geometria(ind: Dict[str, Any]) -> str:
+def _texto_geometria(ind: Dict[str, Any], pad: int = 2) -> str:
     conc = ind.get("concentracao") or {}
     faixas = conc.get("faixas") or {}
     linhas_mais = " · ".join(str(x) for x in (conc.get("linhas_mais") or [])) or "—"
     disp = ind.get("dispersao") or {}
     dist = ind.get("distancias") or {}
-    par = " – ".join(_fmt(n) for n in (dist.get("par_maior") or []))
+    par = " – ".join(_fmt(n, pad) for n in (dist.get("par_maior") or []))
     maior = f"{dist.get('maior')}"
     if par:
         maior = f"{maior} ({par})"
@@ -138,18 +139,27 @@ def _texto_geometria(ind: Dict[str, Any]) -> str:
     )
 
 
-def _posicoes_amostra(rows: Sequence[Dict[str, Any]], idx: int) -> Optional[Dict[str, Any]]:
-    """Dezenas que não saíram em cada posição da ordem de sorteio.
+def _posicoes_amostra(
+    rows: Sequence[Dict[str, Any]],
+    idx: int,
+    dmin: int,
+    dmax: int,
+    npos: int,
+    *,
+    pad: int = 2,
+    leitura: str = "na ordem de sorteio",
+) -> Optional[Dict[str, Any]]:
+    """O que não saiu em cada posição da ordem de sorteio.
 
     A amostra são os concursos anteriores ao retrato, no máximo 14.
     """
     ini = max(0, idx - _AMOSTRA_POS)
     amostra = list(rows[ini:idx])
-    if not amostra:
+    if not amostra or npos < 1:
         return None
-    universo = set(range(1, 32))
+    universo = set(range(int(dmin), int(dmax) + 1))
     itens = []
-    for p in range(7):
+    for p in range(int(npos)):
         seq = []
         for s in amostra:
             nums = s.get("numeros") or []
@@ -161,25 +171,25 @@ def _posicoes_amostra(rows: Sequence[Dict[str, Any]], idx: int) -> Optional[Dict
         repetidas = sorted(n for n, k in cont.items() if vezes > 1 and k == vezes)
         itens.append({
             "posicao": p + 1,
-            "nome": _NOME_POS[p],
+            "nome": _NOME_POS[p] if p < len(_NOME_POS) else f"Posição {p + 1}",
             "ausentes": len(ausentes),
-            "dezenas": [_fmt(n) for n in ausentes],
-            "repetidas": [_fmt(n) for n in repetidas],
+            "dezenas": [_fmt(n, pad) for n in ausentes],
+            "repetidas": [_fmt(n, pad) for n in repetidas],
         })
     return {
         "quantidade": len(amostra),
         "de": int(amostra[0]["concurso"]),
         "ate": int(amostra[-1]["concurso"]),
+        "leitura": leitura,
         "itens": itens,
     }
 
 
 def retrato_concurso(modality_key: str, concurso: Optional[int] = None) -> Dict[str, Any]:
     """Um concurso. A lista `itens` já sai na ordem em que a página mostra."""
-    if (modality_key or "").strip().lower() != "diadesorte":
-        return {"sucesso": False, "erro": "Resumo do concurso disponível no Dia de Sorte."}
+    key = (modality_key or "").strip().lower()
     try:
-        rows = _linhas_sorteio(modality_key)
+        rows = _linhas_sorteio(key)
     except Exception as exc:
         return {"sucesso": False, "erro": str(exc)}
     if not rows:
@@ -212,12 +222,12 @@ def retrato_concurso(modality_key: str, concurso: Optional[int] = None) -> Dict[
     )
     from analise_gaps_ciclo.geometria import indicadores_de, layout_de
 
-    from diadesorte.meses_cores import cor_do_mes
-
-    cfg = get_estudos_config(modality_key)
+    cfg = get_estudos_config(key)
     dmin = int(cfg["dezena_min"])
     dmax = int(cfg["dezena_max"])
     cols = int(cfg.get("volante_cols") or 10)
+    pad = 1 if int(cfg.get("pad_width") or 2) < 2 else 2
+    colunas = key == "supersete"
     det = conjuntos_concurso(
         numeros,
         anterior,
@@ -236,36 +246,60 @@ def retrato_concurso(modality_key: str, concurso: Optional[int] = None) -> Dict[
     ordenados = [list(s.get("numeros_ordenados") or []) for s in rows]
     combos = [crescente] + ordenados[:idx] + ordenados[idx + 1:]
     regua = analisar_regua_combinacoes(combos, limite_linhas=1)
-    reg_txt = _texto_regua(((regua.get("ultimo") or {}).get("posicoes") or []))
+    reg_txt = _texto_regua(((regua.get("ultimo") or {}).get("posicoes") or []), pad)
 
     pares = (basicos.get("pares") or {}).get("dezenas") or []
     impares = (basicos.get("impares") or {}).get("dezenas") or []
     digitos = det.get("digitos_unicos") or []
-    padrao = "-".join(str(int(n) // 10) for n in crescente) or "—"
-    geo = _texto_geometria(indicadores_de(crescente, layout_de(modality_key)))
+    if colunas:
+        padrao = "-".join(_fmt(n, pad) for n in numeros) or "—"
+    else:
+        padrao = "-".join(str(int(n) // 10) for n in crescente) or "—"
+    geo = _texto_geometria(indicadores_de(numeros if colunas else crescente, layout_de(key)), pad)
 
     nome_mes = (alvo.get("mes_nome") or "").strip()
+    extra = None
+    trevos = [int(x) for x in (alvo.get("trevos_ordem") or [])]
+    if trevos:
+        extra = {"rotulo": "Trevos:", "valor": _juntar(trevos, pad=pad)}
+    time_nome = str(alvo.get("time_nome") or "").strip()
+    if time_nome and extra is None:
+        extra = {"rotulo": "Time:", "valor": time_nome}
+    nums2 = [int(x) for x in (alvo.get("numeros2") or [])]
+    cres2 = [int(x) for x in (alvo.get("numeros2_ordenados") or sorted(nums2))]
+    mes_cor = ""
+    if key == "diadesorte" and nome_mes:
+        from diadesorte.meses_cores import cor_do_mes
+
+        mes_cor = cor_do_mes(mes_nome=nome_mes)
     return {
         "sucesso": True,
         "concurso": int(alvo["concurso"]),
         "concursos": [int(s["concurso"]) for s in rows],
-        "resultado_ordem": _juntar(numeros),
-        "resultado_crescente": _juntar(crescente),
+        "pad": pad,
+        "modo": "colunas" if colunas else "dezenas",
+        "resultado_ordem": _juntar(numeros, pad=pad),
+        "resultado_crescente": _juntar(crescente, pad=pad),
+        "resultado2_ordem": _juntar(nums2, pad=pad) if nums2 else "",
+        "resultado2_crescente": _juntar(cres2, pad=pad) if cres2 else "",
+        "tem_mes": bool(nome_mes),
         "mes": _mes_curto(nome_mes),
-        "mes_cor": cor_do_mes(mes_nome=nome_mes) if nome_mes else "",
+        "mes_cor": mes_cor,
+        "extra": extra,
         "nao_sairam": [
-            _qtd_linha(len(fora.get("pares") or []), fora.get("pares") or []),
-            _qtd_linha(len(fora.get("impares") or []), fora.get("impares") or []),
+            _qtd_linha(len(fora.get("pares") or []), fora.get("pares") or [], pad),
+            _qtd_linha(len(fora.get("impares") or []), fora.get("impares") or [], pad),
         ],
         "nao_sairam_linhas": _linhas_dezenas(
-            list(fora.get("pares") or []) + list(fora.get("impares") or [])
+            list(fora.get("pares") or []) + list(fora.get("impares") or []),
+            pad,
         ),
-        "pares": _qtd_linha(len(pares), pares),
-        "impares": _qtd_linha(len(impares), impares),
-        "repetido": _juntar(fora.get("repetidos") or []) or "—",
-        "sequencia": _texto_sequencias(fora.get("sequencias") or []),
-        "finais": _texto_finais(fora.get("finais") or []),
-        "diagonais": _texto_diagonais(fora.get("diagonais") or []),
+        "pares": _qtd_linha(len(pares), pares, pad),
+        "impares": _qtd_linha(len(impares), impares, pad),
+        "repetido": _juntar(fora.get("repetidos") or [], pad=pad) or "—",
+        "sequencia": _texto_sequencias(fora.get("sequencias") or [], pad),
+        "finais": _texto_finais(fora.get("finais") or [], pad),
+        "diagonais": _texto_diagonais(fora.get("diagonais") or [], pad),
         "gaps_classificado": classificado.split() if classificado and classificado != "—" else [],
         "gaps_ordem": ordem_gaps.split() if ordem_gaps and ordem_gaps != "—" else [],
         "soma": str(det.get("soma") if det.get("soma") is not None else "—"),
@@ -273,5 +307,9 @@ def retrato_concurso(modality_key: str, concurso: Optional[int] = None) -> Dict[
         "digitos": " ".join(str(d) for d in digitos) or "—",
         "geometria": geo,
         "regua": reg_txt,
-        "posicoes": _posicoes_amostra(rows, idx),
+        "posicoes": _posicoes_amostra(
+            rows, idx, dmin, dmax, len(numeros),
+            pad=pad,
+            leitura="coluna a coluna" if colunas else "na ordem de sorteio",
+        ),
     }

@@ -41,6 +41,15 @@ class AnaliseEscolhaVisualService:
             if mes_num:
                 item["mes_num"] = int(mes_num)
                 item["mes_nome"] = getattr(r, "mes_nome", "") or ""
+            if hasattr(r, "trevos_ordem_lista"):
+                item["trevos_ordem"] = [int(x) for x in r.trevos_ordem_lista()]
+            time_nome = getattr(r, "time_nome", None)
+            if time_nome:
+                item["time_nome"] = str(time_nome)
+            if hasattr(r, "sorteio2_ordem_lista"):
+                segundo = [int(x) for x in r.sorteio2_ordem_lista()]
+                item["numeros2"] = segundo
+                item["numeros2_ordenados"] = sorted(segundo)
             sorteios.append(item)
 
         ordem_n = (ordem or "desc").strip().lower()

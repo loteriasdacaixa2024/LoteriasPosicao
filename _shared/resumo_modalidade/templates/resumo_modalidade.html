@@ -514,7 +514,6 @@
         </p>
     </div>
 
-    {% if modality_key == 'diadesorte' %}
     <div class="rg-section" id="rg-resultados">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
             <span></span>
@@ -524,7 +523,6 @@
         </div>
         <div id="rg-res-corpo"><p class="text-muted small mb-0">Carregando…</p></div>
     </div>
-    {% endif %}
 
     <div class="rg-section" id="rg-perfis">
         <h2>Gerar apostas por perfil</h2>
@@ -657,13 +655,13 @@
         .catch(function () {});
 })();
 </script>
-{% if modality_key == 'diadesorte' %}
 <script>
 (function () {
     const corpo = document.getElementById('rg-res-corpo');
     const sel = document.getElementById('rg-res-sel');
     if (!corpo || !sel) return;
     let preenchendo = false;
+    let casas = 2;
     function esc(s) {
         return String(s == null ? '' : s)
             .replace(/&/g, '&amp;')
@@ -700,7 +698,9 @@
         const s = String(dezenas || '').trim();
         if (!s || s.indexOf('|') >= 0) return s;
         const lista = s.split(/\s+/).filter(Boolean);
-        return String(lista.length).padStart(2, '0') + ' | ' + lista.join(' ');
+        return String(lista.length).padStart(2, '0') + ' | ' + lista.map(function (n) {
+            return String(n).padStart(casas, '0');
+        }).join(' ');
     }
     function linhasNaoSairam(data) {
         const prontas = data.nao_sairam_linhas;
@@ -723,7 +723,7 @@
         });
         return Object.keys(grupos).sort(function (a, b) { return Number(a) - Number(b); }).map(function (faixa) {
             const lista = grupos[faixa].slice().sort(function (a, b) { return a - b; }).map(function (n) {
-                return String(n).padStart(2, '0');
+                return String(n).padStart(casas, '0');
             });
             return {
                 rotulo: 'L' + (Number(faixa) + 1),
@@ -746,7 +746,7 @@
             const s = String(n == null ? '' : n).trim();
             const neg = s.charAt(0) === '-';
             const abs = neg ? s.slice(1) : s;
-            const corpo = /^\d+$/.test(abs) && abs.length < 2 ? abs.padStart(2, '0') : abs;
+            const corpo = /^\d+$/.test(abs) && abs.length < casas ? abs.padStart(casas, '0') : abs;
             return '<span class="n">' + esc((neg ? '-' : '') + corpo) + '</span>';
         }).join('');
         return '<div class="rg-gap">' + celulas + '<span class="sep">|</span><span>' + esc(legenda) + '</span></div>';
@@ -769,22 +769,39 @@
             const valor = '<strong class="rg-qtd">' + esc(it.ausentes) + '</strong> | <span class="rg-dez">' + listaE(it.repetidas) + '</span>';
             return linha('P' + it.posicao + ':', valor);
         }).join('');
-        return '<div class="rg-res-titulo rg-res-titulo-sec">Dezenas ausentes por posição</div>'
-            + '<p class="rg-res-nota">' + esc(pos.quantidade) + ' concursos anteriores, do ' + esc(pos.de) + ' ao ' + esc(pos.ate) + ', na ordem de sorteio.</p>'
+        const tituloPos = pos.modo === 'colunas' ? 'Dígitos ausentes por coluna' : 'Dezenas ausentes por posição';
+        const notaLei = pos.modo === 'colunas'
+            ? 'Ausentes e dígitos que mais repetiram na coluna.'
+            : 'Ausentes e dezenas que mais repetiram na posição.';
+        return '<div class="rg-res-titulo rg-res-titulo-sec">' + tituloPos + '</div>'
+            + '<p class="rg-res-nota">' + esc(pos.quantidade) + ' concursos anteriores, do ' + esc(pos.de) + ' ao ' + esc(pos.ate) + ', ' + esc(pos.leitura || 'na ordem de sorteio') + '.</p>'
             + '<table class="rg-aus">' + aus + '</table>'
             + '<div class="rg-res-titulo rg-res-titulo-sec">Leitura</div>'
-            + '<p class="rg-res-nota">Ausentes e dezenas que mais repetiram na posição.</p>'
+            + '<p class="rg-res-nota">' + notaLei + '</p>'
             + '<table class="rg-aus">' + lei + '</table>';
     }
     function render(data) {
+        casas = Number(data.pad) === 1 ? 1 : 2;
+        if (data.posicoes) data.posicoes.modo = data.modo;
         const listas = data.nao_sairam || [];
+        const colunas = data.modo === 'colunas';
+        const extra = data.extra && data.extra.valor
+            ? linha(esc(data.extra.rotulo || 'Extra:'), esc(data.extra.valor))
+            : '';
+        const segundo = data.resultado2_ordem
+            ? linha('2º sorteio:', bloco([data.resultado2_ordem, data.resultado2_crescente]))
+            : '';
+        const mesNome = String(data.mes || '').trim();
+        const mostraMes = !!data.tem_mes || (mesNome && mesNome !== '—' && mesNome !== '-');
         corpo.innerHTML =
             '<div id="rg-res-folha" class="rg-res-folha">'
             + '<div class="rg-res-titulo">Resumo dos Resultados</div>'
             + '<table>'
             + linha('Resultado:', bloco([data.resultado_ordem, data.resultado_crescente]))
-            + linha('Mês:', mesValor(data))
-            + linha('Dezenas que<br>não saíram:', blocoQtd(listas), true)
+            + segundo
+            + (mostraMes ? linha('Mês:', mesValor(data)) : '')
+            + extra
+            + linha(colunas ? 'Dígitos que<br>não saíram:' : 'Dezenas que<br>não saíram:', blocoQtd(listas), true)
             + linhasHtml(data)
             + linha('Pares:', qtdLinha(data.pares))
             + linha('Impares:', qtdLinha(data.impares))
@@ -794,7 +811,7 @@
             + linha('Diagonais:', esc(data.diagonais))
             + linha('Gaps:', gaps(data.gaps_classificado, 'Classificado') + gaps(data.gaps_ordem, 'Ordem de Sorteio'))
             + linha('Soma:', esc(data.soma))
-            + linha('Padrão Inicial:', esc(data.padrao))
+            + linha(colunas ? 'Colunas:' : 'Padrão Inicial:', esc(data.padrao))
             + linha('Dígitos:', esc(data.digitos))
             + linha('Geometria Analítica:', esc(data.geometria))
             + linha('Régua:', esc(data.regua))
@@ -843,7 +860,6 @@
     carregar();
 })();
 </script>
-{% endif %}
 <script>
 (function () {
     const btn = document.getElementById('rg-gerar');

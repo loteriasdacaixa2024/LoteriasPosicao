@@ -265,6 +265,18 @@
         line-height: 1;
     }
     #btnPremiacaoLimparBusca i { font-size: .78rem; }
+    #btnBaixarNumeros { font-size: .72rem; font-weight: 700; }
+    #btnBaixarNumeros:disabled { opacity: .5; }
+    #premiacaoCaixaTabela th.px-sel,
+    #premiacaoCaixaTabela td.td-sel {
+        width: 2rem;
+        text-align: center;
+        vertical-align: middle;
+        padding-left: .2rem;
+        padding-right: .2rem;
+    }
+    #premiacaoCaixaTabela th.px-sel input,
+    #premiacaoCaixaTabela td.td-sel input { margin: 0; cursor: pointer; }
 
     .mes-badge {
         display: inline-flex;
@@ -615,6 +627,9 @@
             </button>
         </label>
         <span id="premiacaoBuscaMsg" class="small"></span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnBaixarNumeros" disabled title="Baixa só as dezenas dos concursos marcados">
+            <i class="fas fa-download me-1"></i>Baixar números
+        </button>
         <span class="small text-muted" id="premiacaoCaixaStatus">Histórico completo · filtre coluna a coluna como no Excel.</span>
     </div>
     <div class="premiacao-wrap">
@@ -764,6 +779,7 @@
     let PREMIACAO_SORT = { key: 'concurso', dir: 'desc' };
     let PREMIACAO_FILTERS = {};
     let PREMIACAO_BUSCA_CONCURSO = '';
+    let PREMIACAO_SELECIONADOS = new Set();
     let PREMIACAO_ULTIMO = null;
     let PREMIACAO_MENU = null;
     const PREMIACAO_COLS = [
@@ -955,6 +971,35 @@
         });
         return rows;
     }
+    function atualizarBotaoBaixar() {
+        const btn = document.getElementById('btnBaixarNumeros');
+        if (!btn) return;
+        const n = PREMIACAO_SELECIONADOS.size;
+        btn.disabled = n < 1;
+        btn.innerHTML = '<i class="fas fa-download me-1"></i>Baixar números' + (n ? ' (' + n + ')' : '');
+    }
+    function syncSelecionarTudo() {
+        const box = document.getElementById('pxSelAll');
+        atualizarBotaoBaixar();
+        if (!box) return;
+        const ids = linhasExibicao().map(l => String(l.concurso));
+        const n = ids.filter(id => PREMIACAO_SELECIONADOS.has(id)).length;
+        box.checked = ids.length > 0 && n === ids.length;
+        box.indeterminate = n > 0 && n < ids.length;
+    }
+    function baixarNumerosSelecionados() {
+        const escolhidos = linhasExibicao().filter(l => PREMIACAO_SELECIONADOS.has(String(l.concurso)));
+        if (!escolhidos.length) return;
+        const texto = escolhidos.map(l => dezenasDaLinha(l).filter(n => n != null).map(fmtDez).join(' ')).join('\r\n') + '\r\n';
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'diadesorte_numeros.txt';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
     function fecharMenuFiltro() {
         if (PREMIACAO_MENU) {
             PREMIACAO_MENU.remove();
@@ -1098,7 +1143,8 @@
     function renderCabecalho() {
         const tr = document.getElementById('premiacaoCaixaHeadRow');
         if (!tr) return;
-        tr.innerHTML = PREMIACAO_COLS.map(col => {
+        const sel = `<th class="px-th px-sel"><input type="checkbox" id="pxSelAll" title="Marcar os concursos filtrados" aria-label="Marcar os concursos filtrados"></th>`;
+        tr.innerHTML = sel + PREMIACAO_COLS.map(col => {
             const filtered = !!PREMIACAO_FILTERS[col.key];
             const sorted = PREMIACAO_SORT.key === col.key;
             const ind = sorted ? (PREMIACAO_SORT.dir === 'asc' ? '▲' : '▼') : '';
@@ -1194,10 +1240,13 @@
         const pageRows = PREMIACAO_SIZE > 0
             ? all.slice(start, start + PREMIACAO_SIZE)
             : all;
-        const colCount = PREMIACAO_COLS.length;
+        const colCount = PREMIACAO_COLS.length + 1;
+        const idsFiltrados = new Set(all.map(l => String(l.concurso)));
+        PREMIACAO_SELECIONADOS.forEach(id => { if (!idsFiltrados.has(id)) PREMIACAO_SELECIONADOS.delete(id); });
         if (!PREMIACAO_LINHAS.length) {
             tbody.innerHTML = `<tr><td colspan="${colCount}" class="text-muted text-center py-3">Sincronize os dados para ver os sorteios e a premiação.</td></tr>`;
                 if (pager) pager.innerHTML = '';
+                syncSelecionarTudo();
                 return;
             }
         if (!pageRows.length) {
@@ -1206,7 +1255,9 @@
             tbody.innerHTML = pageRows.map(l => {
                 const dez = dezenasDaLinha(l);
                 const bolas = [0,1,2,3,4,5,6].map(i => `<td class="td-bola">${htmlBola(dez[i])}</td>`).join('');
+                const marcado = PREMIACAO_SELECIONADOS.has(String(l.concurso)) ? ' checked' : '';
                 return `<tr>
+                <td class="td-sel"><input type="checkbox" class="px-sel-row" data-concurso="${escHtml(l.concurso)}"${marcado} aria-label="Selecionar concurso ${escHtml(l.concurso)}"></td>
                 <td class="td-num"><strong>${escHtml(l.concurso)}</strong></td>
                 <td class="td-num">${escHtml(l.data)}</td>
                     ${bolas}
@@ -1243,6 +1294,7 @@
                 pager.innerHTML = '';
             }
         }
+        syncSelecionarTudo();
     }
     async function carregarPremiacaoCaixa() {
         const tbody = document.querySelector('#premiacaoCaixaTabela tbody');
@@ -1257,6 +1309,7 @@
             PREMIACAO_LINHAS = linhas;
             PREMIACAO_FILTERS = {};
             PREMIACAO_BUSCA_CONCURSO = '';
+            PREMIACAO_SELECIONADOS = new Set();
             PREMIACAO_PAGE = 1;
             setBuscaMsg('');
             if (linhas.length) {
@@ -1388,7 +1441,27 @@
             PREMIACAO_SIZE = pageSizeAtual();
             renderPremiacao();
         });
+        document.getElementById('btnBaixarNumeros')?.addEventListener('click', baixarNumerosSelecionados);
         document.getElementById('btnPremiacaoBuscaConcurso')?.addEventListener('click', pesquisarConcurso);
+        document.querySelector('#premiacaoCaixaTabela')?.addEventListener('change', (ev) => {
+            const t = ev.target;
+            if (t && t.id === 'pxSelAll') {
+                const ids = linhasExibicao().map(l => String(l.concurso));
+                ids.forEach(id => {
+                    if (t.checked) PREMIACAO_SELECIONADOS.add(id);
+                    else PREMIACAO_SELECIONADOS.delete(id);
+                });
+                renderPremiacao();
+                return;
+            }
+            if (t && t.classList.contains('px-sel-row')) {
+                const id = String(t.dataset.concurso || '');
+                if (!id) return;
+                if (t.checked) PREMIACAO_SELECIONADOS.add(id);
+                else PREMIACAO_SELECIONADOS.delete(id);
+                syncSelecionarTudo();
+            }
+        });
         document.getElementById('btnPremiacaoLimparBusca')?.addEventListener('click', resetarPesquisaConcurso);
         document.getElementById('premiacaoBuscaConcurso')?.addEventListener('keydown', (ev) => {
             if (ev.key === 'Enter') {

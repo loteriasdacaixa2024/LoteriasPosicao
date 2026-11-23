@@ -638,7 +638,8 @@
     .hit-badge-aposta.n-6 { background: #eab308; color: #000; }
     .hit-badge-aposta.hit-simples { background: #e2e8f0; color: #475569; }
 </style>
-
+{% include 'desdobramento_linhas_estilo.html' %}
+{% include 'desdobramento_linhas_abas.html' %}
 <ul class="nav nav-tabs mb-4 justify-content-center" id="desdTabs"><li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#painel-dezenas" type="button">Dezenas principais</button></li><li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#painel-trevos" type="button">Trevos</button></li></ul><div class="tab-content"><div class="tab-pane fade show active" id="painel-dezenas">
 <!-- HEADER PRINCIPAL -->
 <div class="page-header text-center">
@@ -1052,6 +1053,8 @@
     });
 })();
 </script>
+
+{% include 'desdobramento_linhas_painel.html' %}
 
 {% endblock %}
 
@@ -1800,4 +1803,5 @@ const MAX_DEZENA = 50;
         }
     }
 </script>
+{% include 'desdobramento_linhas_script.html' %}
 {% endblock %}

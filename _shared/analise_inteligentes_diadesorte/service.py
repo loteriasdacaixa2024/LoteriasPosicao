@@ -107,15 +107,24 @@ def padrao_final(dezenas: Sequence[int]) -> str:
     return " ".join(str(int(d) % 10) for d in dezenas)
 
 
+_DISP_CACHE: Dict[Tuple[int, int], Dict[int, int]] = {}
+
+
 def disponibilidade_digito_inicial(
     min_dezena: int = 1,
     max_dezena: int = MAX_DEZENA,
 ) -> Dict[int, int]:
     """Quantidade de dezenas por dígito inicial no universo."""
+    key = (int(min_dezena), int(max_dezena))
+    hit = _DISP_CACHE.get(key)
+    if hit is not None:
+        return hit
     disp: Dict[int, int] = defaultdict(int)
-    for n in range(int(min_dezena), int(max_dezena) + 1):
+    for n in range(key[0], key[1] + 1):
         disp[int(n) // 10] += 1
-    return dict(disp)
+    hit = dict(disp)
+    _DISP_CACHE[key] = hit
+    return hit
 
 
 def descricao_bma_do_padrao(padrao: str) -> str:
@@ -148,14 +157,23 @@ def jogos_possiveis_padrao(
     return int(total)
 
 
+_POOL_CACHE: Dict[Tuple[int, int], Dict[int, List[int]]] = {}
+
+
 def pool_por_digito_universo(
     min_dezena: int = 1,
     max_dezena: int = MAX_DEZENA,
 ) -> Dict[int, List[int]]:
+    key = (int(min_dezena), int(max_dezena))
+    hit = _POOL_CACHE.get(key)
+    if hit is not None:
+        return hit
     out: Dict[int, List[int]] = defaultdict(list)
-    for n in range(int(min_dezena), int(max_dezena) + 1):
+    for n in range(key[0], key[1] + 1):
         out[int(n) // 10].append(int(n))
-    return dict(out)
+    hit = dict(out)
+    _POOL_CACHE[key] = hit
+    return hit
 
 
 def expandir_jogos_padrao(
@@ -234,6 +252,7 @@ def expandir_jogos_padrao(
 
 
 _COMBOS_RANK_CACHE: Dict[Tuple[Tuple[int, ...], int], List[Tuple[int, ...]]] = {}
+_COMBO_INDEX: Dict[Tuple[Tuple[int, ...], int], Dict[Tuple[int, ...], int]] = {}
 
 
 def _combinacoes_ordenadas(pool: Sequence[int], k: int) -> List[Tuple[int, ...]]:
@@ -244,6 +263,16 @@ def _combinacoes_ordenadas(pool: Sequence[int], k: int) -> List[Tuple[int, ...]]
         cached = list(combinations(key[0], key[1]))
         _COMBOS_RANK_CACHE[key] = cached
     return cached
+
+
+def _indice_da_combo(pool: Sequence[int], k: int, combo: Tuple[int, ...]) -> Optional[int]:
+    """Posição da combinação na mesma ordem de expandir_jogos_padrao."""
+    key = (tuple(int(x) for x in pool), int(k))
+    ranks = _COMBO_INDEX.get(key)
+    if ranks is None:
+        ranks = {c: i for i, c in enumerate(_combinacoes_ordenadas(key[0], key[1]))}
+        _COMBO_INDEX[key] = ranks
+    return ranks.get(tuple(int(x) for x in combo))
 
 
 def indice_aposta_no_padrao(
@@ -279,12 +308,11 @@ def indice_aposta_no_padrao(
         k = int(need[d])
         pool = pools.get(d) or []
         combo = tuple(grupos.get(d) or [])
-        combos = _combinacoes_ordenadas(pool, k)
-        try:
-            ranks.append(combos.index(combo))
-        except ValueError:
+        pos = _indice_da_combo(pool, k, combo)
+        if pos is None:
             return None
-        sizes.append(len(combos))
+        ranks.append(pos)
+        sizes.append(len(_combinacoes_ordenadas(pool, k)))
     idx = 0
     for i, r in enumerate(ranks):
         mul = 1
@@ -734,12 +762,16 @@ class AnaliseInteligentesService:
             m = {}
         dmax = int(m.get("dezena_max", MAX_DEZENA))
         dmin = int(m.get("dezena_min", 1))
-        tamanho = int(m.get("pick_default", TAMANHO_JOGO))
+        # Sorteio (resultado) e aposta divergem na Lotomania: saem 20, o bilhete marca 50.
+        # Padrão, volume C(n,k) e universo usam o sorteio. O gerador continua na aposta.
+        sorteadas = int(m.get("sorteadas", m.get("pick_default", TAMANHO_JOGO)))
+        aposta = int(m.get("pick_default", sorteadas))
         pad = 1 if dmax < 10 else 2
         return {
             "max_dezena": dmax,
             "min_dezena": dmin,
-            "tamanho_jogo": tamanho,
+            "tamanho_jogo": sorteadas,
+            "tamanho_aposta": aposta,
             "pad": pad,
         }
 
@@ -861,7 +893,7 @@ class AnaliseInteligentesService:
             perfil=perfil_uso,
             max_dezena=lim["max_dezena"],
             min_dezena=lim["min_dezena"],
-            tamanho_jogo=lim["tamanho_jogo"],
+            tamanho_jogo=int(lim.get("tamanho_aposta") or lim["tamanho_jogo"]),
             pad=lim["pad"],
             modality_key=cls.modality_key,
         )
@@ -901,7 +933,7 @@ class AnaliseInteligentesService:
             perfil=perfil_uso,
             max_dezena=lim["max_dezena"],
             min_dezena=lim["min_dezena"],
-            tamanho_jogo=lim["tamanho_jogo"],
+            tamanho_jogo=int(lim.get("tamanho_aposta") or lim["tamanho_jogo"]),
             pad=lim["pad"],
             modality_key=cls.modality_key,
         )
@@ -1050,7 +1082,9 @@ class AnaliseInteligentesService:
             mid = len(orden) // 2
             atraso_mediano = float(orden[mid]) if len(orden) % 2 else (orden[mid - 1] + orden[mid]) / 2.0
 
-        teoricos = _gerar_padroes_teoricos(k, min_dezena=dmin, max_dezena=dmax)
+        n_teoricos = _contar_padroes_teoricos(k, min_dezena=dmin, max_dezena=dmax)
+        teoricos_completos = n_teoricos <= _MAX_PADROES_TEORICOS
+        teoricos = _gerar_padroes_teoricos(k, min_dezena=dmin, max_dezena=dmax) if teoricos_completos else []
         padroes_set = set(teoricos) | set(ocorrencias.keys())
 
         # Somas históricas por padrão (para média operacional)
@@ -1148,6 +1182,8 @@ class AnaliseInteligentesService:
             "max_dezena": dmax,
             "total_sorteios_analisados": total_sorteios,
             "total_padroes": len(catalogo),
+            "total_padroes_teoricos": n_teoricos,
+            "teoricos_completos": teoricos_completos,
             "total_padroes_com_frequencia": sum(1 for r in catalogo if r["frequencia"] > 0),
             "total_padroes_faltantes": faltantes,
             "total_jogos_possiveis": total_jogos,
@@ -1494,14 +1530,31 @@ class AnaliseInteligentesService:
                 100.0 * int(r["frequencia"]) / max(1, total_concursos), 4
             )
 
-        checks = [
-            {
+        universo_n = dmax - dmin + 1
+        k_sorteio = int(lim["tamanho_jogo"])
+        catalogo_parcial = not bool(cat.get("teoricos_completos"))
+        if catalogo_parcial:
+            check_universo = {
                 "id": "universo",
-                "label": f"Soma dos jogos dos padrões = C({dmax - dmin + 1},{lim['tamanho_jogo']})",
+                "label": (
+                    f"Universo do sorteio C({universo_n},{k_sorteio}). "
+                    "A soma da tabela é só dos padrões que já saíram."
+                ),
+                "esperado": total_universo,
+                "obtido": total_jogos_soma,
+                "ok": True,
+                "parcial": True,
+            }
+        else:
+            check_universo = {
+                "id": "universo",
+                "label": f"Soma dos jogos dos padrões = C({universo_n},{k_sorteio})",
                 "esperado": total_universo,
                 "obtido": total_jogos_soma,
                 "ok": total_jogos_soma == total_universo,
-            },
+            }
+        checks = [
+            check_universo,
             {
                 "id": "concursos",
                 "label": "Soma das frequências = concursos apurados",
@@ -1534,6 +1587,7 @@ class AnaliseInteligentesService:
         n_ok = sum(1 for c in checks if c["ok"])
         checagem = {
             "ok": n_ok == len(checks) and not inconsistencias_linha,
+            "catalogo_parcial": catalogo_parcial,
             "checks": checks,
             "inconsistencias_linha": inconsistencias_linha[:20],
             "total_universo": total_universo,

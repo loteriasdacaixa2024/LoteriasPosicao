@@ -1,0 +1,1224 @@
+{% set dl_linhas_mapa = {
+    'diadesorte': {'jogo': 7, 'min': 1, 'max': 31, 'cols': 10, 'criterios': 1},
+    'lotofacil': {'jogo': 15, 'min': 1, 'max': 25, 'cols': 5, 'criterios': 1},
+    'lotomania': {'jogo': 20, 'min': 0, 'max': 99, 'cols': 10, 'criterios': 1},
+    'quina': {'jogo': 5, 'min': 1, 'max': 80, 'cols': 10, 'criterios': 1},
+    'megasena': {'jogo': 6, 'min': 1, 'max': 60, 'cols': 10, 'criterios': 1},
+    'maismilionaria': {'jogo': 6, 'min': 1, 'max': 50, 'cols': 10, 'criterios': 1},
+    'duplasena': {'jogo': 6, 'min': 1, 'max': 50, 'cols': 10, 'criterios': 1},
+    'timemania': {'jogo': 10, 'min': 1, 'max': 80, 'cols': 10, 'criterios': 1}
+} %}
+{% set DL_LINHAS = dl_linhas_mapa[nav_cfg.key] %}
+<script>
+(function () {
+    const CFG = {{ DL_LINHAS|tojson }};
+    const JOGO = CFG.jogo;
+    const DMIN = CFG.min;
+    const DMAX = CFG.max;
+    const COLS = CFG.cols;
+    const CRITERIOS = CFG.criterios === 1;
+    const MAX_PADROES = 2000;
+    const LIMITE_LISTA = 50000;
+    let porPagina = 100;
+    const abas = document.querySelectorAll('.dl-aba');
+    const painelColunas = document.getElementById('dl-aba-colunas');
+    const painelLinhas = document.getElementById('dl-aba-linhas');
+    const origem = document.getElementById('dlOrigem');
+    const boxLinhas = document.getElementById('dlLinhas');
+    const corpo = document.getElementById('dlPadroes');
+    const titulo = document.getElementById('dlCombTitulo');
+    const lista = document.getElementById('dlCombLista');
+    const pagInfo = document.getElementById('dlPagInfo');
+    const editor = document.getElementById('dlEditor');
+    const status = document.getElementById('dlStatus');
+    let grupos = [];
+    let gruposGeracao = [];
+    let anteriores = [];
+    let avisoGeracao = '';
+    const criterios = { anterior: false, minAnt: 0, maxAnt: 1, zerarL1: false, piso: false, pisoValor: 10 };
+    let padroes = [];
+    let escolhido = '';
+    let vista = 'um';
+    let concursoBase = 0;
+    let historicoSorteios = [];
+    let mediaHist = null;
+    const faixasPadrao = {};
+    let saidas = {};
+    let paginaItens = [];
+    let diagPronto = null;
+    let ordemCampo = 'n';
+    let ordemDir = 'asc';
+    let visiveis = [];
+    const medidaCache = {};
+    const selecionadas = {};
+    const ocultas = {};
+    const filtro = { padrao: '', pares: '', impares: '', somaDe: '', somaAte: '', status: 'dentro_novos', seq: '', finais: '', diag: '', busca: '' };
+    const CORES_MES = { Janeiro: '#e74c3c', Fevereiro: '#9b59b6', 'Março': '#3498db', Abril: '#e67e22', Maio: '#f1c40f', Junho: '#2ecc71', Julho: '#1abc9c', Agosto: '#34495e', Setembro: '#196f3d', Outubro: '#d35400', Novembro: '#8e44ad', Dezembro: '#c0392b' };
+    let pagina = 0;
+    let editorModo = 'um';
+    let cache = null;
+    let editorBase = '';
+    let editorSujo = false;
+    let carregado = false;
+    let escolhaManual = false;
+
+    function comb(n, k) {
+        if (k < 0 || k > n) return 0;
+        let r = 1;
+        for (let i = 1; i <= k; i++) r = r * (n - k + i) / i;
+        return Math.round(r);
+    }
+    function distribuir(qtd, limites, rest) {
+        if (!qtd) return rest === 0 ? [[]] : [];
+        const out = [];
+        const acc = new Array(qtd);
+        function rec(i, falta) {
+            if (out.length >= MAX_PADROES) return;
+            if (i === qtd) {
+                if (falta === 0) out.push(acc.slice());
+                return;
+            }
+            const max = Math.min(limites[i], falta);
+            for (let k = 0; k <= max; k++) {
+                acc[i] = k;
+                rec(i + 1, falta - k);
+            }
+        }
+        rec(0, rest);
+        return out;
+    }
+    function combinacoes(arr, k) {
+        const out = [];
+        const n = arr.length;
+        if (!k) return [[]];
+        if (k > n) return [];
+        const idx = Array.from({ length: k }, function (_, i) { return i; });
+        while (true) {
+            out.push(idx.map(function (i) { return arr[i]; }));
+            let i = k - 1;
+            while (i >= 0 && idx[i] === n - k + i) i--;
+            if (i < 0) break;
+            idx[i] += 1;
+            for (let j = i + 1; j < k; j++) idx[j] = idx[j - 1] + 1;
+        }
+        return out;
+    }
+    function produto(listas) {
+        let acc = [[]];
+        listas.forEach(function (grupo) {
+            const prox = [];
+            acc.forEach(function (pref) {
+                grupo.forEach(function (item) { prox.push(pref.concat(item)); });
+            });
+            acc = prox;
+        });
+        return acc;
+    }
+    function fmt(n) { return String(n).padStart(2, '0'); }
+    function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+        });
+    }
+    function montarPadroes(listaGrupos) {
+        const porDig = {};
+        listaGrupos.forEach(function (g) { porDig[g.digito] = g.nums; });
+        const digitos = Object.keys(porDig).map(Number).sort(function (a, b) { return a - b; });
+        const travados = {};
+        digitos.forEach(function (d) {
+            const n = porDig[d].length;
+            if (n > 0 && n <= 2) travados[d] = n;
+        });
+        let soma = Object.keys(travados).reduce(function (s, d) { return s + travados[d]; }, 0);
+        digitos.slice().some(function (d) {
+            if (soma <= JOGO) return true;
+            if (!travados[d]) return false;
+            const corta = Math.min(travados[d], soma - JOGO);
+            travados[d] -= corta;
+            soma -= corta;
+            if (!travados[d]) delete travados[d];
+            return false;
+        });
+        const livres = digitos.filter(function (d) { return !travados[d] && porDig[d].length; });
+        const dists = distribuir(livres.length, livres.map(function (d) { return porDig[d].length; }), JOGO - soma);
+        return dists.map(function (contagens) {
+            const uso = {};
+            Object.keys(travados).forEach(function (d) { uso[d] = travados[d]; });
+            livres.forEach(function (d, i) { if (contagens[i]) uso[d] = contagens[i]; });
+            const seq = [];
+            digitos.forEach(function (d) {
+                const k = uso[d] || 0;
+                for (let i = 0; i < k; i++) seq.push(d);
+            });
+            if (seq.length !== JOGO) return null;
+            let apostas = 1;
+            Object.keys(uso).forEach(function (d) { apostas *= comb(porDig[d].length, uso[d]); });
+            return { padrao: seq.join(' '), uso: uso, apostas: apostas, vezes: null, atraso: null, travados: travados };
+        }).filter(Boolean);
+    }
+    function fraseTrava(item) {
+        if (!item) return '';
+        const fonte = gruposGeracao.length ? gruposGeracao : grupos;
+        return fonte.filter(function (g) { return item.travados[g.digito]; }).map(function (g) {
+            return g.rotulo + ' entra como ' + Array(item.travados[g.digito]).fill(String(g.digito)).join(' ');
+        }).join(' · ');
+    }
+    function ordenar() {
+        padroes.sort(function (a, b) {
+            const va = a.vezes == null ? -1 : a.vezes;
+            const vb = b.vezes == null ? -1 : b.vezes;
+            if (vb !== va) return vb - va;
+            return b.apostas - a.apostas;
+        });
+    }
+    function desenharLinhas() {
+        boxLinhas.innerHTML = grupos.map(function (g) {
+            const chips = g.nums.map(function (n) { return '<span class="dl-chip">' + fmt(n) + '</span>'; }).join('');
+            return '<div class="dl-linha"><div class="dl-linha-topo"><span class="dl-nome">' + esc(g.rotulo) + '</span><span class="dl-qtd">' + fmt(g.nums.length) + '</span></div><div class="dl-chips">' + chips + '</div></div>';
+        }).join('');
+    }
+    function desenharTabela() {
+        corpo.innerHTML = padroes.map(function (p) {
+            const vezes = p.vezes == null ? '…' : String(p.vezes);
+            const atraso = p.atraso == null ? '—' : String(p.atraso);
+            const marca = p.padrao === escolhido ? ' class="is-on"' : '';
+            return '<tr' + marca + ' data-padrao="' + esc(p.padrao) + '"><td>' + vezes + '</td><td>' + atraso + '</td><td>' + p.apostas.toLocaleString('pt-BR') + '</td><td><span class="dl-pad">' + esc(p.padrao) + '</span></td><td><button type="button" class="dl-usar" data-padrao="' + esc(p.padrao) + '">Este</button></td></tr>';
+        }).join('');
+        const soma = document.getElementById('dlSomaPadroes');
+        if (soma) soma.textContent = padroes.length ? '· ' + totalTodos().toLocaleString('pt-BR') + ' apostas' : '';
+    }
+    function itemAtual() {
+        return padroes.filter(function (p) { return p.padrao === escolhido; })[0] || null;
+    }
+    function itemPor(padrao) {
+        return padroes.filter(function (p) { return p.padrao === padrao; })[0] || null;
+    }
+    function totalTodos() {
+        return padroes.reduce(function (s, p) { return s + p.apostas; }, 0);
+    }
+    function tagCriterio() {
+        if (!CRITERIOS) return 'off';
+        return [criterios.anterior ? 1 : 0, criterios.minAnt, criterios.maxAnt, criterios.zerarL1 ? 1 : 0, criterios.piso ? 1 : 0, criterios.pisoValor].join(':');
+    }
+    function gruposFiltrados() {
+        let lista = grupos.map(function (g) {
+            return { rotulo: g.rotulo, digito: g.digito, nums: g.nums.slice() };
+        });
+        if (!CRITERIOS) return lista;
+        if (criterios.zerarL1) lista = lista.filter(function (g) { return g.digito !== 0; });
+        if (criterios.piso) {
+            const piso = criterios.pisoValor;
+            lista = lista.map(function (g) {
+                return { rotulo: g.rotulo, digito: g.digito, nums: g.nums.filter(function (n) { return n >= piso; }) };
+            }).filter(function (g) { return g.nums.length; });
+        }
+        return lista;
+    }
+    function prevPorDigito(base) {
+        const mapa = {};
+        if (!CRITERIOS || !criterios.anterior) return mapa;
+        const vivos = {};
+        const noResumo = {};
+        base.forEach(function (g) {
+            vivos[g.digito] = true;
+            g.nums.forEach(function (n) { noResumo[n] = true; });
+        });
+        anteriores.forEach(function (n) {
+            const d = Math.floor(n / 10);
+            if (!vivos[d] || noResumo[n]) return;
+            if (criterios.piso && n < criterios.pisoValor) return;
+            (mapa[d] = mapa[d] || []).push(n);
+        });
+        Object.keys(mapa).forEach(function (d) { mapa[d].sort(function (a, b) { return a - b; }); });
+        return mapa;
+    }
+    function formasAnterior(item, resumoPor, prevPor) {
+        const digs = Object.keys(item.uso).map(Number).sort(function (a, b) { return a - b; });
+        const livres = digs.filter(function (d) { return !item.travados[d]; });
+        let base = 1;
+        digs.forEach(function (d) {
+            if (!item.travados[d]) return;
+            base *= comb((resumoPor[d] || []).length, item.uso[d]);
+        });
+        let total = 0;
+        function rec(i, usado, parcial) {
+            if (i === livres.length) {
+                if (usado >= criterios.minAnt && usado <= criterios.maxAnt) total += parcial;
+                return;
+            }
+            const d = livres[i];
+            const q = item.uso[d];
+            const R = (resumoPor[d] || []).length;
+            const P = (prevPor[d] || []).length;
+            for (let k = 0; k <= Math.min(P, q); k++) {
+                const novo = q - k;
+                if (novo > R) continue;
+                rec(i + 1, usado + k, parcial * comb(P, k) * comb(R, novo));
+            }
+        }
+        rec(0, 0, base);
+        return total;
+    }
+    function maxEncaixe(itens, prevPor) {
+        let teto = 0;
+        itens.forEach(function (item) {
+            let soma = 0;
+            Object.keys(item.uso).forEach(function (chave) {
+                const d = Number(chave);
+                if (item.travados[d]) return;
+                soma += Math.min(item.uso[d], (prevPor[d] || []).length);
+            });
+            if (soma > teto) teto = soma;
+        });
+        return teto;
+    }
+    function listarComAnterior(item, digs, resumoPor, prevPor) {
+        const opcoes = digs.map(function (d) {
+            const q = item.uso[d];
+            const R = resumoPor[d] || [];
+            const P = item.travados[d] ? [] : (prevPor[d] || []);
+            const blocos = [];
+            for (let k = 0; k <= (item.travados[d] ? 0 : Math.min(P.length, q)); k++) {
+                const novo = q - k;
+                if (novo > R.length) continue;
+                const listas = [];
+                combinacoes(P, k).forEach(function (a) {
+                    combinacoes(R, novo).forEach(function (b) {
+                        const junta = a.concat(b);
+                        junta.sort(function (x, y) { return x - y; });
+                        listas.push(junta);
+                    });
+                });
+                blocos.push({ k: k, listas: listas });
+            }
+            return blocos;
+        });
+        const out = [];
+        function rec(i, usado, pref) {
+            if (i === opcoes.length) {
+                if (usado >= criterios.minAnt && usado <= criterios.maxAnt) out.push(pref.slice());
+                return;
+            }
+            opcoes[i].forEach(function (bloco) {
+                bloco.listas.forEach(function (lst) {
+                    rec(i + 1, usado + bloco.k, pref.concat(lst));
+                });
+            });
+        }
+        rec(0, 0, []);
+        return out;
+    }
+    function listaDe(item) {
+        if (!item || item.apostas > LIMITE_LISTA) return [];
+        const tag = tagCriterio();
+        if (cache && cache.tag === tag && cache.padrao === item.padrao) return cache.lista;
+        const resumoPor = {};
+        gruposGeracao.forEach(function (g) { resumoPor[g.digito] = g.nums; });
+        const prevPor = prevPorDigito(gruposGeracao);
+        const digs = Object.keys(item.uso).map(Number).sort(function (a, b) { return a - b; });
+        const lista = (CRITERIOS && criterios.anterior)
+            ? listarComAnterior(item, digs, resumoPor, prevPor)
+            : produto(digs.map(function (d) { return combinacoes(resumoPor[d] || [], item.uso[d]); }));
+        cache = { tag: tag, padrao: item.padrao, lista: lista };
+        return cache.lista;
+    }
+    function chaveDe(padrao, ap) { return padrao + '|' + ap.join(','); }
+    function tinta(hex) {
+        const h = String(hex || '').replace('#', '');
+        if (h.length < 6) return '#1a0a00';
+        const r = parseInt(h.slice(0, 2), 16);
+        const g = parseInt(h.slice(2, 4), 16);
+        const b = parseInt(h.slice(4, 6), 16);
+        return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? '#1a0a00' : '#fff';
+    }
+    function linhasDiag() {
+        if (diagPronto) return diagPronto;
+        const rows = [];
+        for (let n = DMIN; n <= DMAX; ) {
+            const fim = Math.min(DMAX, n + COLS - 1);
+            rows.push([n, fim]);
+            n = fim + 1;
+        }
+        const pmap = {};
+        rows.forEach(function (rb, r) {
+            for (let n = rb[0]; n <= rb[1]; n++) pmap[n] = [r, n - rb[0]];
+        });
+        function geom(nums) {
+            const cells = nums.map(function (n) { return pmap[n]; }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+            if (cells.length < 2 || cells[cells.length - 1][1] === cells[0][1]) return 'down';
+            return cells[cells.length - 1][1] > cells[0][1] ? 'down' : 'up';
+        }
+        const mapas = [{}, {}];
+        rows.forEach(function (rb, r) {
+            for (let n = rb[0]; n <= rb[1]; n++) {
+                const c = n - rb[0];
+                (mapas[0][c - r] = mapas[0][c - r] || []).push(n);
+                (mapas[1][c + r] = mapas[1][c + r] || []).push(n);
+            }
+        });
+        const lines = [];
+        mapas.forEach(function (mapa) {
+            Object.keys(mapa).forEach(function (k) {
+                const arr = mapa[k].slice().sort(function (a, b) { return pmap[a][0] - pmap[b][0] || pmap[a][1] - pmap[b][1]; });
+                let run = [];
+                function fechar() { if (run.length >= 2) lines.push(run.slice()); }
+                arr.forEach(function (n) {
+                    if (!run.length || pmap[n][0] === pmap[run[run.length - 1]][0] + 1) run.push(n);
+                    else { fechar(); run = [n]; }
+                });
+                fechar();
+            });
+        });
+        diagPronto = { lines: lines, pmap: pmap, geom: geom };
+        return diagPronto;
+    }
+    function textoDiag(nums) {
+        const g = linhasDiag();
+        const set = {};
+        nums.forEach(function (n) { set[n] = true; });
+        const seen = {};
+        const partes = [];
+        g.lines.forEach(function (line) {
+            let cur = [];
+            function fechar() {
+                if (cur.length < 2) return;
+                const ord = cur.slice().sort(function (a, b) {
+                    const pa = g.pmap[a], pb = g.pmap[b];
+                    return pa[0] - pb[0] || pa[1] - pb[1] || a - b;
+                });
+                const dir = g.geom(ord);
+                const key = dir + ':' + ord.join('-');
+                if (seen[key]) return;
+                seen[key] = true;
+                const seq = (dir === 'up' ? ord.slice().reverse() : ord).map(fmt).join('-');
+                partes.push((dir === 'down' ? '↘' : '↗') + ' | ' + seq);
+            }
+            line.forEach(function (n) {
+                if (set[n]) cur.push(n);
+                else { fechar(); cur = []; }
+            });
+            fechar();
+        });
+        return partes.length ? partes.join(' · ') : '—';
+    }
+    function gruposCorridos(nums) {
+        const s = nums.slice().sort(function (a, b) { return a - b; });
+        const grupos = [];
+        let i = 0;
+        while (i < s.length) {
+            if (i < s.length - 1 && s[i + 1] - s[i] === 1) {
+                const g = [s[i]];
+                while (i < s.length - 1 && s[i + 1] - s[i] === 1) { i += 1; g.push(s[i]); }
+                grupos.push(g);
+            }
+            i += 1;
+        }
+        return grupos;
+    }
+    function gruposFinais(nums) {
+        const by = {};
+        nums.forEach(function (n) { (by[n % 10] = by[n % 10] || []).push(n); });
+        return Object.keys(by).map(function (k) { return by[k].slice().sort(function (a, b) { return a - b; }); }).filter(function (g) { return g.length > 1; });
+    }
+    function pyRound(x) {
+        if (!isFinite(x)) return 0;
+        const neg = x < 0;
+        const ax = Math.abs(x);
+        const f = Math.floor(ax);
+        const diff = ax - f;
+        let r;
+        if (Math.abs(diff - 0.5) < 1e-9) r = (f % 2 === 0) ? f : f + 1;
+        else r = diff > 0.5 ? f + 1 : f;
+        return neg ? -r : r;
+    }
+    function faixaSomaDe(somas) {
+        if (!somas.length) return null;
+        const avg = somas.reduce(function (a, b) { return a + b; }, 0) / somas.length;
+        const media = pyRound(avg);
+        let varsum = 0;
+        somas.forEach(function (s) { const d = s - avg; varsum += d * d; });
+        const std = somas.length > 1 ? Math.sqrt(varsum / somas.length) : 0;
+        const span = somas.length > 1 ? (Math.max.apply(null, somas) - Math.min.apply(null, somas)) : 0;
+        const tolP = Math.max(2, pyRound(std || (span / 4) || 4));
+        const tolD = Math.max(1, pyRound(tolP / 2));
+        return { media: media, tol_dentro: tolD, tol_proxima: tolP, amostra: somas.length };
+    }
+    function numsDoSorteio(s) {
+        const nums = (s.numeros_ordenados && s.numeros_ordenados.length) ? s.numeros_ordenados : (s.numeros || []);
+        return nums.map(Number).filter(function (n) { return n > 0; }).sort(function (a, b) { return a - b; });
+    }
+    function padraoDeNums(nums) {
+        return nums.map(function (n) { return String(Math.floor(Number(n) / 10)); }).join(' ');
+    }
+    function montarSaidas() {
+        saidas = {};
+        historicoSorteios.forEach(function (s) {
+            const nums = numsDoSorteio(s);
+            if (nums.length) saidas[nums.join(',')] = Number(s.concurso) || true;
+        });
+    }
+    function faixaDoPadrao(padrao) {
+        if (Object.prototype.hasOwnProperty.call(faixasPadrao, padrao)) return faixasPadrao[padrao];
+        const somas = [];
+        historicoSorteios.forEach(function (s) {
+            const nums = numsDoSorteio(s);
+            if (!nums.length || padraoDeNums(nums) !== padrao) return;
+            somas.push(nums.reduce(function (a, n) { return a + n; }, 0));
+        });
+        let faixa = faixaSomaDe(somas);
+        if (!faixa) {
+            const item = padroes.filter(function (p) { return p.padrao === padrao; })[0];
+            if (item) faixa = faixaSomaDe(listaDe(item).map(function (ap) { return ap.reduce(function (a, n) { return a + n; }, 0); }));
+        }
+        faixasPadrao[padrao] = faixa;
+        return faixa;
+    }
+    function classificarSoma(soma, faixa) {
+        if (!faixa || faixa.media == null) return { status: 'fora', label: 'Sem média', ord: 3 };
+        const ad = Math.abs(soma - faixa.media);
+        if (ad <= faixa.tol_dentro) return { status: 'dentro', label: 'Dentro da média', ord: 0 };
+        if (ad <= faixa.tol_proxima) return { status: 'proxima', label: 'Próxima da média', ord: 1 };
+        return { status: 'fora', label: 'Fora da faixa', ord: 2 };
+    }
+    function medidasDe(padrao, ap) {
+        const k = chaveDe(padrao, ap);
+        if (medidaCache[k]) return medidaCache[k];
+        const pares = ap.filter(function (n) { return n % 2 === 0; });
+        const impares = ap.filter(function (n) { return n % 2 !== 0; });
+        const seq = gruposCorridos(ap);
+        const fin = gruposFinais(ap);
+        const soma = ap.reduce(function (a, n) { return a + n; }, 0);
+        const digs = {};
+        ap.forEach(function (n) { const s = fmt(n); digs[s.charAt(0)] = 1; digs[s.charAt(1)] = 1; });
+        const listaDig = Object.keys(digs).sort();
+        const cls = classificarSoma(soma, faixaDoPadrao(padrao));
+        const junta = function (grupos, sep) {
+            return grupos.length ? grupos.map(function (g) { return g.map(fmt).join(sep); }).join(' · ') : '—';
+        };
+        const qtd = function (lista) {
+            return lista.length ? (fmt(lista.length) + ' | ' + lista.map(fmt).join(' ')) : '—';
+        };
+        medidaCache[k] = {
+            pares: qtd(pares), paresQ: pares.length,
+            impares: qtd(impares), imparesQ: impares.length,
+            seq: junta(seq, '-'), seqQ: seq.length,
+            finais: junta(fin, ','), finaisQ: fin.length,
+            diag: textoDiag(ap),
+            soma: soma,
+            digitos: listaDig.join(' '), listaDig: listaDig, digitosQ: listaDig.length,
+            status: cls.status, statusLabel: cls.label, statusOrd: cls.ord,
+            jaSaiu: !!saidas[ap.join(',')]
+        };
+        return medidaCache[k];
+    }
+    function ultimoSorteio() {
+        return historicoSorteios.reduce(function (a, s) { return !a || Number(s.concurso) > Number(a.concurso) ? s : a; }, null);
+    }
+    function desenharUltimo() {
+        const box = document.getElementById('dlUltimo');
+        if (!box) return;
+        const ult = ultimoSorteio();
+        if (!ult) { box.innerHTML = ''; return; }
+        const nums = numsDoSorteio(ult);
+        const pad = padraoDeNums(nums);
+        const nome = ult.mes_nome || '';
+        const cor = CORES_MES[nome] || '#6c757d';
+        const chaveV = nums.join(',');
+        const naLista = visiveis.some(function (it) { return it.ap.join(',') === chaveV; });
+        const extra = naLista
+            ? '<span class="small text-success">destacado em verde nesta lista</span>'
+            : '<span class="small text-muted">vencedor fora desta lista</span>';
+        box.innerHTML = '<span class="dl-ultimo-lbl">Último resultado</span>'
+            + '<span class="dl-ultimo-nums"><strong>' + esc(ult.concurso) + '</strong> — <span class="font-monospace">' + nums.map(fmt).join(' ') + '</span></span>'
+            + (pad ? '<span class="dl-ultimo-pad">padrão <code>' + esc(pad) + '</code></span>' : '')
+            + (nome ? '<span class="dl-mes" style="background:' + cor + ';color:' + tinta(cor) + '">' + esc(nome) + '</span>' : '')
+            + '<span class="dl-legenda"><span class="dl-legenda-dot"></span>Último / Vencedor</span>'
+            + extra;
+    }
+    function opcoesFiltro() {
+        const sel = document.getElementById('dlFiltroPadrao');
+        if (sel && sel.dataset.pronto !== String(padroes.length)) {
+            const atual = sel.value;
+            sel.innerHTML = '<option value="">Todos</option>' + padroes.map(function (p) {
+                return '<option value="' + esc(p.padrao) + '">' + esc(p.padrao) + '</option>';
+            }).join('');
+            if (atual) sel.value = atual;
+            sel.dataset.pronto = String(padroes.length);
+        }
+        ['dlFiltroPares', 'dlFiltroImpares'].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (!el || el.dataset.pronto) return;
+            let html = '<option value="">Todos</option>';
+            for (let i = 0; i <= JOGO; i++) html += '<option value="' + i + '">' + i + '</option>';
+            el.innerHTML = html;
+            el.dataset.pronto = '1';
+        });
+    }
+    function universo() {
+        const fonte = vista === 'todos' ? padroes : (itemAtual() ? [itemAtual()] : []);
+        const itens = [];
+        let n = 0;
+        fonte.forEach(function (p) {
+            listaDe(p).forEach(function (ap) {
+                n += 1;
+                const chave = chaveDe(p.padrao, ap);
+                if (ocultas[chave]) return;
+                itens.push({ n: n, padrao: p.padrao, ap: ap, chave: chave });
+            });
+        });
+        return itens;
+    }
+    function combinaFiltro(it) {
+        if (filtro.padrao && it.padrao !== filtro.padrao) return false;
+        if (filtro.busca) {
+            const quer = filtro.busca.split(/\s+/).filter(Boolean).map(Number).filter(function (n) { return n > 0; });
+            if (quer.length && !quer.every(function (n) { return it.ap.indexOf(n) >= 0; })) return false;
+        }
+        const pedeMedida = filtro.pares !== '' || filtro.impares !== '' || filtro.somaDe !== '' || filtro.somaAte !== '' || (filtro.status && filtro.status !== 'all') || filtro.seq || filtro.finais || filtro.diag;
+        if (!pedeMedida) return true;
+        const m = medidasDe(it.padrao, it.ap);
+        if (filtro.pares !== '' && m.paresQ !== Number(filtro.pares)) return false;
+        if (filtro.impares !== '' && m.imparesQ !== Number(filtro.impares)) return false;
+        if (filtro.somaDe !== '' && m.soma < Number(filtro.somaDe)) return false;
+        if (filtro.somaAte !== '' && m.soma > Number(filtro.somaAte)) return false;
+        if (filtro.status === 'dentro_novos' && !(m.status === 'dentro' && !m.jaSaiu)) return false;
+        if (filtro.status === 'dentro_ja' && !(m.status === 'dentro' && m.jaSaiu)) return false;
+        if (filtro.status === 'dentro' && m.status !== 'dentro') return false;
+        if (filtro.status === 'alinhadas' && m.status !== 'dentro' && m.status !== 'proxima') return false;
+        if (filtro.status === 'proxima' && m.status !== 'proxima') return false;
+        if (filtro.status === 'fora' && m.status !== 'fora') return false;
+        if (filtro.seq === 'com' && !m.seqQ) return false;
+        if (filtro.seq === 'sem' && m.seqQ) return false;
+        if (filtro.finais === 'com' && !m.finaisQ) return false;
+        if (filtro.finais === 'sem' && m.finaisQ) return false;
+        if (filtro.diag === 'com' && m.diag === '—') return false;
+        if (filtro.diag === 'sem' && m.diag !== '—') return false;
+        return true;
+    }
+    function valorOrdem(it) {
+        const m = medidasDe(it.padrao, it.ap);
+        if (ordemCampo === 'n') return it.n;
+        if (ordemCampo === 'padrao') return it.padrao;
+        if (ordemCampo === 'aposta') return it.ap.join(',');
+        if (ordemCampo === 'pares') return m.paresQ;
+        if (ordemCampo === 'impares') return m.imparesQ;
+        if (ordemCampo === 'seq') return m.seq;
+        if (ordemCampo === 'finais') return m.finais;
+        if (ordemCampo === 'diag') return m.diag;
+        if (ordemCampo === 'soma') return m.soma;
+        if (ordemCampo === 'digitos') return m.digitos;
+        if (ordemCampo === 'qtd') return m.digitosQ;
+        if (ordemCampo === 'status') return m.statusOrd;
+        return it.n;
+    }
+    function marcarVista() {
+        const todos = document.getElementById('dlVerTodos');
+        const um = document.getElementById('dlVerUm');
+        if (todos) todos.classList.toggle('is-on', vista === 'todos');
+        if (um) um.classList.toggle('is-on', vista === 'um');
+        if (todos) todos.textContent = 'Todos · ' + totalTodos();
+        if (um) um.textContent = 'Este padrão' + (itemAtual() ? ' · ' + itemAtual().apostas : '');
+    }
+    function desenharPagina() {
+        marcarVista();
+        opcoesFiltro();
+        const item = itemAtual();
+        if (vista === 'um' && !item) {
+            titulo.textContent = 'Combinações';
+            lista.innerHTML = '';
+            pagInfo.textContent = '';
+            return;
+        }
+        const somaVista = vista === 'todos' ? totalTodos() : (item ? item.apostas : 0);
+        if (somaVista > LIMITE_LISTA) {
+            titulo.textContent = vista === 'todos' ? 'Todos os padrões' : ('Padrão ' + item.padrao);
+            lista.innerHTML = '<tr><td colspan="14" class="text-muted">Esta vista tem ' + somaVista.toLocaleString('pt-BR') + ' apostas. A lista abre até ' + LIMITE_LISTA.toLocaleString('pt-BR') + '.</td></tr>';
+            pagInfo.textContent = somaVista.toLocaleString('pt-BR') + ' apostas, acima do limite da lista.';
+            document.getElementById('dlPagFirst').disabled = true;
+            document.getElementById('dlPagAnt').disabled = true;
+            document.getElementById('dlPagProx').disabled = true;
+            document.getElementById('dlPagLast').disabled = true;
+            return;
+        }
+        let base = universo().filter(combinaFiltro);
+        const mult = ordemDir === 'asc' ? 1 : -1;
+        if (ordemCampo !== 'n' || ordemDir !== 'asc') {
+            base.sort(function (a, b) {
+                const va = valorOrdem(a);
+                const vb = valorOrdem(b);
+                if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * mult;
+                return String(va).localeCompare(String(vb), 'pt-BR', { numeric: true }) * mult;
+            });
+        }
+        visiveis = base;
+        desenharUltimo();
+        const total = base.length;
+        const paginas = Math.max(1, Math.ceil(total / porPagina));
+        if (pagina >= paginas) pagina = paginas - 1;
+        if (pagina < 0) pagina = 0;
+        const ini = pagina * porPagina;
+        const fatia = base.slice(ini, ini + porPagina);
+        paginaItens = fatia;
+        document.querySelectorAll('#dlApostasHead th[data-campo]').forEach(function (th) {
+            const campo = th.getAttribute('data-campo');
+            const nome = th.getAttribute('data-nome') || th.textContent.replace(/[⇅▲▼]/g, '').trim();
+            th.setAttribute('data-nome', nome);
+            th.textContent = nome + (campo === ordemCampo ? (ordemDir === 'asc' ? ' ▲' : ' ▼') : ' ⇅');
+        });
+        lista.innerHTML = fatia.map(function (it) {
+            const m = medidasDe(it.padrao, it.ap);
+            const href = '/analise/analises-inteligentes/?aba=padroes-ii&padrao=' + encodeURIComponent(it.padrao);
+            const venc = ultimoSorteio();
+            const chaveV = venc ? numsDoSorteio(venc).join(',') : '';
+            return '<tr data-chave="' + esc(it.chave) + '"' + (it.ap.join(',') === chaveV ? ' class="is-vencedor"' : '') + '>'
+                + '<td><input type="checkbox" class="dl-sel" data-chave="' + esc(it.chave) + '"' + (selecionadas[it.chave] ? ' checked' : '') + '></td>'
+                + '<td>' + it.n + '</td>'
+                + '<td><a href="' + href + '">' + esc(it.padrao) + '</a></td>'
+                + '<td>' + it.ap.map(fmt).join(' ') + '</td>'
+                + '<td>' + esc(m.pares) + '</td>'
+                + '<td>' + esc(m.impares) + '</td>'
+                + '<td>' + esc(m.seq) + '</td>'
+                + '<td>' + esc(m.finais) + '</td>'
+                + '<td>' + esc(m.diag) + '</td>'
+                + '<td>' + m.soma + '</td>'
+                + '<td class="dl-td-digitos"><span class="dl-digitos">' + m.listaDig.map(function (d) { return '<span class="dl-digito">' + esc(d) + '</span>'; }).join('') + '</span></td>'
+                + '<td class="dl-td-qtd">' + fmt(m.digitosQ) + '</td>'
+                + '<td><span class="dl-pill ' + m.status + '">' + ((m.status === 'dentro' || m.status === 'proxima') ? '●' : '○') + ' ' + esc(m.statusLabel) + '</span></td>'
+                + '<td><span class="dl-crud"><button type="button" data-acao="baixar" title="Baixar esta aposta"><i class="fas fa-download"></i></button><button type="button" data-acao="tirar" title="Tirar desta lista"><i class="fas fa-trash"></i></button></span></td>'
+                + '</tr>';
+        }).join('');
+        titulo.textContent = vista === 'todos' ? 'Todos os padrões' : ('Padrão ' + item.padrao);
+        pagInfo.textContent = total ? ((ini + 1) + '–' + (ini + fatia.length) + ' de ' + total) : '0 de 0';
+        const num = document.getElementById('dlPagNum');
+        const ate = document.getElementById('dlPagAte');
+        if (num) num.value = String(pagina + 1);
+        if (ate) ate.textContent = '/ ' + paginas;
+        const chk = document.getElementById('dlChkPagina');
+        if (chk) {
+            const marcadasPag = fatia.filter(function (it) { return selecionadas[it.chave]; }).length;
+            chk.checked = fatia.length > 0 && marcadasPag === fatia.length;
+            chk.indeterminate = marcadasPag > 0 && marcadasPag < fatia.length;
+        }
+        document.getElementById('dlPagFirst').disabled = pagina <= 0;
+        document.getElementById('dlPagAnt').disabled = pagina <= 0;
+        document.getElementById('dlPagProx').disabled = pagina >= paginas - 1;
+        document.getElementById('dlPagLast').disabled = pagina >= paginas - 1;
+    }
+    function escolher(padrao, manual) {
+        if (manual) escolhaManual = true;
+        if (escolhido === padrao && manual) return;
+        escolhido = padrao;
+        pagina = 0;
+        desenharTabela();
+        desenharPagina();
+    }
+    function textoDe(item) {
+        return listaDe(item).map(function (ap) { return ap.map(fmt).join(' '); }).join('\n');
+    }
+    function textoTodos() {
+        return padroes.map(function (p) {
+            return listaDe(p).map(function (ap) { return p.padrao + ' | ' + ap.map(fmt).join(' '); }).join('\n');
+        }).filter(Boolean).join('\n');
+    }
+    function preparar(qual) {
+        const modo = qual === 'todos' ? 'todos' : 'um';
+        const item = modo === 'um' ? (itemPor(qual) || itemAtual()) : null;
+        if (modo === 'um' && !item) {
+            status.textContent = 'Escolha um padrão na tabela.';
+            return false;
+        }
+        const volume = modo === 'todos' ? totalTodos() : item.apostas;
+        if (volume > LIMITE_LISTA) {
+            status.textContent = (modo === 'todos' ? 'Todos os padrões somam ' : 'Este padrão tem ') + volume.toLocaleString('pt-BR') + ' apostas. O arquivo abre até ' + LIMITE_LISTA.toLocaleString('pt-BR') + '.';
+            return false;
+        }
+        if (editorSujo && editor.value.trim() && !window.confirm('Substituir o texto que você editou?')) return false;
+        editor.value = modo === 'todos' ? textoTodos() : textoDe(item);
+        editorBase = editor.value;
+        editorSujo = false;
+        editorModo = modo;
+        if (modo === 'um') escolhido = item.padrao;
+        const n = modo === 'todos' ? totalTodos() : item.apostas;
+        status.textContent = (modo === 'todos' ? 'Todos os padrões, ' : 'Padrão ' + item.padrao + ', ') + n + ' linhas. Pode apagar o que não quiser e baixar em seguida.';
+        return true;
+    }
+    function linhasEditor() {
+        return editor.value.replace(/\r/g, '').split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+    }
+    function baixar(nome, texto) {
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = nome;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+    function nomeArquivo(ext) {
+        if (editorModo === 'todos') return 'linhas_todos.' + ext;
+        const item = itemAtual();
+        const miolo = item ? item.padrao.replace(/\s+/g, '-') : 'linhas';
+        return 'linhas_' + miolo + '.' + ext;
+    }
+    function baixarEditado(tipo) {
+        if (!linhasEditor().length) {
+            status.textContent = 'Prepare todos ou um padrão. O texto fica editável antes de baixar.';
+            return;
+        }
+        const linhas = linhasEditor();
+        const comPadrao = linhas.some(function (ln) { return ln.indexOf(' | ') >= 0; });
+        if (tipo === 'csv') {
+            const csv = comPadrao
+                ? ['n;padrao;aposta'].concat(linhas.map(function (ln, i) {
+                    const partes = ln.split(' | ');
+                    return (i + 1) + ';' + partes[0] + ';' + partes.slice(1).join(' | ');
+                })).join('\n') + '\n'
+                : ['n;aposta'].concat(linhas.map(function (ln, i) { return (i + 1) + ';' + ln; })).join('\n') + '\n';
+            baixar(nomeArquivo('csv'), csv);
+        } else {
+            baixar(nomeArquivo('txt'), linhas.join('\r\n') + '\r\n');
+        }
+        status.textContent = linhas.length + ' linhas baixadas.';
+    }
+    function nomeBotaoConferir() {
+        const btn = document.getElementById('dlConferir');
+        if (!btn) return;
+        if (!concursoBase || !historicoSorteios.length) {
+            btn.disabled = true;
+            btn.textContent = concursoBase ? ('Conferir no ' + (concursoBase + 1)) : 'Conferir no concurso seguinte';
+            return;
+        }
+        btn.disabled = false;
+        btn.textContent = 'Conferir no ' + (concursoBase + 1);
+    }
+    function apostasConferir() {
+        const linhas = linhasEditor();
+        if (linhas.length) {
+            return {
+                rotulo: 'o texto do arquivo',
+                apostas: linhas.map(function (ln) {
+                    const corpo = ln.indexOf(' | ') >= 0 ? ln.split(' | ').slice(1).join(' ') : ln;
+                    return (corpo.match(/\d{1,2}/g) || []).map(Number).filter(function (n) { return n >= DMIN && n <= DMAX; });
+                }).filter(function (a) { return a.length === JOGO; })
+            };
+        }
+        const fonte = vista === 'todos' ? padroes : (itemAtual() ? [itemAtual()] : []);
+        const apostas = [];
+        fonte.forEach(function (p) {
+            listaDe(p).forEach(function (ap) {
+                if (!ocultas[chaveDe(p.padrao, ap)]) apostas.push(ap);
+            });
+        });
+        return { rotulo: vista === 'todos' ? 'todos os padrões' : (itemAtual() ? ('o padrão ' + itemAtual().padrao) : 'o padrão'), apostas: apostas };
+    }
+    function conferir() {
+        const out = document.getElementById('dlConferirOut');
+        const alvo = concursoBase + 1;
+        const s = historicoSorteios.filter(function (x) { return Number(x.concurso) === alvo; })[0];
+        if (!s) {
+            out.innerHTML = '<div class="dl-confere"><p>O concurso ' + alvo + ' ainda não saiu. As linhas saíram do ' + concursoBase + ', no Resumo dos Resultados.</p></div>';
+            return;
+        }
+        const oficiais = ((s.numeros_ordenados && s.numeros_ordenados.length) ? s.numeros_ordenados : s.numeros).map(Number).sort(function (a, b) { return a - b; });
+        const marca = {};
+        oficiais.forEach(function (n) { marca[n] = true; });
+        const pacote = apostasConferir();
+        const contagem = new Array(JOGO + 1).fill(0);
+        let melhores = [];
+        let topo = -1;
+        pacote.apostas.forEach(function (ap) {
+            let ac = 0;
+            ap.forEach(function (n) { if (marca[n]) ac += 1; });
+            if (ac > JOGO) ac = JOGO;
+            contagem[ac] += 1;
+            if (ac > topo) {
+                topo = ac;
+                melhores = [ap];
+            } else if (ac === topo) melhores.push(ap);
+        });
+        const bolas = oficiais.map(function (n) { return '<span class="dl-chip is-acerto">' + fmt(n) + '</span>'; }).join('');
+        const faixas = [];
+        for (let i = JOGO; i >= 0; i--) {
+            if (!contagem[i]) continue;
+            faixas.push(contagem[i] + ' com ' + i + (i === 1 ? ' acerto' : ' acertos'));
+        }
+        const mostra = melhores.slice(0, 12);
+        const listaMelhor = mostra.map(function (ap) {
+            const chips = ap.map(function (n) {
+                return '<span class="dl-chip' + (marca[n] ? ' is-acerto' : '') + '">' + fmt(n) + '</span>';
+            }).join('');
+            return '<div class="dl-confere-aposta">' + chips + '</div>';
+        }).join('');
+        const resto = melhores.length - mostra.length;
+        out.innerHTML = '<div class="dl-confere">'
+            + '<p>Concurso <strong>' + alvo + '</strong>, o seguinte ao ' + concursoBase + '. Conferidas ' + pacote.apostas.length + ' apostas de ' + esc(pacote.rotulo) + '.</p>'
+            + '<div class="dl-confere-sorteio">' + bolas + '</div>'
+            + '<p class="dl-confere-faixa">' + (faixas.join(' · ') || 'Nenhuma aposta.') + '</p>'
+            + (topo >= 0 ? '<p>Maior acerto: ' + topo + (resto > 0 ? '. Mais ' + resto + ' nesta faixa.' : '.') + '</p>' + listaMelhor : '')
+            + '</div>';
+    }
+    function limparMedidas() {
+        Object.keys(faixasPadrao).forEach(function (k) { delete faixasPadrao[k]; });
+        Object.keys(medidaCache).forEach(function (k) { delete medidaCache[k]; });
+    }
+    function atribuirFrequencia() {
+        const freq = {};
+        const ultimo = {};
+        let maxC = 0;
+        historicoSorteios.forEach(function (s) {
+            const c = Number(s.concurso) || 0;
+            if (c > maxC) maxC = c;
+            const nums = (s.numeros_ordenados && s.numeros_ordenados.length ? s.numeros_ordenados : s.numeros) || [];
+            const p = nums.map(function (n) { return String(Math.floor(Number(n) / 10)); }).join(' ');
+            freq[p] = (freq[p] || 0) + 1;
+            if (!ultimo[p] || c > ultimo[p]) ultimo[p] = c;
+        });
+        padroes.forEach(function (p) {
+            p.vezes = freq[p.padrao] || 0;
+            p.atraso = freq[p.padrao] ? maxC - ultimo[p.padrao] : null;
+        });
+    }
+    function atualizarOrigem() {
+        if (!concursoBase) return;
+        const trava = fraseTrava(padroes[0]);
+        let html = 'Concurso #' + esc(concursoBase) + ' · linhas do <a href="/analise/resumo-geral/#rg-resultados">Resumo dos Resultados</a>.';
+        if (trava) html += ' ' + esc(trava) + '.';
+        if (padroes.length >= MAX_PADROES) html += ' Lista limitada aos primeiros ' + MAX_PADROES + ' desenhos.';
+        if (avisoGeracao) html += ' ' + esc(avisoGeracao);
+        else if (CRITERIOS && (criterios.anterior || criterios.zerarL1 || criterios.piso)) {
+            const partes = [];
+            if (criterios.zerarL1) partes.push('sem a Linha 1');
+            if (criterios.piso) partes.push('dezenas a partir de ' + criterios.pisoValor);
+            if (criterios.anterior) partes.push('de ' + criterios.minAnt + ' a ' + criterios.maxAnt + ' dezenas do concurso anterior');
+            html += ' Critério: ' + esc(partes.join(' · ')) + '.';
+        }
+        origem.innerHTML = html;
+    }
+    function regenerar() {
+        cache = null;
+        pagina = 0;
+        avisoGeracao = '';
+        limparMedidas();
+        gruposGeracao = gruposFiltrados();
+        const totalNums = gruposGeracao.reduce(function (s, g) { return s + g.nums.length; }, 0);
+        let itens = [];
+        if (totalNums < JOGO) {
+            avisoGeracao = 'As dezenas do resumo que restam (' + totalNums + ') não chegam a ' + JOGO + '. Nada foi gerado.';
+        } else {
+            itens = montarPadroes(gruposGeracao);
+            if (CRITERIOS && criterios.anterior) {
+                const resumoPor = {};
+                gruposGeracao.forEach(function (g) { resumoPor[g.digito] = g.nums; });
+                const prevPor = prevPorDigito(gruposGeracao);
+                const teto = maxEncaixe(itens, prevPor);
+                if (criterios.minAnt > teto) {
+                    itens = [];
+                    avisoGeracao = 'O mínimo de ' + criterios.minAnt + ' dezenas anteriores não cabe nas vagas deste resumo'
+                        + (teto ? ' (cabe no máximo ' + teto + ').' : '.')
+                        + ' Nada foi gerado.';
+                } else {
+                    itens.forEach(function (item) { item.apostas = formasAnterior(item, resumoPor, prevPor); });
+                    itens = itens.filter(function (item) { return item.apostas > 0; });
+                }
+            }
+            if (!avisoGeracao && !itens.length) {
+                avisoGeracao = 'Estas dezenas não fecham uma aposta de ' + JOGO + '. Nada foi gerado.';
+            }
+        }
+        padroes = itens;
+        const guarda = escolhido;
+        if (historicoSorteios.length) atribuirFrequencia();
+        ordenar();
+        if (padroes.some(function (p) { return p.padrao === guarda; })) escolhido = guarda;
+        else escolhido = padroes.length ? padroes[0].padrao : '';
+        atualizarOrigem();
+        desenharTabela();
+        desenharPagina();
+    }
+    function aplicarHistoria(sorteios) {
+        historicoSorteios = sorteios || [];
+        mediaHist = null;
+        limparMedidas();
+        montarSaidas();
+        atribuirFrequencia();
+        ordenar();
+        if (!escolhaManual && padroes.length) {
+            escolhido = padroes[0].padrao;
+            pagina = 0;
+            cache = null;
+        }
+        desenharTabela();
+        desenharPagina();
+        nomeBotaoConferir();
+    }
+    function lerGrupos(linhas) {
+        return (linhas || []).map(function (item) {
+            const bruto = String(item.dezenas || '');
+            const corpoTxt = bruto.indexOf('|') >= 0 ? bruto.slice(bruto.indexOf('|') + 1) : bruto;
+            const nums = corpoTxt.trim().split(/\s+/).filter(function (s) { return /^\d+$/.test(s); }).map(Number).sort(function (a, b) { return a - b; });
+            if (!nums.length) return null;
+            return { rotulo: String(item.rotulo || ('L' + (Math.floor(nums[0] / 10) + 1))), digito: Math.floor(nums[0] / 10), nums: nums };
+        }).filter(Boolean);
+    }
+    function carregar() {
+        if (carregado) return;
+        carregado = true;
+        fetch('/analise/api/resumo-geral/concurso').then(function (r) { return r.json(); }).then(function (data) {
+            if (!data.sucesso) {
+                carregado = false;
+                origem.textContent = data.erro || 'Não foi possível ler o resumo.';
+                return;
+            }
+            concursoBase = Number(data.concurso) || 0;
+            nomeBotaoConferir();
+            grupos = lerGrupos(data.nao_sairam_linhas);
+            anteriores = String(data.resultado_crescente || '').trim().split(/\s+/).filter(function (s) { return /^\d+$/.test(s); }).map(Number);
+            desenharLinhas();
+            regenerar();
+            return fetch('/analise/api/escolha-visual/sorteios?ordem=asc&limite=0&base=geral').then(function (r) { return r.json(); });
+        }).then(function (hist) {
+            if (hist && hist.sucesso) aplicarHistoria(hist.sorteios || []);
+        }).catch(function () {
+            if (!grupos.length) {
+                carregado = false;
+                origem.textContent = 'Não foi possível ler o resumo.';
+            }
+        });
+    }
+    abas.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const qual = btn.getAttribute('data-dl-aba');
+            abas.forEach(function (b) { b.classList.toggle('is-on', b === btn); });
+            painelColunas.hidden = qual !== 'colunas';
+            painelLinhas.hidden = qual !== 'linhas';
+            if (qual === 'linhas') carregar();
+        });
+    });
+    corpo.addEventListener('click', function (ev) {
+        const usar = ev.target.closest('.dl-usar');
+        if (usar) {
+            const padrao = usar.getAttribute('data-padrao');
+            vista = 'um';
+            escolher(padrao, true);
+            preparar(padrao);
+            return;
+        }
+        const tr = ev.target.closest('tr');
+        if (!tr) return;
+        vista = 'um';
+        escolher(tr.getAttribute('data-padrao'), true);
+    });
+    function lerFiltros() {
+        filtro.padrao = document.getElementById('dlFiltroPadrao').value;
+        filtro.pares = document.getElementById('dlFiltroPares').value;
+        filtro.impares = document.getElementById('dlFiltroImpares').value;
+        filtro.somaDe = document.getElementById('dlFiltroSomaDe').value;
+        filtro.somaAte = document.getElementById('dlFiltroSomaAte').value;
+        filtro.status = document.getElementById('dlFiltroStatus').value;
+        filtro.seq = document.getElementById('dlFiltroSeq').value;
+        filtro.finais = document.getElementById('dlFiltroFinais').value;
+        filtro.diag = document.getElementById('dlFiltroDiag').value;
+        filtro.busca = document.getElementById('dlBuscaDez').value.trim();
+        porPagina = Number(document.getElementById('dlPageSize').value) || 100;
+    }
+    function csvDe(it, i) {
+        const m = medidasDe(it.padrao, it.ap);
+        return [i, it.padrao, it.ap.map(fmt).join(' '), m.pares, m.impares, m.seq, m.finais, m.diag, m.soma, m.digitos, m.digitosQ, m.statusLabel, m.jaSaiu ? 'ja saiu' : 'nao saiu'].join(';');
+    }
+    function itensEscopo() {
+        const escopo = document.getElementById('dlEscopo').value;
+        const marcadas = visiveis.filter(function (it) { return selecionadas[it.chave]; });
+        if (escopo === 'sel') return marcadas;
+        if (escopo === 'page') return paginaItens.slice();
+        if (escopo === 'all') return visiveis.slice();
+        return marcadas.length ? marcadas : visiveis.slice();
+    }
+    function textoItens(itens) {
+        return itens.map(function (it) {
+            const m = medidasDe(it.padrao, it.ap);
+            return it.padrao + ' | ' + it.ap.map(fmt).join(' ') + ' | ' + m.statusLabel;
+        }).join('\n');
+    }
+    function baixarItens(itens, nome, tipo) {
+        if (!itens.length) {
+            status.textContent = 'Nada para baixar com este filtro.';
+            return;
+        }
+        if (tipo === 'txt') {
+            baixar(nome, textoItens(itens) + '\n');
+        } else if (tipo === 'xls') {
+            const corpo = itens.map(function (it, i) {
+                return '<tr><td>' + csvDe(it, i + 1).split(';').map(function (c) { return esc(c); }).join('</td><td>') + '</td></tr>';
+            }).join('');
+            const html = '<html><head><meta charset="utf-8"></head><body><table><tr><th>n</th><th>padrao</th><th>aposta</th><th>pares</th><th>impares</th><th>sequencias</th><th>finais</th><th>diagonais</th><th>soma</th><th>digitos</th><th>qtd</th><th>status</th><th>historico</th></tr>' + corpo + '</table></body></html>';
+            const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = nome;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        } else {
+            const csv = ['n;padrao;aposta;pares;impares;sequencias;finais;diagonais;soma;digitos;qtd;status;historico'].concat(itens.map(function (it, i) { return csvDe(it, i + 1); })).join('\n') + '\n';
+            baixar(nome, csv);
+        }
+        status.textContent = itens.length + ' apostas exportadas.';
+    }
+    document.getElementById('dlFiltros').addEventListener('change', function () {
+        lerFiltros();
+        pagina = 0;
+        desenharPagina();
+    });
+    document.getElementById('dlFiltroSomaDe').addEventListener('input', function () { lerFiltros(); pagina = 0; desenharPagina(); });
+    document.getElementById('dlFiltroSomaAte').addEventListener('input', function () { lerFiltros(); pagina = 0; desenharPagina(); });
+    document.getElementById('dlApostasHead').addEventListener('click', function (ev) {
+        const th = ev.target.closest('th');
+        if (!th || !th.getAttribute('data-campo')) return;
+        const campo = th.getAttribute('data-campo');
+        if (ordemCampo === campo) ordemDir = ordemDir === 'asc' ? 'desc' : 'asc';
+        else {
+            ordemCampo = campo;
+            ordemDir = (campo === 'padrao' || campo === 'aposta' || campo === 'seq' || campo === 'finais' || campo === 'diag' || campo === 'status' || campo === 'digitos') ? 'asc' : 'desc';
+        }
+        pagina = 0;
+        desenharPagina();
+    });
+    lista.addEventListener('change', function (ev) {
+        const box = ev.target.closest('.dl-sel');
+        if (!box) return;
+        if (box.checked) selecionadas[box.dataset.chave] = true;
+        else delete selecionadas[box.dataset.chave];
+    });
+    lista.addEventListener('click', function (ev) {
+        const btn = ev.target.closest('button');
+        if (!btn) return;
+        const tr = btn.closest('tr');
+        const chave = tr ? tr.getAttribute('data-chave') : '';
+        const it = visiveis.filter(function (x) { return x.chave === chave; })[0];
+        if (!it) return;
+        if (btn.getAttribute('data-acao') === 'tirar') {
+            ocultas[chave] = true;
+            delete selecionadas[chave];
+            desenharPagina();
+            return;
+        }
+        if (btn.getAttribute('data-acao') === 'baixar') baixarItens([it], 'aposta_' + it.n + '.csv', 'csv');
+    });
+    document.getElementById('dlChkPagina').addEventListener('change', function (ev) {
+        paginaItens.forEach(function (it) {
+            if (ev.target.checked) selecionadas[it.chave] = true;
+            else delete selecionadas[it.chave];
+        });
+        desenharPagina();
+    });
+    document.getElementById('dlMarcarPagina').addEventListener('click', function () {
+        paginaItens.forEach(function (it) { selecionadas[it.chave] = true; });
+        desenharPagina();
+    });
+    document.getElementById('dlMarcarTodas').addEventListener('click', function () {
+        visiveis.forEach(function (it) { selecionadas[it.chave] = true; });
+        desenharPagina();
+    });
+    document.getElementById('dlLimparMarcas').addEventListener('click', function () {
+        Object.keys(selecionadas).forEach(function (k) { delete selecionadas[k]; });
+        desenharPagina();
+    });
+    document.getElementById('dlCopiar').addEventListener('click', function () {
+        const itens = itensEscopo();
+        if (!itens.length) { status.textContent = 'Nada para copiar com este filtro.'; return; }
+        const texto = textoItens(itens);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(texto).then(function () {
+                status.textContent = itens.length + ' apostas copiadas.';
+            });
+        } else {
+            editor.value = texto;
+            status.textContent = itens.length + ' apostas colocadas no arquivo, para copiar.';
+        }
+    });
+    document.getElementById('dlExportTxt').addEventListener('click', function () { baixarItens(itensEscopo(), 'apostas_filtro.txt', 'txt'); });
+    document.getElementById('dlExportCsv').addEventListener('click', function () { baixarItens(itensEscopo(), 'apostas_filtro.csv', 'csv'); });
+    document.getElementById('dlExportXls').addEventListener('click', function () { baixarItens(itensEscopo(), 'apostas_filtro.xls', 'xls'); });
+    document.getElementById('dlBuscaLimpar').addEventListener('click', function () {
+        document.getElementById('dlBuscaDez').value = '';
+        lerFiltros();
+        pagina = 0;
+        desenharPagina();
+    });
+    document.getElementById('dlBuscaDez').addEventListener('input', function () { lerFiltros(); pagina = 0; desenharPagina(); });
+    document.getElementById('dlPagNum').addEventListener('change', function () {
+        const n = Number(document.getElementById('dlPagNum').value) || 1;
+        pagina = Math.max(0, n - 1);
+        desenharPagina();
+    });
+    document.getElementById('dlPagFirst').addEventListener('click', function () { pagina = 0; desenharPagina(); });
+    document.getElementById('dlPagLast').addEventListener('click', function () { pagina = 1000000; desenharPagina(); });
+    document.getElementById('dlVerTodos').addEventListener('click', function () {
+        vista = 'todos';
+        pagina = 0;
+        desenharPagina();
+    });
+    document.getElementById('dlVerUm').addEventListener('click', function () {
+        vista = 'um';
+        pagina = 0;
+        desenharPagina();
+    });
+    document.getElementById('dlPagAnt').addEventListener('click', function () { pagina -= 1; desenharPagina(); });
+    document.getElementById('dlPagProx').addEventListener('click', function () { pagina += 1; desenharPagina(); });
+    document.getElementById('dlConferir').addEventListener('click', conferir);
+    document.getElementById('dlPrepararTodos').addEventListener('click', function () { preparar('todos'); });
+    document.getElementById('dlPreparar').addEventListener('click', function () { preparar(escolhido); });
+    document.getElementById('dlTxt').addEventListener('click', function () { baixarEditado('txt'); });
+    document.getElementById('dlCsv').addEventListener('click', function () { baixarEditado('csv'); });
+    editor.addEventListener('input', function () { editorSujo = editor.value !== editorBase; });
+    function iniciarCriterios() {
+        const box = document.getElementById('dlCriterios');
+        if (!box) return;
+        if (!CRITERIOS) {
+            box.hidden = true;
+            return;
+        }
+        box.hidden = false;
+        const chkAnt = document.getElementById('dlChkAnterior');
+        const faixa = document.getElementById('dlFaixaAnterior');
+        const selMin = document.getElementById('dlMinAnterior');
+        const selMax = document.getElementById('dlMaxAnterior');
+        const chkL1 = document.getElementById('dlChkZerarL1');
+        const chkPiso = document.getElementById('dlChkPiso');
+        const pisoBox = document.getElementById('dlPisoBox');
+        const selPiso = document.getElementById('dlPiso');
+        function ler(origemCampo) {
+            criterios.anterior = chkAnt.checked;
+            criterios.minAnt = Number(selMin.value);
+            criterios.maxAnt = Number(selMax.value);
+            if (criterios.minAnt > criterios.maxAnt) {
+                if (origemCampo === 'max') {
+                    criterios.minAnt = criterios.maxAnt;
+                    selMin.value = String(criterios.minAnt);
+                } else {
+                    criterios.maxAnt = criterios.minAnt;
+                    selMax.value = String(criterios.maxAnt);
+                }
+            }
+            criterios.zerarL1 = chkL1.checked;
+            criterios.piso = chkPiso.checked;
+            criterios.pisoValor = Number(selPiso.value);
+            faixa.hidden = !chkAnt.checked;
+            pisoBox.hidden = !chkPiso.checked;
+        }
+        chkAnt.addEventListener('change', function () { ler('ant'); if (grupos.length) regenerar(); });
+        selMin.addEventListener('change', function () { ler('min'); if (grupos.length) regenerar(); });
+        selMax.addEventListener('change', function () { ler('max'); if (grupos.length) regenerar(); });
+        chkL1.addEventListener('change', function () {
+            if (chkL1.checked) chkPiso.checked = false;
+            ler('l1');
+            if (grupos.length) regenerar();
+        });
+        chkPiso.addEventListener('change', function () {
+            if (chkPiso.checked) chkL1.checked = false;
+            ler('piso');
+            if (grupos.length) regenerar();
+        });
+        selPiso.addEventListener('change', function () { ler('piso'); if (grupos.length) regenerar(); });
+    }
+    iniciarCriterios();
+})();
+</script>

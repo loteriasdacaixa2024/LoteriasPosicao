@@ -638,7 +638,8 @@
     .hit-badge-aposta.n-6 { background: #eab308; color: #000; }
     .hit-badge-aposta.hit-simples { background: #e2e8f0; color: #475569; }
 </style>
-
+{% include 'desdobramento_linhas_estilo.html' %}
+{% include 'desdobramento_linhas_abas.html' %}
 <!-- HEADER PRINCIPAL -->
 <div class="page-header text-center">
     <div class="d-flex flex-column align-items-center">
@@ -992,6 +993,8 @@
         </div>
     </div>
 </div>
+
+{% include 'desdobramento_linhas_painel.html' %}
 
 {% endblock %}
 
@@ -1723,4 +1726,5 @@ const MAX_DEZENA = 99;
         }
     }
 </script>
+{% include 'desdobramento_linhas_script.html' %}
 {% endblock %}
